@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-/*
- Parei aqui validar se extend está bem, acho que não
+/**
+ * Entidade que representa um calendário de partidas de uma equipa
  */
 namespace Domain.Entities
 {
@@ -10,6 +10,61 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Range(0, int.MaxValue, ErrorMessage = "o número mínimo de partidas num calendário é 0")]
+        public int countMatches { get; set; }
         public ICollection<Matches> Matches { get; set; } = new List<Matches>(); //FK
+
+        //EF
+        public Calendar()
+        {
+            this.countMatches = 0;
+        }
+
+        public Calendar(ICollection<Matches> matches)
+        {
+            this.countMatches = matches.Count;
+            Matches = matches;
+        }
+
+        /***
+         * Metodo que permite adicionar uma partida ao calendário
+         * 
+         * match: partida a adicionar
+         * 
+         * Retorna a partida adicionada ou null se não for possível adicionar
+         */
+        public Matches AddMatch(Matches match)
+        {
+            return null;
+        }
+
+        /***
+         * Metodo que permite remover uma partida ao calendário
+         * 
+         * match: partida a remover
+         * 
+         * Retorna a partida removida ou null se não for possível remover
+         */
+        public Matches RemoveMatch(Matches match)
+        {
+            return null;
+        }
+
+        /***
+         * Metodo que permite obter uma partida do calendário pelo seu id
+         * 
+         * idMatch: id da partida a obter
+         * 
+         * Retorna a partida ou null se não for possível encontrar
+         */
+        public Matches GetMatchById(Guid idMatch)
+        {
+            return null;
+        }
+
+        public override string ToString()
+        {
+            return $"Calendar: {Id}, countMatches: {countMatches}";
+        }
     }
 }

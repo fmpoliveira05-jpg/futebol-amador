@@ -1,9 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-/**
- * Entidade que representam uma mensagem do chat
- * 
- * Ver se é preciso meter o MatchId, como o diagrama de classes 
+/***
+ * Entidade que representa uma mensagem no sistema.
  */
 namespace Domain.Entities
 {
@@ -21,5 +19,20 @@ namespace Domain.Entities
         public string MessageText { get; set; }
 
         public DateTime timeStamp { get; set; }
+
+        protected Message() { }
+
+        public Message(Users actor, string messageText)
+        {
+            this.actor = actor;
+            this.idUser = actor.Id;
+            this.MessageText = messageText;
+            this.timeStamp = DateTime.Now;
+        }
+
+        public override string ToString()
+        {
+            return $"[{timeStamp}] {actor.Name}: {MessageText}";
+        }
     }
 }

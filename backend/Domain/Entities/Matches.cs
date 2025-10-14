@@ -2,8 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 
 /*
- * Classe que representa um Match
- * 
+ * Classe que representa um Partida 
  */
 namespace Domain.Entities
 {
@@ -23,10 +22,53 @@ namespace Domain.Entities
 
         public DateTime TimeStart { get; set; }
 
-        public Boolean iscompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
+        public Boolean Iscompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
 
         public Pitch Pitch { get; set; }
 
         public Guid idPitch { get; set; } //FK
+
+        protected Matches() { }
+
+        public Matches(MatchStatus matchStatus, int teamsCount, DateTime matchDate, DateTime timeStart, bool iscompetive, Pitch pitch)
+        {
+            MatchStatus = matchStatus;
+            TeamsCount = teamsCount;
+            MatchDate = matchDate;
+            TimeStart = timeStart;
+            this.Iscompetive = iscompetive;
+            Pitch = pitch;
+            Teams = new List<TeamStatistics>();
+        }
+
+        /***
+         * Método auxiliar para encontrar uma equipa nas estatísticas do match
+         * 
+         * Retorna a equipa ou null se não encontrar
+         */
+        private TeamStatistics findTeam() { 
+            return null;
+        }
+
+        /***
+         * 
+         */
+        public TeamStatistics AddTeam(TeamStatistics team)
+        {
+            return null;
+        }
+
+        /***
+         * Metodo que consulta as estatísticas de uma equipa num determinado match
+         */
+        public TeamStatistics ShowTeamStatistics(Guid idTeam)
+        {
+            return null;
+        }
+
+        public override string ToString()
+        {
+            return $"Match [Id={Id}, MatchStatus={MatchStatus}, TeamsCount={TeamsCount}, MatchDate={MatchDate}, TimeStart={TimeStart}, iscompetive={Iscompetive}, Pitch={Pitch}]";
+        }
     }
 }

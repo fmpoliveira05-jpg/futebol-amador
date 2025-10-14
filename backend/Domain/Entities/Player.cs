@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
 
-/*
- Parei aqui validar se extend está bem, acho que não
+
+/***
+ * Entidade que representa um jogador no sistema.
  */
 namespace Domain.Entities
 {
@@ -23,6 +24,71 @@ namespace Domain.Entities
 
         public Boolean IsAdmin { get; set; } //Validar se é mesmo necessário
 
+        [Range(0, int.MaxValue, ErrorMessage = "O número de convites tem de ser pelo menos 0")]
+        public int counterMembershipRequests { get; set; }
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
+
+        // EF
+        protected Player() { }
+
+        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, int phoneNumber, Position position, int height)
+            : base(name, dateOfBirth, address, email, password, phoneNumber)
+        {
+            this.counterMembershipRequests = 0;
+            Position = position;
+            this.height = height;
+            IsAdmin = false;
+        }
+
+        //Falta meter o CRUD básico do MembershipRequests
+        /***
+         * Metodo que permite encontrar um pedido de adesão a uma equipa pelo seu id
+         * 
+         * idMembershipRequest: O id do pedido de adesão a encontrar
+         * 
+         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
+         */
+        private MembershipRequests FindMembershipRequest(Guid idMembershipRequest)
+        {
+            return null;
+        }
+
+        /***
+         * Metodo que permite adicionar um pedido de adesão a uma equipa
+         * 
+         * membershipRequests: O pedido de adesão a adicionar
+         * 
+         * Retororna o pedido de adesão adicionado ou null se não for possível adicionar
+         */
+        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests) {
+            return null;
+        }
+
+        /***
+         *  Metodo que permite remover um pedido de adesão a uma equipa
+         *  
+         *  membershipRequests: O pedido de adesão a remover
+         *  
+         *  Retorna o pedido de adesão removido ou null se não for possível remover
+         */
+        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests) {
+            return null;
+        }
+
+        /***
+         * Metodo que permite obter um pedido de adesão a uma equipa pelo seu id
+         * 
+         * id: O id do pedido de adesão a obter
+         * 
+         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
+         */
+        public MembershipRequests getMembershipRequestById(Guid id) {
+            return null;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString() + $", Position: {Position}, Height: {height}cm, Team: {(Team != null ? Team.Name : "No Team")}, IsAdmin: {IsAdmin}, MembershipRequestsCount: {counterMembershipRequests}";
+        }
     }
 }

@@ -49,7 +49,7 @@ namespace Infrastructure.Data
             modelBuilder.Entity<Rank>()
                 .HasOne(r => r.NextRank) // Um Rank tem um (ou nenhum) NextRank
                 .WithOne(r => r.PreviousRank) // E esse NextRank tem um PreviousRank (o Rank original)
-                .HasForeignKey<Rank>(r => r.idNextRank) // A chave estrangeira está na propriedade NextRankId do Rank dependente
+                .HasForeignKey<Rank>(r => r.IdNextRank) // A chave estrangeira está na propriedade NextRankId do Rank dependente
                 .IsRequired(false) // A chave estrangeira não é obrigatória (o último rank não tem próximo)
                 .OnDelete(DeleteBehavior.Restrict); // Evita eliminação em cascata
 

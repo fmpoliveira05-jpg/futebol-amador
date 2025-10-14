@@ -1,10 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-/**
+/***
  * Entidade que representa um rank no sistema.
- * 
- * Falta meter o NextRank e PreviousRank como Null e meter regra que so pode estar null 
- * se o outro não estiver
  */
 namespace Domain.Entities
 {
@@ -17,22 +14,43 @@ namespace Domain.Entities
         public string Name { get; set; }
 
         [Range(1, int.MaxValue, ErrorMessage = "O número de pontos ganhos por vitoria deve ser superior ou igual a 1")]
-        public int winPoints { get; set; }
+        public int WinPoints { get; set; }
 
-        public int drawPoints { get; set; }
+        public int DrawPoints { get; set; }
 
         [Range(int.MinValue, 0, ErrorMessage = "O número de pontos perdidos deve ser igual ou inferior a 0")]
-        public int losePoints { get; set; }
+        public int LosePoints { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "O número de pontos para estar num rank deve ser maior ou igaul a 0")]
         public int PointsToPromotion { get; set; }
 
         public Rank? NextRank { get; set; }
 
-        public Guid? idNextRank { get; set; } //FK
+        public Guid? IdNextRank { get; set; } //FK
 
         public Rank? PreviousRank { get; set; } 
 
-        public Guid? idPreviousRank { get; set; } //FK
+        public Guid? IdPreviousRank { get; set; } //FK
+
+        // EF
+        protected Rank() { }
+
+        public Rank(string name, int winPoints, int drawPoints, int losePoints, int pointsToPromotion, Rank nextRank, Rank previousRank)
+        {
+            this.Name = name;
+            this.WinPoints = winPoints;
+            this.DrawPoints = drawPoints;
+            this.LosePoints = losePoints;
+            this.PointsToPromotion = pointsToPromotion;
+            this.PreviousRank = previousRank;
+            this.IdPreviousRank = previousRank?.Id;
+            this.NextRank = nextRank;
+            this.IdNextRank = nextRank?.Id;
+        }
+
+        public override string ToString()
+        {
+            return $"Rank: {Name}, Win Points: {WinPoints}, Draw Points: {DrawPoints}, Lose Points: {LosePoints}, Points To Promotion: {PointsToPromotion}";
+        }
     }
 }

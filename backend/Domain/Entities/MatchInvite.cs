@@ -1,8 +1,8 @@
-﻿/*
- Parei aqui validar se extend está bem, acho que não
- */
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
+/**
+ * Entidade que representa um convite de partida entre duas equipas
+ */
 namespace Domain.Entities
 {
     public class MatchInvite
@@ -24,5 +24,27 @@ namespace Domain.Entities
         public Chat Chat { get; set; } //FK
 
         public Guid IdChat { get; set; } //FK
+
+        //FK
+        protected MatchInvite() { }
+
+        public MatchInvite(Teams sender, Teams receiver, DateTime gameDate, Pitch pitch, Chat chat)
+        {
+            Sender = sender;
+            IdSender = sender.Id;
+            Receiver = receiver;
+            IdReceiver = receiver.Id;
+            GameDate = gameDate;
+            Pitch = pitch;
+            IdPitch = pitch.Id;
+            Chat = chat;
+            IdChat = chat.Id;
+        }
+
+
+        public override string ToString()
+        {
+            return $"MatchInvite [Id={Id}, IdSender={IdSender}, IdReceiver={IdReceiver}, GameDate={GameDate}, IdPitch={IdPitch}, IdChat={IdChat}]";
+        }
     }
 }

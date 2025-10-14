@@ -1,11 +1,8 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
 
-/**
- * Entidade que representa os pedidos de adesão a uma equipa
- * 
- * Depois ao Criar a BD, temos de definir a PK composta, o ORM por default não o faz
- * Mas fazemos isso com Fluent API, ou seja, no DbContext
+/***
+ * Entidade que representa um pedido de adesão de um jogador a uma equipa ou convite de uma equipa a um jogador
  */
 namespace Domain.Entities
 {
@@ -25,5 +22,22 @@ namespace Domain.Entities
         public DateTime inviteDate { get; set; }
 
         public Boolean sender { get; set; } // true - Player, false - Team
+
+        protected MembershipRequests() { }
+
+        public MembershipRequests(Player player, Teams team, Boolean sender)
+        {
+            Player = player;
+            idPlayer = player.Id;
+            Team = team;
+            idTeam = team.Id;
+            inviteDate = DateTime.Now;
+            this.sender = sender;
+        }
+
+        public override string ToString()
+        {
+            return $"[MembershipRequests: Id={Id}, Player={Player}, idPlayer={idPlayer}, Team={Team}, idTeam={idTeam}, inviteDate={inviteDate}, sender={sender}]";
+        }
     }
 }

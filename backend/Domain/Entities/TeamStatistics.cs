@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Enums;
-/**
- * Entidade que representa uma equipa no sistema.
- * Nota: Ver se está tudo
- *
+
+/***
+ * Entidade que representa as estatísticas de uma equipa durante uma Partida
  */
 namespace Domain.Entities
 {
@@ -19,8 +18,16 @@ namespace Domain.Entities
         public const int max_goals = 100;
 
         [Range(0, max_goals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
-        public int num_goals;
+        public int Num_goals { get; set; } = 0;
 
-        public MatchResult MatchResult { get; set; } 
+        public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;
+
+        // EF
+        protected TeamStatistics() { }
+
+        public TeamStatistics(Teams team)
+        {
+            this.Team = team;
+        }
     }
 }
