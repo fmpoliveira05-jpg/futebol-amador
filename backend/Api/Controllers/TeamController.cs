@@ -17,7 +17,7 @@ public class TeamController : ControllerBase
     public IActionResult CriarEquipa(CreateTeamDto dto)
     {
         var result = "test";
-//        var result = _equipaService.CriarEquipa(dto);
+        //var result = _equipaService.CriarEquipa(dto);
         return Ok(result);
     }
 }
