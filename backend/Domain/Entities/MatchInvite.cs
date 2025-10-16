@@ -34,7 +34,7 @@ namespace Domain.Entities
         //FK
         protected MatchInvite() { }
 
-        public MatchInvite(Teams sender, Teams receiver, DateTime gameDate, Pitch pitch, Chat chat)
+        public MatchInvite(Teams sender, Teams receiver, DateTime gameDate, Pitch pitch)
         {
             Sender = sender;
             IdSender = sender.Id;
@@ -43,8 +43,8 @@ namespace Domain.Entities
             GameDate = gameDate;
             Pitch = pitch;
             IdPitch = pitch.Id;
-            Chat = chat;
-            IdChat = chat.Id;
+            Chat = new Chat();
+            IdChat = Chat.Id;
         }
 
 

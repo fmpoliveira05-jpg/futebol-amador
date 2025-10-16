@@ -197,7 +197,7 @@ namespace Domain.Entities
          * 
          * Retorna o convite de partida adicionado, ou null se a adição não for possível.
          */
-        public void SendMatchInvite(MatchInvite matchInvite)
+        public void AddSendMatchInvite(MatchInvite matchInvite)
         {
             if (matchInvite == null) {
                 throw new ArgumentNullException("O convite de partida não pode ser nulo");
@@ -210,7 +210,7 @@ namespace Domain.Entities
             this.SentInvites.Add(matchInvite);
         }
 
-        public void ReceiveMatchInvite(MatchInvite matchInvite)
+        public void AddReceiveMatchInvite(MatchInvite matchInvite)
         {
             if (matchInvite == null)
             {
@@ -248,7 +248,7 @@ namespace Domain.Entities
             }
 
             if (!this.SentInvites.Contains(matchInvite)) {
-                throw new Exception("O match Invite enviado não existe");
+                throw new MatchInviteException("O match Invite enviado não existe");
             }
 
             this.SentInvites.Remove(matchInvite);

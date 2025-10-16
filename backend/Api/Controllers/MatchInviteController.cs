@@ -1,8 +1,10 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs;
+using Domain.Entities;
 using Domain.Exceptions;
 using Infrastructure.Data;
-using Application.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace Api.Controllers
 {
@@ -16,6 +18,7 @@ namespace Api.Controllers
 
         /***
          * Vai faltar as questões de aut neste metodo e nos restantes
+         * Meter Try Catchs (Adds, Removes)
          */
         [HttpPost("teams/{idTeam:guid}/match-invites/")]
         public IActionResult SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
@@ -33,11 +36,49 @@ namespace Api.Controllers
                 return BadRequest("O recetor do convite deve ser diferente do emissor!");
             }
 
-            //Depois trocar para o Match Invite Criado
-            return NoContent();
+            //Validações de existencia das teams na BD
+            Teams? Sender = context.Team.FirstOrDefault(t => t.Id == idTeam);
+
+            if (Sender == null) { 
+                return NotFound("A equipa que enviou o convite não foi encontrada");
+            }
+
+            Teams? Receiver = context.Team.FirstOrDefault(t => t.Id == dto.IdReceiver);
+
+            if (Receiver == null)
+            {
+                return NotFound("A equipa que recebeu o convite não foi encontrada");
+            }
+
+            //Regra de negocio
+            if (Sender.IdPitch != dto.IdPitch && Receiver.IdPitch != dto.IdPitch)
+            {
+                return BadRequest("O campo da partida não pertence a nenhuma das equipas");
+            }
+
+            //Regra de negocio
+            if ((dto.GameDate - DateTime.UtcNow).TotalHours < 12) {
+                return BadRequest("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
+            }
+
+            MatchInvite matchInvite = new MatchInvite(Sender, Receiver, dto.GameDate, dto.Pitch);
+            try {                
+                context.MatchInvite.Add(matchInvite);
+                Receiver.AddReceiveMatchInvite(matchInvite);
+                Sender.AddSendMatchInvite(matchInvite);
+                context.SaveChanges();
+            } catch (ArgumentNullException ex) { 
+                return BadRequest(new { message = ex.Message });
+            } catch (MatchInviteException ex) {
+                return Conflict(new { message = ex.Message });
+            } catch (DbUpdateException ex) {
+                return StatusCode(500, new { message = "Erro ao guardar o convite na base de dados.", details = ex.Message });
+            }
+            
+            return NoContent(); // Depois trocar para o Match Invite criado
         }
 
-        /**
+        /***
          * Talvez eliminar o counter da variavel
          * Falta definir url
          * No Action Resukt vai estar o DTO/Resultado retornado ao user
@@ -81,16 +122,19 @@ namespace Api.Controllers
             }
 
             //Removes
-            //opponentTeam.SentInvites.Remove(matchInvite);
-            //opponentTeam.CountSendInvites--;
-            opponentTeam.removeSendMatchInvite(matchInvite);
+            try {
+                context.MatchInvite.Remove(matchInvite);
+                opponentTeam.removeSendMatchInvite(matchInvite);
+                team.removeReceiverMatchInvite(matchInvite);
+                context.SaveChanges();
+            } catch (ArgumentNullException ex) {
+                return BadRequest(new { message = ex.Message });
+            } catch (MatchInviteException ex) {
+                return Conflict(new { message = ex.Message });
+            } catch (DbUpdateException ex) {
+                return StatusCode(500, new { message = "Erro ao guardar o convite na base de dados.", details = ex.Message });
+            }
 
-            //team.ReceivedInvites.Remove(matchInvite);
-            //team.CountReceivedIntes--;
-            team.removeSendMatchInvite(matchInvite);
-
-            context.MatchInvite.Remove(matchInvite);
-            context.SaveChanges();
             return NoContent();
         }
     }
