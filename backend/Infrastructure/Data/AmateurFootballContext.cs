@@ -4,7 +4,7 @@ using Domain.Entities;
 namespace Infrastructure.Data
 {
     //Esta classe herda de DbContext e funciona como uma sessão de trabalho DB
-    internal class AmateurFootballContext : DbContext
+    public class AmateurFootballContext : DbContext
     {
         public DbSet<Users> User { get; set; } = null;
         public DbSet<Player> Player { get; set; } = null;

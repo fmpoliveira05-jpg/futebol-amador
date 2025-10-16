@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using Domain.Exceptions;
 /***
  * Entidade que representa uma equipa desportiva.
  */
@@ -194,6 +194,18 @@ namespace Domain.Entities
             return null;
         }
 
+        /*
+         Falta metodos da partida Aceitar, Negociar, etc
+
+        Falta:
+        - Aceitar
+        - Negociar
+        - Enviar
+        Metodos Implementados
+        - Refuse
+         */
+
+
         /***
          * Método que adiciona um convite de partida enviado pela equipa.
          * 
@@ -201,9 +213,34 @@ namespace Domain.Entities
          * 
          * Retorna o convite de partida adicionado, ou null se a adição não for possível.
          */
-        public MatchInvite AddSendMatchInvite(MatchInvite matchInvite)
+        public void SendMatchInvite(MatchInvite matchInvite)
         {
-            return null;
+            if (matchInvite == null) {
+                throw new ArgumentNullException("O convite de partida não pode ser nulo");
+            }
+
+            if (this.SentInvites.Contains(matchInvite)) {
+                throw new MatchInviteException("O convite de partida que recebeu já está na lista de convites");
+            }
+
+            this.SentInvites.Add(matchInvite);
+            this.CountSendInvites++;
+        }
+
+        public void ReceiveMatchInvite(MatchInvite matchInvite)
+        {
+            if (matchInvite == null)
+            {
+                throw new ArgumentNullException("O convite de partida não pode ser nulo");
+            }
+
+            if (this.ReceivedInvites.Contains(matchInvite))
+            {
+                throw new MatchInviteException("O convite de partida que recebeu já está na lista de convites");
+            }
+
+            this.ReceivedInvites.Add(matchInvite);
+            this.CountReceivedIntes++;
         }
 
         /***
@@ -212,11 +249,49 @@ namespace Domain.Entities
          * matchInvite: Convite de partida a remover.
          * 
          * Retorna o convite de partida removido, ou null se a remoção não for possível.
-         */
-        public MatchInvite RemoveSendMatchInvite(MatchInvite matchInvite)
+         * 
+         * !!apagar da BD, falta
+         * 
+         * public MatchInvite RefuseMatchInvite(Guid idMatchInvite)
         {
-            return null;
+            
         }
+         */
+        public bool removeSendMatchInvite(MatchInvite matchInvite)
+        {
+            bool sucess = true;
+            if (matchInvite == null)
+            {
+                throw new ArgumentNullException("O match Invite está a nulo");
+            }
+
+            if (!this.SentInvites.Contains(matchInvite)) {
+                throw new Exception("O match Invite enviado não existe");
+            }
+
+            this.SentInvites.Remove(matchInvite);
+            
+            return sucess; 
+        }
+
+        public bool removeReceiverMatchInvite(MatchInvite matchInvite)
+        {
+            bool sucess = true;
+            if (matchInvite == null)
+            {
+                throw new ArgumentNullException("O match Invite está a nulo");
+            }
+
+            if (!this.ReceivedInvites.Contains(matchInvite))
+            {
+                throw new Exception("O match Invite enviado não existe");
+            }
+
+            this.ReceivedInvites.Remove(matchInvite);
+
+            return sucess;
+        }
+
 
         /***
          * Método que mostra um convite de partida enviado específico da equipa.
@@ -227,43 +302,46 @@ namespace Domain.Entities
          */
         public MatchInvite ShowSendMatchInvite(Guid idMatchInvite)
         {
-            return null;
+            if (this.CountSendInvites == 0)
+            {
+                throw new InvalidOperationException("Não é possível recusar um convite porque não existem convites enviados.");
+            }
+
+            if (idMatchInvite == Guid.Empty)
+            {
+                throw new ArgumentNullException("O id da match não pode ser nulo");
+            }
+
+            MatchInvite? matchInvite = this.SentInvites.FirstOrDefault(i => i.Id == idMatchInvite);
+
+            if (matchInvite == null)
+            {
+                throw new MatchInviteException("A Match invite a eliminar não existe!");
+            }
+
+            return matchInvite;
         }
 
-        /***
-         * Método que adiciona um convite de partida recebido pela equipa.
-         * 
-         * matchInvite: Convite de partida a adicionar.
-         * 
-         * Retorna o convite de partida adicionado, ou null se a adição não for possível.
-         */
-        public MatchInvite AddReceivedMatchInvite(MatchInvite matchInvite) 
+        public MatchInvite ShowReceivedMatchInvite(Guid idMatchInvite)
         {
-            return null;
-        }
+            if (this.CountReceivedIntes == 0)
+            {
+                throw new InvalidOperationException("Não é possível recusar um convite porque não existem convites enviados.");
+            }
 
-        /***
-         * Método que remove um convite de partida recebido pela equipa.
-         * 
-         * matchInvite: Convite de partida a remover.
-         * 
-         * Retorna o convite de partida removido, ou null se a remoção não for possível.
-         */
-        public MatchInvite RemoveReceivedMatchInvite(MatchInvite matchInvite) 
-        {
-            return null;
-        }
+            if (idMatchInvite == Guid.Empty)
+            {
+                throw new ArgumentNullException("O id da match não pode ser nulo");
+            }
 
-        /***
-         * Método que mostra um convite de partida recebido específico da equipa.
-         * 
-         * idMatchInvite: ID do convite de partida a mostrar.
-         * 
-         * Retorna o convite de partida se encontrado, ou null se não encontrado.
-         */
-        public MatchInvite ShowReceivedMatchInvite(Guid idMatchInvite) 
-        {
-            return null;
+            MatchInvite? matchInvite = this.ReceivedInvites.FirstOrDefault(i => i.Id == idMatchInvite);
+
+            if (matchInvite == null)
+            {
+                throw new MatchInviteException("A Match invite a eliminar não existe!");
+            }
+
+            return matchInvite;
         }
 
         public override string ToString()
