@@ -10,17 +10,11 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Range(0, int.MaxValue, ErrorMessage = "o número mínimo de mensagens de um chat é 0")]
-        public int countMessages { get; set; }
         public ICollection<Message> Messages { get; set; } = new List<Message>();
 
-        //EF
-        protected Chat() { }
-
         //Construtor para criar um chat novo
-        public Chat(int countMessages)
+        public Chat()
         {
-            this.countMessages = countMessages;
         }
 
         /**
@@ -65,7 +59,7 @@ namespace Domain.Entities
 
         public override string ToString()
         {
-            return $"Chat [Id={Id}, countMessages={countMessages}, Messages={Messages}]";
+            return $"Chat [Id={Id}, Messages={Messages}]";
         }
     }
 }

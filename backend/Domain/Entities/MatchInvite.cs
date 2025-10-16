@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /**
  * Entidade que representa um convite de partida entre duas equipas
@@ -9,20 +10,25 @@ namespace Domain.Entities
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
-        public Guid IdSender { get; set; } //FK e PK
-        public Guid IdReceiver { get; set; } //FK e PK
 
         public Teams Sender { get; set; }
         public Teams Receiver { get; set; }
 
+        [ForeignKey("Sender")]
+        public Guid IdSender { get; set; } //FK e
+        
+        [ForeignKey("Receiver")]
+        public Guid IdReceiver { get; set; } //FK 
         public DateTime GameDate { get; set; }
 
         public Pitch Pitch { get; set; }
 
+        [ForeignKey("Pitch")]
         public Guid IdPitch { get; set; } //FK
 
         public Chat Chat { get; set; } //FK
 
+        [ForeignKey("Chat")]
         public Guid IdChat { get; set; } //FK
 
         //FK

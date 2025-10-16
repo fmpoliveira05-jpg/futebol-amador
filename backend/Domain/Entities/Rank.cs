@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /***
  * Entidade que representa um rank no sistema.
@@ -26,10 +27,12 @@ namespace Domain.Entities
 
         public Rank? NextRank { get; set; }
 
+        [ForeignKey("NextRank")]
         public Guid? IdNextRank { get; set; } //FK
 
-        public Rank? PreviousRank { get; set; } 
+        public Rank? PreviousRank { get; set; }
 
+        [ForeignKey("PreviousRank")]
         public Guid? IdPreviousRank { get; set; } //FK
 
         // EF

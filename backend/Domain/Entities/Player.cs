@@ -16,16 +16,15 @@ namespace Domain.Entities
         public const int maxHeight = 250;
 
         [Range(minHeight, maxHeight, ErrorMessage = "Um jogador deve ter entre 100 e 250 centimetors")]
-        public int height { get; set; }
+        public int Height { get; set; }
 
         public Teams? Team { get; set; }
 
         public Guid? idTeam { get; set; } //FK
 
-        public Boolean IsAdmin { get; set; } //Validar se é mesmo necessário
+        public bool IsAdmin { get; set; } //Validar se é mesmo necessário
 
         [Range(0, int.MaxValue, ErrorMessage = "O número de convites tem de ser pelo menos 0")]
-        public int counterMembershipRequests { get; set; }
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
 
         // EF
@@ -34,9 +33,8 @@ namespace Domain.Entities
         public Player(string name, DateOnly dateOfBirth, string address, string email, string password, int phoneNumber, Position position, int height)
             : base(name, dateOfBirth, address, email, password, phoneNumber)
         {
-            this.counterMembershipRequests = 0;
             Position = position;
-            this.height = height;
+            Height = height;
             IsAdmin = false;
         }
 
@@ -88,7 +86,7 @@ namespace Domain.Entities
 
         public override string ToString()
         {
-            return base.ToString() + $", Position: {Position}, Height: {height}cm, Team: {(Team != null ? Team.Name : "No Team")}, IsAdmin: {IsAdmin}, MembershipRequestsCount: {counterMembershipRequests}";
+            return base.ToString() + $", Position: {Position}, Height: {Height}cm, Team: {(Team != null ? Team.Name : "No Team")}, IsAdmin: {IsAdmin}";
         }
     }
 }

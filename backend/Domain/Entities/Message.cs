@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /***
  * Entidade que representa uma mensagem no sistema.
@@ -11,9 +12,10 @@ namespace Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [MaxLength(50)]
-        public Users actor { get; set; }
+        public Users Actor { get; set; }
 
-        public Guid idUser { get; set; } //FK
+        [ForeignKey("Actor")]
+        public Guid IdUser { get; set; } //FK
 
         [MaxLength(250)]
         public string MessageText { get; set; }
@@ -24,15 +26,15 @@ namespace Domain.Entities
 
         public Message(Users actor, string messageText)
         {
-            this.actor = actor;
-            this.idUser = actor.Id;
+            this.Actor = actor;
+            this.IdUser = actor.Id;
             this.MessageText = messageText;
             this.timeStamp = DateTime.Now;
         }
 
         public override string ToString()
         {
-            return $"[{timeStamp}] {actor.Name}: {MessageText}";
+            return $"[{timeStamp}] {Actor.Name}: {MessageText}";
         }
     }
 }

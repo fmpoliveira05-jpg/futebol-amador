@@ -10,19 +10,15 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Range(0, int.MaxValue, ErrorMessage = "o número mínimo de partidas num calendário é 0")]
-        public int countMatches { get; set; }
         public ICollection<Matches> Matches { get; set; } = new List<Matches>(); //FK
 
         //EF
         public Calendar()
         {
-            this.countMatches = 0;
         }
 
         public Calendar(ICollection<Matches> matches)
         {
-            this.countMatches = matches.Count;
             Matches = matches;
         }
 
@@ -64,7 +60,7 @@ namespace Domain.Entities
 
         public override string ToString()
         {
-            return $"Calendar: {Id}, countMatches: {countMatches}";
+            return $"Calendar: {Id}, Matches: {Matches}";
         }
     }
 }

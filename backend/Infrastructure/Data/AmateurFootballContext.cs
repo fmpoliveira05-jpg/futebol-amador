@@ -45,19 +45,26 @@ namespace Infrastructure.Data
                 .HasForeignKey(mi => mi.IdReceiver)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Configuração da relação hierárquica de Ranks
+            // Relação 1: De um Rank para o seu NextRank, usando a FK IdNextRank
             modelBuilder.Entity<Rank>()
-                .HasOne(r => r.NextRank) // Um Rank tem um (ou nenhum) NextRank
-                .WithOne(r => r.PreviousRank) // E esse NextRank tem um PreviousRank (o Rank original)
-                .HasForeignKey<Rank>(r => r.IdNextRank) // A chave estrangeira está na propriedade NextRankId do Rank dependente
-                .IsRequired(false) // A chave estrangeira não é obrigatória (o último rank não tem próximo)
-                .OnDelete(DeleteBehavior.Restrict); // Evita eliminação em cascata
+                .HasOne(rank => rank.NextRank)
+                .WithOne() // Não há propriedade de navegação de volta para ESTA relação
+                .HasForeignKey<Rank>(rank => rank.IdNextRank) // A FK é IdNextRank
+                .IsRequired(false) // Pode ser nulo
+                .OnDelete(DeleteBehavior.Restrict); // Evita apagar em cascata
+
+            // Relação 2: De um Rank para o seu PreviousRank, usando a FK IdPreviousRank
+            modelBuilder.Entity<Rank>()
+                .HasOne(rank => rank.PreviousRank)
+                .WithOne() // Também não há propriedade de navegação de volta para ESTA relação
+                .HasForeignKey<Rank>(rank => rank.IdPreviousRank) // A FK é IdPreviousRank
+                .IsRequired(false) // Também pode ser nulo
+                .OnDelete(DeleteBehavior.Restrict);
 
             //Herança — TPH: uma tabela Users com discriminator
             modelBuilder.Entity<Users>()
-                .HasDiscriminator<string>("UserType")
-                .HasValue<Player>("Player")
-                .HasValue<SuperAdmin>("SuperAdmin");
+                    .UseTptMappingStrategy();
+
         }
     }
 }

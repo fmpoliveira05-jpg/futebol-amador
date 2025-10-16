@@ -1,5 +1,6 @@
 ﻿using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /*
  * Classe que representa um Partida 
@@ -13,32 +14,36 @@ namespace Domain.Entities
 
         public MatchStatus MatchStatus { get; set; }
 
-        [Range(0, 2, ErrorMessage = "O número de equipas que compõem o match deve estar entre 0 e 2")]
-        public int TeamsCount { get; set; }
-
         public ICollection<TeamStatistics> Teams { get; set; }
 
         public DateTime MatchDate { get; set; }
 
         public DateTime TimeStart { get; set; }
 
-        public Boolean Iscompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
+        public bool IsCompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
 
         public Pitch Pitch { get; set; }
 
+        [ForeignKey("Pitch")]
         public Guid idPitch { get; set; } //FK
+
+        public Chat Chat { get; set; }
+
+        [ForeignKey("Chat")]
+        public Guid IdChat { get; set; }
 
         protected Matches() { }
 
         public Matches(MatchStatus matchStatus, int teamsCount, DateTime matchDate, DateTime timeStart, bool iscompetive, Pitch pitch)
         {
             MatchStatus = matchStatus;
-            TeamsCount = teamsCount;
             MatchDate = matchDate;
             TimeStart = timeStart;
-            this.Iscompetive = iscompetive;
+            IsCompetive = iscompetive;
             Pitch = pitch;
             Teams = new List<TeamStatistics>();
+            Chat = new Chat();
+            IdChat = Chat.Id;
         }
 
         /***
@@ -68,7 +73,7 @@ namespace Domain.Entities
 
         public override string ToString()
         {
-            return $"Match [Id={Id}, MatchStatus={MatchStatus}, TeamsCount={TeamsCount}, MatchDate={MatchDate}, TimeStart={TimeStart}, iscompetive={Iscompetive}, Pitch={Pitch}]";
+            return $"Match [Id={Id}, MatchStatus={MatchStatus}, MatchDate={MatchDate}, TimeStart={TimeStart}, iscompetive={IsCompetive}, Pitch={Pitch}]";
         }
     }
 }
