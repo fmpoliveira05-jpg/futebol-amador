@@ -47,6 +47,36 @@ namespace Domain.Entities
             IdChat = Chat.Id;
         }
 
+        public bool NegociateMatchInvite(DateTime gameDate, Pitch pitch)
+        {
+            bool hasChanged = false;
+
+            if (this.GameDate != gameDate)
+            {
+                this.GameDate = gameDate;
+                hasChanged = true;
+            }
+
+            if (this.Pitch != pitch)
+            {
+                this.IdPitch = pitch.Id;
+                this.Pitch = pitch;
+                hasChanged = true;
+            }
+
+            if (hasChanged)
+            {
+                Teams tempTeam = this.Sender;
+
+                this.IdSender = this.IdReceiver;
+                this.Sender = Receiver;
+
+                this.IdReceiver = tempTeam.Id;
+                this.Receiver = tempTeam;
+            }
+
+            return hasChanged;
+        }
 
         public override string ToString()
         {

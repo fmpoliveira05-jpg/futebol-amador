@@ -31,7 +31,16 @@ namespace Domain.Entities
          */
         public Matches AddMatch(Matches match)
         {
-            return null;
+            if (match == null)
+            {
+                throw new ArgumentNullException("A partida a adicionar no calendario não pode ser nula");
+            }
+            if (Matches.Contains(match)) {
+                throw new ArgumentException("Este 'match' já existe na lista.", nameof(match));
+            }
+
+            Matches.Add(match);
+            return match;
         }
 
         /***

@@ -12,13 +12,13 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public MatchStatus MatchStatus { get; set; }
+        public MatchStatus MatchStatus { get; set; } = MatchStatus.SCHEDULED;
 
         public ICollection<TeamStatistics> Teams { get; set; }
 
         public DateTime MatchDate { get; set; }
 
-        public DateTime TimeStart { get; set; }
+        public DateTime? TimeStart { get; set; } = null;
 
         public bool IsCompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
 
@@ -34,15 +34,23 @@ namespace Domain.Entities
 
         protected Matches() { }
 
-        public Matches(MatchStatus matchStatus, int teamsCount, DateTime matchDate, DateTime timeStart, bool iscompetive, Pitch pitch)
+        public Matches(DateTime matchDate, bool isCompetive, Pitch pitch)
         {
-            MatchStatus = matchStatus;
             MatchDate = matchDate;
-            TimeStart = timeStart;
-            IsCompetive = iscompetive;
+            IsCompetive = isCompetive;
             Pitch = pitch;
             Teams = new List<TeamStatistics>();
             Chat = new Chat();
+            IdChat = Chat.Id;
+        }
+
+        public Matches(DateTime matchDate, bool isCompetive, Pitch pitch, List<TeamStatistics> teamStatistics, Chat chat)
+        {
+            MatchDate = matchDate;
+            IsCompetive = isCompetive;
+            Pitch = pitch;
+            Teams = teamStatistics;
+            Chat = chat;
             IdChat = Chat.Id;
         }
 
