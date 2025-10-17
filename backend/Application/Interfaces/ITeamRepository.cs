@@ -15,8 +15,7 @@ namespace Application.Interfaces
         Task DeleteTeam(int id);
 
         Task<IEnumerable<Teams>> EditTeam(int id);
-        //TESTE 2
-        //Teste 3
+
         Task SaveTeam(Teams teams);
 
     }
