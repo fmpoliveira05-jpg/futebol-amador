@@ -11,6 +11,12 @@ namespace Application.Interfaces
         Task<IEnumerable<Teams>> GetAllTeams();
         Task<IEnumerable<Teams>> GetAllTeamsAsync();
 
-        Task<IEnumerable<Teams>>
+        Task<IEnumerable<Teams>> GetTeamById(int id);
+        Task DeleteTeam(int id);
+
+        Task<IEnumerable<Teams>> EditTeam(int id);
+
+        Task SaveTeam(Teams teams);
+
     }
 }
