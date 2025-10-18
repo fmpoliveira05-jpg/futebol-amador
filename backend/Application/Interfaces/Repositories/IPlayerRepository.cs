@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.Repositories
 {
-    internal interface IPlayerRepository
+    public interface IPlayerRepository
     {
     }
 }

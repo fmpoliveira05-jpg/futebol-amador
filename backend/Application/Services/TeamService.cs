@@ -9,7 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using static Domain.Constants.ModelConstants;
+using Domain.Entities;
+//using static Domain.Constants.ModelConstants;
 using Domain.Exceptions;
 
 namespace Application.Services
@@ -23,45 +24,48 @@ namespace Application.Services
         private readonly IUserRepository UserRepository;
         private readonly IUnitOfWork UnitOfWork;
 
+        public TeamService(ITeamRepository teamRepository,IPlayerRepository playerRepository,IUserRepository userRepository,IUnitOfWork unitOfWork)
+        {
+            TeamRepository = teamRepository;
+            PlayerRepository = playerRepository;
+            UserRepository = userRepository;
+            UnitOfWork = unitOfWork;
+        }
+
         public Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
             throw new NotImplementedException();
         }
 
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorUserId)
+        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
         {
 
             var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
             if (existingTeam != null)
             {
-                // Lança uma exceção que o seu middleware apanha e transforma num 400 Bad Request
                 throw new ValidationException($"Uma equipa com o nome '{teamDto.Name}' já existe.");
             }
 
-            var creatorUser = await UserRepository.GetUserByIdAsync(creatorUserId);
-            if (creatorUser == null)
+            var creatorPlayer = await UserRepository.GetUserByIdAsync(creatorPlayerId);
+            if (creatorPlayer == null)
             {
-                throw new NotFoundException($"Utilizador com ID {creatorUserId} não encontrado.");
+                throw new NotFoundException($"Utilizador com ID {creatorPlayerId} não encontrado.");
             }
 
-            var newTeam = new Team(
-                teamDto.Name,
-                teamDto.Description,
-                teamDto.FoundationDate,
-                teamDto.HomePitchId
+            var pitch = new Pitch(
+                teamDto.HomePitch.Name,
+                teamDto.HomePitch.Address
             );
 
- 
-            var newPlayer = new Player(
-                creatorUser,  
-                newTeam,      
-                "Capitão",    
-                true          
+            var newTeam = new Teams(
+                teamDto.Name,
+                teamDto.Description,
+                teamDto.icon,
+                pitch
             );
 
 
             await TeamRepository.AddAsync(newTeam);
-            await PlayerRepository.AddAsync(newPlayer);
 
 
             await UnitOfWork.SaveChangesAsync();
