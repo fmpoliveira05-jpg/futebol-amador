@@ -28,9 +28,9 @@ namespace Domain.Entities
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
 
         // EF
-        protected Player() { }
+        public Player() { }
 
-        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, int phoneNumber, Position position, int height)
+        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, string phoneNumber, Position position, int height)
             : base(name, dateOfBirth, address, email, password, phoneNumber)
         {
             Position = position;
@@ -58,7 +58,8 @@ namespace Domain.Entities
          * 
          * Retororna o pedido de adesão adicionado ou null se não for possível adicionar
          */
-        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests) {
+        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests)
+        {
             return null;
         }
 
@@ -69,7 +70,8 @@ namespace Domain.Entities
          *  
          *  Retorna o pedido de adesão removido ou null se não for possível remover
          */
-        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests) {
+        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests)
+        {
             return null;
         }
 
@@ -80,7 +82,8 @@ namespace Domain.Entities
          * 
          * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
          */
-        public MembershipRequests getMembershipRequestById(Guid id) {
+        public MembershipRequests getMembershipRequestById(Guid id)
+        {
             return null;
         }
 
