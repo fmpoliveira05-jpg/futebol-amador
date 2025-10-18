@@ -6,17 +6,16 @@ using System.Threading.Tasks;
 using Domain.Entities;
 namespace Application.Interfaces
 {
-    internal interface ITeamRepository
+    public interface ITeamRepository
     {
-        Task<IEnumerable<Teams>> GetAllTeams();
-        Task<IEnumerable<Teams>> GetAllTeamsAsync();
+        Task<List<Teams>?> GetAllTeamsAsync();
+        Task<Teams?> GetTeamById(Guid id);
+        Task<Teams?> GetTeamByName(string name);
+        void DeleteTeam(Teams teamToRemove);
 
-        Task<IEnumerable<Teams>> GetTeamById(int id);
-        Task DeleteTeam(int id);
+        void UpdateTeam(Teams updatedTeam);
 
-        Task<IEnumerable<Teams>> EditTeam(int id);
-
-        Task SaveTeam(Teams teams);
+        Task AddAsync(Teams team);
 
     }
 }
