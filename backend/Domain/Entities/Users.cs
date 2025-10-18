@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using Domain.Constants;
 /***
  * Entidade que representa um utilizador no sistema.
  * 
@@ -13,19 +13,19 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MinLength(3), MaxLength(50)]
+        [MinLength(ModelConstants.User.MinNameLength), MaxLength(ModelConstants.User.MaxNameLength)]
         public string Name { get; set; }
 
         public DateOnly DateOfBirth { get; set; }
 
-        [MaxLength(250)]
+        [MaxLength(ModelConstants.General.MaxAddressLength)]
         public string Address { get; set; }
 
         [MaxLength(50)]
         [EmailAddress(ErrorMessage = "O campo Email não está em um formato válido.")] // Adicione este
         public string Email { get; set; }
 
-        [MinLength(8), MaxLength(16)]
+        [MinLength(ModelConstants.User.MinPasswordLength), MaxLength(ModelConstants.User.MaxPasswordLength)]
         public string Password { get; set; }
 
         [Range(100000000, 999999999, ErrorMessage = "O número de telefone deve ter 9 dígitos.")]

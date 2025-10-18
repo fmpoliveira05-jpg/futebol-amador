@@ -12,7 +12,7 @@ namespace Domain.Entities
     {
         public Position Position { get; set; }
 
-        [Range(ModelConstants.Player.MinHeight, ModelConstants.Player.MaxHeight, ErrorMessage = "Um jogador deve ter entre 100 e 250 centimetors")]
+        [Range(ModelConstants.Player.MinHeight, ModelConstants.Player.MaxHeight, ErrorMessage = "Um jogador deve ter entre {0} e {1} centimetors")]
         public int Height { get; set; }
 
         public Teams? Team { get; set; }

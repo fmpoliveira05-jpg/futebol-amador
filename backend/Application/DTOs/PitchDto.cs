@@ -12,8 +12,12 @@ namespace Application.DTOs
         [MaxLength(ModelConstants.Pitch.MaxNameLength), Required(ErrorMessage = "É Obrigatorio o nome do campo.")]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.Pitch.MaxAddressLength), Required(ErrorMessage = "É Obrigatorio o Endereço do campo.")]
+        [MaxLength(ModelConstants.General.MaxAddressLength), Required(ErrorMessage = "É Obrigatorio o Endereço do campo.")]
         public string Address { get; set; }
+
+        public PitchDto()
+        {
+        }
 
         public PitchDto(string name, string address)
         {

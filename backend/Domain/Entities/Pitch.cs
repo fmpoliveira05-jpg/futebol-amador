@@ -12,7 +12,7 @@ namespace Domain.Entities {
         [MaxLength(ModelConstants.Pitch.MaxNameLength)]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.Pitch.MaxAddressLength)]
+        [MaxLength(ModelConstants.General.MaxAddressLength)]
         public string Address { get; set; }
 
         protected Pitch() { }

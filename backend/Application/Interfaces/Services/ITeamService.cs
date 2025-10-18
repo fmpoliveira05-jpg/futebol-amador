@@ -12,7 +12,7 @@ namespace Application.Interfaces.Services
 {
     internal interface ITeamService
     {
-        Task<Guid> CreateTeamAsync(CreateTeamDto dto, Guid creatorUserId);
+        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorUserId);
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 

@@ -14,6 +14,8 @@ namespace Domain.Constants
             public const int MinAge = 18;
             public const int MaxAge = 70;
             public const int MaxGoals = 100;
+            public const int MaxAddressLength = 250;
+
 
         }
         public static class Team
@@ -27,6 +29,10 @@ namespace Domain.Constants
         public static class User
         {
             public const int MaxNameLength = 100;
+            public const int MinNameLength = 3;
+            public const int MaxNameLengthEmail = 50;
+            public const int MinPasswordLength = 8;
+            public const int MaxPasswordLength = 16;
         }
 
         public static class Player
@@ -39,7 +45,6 @@ namespace Domain.Constants
         public static class Pitch
         {
             public const int MaxNameLength = 50;
-            public const int MaxAddressLength = 250;
         }
     }
 }
