@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using Domain.Constants;
 /***
  * Entidade que representa um campo de jogo no sistema.
  */
@@ -9,10 +9,10 @@ namespace Domain.Entities {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(50)]
+        [MaxLength(ModelConstants.Pitch.MaxNameLength)]
         public string Name { get; set; }
 
-        [MaxLength(250)]
+        [MaxLength(ModelConstants.Pitch.MaxAddressLength)]
         public string Address { get; set; }
 
         protected Pitch() { }

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Domain.Entities;
-namespace Application.Interfaces
+namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
         Task<List<Teams>?> GetAllTeamsAsync();
-        Task<Teams?> GetTeamById(Guid id);
-        Task<Teams?> GetTeamByName(string name);
+        Task<Teams?> GetTeamByIdAsync(Guid id);
+        Task<Teams?> GetTeamByNameAsync(string name);
         void DeleteTeam(Teams teamToRemove);
 
         void UpdateTeam(Teams updatedTeam);

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Domain.Constants;
 using Domain.Enums;
 
 
@@ -11,11 +12,7 @@ namespace Domain.Entities
     {
         public Position Position { get; set; }
 
-        public const int minHeight = 100;
-
-        public const int maxHeight = 250;
-
-        [Range(minHeight, maxHeight, ErrorMessage = "Um jogador deve ter entre 100 e 250 centimetors")]
+        [Range(ModelConstants.Player.MinHeight, ModelConstants.Player.MaxHeight, ErrorMessage = "Um jogador deve ter entre 100 e 250 centimetors")]
         public int Height { get; set; }
 
         public Teams? Team { get; set; }

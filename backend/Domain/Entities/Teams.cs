@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Exceptions;
+using Domain.Constants;
 /***
  * Entidade que representa uma equipa desportiva.
  */
@@ -11,10 +12,10 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(50)]
+        [MaxLength(ModelConstants.Team.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
         public string Name { get; set; }
 
-        [MaxLength(250)]
+        [MaxLength(ModelConstants.Team.MaxDescriptionLength)]
         public string? Description { get; set; }
 
         public byte[]? Icon { get; set; }
@@ -26,13 +27,9 @@ namespace Domain.Entities
 
         public DateTime DataFoundation { get; set; }
 
-        public const int MaxPlayers = 32; //Validar se é mesmo 32
-
-        public const int MaxAdmins = 4;
-
         public ICollection<Player> Members { get; set; } = new List<Player>();
 
-        [Range(18, 70, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
+        [Range(ModelConstants.General.MinAge, ModelConstants.General.MaxAge, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
         public float AverageAge { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
@@ -67,7 +64,7 @@ namespace Domain.Entities
             Pitch = pitch;
             IdPitch = pitch.Id;
             DataFoundation = DateTime.Now;
-            AverageAge = 18;
+            AverageAge = ModelConstants.General.MinAge;
             CurrentPoints = 0;
             Calendar = new Calendar();
             IdCalendar = Calendar.Id;

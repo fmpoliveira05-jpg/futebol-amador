@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -33,12 +33,12 @@ namespace Infrastructure.Repositories
             return await DbContext.Team.ToListAsync();
         }
 
-        public async Task<Teams?> GetTeamById(Guid id)
+        public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
             return await DbContext.Team.FindAsync(id); // Retorna a equipa ou null
         }
-
-        public async Task<Teams?> GetTeamByName(String name)
+        //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
+        public async Task<Teams?> GetTeamByNameAsync(String name)
         {
             return await DbContext.Team.FindAsync(name); // Retorna a equipa ou null
         }

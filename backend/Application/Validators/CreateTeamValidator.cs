@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using FluentValidation;
+﻿using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentValidation;
+using Application.DTOs.Team;
 
 namespace Application.Validators
 {
