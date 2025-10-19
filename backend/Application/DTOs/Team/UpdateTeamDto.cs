@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Team
 {
-    internal class UpdateTeamDto
+    public class UpdateTeamDto
     {
         public string? Name { get; set; }
         public string? Description { get; set; }

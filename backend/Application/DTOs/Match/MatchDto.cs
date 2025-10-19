@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Match
 {
-    internal class MatchDto
+    public class MatchDto
     {
     }
 }

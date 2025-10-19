@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Application.Interfaces.Services
 {
-    internal interface ITeamService
+    public interface ITeamService
     {
         Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorUserId);
 

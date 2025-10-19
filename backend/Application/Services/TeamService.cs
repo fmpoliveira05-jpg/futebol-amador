@@ -83,9 +83,34 @@ namespace Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
+        public async Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
         {
-            throw new NotImplementedException();
+            var team = await TeamRepository.GetTeamByIdAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException($"Equipe com ID {teamId} não encontrada.");
+            }
+          
+            var teamDetailsDto = new TeamDetailsDto
+            {
+                Id = team.Id,
+                Name = team.Name,
+                Description = team.Description,
+                FoundationDate = team.DataFoundation,
+                TotalPoints = team.CurrentPoints,
+                RankName = team.Rank?.Name,
+                PitchDto = $"{team.Pitch.Name}, {team.Pitch.Address}",
+                Players = team.Members.Select(player => new PlayerDto
+                {
+                    PlayerId = player.Id,
+                    PlayerName = player.Name,
+                    Height = player.Height,
+                    idTeam = player.idTeam,
+                    Position = player.Position,
+                    IsAdmin = player.IsAdmin
+                }).ToList()
+            };
+            return teamDetailsDto;
         }
 
         public Task<List<PlayerDto>> GetTeamPlayersAsync(Guid teamId)

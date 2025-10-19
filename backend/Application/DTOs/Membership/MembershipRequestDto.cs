@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.MemberShip
 {
-    internal class MemberShipRequestDto
+    public class MemberShipRequestDto
     {
     }
 }

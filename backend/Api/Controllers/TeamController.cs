@@ -3,12 +3,12 @@ using Application.DTOs.Team;
 using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-
+using Application.Interfaces.Services;
 [ApiController]
 [Route("api/[controller]")]
 public class TeamController : ControllerBase
 {
-    private readonly TeamService TeamService;
+    private readonly ITeamService TeamService;
 
     public TeamController(TeamService teamService)
     {
@@ -18,6 +18,12 @@ public class TeamController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTeamById(Guid id)
     {
+        var creatorIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
+        {
+            return Unauthorized("Token de utilizador inválido ou em falta.");
+        }
         var team = await TeamService.GetTeamByIdAsync(id);
         return Ok(team);
     }
