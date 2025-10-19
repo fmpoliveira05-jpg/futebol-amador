@@ -1,23 +1,45 @@
 ﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
     public class PlayerRepository : IPlayerRepository
     {
-        Task<Player?> IPlayerRepository.GetPlayerByIdAsync(Guid id)
+        private readonly AmateurFootballContext _context;
+
+        public PlayerRepository(AmateurFootballContext context)
         {
-            throw new NotImplementedException();
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        Task<Player?> IPlayerRepository.GetPlayerByIdWithMembershipRequests(Guid id)
+        public async Task<Player?> GetPlayerByIdAsync(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty) return null;
+
+            return await _context.Player
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        Task IPlayerRepository.UpdatePlayer(Player player)
+        public async Task<Player?> GetPlayerByIdWithMembershipRequests(Guid id)
         {
-            throw new NotImplementedException();
+            if (id == Guid.Empty) return null;
+
+            return await _context.Player
+                .Include(p => p.MembershipRequests)
+                    .ThenInclude(mr => mr.Team)
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public Task UpdatePlayer(Player player)
+        {
+            if (player == null) throw new ArgumentNullException(nameof(player));
+
+            _context.Player.Update(player);
+            return Task.CompletedTask;
         }
     }
 }

@@ -7,108 +7,103 @@ namespace Infrastructure.Repositories
 {
     public class TeamRepository : ITeamRepository
     {
-        private readonly AmateurFootballContext DbContext;
+        private readonly AmateurFootballContext _context;
 
-        public TeamRepository(AmateurFootballContext DbContext)
+        public TeamRepository(AmateurFootballContext context)
         {
-            this.DbContext = DbContext;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public void DeleteTeam(Teams teamToRemove)
+        public Task DeleteTeam(Teams teamToRemove)
         {
-            DbContext.Team.Remove(teamToRemove);
+            if (teamToRemove == null)
+            {
+                throw new ArgumentNullException(nameof(teamToRemove));
+            }
+
+            _context.Team.Remove(teamToRemove);
+            return Task.CompletedTask;
         }
 
-        public void UpdateTeam(Teams updatedTeam)
+        public Task UpdateTeam(Teams updatedTeam)
         {
-            DbContext.Team.Update(updatedTeam);
+            if (updatedTeam == null)
+            {
+                throw new ArgumentNullException(nameof(updatedTeam));
+            }
+
+            _context.Team.Update(updatedTeam);
+            return Task.CompletedTask;
         }
 
         public async Task<List<Teams>?> GetAllTeamsAsync()
         {
-            return await DbContext.Team.ToListAsync();
+            return await _context.Team.ToListAsync();
         }
 
         public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
-            return await DbContext.Team.FindAsync(id); // Retorna a equipa ou null
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+
+            return await _context.Team.FirstOrDefaultAsync(t => t.Id == id);
         }
-        //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
-        public async Task<Teams?> GetTeamByNameAsync(String name)
+
+        public async Task<Teams?> GetTeamByNameAsync(string name)
         {
-            return await DbContext.Team.FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            return await _context.Team.FirstOrDefaultAsync(t => t.Name == name);
         }
 
         public async Task AddAsync(Teams team)
         {
-            await DbContext.Team.AddAsync(team);
+            if (team == null)
+            {
+                throw new ArgumentNullException(nameof(team));
+            }
+
+            await _context.Team.AddAsync(team);
         }
 
         public async Task<Teams?> GetTeamByIdWithPitchAsync(Guid id)
         {
-            return await DbContext.Team
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+
+            return await _context.Team
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
         {
-            return await DbContext.Team
+            if (id == Guid.Empty) {
+                return null;
+            }
+
+            return await _context.Team
                 .Include(t => t.ReceivedInvites)
                 .Include(t => t.Calendar)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
-
         public async Task<Teams?> GetByIdWithReceivedInvites(Guid id)
         {
-            return await DbContext.Team
+            if (id == Guid.Empty)
+            {
+                return null;
+            }
+
+            return await _context.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        Task<List<Teams>?> ITeamRepository.GetAllTeamsAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Teams?> ITeamRepository.GetTeamByNameAsync(string name)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task ITeamRepository.DeleteTeam(Teams teamToRemove)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task ITeamRepository.UpdateTeam(Teams updatedTeam)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task ITeamRepository.AddAsync(Teams team)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Teams?> ITeamRepository.GetTeamByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Teams?> ITeamRepository.GetTeamByIdWithPitchAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Teams?> ITeamRepository.GetByIdWithReceivedInvites(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        Task<Teams?> ITeamRepository.GetByIdWithReceivedInvitesAndCalendar(Guid id)
-        {
-            throw new NotImplementedException();
         }
     }
 }
