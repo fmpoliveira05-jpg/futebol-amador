@@ -31,7 +31,7 @@ namespace Application.Services
             UserRepository = userRepository;
             UnitOfWork = unitOfWork;
         }
-
+        //teste
         public Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
             throw new NotImplementedException();
