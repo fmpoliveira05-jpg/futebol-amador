@@ -63,7 +63,7 @@ namespace Application.Services
                 teamDto.icon,
                 pitch
             );
-
+            //teste
 
             await TeamRepository.AddAsync(newTeam);
 
