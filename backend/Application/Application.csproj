@@ -7,11 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Interfaces\Repositories\IUnitOfWork.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
   </ItemGroup>
 
 </Project>

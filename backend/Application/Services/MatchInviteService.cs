@@ -185,7 +185,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        //Validar a data (Falta) e provavelmente mais coisas
+        //Validar a data (Falta) e provavelmente mais coisas (Tavlez meter o Update)
         public async Task<MatchInvite> NegociateMatchInvite(SendMatchInviteDTO dto)
         {
             if ((dto.GameDate - DateTime.UtcNow).TotalHours < 12)
@@ -235,7 +235,7 @@ namespace Application.Services
             //Quem recebou o convite e fez a contra-oferta passa a ser o emissor
             receiverTeam.removeReceiverMatchInvite(matchInvite);
             receiverTeam.AddSendMatchInvite(matchInvite);
-
+           
             await unityOfWork.SaveChangesAsync();
 
             return matchInvite;
