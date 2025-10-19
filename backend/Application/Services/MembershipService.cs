@@ -29,7 +29,7 @@ namespace Application.Services
         public async Task<IEnumerable<MembershipRequestDTO>> GetRequestsReceivedByPlayerFromTeams(Guid idPlayer)
         {
             if (idPlayer == Guid.Empty)
-                throw new BusinessRuleException("O id do jogador não pode ser vazio");
+                throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
             if (player == null)
@@ -57,7 +57,7 @@ namespace Application.Services
         public async Task<IEnumerable<MembershipRequestDTO>> GetRequestsSentByPlayer(Guid idPlayer)
         {
             if (idPlayer == Guid.Empty)
-                throw new BusinessRuleException("O id do jogador não pode ser vazio");
+                throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
             if (player == null)
@@ -88,10 +88,10 @@ namespace Application.Services
                 throw new BusinessRuleException("DTO inválido");
 
             if (dto.IdPlayer == Guid.Empty)
-                throw new BusinessRuleException("O id do jogador não pode ser vazio");
+                throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             if (dto.IdTeam == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode ser vazio");
+                throw new BusinessRuleException("O id da equipa não pode estar vazio");
 
             bool senderFlag = dto.Sender ?? true;
 
@@ -106,7 +106,7 @@ namespace Application.Services
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(dto.IdPlayer, dto.IdTeam);
             if (existing != null)
             {
-                throw new BusinessRuleException("Já existe um pedido/convite entre este jogador e esta equipa.");
+                throw new BusinessRuleException("Já existe um pedido de adesão entre este jogador e esta equipa");
             }
 
             var membershipRequest = new MembershipRequests(player, team, senderFlag)
@@ -123,17 +123,17 @@ namespace Application.Services
         public async Task<Player> AcceptMembershipRequest(Guid idTeam, Guid idMembershipRequest)
         {
             if (idTeam == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode ser vazio");
+                throw new BusinessRuleException("O id da equipa não pode estar vazio");
 
             if (idMembershipRequest == Guid.Empty)
-                throw new BusinessRuleException("O id do pedido não pode ser vazio");
+                throw new BusinessRuleException("O id do pedido não pode estar vazio");
 
             var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
             if (request == null)
                 throw new ArgumentNullException("O pedido de adesão não existe");
 
             if (request.IdTeam != idTeam)
-                throw new BusinessRuleException("O pedido não pertence a esta equipa");
+                throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");
 
             var player = request.Player;
             if (player == null)
@@ -159,17 +159,17 @@ namespace Application.Services
         public async Task RefuseMembershipRequest(Guid idTeam, Guid idMembershipRequest)
         {
             if (idTeam == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode ser vazio");
+                throw new BusinessRuleException("O id da equipa não pode estar vazio");
 
             if (idMembershipRequest == Guid.Empty)
-                throw new BusinessRuleException("O id do pedido não pode ser vazio");
+                throw new BusinessRuleException("O id do pedido não pode estar vazio");
 
             var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
             if (request == null)
                 throw new ArgumentNullException("O pedido de adesão não existe");
 
             if (request.IdTeam != idTeam)
-                throw new BusinessRuleException("O pedido não pertence a esta equipa");
+                throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");
 
             await membershipRequestRepository.DeleteMembershipRequest(request);
 

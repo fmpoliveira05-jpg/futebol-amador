@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 
-namespace Application.Interfaces.Repositorys
+namespace Application.Interfaces.Repositories
 {
     public interface IPitchRepository
     {

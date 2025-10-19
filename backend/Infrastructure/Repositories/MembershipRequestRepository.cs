@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories
         public async Task AddMembershipRequest(MembershipRequests membershipRequest)
         {
             if (membershipRequest == null)
-                throw new ArgumentNullException(nameof(membershipRequest), "O membershipRequest enviado está a nulo");
+                throw new ArgumentNullException(nameof(membershipRequest), "O pedido de adesão enviado é null");
 
             await context.MembershipRequests.AddAsync(membershipRequest);
         }
@@ -25,7 +25,7 @@ namespace Infrastructure.Repositories
         public Task DeleteMembershipRequest(MembershipRequests membershipRequest)
         {
             if (membershipRequest == null)
-                throw new ArgumentNullException(nameof(membershipRequest), "O membershipRequest enviado está a nulo");
+                throw new ArgumentNullException(nameof(membershipRequest), "O pedido de adesão enviado é null");
 
             context.MembershipRequests.Remove(membershipRequest);
             return Task.CompletedTask;

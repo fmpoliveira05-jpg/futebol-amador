@@ -1,5 +1,4 @@
 ﻿using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositorys;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +26,7 @@ namespace Infrastructure
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IUnityOfWork, UnityOfWork>();
+            services.AddScoped<IMembershipRequestRepository, MembershipRequestRepository>();
 
             return services;
         }

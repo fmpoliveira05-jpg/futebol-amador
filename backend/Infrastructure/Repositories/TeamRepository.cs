@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.Repositorys;
+﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +64,51 @@ namespace Infrastructure.Repositories
             return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        Task<List<Teams>?> ITeamRepository.GetAllTeamsAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Teams?> ITeamRepository.GetTeamByNameAsync(string name)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task ITeamRepository.DeleteTeam(Teams teamToRemove)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task ITeamRepository.UpdateTeam(Teams updatedTeam)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task ITeamRepository.AddAsync(Teams team)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Teams?> ITeamRepository.GetTeamByIdAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Teams?> ITeamRepository.GetTeamByIdWithPitchAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Teams?> ITeamRepository.GetByIdWithReceivedInvites(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        Task<Teams?> ITeamRepository.GetByIdWithReceivedInvitesAndCalendar(Guid id)
+        {
+            throw new NotImplementedException();
         }
     }
 }
