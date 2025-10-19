@@ -17,7 +17,7 @@ namespace Infrastructure.Repositories
         {
             DbContext = dbContext;
         }
-
+        //finalboss
         public void DeleteTeam(Teams teamToRemove)
         {
             DbContext.Team.Remove(teamToRemove);
