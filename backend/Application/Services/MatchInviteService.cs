@@ -38,14 +38,14 @@ namespace Application.Services
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            var sender = await teamRepository.GetTeamById(dto.IdSender);
+            var sender = await teamRepository.GetTeamByIdAsync(dto.IdSender);
             
             if (sender == null)
             {
                 throw new ArgumentNullException("A equipa que enviou o convite não foi encontrada");
             }
 
-            var receiver = await teamRepository.GetTeamById(dto.IdReceiver);
+            var receiver = await teamRepository.GetTeamByIdAsync(dto.IdReceiver);
 
             if (receiver == null)
             {
@@ -214,14 +214,14 @@ namespace Application.Services
                 throw new BusinessRuleException("Não é possível lançar uma contra-oferta uma vez que os dados estão iguais");
             }
 
-            var senderTeam = await teamRepository.GetTeamById(dto.IdSender);
+            var senderTeam = await teamRepository.GetTeamByIdAsync(dto.IdSender);
 
             if (senderTeam == null)
             {
                 throw new NullReferenceException("A equipa que enviou o convite não foi encontrada");
             }
 
-            var receiverTeam = await teamRepository.GetTeamById(dto.IdReceiver);
+            var receiverTeam = await teamRepository.GetTeamByIdAsync(dto.IdReceiver);
 
             if (receiverTeam == null)
             {

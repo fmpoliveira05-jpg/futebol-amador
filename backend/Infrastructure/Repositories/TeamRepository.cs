@@ -7,21 +7,46 @@ namespace Infrastructure.Repositories
 {
     public class TeamRepository : ITeamRepository
     {
-        private readonly AmateurFootballContext context;
+        private readonly AmateurFootballContext DbContext;
 
-        public TeamRepository(AmateurFootballContext context)
+        public TeamRepository(AmateurFootballContext DbContext)
         {
-            this.context = context;
+            this.DbContext = DbContext;
         }
 
-        public async Task<Teams?> GetTeamById(Guid id)
+        public void DeleteTeam(Teams teamToRemove)
         {
-            return await context.Team.FirstOrDefaultAsync(t => t.Id == id);
+            DbContext.Team.Remove(teamToRemove);
+        }
+
+        public void UpdateTeam(Teams updatedTeam)
+        {
+            DbContext.Team.Update(updatedTeam);
+        }
+
+        public async Task<List<Teams>?> GetAllTeamsAsync()
+        {
+            return await DbContext.Team.ToListAsync();
+        }
+
+        public async Task<Teams?> GetTeamByIdAsync(Guid id)
+        {
+            return await DbContext.Team.FindAsync(id); // Retorna a equipa ou null
+        }
+        //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
+        public async Task<Teams?> GetTeamByNameAsync(String name)
+        {
+            return await DbContext.Team.FindAsync(name); // Retorna a equipa ou null
+        }
+
+        public async Task AddAsync(Teams team)
+        {
+            await DbContext.Team.AddAsync(team);
         }
 
         public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.ReceivedInvites)
                 .Include(t => t.Calendar)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -29,7 +54,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetByIdWithReceivedInvites(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
