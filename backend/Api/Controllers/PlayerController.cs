@@ -1,7 +1,10 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.PlayerDTOs;
+using Application.Interfaces.Repositories;
+using Application.Services;
+using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using Application.DTOs.PlayerDTOs;
+using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -9,109 +12,61 @@ namespace Api.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly AmateurFootballContext context;
+        private readonly PlayerService playerService;
 
-        public PlayerController(AmateurFootballContext context)
+        public PlayerController(PlayerService playerService)
         {
-            this.context = context;
+            this.playerService = playerService;
         }
 
-        [HttpPost("create")]
-        public IActionResult CreatePlayer([FromBody] CreatePlayerDTO dto)
+        [HttpPost]
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTO playerDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var player = new Player
-            {
-                Name = dto.Name,
-                DateOfBirth = dto.DateOfBirth,
-                Address = dto.Address,
-                Email = dto.Email,
-                Password = dto.Password,
-                Phone = dto.Phone,
-                Position = dto.Position,
-                Height = dto.Height,
-                CreationDate = DateTime.Now
-            };
+            var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
 
-            context.Player.Add(player);
-            context.SaveChanges();
-
-            return CreatedAtAction(nameof(GetPlayer), new { playerId = player.Id }, player);
+            return CreatedAtAction(nameof(GetPlayer), new { playerId = newPlayerId });
         }
 
         [HttpDelete("{playerId:guid}")]
-        public IActionResult DeletePlayer(Guid playerId) 
+        public async Task<IActionResult> DeletePlayer(Guid playerId) 
         {
-            var player = context.Player.Find(playerId);
-            
-            if ( player == null)
-            {
-                return NotFound("Player not found");
-            }
-
-            context.Player.Remove(player);
-            context.SaveChanges();
+            await playerService.DeletePlayerAsync(playerId);
 
             return NoContent();
         }
 
         [HttpGet("{playerId:guid}")]
-        public IActionResult GetPlayer(Guid playerId)
+        public async Task<IActionResult> GetPlayer(Guid playerId)
         {
-            var player = context.Player.Find(playerId);
+            var playerDetails = await playerService.GetPlayerByIdAsync(playerId);
 
-            if (player == null)
-            {
-                return NotFound("Player not found");
-            }
-
-            return Ok(player);
+            return Ok(playerDetails);
         }
 
         [HttpPut("{playerId:guid}")]
-        public IActionResult UpdateUser(Guid playerId, [FromBody] UpdatePlayerDTO dto)
+        public async Task<IActionResult> UpdateUser(Guid playerId, [FromBody] UpdatePlayerDTO dto)
         {
-            var player = context.Player.Find(playerId);
-
-            if (player == null)
+            if (!ModelState.IsValid)
             {
-                return NotFound("Player not found");
+                return BadRequest(ModelState);
             }
 
-            player.Name = dto.Name;
-            player.DateOfBirth = dto.DateOfBirth;
-            player.Email = dto.Email;
-            player.Password = dto.Password;
-            player.Phone = dto.Phone;
-            player.Position = dto.Position;
-            player.Height = dto.Height;
+            await playerService.UpdatePlayerAsync(playerId, dto);
 
-            context.SaveChanges();
-            return Ok(player);
+            return Ok("Player information updated succesfully.");
         }
 
         [HttpPut("{playerId:guid}/leave-team")]
-        public IActionResult LeaveTeam(Guid playerId)
+        public async Task<IActionResult> LeaveTeam(Guid playerId)
         {
-            var player = context.Player.Find(playerId);
+            string teamName = await playerService.LeaveTeam(playerId);
 
-            if (player == null)
-            {
-                return NotFound("Player not found.");
-            }
-
-            string teamName = player.Team.Name;
-
-            player.Team = null;
-            player.idTeam = null;
-
-            context.SaveChanges();
-
-            return Ok("Player succesfully left the team" + teamName);
+            return Ok("Player succesfully left the team" + teamName + ".");
         }
     }
 }
