@@ -19,6 +19,12 @@ public class TeamController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetTeamById(Guid id)
     {
+        var creatorIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        //if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
+        //{
+          //  return Unauthorized("Token de utilizador inválido ou em falta.");
+        //}
         var team = await TeamService.GetTeamByIdAsync(id);
         return Ok(team);
     }
@@ -28,13 +34,12 @@ public class TeamController : ControllerBase
     {
         var creatorIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
-        {
-            return Unauthorized("Token de utilizador inválido ou em falta.");
-        }
+        //if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
+        //{
+            //return Unauthorized("Token de utilizador inválido ou em falta.");
+        //}
         //TODO: Adicionar verificação se o player já tem equipa
-
-        var newTeamId = await TeamService.CreateTeamAsync(teamDto, creatorUserId);
+        var newTeamId = await TeamService.CreateTeamAsync(teamDto);
 
         return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
     }

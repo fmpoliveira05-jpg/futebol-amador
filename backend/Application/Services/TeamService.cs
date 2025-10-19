@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Team;
+﻿using Application.DTOs.Player;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
@@ -30,7 +31,7 @@ namespace Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
+        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto)
         {
 
             var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
@@ -39,11 +40,11 @@ namespace Application.Services
                 throw new ValidationException($"Uma equipa com o nome '{teamDto.Name}' já existe.");
             }
 
-            var creatorPlayer = await UserRepository.GetUserByIdAsync(creatorPlayerId);
-            if (creatorPlayer == null)
-            {
-                throw new NotFoundException($"Utilizador com ID {creatorPlayerId} não encontrado.");
-            }
+            //var creatorPlayer = await UserRepository.GetUserByIdAsync(creatorPlayerId);
+            //if (creatorPlayer == null)
+            //{
+              //  throw new NotFoundException($"Utilizador com ID {creatorPlayerId} não encontrado.");
+            //}
 
             var pitch = new Pitch(
                 teamDto.HomePitch.Name,
@@ -66,9 +67,34 @@ namespace Application.Services
             return newTeam.Id;
         }
 
-        public Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
+        public async Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
         {
-            throw new NotImplementedException();
+            var team = await TeamRepository.GetTeamByIdAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException($"Equipe com ID {teamId} não encontrada.");
+            }
+
+            var teamDetailsDto = new TeamDetailsDto
+            {
+                Id = team.Id,
+                Name = team.Name,
+                Description = team.Description,
+                FoundationDate = team.DataFoundation,
+                TotalPoints = team.CurrentPoints,
+                RankName = team.Rank?.Name,
+                PitchDto = $"{team.Pitch.Name}, {team.Pitch.Address}",
+                Players = team.Members.Select(player => new PlayerDto
+                {
+                    PlayerId = player.Id,
+                    PlayerName = player.Name,
+                    Height = player.Height,
+                    idTeam = player.idTeam,
+                    Position = player.Position,
+                    IsAdmin = player.IsAdmin
+                }).ToList()
+            };
+            return teamDetailsDto;
         }
     }
 }

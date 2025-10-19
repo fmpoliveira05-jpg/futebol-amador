@@ -36,12 +36,19 @@ namespace Infrastructure.Repositories
         //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
         public async Task<Teams?> GetTeamByNameAsync(String name)
         {
-            return await DbContext.Team.FindAsync(name); // Retorna a equipa ou null
+            return await DbContext.Team.FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
         }
 
         public async Task AddAsync(Teams team)
         {
             await DbContext.Team.AddAsync(team);
+        }
+
+        public async Task<Teams?> GetTeamByIdWithPitchAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Pitch)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)

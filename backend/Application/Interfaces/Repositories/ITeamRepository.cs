@@ -10,6 +10,8 @@ namespace Application.Interfaces.Repositorys
         void UpdateTeam(Teams updatedTeam);
         Task AddAsync(Teams team);
         Task<Teams?> GetTeamByIdAsync(Guid id);
+
+        Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
         Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id);
     }

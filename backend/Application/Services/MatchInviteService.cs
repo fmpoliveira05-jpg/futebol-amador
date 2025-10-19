@@ -38,20 +38,21 @@ namespace Application.Services
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            var sender = await teamRepository.GetTeamByIdAsync(dto.IdSender);
+            var sender = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdSender);
             
             if (sender == null)
             {
                 throw new ArgumentNullException("A equipa que enviou o convite não foi encontrada");
             }
 
-            var receiver = await teamRepository.GetTeamByIdAsync(dto.IdReceiver);
+            var receiver = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdReceiver);
 
             if (receiver == null)
             {
                 throw new ArgumentNullException("A equipa que recebeu o convite não foi encontrada");
             }
 
+          
             if (sender.Pitch.Name != dto.namePitch && receiver.Pitch.Name != dto.namePitch)
             {
                 throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
