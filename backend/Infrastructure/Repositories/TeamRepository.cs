@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories
         {
             DbContext.Team.Remove(teamToRemove);
         }
-
+        //teste
         public void UpdateTeam(Teams updatedTeam)
         {
             DbContext.Team.Update(updatedTeam);
