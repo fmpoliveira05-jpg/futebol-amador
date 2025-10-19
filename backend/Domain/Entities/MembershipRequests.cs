@@ -1,5 +1,4 @@
-﻿
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
@@ -22,25 +21,38 @@ namespace Domain.Entities
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
 
+        // Data do convite/pedido (usar UTC para consistência)
         public DateTime InviteDate { get; set; }
 
-        public bool Sender { get; set; } // true - Player, false - Team
+        // true  => enviado pelo Player (player pediu entrar na team)
+        // false => enviado pela Team  (team convidou o player)
+        public bool Sender { get; set; }
 
         protected MembershipRequests() { }
 
         public MembershipRequests(Player player, Teams team, bool sender)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            if (team == null)
+            {
+                throw new ArgumentNullException(nameof(team));
+            }
+
             Player = player;
             IdPlayer = player.Id;
             Team = team;
             IdTeam = team.Id;
-            InviteDate = DateTime.Now;
+            InviteDate = DateTime.UtcNow;
             Sender = sender;
         }
 
         public override string ToString()
         {
-            return $"[MembershipRequests: Id={Id}, Player={Player}, idPlayer={IdPlayer}, Team={Team}, idTeam={IdTeam}, inviteDate={InviteDate}, sender={Sender}]";
+            return $"[MembershipRequests: Id={Id}, PlayerId={IdPlayer}, TeamId={IdTeam}, InviteDate={InviteDate:u}, Sender={(Sender ? "Player" : "Team")}]";
         }
     }
 }
