@@ -1,11 +1,12 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Repositorys;
+using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
 
 namespace Application.Services
 {
-    public class MatchInviteService
+    public class MatchInviteService: IMatchInviteService
     {
         private readonly ITeamRepository teamRepository;
         
@@ -51,7 +52,7 @@ namespace Application.Services
                 throw new ArgumentNullException("A equipa que recebeu o convite não foi encontrada");
             }
 
-            if (sender.IdPitch != dto.IdPitch && receiver.IdPitch != dto.IdPitch)
+            if (sender.Pitch.Name != dto.namePitch && receiver.Pitch.Name != dto.namePitch)
             {
                 throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
             }
@@ -59,7 +60,7 @@ namespace Application.Services
             //Determinar de quem é o campo
             var pitch = sender.Pitch;
 
-            if (dto.IdPitch == receiver.IdPitch)
+            if (dto.namePitch == receiver.Pitch.Name)
             {
                 pitch = receiver.Pitch;
             } 
@@ -145,8 +146,8 @@ namespace Application.Services
             sender.removeSendMatchInvite(matchInvite);
             receiver.removeReceiverMatchInvite(matchInvite);
 
-            sender.Calendar.AddMatch(match);
-            receiver.Calendar.AddMatch(match);
+            sender.Calendar.ScheduledMatch(match);
+            receiver.Calendar.ScheduledMatch(match);
 
             await unityOfWork.SaveChangesAsync();
 
@@ -192,7 +193,7 @@ namespace Application.Services
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            var pitch = await pitchRepository.GetPitchById(dto.IdPitch);
+            var pitch = await pitchRepository.GetPitchByName(dto.namePitch);
             
             if (pitch == null)
             {

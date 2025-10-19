@@ -2,24 +2,25 @@
 using Application.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Application.Interfaces.Services;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]/teams/{idTeam:guid}")]
+    [Route("api/{idTeam:guid}/[controller]")]
     [ApiController]
     public class MatchInviteController : ControllerBase
     {
-        private readonly MatchInviteService matchInviteService;
+        private readonly IMatchInviteService matchInviteService;
 
-        public MatchInviteController(MatchInviteService matchInviteService)
+        public MatchInviteController(IMatchInviteService matchInviteService)
         {
             this.matchInviteService = matchInviteService;
         }
 
         /***
-         * Vai faltar as questões de aut neste metodo e nos restantes
-         * Meter Try Catchs (Adds, Removes)
+         *  Vai faltar AUTs
          */
+
         [HttpPost("/match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
@@ -77,9 +78,7 @@ namespace Api.Controllers
 
             return error;
         }
-        /***
-         * Metodo para adicionar
-         */
+
         [HttpPost("/AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
@@ -110,14 +109,6 @@ namespace Api.Controllers
             }
         }
 
-        /***
-         * Talvez eliminar o counter da variavel
-         * Falta definir url
-         * No Action Resukt vai estar o DTO/Resultado retornado ao user
-         * Meter Try Catchm, por causa dos removes
-         * 
-         * Receberá o futuro o User para aut
-         */
         //DELETE
         // api/.../RefuseMatchInvite/id_invite
         [HttpDelete("/RefuseMatchInvite")]
@@ -166,7 +157,7 @@ namespace Api.Controllers
                 return BadRequest("O id do recetor do convite não pode ser nulo!");
             }
 
-            if (dto.IdPitch == Guid.Empty)
+            if (dto.namePitch == null || dto.namePitch == "")
             {
                 return BadRequest("O id do campo não pode ser nulo");
             }
@@ -176,11 +167,9 @@ namespace Api.Controllers
                 return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
             }
 
-            //Validar catch
-
             try
             {
-                var matchInvite = await matchInviteService.NegociateMatchInvite(idTeam, dto);
+                var matchInvite = await matchInviteService.NegociateMatchInvite(dto);
             
                 return Ok(matchInvite);
             }

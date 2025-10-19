@@ -14,6 +14,7 @@ namespace Application.DTOs
         public DateTime GameDate { get; set; }
 
         [Required(ErrorMessage = "É obrigatório especificar o id do Campo")]
-        public Guid IdPitch { get; set; }
+        [MaxLength(50)]
+        public string namePitch { get; set; }
     }
 }

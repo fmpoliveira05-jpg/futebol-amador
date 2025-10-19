@@ -18,5 +18,10 @@ namespace Infrastructure.Repositories
         {
             return await context.Pitch.FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        public async Task<Pitch?> GetPitchByName(string namePitch)
+        {
+            return await context.Pitch.FirstOrDefaultAsync(p => p.Name == namePitch);
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Enums;
+using Domain.Exceptions;
+using System.ComponentModel.DataAnnotations;
 
 /**
  * Entidade que representa um calendário de partidas de uma equipa
@@ -29,42 +31,67 @@ namespace Domain.Entities
          * 
          * Retorna a partida adicionada ou null se não for possível adicionar
          */
-        public Matches AddMatch(Matches match)
+        public Matches ScheduledMatch(Matches match)
         {
             if (match == null)
             {
                 throw new ArgumentNullException("A partida a adicionar no calendario não pode ser nula");
             }
+
             if (Matches.Contains(match)) {
-                throw new ArgumentException("Este 'match' já existe na lista.", nameof(match));
+                throw new ArgumentException("Este match já existe na lista.", nameof(match));
             }
 
             Matches.Add(match);
             return match;
         }
 
-        /***
-         * Metodo que permite remover uma partida ao calendário
-         * 
-         * match: partida a remover
-         * 
-         * Retorna a partida removida ou null se não for possível remover
-         */
-        public Matches RemoveMatch(Matches match)
+        public Matches PostPoneMatch(Guid idMatch, DateTime newDate)
         {
-            return null;
+            if (idMatch == Guid.Empty)
+            {
+                throw new ArgumentNullException("O id da match está vazio!");
+            }
+
+            Matches? matchFind = Matches.FirstOrDefault(m => m.Id == idMatch);
+            
+            if (matchFind == null) {
+                throw new NotFindException("A equipa não possui esse jogo");
+            }
+
+            matchFind.MatchDate = newDate;
+            matchFind.MatchStatus = MatchStatus.POST_PONED;
+
+            return matchFind;
         }
 
-        /***
-         * Metodo que permite obter uma partida do calendário pelo seu id
-         * 
-         * idMatch: id da partida a obter
-         * 
-         * Retorna a partida ou null se não for possível encontrar
-         */
-        public Matches GetMatchById(Guid idMatch)
+        public Matches AcceptPostPoneMatch(Guid idMatch)
         {
-            return null;
+            if (idMatch == Guid.Empty)
+            {
+                throw new ArgumentNullException("O id da match está vazio!");
+            }
+
+            Matches? matchFind = Matches.FirstOrDefault(m => m.Id == idMatch);
+
+            if (matchFind == null)
+            {
+                throw new NotFindException("A equipa não possui esse jogo");
+            }
+
+            matchFind.MatchStatus = MatchStatus.SCHEDULED;
+
+            return matchFind;
+        }
+
+        public void CancelMatch(Matches match)
+        {
+            if (match == null)
+            {
+                throw new NullReferenceException("O match não pode ser nullo");
+            }
+
+            Matches.Remove(match);
         }
 
         public override string ToString()
