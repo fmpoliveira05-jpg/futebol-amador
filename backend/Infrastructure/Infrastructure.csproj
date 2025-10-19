@@ -17,7 +17,6 @@
     <Folder Include="Configuration\" />
     <Folder Include="Migrations\" />
     <Folder Include="Notification\" />
-    <Folder Include="Repositories\" />
   </ItemGroup>
 
   <ItemGroup>

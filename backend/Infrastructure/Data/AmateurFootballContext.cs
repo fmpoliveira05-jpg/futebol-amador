@@ -20,6 +20,11 @@ namespace Infrastructure.Data
         public DbSet<MatchInvite> MatchInvite { get; set; } = null;
         public DbSet<MembershipRequests> MembershipRequests { get; set; } = null;
 
+        public AmateurFootballContext(DbContextOptions<AmateurFootballContext> options)
+        : base(options)
+        {
+        }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Ligação à base de dados
