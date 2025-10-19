@@ -23,7 +23,8 @@ namespace Api.Controllers
         [HttpPost("/match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
-            if (idTeam == Guid.Empty) {
+            if (idTeam == Guid.Empty)
+            {
                 return BadRequest("O id da equipa está vazio");
             }
 
@@ -111,7 +112,8 @@ namespace Api.Controllers
         //DELETE
         // api/.../RefuseMatchInvite/id_invite
         [HttpDelete("/RefuseMatchInvite")]
-        public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite) {
+        public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
+        {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
             if (validator.Count() > 0)
             {
@@ -161,7 +163,7 @@ namespace Api.Controllers
                 return BadRequest("O id do campo não pode ser nulo");
             }
 
-            if(idTeam != dto.IdSender)
+            if (idTeam != dto.IdSender)
             {
                 return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
             }
@@ -169,7 +171,7 @@ namespace Api.Controllers
             try
             {
                 var matchInvite = await matchInviteService.NegociateMatchInvite(dto);
-            
+
                 return Ok(matchInvite);
             }
             catch (BusinessRuleException ex)
