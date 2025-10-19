@@ -31,7 +31,7 @@ namespace Application.Services
             UserRepository = userRepository;
             UnitOfWork = unitOfWork;
         }
-        //teste
+        
         public Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
             throw new NotImplementedException();
@@ -40,13 +40,15 @@ namespace Application.Services
         public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
         {
 
-            var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
+            var existingTeam = TeamRepository.GetTeamByNameAsync(teamDto.Name);
+            var creatorPlayer =  UserRepository.GetUserByIdAsync(creatorPlayerId);
+            await Task.WhenAll(existingTeam, creatorPlayer);
+
             if (existingTeam != null)
             {
                 throw new ValidationException($"Uma equipa com o nome '{teamDto.Name}' já existe.");
             }
 
-            var creatorPlayer = await UserRepository.GetUserByIdAsync(creatorPlayerId);
             if (creatorPlayer == null)
             {
                 throw new NotFoundException($"Utilizador com ID {creatorPlayerId} não encontrado.");
@@ -63,7 +65,6 @@ namespace Application.Services
                 teamDto.icon,
                 pitch
             );
-            //teste
 
             await TeamRepository.AddAsync(newTeam);
 
@@ -73,9 +74,30 @@ namespace Application.Services
             return newTeam.Id;
         }
 
-        public Task DeleteTeamAsync(Guid teamId, Guid currentUserId)
+        public async Task DeleteTeamAsync(Guid teamId, Guid currentUserId)
         {
-            throw new NotImplementedException();
+            var existingTeamTask = TeamRepository.GetTeamByIdAsync(teamId);
+            var playerTryingToDeleteTask = PlayerRepository.GetPlayerByIdAsync(currentUserId);
+            await Task.WhenAll(existingTeamTask, playerTryingToDeleteTask);
+
+            var existingTeam = await existingTeamTask;
+            var playerTryingToDelete = await playerTryingToDeleteTask;
+
+            if (playerTryingToDelete == null)
+            {
+                throw new NotFoundException($"Utilizador com ID {currentUserId} não encontrado.");
+            }
+            //adicionar verificação se o player pertence à equipa
+            if (!playerTryingToDelete.IsAdmin)
+            {
+                throw new ValidationException($"O player de id '{playerTryingToDelete.Id}' não é admnistrador da equipa.");
+            }
+            if (existingTeam == null)
+            {
+                throw new ValidationException($"O time não com o Id '{teamId}' não existe.");
+            }
+
+
         }
 
         public Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid currentAdminId)
@@ -113,9 +135,24 @@ namespace Application.Services
             return teamDetailsDto;
         }
 
-        public Task<List<PlayerDto>> GetTeamPlayersAsync(Guid teamId)
+        public async Task<List<PlayerDto>> GetTeamPlayersAsync(Guid teamId)
         {
-            throw new NotImplementedException();
+            var team = await TeamRepository.GetTeamByIdAsync(teamId);
+            if (team == null)
+            {
+                throw new NotFoundException($"Equipe com ID {teamId} não encontrada.");
+            }
+            var playerDtos = team.Members.Select(player => new PlayerDto
+            {
+                PlayerId = player.Id,
+                PlayerName = player.Name,
+                Height = player.Height,
+                idTeam = player.idTeam,
+                Position = player.Position,
+                IsAdmin = player.IsAdmin
+            }).ToList();
+            return playerDtos;
+
         }
 
         public Task KickPlayerFromTeamAsync(Guid teamId, Guid playerIdToKick, Guid adminUserId)
