@@ -1,10 +1,7 @@
 ﻿using Application.DTOs.PlayerDTOs;
-using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Services;
-using Domain.Entities;
-using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Api.Controllers
 {
@@ -12,9 +9,9 @@ namespace Api.Controllers
     [ApiController]
     public class PlayerController : ControllerBase
     {
-        private readonly PlayerService playerService;
+        private readonly IPlayerService playerService;
 
-        public PlayerController(PlayerService playerService)
+        public PlayerController(IPlayerService playerService)
         {
             this.playerService = playerService;
         }

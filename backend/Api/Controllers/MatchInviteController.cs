@@ -29,7 +29,7 @@ namespace Api.Controllers
             }
 
             //Regra de negocio
-            if (dto.IdSender == dto.IdReceiver || dto.Sender.Equals(dto.Receiver)) {
+            if (dto.IdSender == dto.IdReceiver) {
                 return BadRequest("O recetor do convite deve ser diferente do emissor!");
             }
 
