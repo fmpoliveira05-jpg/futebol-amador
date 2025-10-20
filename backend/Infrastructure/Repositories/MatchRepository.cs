@@ -38,11 +38,9 @@ namespace Infrastructure.Repositories
 
         public async Task<Matches?> GetMatchProxim12HoursMatchs(Guid idTeam, DateTime gameDate)
         {
-            //Definir ciclo de 12 horas
             const int totalHours = 12;
             const int totalMinutes = 60 * totalHours;
 
-            //ACHO QUE JÁ SEI O PROBLEMA FALTA FAZER M.MATCHDATE - UCT.NOW
             var query = await context.Match
                 .Include(m => m.Teams)
                 .Where(m => m.Teams.Any(t => t.IdTeam == idTeam)
