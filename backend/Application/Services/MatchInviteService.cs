@@ -1,8 +1,10 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
+using Application.DTOs.MatchInvites;
 using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
+using System.Reflection;
 
 namespace Application.Services
 {
@@ -31,18 +33,31 @@ namespace Application.Services
             this.unityOfWork = unityOfWork;
         }
 
-        public async Task SendMatchInvite(SendMatchInviteDTO dto)
+        /***
+         * Ainda não dá a regra das 12 horas para acietar, enviar e negociar (Ver se´já tem jogo marcado)
+         */
+        private async Task<string> validateHaveMatchWith12Hours(Guid idTeam, DateTime gameDate)
+        {
+            var findMatchWith12hours = await matchRepository.GetMatchProxim12HoursMatchs(idTeam, gameDate);
+
+            if (findMatchWith12hours != null)
+            {
+                return "Não pode marcar esse jogo a essa hora, porque já tem um a pelo menos 12 horas da data especificada";
+            }
+
+            return "";
+        }
+
+        /***
+        * Ainda não dá a regra das 12 horas para acietar, enviar e negociar (Ver se´já tem jogo marcado)
+        * Falta corrigir erro de quando clico em aceitar dar erro 500
+        
+         */
+        public async Task<InfoMatchInviteDTO> SendMatchInvite(SendMatchInviteDTO dto)
         {
             if ((dto.GameDate - DateTime.UtcNow).TotalHours < 12)
             {
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
-            }
-
-            var sender = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdSender);
-            
-            if (sender == null)
-            {
-                throw new ArgumentNullException("A equipa que enviou o convite não foi encontrada");
             }
 
             var receiver = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdReceiver);
@@ -52,7 +67,25 @@ namespace Application.Services
                 throw new ArgumentNullException("A equipa que recebeu o convite não foi encontrada");
             }
 
-          
+            var sender = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdSender);
+
+            if (sender == null)
+            {
+                throw new ArgumentNullException("A equipa que enviou o convite não foi encontrada");
+            }
+
+            MatchInvite? matchInviteFind = await matchInviteRepository.GetMatchInvite(dto);
+
+            if (matchInviteFind != null)
+            {
+                throw new BusinessRuleException("A match invite já existe");
+            }
+
+            var validateMatch = await validateHaveMatchWith12Hours(dto.IdSender, dto.GameDate);
+            if (validateMatch != "") {
+                throw new BusinessRuleException(validateMatch);
+            }
+
             if (sender.Pitch.Name != dto.namePitch && receiver.Pitch.Name != dto.namePitch)
             {
                 throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
@@ -69,11 +102,20 @@ namespace Application.Services
             var matchInvite = new MatchInvite(sender, receiver, dto.GameDate, pitch);
 
             await matchInviteRepository.AddMatchInvite(matchInvite);
-            
-            receiver.AddReceiveMatchInvite(matchInvite);
-            sender.AddSendMatchInvite(matchInvite);
 
+            var sendMatchInviteDto = new InfoMatchInviteDTO
+            {
+                Id = matchInvite.Id,
+                IdSender = matchInvite.IdSender,
+                NameSender = sender.Name,
+                IdReceiver = matchInvite.IdReceiver,
+                NameReceiver = receiver.Name,
+                GameDate = matchInvite.GameDate,
+                NamePitch = pitch.Name
+            };
             await unityOfWork.SaveChangesAsync();
+
+            return sendMatchInviteDto;
         }
 
         private async Task<List<TeamStatistics>> ListTeamsStatistics(Teams sender, Teams receiver)
@@ -107,7 +149,19 @@ namespace Application.Services
             return "";
         }
 
-        public async Task<Matches> AcceptMatchInvite(Guid idTeam, Guid idMatchInvite)
+        private string ValidateSender(Teams sender, MatchInvite matchInvite)
+        {
+
+            if (sender.SentInvites.FirstOrDefault(matchInvite) == null)
+            {
+                return "O convite a recusar não existe na equipa oponetne";
+            }
+
+            return "";
+        }
+
+        //Trocar para DTO com dados do Match
+        public async Task<MatchDto> AcceptMatchInvite(Guid idTeam, Guid idMatchInvite)
         {
             var receiver = await teamRepository.GetByIdWithReceivedInvitesAndCalendar(idTeam);
             
@@ -125,13 +179,26 @@ namespace Application.Services
                 throw new ArgumentNullException("O convite a aceitar não existe");
             }
 
-            var sender = matchInvite.Sender;
-            if (sender.SentInvites.FirstOrDefault(matchInvite) == null)
+            var validateMatch = await validateHaveMatchWith12Hours(receiver.Id, matchInvite.GameDate);
+            if (validateMatch != "")
             {
-                throw new ArgumentNullException("O convite a recusar não existe na equipa oponetne");
+                throw new BusinessRuleException(validateMatch);
             }
 
-            Pitch pitch = matchInvite.Pitch;
+            var sender = await teamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+           
+            if (sender == null)
+            {
+                throw new NullReferenceException("O emissor do convite está a null");
+            }
+
+            var validateSender = ValidateSender(sender, matchInvite);
+            if (validateSender != "")
+            {
+                throw new ValidatorException(validateSender);
+            }
+
+            var pitch = await pitchRepository.GetPitchById(matchInvite.IdPitch);
             if (pitch == null)
             {
                 throw new ArgumentNullException("O campo do convite de partida não pode ser nulo");
@@ -144,15 +211,19 @@ namespace Application.Services
             await matchInviteRepository.DeleteMatchInvite(matchInvite);
             await matchRepository.AddMatch(match);
 
-            sender.removeSendMatchInvite(matchInvite);
-            receiver.removeReceiverMatchInvite(matchInvite);
-
-            sender.Calendar.ScheduledMatch(match);
-            receiver.Calendar.ScheduledMatch(match);
+            var matchDTO = new MatchDto
+            {
+                IdMatch = match.Id,
+                GameDate = match.MatchDate,
+                NameTeam = receiver.Name,
+                NameOpponent = sender.Name,
+                NamePitch = pitch.Name
+            };
 
             await unityOfWork.SaveChangesAsync();
 
-            return match;
+            //var acceptMatch
+            return matchDTO;
         }
 
         public async Task RefuseMatchInvites(Guid idTeam, Guid idMatchInvite)
@@ -173,21 +244,27 @@ namespace Application.Services
                 throw new MatchInviteException("O convite a recusar não existe");
             }
 
-            Teams sender = matchInvite.Sender;
-            if (sender.SentInvites.FirstOrDefault(matchInvite) == null)
+            var validateMatch = await validateHaveMatchWith12Hours(receiver.Id, matchInvite.GameDate);
+            if (validateMatch != "")
             {
-                throw new MatchInviteException("O convite a recusar não existe na equipa oponetne");
+                throw new BusinessRuleException(validateMatch);
+            }
+
+            var sender = await teamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+
+            var validateSender = ValidateSender(sender, matchInvite);
+            if(validateSender != "")
+            {
+                throw new ValidatorException(validateSender);
             }
 
             await matchInviteRepository.DeleteMatchInvite(matchInvite);
-            sender.removeSendMatchInvite(matchInvite);
-            receiver.removeReceiverMatchInvite(matchInvite);
-
+ 
             await unityOfWork.SaveChangesAsync();
         }
 
-        //Validar a data (Falta) e provavelmente mais coisas (Tavlez meter o Update)
-        public async Task<MatchInvite> NegociateMatchInvite(SendMatchInviteDTO dto)
+        //Ver erro da data 12h e error 500 que deixa executar o codigo e depois é lançado
+        public async Task<InfoMatchInviteDTO> NegociateMatchInvite(SendMatchInviteDTO dto)
         {
             if ((dto.GameDate - DateTime.UtcNow).TotalHours < 12)
             {
@@ -229,17 +306,40 @@ namespace Application.Services
                 throw new NullReferenceException("A equipa que recebeu o convite não foi encontrada");
             }
 
-            //Quem enviou o convite passa a ser o recetor
-            senderTeam.removeSendMatchInvite(matchInvite);
-            senderTeam.AddReceiveMatchInvite(matchInvite);
 
-            //Quem recebou o convite e fez a contra-oferta passa a ser o emissor
-            receiverTeam.removeReceiverMatchInvite(matchInvite);
-            receiverTeam.AddSendMatchInvite(matchInvite);
-           
+            var sendMatchInviteDto = new InfoMatchInviteDTO
+            {
+                Id = matchInvite.Id,
+                IdSender = matchInvite.IdSender,
+                NameSender = senderTeam.Name,
+                IdReceiver = matchInvite.IdReceiver,
+                NameReceiver = receiverTeam.Name,
+                GameDate = matchInvite.GameDate,
+                NamePitch = pitch.Name
+            };
+
             await unityOfWork.SaveChangesAsync();
 
-            return matchInvite;
+            return sendMatchInviteDto;
+        }
+
+        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeam(Guid idTeam)
+        {
+            var team = await teamRepository.GetTeamByIdAsync(idTeam);
+
+            if (team == null)
+            {
+                throw new NullReferenceException("A team a consultar a lista de pedidos não existe");
+            }
+
+            List<InfoMatchInviteDTO> listMatchInvites = await matchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
+
+            if (listMatchInvites == null || !listMatchInvites.Any())
+            {
+                throw new NullReferenceException("A equipa ainda não recebeu pedidos de partida");
+            }
+
+            return listMatchInvites;
         }
     }
 }

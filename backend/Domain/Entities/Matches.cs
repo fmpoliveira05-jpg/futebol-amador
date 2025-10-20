@@ -18,6 +18,8 @@ namespace Domain.Entities
 
         public DateTime MatchDate { get; set; }
 
+        //public DateTime PostPoneDate { get; set; }
+
         public DateTime? TimeStart { get; set; } = null;
 
         public bool IsCompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
@@ -36,47 +38,31 @@ namespace Domain.Entities
 
         public Matches(DateTime matchDate, bool isCompetive, Pitch pitch)
         {
-            MatchDate = matchDate;
-            IsCompetive = isCompetive;
-            Pitch = pitch;
-            Teams = new List<TeamStatistics>();
-            Chat = new Chat();
-            IdChat = Chat.Id;
+            this.MatchDate = matchDate;
+            //this.PostPoneDate = matchDate
+            this.IsCompetive = isCompetive;
+            this.Pitch = pitch;
+            this.Teams = new List<TeamStatistics>();
+            this.Chat = new Chat();
+            this.IdChat = Chat.Id;
         }
 
         public Matches(DateTime matchDate, bool isCompetive, Pitch pitch, List<TeamStatistics> teamStatistics, Chat chat)
         {
-            MatchDate = matchDate;
-            IsCompetive = isCompetive;
-            Pitch = pitch;
-            Teams = teamStatistics;
-            Chat = chat;
-            IdChat = Chat.Id;
-        }
+            this.MatchDate = matchDate;
+            this.IsCompetive = isCompetive;
+            this.Pitch = pitch;
+            this.Teams = teamStatistics;
 
-        /***
-         * Método auxiliar para encontrar uma equipa nas estatísticas do match
-         * 
-         * Retorna a equipa ou null se não encontrar
-         */
-        private TeamStatistics findTeam() { 
-            return null;
-        }
-
-        /***
-         * 
-         */
-        public TeamStatistics AddTeam(TeamStatistics team)
-        {
-            return null;
-        }
-
-        /***
-         * Metodo que consulta as estatísticas de uma equipa num determinado match
-         */
-        public TeamStatistics ShowTeamStatistics(Guid idTeam)
-        {
-            return null;
+            if (chat != null)
+            {
+                this.Chat = chat;
+                this.IdChat = Chat.Id;
+            } else
+            {
+                this.Chat = new Chat();
+                this.IdChat = this.Chat.Id;
+            }
         }
 
         public override string ToString()

@@ -46,25 +46,6 @@ namespace Domain.Entities
             return match;
         }
 
-        public Matches PostPoneMatch(Guid idMatch, DateTime newDate)
-        {
-            if (idMatch == Guid.Empty)
-            {
-                throw new ArgumentNullException("O id da match está vazio!");
-            }
-
-            Matches? matchFind = Matches.FirstOrDefault(m => m.Id == idMatch);
-            
-            if (matchFind == null) {
-                throw new NotFindException("A equipa não possui esse jogo");
-            }
-
-            matchFind.MatchDate = newDate;
-            matchFind.MatchStatus = MatchStatus.POST_PONED;
-
-            return matchFind;
-        }
-
         public Matches AcceptPostPoneMatch(Guid idMatch)
         {
             if (idMatch == Guid.Empty)

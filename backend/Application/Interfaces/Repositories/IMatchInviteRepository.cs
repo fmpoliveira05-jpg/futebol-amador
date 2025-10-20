@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.MatchInvites;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositorys
 {
@@ -11,5 +12,9 @@ namespace Application.Interfaces.Repositorys
         Task<MatchInvite?> GetMatchInviteById(Guid id);
 
         Task<MatchInvite?> GetMatchInviteByTeams(Guid idSender, Guid idReceiver);
+
+        public Task<MatchInvite?> GetMatchInvite(SendMatchInviteDTO dto);
+
+        public Task<List<InfoMatchInviteDTO>> GetAllMatchInviteReceiverById(Guid idReceiver);
     }
 }

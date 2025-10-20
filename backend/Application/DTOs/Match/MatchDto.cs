@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Match
 {
-    internal class MatchDto
+    public class MatchDto
     {
+        [Required]
+        public Guid IdMatch { get; set; }
+        [Required]
+        public DateTime GameDate { get; set; }
+        [Required]
+        public string NameTeam { get; set; }
+        [Required]
+        public string NameOpponent { get; set; }
+        [Required]
+        public string NamePitch { get; set; }
     }
 }
