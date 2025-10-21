@@ -35,12 +35,12 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
-            return await DbContext.Team.FindAsync(id); // Retorna a equipa ou null
+            return await DbContext.Team.FirstOrDefaultAsync(team => team.Id == id); // Retorna a equipa ou null
         }
         //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
         public async Task<Teams?> GetTeamByNameAsync(String name)
         {
-            return await DbContext.Team.FindAsync(name); // Retorna a equipa ou null
+            return await DbContext.Team.FirstOrDefaultAsync(team => team.Name == name); // Retorna a equipa ou null
         }
 
         public async Task AddAsync(Teams team)
