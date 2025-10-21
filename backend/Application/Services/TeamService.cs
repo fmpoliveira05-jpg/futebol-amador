@@ -1,7 +1,6 @@
-﻿using Application.DTOs.Player;
+﻿using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -84,12 +83,12 @@ namespace Application.Services
                 TotalPoints = team.CurrentPoints,
                 RankName = team.Rank?.Name,
                 PitchDto = $"{team.Pitch.Name}, {team.Pitch.Address}",
-                Players = team.Members.Select(player => new PlayerDto
+                Players = team.Members.Select(player => new PlayerDetailsDTO
                 {
-                    PlayerId = player.Id,
-                    PlayerName = player.Name,
+                    Name = player.Name,
+                    DateOfBirth = player.DateOfBirth,
                     Height = player.Height,
-                    idTeam = player.idTeam,
+                    IdTeam = player.IdTeam,
                     Position = player.Position,
                     IsAdmin = player.IsAdmin
                 }).ToList()

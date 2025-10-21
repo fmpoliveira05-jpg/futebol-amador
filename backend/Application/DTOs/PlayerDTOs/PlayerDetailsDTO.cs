@@ -9,7 +9,6 @@ namespace Application.DTOs.PlayerDTOs
 {
     public class PlayerDetailsDTO
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
 
         public DateOnly DateOfBirth { get; set; }
@@ -19,5 +18,9 @@ namespace Application.DTOs.PlayerDTOs
         public Position Position { get; set; }
 
         public int Height { get; set; }
+
+        public Guid? IdTeam { get; set; }
+
+        public bool? IsAdmin { get; set; }
     }
 }

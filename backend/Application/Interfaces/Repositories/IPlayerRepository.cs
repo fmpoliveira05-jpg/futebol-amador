@@ -12,6 +12,8 @@ namespace Application.Interfaces.Repositories
         Task<List<Player>?> GetAllTPlayersAsync();
         
         Task<Player?> GetPlayerByIdAsync(Guid id);
+
+        Task<Player?> GetPlayerByEmailAsync(string email);
         
         void DeletePlayer(Player playerToRemove);
 

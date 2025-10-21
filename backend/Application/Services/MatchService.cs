@@ -1,5 +1,5 @@
 ﻿using Application.DTOs;
-using Application.Interfaces.Repositorys;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;

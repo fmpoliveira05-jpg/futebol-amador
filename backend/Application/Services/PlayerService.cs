@@ -8,11 +8,13 @@ namespace Application.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository playerRepository;
-        private readonly IUnitOfWork unitOfWork;
+        private readonly ITeamRepository teamRepository;
+        private readonly IUnityOfWork unitOfWork;
 
-        public PlayerService(IPlayerRepository playerRepository, IUnitOfWork unitOfWork)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork)
         {
             this.playerRepository = playerRepository;
+            this.teamRepository = teamRepository;
             this.unitOfWork = unitOfWork;
         }
 
@@ -63,7 +65,6 @@ namespace Application.Services
 
             PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
             {
-                Id = playerId,
                 Name = player.Name,
                 DateOfBirth = player.DateOfBirth,
                 Address = player.Address,
@@ -83,12 +84,20 @@ namespace Application.Services
                 throw new Exception($"Player with ID {playerId} not found.");
             }
 
+            var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
+            if (emailExists != null)
+            {
+                throw new Exception($"The Email {dto.Email} is already being used.");
+            }
+
             var updatedPlayer = new Player
             {
                 Id = playerId,
                 Name = dto.Name,
                 DateOfBirth = dto.DateOfBirth,
                 Address = dto.Address,
+                Email = dto.Email,
+                Phone = dto.Phone,
                 Position = dto.Position,
                 Height = dto.Height
             };
@@ -107,10 +116,35 @@ namespace Application.Services
                 throw new Exception($"Player with ID {playerId} not found.");
             }
 
+            if (player.IsAdmin)
+            {
+                player.IsAdmin = false;
+
+                if (player.Team != null)
+                {
+                    if (player.Team.Members.Count == 0)
+                    {
+                        //delete team, there are no more players.
+                        //n sei como vou fazer isso, willkie disse q saberia fazer.
+                    }
+                    
+                    var otherAdmin = player.Team.Members.First(p => p.IsAdmin == true);
+
+                    //if the team has no more admins, choose the oldest account player to be the new admin.
+                    if (otherAdmin == null)
+                    {
+                        var oldestDate = player.Team.Members.Min(p => p.CreationDate);
+                        Player newAdmin = player.Team.Members.First(p => p.CreationDate == oldestDate);
+                        newAdmin.IsAdmin = true;
+                    }
+                }
+
+            }
+
             string teamName = player.Team.Name;
 
             player.Team = null;
-            player.idTeam = null;
+            player.IdTeam = null;
 
             playerRepository.UpdatePlayer(player);
 

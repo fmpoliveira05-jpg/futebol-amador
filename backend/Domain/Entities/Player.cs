@@ -20,7 +20,7 @@ namespace Domain.Entities
 
         public Teams? Team { get; set; }
 
-        public Guid? idTeam { get; set; } //FK
+        public Guid? IdTeam { get; set; } //FK
 
         public bool IsAdmin { get; set; } //Validar se é mesmo necessário
 
