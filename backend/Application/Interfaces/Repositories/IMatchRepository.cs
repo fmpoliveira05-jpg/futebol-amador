@@ -1,4 +1,5 @@
-﻿using Application.DTOs.PostPoneGame;
+﻿using Application.DTOs.Match;
+using Application.DTOs.PostPoneGame;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositorys
@@ -13,6 +14,9 @@ namespace Application.Interfaces.Repositorys
         public Task<Matches?> GetMatchWitchPitchById(Guid idMatch);
 
         public Task<Matches?> GetMatchProxim12HoursMatchs(Guid idReceiver, DateTime gameDate);
+
+        //Criar também um com filtros
+        public Task<List<MatchDto>> GetAllMatchesTeam(Guid idTeam);
 
         public Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverById(Guid idReceiver);
     }

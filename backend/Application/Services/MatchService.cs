@@ -14,14 +14,17 @@ namespace Application.Services
         IMatchRepository matchRepository;
         ITeamStatisticsRepository teamStatisticsRepository;
         ITeamPostPoneGameRepository teamPostPoneGameRepository;
+        ICancelledMatchRepository cancelledMatchRepository;
         IUnityOfWork unityOfWork;
 
         public MatchService(IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository, 
-            ITeamPostPoneGameRepository teamPostPoneGameRepository, IUnityOfWork unityOfWork)
+            ITeamPostPoneGameRepository teamPostPoneGameRepository, ICancelledMatchRepository cancelledMatchRepository,
+            IUnityOfWork unityOfWork)
         {
             this.matchRepository = matchRepository;
             this.teamStatisticsRepository = teamStatisticsRepository;
             this.teamPostPoneGameRepository = teamPostPoneGameRepository;
+            this.cancelledMatchRepository = cancelledMatchRepository;
             this.unityOfWork = unityOfWork;
         }
 
@@ -31,7 +34,7 @@ namespace Application.Services
          * Ou seja só dá para atualizar para um tempo significativo
          */
 
-        private string validateTeam(Guid idTeam, TeamStatistics teamStatistics)
+        private string validateTeam(Guid idTeam, TeamStatistics? teamStatistics)
         {
             if (teamStatistics == null)
             {
@@ -253,6 +256,14 @@ namespace Application.Services
                 throw new ArgumentNullException("A match a cancelar não existe ou já não pode ser cancelada.");
             }
 
+            var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;
+            const int numDays = 2;
+
+            if (diffDaysToCancel < numDays)
+            {
+                throw new BusinessRuleException("Uma partida só pode ser cancelada " + numDays + " dias antes da data do jogo");
+            }
+
             var teamsMatch = match.Teams;
             var teamStatistics = teamsMatch.FirstOrDefault(ts => ts.IdTeam == idTeam);
 
@@ -261,6 +272,14 @@ namespace Application.Services
             {
                 throw new BusinessRuleException(validateO);
             }
+
+            var opponentStatistic = teamsMatch.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            if (opponentStatistic == null)
+            {
+                throw new ArgumentNullException("O opponente da equipa para este jogo não foi encotnrado");
+            }
+
+
 
             //Falta o resto!!! 
         }

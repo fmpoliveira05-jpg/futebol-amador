@@ -15,6 +15,7 @@ namespace Infrastructure.Data
         public DbSet<Calendar> Calendar { get; set; } = null;
         public DbSet<Matches> Match { get; set; } = null;
         public DbSet<PostPoneMatch> PostPoneMatch { get; set; } = null;
+        public DbSet<CancelledMatch> CancelledMatch { get; set; } = null;
         public DbSet<TeamStatistics> TeamStatistics { get; set; } = null;
         public DbSet<Message> Message { get; set; } = null;
         public DbSet<Chat> Chat { get; set; } = null;     
@@ -36,7 +37,7 @@ namespace Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            
             // 🔹 PostPoneMatch → Team
             modelBuilder.Entity<PostPoneMatch>()
                 .HasOne(p => p.Team)
@@ -46,6 +47,20 @@ namespace Infrastructure.Data
 
             // 🔹 PostPoneMatch → Match
             modelBuilder.Entity<PostPoneMatch>()
+                .HasOne(p => p.Match)
+                .WithMany()
+                .HasForeignKey(p => p.IdMatch)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 CancelledMatch → Team
+            modelBuilder.Entity<CancelledMatch>()
+                .HasOne(p => p.Team)
+                .WithMany()
+                .HasForeignKey(p => p.IdTeam)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 CancelledMatch → Match
+            modelBuilder.Entity<CancelledMatch>()
                 .HasOne(p => p.Match)
                 .WithMany()
                 .HasForeignKey(p => p.IdMatch)
