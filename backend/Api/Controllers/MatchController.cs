@@ -214,5 +214,34 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
         }
+
+        [HttpDelete("/CancelMatch/{idMatch}")]
+        public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode estar vazio");
+            }
+
+            if(idMatch == Guid.Empty)
+            {
+                return BadRequest("O id da partida está vazio");
+            }
+
+            try
+            {
+                await matchController.CancelMatch(idTeam, idMatch);
+
+                return Ok();
+            }
+            catch (EmptyCollectionException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
     }
 }

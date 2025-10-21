@@ -28,6 +28,14 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 
+        public async Task<Matches?> GetMatchValideToCancelById(Guid idMatch)
+        {
+            return await context.Match
+                .Include(m => m.Teams)
+                .FirstOrDefaultAsync(match => match.Id == idMatch
+                                    && match.MatchStatus == MatchStatus.SCHEDULED || match.MatchStatus == MatchStatus.POST_PONED);
+        }
+
         public async Task<Matches?> GetMatchWitchPitchById(Guid idMatch)
         {
             return await context.Match

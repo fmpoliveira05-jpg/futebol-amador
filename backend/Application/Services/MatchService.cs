@@ -144,11 +144,6 @@ namespace Application.Services
                 throw new BusinessRuleException(validateT);
             }
             
-            //pOSSO DEPOIS FAZER VERIFICAÇÕES DE AUT
-            //if (idTeamUrl != teamStatistic.IdTeam)
-            //{
-                //throw new BusinessRuleException("O id da url não pertence há equipa que quer aceitar o adiamento");
-            //}
 
             var opponentStatistics = await teamStatisticsRepository.GetTeamByIdAndMatch(idMatch, dto.IdOpponent);
 
@@ -211,12 +206,6 @@ namespace Application.Services
                 throw new BusinessRuleException(validateT);
             }
 
-            //pOSSO DEPOIS FAZER VERIFICAÇÕES DE AUT  
-            //if (idTeamUrl != teamStatistic.IdTeam)
-            //{
-              //  throw new BusinessRuleException("O id da url não pertence há equipa que quer aceitar o adiamento");
-            //}
-
             var opponentStatistics = await teamStatisticsRepository.GetTeamByIdAndMatch(dto.IdMatch, dto.IdOpponent); ;
 
             string validateO = validateTeam(dto.IdOpponent, opponentStatistics);
@@ -253,6 +242,27 @@ namespace Application.Services
             }
 
             return listPostPone;
+        }
+
+        public async Task CancelMatch(Guid idTeam, Guid idMatch)
+        {
+            var match = await matchRepository.GetMatchValideToCancelById(idMatch);
+
+            if (match == null)
+            {
+                throw new ArgumentNullException("A match a cancelar não existe ou já não pode ser cancelada.");
+            }
+
+            var teamsMatch = match.Teams;
+            var teamStatistics = teamsMatch.FirstOrDefault(ts => ts.IdTeam == idTeam);
+
+            string validateO = validateTeam(idTeam, teamStatistics);
+            if (validateO != "")
+            {
+                throw new BusinessRuleException(validateO);
+            }
+
+            //Falta o resto!!! 
         }
     }
 }
