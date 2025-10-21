@@ -17,11 +17,19 @@ namespace Domain.Entities
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
 
+        /// <summary>
+        /// public bool postponeGame { get; set; }
+        /// </summary>
+
         public const int max_goals = 100;
 
         [Range(0, max_goals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoals { get; set; } = 0;
 
+        [ForeignKey("Match")]
+        public Guid MatchesId { get; set; }
+
+        public Matches Match { get; set; }
         public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;
 
         // EF

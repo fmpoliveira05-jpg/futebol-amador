@@ -66,13 +66,10 @@ namespace Domain.Entities
 
             if (hasChanged)
             {
-                Teams tempTeam = this.Sender;
+                var idSender = this.IdSender;
 
                 this.IdSender = this.IdReceiver;
-                this.Sender = Receiver;
-
-                this.IdReceiver = tempTeam.Id;
-                this.Receiver = tempTeam;
+                this.IdReceiver = idSender;
             }
 
             return hasChanged;

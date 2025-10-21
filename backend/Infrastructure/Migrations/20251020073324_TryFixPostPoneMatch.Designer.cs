@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AmateurFootballContext))]
-    partial class AmateurFootballContextModelSnapshot : ModelSnapshot
+    [Migration("20251020073324_TryFixPostPoneMatch")]
+    partial class TryFixPostPoneMatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -199,10 +202,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdMatch")
+                    b.Property<Guid?>("IdMatch")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdTeamPostPone")
+                    b.Property<Guid?>("IdTeamPostPone")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("PostPoneDate")
@@ -274,6 +277,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("MatchesId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("MatchesId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("NumGoals")
                         .HasColumnType("int");
 
@@ -282,6 +288,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("IdTeam");
 
                     b.HasIndex("MatchesId");
+
+                    b.HasIndex("MatchesId1");
 
                     b.ToTable("TeamStatistics");
                 });
@@ -503,14 +511,12 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Matches", "Match")
                         .WithMany()
                         .HasForeignKey("IdMatch")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Domain.Entities.Teams", "Team")
                         .WithMany()
                         .HasForeignKey("IdTeamPostPone")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.Navigation("Match");
 
@@ -543,10 +549,14 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Matches", "Match")
-                        .WithMany("Teams")
+                        .WithMany()
                         .HasForeignKey("MatchesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.Matches", null)
+                        .WithMany("Teams")
+                        .HasForeignKey("MatchesId1");
 
                     b.Navigation("Match");
 

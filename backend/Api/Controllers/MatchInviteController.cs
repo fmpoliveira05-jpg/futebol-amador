@@ -1,7 +1,7 @@
-﻿using Application.DTOs;
-using Domain.Exceptions;
+﻿using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces.Services;
+using Application.DTOs.MatchInvites;
 
 namespace Api.Controllers
 {
@@ -45,7 +45,9 @@ namespace Api.Controllers
 
             try
             {
-                await matchInviteService.SendMatchInvite(dto);
+                var sendInvite = await matchInviteService.SendMatchInvite(dto);
+
+                return Ok(sendInvite);
             }
             catch (BusinessRuleException ex)
             {
@@ -59,8 +61,6 @@ namespace Api.Controllers
             {
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
-
-            return Ok(dto);
         }
 
         private List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
@@ -132,6 +132,10 @@ namespace Api.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
@@ -140,7 +144,7 @@ namespace Api.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("/Negociate")]
         public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
             if (idTeam == Guid.Empty)
@@ -163,7 +167,7 @@ namespace Api.Controllers
                 return BadRequest("O id do campo não pode ser nulo");
             }
 
-            if (idTeam != dto.IdSender)
+            if (idTeam != dto.IdReceiver)
             {
                 return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
             }
@@ -187,5 +191,30 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode ser nulo");
+            }
+
+            try
+            {
+                var matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
+
+                return Ok(matchesInvite);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
     }
 }

@@ -1,5 +1,6 @@
-﻿using Application.DTOs;
-using Application.Services;
+﻿using Application.DTOs.PostPoneGame;
+using Application.Interfaces.Services;
+using Domain.Enums;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,9 @@ namespace Api.Controllers
     [ApiController]
     public class MatchController : ControllerBase
     {
-        private readonly MatchService matchController;
+        private readonly IMatchService matchController;
 
-        public MatchController(MatchService matchController)
+        public MatchController(IMatchService matchController)
         {
             this.matchController = matchController;
         }
@@ -55,11 +56,17 @@ namespace Api.Controllers
                 return BadRequest(listErrors); 
             }
 
+            /*
+            if (dto.PostPoneDate == null)
+            {
+                return BadRequest("A data de adiamento não pode ser nula");
+            }*/
+
             try
             {
-                var match = await matchController.PostPoneMatch(dto);
+                var matchPostPone = await matchController.PostPoneMatch(dto);
 
-                return Ok(match);
+                return Ok(matchPostPone);
             }
             catch (BusinessRuleException ex)
             {
@@ -93,11 +100,6 @@ namespace Api.Controllers
                 errors.Add("O id da equipa não pode estar vazio");
             }
 
-            if (dto.IdTeam != idTeam)
-            {
-                errors.Add("O id da equipa que quer adiar é diferente da que está no url");
-            }
-
             if (dto.IdOpponent == Guid.Empty)
             {
                 errors.Add("O id do opponete não pode estar vazio");
@@ -115,9 +117,14 @@ namespace Api.Controllers
                 return BadRequest(listErrors);
             }
 
+            if (dto.StatusPostPone != StatusPostPone.ACCEPT)
+            {
+                return BadRequest("Para poder aceitar um convite ele precisa de estar aceite");
+            }
+
             try
             {
-                var match = await matchController.AcceptPostPoneMatch(dto);
+                var match = await matchController.AcceptPostPoneMatch(idTeam, dto);
 
                 return Ok(match);
             }
@@ -143,7 +150,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpDelete("/AcceptPostponeMatch")]
+        [HttpDelete("/RejectPostponeMatch")]
         public async Task<IActionResult> RejectPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDTO dto)
         {
             var listErrors = validateAnswerPostPoneMatch(idTeam, dto);
@@ -152,11 +159,16 @@ namespace Api.Controllers
                 return BadRequest(listErrors);
             }
 
+            if (dto.StatusPostPone != StatusPostPone.REJECT)
+            {
+                return BadRequest("Para poder rejeitar um convite ele precisa de estar como rejeitado");
+            }
+
             try
             {
-                var match = await matchController.RejectPostPoneMatch(dto);
+                await matchController.RejectPostPoneMatch(idTeam, dto);
 
-                return Ok(match);
+                return Ok();
             }
             catch (MatchException ex)
             {
@@ -171,6 +183,29 @@ namespace Api.Controllers
                 return NotFound(new { message = ex.Message });
             }
             catch (NotFindException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
+        [HttpGet("/PostPoneMatchs")]
+        public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam)
+        {
+            if(idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode estar vazio");
+            } 
+            try
+            {
+                var listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
+
+                return Ok(listPostPone);
+            }
+            catch (EmptyCollectionException ex)
             {
                 return NotFound(new { message = ex.Message });
             }

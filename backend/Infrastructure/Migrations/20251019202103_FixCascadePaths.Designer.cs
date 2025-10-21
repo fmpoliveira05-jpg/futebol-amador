@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AmateurFootballContext))]
-    partial class AmateurFootballContextModelSnapshot : ModelSnapshot
+    [Migration("20251019202103_FixCascadePaths")]
+    partial class FixCascadePaths
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -274,6 +277,9 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("MatchesId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("MatchesId1")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("NumGoals")
                         .HasColumnType("int");
 
@@ -282,6 +288,8 @@ namespace Infrastructure.Migrations
                     b.HasIndex("IdTeam");
 
                     b.HasIndex("MatchesId");
+
+                    b.HasIndex("MatchesId1");
 
                     b.ToTable("TeamStatistics");
                 });
@@ -450,13 +458,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Chat", "Chat")
                         .WithMany()
                         .HasForeignKey("IdChat")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Pitch", "Pitch")
                         .WithMany()
                         .HasForeignKey("idPitch")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Chat");
@@ -543,10 +551,14 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Matches", "Match")
-                        .WithMany("Teams")
+                        .WithMany()
                         .HasForeignKey("MatchesId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("Domain.Entities.Matches", null)
+                        .WithMany("Teams")
+                        .HasForeignKey("MatchesId1");
 
                     b.Navigation("Match");
 
@@ -558,7 +570,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Calendar", "Calendar")
                         .WithMany()
                         .HasForeignKey("IdCalendar")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Pitch", "Pitch")
