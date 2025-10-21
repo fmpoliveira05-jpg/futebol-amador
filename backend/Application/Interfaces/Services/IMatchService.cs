@@ -9,5 +9,7 @@ namespace Application.Interfaces.Services
         public Task<MatchDto> AcceptPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto);
         public Task RejectPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto);
         public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam);
+
+        public Task CancelMatch(Guid idTeam, Guid idMatch);
     }
 }

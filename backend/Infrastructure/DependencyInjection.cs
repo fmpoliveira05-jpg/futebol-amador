@@ -22,6 +22,7 @@ namespace Infrastructure
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IMatchInviteRepository, MatchInviteRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
+            services.AddScoped<ICancelledMatchRepository, CancelledMatchRepository>();
             services.AddScoped<IPitchRepository, PitchRepository>();
             services.AddScoped<ITeamStatisticsRepository, TeamStatisticsRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();

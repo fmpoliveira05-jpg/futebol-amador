@@ -1,9 +1,10 @@
-﻿using Application.DTOs.PostPoneGame;
+﻿using Application.DTOs.Match;
+using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositorys;
 using Domain.Entities;
+using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Domain.Enums;
 
 namespace Infrastructure.Repositories
 {
@@ -28,6 +29,14 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 
+        public async Task<Matches?> GetMatchValideToCancelById(Guid idMatch)
+        {
+            return await context.Match
+                .Include(m => m.Teams)
+                .FirstOrDefaultAsync(match => match.Id == idMatch
+                                    && match.MatchStatus == MatchStatus.SCHEDULED || match.MatchStatus == MatchStatus.POST_PONED);
+        }
+
         public async Task<Matches?> GetMatchWitchPitchById(Guid idMatch)
         {
             return await context.Match
@@ -50,6 +59,32 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync();
 
             return query; 
+        }
+
+        /***
+         Busca todos os match agendados de e finalizados de uma equipa
+         Calendario
+
+        Nota depois fazer um com filtros (onde tem um var para cada um e depois se for usado ou não é alterado o valor recebido)
+        Criar DTO para os filtros
+         */
+        public async Task<List<MatchDto>> GetAllMatchesTeam(Guid idTeam)
+        {
+            var query = await context.Match
+                .Include(m => m.Pitch)
+                .Include(m => m.Teams).ThenInclude(ts => ts.Team)
+                .Where(m => m.MatchStatus == MatchStatus.SCHEDULED || m.MatchStatus == MatchStatus.DONE)
+                .Where(m => m.Teams.Any(ts => ts.IdTeam == idTeam) && m.Teams.Any(ts => ts.IdTeam != idTeam))
+                .Select(m => new MatchDto { 
+                    IdMatch = m.Id,
+                    GameDate = m.MatchDate,
+                    NameTeam = m.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam).Team.Name,
+                    NameOpponent = m.Teams.FirstOrDefault(ts => ts.IdTeam != idTeam).Team.Name,
+                    NamePitch = m.Pitch.Name
+                })
+                .ToListAsync();
+
+            return query;
         }
 
         public async Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverById(Guid idReceiver)
