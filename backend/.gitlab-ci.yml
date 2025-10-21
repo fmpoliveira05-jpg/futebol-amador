@@ -1,13 +1,46 @@
-# You can override the included template(s) by including variable overrides
-# SAST customization: https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings
-# Secret Detection customization: https://docs.gitlab.com/ee/user/application_security/secret_detection/pipeline/#customization
-# Dependency Scanning customization: https://docs.gitlab.com/ee/user/application_security/dependency_scanning/#customizing-the-dependency-scanning-settings
-# Container Scanning customization: https://docs.gitlab.com/ee/user/application_security/container_scanning/#customizing-the-container-scanning-settings
-# Note that environment variables can be set in several places
-# See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
+image: mcr.microsoft.com/dotnet/sdk:8.0
+
+variables:
+  NUGET_PACKAGES: "$CI_PROJECT_DIR/.nuget/packages"
+  SLN_PROJECT: "FutebolAmador.sln"
+
 stages:
-- test
-sast:
+  - build
+  - test
+
+cache:
+  key: "$CI_COMMIT_REF_SLUG"
+  paths:
+    - .nuget/packages/
+
+before_script:
+  - echo "A restaurar pacotes NuGet..."
+  - dotnet restore $SLN_PROJECT
+
+build-job:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - echo "Build do projeto..."
+    - dotnet build $SLN_PROJECT --configuration Release --no-restore
+  artifacts:
+    paths:
+      - '**/bin/Release'
+    expire_in: 1 week
+    
+unit-test-job:
   stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
+  dependencies:
+    - build-job
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master" || $CI_PIPELINE_SOURCE == "merge_request_event"'
+  variables:
+    TEST_PROJECT_PATH: "Tests/Tests.csproj"
+  script:
+    - echo "Running unit tests"
+    - dotnet test $TEST_PROJECT_PATH --no-build --logger "junit;LogFileName=test-results.xml"
+  artifacts:
+    when: always
+    reports:
+      junit: "Tests/test-results.xml"
