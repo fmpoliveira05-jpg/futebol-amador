@@ -18,7 +18,7 @@ namespace Domain.Entities
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
 
-        [Range(0, ModelConstants.General.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
+        [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoals { get; set; } = 0;
 
         public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;

@@ -15,7 +15,7 @@ namespace Application.DTOs.Player
 
         public string PlayerName { get; set; }
 
-        [Range(ModelConstants.Player.MinHeight, ModelConstants.Player.MaxHeight, ErrorMessage = "Um jogador deve ter entre {0} e {1} centimetors")]
+        [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight, ErrorMessage = "Um jogador deve ter entre {0} e {1} centimetors")]
         public int Height { get; set; }
 
         public Guid? idTeam { get; set; }

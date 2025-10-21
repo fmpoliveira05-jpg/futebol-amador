@@ -12,10 +12,10 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(ModelConstants.Team.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
+        [MaxLength(ModelConstants.TeamConst.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.Team.MaxDescriptionLength)]
+        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string? Description { get; set; }
 
         public byte[]? Icon { get; set; }
@@ -29,7 +29,7 @@ namespace Domain.Entities
 
         public ICollection<Player> Members { get; set; } = new List<Player>();
 
-        [Range(ModelConstants.General.MinAge, ModelConstants.General.MaxAge, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
+        [Range(ModelConstants.GeneralConst.MinAge, ModelConstants.GeneralConst.MaxAge, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
         public float AverageAge { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
@@ -64,7 +64,7 @@ namespace Domain.Entities
             Pitch = pitch;
             IdPitch = pitch.Id;
             DataFoundation = DateTime.Now;
-            AverageAge = ModelConstants.General.MinAge;
+            AverageAge = ModelConstants.GeneralConst.MinAge;
             CurrentPoints = 0;
             Calendar = new Calendar();
             IdCalendar = Calendar.Id;

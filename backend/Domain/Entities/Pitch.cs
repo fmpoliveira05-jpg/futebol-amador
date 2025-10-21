@@ -9,10 +9,10 @@ namespace Domain.Entities {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(ModelConstants.Pitch.MaxNameLength)]
+        [MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.General.MaxAddressLength)]
+        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string Address { get; set; }
 
         protected Pitch() { }

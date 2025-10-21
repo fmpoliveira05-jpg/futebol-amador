@@ -13,19 +13,19 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MinLength(ModelConstants.User.MinNameLength), MaxLength(ModelConstants.User.MaxNameLength)]
+        [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string Name { get; set; }
 
         public DateOnly DateOfBirth { get; set; }
 
-        [MaxLength(ModelConstants.General.MaxAddressLength)]
+        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string Address { get; set; }
 
         [MaxLength(50)]
         [EmailAddress(ErrorMessage = "O campo Email não está em um formato válido.")] // Adicione este
         public string Email { get; set; }
 
-        [MinLength(ModelConstants.User.MinPasswordLength), MaxLength(ModelConstants.User.MaxPasswordLength)]
+        [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
         public string Password { get; set; }
 
         [Range(100000000, 999999999, ErrorMessage = "O número de telefone deve ter 9 dígitos.")]

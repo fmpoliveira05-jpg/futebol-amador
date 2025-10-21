@@ -13,10 +13,12 @@ namespace Application.DTOs.Team
         public string? Name { get; set; }
         public string? Description { get; set; }
 
-        [MaxLength(ModelConstants.Pitch.MaxNameLength)]
+        public byte[]? icon { get; set; }
+
+        [MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string? PitchName{ get; set; }
 
-        [MaxLength(ModelConstants.General.MaxAddressLength)]
+        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string? PitchLocation { get; set; }
     }
 }

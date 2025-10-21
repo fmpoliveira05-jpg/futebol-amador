@@ -28,10 +28,10 @@ namespace Application.Interfaces.Services
 
         Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
 
-        Task KickPlayerFromTeamAsync(Guid teamId, Guid playerIdToKick, Guid adminUserId);
+        Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId);
 
         //Gestão de admins
-        Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromote, Guid currentAdminId);
+        Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromoteId, Guid playerPromotingId);
 
         Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid currentAdminId);
 
