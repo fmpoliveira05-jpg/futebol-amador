@@ -9,6 +9,7 @@ namespace Application.Interfaces.Repositorys
 
         public Task<Matches?> GetMatchById(Guid idMatch);
 
+        public Task<Matches?> GetMatchValideToCancelById(Guid idMatch);
         public Task<Matches?> GetMatchWitchPitchById(Guid idMatch);
 
         public Task<Matches?> GetMatchProxim12HoursMatchs(Guid idReceiver, DateTime gameDate);
