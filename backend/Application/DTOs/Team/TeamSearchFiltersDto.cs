@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Team
 {
-    internal class TeamSearchFiltersDto
+    public class TeamSearchFiltersDto
     {
     }
 }

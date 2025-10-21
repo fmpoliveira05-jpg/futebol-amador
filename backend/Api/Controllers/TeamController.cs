@@ -1,17 +1,16 @@
 ﻿namespace Api.Controllers;
 using Application.DTOs.Team;
-
+using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Application.Interfaces.Services;
-
 [ApiController]
 [Route("api/[controller]")]
 public class TeamController : ControllerBase
 {
     private readonly ITeamService TeamService;
 
-    public TeamController(ITeamService teamService)
+    public TeamController(TeamService teamService)
     {
         TeamService = teamService;
     }
@@ -21,10 +20,10 @@ public class TeamController : ControllerBase
     {
         var creatorIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        //if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
-        //{
-          //  return Unauthorized("Token de utilizador inválido ou em falta.");
-        //}
+        if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
+        {
+            return Unauthorized("Token de utilizador inválido ou em falta.");
+        }
         var team = await TeamService.GetTeamByIdAsync(id);
         return Ok(team);
     }
@@ -34,13 +33,15 @@ public class TeamController : ControllerBase
     {
         var creatorIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        //if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
-        //{
-            //return Unauthorized("Token de utilizador inválido ou em falta.");
-        //}
+        if (string.IsNullOrEmpty(creatorIdString) || !Guid.TryParse(creatorIdString, out Guid creatorUserId))
+        {
+            return Unauthorized("Token de utilizador inválido ou em falta.");
+        }
         //TODO: Adicionar verificação se o player já tem equipa
-        var newTeamId = await TeamService.CreateTeamAsync(teamDto);
+
+        var newTeamId = await TeamService.CreateTeamAsync(teamDto, creatorUserId);
 
         return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
     }
+
 }

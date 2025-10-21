@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Domain.Constants;
 using Domain.Enums;
 
 
@@ -11,11 +12,7 @@ namespace Domain.Entities
     {
         public Position Position { get; set; }
 
-        public const int minHeight = 100;
-
-        public const int maxHeight = 250;
-
-        [Range(minHeight, maxHeight, ErrorMessage = "Um jogador deve ter entre 100 e 250 centimetors")]
+        [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight, ErrorMessage = "Um jogador deve ter entre {0} e {1} centimetors")]
         public int Height { get; set; }
 
         public Teams? Team { get; set; }
@@ -23,6 +20,8 @@ namespace Domain.Entities
         public Guid? idTeam { get; set; } //FK
 
         public bool IsAdmin { get; set; } //Validar se é mesmo necessário
+
+        public DateTime? IsAdminLastChangedAt { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = "O número de convites tem de ser pelo menos 0")]
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
@@ -58,7 +57,8 @@ namespace Domain.Entities
          * 
          * Retororna o pedido de adesão adicionado ou null se não for possível adicionar
          */
-        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests) {
+        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests)
+        {
             return null;
         }
 
@@ -69,7 +69,8 @@ namespace Domain.Entities
          *  
          *  Retorna o pedido de adesão removido ou null se não for possível remover
          */
-        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests) {
+        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests)
+        {
             return null;
         }
 
@@ -80,7 +81,8 @@ namespace Domain.Entities
          * 
          * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
          */
-        public MembershipRequests getMembershipRequestById(Guid id) {
+        public MembershipRequests getMembershipRequestById(Guid id)
+        {
             return null;
         }
 

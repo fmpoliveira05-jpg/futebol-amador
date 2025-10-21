@@ -23,7 +23,7 @@ namespace Domain.Entities
 
         public DateTime InviteDate { get; set; }
 
-        public bool Sender { get; set; } // true - Player, false - Team
+        public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
         protected MembershipRequests() { }
 
