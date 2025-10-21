@@ -1,0 +1,105 @@
+# Nome da pipeline
+name: Build e Teste (.NET 8)
+
+# Define quando corre (push para 'master' ou em qualquer Pull Request)
+on:
+  push:
+    branches: [ master, developer ] # Podes adicionar as tuas branches principais
+  pull_request: {}
+
+jobs:
+  #####################
+  # JOB 1: BUILD
+  #####################
+  build:
+    name: Build do Projeto
+    runs-on: ubuntu-latest # Corre numa VM Linux
+
+    steps:
+      # 1. Copia o código do repositório para a VM
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Instala o .NET 8.0 (como o teu 'image:')
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3. Configura o cache (como o teu 'cache:')
+      - name: Cache dos pacotes NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
+      # 4. Restaura os pacotes (como o teu 'before_script:')
+      - name: Restore (dotnet restore)
+        run: dotnet restore FutebolAmador.sln
+
+      # 5. Compila (como o teu 'build-job:')
+      - name: Build (dotnet build)
+        run: dotnet build FutebolAmador.sln --configuration Release --no-restore
+
+      # 6. Guarda os artefactos (como o teu 'artifacts:')
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output # Nome do "pacote"
+          path: '**/bin/Release' # O que guardar
+
+  #####################
+  # JOB 2: TEST
+  #####################
+  test:
+    name: Executar Testes
+    runs-on: ubuntu-latest
+    
+    # Define que este job SÓ CORRE DEPOIS do job 'build'
+    needs: build
+
+    steps:
+      # 1. Copia o código (precisamos dos ficheiros de teste)
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # 2. Instala o .NET 8.0 (preciso para o 'dotnet test')
+      - name: Setup .NET 8.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3. Configura o cache (preciso para o restore)
+      - name: Cache dos pacotes NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+            
+      # 4. Restaura os pacotes (o 'test' também precisa disto)
+      - name: Restore (dotnet restore)
+        run: dotnet restore FutebolAmador.sln
+
+      # 5. Descarrega os artefactos compilados do job 'build'
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output # O mesmo nome que usámos em cima
+          path: . # Descarrega para a raiz
+
+      # 6. Corre os testes (como o teu 'unit-test-job:')
+      - name: Test (dotnet test)
+        run: dotnet test Tests/Tests.csproj --no-build --logger "junit;LogFileName=test-results.xml"
+
+      # 7. (BÓNUS) Publica os resultados dos testes na UI do GitHub
+      - name: Publicar Resultados dos Testes
+        uses: dorny/test-reporter@v1
+        if: always() # Corre sempre, mesmo que o passo anterior falhe
+        with:
+          name: Resultados dos Testes de Unidade
+          path: "Tests/test-results.xml"
+          reporter: dotnet-junit
