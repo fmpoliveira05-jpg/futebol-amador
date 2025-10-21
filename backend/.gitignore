@@ -375,3 +375,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 /Domain/obj
+/Domain/obj/Debug
+/Domain/obj/Debug
