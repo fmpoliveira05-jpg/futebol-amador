@@ -22,14 +22,14 @@ namespace Domain.Entities
         public string Address { get; set; }
 
         [MaxLength(50)]
-        [EmailAddress(ErrorMessage = "O campo Email não está em um formato válido.")] // Adicione este
+        [EmailAddress(ErrorMessage = "Invalid email format")] // Adicione este
         public string Email { get; set; }
 
         [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
         public string Password { get; set; }
 
-        [Range(100000000, 999999999, ErrorMessage = "O número de telefone deve ter 9 dígitos.")]
-        public int PhoneNumber { get; set; }
+        [StringLength(9, ErrorMessage = "Phone number must have 9 digits")]
+        public string Phone { get; set; }
 
         public DateTime CreationDate { get; set; }
 
@@ -37,14 +37,14 @@ namespace Domain.Entities
         protected Users() { }
 
         // Construtor público para inicializar todas as propriedades obrigatórias
-        public Users(string name, DateOnly dateOfBirth, string address, string email, string password, int phoneNumber)
+        public Users(string name, DateOnly dateOfBirth, string address, string email, string password, string phone)
         {
             this.Name = name;
             this.DateOfBirth = dateOfBirth;
             this.Address = address;
             this.Email = email;
             this.Password = password;
-            this.PhoneNumber = phoneNumber;
+            this.Phone = phone;
             this.CreationDate = DateTime.Now;
         }
 
@@ -63,13 +63,13 @@ namespace Domain.Entities
          *
          * Retorna a idade do jogador
          */
-        public int agePalyer()
+        public int agePlayer()
         {
             return 0;
         }
         public override string ToString()
         {
-            return $"Id: {Id}, Name: {Name}, DateOfBirth: {DateOfBirth}, Address: {Address}, Email: {Email}, PhoneNumber: {PhoneNumber}, CreationDate: {CreationDate}";
+            return $"Id: {Id}, Name: {Name}, DateOfBirth: {DateOfBirth}, Address: {Address}, Email: {Email}, PhoneNumber: {Phone}, CreationDate: {CreationDate}";
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Application.DTOs.Player;
+using Application.DTOs.PlayerDTOs;
 
 namespace Application.DTOs.Team
 {
@@ -20,7 +20,7 @@ namespace Application.DTOs.Team
 
         public string PitchDto { get; set; }
 
-        public List<PlayerDto> Players { get; set; }
+        public List<PlayerDetailsDTO> Players { get; set; }
     }
 
 

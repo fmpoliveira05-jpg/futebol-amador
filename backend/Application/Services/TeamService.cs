@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
+using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -73,7 +73,7 @@ namespace Application.Services
                 if (playerRequest != null)
                 {
                     playerAccepted.MembershipRequests.Remove(playerRequest);
-                    playerAccepted.idTeam = teamId;
+                    playerAccepted.IdTeam = teamId;
                     existingTeam.Members.Add(playerAccepted);
                 }
             }
@@ -208,12 +208,11 @@ namespace Application.Services
                 TotalPoints = team.CurrentPoints,
                 RankName = team.Rank?.Name,
                 PitchDto = $"{team.Pitch.Name}, {team.Pitch.Address}",
-                Players = team.Members.Select(player => new PlayerDto
+                Players = team.Members.Select(player => new PlayerDetailsDTO
                 {
-                    PlayerId = player.Id,
-                    PlayerName = player.Name,
+                    Name = player.Name,
                     Height = player.Height,
-                    idTeam = player.idTeam,
+                    IdTeam = player.IdTeam,
                     Position = player.Position,
                     IsAdmin = player.IsAdmin
                 }).ToList()
@@ -221,18 +220,17 @@ namespace Application.Services
             return teamDetailsDto;
         }
 
-        public async Task<List<PlayerDto>> GetTeamPlayersAsync(Guid teamId)
+        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersAsync(Guid teamId)
         {
             var team = await TeamRepository.GetTeamByIdAsync(teamId);
 
             TeamValidator.GetTeamMembersValidation(team);
 
-            var playerDtos = team.Members.Select(player => new PlayerDto
+            var playerDtos = team.Members.Select(player => new PlayerDetailsDTO
             {
-                PlayerId = player.Id,
-                PlayerName = player.Name,
+                Name = player.Name,
                 Height = player.Height,
-                idTeam = player.idTeam,
+                IdTeam = player.IdTeam,
                 Position = player.Position,
                 IsAdmin = player.IsAdmin
             }).ToList();
@@ -254,7 +252,7 @@ namespace Application.Services
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
 
             existingTeam.Members.Remove(playerToRemove);
-            playerToRemove.idTeam = null;
+            playerToRemove.IdTeam = null;
             if (playerToRemove.IsAdmin)
             {
                 playerToRemove.IsAdmin = false;

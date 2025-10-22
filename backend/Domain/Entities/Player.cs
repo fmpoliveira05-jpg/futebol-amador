@@ -17,7 +17,7 @@ namespace Domain.Entities
 
         public Teams? Team { get; set; }
 
-        public Guid? idTeam { get; set; } //FK
+        public Guid? IdTeam { get; set; } //FK
 
         public bool IsAdmin { get; set; } //Validar se é mesmo necessário
 
@@ -27,9 +27,9 @@ namespace Domain.Entities
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
 
         // EF
-        protected Player() { }
+        public Player() { }
 
-        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, int phoneNumber, Position position, int height)
+        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, string phoneNumber, Position position, int height)
             : base(name, dateOfBirth, address, email, password, phoneNumber)
         {
             Position = position;

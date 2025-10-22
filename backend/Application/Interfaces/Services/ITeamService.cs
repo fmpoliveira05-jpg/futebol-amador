@@ -1,12 +1,12 @@
 ﻿using Application.DTOs.Team;
 using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
 using Application.DTOs.Match;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Application.DTOs.PlayerDTOs;
 
 namespace Application.Interfaces.Services
 {
@@ -35,7 +35,7 @@ namespace Application.Interfaces.Services
 
         Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid currentAdminId);
 
-        Task<List<PlayerDto>> GetTeamPlayersAsync(Guid teamId);
+        Task<List<PlayerDetailsDTO>> GetTeamPlayersAsync(Guid teamId);
 
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
     }
