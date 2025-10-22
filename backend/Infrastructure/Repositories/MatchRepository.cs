@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
-using Application.Interfaces.Repositorys;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;

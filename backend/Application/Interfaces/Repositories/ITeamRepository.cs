@@ -17,5 +17,11 @@ namespace Application.Interfaces.Repositories
 
         Task AddAsync(Teams team);
 
+        Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
+
+        Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id);
+
+        Task<Teams?> GetByIdWithReceivedInvites(Guid id);
+
     }
 }
