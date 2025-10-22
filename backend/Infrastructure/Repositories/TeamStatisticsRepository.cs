@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
@@ -15,12 +16,16 @@ namespace Infrastructure.Repositories
 
         public async Task AddTeamStatistics(TeamStatistics teamStatistics)
         {
-            if(teamStatistics == null)
-            {
-                throw new ArgumentNullException("A teamStatistics não pode ser nulo: ", nameof(teamStatistics));
-            }
-
             await context.TeamStatistics.AddAsync(teamStatistics);
+        }
+
+        public async Task<TeamStatistics> GetTeamByIdAndMatch(Guid idMatch, Guid idTeam)
+        {
+            var query = await context.TeamStatistics
+                .Include(T => T.Team)
+                .FirstOrDefaultAsync(ts => ts.MatchesId == idMatch
+                                    && ts.IdTeam == idTeam);
+            return query;
         }
     }
 }
