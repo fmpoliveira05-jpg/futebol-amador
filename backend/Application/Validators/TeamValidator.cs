@@ -25,7 +25,7 @@ namespace Application.Validators
             }
 
 
-            if (playerCreating.idTeam != null) {
+            if (playerCreating.IdTeam != null) {
                 throw new ValidationException($"O jogador com o Id '{playerCreating.Id}' ja possui uma equipa.");
             }
 
