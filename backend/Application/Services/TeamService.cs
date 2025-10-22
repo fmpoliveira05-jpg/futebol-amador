@@ -3,7 +3,6 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;

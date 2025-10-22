@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
-using Application.Interfaces.Repositorys;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -10,27 +10,27 @@ namespace Application.Services
 {
     public class MatchInviteService: IMatchInviteService
     {
-        private readonly ITeamRepository teamRepository;
+        private readonly ITeamRepository TeamRepository;
         
-        private readonly IMatchInviteRepository matchInviteRepository;
+        private readonly IMatchInviteRepository MatchInviteRepository;
         
-        private readonly IMatchRepository matchRepository;
+        private readonly IMatchRepository MatchRepository;
         
-        private readonly ITeamStatisticsRepository teamStatisticsRepository;
+        private readonly ITeamStatisticsRepository TeamStatisticsRepository;
 
-        private readonly IPitchRepository pitchRepository;
+        private readonly IPitchRepository PitchRepository;
 
-        private readonly IUnityOfWork unityOfWork;
+        private readonly IUnityOfWork UnityOfWork;
 
         public MatchInviteService(ITeamRepository teamRepository, IMatchInviteRepository matchInviteRepository, 
             IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository,
             IPitchRepository pitchRepository, IUnityOfWork unityOfWork) {
-            this.teamRepository = teamRepository; 
-            this.matchInviteRepository = matchInviteRepository;
-            this.matchRepository = matchRepository;
-            this.teamStatisticsRepository = teamStatisticsRepository;
-            this.pitchRepository = pitchRepository;
-            this.unityOfWork = unityOfWork;
+            this.TeamRepository = teamRepository; 
+            this.MatchInviteRepository = matchInviteRepository;
+            this.MatchRepository = matchRepository;
+            this.TeamStatisticsRepository = teamStatisticsRepository;
+            this.PitchRepository = pitchRepository;
+            this.UnityOfWork = unityOfWork;
         }
 
         /***
@@ -38,7 +38,7 @@ namespace Application.Services
          */
         private async Task<string> validateHaveMatchWith12Hours(Guid idTeam, DateTime gameDate)
         {
-            var findMatchWith12hours = await matchRepository.GetMatchProxim12HoursMatchs(idTeam, gameDate);
+            var findMatchWith12hours = await MatchRepository.GetMatchProxim12HoursMatchs(idTeam, gameDate);
 
             if (findMatchWith12hours != null)
             {
@@ -60,21 +60,21 @@ namespace Application.Services
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            var receiver = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdReceiver);
+            var receiver = await TeamRepository.GetTeamByIdWithPitchAsync(dto.IdReceiver);
 
             if (receiver == null)
             {
                 throw new ArgumentNullException("A equipa que recebeu o convite não foi encontrada");
             }
 
-            var sender = await teamRepository.GetTeamByIdWithPitchAsync(dto.IdSender);
+            var sender = await TeamRepository.GetTeamByIdWithPitchAsync(dto.IdSender);
 
             if (sender == null)
             {
                 throw new ArgumentNullException("A equipa que enviou o convite não foi encontrada");
             }
 
-            MatchInvite? matchInviteFind = await matchInviteRepository.GetMatchInvite(dto);
+            MatchInvite? matchInviteFind = await MatchInviteRepository.GetMatchInvite(dto);
 
             if (matchInviteFind != null)
             {
@@ -101,7 +101,7 @@ namespace Application.Services
 
             var matchInvite = new MatchInvite(sender, receiver, dto.GameDate, pitch);
 
-            await matchInviteRepository.AddMatchInvite(matchInvite);
+            await MatchInviteRepository.AddMatchInvite(matchInvite);
 
             var sendMatchInviteDto = new InfoMatchInviteDTO
             {
@@ -113,7 +113,7 @@ namespace Application.Services
                 GameDate = matchInvite.GameDate,
                 NamePitch = pitch.Name
             };
-            await unityOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return sendMatchInviteDto;
         }
@@ -127,8 +127,8 @@ namespace Application.Services
             list.Add(sendTeam);
             list.Add(receiverTeam);
 
-            await teamStatisticsRepository.AddTeamStatistics(sendTeam);
-            await teamStatisticsRepository.AddTeamStatistics(receiverTeam);
+            await TeamStatisticsRepository.AddTeamStatistics(sendTeam);
+            await TeamStatisticsRepository.AddTeamStatistics(receiverTeam);
 
             return list;
         }
@@ -163,7 +163,7 @@ namespace Application.Services
         //Trocar para DTO com dados do Match
         public async Task<MatchDto> AcceptMatchInvite(Guid idTeam, Guid idMatchInvite)
         {
-            var receiver = await teamRepository.GetByIdWithReceivedInvitesAndCalendar(idTeam);
+            var receiver = await TeamRepository.GetByIdWithReceivedInvitesAndCalendar(idTeam);
             
             string validateReceiver = ValidateReciever(receiver);
             if (validateReceiver != "")
@@ -185,7 +185,7 @@ namespace Application.Services
                 throw new BusinessRuleException(validateMatch);
             }
 
-            var sender = await teamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
            
             if (sender == null)
             {
@@ -198,7 +198,7 @@ namespace Application.Services
                 throw new ValidatorException(validateSender);
             }
 
-            var pitch = await pitchRepository.GetPitchById(matchInvite.IdPitch);
+            var pitch = await PitchRepository.GetPitchById(matchInvite.IdPitch);
             if (pitch == null)
             {
                 throw new ArgumentNullException("O campo do convite de partida não pode ser nulo");
@@ -208,8 +208,8 @@ namespace Application.Services
 
             var match = new Matches(matchInvite.GameDate, false, pitch, teamStatistics, matchInvite.Chat);
 
-            await matchInviteRepository.DeleteMatchInvite(matchInvite);
-            await matchRepository.AddMatch(match);
+            await MatchInviteRepository.DeleteMatchInvite(matchInvite);
+            await MatchRepository.AddMatch(match);
 
             var matchDTO = new MatchDto
             {
@@ -220,7 +220,7 @@ namespace Application.Services
                 NamePitch = pitch.Name
             };
 
-            await unityOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             //var acceptMatch
             return matchDTO;
@@ -228,7 +228,7 @@ namespace Application.Services
 
         public async Task RefuseMatchInvites(Guid idTeam, Guid idMatchInvite)
         {
-            var receiver = await teamRepository.GetByIdWithReceivedInvites(idTeam);
+            var receiver = await TeamRepository.GetByIdWithReceivedInvites(idTeam);
 
             string validateReceiver = ValidateReciever(receiver);
             if (validateReceiver != "")
@@ -250,7 +250,7 @@ namespace Application.Services
                 throw new BusinessRuleException(validateMatch);
             }
 
-            var sender = await teamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
 
             var validateSender = ValidateSender(sender, matchInvite);
             if(validateSender != "")
@@ -258,9 +258,9 @@ namespace Application.Services
                 throw new ValidatorException(validateSender);
             }
 
-            await matchInviteRepository.DeleteMatchInvite(matchInvite);
+            await MatchInviteRepository.DeleteMatchInvite(matchInvite);
  
-            await unityOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         //Ver erro da data 12h e error 500 que deixa executar o codigo e depois é lançado
@@ -271,14 +271,14 @@ namespace Application.Services
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            var pitch = await pitchRepository.GetPitchByName(dto.namePitch);
+            var pitch = await PitchRepository.GetPitchByName(dto.namePitch);
             
             if (pitch == null)
             {
                 throw new NullReferenceException("O campo não pode estar a nulo");
             }
             
-            var matchInvite = await matchInviteRepository.GetMatchInviteByTeams(dto.IdSender, dto.IdReceiver);
+            var matchInvite = await MatchInviteRepository.GetMatchInviteByTeams(dto.IdSender, dto.IdReceiver);
 
             if (matchInvite == null)
             {
@@ -292,14 +292,14 @@ namespace Application.Services
                 throw new BusinessRuleException("Não é possível lançar uma contra-oferta uma vez que os dados estão iguais");
             }
 
-            var senderTeam = await teamRepository.GetTeamByIdAsync(dto.IdSender);
+            var senderTeam = await TeamRepository.GetTeamByIdAsync(dto.IdSender);
 
             if (senderTeam == null)
             {
                 throw new NullReferenceException("A equipa que enviou o convite não foi encontrada");
             }
 
-            var receiverTeam = await teamRepository.GetTeamByIdAsync(dto.IdReceiver);
+            var receiverTeam = await TeamRepository.GetTeamByIdAsync(dto.IdReceiver);
 
             if (receiverTeam == null)
             {
@@ -318,21 +318,21 @@ namespace Application.Services
                 NamePitch = pitch.Name
             };
 
-            await unityOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return sendMatchInviteDto;
         }
 
         public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeam(Guid idTeam)
         {
-            var team = await teamRepository.GetTeamByIdAsync(idTeam);
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
 
             if (team == null)
             {
                 throw new NullReferenceException("A team a consultar a lista de pedidos não existe");
             }
 
-            List<InfoMatchInviteDTO> listMatchInvites = await matchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
+            List<InfoMatchInviteDTO> listMatchInvites = await MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
 
             if (listMatchInvites == null || !listMatchInvites.Any())
             {

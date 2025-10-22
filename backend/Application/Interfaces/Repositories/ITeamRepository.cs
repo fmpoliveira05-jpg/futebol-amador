@@ -30,5 +30,11 @@ namespace Application.Interfaces.Repositories
 
         Task<Teams?> GetTeamForMemberManagementAsync(Guid id);
 
+        Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
+
+        Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id);
+
+        Task<Teams?> GetByIdWithReceivedInvites(Guid id);
+
     }
 }

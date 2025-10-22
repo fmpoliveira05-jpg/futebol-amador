@@ -8,11 +8,11 @@ namespace Api.Middlewares
 
     public class GlobalExceptionHandler : IExceptionHandler
     {
-        private readonly ILogger<GlobalExceptionHandler> _logger;
+        private readonly ILogger<GlobalExceptionHandler> Logger;
 
         public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
-            _logger = logger;
+            Logger = logger;
         }
 
         public async ValueTask<bool> TryHandleAsync(
@@ -47,7 +47,7 @@ namespace Api.Middlewares
                     break;
 
                 default:
-                    _logger.LogError(exception, "Erro não tratado: {Message}", exception.Message);
+                    Logger.LogError(exception, "Erro não tratado: {Message}", exception.Message);
 
                     problemDetails.Title = "Erro Interno do Servidor";
                     problemDetails.Status = (int)HttpStatusCode.InternalServerError;
