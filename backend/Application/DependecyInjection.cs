@@ -11,7 +11,7 @@ namespace Application
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
-
+            
             return services;
         }
     }

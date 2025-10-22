@@ -35,10 +35,10 @@ namespace Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
         public int CurrentPoints { get; set; }
 
-        public Rank? Rank { get; set; }
+        public Rank Rank { get; set; }
 
         [ForeignKey("Rank")]
-        public Guid? IdRank { get; set; } //FK
+        public Guid IdRank { get; set; } //FK
 
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
 

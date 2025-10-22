@@ -7,13 +7,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
-//using static Domain.Constants.ModelConstants;
 using Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Services
 //criar/editar/remover equipas; gerir admins e membros.

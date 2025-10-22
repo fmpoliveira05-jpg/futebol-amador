@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
-using System.Reflection;
 
 namespace Application.Services
 {

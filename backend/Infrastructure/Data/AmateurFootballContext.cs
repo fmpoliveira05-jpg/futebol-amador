@@ -21,7 +21,6 @@ namespace Infrastructure.Data
         public DbSet<Chat> Chat { get; set; } = null;     
         public DbSet<MatchInvite> MatchInvite { get; set; } = null;
         public DbSet<MembershipRequests> MembershipRequests { get; set; } = null;
-
         public AmateurFootballContext(DbContextOptions<AmateurFootballContext> options)
         : base(options)
         {
