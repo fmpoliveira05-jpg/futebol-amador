@@ -1,4 +1,8 @@
-﻿using Application.DTOs.Team;
+﻿using Api.Controllers; // Assume que este é o teu namespace
+using Application.DTOs.Team;
+using Application.DTOs.PlayerDTOs;
+using Application.DTOs.MemberShip;
+using Application.DTOs.Match;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
