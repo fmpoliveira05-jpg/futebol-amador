@@ -1,6 +1,6 @@
 ﻿using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
 using Application.DTOs.Team;
+using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -92,7 +92,7 @@ namespace Infrastructure.Repositories
                         PlayerId = player.Id,
                         PlayerName = player.Name,
                         Height = player.Height,
-                        idTeam = player.idTeam,
+                        idTeam = player.IdTeam,
                         Position = player.Position,
                         IsAdmin = player.IsAdmin
                     }).ToList()
