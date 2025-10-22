@@ -23,5 +23,6 @@ namespace Application.Interfaces.Repositories
 
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
 
+        IQueryable<Teams> GetTeamsQueryable();
     }
 }

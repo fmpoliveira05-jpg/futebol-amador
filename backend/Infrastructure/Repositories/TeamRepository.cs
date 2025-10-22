@@ -70,5 +70,10 @@ namespace Infrastructure.Repositories
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        public IQueryable<Teams> GetTeamsQueryable()
+        {
+            return DbContext.Team.AsQueryable();
+        }
     }
 }

@@ -8,5 +8,14 @@ namespace Application.DTOs.Team
 {
     public class TeamSearchFiltersDto
     {
+        public string Name { get; set; }
+
+        public string RankName { get; set; }
+
+        public int MinAvgAge { get; set; }
+
+        public int MaxAvgxAge { get; set; }
+
+        public string PitchAddress { get; set; }
     }
 }
