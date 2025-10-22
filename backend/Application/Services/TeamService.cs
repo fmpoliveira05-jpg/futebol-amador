@@ -3,17 +3,18 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
+using Application.Validators;
+using Domain.Entities;
+//using static Domain.Constants.ModelConstants;
+using Domain.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Entities;
-//using static Domain.Constants.ModelConstants;
-using Domain.Exceptions;
-using Application.Interfaces.Validators;
-using Application.Validators;
 
 namespace Application.Services
 //criar/editar/remover equipas; gerir admins e membros.
@@ -24,15 +25,15 @@ namespace Application.Services
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
         private readonly IUserRepository UserRepository;
-        private readonly IUnitOfWork UnitOfWork;
+        private readonly IUnityOfWork UnityOfWork;
         private readonly ITeamValidator TeamValidator;
 
-        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnitOfWork unitOfWork)
+        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             UserRepository = userRepository;
-            UnitOfWork = unitOfWork;
+            UnityOfWork = unitOfWork;
             TeamValidator = new TeamValidator();
         }
 
@@ -78,7 +79,7 @@ namespace Application.Services
                 }
             }
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             if (playerAccepted == null)
             {
@@ -113,7 +114,7 @@ namespace Application.Services
             await TeamRepository.AddAsync(newTeam);
 
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return newTeam.Id;
         }
@@ -131,7 +132,7 @@ namespace Application.Services
 
             TeamRepository.DeleteTeam(teamToDelete);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, Guid currentUserId)
@@ -171,7 +172,7 @@ namespace Application.Services
 
             TeamRepository.UpdateTeam(teamToUpdate);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
         }
 
@@ -190,7 +191,7 @@ namespace Application.Services
 
             playerDemoted.IsAdmin = false;
             playerDemoted.IsAdminLastChangedAt = DateTime.UtcNow;
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
@@ -261,7 +262,7 @@ namespace Application.Services
                 playerToRemove.IsAdminLastChangedAt = DateTime.UtcNow;
             }
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
         }
 
@@ -282,7 +283,7 @@ namespace Application.Services
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
         public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
@@ -325,7 +326,7 @@ namespace Application.Services
             }
         }
 
-        await UnitOfWork.SaveChangesAsync();
+        await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId)
@@ -362,6 +363,7 @@ namespace Application.Services
             }).ToList();
 */
         }
+
 
         public Task<List<TeamSummaryDto>> SearchTeamsAsync(TeamSearchFiltersDto filters)
         {

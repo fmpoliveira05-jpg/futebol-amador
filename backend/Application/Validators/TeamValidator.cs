@@ -212,6 +212,24 @@ namespace Application.Validators
             }
         }
 
+        public void PromoteMemberToAdminValidation(Teams team, Player memberToPromote, Player memberPromoting) {
+            ValidatePlayerAndTeamExists(team, memberToPromote);
+
+            PlayerValidator.PlayerExists(memberPromoting);
+
+            if (memberToPromote.Id == memberPromoting.Id)
+            {
+                throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
+            }
+
+            ValidatePlayerBelongToTeamAndIsAdmin(team, memberPromoting);
+
+            if (!PlayerExistsInTeam(team,memberToPromote))
+            {
+                throw new ValidationException($"O player de id '{memberToPromote.Id}' não pertence a equipa '{team.Name}'.");
+            }
+        }
+
         public void GetTeamScheduleValidation(Teams team)
         {
             if (!TeamExists(team))
