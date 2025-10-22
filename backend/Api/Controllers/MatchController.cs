@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.PostPoneGame;
+using Application.Interfaces.Hub;
 using Application.Interfaces.Services;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -11,6 +12,7 @@ namespace Api.Controllers
     public class MatchController : ControllerBase
     {
         private readonly IMatchService matchController;
+        private readonly IStartMatchHub hub;
 
         public MatchController(IMatchService matchController)
         {
@@ -55,12 +57,6 @@ namespace Api.Controllers
             if (listErrors.Count > 0) { 
                 return BadRequest(listErrors); 
             }
-
-            /*
-            if (dto.PostPoneDate == null)
-            {
-                return BadRequest("A data de adiamento não pode ser nula");
-            }*/
 
             try
             {
@@ -215,8 +211,9 @@ namespace Api.Controllers
             }
         }
 
+        //Falta Testar
         [HttpDelete("/CancelMatch/{idMatch}")]
-        public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch)
+        public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
             if (idTeam == Guid.Empty)
             {
@@ -228,9 +225,14 @@ namespace Api.Controllers
                 return BadRequest("O id da partida está vazio");
             }
 
+            if (description == "")
+            {
+                return BadRequest("O cancelamento precisa de uma descrição");
+            }
+
             try
             {
-                await matchController.CancelMatch(idTeam, idMatch);
+                await matchController.CancelMatch(idTeam, idMatch, description);
 
                 return Ok();
             }
@@ -243,5 +245,22 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
         }
+
+        //IHUbContext<Hub> para poder chamar o metodo do Hub
+        //Vou ter de utilizar socket (SignalR) para o iniciar partida.
+        //Posso utilizar um backgroundService para que caso a partida não seja aceite em 5 minutos o soocket é desligado
+        /*
+        [HttpPost("/StartMatch")]
+        public async Task<IActionResult> StartMatch([FromBody] Guid idMatch)
+        {
+            if (idMatch == Guid.Empty)
+            {
+                return BadRequest("O id de admin não pode estar vazio");
+            }
+
+            hub.JoinMatch(idMatch);
+            return Ok();
+        }
+        */
     }
 }

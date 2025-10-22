@@ -1,10 +1,9 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
-using Application.Interfaces.Repositorys;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
-using System.Reflection;
 
 namespace Application.Services
 {

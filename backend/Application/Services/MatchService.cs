@@ -1,7 +1,6 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Enums;
@@ -247,7 +246,7 @@ namespace Application.Services
             return listPostPone;
         }
 
-        public async Task CancelMatch(Guid idTeam, Guid idMatch)
+        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
         {
             var match = await matchRepository.GetMatchValideToCancelById(idMatch);
 
@@ -264,24 +263,27 @@ namespace Application.Services
                 throw new BusinessRuleException("Uma partida só pode ser cancelada " + numDays + " dias antes da data do jogo");
             }
 
-            var teamsMatch = match.Teams;
-            var teamStatistics = teamsMatch.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var teamsStatistics = match.Teams;
+            var team = teamsStatistics.FirstOrDefault(ts => ts.IdTeam == idTeam);
 
-            string validateO = validateTeam(idTeam, teamStatistics);
+            string validateO = validateTeam(idTeam, team);
             if (validateO != "")
             {
                 throw new BusinessRuleException(validateO);
             }
 
-            var opponentStatistic = teamsMatch.FirstOrDefault(ts => ts.IdTeam != idTeam);
-            if (opponentStatistic == null)
+            var opponent = teamsStatistics.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            if (opponent == null)
             {
                 throw new ArgumentNullException("O opponente da equipa para este jogo não foi encotnrado");
             }
 
+            var cancelledMatch = new CancelledMatch(team.Team, match, description);
 
-
-            //Falta o resto!!! 
+            await cancelledMatchRepository.AddCancelledMatch(cancelledMatch);
+            match.MatchStatus = MatchStatus.CANCELED;
+            
+            await unityOfWork.SaveChangesAsync();
         }
     }
 }

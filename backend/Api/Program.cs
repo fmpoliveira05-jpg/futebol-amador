@@ -1,11 +1,14 @@
 
+using Api.Extensions;
 using Application;
 using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
+
+// Add services to the container.
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 builder.Services.AddApplicationServices();
@@ -16,6 +19,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+//Hubs
+app.MapHubs();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

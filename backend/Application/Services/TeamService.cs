@@ -1,7 +1,6 @@
 ﻿using Application.DTOs.Player;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Repositorys;
 using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;

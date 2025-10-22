@@ -29,6 +29,20 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 
+        public async Task<Matches?> GetMatchWithListPlayerById(Guid idMatch)
+        {
+            return await context.Match
+                .Include(m => m.Teams).ThenInclude(ts => ts.Team).ThenInclude(t => t.Members)
+                .FirstOrDefaultAsync(match => match.Id == idMatch);
+        }
+
+        public async Task<Matches?> GetScheduledMatchById(Guid idMatch) 
+        {
+            return await context.Match
+                    .Include(m => m.Teams)
+                    .FirstOrDefaultAsync(match => match.Id == idMatch && match.MatchStatus == MatchStatus.SCHEDULED);
+        }
+
         public async Task<Matches?> GetMatchValideToCancelById(Guid idMatch)
         {
             return await context.Match
