@@ -7,25 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="DTOs\NovaPasta1\**" />
-    <Compile Remove="DTOs\NovaPasta\**" />
-    <EmbeddedResource Remove="DTOs\NovaPasta1\**" />
-    <EmbeddedResource Remove="DTOs\NovaPasta\**" />
-    <None Remove="DTOs\NovaPasta1\**" />
-    <None Remove="DTOs\NovaPasta\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Interfaces\Repositories\IUnitOfWork.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.0.0" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.9" />
   </ItemGroup>
 
 </Project>

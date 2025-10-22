@@ -1,7 +1,7 @@
-﻿using Domain.Entities;
+﻿using Application.Interfaces.Repositories;
+using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Application.Interfaces.Repositories;
 
 namespace Infrastructure.Repositories
 {
@@ -31,17 +31,12 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
-            return await DbContext.Team
-                .Include(t => t.Calendar)
-                .Include(t => t.SentInvites)
-                .Include(t => t.ReceivedInvites)
-                .FirstOrDefaultAsync(t => t.Id == id); 
+            return await DbContext.Team.FindAsync(id); // Retorna a equipa ou null
         }
         //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
         public async Task<Teams?> GetTeamByNameAsync(String name)
         {
-            return await DbContext.Team
-                .FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
+            return await DbContext.Team.FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
         }
 
         public async Task AddAsync(Teams team)
