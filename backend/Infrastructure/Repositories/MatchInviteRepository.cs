@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.MatchInvites;
-using Application.Interfaces.Repositorys;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

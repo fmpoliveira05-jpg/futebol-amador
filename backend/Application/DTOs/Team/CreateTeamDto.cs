@@ -14,10 +14,10 @@ namespace Application.DTOs.Team
 {
     public class CreateTeamDto
     {    
-        [MaxLength(ModelConstants.Team.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
+        [Length(ModelConstants.TeamConst.MinNameLength, ModelConstants.TeamConst.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.Team.MaxDescriptionLength)]
+        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string Description { get; set; }
 
         //IMPORTANTE: definir depois o tamanho maximo da imagem

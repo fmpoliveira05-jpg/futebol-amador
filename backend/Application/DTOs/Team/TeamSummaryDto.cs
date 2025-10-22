@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Team
 {
-    internal class TeamSummaryDto
+    public class TeamSummaryDto
     {
         public Guid Id { get; set; }
         public string Name { get; set; }

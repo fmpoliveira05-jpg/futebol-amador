@@ -23,7 +23,7 @@ namespace Domain.Entities
 
         public DateTime InviteDate { get; set; }
 
-        public bool Sender { get; set; } // true - Player, false - Team
+        public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
         protected MembershipRequests() { }
 
@@ -34,12 +34,12 @@ namespace Domain.Entities
             Team = team;
             IdTeam = team.Id;
             InviteDate = DateTime.Now;
-            Sender = sender;
+            IsPlayerSender = sender;
         }
 
         public override string ToString()
         {
-            return $"[MembershipRequests: Id={Id}, Player={Player}, idPlayer={IdPlayer}, Team={Team}, idTeam={IdTeam}, inviteDate={InviteDate}, sender={Sender}]";
+            return $"[MembershipRequests: Id={Id}, Player={Player}, idPlayer={IdPlayer}, Team={Team}, idTeam={IdTeam}, inviteDate={InviteDate}, sender={IsPlayerSender}]";
         }
     }
 }

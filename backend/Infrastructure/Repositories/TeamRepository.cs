@@ -1,4 +1,7 @@
-﻿using Application.Interfaces.Repositorys;
+﻿using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
+using Application.DTOs.Team;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +38,7 @@ namespace Infrastructure.Repositories
                 .Include(t => t.Calendar)
                 .Include(t => t.SentInvites)
                 .Include(t => t.ReceivedInvites)
-                .FirstOrDefaultAsync(t => t.Id == id); 
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
         //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
         public async Task<Teams?> GetTeamByNameAsync(String name)
@@ -69,6 +72,89 @@ namespace Infrastructure.Repositories
             return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
+        {
+            return await DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Select(t => new TeamDetailsDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Description = t.Description,
+                    FoundationDate = t.DataFoundation,
+                    TotalPoints = t.CurrentPoints,
+                    RankName = t.Rank.Name,
+                    PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",
+                    Players = t.Members.Select(player => new PlayerDto
+                    {
+                        PlayerId = player.Id,
+                        PlayerName = player.Name,
+                        Height = player.Height,
+                        idTeam = player.idTeam,
+                        Position = player.Position,
+                        IsAdmin = player.IsAdmin
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId)
+        {
+
+            return await DbContext.MembershipRequests
+                        .Where(mr => mr.IdTeam == teamId)
+                        .Select(mr => new MemberShipRequestDto
+                        {
+                            RequestId = mr.Id,
+                            PlayerName = mr.Player.Name, 
+                            PlayerId = mr.IdPlayer,
+                            TeamName = mr.Team.Name,     
+                            RequestDate = mr.InviteDate,
+                            IsPlayerSender = mr.IsPlayerSender
+                        })
+                        .ToListAsync();
+        }
+
+        public async Task<Teams?> GetTeamForMembershipRequestAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .Include(t => t.MembershipRequests)
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<Teams?> GetTeamForDeletionAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .Include(t => t.Calendar)
+                    .ThenInclude(c => c.Matches)
+                .AsSplitQuery() // Importante para evitar explosão cartesiana
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<Teams?> GetTeamForUpdateAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .Include(t => t.Pitch)
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<Teams?> GetTeamByNameWithMembersAsync(string name)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .FirstOrDefaultAsync(t => t.Name == name);
+        }
+
+        public async Task<Teams?> GetTeamForMemberManagementAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
     }
 }
