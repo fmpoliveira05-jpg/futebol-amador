@@ -1,6 +1,6 @@
 ﻿using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Team;
-using Application.DTOs.Player;
+using Application.DTOs.PlayerDTOs;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Match;
 using Application.Interfaces.Services;

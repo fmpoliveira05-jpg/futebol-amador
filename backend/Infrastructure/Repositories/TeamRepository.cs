@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
+using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
@@ -87,12 +87,12 @@ namespace Infrastructure.Repositories
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
                     PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",
-                    Players = t.Members.Select(player => new PlayerDto
+                    Players = t.Members.Select(player => new PlayerDetailsDTO
                     {
                         PlayerId = player.Id,
-                        PlayerName = player.Name,
+                        Name = player.Name,
                         Height = player.Height,
-                        idTeam = player.idTeam,
+                        IdTeam = player.IdTeam,
                         Position = player.Position,
                         IsAdmin = player.IsAdmin
                     }).ToList()
