@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <Using Remove="Xunit" />
   </ItemGroup>
 
   <ItemGroup>
