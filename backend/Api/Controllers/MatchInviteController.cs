@@ -1,97 +1,220 @@
-﻿using Domain.Entities;
-using Domain.Exceptions;
-using Infrastructure.Data;
-using Application.DTOs;
+﻿using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Application.Interfaces.Services;
+using Application.DTOs.MatchInvites;
 
 namespace Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/{idTeam:guid}/[controller]")]
     [ApiController]
     public class MatchInviteController : ControllerBase
     {
-        private readonly AmateurFootballContext context;
+        private readonly IMatchInviteService matchInviteService;
 
-        public MatchInviteController(AmateurFootballContext amatuerFutebolContext) => this.context = amatuerFutebolContext;
+        public MatchInviteController(IMatchInviteService matchInviteService)
+        {
+            this.matchInviteService = matchInviteService;
+        }
 
         /***
-         * Vai faltar as questões de aut neste metodo e nos restantes
+         *  Vai faltar AUTs
          */
-        [HttpPost("teams/{idTeam:guid}/match-invites/")]
-        public IActionResult SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+
+        [HttpPost("/match-invites")]
+        public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
-            if (idTeam == Guid.Empty) {
+            if (idTeam == Guid.Empty)
+            {
                 return BadRequest("O id da equipa está vazio");
             }
 
-            if (dto.IdSender != idTeam) {
+            if (dto.IdSender == Guid.Empty)
+            {
+                return BadRequest("O id do emissor do convite não pode ser nulo");
+            }
+
+            if (dto.IdSender != idTeam)
+            {
                 return BadRequest("O id da equipa do DTO não bate com a do url");
             }
 
-            //Regra de negocio
-            if (dto.IdSender == dto.IdReceiver) {
-                return BadRequest("O recetor do convite deve ser diferente do emissor!");
+            if (dto.IdSender == dto.IdReceiver)
+            {
+                throw new BusinessRuleException("O recetor do convite deve ser diferente do emissor!");
             }
 
-            //Depois trocar para o Match Invite Criado
-            return NoContent();
+            try
+            {
+                var sendInvite = await matchInviteService.SendMatchInvite(dto);
+
+                return Ok(sendInvite);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
         }
 
-        /**
-         * Talvez eliminar o counter da variavel
-         * Falta definir url
-         * No Action Resukt vai estar o DTO/Resultado retornado ao user
-         * Meter Try Catchm, por causa dos removes
-         * 
-         * Receberá o futuro o User para aut
-         */
+        private List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
+        {
+            var error = new List<string>();
+            if (idTeam == Guid.Empty)
+            {
+                error.Add("O id da equipa não pode estar vazio");
+            }
+
+            if (idMatchInvite == Guid.Empty)
+            {
+                error.Add("O id da partida não pode estar vazio");
+            }
+
+            return error;
+        }
+
+        [HttpPost("/AcceptMatchInvite")]
+        public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
+        {
+            List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
+            if (validator.Count() > 0)
+            {
+                return BadRequest(validator);
+            }
+
+            //Chamar service
+            try
+            {
+                var match = await matchInviteService.AcceptMatchInvite(idTeam, idMatchInvite);
+
+                return Ok(match);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
         //DELETE
         // api/.../RefuseMatchInvite/id_invite
-        [HttpDelete("{idTeam:guid}/RefuseMatchInvite/{idMatchInvite:guid}")]
-        public IActionResult RefuseMatchInvite(Guid idTeam, Guid idMatchInvite) {
-            if (idTeam == Guid.Empty){
-                return BadRequest("O id da equipa não pode estar vazio");
+        [HttpDelete("/RefuseMatchInvite")]
+        public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
+        {
+            List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
+            if (validator.Count() > 0)
+            {
+                return BadRequest(validator);
             }
 
-            if (idMatchInvite == Guid.Empty) {
-                return BadRequest("O id da partida não pode estar vazio");
+            try
+            {
+                await matchInviteService.RefuseMatchInvites(idTeam, idMatchInvite);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
 
-            var team = context.Team.FirstOrDefault(t => t.Id == idTeam);
-
-            if (team == null){
-                return NotFound("A equipa não foi encontrada");
-            }
-
-            var numReceivedInvites = team.ReceivedInvites.Count();
-            if (numReceivedInvites == 0) {
-                return Conflict("Não é possível recusar um convite porque não existem convites recebidos.");
-            }
-
-            var receivedInvitesList = team.ReceivedInvites;
-            MatchInvite? matchInvite = receivedInvitesList.FirstOrDefault(i => i.Id == idMatchInvite);
-
-            if (matchInvite == null) {
-                throw new MatchInviteException("O convite a recusar não existe");
-            }
-
-            Teams opponentTeam = matchInvite.Sender;
-            if (opponentTeam.SentInvites.FirstOrDefault(matchInvite) == null) {
-                throw new MatchInviteException("O convite a recusar não existe na equipa oponetne");
-            }
-
-            //Removes
-            //opponentTeam.SentInvites.Remove(matchInvite);
-            //opponentTeam.CountSendInvites--;
-            opponentTeam.removeSendMatchInvite(matchInvite);
-
-            //team.ReceivedInvites.Remove(matchInvite);
-            //team.CountReceivedIntes--;
-            team.removeSendMatchInvite(matchInvite);
-
-            context.MatchInvite.Remove(matchInvite);
-            context.SaveChanges();
-            return NoContent();
+            return Ok();
         }
+
+        [HttpPut("/Negociate")]
+        public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode ser nulo");
+            }
+
+            if (dto.IdSender == Guid.Empty)
+            {
+                return BadRequest("O id de quem enviou o convite não pode ser nulo");
+            }
+
+            if (dto.IdReceiver == Guid.Empty)
+            {
+                return BadRequest("O id do recetor do convite não pode ser nulo!");
+            }
+
+            if (dto.namePitch == null || dto.namePitch == "")
+            {
+                return BadRequest("O id do campo não pode ser nulo");
+            }
+
+            if (idTeam != dto.IdReceiver)
+            {
+                return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
+            }
+
+            try
+            {
+                var matchInvite = await matchInviteService.NegociateMatchInvite(dto);
+
+                return Ok(matchInvite);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode ser nulo");
+            }
+
+            try
+            {
+                var matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
+
+                return Ok(matchesInvite);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
     }
 }

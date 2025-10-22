@@ -1,7 +1,7 @@
 ﻿using Application.DTOs.MatchInvites;
 using Domain.Entities;
 
-namespace Application.Interfaces.Repositories
+namespace Application.Interfaces.Repositorys
 {
     public interface IMatchInviteRepository
     {
