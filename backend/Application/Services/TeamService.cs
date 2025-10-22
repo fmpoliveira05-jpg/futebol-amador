@@ -21,13 +21,13 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly ITeamValidator TeamValidator;
 
-        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork)
+        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             UserRepository = userRepository;
             UnityOfWork = unitOfWork;
-            TeamValidator = new TeamValidator();
+            TeamValidator = teamValidator;
         }
 
         public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)

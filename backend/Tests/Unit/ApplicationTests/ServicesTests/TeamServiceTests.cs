@@ -2,16 +2,15 @@
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Services;
+using Application.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -23,7 +22,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private readonly Mock<IPlayerRepository> _playerRepoMock;
         private readonly Mock<IUserRepository> _userRepoMock;
         private readonly Mock<IUnityOfWork> _unitOfWorkMock;
-        private readonly Mock<ITeamValidator> _validatorMock;
+        private readonly ITeamValidator _validatorReal;
         private readonly TeamService _sut;
 
         public TeamServiceTests()
@@ -32,14 +31,16 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock = new Mock<IPlayerRepository>();
             _userRepoMock = new Mock<IUserRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
-            _validatorMock = new Mock<ITeamValidator>();
 
-            // Substituir o validator concreto por mock via reflexão
+            // ⚙️ Usa o validator real
+            _validatorReal = new TeamValidator();
+
             _sut = new TeamService(
                 _teamRepoMock.Object,
                 _playerRepoMock.Object,
                 _userRepoMock.Object,
-                _unitOfWorkMock.Object
+                _unitOfWorkMock.Object,
+                _validatorReal
             );
         }
 
@@ -58,19 +59,16 @@ namespace Unit.ApplicationTests.ServicesTests
                 HomePitch = new PitchDto { Name = "Campo Central", Address = "Rua Principal" }
             };
 
-            var player = new Player { Id = Guid.NewGuid(), Name = "Jogador 1" };
+            var player = new Player { Id = Guid.NewGuid(), Name = "Jogador 1", IdTeam = null };
 
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name))
                 .ReturnsAsync((Teams)null);
-
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(player);
-
             _teamRepoMock.Setup(r => r.AddAsync(It.IsAny<Teams>()))
                 .Returns(Task.CompletedTask);
-
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns((Task<int>)Task.CompletedTask);
+                .Returns(Task.FromResult(1));
 
             // Act
             var result = await _sut.CreateTeamAsync(dto, player.Id);
@@ -88,17 +86,22 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task CreateTeamAsync_Should_Throw_When_TeamNameExists()
         {
             // Arrange
-            var dto = new CreateTeamDto { Name = "FC Duplicado", Description = "Teste" };
+            var dto = new CreateTeamDto
+            {
+                Name = "FC Duplicado",
+                Description = "Teste",
+                icon = new byte[] { 1, 2, 3, 4 },
+                HomePitch = new PitchDto { Name = "Campo", Address = "Rua" }
+            };
+
             var existingTeam = new Teams(dto.Name, "desc", new byte[] { 1, 2, 3, 4 }, new Pitch("Campo", "Rua"));
+            var player = new Player { Id = Guid.NewGuid(), IdTeam = null };
 
-            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name))
-                .ReturnsAsync(existingTeam);
-
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(new Player());
+            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync(existingTeam);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>())).ReturnsAsync(player);
 
             // Act
-            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, Guid.NewGuid());
+            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, player.Id);
 
             // Assert
             await act.Should().ThrowAsync<ValidationException>();
@@ -111,12 +114,20 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task UpdateTeamInfoAsync_Should_Update_Team()
         {
             // Arrange
-            var team = new Teams("Antigo Nome", "Desc", new byte[] { 1, 2, 3, 4 }, new Pitch("Campo", "Rua"))
+            var team = new Teams("Antigo Nome", "Desc", new byte[] { 1, 2, 3 }, new Pitch("Campo", "Rua"))
             {
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
+                Members = new List<Player>()
             };
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                IsAdmin = true,
+                IdTeam = team.Id
+            };
+            team.Members.Add(player);
+
             var dto = new UpdateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
-            var player = new Player { Id = Guid.NewGuid(), IsAdmin = true };
 
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(team.Id))
                 .ReturnsAsync(team);
@@ -124,9 +135,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(player);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name))
                 .ReturnsAsync((Teams)null);
-
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns((Task<int>)Task.CompletedTask);
+                .Returns(Task.FromResult(1));
 
             // Act
             await _sut.UpdateTeamInfoAsync(team.Id, dto, player.Id);
@@ -144,26 +154,23 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task RemovePlayerFromTeamAsync_Should_Remove_Player()
         {
             // Arrange
-            var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3, 4 }, new Pitch("campo", "morada"))
+            var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"))
             {
+                Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var playerToRemove = new Player { Id = Guid.NewGuid(), Name = "Jogador 1" };
-            var playerRemoving = new Player { Id = Guid.NewGuid(), Name = "Admin", IsAdmin = true };
+            var playerToRemove = new Player { Id = Guid.NewGuid(), Name = "Jogador 1", IdTeam = team.Id };
+            var playerRemoving = new Player { Id = Guid.NewGuid(), Name = "Admin", IdTeam = team.Id, IsAdmin = true };
             team.Members.Add(playerToRemove);
+            team.Members.Add(playerRemoving);
 
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerToRemove.Id))
-                .ReturnsAsync(playerToRemove);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerRemoving.Id))
-                .ReturnsAsync(playerRemoving);
-
-            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns((Task<int>)Task.CompletedTask);
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerToRemove.Id)).ReturnsAsync(playerToRemove);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerRemoving.Id)).ReturnsAsync(playerRemoving);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
             // Act
-            await _sut.RemovePlayerFromTeamAsync(Guid.NewGuid(), playerToRemove.Id, playerRemoving.Id);
+            await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, playerRemoving.Id);
 
             // Assert
             team.Members.Should().NotContain(playerToRemove);
@@ -177,26 +184,35 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task PromotePlayerToAdminAsync_Should_Promote_Player()
         {
             // Arrange
-            var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3, 4 }, new Pitch("campo", "morada"))
+            var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"))
             {
+                Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var playerToPromote = new Player { Id = Guid.NewGuid(), Name = "Jogador 1", IsAdmin = false };
-            var playerPromoting = new Player { Id = Guid.NewGuid(), Name = "Admin", IsAdmin = true };
+            var playerToPromote = new Player
+            {
+                Id = Guid.NewGuid(),
+                Name = "Jogador 1",
+                IsAdmin = false,
+                IdTeam = team.Id
+            };
+            var playerPromoting = new Player
+            {
+                Id = Guid.NewGuid(),
+                Name = "Admin",
+                IsAdmin = true,
+                IdTeam = team.Id
+            };
             team.Members.Add(playerToPromote);
+            team.Members.Add(playerPromoting);
 
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerToPromote.Id))
-                .ReturnsAsync(playerToPromote);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerPromoting.Id))
-                .ReturnsAsync(playerPromoting);
-
-            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns((Task<int>)Task.CompletedTask);
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerToPromote.Id)).ReturnsAsync(playerToPromote);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerPromoting.Id)).ReturnsAsync(playerPromoting);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
             // Act
-            await _sut.PromotePlayerToAdminAsync(Guid.NewGuid(), playerToPromote.Id, playerPromoting.Id);
+            await _sut.PromotePlayerToAdminAsync(team.Id, playerToPromote.Id, playerPromoting.Id);
 
             // Assert
             playerToPromote.IsAdmin.Should().BeTrue();
