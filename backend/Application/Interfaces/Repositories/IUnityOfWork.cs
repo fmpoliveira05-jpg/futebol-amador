@@ -1,4 +1,4 @@
-﻿namespace Application.Interfaces.Repositories
+﻿namespace Application.Interfaces.Repositorys
 {
     public interface IUnityOfWork
     {
