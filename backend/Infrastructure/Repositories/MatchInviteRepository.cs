@@ -51,16 +51,19 @@ namespace Infrastructure.Repositories
             return query;
         }
 
-        public async Task<MatchInvite?> GetMatchInvite(SendMatchInviteDTO dto)
+        public async Task<MatchInvite?> GetMatchInvite(Guid idSender, Guid idReceiver, DateTime gameDate)
         {
-            return await context.MatchInvite.FirstOrDefaultAsync(mi => mi.IdSender == dto.IdSender
-                                                                    && mi.IdReceiver == dto.IdReceiver
-                                                                    && mi.GameDate == dto.GameDate);
+            return await context.MatchInvite.FirstOrDefaultAsync(mi => mi.IdSender == idSender
+                                                                    && mi.IdReceiver == idReceiver
+                                                                    && mi.GameDate == gameDate);
         }
 
-        public async Task<MatchInvite?> GetMatchInviteByTeams(Guid idSender, Guid idReceiver)
+        public async Task<MatchInvite?> GetMatchInviteWithPitchByTeams(Guid idSender, Guid idReceiver)
         {
             return await context.MatchInvite
+                .Include(mi => mi.Sender)
+                .Include (mi => mi.Receiver)
+                .Include(mi => mi.Pitch)
                 .FirstOrDefaultAsync(mi => mi.IdSender == idSender && mi.IdReceiver == idReceiver);
         }
 

@@ -81,11 +81,16 @@ namespace Application.Validators
             ValidateSender(sender, matchInvite, errorMsgNullSender, errorMsg);
         }
 
-        public void ValidateNegociateMatchInvite(Pitch pitch, MatchInvite matchInvite, Teams senderTeam, 
+        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Teams senderTeam, 
             Teams receiverTeam, Matches findMatchWith12hour)
         {
             const string msgNullPitch = "O campo da partida não pode estar a nulo";
             ValidateNullPitch(pitch, msgNullPitch);
+
+            if (pitch.Name != namePitch)
+            {
+                throw new InvalidOperationException("O nome do campo não bate com o da partida");
+            }
 
             if (matchInvite == null)
             {

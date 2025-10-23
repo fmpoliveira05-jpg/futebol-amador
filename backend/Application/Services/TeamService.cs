@@ -84,19 +84,16 @@ namespace Application.Services
             }
         }
 
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
+        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto)
         {
-            var existingTeamTask = TeamRepository.GetTeamByNameAsync(teamDto.Name);
-            var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
-            var defaultTeamRankTask = RankRepository.GetDefaultRankAsync();
-            await Task.WhenAll(existingTeamTask, creatorPlayerTask);
 
-            var existingTeam = await existingTeamTask;
-            var creatorPlayer = await creatorPlayerTask;
+            var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
+            //var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
+            var rank = await RankRepository.GetDefaultRankAsync();
+            //var creatorPlayer = await creatorPlayerTask;
+            //TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
 
-            TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
 
-            var rank = await defaultTeamRankTask;
             if (rank == null)
             {
                 throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
@@ -116,7 +113,6 @@ namespace Application.Services
             );
 
             await TeamRepository.AddAsync(newTeam);
-
 
             await UnityOfWork.SaveChangesAsync();
 
@@ -353,6 +349,5 @@ namespace Application.Services
         {
             throw new NotImplementedException();
         }
-
     }
 }

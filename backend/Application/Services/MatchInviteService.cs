@@ -39,12 +39,15 @@ namespace Application.Services
         //Otimizar o sender e o receiver para fazer menos pesquisas
         public async Task<InfoMatchInviteDTO> SendMatchInvite(SendMatchInviteDTO dto)
         {
+            var idSender = dto.IdSender;
+            var idReceiver = dto.IdReceiver;
             var gameDate = dto.GameDate;
             var pitchName = dto.namePitch;
             Pitch? pitch = null;
 
             MatchInviteValidator.ValidateHoursGame(gameDate);
 
+            /*
             var exisitngReceiverTask = TeamRepository.GetTeamByIdWithPitchAsync(dto.IdReceiver);
             var existingMatchInviteTask = MatchInviteRepository.GetMatchInvite(dto);
             var findMatchWith12hours = MatchRepository.GetMatchProxim12HoursMatchs(dto.IdSender, dto.GameDate);
@@ -56,8 +59,13 @@ namespace Application.Services
             var existingmatchInvite = await existingMatchInviteTask;
             var validateMatch = await findMatchWith12hours;
             var sender = await senderTask;
+            */
 
-            MatchInviteValidator.ValidateSendMatchInvite(receiver, sender, existingmatchInvite, validateMatch, pitchName);
+            var receiver= await TeamRepository.GetTeamByIdWithPitchAsync(idReceiver);
+            var existingMatchInvite = await MatchInviteRepository.GetMatchInvite(idSender, idReceiver, gameDate);
+            var findMatchWith12hours = await MatchRepository.GetMatchProxim12HoursMatchs(idSender, gameDate);
+            var sender = await TeamRepository.GetTeamByIdWithPitchAsync(idSender);
+            MatchInviteValidator.ValidateSendMatchInvite(receiver, sender, existingMatchInvite, findMatchWith12hours, pitchName);
             
             if (pitchName == receiver.Pitch.Name)
             {
@@ -92,6 +100,7 @@ namespace Application.Services
             list.Add(sendTeam);
             list.Add(receiverTeam);
 
+            /*
             var addSenderTask = TeamStatisticsRepository.AddTeamStatistics(sendTeam);
             var addReceiverTask = TeamStatisticsRepository.AddTeamStatistics(receiverTeam);
 
@@ -99,6 +108,9 @@ namespace Application.Services
 
             await addSenderTask;
             await addReceiverTask;
+             */
+            await TeamStatisticsRepository.AddTeamStatistics(sendTeam);
+            await TeamStatisticsRepository.AddTeamStatistics(receiverTeam);
 
             return list;
         }
@@ -116,7 +128,8 @@ namespace Application.Services
             //Ver se é preciso
             MatchInviteValidator.ValidateMatchInvite(matchInvite);
 
-            var senderTask = TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+            /*
+              var senderTask = TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
             var pitchTask = PitchRepository.GetPitchById(matchInvite.IdPitch);
             var validateMatchTask = MatchRepository.GetMatchProxim12HoursMatchs(receiver.Id, matchInvite.GameDate);
             
@@ -124,6 +137,10 @@ namespace Application.Services
             var sender = await senderTask;
             var pitch = await pitchTask;
             var validateMatch = await validateMatchTask;
+             */
+            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender); ;
+            var pitch = await PitchRepository.GetPitchById(matchInvite.IdPitch);
+            var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(receiver.Id, matchInvite.GameDate);
 
             MatchInviteValidator.ValidateAcceptMatchInvite(sender, validateMatch, matchInvite, pitch);
             
@@ -154,10 +171,10 @@ namespace Application.Services
         {
             MatchInvite? matchInvite = null;
             var receiver = await TeamRepository.GetByIdWithReceivedInvites(idTeam);
+            
             MatchInviteValidator.ValidateReciever(receiver);
 
-            var receivedInvitesList = receiver.ReceivedInvites;
-            matchInvite = receivedInvitesList.FirstOrDefault(i => i.Id == idMatchInvite);
+            matchInvite = receiver.ReceivedInvites.FirstOrDefault(i => i.Id == idMatchInvite);
             MatchInviteValidator.ValidateMatchInvite(matchInvite);
 
             var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
@@ -180,6 +197,7 @@ namespace Application.Services
             
             MatchInviteValidator.ValidateHoursGame(gameDate);
 
+            /*
             var pitchTask = PitchRepository.GetPitchByName(namePitch);
             var matchInviteTask = MatchInviteRepository.GetMatchInviteByTeams(idSender, idReceiver);
             var senderTeamTask = TeamRepository.GetTeamByIdAsync(idSender);
@@ -193,8 +211,15 @@ namespace Application.Services
             var senderTeam = await senderTeamTask;
             var receiverTeam = await receiverTeamTask;
             var findMatchWith12hour = await findMatchWith12hoursTask;
+            */
 
-            MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
+            var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idSender, idReceiver);
+            var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
+            var senderTeam = matchInvite?.Sender;
+            var receiverTeam = matchInvite?.Receiver;
+            var pitch = matchInvite?.Pitch;
+
+            MatchInviteValidator.ValidateNegociateMatchInvite(namePitch, pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
             
             hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); //Meter isto como private aqui para não estar na entidades 
 
@@ -218,6 +243,7 @@ namespace Application.Services
 
         public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeam(Guid idTeam)
         {
+            /*
             var teamTask = TeamRepository.GetTeamByIdAsync(idTeam);
             Task<List<InfoMatchInviteDTO>> listMatchInvitesTask = MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
 
@@ -225,8 +251,12 @@ namespace Application.Services
 
             var team = await teamTask;
             var listMatchInvites = await listMatchInvitesTask;
+             */
 
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
+            var listMatchInvites = await MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
             MatchInviteValidator.ValidateGetAll(team, listMatchInvites);
+            
             return listMatchInvites;
         }
 

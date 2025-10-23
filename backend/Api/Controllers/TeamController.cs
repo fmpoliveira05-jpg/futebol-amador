@@ -1,11 +1,9 @@
 ﻿using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Team;
-using Application.DTOs.PlayerDTOs;
-using Application.DTOs.MemberShip;
-using Application.DTOs.Match;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -24,19 +22,22 @@ namespace Api.Controllers
 
         private Guid GetCurrentUserId()
         {
+            /*
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
             {
                 throw new ValidationException("Token de utilizador inválido ou em falta.");
             }
             return userId;
+             */
+            return Guid.Empty;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
         {
             var creatorUserId = GetCurrentUserId();
-            var newTeamId = await TeamService.CreateTeamAsync(teamDto, creatorUserId);
+            var newTeamId = await TeamService.CreateTeamAsync(teamDto);
 
             // Retorna 201 Created com a localização do novo recurso
             return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });

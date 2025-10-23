@@ -1,7 +1,6 @@
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
-using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;

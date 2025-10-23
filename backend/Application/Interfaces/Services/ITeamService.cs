@@ -1,18 +1,13 @@
 ﻿using Application.DTOs.Team;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Match;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Application.DTOs.PlayerDTOs;
 
 namespace Application.Interfaces.Services
 {
     public interface ITeamService
     {
-        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorUserId);
+        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto);
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 
