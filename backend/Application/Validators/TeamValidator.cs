@@ -7,7 +7,7 @@ using Domain.Exceptions;
 
 namespace Application.Validators
 {
-    internal class TeamValidator : ITeamValidator
+    public class TeamValidator : ITeamValidator
     {
         private IPlayerValidator PlayerValidator = new PlayerValidator();
         public void CreateTeamValidation(CreateTeamDto? createTeamDto, Teams? team, Player? playerCreating)
@@ -314,12 +314,13 @@ namespace Application.Validators
 
         private bool CreateTeamDtoIsValid(CreateTeamDto createTeamDto)
         {
-            if (string.IsNullOrWhiteSpace(createTeamDto.Name) || createTeamDto.HomePitch != null)
+            if (string.IsNullOrWhiteSpace(createTeamDto.Name) || createTeamDto.HomePitch == null)
             {
                 return false;
             }
             return true;
         }
+
 
     }
 }

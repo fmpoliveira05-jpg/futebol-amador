@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Application.Interfaces.Validators
 {
-    internal interface ITeamValidator
+    public interface ITeamValidator
     {
         void CreateTeamValidation(CreateTeamDto createTeamDto, Teams? team, Player? playerCreating);
         void UpdateTeamValidation(Teams? existingTeamNewName, Teams? team, Player? playerEditing);
