@@ -7,6 +7,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
+
 using Domain.Exceptions;
 
 namespace Application.Services
@@ -49,7 +50,7 @@ namespace Application.Services
             var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
             if (requestToRemove != null)
             {
-                playerAcceptedId = requestToRemove.IdPlayer;
+                playerAcceptedId = requestToRemove.Id;
             }
 
             playerAcceptedTask = PlayerRepository.GetPlayerByIdAsync(playerAcceptedId);
@@ -83,21 +84,16 @@ namespace Application.Services
             }
         }
 
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
+        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto)
         {
 
-            var existingTeamTask = TeamRepository.GetTeamByNameAsync(teamDto.Name);
-            var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
-            await Task.WhenAll(existingTeamTask, creatorPlayerTask);
-
-            var existingTeam = await existingTeamTask;
-            var creatorPlayer = await creatorPlayerTask;
-            var defaultTeamRankTask = RankRepository.GetDefaultRankAsync();
+            var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
+            //var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
+            var rank = await RankRepository.GetDefaultRankAsync();
+            //var creatorPlayer = await creatorPlayerTask;
+            //TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
 
 
-            TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
-
-            var rank = await defaultTeamRankTask;
             if (rank == null)
             {
                 throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
@@ -117,7 +113,6 @@ namespace Application.Services
             );
 
             await TeamRepository.AddAsync(newTeam);
-
 
             await UnityOfWork.SaveChangesAsync();
 
@@ -353,6 +348,5 @@ namespace Application.Services
         {
             throw new NotImplementedException();
         }
-
     }
 }

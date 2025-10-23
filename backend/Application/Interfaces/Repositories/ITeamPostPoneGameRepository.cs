@@ -4,9 +4,9 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamPostPoneGameRepository
     {
-        Task AddTeamPostPoneMatch(PostPoneMatch postPoneMatch);
-
-        void RemoveTeamPostPoneMatch(PostPoneMatch postPoneMatch);
-        Task<PostPoneMatch?> GetTeamPostPoneMatch(Guid idTeam, Guid idMatch);
+        public Task AddTeamPostPoneMatch(PostPoneMatch postPoneMatch);
+        public void RemoveTeamPostPoneMatch(PostPoneMatch postPoneMatch);
+        public Task<PostPoneMatch?> GetTeamPostPoneMatchWithPitch(Guid idTeam, Guid idMatch);
+        public Task<PostPoneMatch?> GetTeamPostPoneMatch(Guid idTeam, Guid idMatch);
     }
 }

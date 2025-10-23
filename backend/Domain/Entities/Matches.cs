@@ -65,6 +65,24 @@ namespace Domain.Entities
             }
         }
 
+        public Matches(DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics, Guid? idChat)
+        {
+            this.MatchDate = matchDate;
+            this.IsCompetive = isCompetive;
+            this.idPitch = idPitch;
+            this.Teams = teamStatistics;
+
+            if (idChat != Guid.Empty)
+            {
+                this.IdChat = idPitch;
+            }
+            else
+            {
+                this.Chat = new Chat();
+                this.IdChat = this.Chat.Id;
+            }
+        }
+
         public override string ToString()
         {
             return $"Match [Id={Id}, MatchStatus={MatchStatus}, MatchDate={MatchDate}, TimeStart={TimeStart}, iscompetive={IsCompetive}, Pitch={Pitch}]";

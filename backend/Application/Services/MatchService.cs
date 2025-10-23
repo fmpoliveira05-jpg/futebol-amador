@@ -2,187 +2,105 @@
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Exceptions;
 
 namespace Application.Services
 {
     public class MatchService: IMatchService
     {
-        IMatchRepository matchRepository;
-        ITeamStatisticsRepository teamStatisticsRepository;
-        ITeamPostPoneGameRepository teamPostPoneGameRepository;
-        ICancelledMatchRepository cancelledMatchRepository;
-        IUnityOfWork unityOfWork;
+        IMatchRepository MatchRepository;
+        ITeamStatisticsRepository TeamStatisticsRepository;
+        ITeamPostPoneGameRepository TeamPostPoneGameRepository;
+        ICancelledMatchRepository CancelledMatchRepository;
+        IUnityOfWork UnityOfWork;
+        IMatchValidator ValidatorMatch;
 
         public MatchService(IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository, 
             ITeamPostPoneGameRepository teamPostPoneGameRepository, ICancelledMatchRepository cancelledMatchRepository,
-            IUnityOfWork unityOfWork)
+            IUnityOfWork unityOfWork, IMatchValidator validatorMatch)
         {
-            this.matchRepository = matchRepository;
-            this.teamStatisticsRepository = teamStatisticsRepository;
-            this.teamPostPoneGameRepository = teamPostPoneGameRepository;
-            this.cancelledMatchRepository = cancelledMatchRepository;
-            this.unityOfWork = unityOfWork;
+            this.MatchRepository = matchRepository;
+            this.TeamStatisticsRepository = teamStatisticsRepository;
+            this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
+            this.CancelledMatchRepository = cancelledMatchRepository;
+            this.UnityOfWork = unityOfWork;
+            this.ValidatorMatch = validatorMatch;
+
         }
 
-        /***
-         * Trocar os dois if do opponeten e temam por private metodo
-         * Deve validar se o user não atualizou para mais ou menos 5 minutos.
-         * Ou seja só dá para atualizar para um tempo significativo
-         */
-
-        private string validateTeam(Guid idTeam, TeamStatistics? teamStatistics)
-        {
-            if (teamStatistics == null)
-            {
-                return "A equipa não existe neste jogo";
-            }
-
-            if (teamStatistics.IdTeam != idTeam)
-            {
-                return "A equipa não pertence ao jogo";
-            }
-
-            return "";
-        }
-
-        //Testar
+        //Testar (Já fiz otimizações nas pesquisas)
         public async Task<InfoPostPoneMatch> PostPoneMatch(PostponeMatchDTO dto)
         {
             var idMatch = dto.IdMatch;
-            var match = await matchRepository.GetMatchById(idMatch);
-
-            if (match == null)
-            {
-                throw new ArgumentNullException("A match não pode estar nula", nameof(match));
-            }
-
             var newDate = dto.PostPoneDate;
-            
-            if (match.MatchDate == newDate) {
-                throw new BusinessRuleException("A data de adiamento não pode ser a mesma da data já marcada");
-            }
+            var idTeam = dto.IdTeam;
+            var idOpponnent = dto.IdOpponent;
+            PostPoneMatch postPoneDate;
+            Teams team;
 
-            if (match.MatchStatus != MatchStatus.SCHEDULED && match.MatchStatus != MatchStatus.POST_PONED)
-            {
-                throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento");
-            }
+            var match = await MatchRepository.GetMatchById(idMatch);
+            var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
-            var teamStatistic = await teamStatisticsRepository.GetTeamByIdAndMatch(dto.IdMatch, dto.IdTeam);
+            //Valida os dados carregados
+            ValidatorMatch.ValidatorPostPoneMatch(match, newDate, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
-            string validateT = validateTeam(dto.IdTeam, teamStatistic);
-            if (validateT != "")
-            {
-                throw new BusinessRuleException(validateT);
-            }
-
-            var opponentStatistics = await teamStatisticsRepository.GetTeamByIdAndMatch(dto.IdMatch, dto.IdOpponent);
-
-            string validateO = validateTeam(dto.IdOpponent, opponentStatistics);
-            if (validateO != "")
-            {
-                throw new BusinessRuleException(validateO);
-            }
-
-            var team = teamStatistic.Team;
-            if (team == null)
-            {
-                throw new ArgumentNullException("A equipa que fez o adiamento está nula");
-            }
- 
-            var postPoneDate = new PostPoneMatch(team, match, newDate);
-            await teamPostPoneGameRepository.AddTeamPostPoneMatch(postPoneDate);
-
+            //Criação do adiamento e atualização do estado da equipa
+            team = teamStatistic.Team;
+            postPoneDate = new PostPoneMatch(team, match, newDate);
+            await TeamPostPoneGameRepository.AddTeamPostPoneMatch(postPoneDate);
 
             match.MatchStatus = MatchStatus.POST_PONED;
 
             var postPoneMatch = new InfoPostPoneMatch
             {
-                IdMatch = match.Id,
-                PostPoneDate = match.MatchDate,
-                IdTeam = teamStatistic.IdTeam,
-                nameTeam = teamStatistic.Team.Name,
-                IdOpponent = opponentStatistics.IdTeam,
+                IdMatch = idMatch,
+                PostPoneDate = newDate,
+                IdTeam = idTeam,
+                nameTeam = team.Name,
+                IdOpponent = idOpponnent,
                 nameOpponent = opponentStatistics.Team.Name
             };
-            await unityOfWork.SaveChangesAsync();
+
+            await UnityOfWork.SaveChangesAsync();
 
             return postPoneMatch;
         }
 
-        private string validateStatusPostPoneMatch(Matches? match)
-        {
-            if (match == null)
-            {
-                return "A match não pode estar nula";
-            }
-
-            if (match.MatchStatus != MatchStatus.POST_PONED)
-            {
-                return "Só podem ser adiadas partidas marcadas ou em estado de adiamento";
-            }
-
-            return "";
-        }
-
+        //Vou ter que implementar aquele find na database para ver se quem adiou tem um jogo já marcado a pelo menos 12 horas
         public async Task<MatchDto> AcceptPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto)
         {
+            var idTeam = dto.IdTeam;
+            var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
-            var match = await matchRepository.GetMatchWitchPitchById(idMatch);
-            string validatePostPone = validateStatusPostPoneMatch(match);
+            DateTime newDate;
 
-            if (validatePostPone != "")
-            {
-                throw new MatchException(validatePostPone);
-            }
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idOpponnent, idMatch);
+            var match = postPoneMatch?.Match;
+            var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
-            var teamStatistic = await teamStatisticsRepository.GetTeamByIdAndMatch(idMatch, dto.IdTeam);
+            //Validator
+            ValidatorMatch.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
-            string validateT = validateTeam(dto.IdTeam, teamStatistic);
-            if (validateT != "")
-            {
-                throw new BusinessRuleException(validateT);
-            }
-            
-
-            var opponentStatistics = await teamStatisticsRepository.GetTeamByIdAndMatch(idMatch, dto.IdOpponent);
-
-            string validateO = validateTeam(dto.IdOpponent, opponentStatistics);
-            if (validateO != "")
-            {
-                throw new BusinessRuleException(validateO);
-            }
-
-            var postPoneMatch = await teamPostPoneGameRepository.GetTeamPostPoneMatch(dto.IdOpponent, dto.IdMatch);
-
-            if (postPoneMatch == null)
-            {
-                throw new ArgumentNullException("O adiamento da partida está a null");
-            }
-
-            if (postPoneMatch.IdTeamPostPone == teamStatistic.IdTeam)
-            {
-                throw new BusinessRuleException("Apenas a equipa que recebeu o convite pode aceita-lo");
-            }
-
-            //Adiar a partida
-            teamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
+            //Adiamento da partida
+            TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
+            newDate = postPoneMatch.PostPoneDate;
+            match.MatchDate = newDate;
             match.MatchStatus = MatchStatus.SCHEDULED;
 
-            //O match não inclui o pitch
             var matchDTO = new MatchDto
             {
-                IdMatch = dto.IdMatch,
-                GameDate = match.MatchDate,
+                IdMatch = idMatch,
+                GameDate = newDate,
                 NameTeam = teamStatistic.Team.Name,
                 NameOpponent = opponentStatistics.Team.Name,
                 NamePitch = match.Pitch.Name
             };
 
-            await unityOfWork.SaveChangesAsync();
-
+            await UnityOfWork.SaveChangesAsync();
             return matchDTO;
         }
 
@@ -192,98 +110,47 @@ namespace Application.Services
         public async Task RejectPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto)
         {
             var idMatch = dto.IdMatch;
-            var match = await matchRepository.GetMatchById(idMatch);
-            string validatePostPone = validateStatusPostPoneMatch(match);
+            var idTeam = dto.IdTeam;
+            var idOpponnent = dto.IdOpponent;
 
-            if (validatePostPone != "")
-            {
-                throw new MatchException(validatePostPone);
-            }
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatch(idOpponnent, idMatch);
+            var match = postPoneMatch?.Match;
+            var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
-            var teamStatistic = await teamStatisticsRepository.GetTeamByIdAndMatch(dto.IdMatch, dto.IdTeam);
+            ValidatorMatch.ValidatorRejectPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
-            string validateT = validateTeam(dto.IdTeam, teamStatistic);
-            if (validateT != "")
-            {
-                throw new BusinessRuleException(validateT);
-            }
-
-            var opponentStatistics = await teamStatisticsRepository.GetTeamByIdAndMatch(dto.IdMatch, dto.IdOpponent); ;
-
-            string validateO = validateTeam(dto.IdOpponent, opponentStatistics);
-            if (validateO != "")
-            {
-                throw new BusinessRuleException(validateO);
-            }
-
-            var postPoneMatch = await teamPostPoneGameRepository.GetTeamPostPoneMatch(dto.IdOpponent, dto.IdMatch);
-
-            if (postPoneMatch == null)
-            {
-                throw new ArgumentNullException("O adiamento da partida está a null");
-            }
-
-            if (postPoneMatch.IdTeamPostPone == teamStatistic.IdTeam)
-            {
-                throw new BusinessRuleException("Apenas a equipa que recebeu o convite pode rejetia-lo");
-            }
-
-            teamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
+            //Cancelamento do match
+            TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
             match.MatchStatus = MatchStatus.CANCELED;
 
-            await unityOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
+        }
+
+        //Testar
+        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
+        {
+            var match = await MatchRepository.GetMatchToCancelById(idMatch);
+            var teamsStatistics = match?.Teams;
+            var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+
+            ValidatorMatch.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
+            //Cancelamento do jogo
+            var cancelledMatch = new CancelledMatch(team.Team, match, description);
+            await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
+            match.MatchStatus = MatchStatus.CANCELED;
+            
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
         {
-            var listPostPone = await matchRepository.GetAllMatchPostPoneReceiverById(idTeam);
-            
-            if (listPostPone.Count == 0)
-            {
-                throw new EmptyCollectionException("A lista de adiamentos da equipa está vazia");
-            }
+            var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
+
+            ValidatorMatch.ValidatorGetListPostPoneMatchTeam(listPostPone);
 
             return listPostPone;
-        }
-
-        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
-        {
-            var match = await matchRepository.GetMatchValideToCancelById(idMatch);
-
-            if (match == null)
-            {
-                throw new ArgumentNullException("A match a cancelar não existe ou já não pode ser cancelada.");
-            }
-
-            var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;
-            const int numDays = 2;
-
-            if (diffDaysToCancel < numDays)
-            {
-                throw new BusinessRuleException("Uma partida só pode ser cancelada " + numDays + " dias antes da data do jogo");
-            }
-
-            var teamsStatistics = match.Teams;
-            var team = teamsStatistics.FirstOrDefault(ts => ts.IdTeam == idTeam);
-
-            string validateO = validateTeam(idTeam, team);
-            if (validateO != "")
-            {
-                throw new BusinessRuleException(validateO);
-            }
-
-            var opponent = teamsStatistics.FirstOrDefault(ts => ts.IdTeam != idTeam);
-            if (opponent == null)
-            {
-                throw new ArgumentNullException("O opponente da equipa para este jogo não foi encotnrado");
-            }
-
-            var cancelledMatch = new CancelledMatch(team.Team, match, description);
-
-            await cancelledMatchRepository.AddCancelledMatch(cancelledMatch);
-            match.MatchStatus = MatchStatus.CANCELED;
-            
-            await unityOfWork.SaveChangesAsync();
         }
     }
 }

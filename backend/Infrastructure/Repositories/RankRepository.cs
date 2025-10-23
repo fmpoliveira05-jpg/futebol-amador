@@ -3,15 +3,12 @@ using Domain.Entities;
 using Infrastructure.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    internal class RankRepository : IRankRepository
+    public class RankRepository : IRankRepository
     {
         private readonly AmateurFootballContext DbContext;
 
