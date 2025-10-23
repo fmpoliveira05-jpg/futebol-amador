@@ -19,15 +19,18 @@ namespace Application.Services
         private readonly IPlayerRepository PlayerRepository;
         private readonly IUserRepository UserRepository;
         private readonly IUnityOfWork UnityOfWork;
+        private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
 
-        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator)
+        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator, IRankRepository rankRepository)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             UserRepository = userRepository;
             UnityOfWork = unitOfWork;
             TeamValidator = teamValidator;
+            RankRepository = rankRepository;
+
         }
 
         public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
@@ -85,12 +88,19 @@ namespace Application.Services
 
             var existingTeamTask = TeamRepository.GetTeamByNameAsync(teamDto.Name);
             var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
+            var defaultTeamRankTask = RankRepository.GetDefaultRankAsync();
             await Task.WhenAll(existingTeamTask, creatorPlayerTask);
 
             var existingTeam = await existingTeamTask;
             var creatorPlayer = await creatorPlayerTask;
 
             TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
+
+            var rank = await defaultTeamRankTask;
+            if (rank == null)
+            {
+                throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
+            }
 
             var pitch = new Pitch(
                 teamDto.HomePitch.Name,
@@ -101,7 +111,8 @@ namespace Application.Services
                 teamDto.Name,
                 teamDto.Description,
                 teamDto.icon,
-                pitch
+                pitch,
+                rank
             );
 
             await TeamRepository.AddAsync(newTeam);
