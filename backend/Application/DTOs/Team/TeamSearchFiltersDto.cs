@@ -14,7 +14,7 @@ namespace Application.DTOs.Team
 
         public int MinAvgAge { get; set; }
 
-        public int MaxAvgxAge { get; set; }
+        public int MaxAvgAge { get; set; }
 
         public string PitchAddress { get; set; }
     }

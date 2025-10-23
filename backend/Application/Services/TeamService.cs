@@ -362,8 +362,10 @@ namespace Application.Services
         }
 
 
-        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(TeamSearchFiltersDto filters)
+        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
         {
+            var player = await PlayerRepository.GetPlayerByIdAsync(playerId);
+            
             var query = TeamRepository.GetTeamsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filters.Name))
@@ -405,6 +407,16 @@ namespace Application.Services
                     PlayerCount = t.Members.Count,
                 })
                 .ToList();
+
+            if (player.IsAdmin)
+            {
+                teams.Where(t =>
+                    t.PlayerCount > 11
+                    );
+            }else if (player.IdTeam == null)
+                teams.Where(t =>
+                    t.PlayerCount > 11
+                    );
 
             return teams;
         }
