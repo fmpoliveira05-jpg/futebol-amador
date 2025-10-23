@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
-using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {

@@ -5,16 +5,11 @@ namespace Application.Interfaces.Repositories
 {
     public interface IMatchInviteRepository
     {
-        Task AddMatchInvite(MatchInvite matchInvite);
-
-        Task DeleteMatchInvite(MatchInvite matchInvite);
-
-        Task<MatchInvite?> GetMatchInviteById(Guid id);
-
-        Task<MatchInvite?> GetMatchInviteByTeams(Guid idSender, Guid idReceiver);
-
+        public Task AddMatchInvite(MatchInvite matchInvite);
+        public void DeleteMatchInvite(MatchInvite matchInvite);
+        public Task<MatchInvite?> GetMatchInviteById(Guid id);
+        public Task<MatchInvite?> GetMatchInviteByTeams(Guid idSender, Guid idReceiver);
         public Task<MatchInvite?> GetMatchInvite(SendMatchInviteDTO dto);
-
         public Task<List<InfoMatchInviteDTO>> GetAllMatchInviteReceiverById(Guid idReceiver);
     }
 }

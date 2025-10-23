@@ -27,6 +27,14 @@ namespace Infrastructure.Repositories
         public async Task<PostPoneMatch?> GetTeamPostPoneMatch(Guid idTeam, Guid idMatch)
         {
             return await context.PostPoneMatch
+                .Include(ts => ts.Match)
+                .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone == idTeam && ppm.IdMatch == idMatch);
+        }
+
+        public async Task<PostPoneMatch?> GetTeamPostPoneMatchWithPitch(Guid idTeam, Guid idMatch)
+        {
+            return await context.PostPoneMatch
+                .Include(ts => ts.Match).ThenInclude(m => m.Pitch)
                 .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone == idTeam && ppm.IdMatch == idMatch);
         }
     }

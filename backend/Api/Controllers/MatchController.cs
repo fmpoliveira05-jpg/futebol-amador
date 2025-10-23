@@ -191,10 +191,11 @@ namespace Api.Controllers
         [HttpGet("/PostPoneMatchs")]
         public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam)
         {
-            if(idTeam == Guid.Empty)
+            if (idTeam == Guid.Empty)
             {
                 return BadRequest("O id da equipa não pode estar vazio");
             } 
+
             try
             {
                 var listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);

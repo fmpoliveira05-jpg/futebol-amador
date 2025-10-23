@@ -7,6 +7,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
+
 using Domain.Exceptions;
 
 namespace Application.Services
@@ -46,7 +47,7 @@ namespace Application.Services
             var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
             if (requestToRemove != null)
             {
-                playerAcceptedId = requestToRemove.IdPlayer;
+                playerAcceptedId = requestToRemove.Id;
             }
 
             playerAcceptedTask = PlayerRepository.GetPlayerByIdAsync(playerAcceptedId);
@@ -82,7 +83,6 @@ namespace Application.Services
 
         public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid creatorPlayerId)
         {
-
             var existingTeamTask = TeamRepository.GetTeamByNameAsync(teamDto.Name);
             var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
             await Task.WhenAll(existingTeamTask, creatorPlayerTask);

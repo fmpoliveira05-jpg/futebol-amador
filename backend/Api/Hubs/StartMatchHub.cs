@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Enums;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
 /**
@@ -10,8 +11,7 @@ using System.Collections.Concurrent;
  
  Se calhar para resolver o problema do Lobby tenho de a classe atual ser userLoby 
  e criar uma classe Loby com o id dele, talvez a connectionString e também a Lista de playersLoby
- 
-
+ */
 namespace Api.Hubs
 {
     //Descomentar isto quando houver aut para so pessoas autenticadas acederem
@@ -21,21 +21,29 @@ namespace Api.Hubs
         private readonly IManageStarMatchService startMatchManager; //Service com a logica
         private readonly IMatchRepository matchRepository; //Atualizar match
         private readonly IUnityOfWork unityOfWork;
-        private static readonly ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, string>> lobbies =
-            new ConcurrentDictionary<Guid, ConcurrentDictionary<Guid, string>>();
-   
+        private readonly IMemoryCache cache;
+
         // Injeção do service de domínio
         public StartMatchHub(IManageStarMatchService startMatchManager, 
-            IMatchRepository matchRepository,
+            IMatchRepository matchRepository, IMemoryCache memoryCache,
             IUnityOfWork unityOfWork)
         {
             this.startMatchManager = startMatchManager;
             this.matchRepository = matchRepository;
+            this.cache = memoryCache;
+            this.unityOfWork = unityOfWork;
+        }
+
+        //Dá uma duração de 10 minutos ao lobbie
+        private MemoryCacheEntryOptions GetCacheOptions()
+        {
+            return new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
         }
 
         /**
          Como o hub não fecha tentar encontrar forma de caso outra pessoa entra dar a mensagem
-         
+         */
         public async Task JoinMatch(Guid idMatch)
         {
             var groupName = $"match-{idMatch}";
@@ -63,7 +71,13 @@ namespace Api.Hubs
 
             var teamId = teamMatchAdmin.IdTeam;
 
-            var lobby = lobbies.GetOrAdd(idMatch, new ConcurrentDictionary<Guid, string>());
+            var lobbyCacheKey = $"lobby-{idMatch}";
+
+            if (!cache.TryGetValue(lobbyCacheKey, out ConcurrentDictionary<Guid, string> lobby))
+            {
+ 
+                lobby = new ConcurrentDictionary<Guid, string>();
+            }
 
             if (lobby.ContainsKey(teamId))
             {
@@ -74,45 +88,27 @@ namespace Api.Hubs
             if (lobby.Count == 0)
             {
                 await Groups.AddToGroupAsync(connectionId, groupName);
-
                 lobby.TryAdd(teamId, connectionId);
-                //Ver como faço isto
-                Context.Items["LobbyMatchId"] = idMatch; // O que guardar
-                Context.Items["LobbyTeamId"] = teamId;   // O que guardar 
 
-                //await _notifier.SendMessageToCallerAsync(connectionId, "Entraste no lobby. A aguardar oponente...");
+                cache.Set(lobbyCacheKey, lobby, GetCacheOptions());
+
+                Context.Items["LobbyMatchId"] = idMatch;
+                Context.Items["LobbyTeamId"] = teamId;
             }
             else if (lobby.Count == 1)
             {
-
-                await Groups.AddToGroupAsync(connectionId, groupName);
-
-                // 4.2. Pega nos dados do primeiro admin
                 var firstAdminEntry = lobby.First();
                 var firstAdminTeamId = firstAdminEntry.Key;
                 var firstAdminConnectionId = firstAdminEntry.Value;
 
-                // 4.3. Atualiza a partida (Lógica de Negócio)
+                // Atualiza a partida (Lógica de Negócio)
                 match.MatchStatus = MatchStatus.IN_PROGRESS;
                 match.TimeStart = DateTime.UtcNow;
-                await unityOfWork.SaveChangesAsync(); // Salva a partida
+                await unityOfWork.SaveChangesAsync();
+                cache.Remove(lobbyCacheKey);
 
-                // 4.4. Limpa o lobby em memória (remove o 1º admin)
-                lobby.TryRemove(firstAdminTeamId, out _);
-                // (Opcional: limpa o lobby se estiver vazio)
-                if (lobby.IsEmpty) lobbies.TryRemove(idMatch, out _);
-
-                // 4.5. Limpa os Grupos SignalR
                 await Groups.RemoveFromGroupAsync(firstAdminConnectionId, groupName);
-                await Groups.RemoveFromGroupAsync(connectionId, groupName);
-
-                //await _notifier.NotifyMatchStarted(groupName, idMatch);
             }
-            ///Só manter se depois houver notificações
-            //else
-            //{
-                //await _notifier.SendErrorToCallerAsync(connectionId, "Este lobby está cheio ou bloqueado.");
-            //}
 
             return;
         }
@@ -144,30 +140,32 @@ namespace Api.Hubs
         /*
          * Contém a lógica de limpeza que é partilhada
          * Retorna 'true' se limpou algo, 'false' se não encontrou nada
-        
+        */
         private async Task<bool> HandleLeaveLobby()
         {
             if (Context.Items.TryGetValue("LobbyMatchId", out var matchIdObj) &&
-                            Context.Items.TryGetValue("LobbyTeamId", out var teamIdObj))
+                Context.Items.TryGetValue("LobbyTeamId", out var teamIdObj))
             {
                 var matchId = (Guid)matchIdObj;
                 var teamId = (Guid)teamIdObj;
                 var connectionId = Context.ConnectionId;
+                var lobbyCacheKey = $"lobby-{matchId}";
 
-                // 2. Encontra o lobby em memória
-                if (lobbies.TryGetValue(matchId, out var lobby))
+                if (cache.TryGetValue(lobbyCacheKey, out ConcurrentDictionary<Guid, string> lobby))
                 {
-                    // 3. Remove a equipa do lobby em memória
                     if (lobby.TryRemove(teamId, out _))
                     {
-                        // 4. Limpa o Grupo SignalR
                         var groupName = $"match-{matchId}";
                         await Groups.RemoveFromGroupAsync(connectionId, groupName);
 
-                        // (Opcional: limpa o lobby se estiver vazio)
-                        if (lobby.IsEmpty) lobbies.TryRemove(matchId, out _);
-
-                        // ... Notificar oponente que saíste ...
+                        if (lobby.IsEmpty)
+                        {
+                            cache.Remove(lobbyCacheKey);
+                        }
+                        else
+                        {
+                            cache.Set(lobbyCacheKey, lobby, GetCacheOptions());
+                        }
                         return true;
                     }
                 }
@@ -177,4 +175,3 @@ namespace Api.Hubs
     }
 }
 
-*/

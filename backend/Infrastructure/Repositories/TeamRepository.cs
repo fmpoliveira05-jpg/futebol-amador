@@ -32,6 +32,7 @@ namespace Infrastructure.Repositories
             return await DbContext.Team.ToListAsync();
         }
 
+        //Talvez crie uma variação deste apenas com o send e outro apenas com o receiver
         public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
             return await DbContext.Team

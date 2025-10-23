@@ -43,10 +43,10 @@ namespace Infrastructure.Repositories
                     .FirstOrDefaultAsync(match => match.Id == idMatch && match.MatchStatus == MatchStatus.SCHEDULED);
         }
 
-        public async Task<Matches?> GetMatchValideToCancelById(Guid idMatch)
+        public async Task<Matches?> GetMatchToCancelById(Guid idMatch)
         {
             return await context.Match
-                .Include(m => m.Teams)
+                .Include(m => m.Teams).Include(ts => ts.Teams)
                 .FirstOrDefaultAsync(match => match.Id == idMatch
                                     && match.MatchStatus == MatchStatus.SCHEDULED || match.MatchStatus == MatchStatus.POST_PONED);
         }
