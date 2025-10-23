@@ -12,6 +12,7 @@ namespace Application
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
             
+            
             return services;
         }
     }

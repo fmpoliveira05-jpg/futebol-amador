@@ -88,11 +88,12 @@ namespace Application.Services
 
             var existingTeamTask = TeamRepository.GetTeamByNameAsync(teamDto.Name);
             var creatorPlayerTask = PlayerRepository.GetPlayerByIdAsync(creatorPlayerId);
-            var defaultTeamRankTask = RankRepository.GetDefaultRankAsync();
             await Task.WhenAll(existingTeamTask, creatorPlayerTask);
 
             var existingTeam = await existingTeamTask;
             var creatorPlayer = await creatorPlayerTask;
+            var defaultTeamRankTask = RankRepository.GetDefaultRankAsync();
+
 
             TeamValidator.CreateTeamValidation(teamDto, existingTeam, creatorPlayer);
 
@@ -262,7 +263,6 @@ namespace Application.Services
 
             TeamValidator.PromoteMemberToAdminValidation(existingTeam, playerToPromote, playerPromoting);
 
-            existingTeam.Members.Remove(playerToPromote);
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
