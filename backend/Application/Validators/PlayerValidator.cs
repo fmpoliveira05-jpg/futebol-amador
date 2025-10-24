@@ -29,13 +29,14 @@ namespace Application.Validators
                 throw new ValidationException($"Email format is invalid.");
             }
 
-            if(createPlayerDTO.Height < 100 || createPlayerDTO.Height > 250)
+            if(createPlayerDTO.Height < 100 
+                || createPlayerDTO.Height > 250)
             {
                 throw new ValidationException("Height value is invalid");
             }
 
-            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now) ||
-                createPlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
+            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now) 
+                || createPlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
             {
                 throw new ValidationException("Invalid Date of birth");
             }
@@ -56,9 +57,10 @@ namespace Application.Validators
             }
         }
 
-        public void DeleteTeamValidator(Player player)
+        public void DeletePlayerValidator(Player player)
         {
-            throw new NotImplementedException();
+            PlayerExists(player);
+            //check if admin? if only player on team and have matches?
         }
 
         public void GetPlayerByIdValidator(Player player)

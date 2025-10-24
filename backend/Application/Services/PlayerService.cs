@@ -1,6 +1,8 @@
 ﻿using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -10,19 +12,21 @@ namespace Application.Services
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;
         private readonly IUnityOfWork unitOfWork;
+        private readonly IPlayerValidator playerValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork, IPlayerValidator playerValidator)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
             this.unitOfWork = unitOfWork;
+            this.playerValidator = playerValidator;
         }
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
             var existingPlayer = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
 
-
+            PlayerValidator 
 
             var player = new Player
             {
