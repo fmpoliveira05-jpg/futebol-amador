@@ -20,6 +20,10 @@ namespace Application.Services
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
+            var existingPlayer = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
+
+
+
             var player = new Player
             {
                 Name = playerDto.Name,
