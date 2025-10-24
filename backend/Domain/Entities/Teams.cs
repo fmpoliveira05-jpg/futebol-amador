@@ -35,10 +35,10 @@ namespace Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
         public int CurrentPoints { get; set; }
 
-        public Rank? Rank { get; set; }
+        public Rank Rank { get; set; }
 
         [ForeignKey("Rank")]
-        public Guid? IdRank { get; set; } //FK
+        public Guid IdRank { get; set; } //FK
 
         public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
 
@@ -56,7 +56,7 @@ namespace Domain.Entities
         //EF
         protected Teams() { }
 
-        public Teams(string name, string? description, byte[]? icon, Pitch pitch)
+        public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
             Name = name;
             Description = description;
@@ -65,11 +65,12 @@ namespace Domain.Entities
             IdPitch = pitch.Id;
             DataFoundation = DateTime.Now;
             AverageAge = ModelConstants.GeneralConst.MinAge;
+            this.Rank = DefaultRank;
             CurrentPoints = 0;
             Calendar = new Calendar();
             IdCalendar = Calendar.Id;
         }
-
+        //
         public override string ToString()
         {
             return $"Team: {Name}, Description: {Description}, Founded: {DataFoundation.ToShortDateString()}, Average Age: {AverageAge}, Current Points: {CurrentPoints}";

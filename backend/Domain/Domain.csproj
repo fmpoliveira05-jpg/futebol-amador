@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Entities\LobbyPresence.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="ValueObjects\" />
   </ItemGroup>
 

@@ -8,11 +8,8 @@
 
   <ItemGroup>
     <Compile Remove="DTOs\NovaPasta1\**" />
-    <Compile Remove="DTOs\NovaPasta\**" />
     <EmbeddedResource Remove="DTOs\NovaPasta1\**" />
-    <EmbeddedResource Remove="DTOs\NovaPasta\**" />
     <None Remove="DTOs\NovaPasta1\**" />
-    <None Remove="DTOs\NovaPasta\**" />
   </ItemGroup>
 
   <ItemGroup>

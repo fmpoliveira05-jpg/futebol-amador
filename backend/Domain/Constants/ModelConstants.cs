@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Constants
+﻿namespace Domain.Constants
 {
     // Uma classe estática para guardar todas as constantes
     public static class ModelConstants
@@ -15,7 +9,7 @@ namespace Domain.Constants
             public const int MaxAge = 70;
             public const int MaxGoals = 100;
             public const int MaxAddressLength = 250;
-
+            public const string DefaultRankName = "Unranked";
 
         }
         public static class TeamConst
@@ -23,7 +17,7 @@ namespace Domain.Constants
             public const int MaxNameLength = 50;
             public const int MinNameLength = 3;
             public const int MaxDescriptionLength = 250;
-            public const int MaxPlayers = 32; //Validar se é mesmo 32
+            public const int MaxPlayers = 32;
             public const int MaxAdmins = 4;
         }
 

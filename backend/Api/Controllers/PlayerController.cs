@@ -26,7 +26,10 @@ namespace Api.Controllers
 
             var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
 
-            return CreatedAtAction(nameof(GetPlayer), new { playerId = newPlayerId });
+            return CreatedAtAction(
+                    nameof(GetPlayer),
+                    new { playerId = newPlayerId },
+                    playerDto);
         }
 
         [HttpDelete("{playerId:guid}")]

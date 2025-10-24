@@ -160,7 +160,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("InviteDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Sender")
+                    b.Property<bool>("IsPlayerSender")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -343,7 +343,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("IdPitch")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("IdRank")
+                    b.Property<Guid>("IdRank")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -386,16 +386,18 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(16)
                         .HasColumnType("nvarchar(16)");
 
-                    b.Property<int>("PhoneNumber")
-                        .HasColumnType("int");
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
 
                     b.HasKey("Id");
 
@@ -411,16 +413,19 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("IdTeam")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("IsAdminLastChangedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("idTeam")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("TeamId");
@@ -617,7 +622,9 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.Rank", "Rank")
                         .WithMany()
-                        .HasForeignKey("IdRank");
+                        .HasForeignKey("IdRank")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Calendar");
 

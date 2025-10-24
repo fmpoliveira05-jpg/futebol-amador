@@ -27,6 +27,7 @@ namespace Infrastructure
             services.AddScoped<IPlayerRepository, PlayerRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ITeamPostPoneGameRepository, TeamPostPoneGame>();
+            services.AddScoped<IRankRepository, RankRepository>();
             services.AddScoped<IUnityOfWork, UnityOfWork>();
 
             return services;
