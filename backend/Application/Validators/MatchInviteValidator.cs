@@ -1,4 +1,4 @@
-﻿using Application.DTOs.MatchInvites;
+﻿using Application.DTOs.Filters;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
@@ -119,14 +119,22 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateGetAll(Teams team, List<InfoMatchInviteDTO?> listMatchInvites)
+        public void ValidateFilterMatchInvite(Guid idTeam, FilterMatchInvitesDto filter)
         {
-            const string msgError = "A team a consultar a lista de pedidos não existe";
-            ValidateNullTeam(team, msgError);
+            var dateMin = filter.MinDate;
+            var dateMax = filter.MaxDate;
 
-            if (listMatchInvites == null || !listMatchInvites.Any())
+            if (idTeam == Guid.Empty)
             {
-                throw new NullReferenceException("A equipa ainda não recebeu pedidos de partida");
+                throw new InvalidOperationException("O id da equipa não pode estar nulo");
+            }
+
+            if (dateMin.HasValue && dateMax.HasValue)
+            {
+                if (dateMin.Value > dateMax.Value)
+                {
+                    throw new InvalidOperationException("A data minima tem de ser inferior à data maxima");
+                }
             }
         }
 

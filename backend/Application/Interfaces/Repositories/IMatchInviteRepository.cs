@@ -1,4 +1,5 @@
-﻿using Application.DTOs.MatchInvites;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MatchInvites;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
@@ -11,5 +12,6 @@ namespace Application.Interfaces.Repositories
         public Task<MatchInvite?> GetMatchInviteWithPitchByTeams(Guid idSender, Guid idReceiver);
         public Task<MatchInvite?> GetMatchInvite(Guid idSender, Guid idReceiver, DateTime gameDate);
         public Task<List<InfoMatchInviteDTO>> GetAllMatchInviteReceiverById(Guid idReceiver);
+        public Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter);
     }
 }

@@ -2,7 +2,7 @@
 {
     public interface IStartMatchHub
     {
-        public Task JoinMatch(Guid idMatch);
-        public Task LeaveMatch();
+        public Task JoinStartMatch(Guid idMatch);
+        public Task LeaveStartMatch();
     }
 }
