@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Match;
+﻿using Application.DTOs;
+using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -6,31 +8,41 @@ using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
 
+/*
+ Fazer breves testes para ver se está tudo a dar com estas alterações
+ */
 namespace Application.Services
 {
     public class MatchService: IMatchService
     {
         IMatchRepository MatchRepository;
-        ITeamStatisticsRepository TeamStatisticsRepository;
         ITeamPostPoneGameRepository TeamPostPoneGameRepository;
         ICancelledMatchRepository CancelledMatchRepository;
         IUnityOfWork UnityOfWork;
-        IMatchValidator ValidatorMatch;
+        IMatchValidator MatchValidator;
 
-        public MatchService(IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository, 
-            ITeamPostPoneGameRepository teamPostPoneGameRepository, ICancelledMatchRepository cancelledMatchRepository,
-            IUnityOfWork unityOfWork, IMatchValidator validatorMatch)
+        public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
+            ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
+            IMatchValidator MatchValidator)
         {
             this.MatchRepository = matchRepository;
-            this.TeamStatisticsRepository = teamStatisticsRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
-            this.ValidatorMatch = validatorMatch;
-
+            this.MatchValidator = MatchValidator;
         }
 
-        //Testar (Já fiz otimizações nas pesquisas)
+        public async Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam)
+        {
+            return await MatchRepository.GetAllMatchesTeam(idTeam);
+        }
+
+        public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendar filter)
+        {
+            MatchValidator.ValidateFilterCalendar(idTeam, filter);
+            return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
+        }
+
         public async Task<InfoPostPoneMatch> PostPoneMatch(PostponeMatchDTO dto)
         {
             var idMatch = dto.IdMatch;
@@ -45,7 +57,7 @@ namespace Application.Services
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
             //Valida os dados carregados
-            ValidatorMatch.ValidatorPostPoneMatch(match, newDate, teamStatistic, idTeam, opponentStatistics, idOpponnent);
+            MatchValidator.ValidatorPostPoneMatch(match, newDate, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
             //Criação do adiamento e atualização do estado da equipa
             team = teamStatistic.Team;
@@ -83,7 +95,7 @@ namespace Application.Services
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
             //Validator
-            ValidatorMatch.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
+            MatchValidator.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
             //Adiamento da partida
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
@@ -118,7 +130,7 @@ namespace Application.Services
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
-            ValidatorMatch.ValidatorRejectPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
+            MatchValidator.ValidatorRejectPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
             //Cancelamento do match
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
@@ -127,7 +139,15 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        //Testar
+        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
+        {
+            var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
+
+            MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
+
+            return listPostPone;
+        }
+
         public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
         {
             var match = await MatchRepository.GetMatchToCancelById(idMatch);
@@ -135,7 +155,8 @@ namespace Application.Services
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
 
-            ValidatorMatch.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
+            MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
+            
             //Cancelamento do jogo
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
             await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
@@ -144,13 +165,24 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
+        public async Task FinishMatch(Guid idTeam, ResultMatchDto result)
         {
-            var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
+            MatchValidator.validateResultMatch(idTeam, result);
 
-            ValidatorMatch.ValidatorGetListPostPoneMatchTeam(listPostPone);
+            var idMatch = result.IdMatch;
+            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);        
+            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponent = match?.Teams.FirstOrDefault(ts => ts.IdTeam == result.IdOpponent);
+         
+            MatchValidator.ValidateFinishMatch(match, team, idTeam, opponent, opponent.IdTeam, result);
+        }
 
-            return listPostPone;
+        public async Task LeaveFinishMatch(Guid idTeam, Guid idMatch)
+        {
+            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);
+            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam)?.Team;
+
+            MatchValidator.ValidateCancelFinishMatch(match, team);
         }
     }
 }

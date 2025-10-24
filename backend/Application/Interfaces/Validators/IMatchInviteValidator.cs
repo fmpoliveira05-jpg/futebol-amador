@@ -1,4 +1,4 @@
-﻿using Application.DTOs.MatchInvites;
+﻿using Application.DTOs.Filters;
 using Domain.Entities;
 
 namespace Application.Interfaces.Validators
@@ -13,6 +13,6 @@ namespace Application.Interfaces.Validators
         public void ValidateRefuseMatchInvite(Teams sender, MatchInvite matchInvite);
         public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Teams senderTeam, Teams receiverTeam, Matches findMatchWith12hour);
         public void ValidateHasChangeNegociateMatchInvite(bool hasChanged);
-        public void ValidateGetAll(Teams team, List<InfoMatchInviteDTO?> listMatchInvites);
+        public void ValidateFilterMatchInvite(Guid idTeam, FilterMatchInvitesDto filter);
     }
 }

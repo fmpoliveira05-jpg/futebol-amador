@@ -1,4 +1,6 @@
-﻿using Application.DTOs.PostPoneGame;
+﻿using Application.DTOs;
+using Application.DTOs.Filters;
+using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
@@ -8,6 +10,24 @@ namespace Application.Validators
 {
     public class MatchValidator: IMatchValidator
     {
+        public void ValidateFilterCalendar(Guid idTeam, FilterCalendar filter)
+        {
+            var dateMin = filter.MinDate;
+            var dateMax = filter.MaxDate;
+
+            if (idTeam == Guid.Empty)
+            {
+                throw new InvalidOperationException("O id da equipa não pode estar nulo");
+            }
+
+            if (dateMin.HasValue && dateMax.HasValue)
+            {
+                if (dateMin.Value > dateMax.Value)
+                {
+                    throw new InvalidOperationException("A data minima tem de ser inferior à data maxima");
+                }
+            }
+        }
         public void ValidatorPostPoneMatch(Matches match, DateTime newDate, TeamStatistics team, Guid idTeam, 
             TeamStatistics opponetTeam, Guid idOpponnent)
         {
@@ -88,6 +108,60 @@ namespace Application.Validators
             ValidateTeam(idOpponent, opponent);
         }
 
+        public void validateResultMatch(Guid idTeam, ResultMatchDto result)
+        {
+            if (idTeam != result.IdTeam)
+            {
+                throw new ArgumentException("A team que está a tentar cancelar não faz parte do jogo");
+            }
+
+            ValidateNumGoals(result.MyTeamGoals);
+
+            ValidateNumGoals(result.OpponentGoals);
+        }
+
+        public void ValidateFinishMatch(Matches match, TeamStatistics team, Guid idTeam,
+            TeamStatistics opponent, Guid idOponnent, ResultMatchDto result)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException("A match não existe ou então não está em progresso");
+            }
+
+            if (team == null)
+            {
+                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+            }
+
+            if (idTeam != result.IdTeam)
+            {
+                throw new ArgumentException("A team que está a tentar cancelar não faz parte do jogo");
+            }
+
+            if (opponent == null)
+            {
+                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+            }
+
+            if (opponent.IdTeam == result.IdOpponent)
+            {
+                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+            }
+        }
+
+        public void ValidateCancelFinishMatch(Matches match, Teams team)
+        {
+            if (match == null)
+            {
+                throw new ArgumentNullException("A match não foi encontrada");
+            }
+
+            if (team == null)
+            {
+                throw new ArgumentNullException("A equipa que está a tentar sair do match não faz parte do mesmo");
+            }
+        }
+
         private void ValidateTeam(Guid idTeam, TeamStatistics? teamStatistics)
         {
             if (teamStatistics == null)
@@ -129,6 +203,13 @@ namespace Application.Validators
             if (match.MatchStatus != MatchStatus.POST_PONED)
             {
                 throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento");
+            }
+        }
+
+        private void ValidateNumGoals(int numGoals) {
+            if (numGoals < 0)
+            {
+                throw new InvalidOperationException("O número de golos de uma equipa não pode ser menor que 0");
             }
         }
     }

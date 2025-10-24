@@ -1,17 +1,20 @@
 ﻿using Application.Interfaces.Hub;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators.Hub;
+using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
-/**
- Meter try catchs nas linhas que chamam funcionalidades do service
- 
- Se calhar para resolver o problema do Lobby tenho de a classe atual ser userLoby 
- e criar uma classe Loby com o id dele, talvez a connectionString e também a Lista de playersLoby
+/*
+ Criar um servce com a logica do loby
+ Criar validator para as validações
+Posso mandar throws desta forma: "throw new HubException("A partida não foi encontrada.");"
  */
+
 namespace Api.Hubs
 {
     //Descomentar isto quando houver aut para so pessoas autenticadas acederem
@@ -21,17 +24,20 @@ namespace Api.Hubs
         private readonly IManageStarMatchService startMatchManager; //Service com a logica
         private readonly IMatchRepository matchRepository; //Atualizar match
         private readonly IUnityOfWork unityOfWork;
+        private readonly IStartMatchHubValidator startMatchHubValidator;
         private readonly IMemoryCache cache;
+        
 
         // Injeção do service de domínio
         public StartMatchHub(IManageStarMatchService startMatchManager, 
-            IMatchRepository matchRepository, IMemoryCache memoryCache,
-            IUnityOfWork unityOfWork)
+            IMatchRepository matchRepository, IUnityOfWork unityOfWork,
+            IStartMatchHubValidator startMatchHubValidator, IMemoryCache memoryCache)
         {
             this.startMatchManager = startMatchManager;
             this.matchRepository = matchRepository;
-            this.cache = memoryCache;
             this.unityOfWork = unityOfWork;
+            this.startMatchHubValidator = startMatchHubValidator;
+            this.cache = memoryCache;
         }
 
         //Dá uma duração de 10 minutos ao lobbie
@@ -44,48 +50,47 @@ namespace Api.Hubs
         /**
          Como o hub não fecha tentar encontrar forma de caso outra pessoa entra dar a mensagem
          */
-        public async Task JoinMatch(Guid idMatch)
+        public async Task JoinStartMatch(Guid idMatch)
         {
             var groupName = $"match-{idMatch}";
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
-
-            var match = await matchRepository.GetMatchWithListPlayerById(idMatch);
-
-            if (match == null)
-            {
-                //Meter throw ou mensagem
-                return;
-            }
-
-            //Validar se o player está em alguma das equipas (Talvez seja melhor dar mais)
-            var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
-                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
-            );
-
-            if (teamMatchAdmin == null)
-            {
-                //Throw
-                return;
-            }
-
-            var teamId = teamMatchAdmin.IdTeam;
-
             var lobbyCacheKey = $"lobby-{idMatch}";
+            Guid teamId = Guid.Empty;
+            Matches? match;
+            ConcurrentDictionary<Guid, string> lobby;
+            int lobbyCount = 0;
 
-            if (!cache.TryGetValue(lobbyCacheKey, out ConcurrentDictionary<Guid, string> lobby))
+            try
             {
- 
-                lobby = new ConcurrentDictionary<Guid, string>();
+                match = await matchRepository.GetMatchWithListPlayerById(idMatch);
+                var teamMatchAdmin = match?.Teams.FirstOrDefault(ts =>
+                    ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
+                )?.Team;
+
+                if (teamMatchAdmin != null)
+                {
+                    teamId = teamMatchAdmin.Id;
+                }
+
+                if (!cache.TryGetValue(lobbyCacheKey, out lobby))
+                {
+                    lobby = new ConcurrentDictionary<Guid, string>();
+                }
+
+                startMatchHubValidator.ValidateJoinMatch(match, teamMatchAdmin, teamId, lobby);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new HubException(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new HubException(ex.Message);
             }
 
-            if (lobby.ContainsKey(teamId))
-            {
-                //await _notifier.SendErrorToCallerAsync(connectionId, "Já existe um admin desta equipa no lobby.");
-                return;
-            }
-
-            if (lobby.Count == 0)
+            lobbyCount = lobby.Count;
+            if (lobbyCount == 0)
             {
                 await Groups.AddToGroupAsync(connectionId, groupName);
                 lobby.TryAdd(teamId, connectionId);
@@ -95,7 +100,7 @@ namespace Api.Hubs
                 Context.Items["LobbyMatchId"] = idMatch;
                 Context.Items["LobbyTeamId"] = teamId;
             }
-            else if (lobby.Count == 1)
+            else if (lobbyCount == 1)
             {
                 var firstAdminEntry = lobby.First();
                 var firstAdminTeamId = firstAdminEntry.Key;
@@ -113,22 +118,23 @@ namespace Api.Hubs
             return;
         }
 
-        public async Task LeaveMatch()
+        public async Task LeaveStartMatch()
         {
-            var connectionId = Context.ConnectionId;
-
-            bool success = await HandleLeaveLobby();
-
-            if (!success)
+            try
             {
-                //Throw
-                return;
-                //await _notifier.SendMessageToCallerAsync(connectionId, "Saíste do lobby com sucesso.");
+                bool success = await HandleLeaveLobby();
+                startMatchHubValidator.ValidateLeaveMatch(success);
+            }
+            catch (ArgumentNullException ex)
+            {
+                throw new HubException(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new HubException(ex.Message);
             }
 
-            //Mensagem se necessário
             return;
-            //await _notifier.SendErrorToCallerAsync(connectionId, "Não foi possível sair (não estavas em nenhum lobby).");
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -140,6 +146,8 @@ namespace Api.Hubs
         /*
          * Contém a lógica de limpeza que é partilhada
          * Retorna 'true' se limpou algo, 'false' se não encontrou nada
+         * 
+         * Ver se tem sentido um validator!!!!!
         */
         private async Task<bool> HandleLeaveLobby()
         {

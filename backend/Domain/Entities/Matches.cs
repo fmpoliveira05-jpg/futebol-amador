@@ -65,15 +65,16 @@ namespace Domain.Entities
             }
         }
 
-        public Matches(DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics, Guid? idChat)
+        public Matches(DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics, Chat chat)
         {
             this.MatchDate = matchDate;
             this.IsCompetive = isCompetive;
             this.idPitch = idPitch;
             this.Teams = teamStatistics;
 
-            if (idChat != Guid.Empty)
+            if (Chat != null)
             {
+                this.Chat = chat;
                 this.IdChat = idPitch;
             }
             else
