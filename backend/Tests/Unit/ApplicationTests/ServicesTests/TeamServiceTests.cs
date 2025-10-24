@@ -1,5 +1,4 @@
 ﻿using Application.DTOs;
-using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
@@ -9,30 +8,32 @@ using Domain.Entities;
 using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
+using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Unit.ApplicationTests.ServicesTests
 {
+    [TestFixture]
     public class TeamServiceTests
     {
-        private readonly Mock<ITeamRepository> _teamRepoMock;
-        private readonly Mock<IPlayerRepository> _playerRepoMock;
-        private readonly Mock<IUserRepository> _userRepoMock;
-        private readonly Mock<IUnityOfWork> _unitOfWorkMock;
-        private readonly ITeamValidator _validatorReal;
-        private readonly TeamService _sut;
+        private Mock<ITeamRepository> _teamRepoMock;
+        private Mock<IPlayerRepository> _playerRepoMock;
+        private Mock<IUserRepository> _userRepoMock;
+        private Mock<IUnityOfWork> _unitOfWorkMock;
+        private ITeamValidator _validatorReal;
+        private TeamService _sut;
 
-        public TeamServiceTests()
+        [SetUp]
+        public void SetUp()
         {
             _teamRepoMock = new Mock<ITeamRepository>();
             _playerRepoMock = new Mock<IPlayerRepository>();
             _userRepoMock = new Mock<IUserRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
 
-            // ⚙️ Usa o validator real
             _validatorReal = new TeamValidator();
 
             _sut = new TeamService(
@@ -47,10 +48,9 @@ namespace Unit.ApplicationTests.ServicesTests
         // --------------------------------------------------------
         // TESTE: Criar equipa com sucesso
         // --------------------------------------------------------
-        [Fact(DisplayName = "CreateTeamAsync deve criar uma nova equipa quando os dados são válidos")]
+        [Test(Description = "CreateTeamAsync deve criar uma nova equipa quando os dados são válidos")]
         public async Task CreateTeamAsync_Should_Create_Team_When_Valid()
         {
-            // Arrange
             var dto = new CreateTeamDto
             {
                 Name = "FC Teste",
@@ -61,19 +61,13 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var player = new Player { Id = Guid.NewGuid(), Name = "Jogador 1", IdTeam = null };
 
-            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name))
-                .ReturnsAsync((Teams)null);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>()))
-                .ReturnsAsync(player);
-            _teamRepoMock.Setup(r => r.AddAsync(It.IsAny<Teams>()))
-                .Returns(Task.CompletedTask);
-            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns(Task.FromResult(1));
+            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Teams)null);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>())).ReturnsAsync(player);
+            _teamRepoMock.Setup(r => r.AddAsync(It.IsAny<Teams>())).Returns(Task.CompletedTask);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             var result = await _sut.CreateTeamAsync(dto, player.Id);
 
-            // Assert
             result.Should().NotBeEmpty();
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Teams>()), Times.Once);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -82,10 +76,9 @@ namespace Unit.ApplicationTests.ServicesTests
         // --------------------------------------------------------
         // TESTE: Criar equipa com nome duplicado
         // --------------------------------------------------------
-        [Fact(DisplayName = "CreateTeamAsync deve lançar exceção quando o nome da equipa já existe")]
+        [Test(Description = "CreateTeamAsync deve lançar exceção quando o nome da equipa já existe")]
         public async Task CreateTeamAsync_Should_Throw_When_TeamNameExists()
         {
-            // Arrange
             var dto = new CreateTeamDto
             {
                 Name = "FC Duplicado",
@@ -100,20 +93,17 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync(existingTeam);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.IsAny<Guid>())).ReturnsAsync(player);
 
-            // Act
             Func<Task> act = async () => await _sut.CreateTeamAsync(dto, player.Id);
 
-            // Assert
             await act.Should().ThrowAsync<ValidationException>();
         }
 
         // --------------------------------------------------------
         // TESTE: Atualizar equipa
         // --------------------------------------------------------
-        [Fact(DisplayName = "UpdateTeamInfoAsync deve atualizar os dados da equipa com sucesso")]
+        [Test(Description = "UpdateTeamInfoAsync deve atualizar os dados da equipa com sucesso")]
         public async Task UpdateTeamInfoAsync_Should_Update_Team()
         {
-            // Arrange
             var team = new Teams("Antigo Nome", "Desc", new byte[] { 1, 2, 3 }, new Pitch("Campo", "Rua"))
             {
                 Id = Guid.NewGuid(),
@@ -129,19 +119,13 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var dto = new UpdateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
 
-            _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(team.Id))
-                .ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id))
-                .ReturnsAsync(player);
-            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name))
-                .ReturnsAsync((Teams)null);
-            _unitOfWorkMock.Setup(u => u.SaveChangesAsync())
-                .Returns(Task.FromResult(1));
+            _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(team.Id)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
+            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Teams)null);
+            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await _sut.UpdateTeamInfoAsync(team.Id, dto, player.Id);
 
-            // Assert
             team.Name.Should().Be("Novo Nome");
             team.Description.Should().Be("Nova desc");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -150,10 +134,9 @@ namespace Unit.ApplicationTests.ServicesTests
         // --------------------------------------------------------
         // TESTE: Remover jogador da equipa
         // --------------------------------------------------------
-        [Fact(DisplayName = "RemovePlayerFromTeamAsync deve remover o jogador da equipa com sucesso")]
+        [Test(Description = "RemovePlayerFromTeamAsync deve remover o jogador da equipa com sucesso")]
         public async Task RemovePlayerFromTeamAsync_Should_Remove_Player()
         {
-            // Arrange
             var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"))
             {
                 Id = Guid.NewGuid(),
@@ -169,10 +152,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerRemoving.Id)).ReturnsAsync(playerRemoving);
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, playerRemoving.Id);
 
-            // Assert
             team.Members.Should().NotContain(playerToRemove);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
@@ -180,10 +161,9 @@ namespace Unit.ApplicationTests.ServicesTests
         // --------------------------------------------------------
         // TESTE: Promover jogador a admin
         // --------------------------------------------------------
-        [Fact(DisplayName = "PromotePlayerToAdminAsync deve promover um jogador a admin")]
+        [Test(Description = "PromotePlayerToAdminAsync deve promover um jogador a admin")]
         public async Task PromotePlayerToAdminAsync_Should_Promote_Player()
         {
-            // Arrange
             var team = new Teams("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"))
             {
                 Id = Guid.NewGuid(),
@@ -211,10 +191,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerPromoting.Id)).ReturnsAsync(playerPromoting);
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await _sut.PromotePlayerToAdminAsync(team.Id, playerToPromote.Id, playerPromoting.Id);
 
-            // Assert
             playerToPromote.IsAdmin.Should().BeTrue();
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
