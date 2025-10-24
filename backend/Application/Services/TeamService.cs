@@ -111,7 +111,12 @@ namespace Application.Services
                 pitch,
                 rank
             );
-
+            /*
+            creatorPlayer.IdTeam = newTeam.Id;
+            creatorPlayer.IsAdmin = true;
+            creatorPlayer.IsAdminLastChangedAt = DateTime.UtcNow;
+            newTeam.Members.Add(creatorPlayer);
+            */
             await TeamRepository.AddAsync(newTeam);
 
             await UnityOfWork.SaveChangesAsync();
@@ -129,7 +134,15 @@ namespace Application.Services
             var playerTryingToDelete = await playerTryingToDeleteTask;
 
             TeamValidator.DeleteTeamValidation(teamToDelete, playerTryingToDelete);
-
+            foreach (var member in teamToDelete.Members)
+            {
+                member.IdTeam = null;
+                if (member.IsAdmin)
+                {
+                    member.IsAdmin = false;
+                    member.IsAdminLastChangedAt = DateTime.UtcNow;
+                }
+            }
             TeamRepository.DeleteTeam(teamToDelete);
 
             await UnityOfWork.SaveChangesAsync();
