@@ -16,6 +16,7 @@ namespace Application
             services.AddScoped<ITeamValidator, TeamValidator>();
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
             services.AddScoped<IMatchValidator, MatchValidator>();
+            services.AddScoped<IPlayerService, PlayerService>();
             return services;
         }
     }
