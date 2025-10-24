@@ -11,7 +11,7 @@ namespace Application.Interfaces.Services
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 
-        Task<List<TeamSummaryDto>> SearchTeamsAsync(TeamSearchFiltersDto filters);
+        Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters);
 
         Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, Guid currentUserId);
 
