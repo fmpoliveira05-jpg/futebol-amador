@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Match;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
@@ -61,7 +62,7 @@ namespace Application.Services
             var sender = await senderTask;
             */
 
-            var receiver= await TeamRepository.GetTeamByIdWithPitchAsync(idReceiver);
+            var receiver = await TeamRepository.GetTeamByIdWithPitchAsync(idReceiver);
             var existingMatchInvite = await MatchInviteRepository.GetMatchInvite(idSender, idReceiver, gameDate);
             var findMatchWith12hours = await MatchRepository.GetMatchProxim12HoursMatchs(idSender, gameDate);
             var sender = await TeamRepository.GetTeamByIdWithPitchAsync(idSender);
@@ -70,12 +71,16 @@ namespace Application.Services
             if (pitchName == receiver.Pitch.Name)
             {
                 pitch = receiver.Pitch;
+            } 
+            else
+            {
+                pitch = sender.Pitch;
             }
 
             var matchInvite = new MatchInvite(sender, receiver, gameDate, pitch);
 
             await MatchInviteRepository.AddMatchInvite(matchInvite);
-
+            
             var sendMatchInviteDto = new InfoMatchInviteDTO
             {
                 Id = matchInvite.Id,
@@ -147,10 +152,14 @@ namespace Application.Services
             gameDate = matchInvite.GameDate;
             List<TeamStatistics> teamStatistics = await ListTeamsStatistics(sender, receiver);
 
-            var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.IdChat);
+            var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.Chat);
             
             MatchInviteRepository.DeleteMatchInvite(matchInvite);
+            //Ver se assim é associado um calendario há match na BD
+            receiver.Calendar.Matches.Add(match);
+            sender.Calendar.Matches.Add(match);
             await MatchRepository.AddMatch(match);
+
 
             var matchDTO = new MatchDto
             {
@@ -243,21 +252,18 @@ namespace Application.Services
 
         public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeam(Guid idTeam)
         {
-            /*
-            var teamTask = TeamRepository.GetTeamByIdAsync(idTeam);
-            Task<List<InfoMatchInviteDTO>> listMatchInvitesTask = MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
-
-            await Task.WhenAll(teamTask, listMatchInvitesTask);
-
-            var team = await teamTask;
-            var listMatchInvites = await listMatchInvitesTask;
-             */
-
-            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
+            //sE CALHJAR SO VALIDAR O ID ANTES DE MANDAR
             var listMatchInvites = await MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
-            MatchInviteValidator.ValidateGetAll(team, listMatchInvites);
-            
+           
             return listMatchInvites;
+        }
+
+        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
+        {
+            MatchInviteValidator.ValidateFilterMatchInvite(idTeam, filter);
+
+            var listMatchInvite = await MatchInviteRepository.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
+            return listMatchInvite;
         }
 
         private bool NegociateMatchInvite(MatchInvite matchInvite, DateTime gameDate, Pitch pitch)

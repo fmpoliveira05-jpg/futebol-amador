@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces.Services;
 using Application.DTOs.MatchInvites;
+using Application.DTOs.Filters;
 
 namespace Api.Controllers
 {
@@ -182,7 +183,7 @@ namespace Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (NullReferenceException ex)
+            catch (InvalidOperationException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
@@ -193,7 +194,7 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam)
+        public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam, [FromQuery] FilterMatchInvitesDto filter)
         {
             if (idTeam == Guid.Empty)
             {
@@ -202,11 +203,28 @@ namespace Api.Controllers
 
             try
             {
-                var matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
+                IEnumerable<InfoMatchInviteDTO> matchesInvite;
+
+                bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
+                                 filter.MinDate.HasValue ||
+                                 filter.MaxDate.HasValue;
+
+                if (hasFilter)
+                {
+                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
+                }
+                else
+                {
+                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
+                }
 
                 return Ok(matchesInvite);
             }
             catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
             {
                 return NotFound(new { message = ex.Message });
             }

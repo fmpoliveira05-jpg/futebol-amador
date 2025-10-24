@@ -125,7 +125,7 @@ namespace Api.Controllers
         }
 
 
-        [HttpGet] // Responde a GET /api/team
+        [HttpGet("{teamId}/search")] // Responde a GET /api/team
         public async Task<IActionResult> SearchTeams([FromQuery] TeamSearchFiltersDto filters)
         {
 

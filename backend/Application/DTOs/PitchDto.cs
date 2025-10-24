@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 using Domain.Constants;
 namespace Application.DTOs
 {
@@ -17,12 +12,6 @@ namespace Application.DTOs
 
         public PitchDto()
         {
-        }
-
-        public PitchDto(string name, string address)
-        {
-            Name = name;
-            Address = address;
         }
     }
 }
