@@ -26,7 +26,7 @@ namespace Application.Services
         {
             var existingPlayer = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
 
-            PlayerValidator 
+            playerValidator.CreatePlayerValidator(playerDto, existingPlayer);
 
             var player = new Player
             {
@@ -52,10 +52,7 @@ namespace Application.Services
         {
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            if (playerToDelete == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }    
+            playerValidator.PlayerExists(playerToDelete);
 
             playerRepository.DeletePlayer(playerToDelete);
 
@@ -66,10 +63,7 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            if (player == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
+            playerValidator.PlayerExists(player);
 
             PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
             {
@@ -117,44 +111,41 @@ namespace Application.Services
 
         public async Task<String> LeaveTeam(Guid playerId)
         {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+            var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            if (player == null)
+            playerValidator.PlayerExists(existingPlayer);
+
+            if (existingPlayer.IsAdmin)
             {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
+                existingPlayer.IsAdmin = false;
 
-            if (player.IsAdmin)
-            {
-                player.IsAdmin = false;
-
-                if (player.Team != null)
+                if (existingPlayer.Team != null)
                 {
-                    if (player.Team.Members.Count == 0)
+                    if (existingPlayer.Team.Members.Count == 0)
                     {
                         //delete team, there are no more players.
                         //n sei como vou fazer isso, willkie disse q saberia fazer.
                     }
                     
-                    var otherAdmin = player.Team.Members.First(p => p.IsAdmin == true);
+                    var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true);
 
                     //if the team has no more admins, choose the oldest account player to be the new admin.
                     if (otherAdmin == null)
                     {
-                        var oldestDate = player.Team.Members.Min(p => p.CreationDate);
-                        Player newAdmin = player.Team.Members.First(p => p.CreationDate == oldestDate);
+                        var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
+                        Player newAdmin = existingPlayer.Team.Members.First(p => p.CreationDate == oldestDate);
                         newAdmin.IsAdmin = true;
                     }
                 }
 
             }
 
-            string teamName = player.Team.Name;
+            string teamName = existingPlayer.Team.Name;
 
-            player.Team = null;
-            player.IdTeam = null;
+            existingPlayer.Team = null;
+            existingPlayer.IdTeam = null;
 
-            playerRepository.UpdatePlayer(player);
+            playerRepository.UpdatePlayer(existingPlayer);
 
             await unitOfWork.SaveChangesAsync();
 

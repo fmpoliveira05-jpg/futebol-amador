@@ -13,7 +13,7 @@ namespace Application.Validators
         {
             if (player == null)
             {
-                throw new NotFoundException("O Player não existe");
+                throw new NotFoundException("Player doesn't exist.");
             }
         }
 
@@ -70,12 +70,14 @@ namespace Application.Validators
 
         public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player)
         {
+            //same as create validator, maybe use same for both
             throw new NotImplementedException();
         }
 
         public void LeaveTeamValidator(Player player)
         {
-            throw new NotImplementedException();
+            //same as the delete one
+            PlayerExists(player);
         }
 
         private bool IsValidEmail(string email)
