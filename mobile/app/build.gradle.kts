@@ -21,6 +21,11 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            // Habilita a cobertura de testes para a build de debug
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true // Para quando tivermos testes da UI
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -39,6 +44,30 @@ android {
     buildFeatures {
         compose = true
     }
+}
+
+// Configuração da tarefa Jacoco para gerar o relatório XML
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest") // Corre depois dos testes unitários
+
+    reports {
+        xml.required.set(true)
+        html.required.set(false) //falso porque o sonarqube so precisa do xml
+    }
+
+    classDirectories.setFrom(
+        layout.buildDirectory.map { buildDir ->
+            buildDir.dir("tmp/kotlin-classes/debug").asFileTree.matching {
+                exclude("**/R.class", "**/R\$*.class", "**/BuildConfig.*", "**/Manifest*.*")
+            }
+        }
+    )
+
+    // Define onde o Jacoco procura os ficheiros de código-fonte
+    sourceDirectories.setFrom(files("$projectDir/src/main/kotlin"))
+
+    // Define onde o Jacoco procura os resultados da execução dos testes
+    executionData.setFrom(layout.buildDirectory.map { it.file("jacoco/testDebugUnitTest.exec") })
 }
 
 dependencies {
