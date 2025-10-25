@@ -49,7 +49,7 @@ fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
 fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: MainViewModel) {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        MyAppTopAppBar("TEST", MainViewModel);
+        //MyAppTopAppBar("TEST", MainViewModel);
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
