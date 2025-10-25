@@ -57,12 +57,9 @@ jobs:
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.spec.ts
 
-            # 3. Caminho para o relatório de cobertura (gerado pelo 'ng test --code-coverage')
-            # MUDE 'your-project-name' para o nome do seu projeto no angular.json
-            -Dsonar.javascript.lcov.reportPaths=coverage/your-project-name/lcov.info
 
-            # 4. Caminho para o relatório de testes (gerado pelo karma-junit-reporter)
+            -Dsonar.javascript.lcov.reportPaths=coverage/FutebolAmadorWeb/lcov.info
+
             -Dsonar.junit.reportsPath=test-results.xml
             
-            # 5. Caminho para o tsconfig (para análise de TypeScript)
             -Dsonar.typescript.tsconfigPath=tsconfig.json
