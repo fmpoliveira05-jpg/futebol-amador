@@ -98,7 +98,7 @@ fun MyCustomDialog() {
             properties = DialogProperties(
                 dismissOnBackPress = false,
                 dismissOnClickOutside = false
-            )
+            ) // test ci
         ) {
             Surface( modifier = Modifier.fillMaxWidth().wrapContentHeight(),
                 shape = RoundedCornerShape(size = 10.dp)
