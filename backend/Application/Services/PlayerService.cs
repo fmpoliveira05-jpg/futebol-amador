@@ -41,9 +41,9 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-            
+
             await unitOfWork.SaveChangesAsync();
-            
+
             return player.Id;
         }
 
@@ -79,34 +79,19 @@ namespace Application.Services
         public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-
-            if (player == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
-
             var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
 
             playerValidator.UpdatePlayerValidator(dto, player, emailExists);
-            
-            if (emailExists != null)
-            {
-                throw new Exception($"The Email {dto.Email} is already being used.");
-            }
 
-            var updatedPlayer = new Player
-            {
-                Id = playerId,
-                Name = dto.Name,
-                DateOfBirth = dto.DateOfBirth,
-                Address = dto.Address,
-                Email = dto.Email,
-                Phone = dto.Phone,
-                Position = dto.Position,
-                Height = dto.Height
-            };
+            player.Name = dto.Name;
+            player.DateOfBirth = dto.DateOfBirth;
+            player.Address = dto.Address;
+            player.Email = dto.Email;
+            player.Phone = dto.Phone;
+            player.Position = dto.Position;
+            player.Height = dto.Height;
 
-            playerRepository.UpdatePlayer(updatedPlayer);
+            playerRepository.UpdatePlayer(player);
 
             await unitOfWork.SaveChangesAsync();
         }
@@ -119,22 +104,19 @@ namespace Application.Services
 
             if (existingPlayer.IsAdmin)
             {
-                if (existingPlayer.Team != null)
+                if (existingPlayer.Team.Members.Count == 0)
                 {
-                    if (existingPlayer.Team.Members.Count == 0)
-                    {
-                        await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
-                    }
-                    
-                    var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true && p.Id != existingPlayer.Id);
+                    await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
+                }
 
-                    //if the team has no more admins, choose the oldest account player to be the new admin.
-                    if (otherAdmin == null)
-                    {
-                        var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
-                        Player newAdmin = existingPlayer.Team.Members.First(p => p.CreationDate == oldestDate);
-                        newAdmin.IsAdmin = true;
-                    }
+                var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true && p.Id != existingPlayer.Id);
+
+                //if the team has no more admins, choose the oldest account player to be the new admin.
+                if (otherAdmin == null)
+                {
+                    var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
+                    Player newAdmin = existingPlayer.Team.Members.First(p => p.CreationDate == oldestDate);
+                    newAdmin.IsAdmin = true;
                 }
 
                 existingPlayer.IsAdmin = false;

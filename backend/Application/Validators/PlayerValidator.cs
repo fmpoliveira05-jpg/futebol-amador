@@ -35,7 +35,7 @@ namespace Application.Validators
                 throw new ValidationException("Height value is invalid");
             }
 
-            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)
+            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
                 || createPlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
             {
                 throw new ValidationException("Invalid Date of birth");
@@ -76,7 +76,7 @@ namespace Application.Validators
             {
                 if (playerEmail != null)
                 {
-                    throw new ValidationException($"The email '{player.Email}' is already in use.");
+                    throw new ValidationException($"The email '{updatePlayerDTO.Email}' is already in use.");
                 }
             }
 
@@ -91,7 +91,7 @@ namespace Application.Validators
                 throw new ValidationException("Height value is invalid");
             }
 
-            if (updatePlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)
+            if (updatePlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
                 || updatePlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
             {
                 throw new ValidationException("Invalid Date of birth");
@@ -116,6 +116,11 @@ namespace Application.Validators
         public void LeaveTeamValidator(Player player)
         {
             //same as the delete one
+            if (player.Team == null)
+            {
+                throw new ValidationException("Player does not belong to any team.");
+            }
+
             PlayerExists(player);
         }
 
@@ -128,6 +133,11 @@ namespace Application.Validators
                 var emailAddress = new MailAddress(email);
             }
             catch
+            {
+                valid = false;
+            }
+            
+            if (!email.EndsWith(".com"))
             {
                 valid = false;
             }
