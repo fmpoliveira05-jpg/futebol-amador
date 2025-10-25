@@ -9,7 +9,7 @@ namespace Application.Validators
 {
     internal class PlayerValidator : IPlayerValidator
     {
-        public void PlayerExists(Player player)
+        public void PlayerExists(Player? player)
         {
             if (player == null)
             {
@@ -19,7 +19,7 @@ namespace Application.Validators
 
         public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player player)
         {
-            if(player != null) 
+            if (player != null)
             {
                 throw new ValidationException($"The email '{player.Email}' is already in use.");
             }
@@ -29,19 +29,19 @@ namespace Application.Validators
                 throw new ValidationException($"Email format is invalid.");
             }
 
-            if(createPlayerDTO.Height < 100 
+            if (createPlayerDTO.Height < 100
                 || createPlayerDTO.Height > 250)
             {
                 throw new ValidationException("Height value is invalid");
             }
 
-            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now) 
+            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)
                 || createPlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
             {
                 throw new ValidationException("Invalid Date of birth");
             }
 
-            if(createPlayerDTO.Phone.Length != 9)
+            if (createPlayerDTO.Phone.Length != 9)
             {
                 throw new ValidationException("Phone number must have 9 digits.");
             }
@@ -51,13 +51,13 @@ namespace Application.Validators
                 throw new ValidationException("Phone number must only have numbers.");
             }
 
-            if(!Enum.IsDefined(typeof(Position), createPlayerDTO.Position))
+            if (!Enum.IsDefined(typeof(Position), createPlayerDTO.Position))
             {
                 throw new ValidationException("Position invalid.");
             }
         }
 
-        public void DeletePlayerValidator(Player player)
+        public void DeletePlayerValidator(Player? player)
         {
             PlayerExists(player);
             //check if admin? if only player on team and have matches?
@@ -68,10 +68,49 @@ namespace Application.Validators
             throw new NotImplementedException();
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player)
+        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player playerEmail)
         {
-            //same as create validator, maybe use same for both
-            throw new NotImplementedException();
+            PlayerExists(player);
+
+            if (updatePlayerDTO.Email != player.Email)
+            {
+                if (playerEmail != null)
+                {
+                    throw new ValidationException($"The email '{player.Email}' is already in use.");
+                }
+            }
+
+            if (!IsValidEmail(updatePlayerDTO.Email))
+            {
+                throw new ValidationException($"Email format is invalid.");
+            }
+
+            if (updatePlayerDTO.Height < 100
+                || updatePlayerDTO.Height > 250)
+            {
+                throw new ValidationException("Height value is invalid");
+            }
+
+            if (updatePlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now)
+                || updatePlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
+            {
+                throw new ValidationException("Invalid Date of birth");
+            }
+
+            if (updatePlayerDTO.Phone.Length != 9)
+            {
+                throw new ValidationException("Phone number must have 9 digits.");
+            }
+
+            if (!int.TryParse(updatePlayerDTO.Phone, out _))
+            {
+                throw new ValidationException("Phone number must only have numbers.");
+            }
+
+            if (!Enum.IsDefined(typeof(Position), updatePlayerDTO.Position))
+            {
+                throw new ValidationException("Position invalid.");
+            }
         }
 
         public void LeaveTeamValidator(Player player)

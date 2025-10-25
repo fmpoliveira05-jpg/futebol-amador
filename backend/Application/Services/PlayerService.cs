@@ -2,7 +2,6 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -10,14 +9,14 @@ namespace Application.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository playerRepository;
-        private readonly ITeamRepository teamRepository;
+        private readonly ITeamService teamService;
         private readonly IUnityOfWork unitOfWork;
         private readonly IPlayerValidator playerValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork, IPlayerValidator playerValidator)
+        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator)
         {
             this.playerRepository = playerRepository;
-            this.teamRepository = teamRepository;
+            this.teamService = teamService;
             this.unitOfWork = unitOfWork;
             this.playerValidator = playerValidator;
         }
@@ -52,7 +51,7 @@ namespace Application.Services
         {
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(playerToDelete);
+            playerValidator.DeletePlayerValidator(playerToDelete);
 
             playerRepository.DeletePlayer(playerToDelete);
 
@@ -87,6 +86,9 @@ namespace Application.Services
             }
 
             var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
+
+            playerValidator.UpdatePlayerValidator(dto, player, emailExists);
+            
             if (emailExists != null)
             {
                 throw new Exception($"The Email {dto.Email} is already being used.");
@@ -113,21 +115,18 @@ namespace Application.Services
         {
             var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(existingPlayer);
+            playerValidator.LeaveTeamValidator(existingPlayer);
 
             if (existingPlayer.IsAdmin)
             {
-                existingPlayer.IsAdmin = false;
-
                 if (existingPlayer.Team != null)
                 {
                     if (existingPlayer.Team.Members.Count == 0)
                     {
-                        //delete team, there are no more players.
-                        //n sei como vou fazer isso, willkie disse q saberia fazer.
+                        await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
                     }
                     
-                    var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true);
+                    var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true && p.Id != existingPlayer.Id);
 
                     //if the team has no more admins, choose the oldest account player to be the new admin.
                     if (otherAdmin == null)
@@ -138,6 +137,7 @@ namespace Application.Services
                     }
                 }
 
+                existingPlayer.IsAdmin = false;
             }
 
             string teamName = existingPlayer.Team.Name;
