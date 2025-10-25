@@ -185,12 +185,12 @@ namespace Infrastructure.Repositories
 
             if (filter.MinDate.HasValue)
             {
-                query = query.Where(m => DateOnly.FromDateTime(m.MatchDate) >= filter.MinDate.Value); // <-- Faltava .Value
+                query = query.Where(m => DateOnly.FromDateTime(m.MatchDate) >= filter.MinDate.Value);
             }
 
             if (filter.MaxDate.HasValue)
             {
-                query = query.Where(m => DateOnly.FromDateTime(m.MatchDate) <= filter.MaxDate.Value); // <-- Faltava .Value
+                query = query.Where(m => DateOnly.FromDateTime(m.MatchDate) <= filter.MaxDate.Value);
             }
 
             if (!string.IsNullOrEmpty(filter.NameOpponent))

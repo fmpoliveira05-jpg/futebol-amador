@@ -1,11 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Constants;
-/***
- * Entidade que representa um utilizador no sistema.
- * 
- * !!!Falta criar validação para a dateOfBirthday, para só receber datas de 18 até 70
- * !!!Falta verificação para a password.
- */
+
 namespace Domain.Entities
 {
     public abstract class Users
@@ -22,7 +17,7 @@ namespace Domain.Entities
         public string Address { get; set; }
 
         [MaxLength(50)]
-        [EmailAddress(ErrorMessage = "Invalid email format")] // Adicione este
+        [EmailAddress(ErrorMessage = "Invalid email format")] 
         public string Email { get; set; }
 
         [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
@@ -48,25 +43,6 @@ namespace Domain.Entities
             this.CreationDate = DateTime.Now;
         }
 
-        /***
-         * Metodo que calcula a idade de um jogador, com base no dia atual - a sua data de nascimento
-         * 
-         * Retorna a idade do jogador
-         */
-        private int CalculateAge()
-        {
-            return 0;
-        }
-
-        /*
-         * Metodo que calcula a idade de um jogador, com base no dia atual - a sua data de nascimento
-         *
-         * Retorna a idade do jogador
-         */
-        public int agePlayer()
-        {
-            return 0;
-        }
         public override string ToString()
         {
             return $"Id: {Id}, Name: {Name}, DateOfBirth: {DateOfBirth}, Address: {Address}, Email: {Email}, PhoneNumber: {Phone}, CreationDate: {CreationDate}";
