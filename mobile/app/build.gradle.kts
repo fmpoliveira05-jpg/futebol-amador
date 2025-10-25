@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("org.sonarqube") version "4.4.1.3373" // Adicione esta linha
+    id("jacoco") // Adicione esta linha (para os relatórios de cobertura)
 }
 
 android {
@@ -41,6 +43,22 @@ android {
     }
 }
 
+tasks.withType<Test> {
+    reports.junitXml.required.set(true)
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "LDS-Frontend-Mobile")
+
+        property("sonar.junit.reportsPath", "build/test-results/testDebugUnitTest")
+        property("sonar.coverage.jacoco.xmlReportPath", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -72,3 +90,4 @@ dependencies {
 // Optional: Coil for images
     implementation("io.coil-kt:coil-compose:2.4.0")
 }
+
