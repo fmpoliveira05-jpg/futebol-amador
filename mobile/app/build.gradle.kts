@@ -45,7 +45,7 @@ android {
         compose = true
     }
 }
-
+//teste
 // Configuração da tarefa Jacoco para gerar o relatório XML
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest") // Corre depois dos testes unitários
