@@ -71,6 +71,22 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     executionData.setFrom(layout.buildDirectory.map { it.file("jacoco/testDebugUnitTest.exec") })
 }
 
+tasks.withType<Test> {
+    reports.junitXml.required.set(true)
+}
+
+sonarqube {
+    properties {
+        property("sonar.projectKey", "LDS-Frontend-Mobile")
+
+        property("sonar.junit.reportsPath", "build/test-results/testDebugUnitTest")
+        property("sonar.coverage.jacoco.xmlReportPath", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin")
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -102,3 +118,4 @@ dependencies {
 // Optional: Coil for images
     implementation("io.coil-kt:coil-compose:2.4.0")
 }
+
