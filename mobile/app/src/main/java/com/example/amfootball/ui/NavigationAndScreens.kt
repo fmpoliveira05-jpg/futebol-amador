@@ -14,22 +14,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.Button
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Divider
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.data.Match
 import com.example.amfootball.data.Team
 import com.example.amfootball.data.User
+import com.example.amfootball.ui.components.MyAppTopAppBar
 import com.example.amfootball.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-
+import com.example.amfootball.ui.screens.HomeScreen
 @Composable
 fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
-    // Simple state: current user (demo: first user or guest)
     val users by viewModel.users.collectAsState()
     var currentUser by remember { mutableStateOf<User?>(users.firstOrNull()) }
 
-    // UI scaffold minimal: show screens with simple nav
     var currentScreen by remember { mutableStateOf("home") }
     when (currentScreen) {
         "home" -> HomeScreen(
@@ -46,7 +47,9 @@ fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
 
 @Composable
 fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: MainViewModel) {
+
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        MyAppTopAppBar("TEST", MainViewModel);
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
@@ -59,6 +62,8 @@ fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: Main
         Button(onClick = { onNavigate("map") }, modifier = Modifier.fillMaxWidth()) { Text("Mapa / Partidas próximas") }
     }
 }
+
+
 
 @Composable
 fun LeaderboardScreen(onBack: () -> Unit, viewModel: MainViewModel) {
@@ -105,7 +110,7 @@ fun SearchMatchesScreen(onBack: () -> Unit, viewModel: MainViewModel, currentUse
     val teams by viewModel.teams.collectAsState()
     var selectedTeamId by remember { mutableStateOf<String?>(currentUser?.teamId ?: teams.firstOrNull()?.id) }
     var threshold by remember { mutableStateOf(100) }
-    var results by remember { mutableStateOf<List<Pair<com.example.amfootball.data.Team, com.example.amfootball.data.Team>>>(emptyList()) }
+    var results by remember { mutableStateOf<List<Pair<Team, Team>>>(emptyList()) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Procurar partidas ranqueadas", modifier = Modifier.padding(8.dp))
