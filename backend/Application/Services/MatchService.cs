@@ -7,6 +7,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
+using NUnit.Framework;
 
 /*
  Fazer breves testes para ver se está tudo a dar com estas alterações
@@ -23,7 +24,7 @@ namespace Application.Services
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            IMatchValidator MatchValidator)
+            IMatchValidator MatchValidator, IPlayerRepository @object)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
@@ -154,6 +155,16 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            /*
+             * Nos testes se simular uma match a null,
+             * o campo do opponent vai ser null,
+             * e vai dar NullReferenceException ao tentar aceder a opponent.IdTeam,
+             * estamos a aceder a isso já na linha do ValidateCancelMatch
+            */
+            if (opponent == null)
+            {
+                throw new ArgumentException("Adversário não encontrado na partida.");
+            }
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
             
