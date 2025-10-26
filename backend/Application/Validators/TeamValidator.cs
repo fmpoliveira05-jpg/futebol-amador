@@ -152,7 +152,7 @@ namespace Application.Validators
         {
             ValidatePlayerAndTeamExists(team, playerApproving);
             ValidatePlayerBelongToTeamAndIsAdmin(team, playerApproving);
-            if (team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
+            if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
             {
                 throw new ValidationException($"A equipa com Id '{team.Id}' não possui um pedido de adesão com Id '{requestToDelete}'.");
             }
@@ -164,7 +164,7 @@ namespace Application.Validators
         {
             ValidatePlayerAndTeamExists(team, playerRejecting);
             ValidatePlayerBelongToTeamAndIsAdmin(team, playerRejecting);
-            if (team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
+            if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
             {
                 throw new ValidationException($"A equipa com Id '{team.Id}' não possui um pedido de adesão com Id '{requestToDelete}'.");
             }
