@@ -758,6 +758,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new TestRank();
             var team = new Teams("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId);
+            team.MembershipRequests = team.MembershipRequests ?? new List<MembershipRequests>();
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequests> { request } };
@@ -795,10 +796,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = Guid.NewGuid();
             var playerId = Guid.NewGuid();
             var rank = new TestRank();
-            var team = new Teams("FC Reject", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
-            {
-                Id = teamId
-            };
+            var team = new Teams("FC Reject", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId);
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
