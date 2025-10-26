@@ -1,12 +1,12 @@
-package com.example.amfootball.ui.screens
+package com.example.amfootball.ui.screens.Lists
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun SettingsScreen(){
+fun ListPlayersScreen(){
     Column {
-        Text(text = "Settings")
+        Text(text = "Lista de jogadores")
     }
 }

@@ -1,14 +1,13 @@
 package com.example.amfootball.ui.screens
 
+import android.preference.PreferenceScreen
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 
 @Composable
-fun HomePageScreen(){
+fun PreferenceScreen(){
     Column {
-        //NavigatonDrawerNavBarHomePage()
-        Text(text = "Ecrã Principal")
+        Text(text = "Preferencias")
     }
 }

@@ -35,6 +35,23 @@ fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
 }
 
 @Composable
+fun LeaderboardScreen(onBack: () -> Unit, viewModel: MainViewModel) {
+    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        Text("Leaderboard", modifier = Modifier.padding(8.dp))
+        val board = viewModel.getLeaderboard()
+
+        LazyColumn {
+            items(board) { team ->
+                TeamRow(team)
+                Divider()
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onBack) { Text("Voltar") }
+    }
+}
+@Composable
 fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: MainViewModel) {
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -42,31 +59,15 @@ fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: Main
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
+
         Button(onClick = { onNavigate("leaderboard") }, modifier = Modifier.fillMaxWidth()) { Text("Leaderboard") }
         Spacer(modifier = Modifier.height(8.dp))
+
         Button(onClick = { onNavigate("teams") }, modifier = Modifier.fillMaxWidth()) { Text("Equipas") }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { onNavigate("search") }, modifier = Modifier.fillMaxWidth()) { Text("Procurar partidas ranqueadas semelhantes") }
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { onNavigate("map") }, modifier = Modifier.fillMaxWidth()) { Text("Mapa / Partidas próximas") }
-    }
-}
-
-
-
-@Composable
-fun LeaderboardScreen(onBack: () -> Unit, viewModel: MainViewModel) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Leaderboard", modifier = Modifier.padding(8.dp))
-        val board = viewModel.getLeaderboard()
-        LazyColumn {
-            items(board) { team ->
-                TeamRow(team)
-                Divider()
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) { Text("Voltar") }
     }
 }
 

@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">AMFootball</string>
+    <string name="navbar_home_page_team">Homepage Team</string>
+    <string name="description_NavBar_HomePageTeam">HomePage of Team</string>
+    <string name="navbar_Calendar">Calendar</string>
+    <string name="descritpion_NavBar_Calendar">Calendar with match of team</string>
+    <string name="content_Description_NavBar">Open itens navbar</string>
 </resources>

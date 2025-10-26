@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AMFootball</string>
+    <string name="navbar_home_page_team">Página Inicial Equipa</string>
+    <string name="navbar_Calendar">Calendário Jogos</string>
+    <string name="description_NavBar_HomePageTeam">Home Page da equipa</string>
+    <string name="descritpion_NavBar_Calendar">Calendario com os jogos da equipa</string>
+    <string name="content_Description_NavBar">Abrir itens navBar</string>
+</resources>

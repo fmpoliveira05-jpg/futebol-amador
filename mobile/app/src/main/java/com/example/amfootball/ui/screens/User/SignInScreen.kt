@@ -1,12 +1,12 @@
-package com.example.amfootball.ui.screens
+package com.example.amfootball.ui.screens.User
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun Settings(){
+fun SignInScreen(){
     Column {
-        Text(text = "Tela Principal")
+        Text(text = "Página de SignIn")
     }
 }
