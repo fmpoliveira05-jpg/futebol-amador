@@ -10,9 +10,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.AppGraphRoute
+import com.example.amfootball.navigation.RouteNavBarHomePage
 import com.example.amfootball.navigation.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.Team.CalendarScreen
@@ -20,30 +22,35 @@ import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigatonDrawerTeam(){
+fun NavigatonDrawerTeam(globalNavController: NavHostController){
     val drawerItemList = prepareNavigationDrawerItems()
+    val internalNavController = rememberNavController()
 
     NavigatonDrawer(
         itens = drawerItemList,
         titleNavBar = "NavBar Team",
-        scaffoldContent = { navController ->
-            ScaffoldContentTeamNavBar(navController)
-        }
+        scaffoldContent = { innerNav ->
+            ScaffoldContentTeamNavBar(navController = innerNav)
+        },
+        internalNavController = internalNavController, // Passa o interno
+        globalNavController = globalNavController
     )
 }
-
 //Metodo que define todas as rotas da NavBar
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldContentTeamNavBar(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = AppGraphRoute.HOME_PAGE_TEAM) {
-        composable(AppGraphRoute.HOME_PAGE_TEAM) {
+    NavHost(navController = navController, startDestination = RouteNavBarHomePage.HOME_PAGE) {
+        /*
+        composable(RoutesNavBarTeam.HOME_PAGE_TEAM) {
             HomePageTeamScreen()
         }
+        */
         composable(RoutesNavBarTeam.CALENDAR) {
             CalendarScreen()
         }
-        composable(AppGraphRoute.HOME_PAGE) {
+        composable(RouteNavBarHomePage.HOME_PAGE) {
             HomePageScreen()
         }
     }
@@ -57,20 +64,17 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_home_page_team),
         description = stringResource(R.string.description_NavBar_HomePageTeam),
         icon = Icons.Filled.Home,
-        route = AppGraphRoute.HOME_PAGE_TEAM))
+        route = RoutesNavBarTeam.HOME_PAGE_TEAM,
+        isGlobalRoute = true))
     drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_Calendar),
         description = stringResource(R.string.descritpion_NavBar_Calendar),
         icon = Icons.Filled.DateRange,
-        route = RoutesNavBarTeam.CALENDAR))
+        route = RoutesNavBarTeam.CALENDAR,
+        isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = "Home",
         description = "Página inicial",
         icon = Icons.Filled.Home,
-        route = AppGraphRoute.HOME_PAGE))
+        route = RouteNavBarHomePage.HOME_PAGE,
+        isGlobalRoute = true))
     return drawerItemsList
-}
-
-@Preview(showBackground = true, locale = "pt-rPT")
-@Composable
-fun GreetingPreview() {
-    NavigatonDrawerTeam()
 }

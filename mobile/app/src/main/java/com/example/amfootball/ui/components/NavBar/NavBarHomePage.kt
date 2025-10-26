@@ -15,9 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
-import com.example.amfootball.navigation.AppGraphRoute
 import com.example.amfootball.navigation.GeralRoutes
 import com.example.amfootball.navigation.RoutesNavBarTeam
 import com.example.amfootball.navigation.RouteNavBarHomePage
@@ -27,37 +27,35 @@ import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.SettingsScreen
 import com.example.amfootball.ui.screens.PreferenceScreen
-import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigatonDrawerNavBarHomePage(appNavController: NavHostController){
+fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController){
     val drawerItemList = prepareNavigationDrawerItems()
+    val internalNavController = rememberNavController()
 
     NavigatonDrawer(
         itens = drawerItemList,
         titleNavBar = "NavBar HomePage",
-        onItemClick = { item ->
-            if (item.route == RoutesNavBarTeam.HOME_PAGE_TEAM) {
-                appNavController.navigate(AppGraphRoute.TEAM_NAV)
-            }
+        scaffoldContent = { innerNav ->
+            ScaffoldContentNavBarHomePage(navController = innerNav)
         },
-        scaffoldContent = { navController ->
-            ScaffoldContentNavBarHomePage(navController)
-        }
+        internalNavController = internalNavController, // Passa o interno
+        globalNavController = globalNavController
     )
 }
 
 //Metodo que define todas as rotas da NavBar
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = AppGraphRoute.HOME_NAV) {
-        composable(AppGraphRoute.HOME_NAV) {
+    NavHost(navController = navController, startDestination = RouteNavBarHomePage.HOME_PAGE) {
+        composable(RouteNavBarHomePage.HOME_PAGE) {
             HomePageScreen()
         }
         /*
-        * composable(AppGraphRoute.TEAM_NAV) {
+        composable(RoutesNavBarTeam.HOME_PAGE_TEAM) {
             NavigatonDrawerTeam()
         }
         * */
@@ -88,39 +86,37 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     drawerItemsList.add(NavigationItem(label = "Home",
         description = "Página inicial",
         icon = Icons.Filled.Home,
-        route = AppGraphRoute.HOME_NAV))
+        route = RouteNavBarHomePage.HOME_PAGE,
+        isGlobalRoute =  true))
     drawerItemsList.add(NavigationItem(label = "Home My Team",
         description = "Página da sua equipa",
         icon = Icons.Filled.Home,
-        route = AppGraphRoute.TEAM_NAV))
+        route = RoutesNavBarTeam.HOME_PAGE_TEAM,
+        isGlobalRoute =  true))
     drawerItemsList.add(NavigationItem(label = "Equipas",
         description = "Lista com as equipas da app",
         icon = Icons.Filled.List,
-        route = RouteNavBarHomePage.EQUIPAS))
+        route = RouteNavBarHomePage.EQUIPAS,
+        isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = "Jogadores",
         description = "Lista com todos os jogadores do app",
         icon = Icons.Filled.List,
-        route = RouteNavBarHomePage.PLAYERS))
+        route = RouteNavBarHomePage.PLAYERS,
+        isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = "LeadBoard",
         description = "Tabela das melhores equipas do app",
         icon = Icons.Filled.List, //Depois sacar
-        route = RouteNavBarHomePage.LEADBOARD))
+        route = RouteNavBarHomePage.LEADBOARD,
+        isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = "Configurações",
         description = "Configrações do app",
         icon = Icons.Filled.Settings,
-        route = GeralRoutes.SETTINGS))
+        route = GeralRoutes.SETTINGS,
+        isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = "Preferencias",
         description = "Preferencias do site",
         icon = Icons.Filled.Person, //Depois trocar
-        route = GeralRoutes.PREFERENCE))
+        route = GeralRoutes.PREFERENCE,
+        isGlobalRoute =  false))
     return drawerItemsList
 }
-
-/*
-@Preview(showBackground = true, locale = "en")
-@Preview(showBackground = true, locale = "pt-rPT")
-@Composable
-fun GreetingPreviewNavigatonDrawerNavBarHomePage() {
-    NavigatonDrawerNavBarHomePage()
-}
-* */

@@ -37,48 +37,63 @@ import com.example.amfootball.R
 @Composable
 fun NavigatonDrawer(itens: List<NavigationItem>,
                     titleNavBar: String,
-                    drawerState: DrawerState,
-                    scaffoldContent: @Composable (NavHostController) -> Unit
-){
+                    scaffoldContent: @Composable (NavHostController) -> Unit,
+                    internalNavController: NavHostController,
+                    globalNavController: NavHostController
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val navController = rememberNavController()
     val drawerItemList = itens
     var selectedItem by remember { mutableStateOf(drawerItemList[0]) }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            //Faz o desenho de cada item da navBar
             ModalDrawerSheet {
                 Spacer(Modifier.height(12.dp))
                 drawerItemList.forEach { item ->
-                    DrawerItem(item,selectedItem,{selectedItem=item},navController,drawerState)
+                    DrawerItem(
+                        item = item,
+                        selectedItem = selectedItem,
+                        updatedSelected = { selectedItem = it },
+                        internalNavController = internalNavController, // Passa o interno
+                        globalNavController = globalNavController,   // Passa o global
+                        drawerState = drawerState
+                    )
                 }
             }
         },
-        //Parte que desenha a navBar em si
-        content = { Scaffold(drawerState = drawerState, titleNavBar = titleNavBar,navController = navController, scaffoldContent = scaffoldContent)}
+        content = {
+            Scaffold(
+                drawerState = drawerState,
+                titleNavBar = titleNavBar,
+                internalNavController = internalNavController,
+                scaffoldContent = scaffoldContent
+            )
+        }
     )
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DrawerItem(item: NavigationItem,
                selectedItem: NavigationItem,
                updatedSelected: (i: NavigationItem) -> Unit,
-               navController: NavHostController,
+               internalNavController: NavHostController,
+               globalNavController: NavHostController,
                drawerState: DrawerState
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    //Resposavel por desenhar os itens da navBar
     NavigationDrawerItem(
         icon = { Icon(imageVector = item.icon, contentDescription = item.description) },
         label = { Text(text = item.label) },
-        selected = (item == selectedItem), //Definir item selecionado
+        selected = (item == selectedItem),
         onClick = {
             coroutineScope.launch {
-                navController.navigate(item.route)
+                if (item.isGlobalRoute) {
+                    globalNavController.navigate(item.route)
+                } else {
+                    internalNavController.navigate(item.route)
+                }
                 drawerState.close()
             }
             updatedSelected(item)
@@ -90,7 +105,7 @@ fun DrawerItem(item: NavigationItem,
 @Composable
 fun Scaffold(drawerState: DrawerState,
              titleNavBar: String,
-             navController: NavHostController,
+             internalNavController: NavHostController,
              scaffoldContent: @Composable (NavHostController) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -108,7 +123,7 @@ fun Scaffold(drawerState: DrawerState,
         },
         content = { padding ->
             Column(modifier = Modifier.padding(padding)) {
-                scaffoldContent(navController)
+                scaffoldContent(internalNavController)
             }
         }
     )

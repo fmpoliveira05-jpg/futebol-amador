@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.amfootball.ui.AMFootballApp
+import com.example.amfootball.ui.components.NavBar.MainNavigation
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.HomePageScreen
@@ -18,7 +19,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
         setContent {
-            NavigatonDrawerNavBarHomePage()
+            MainNavigation()
             //AMFootballApp()
             //NavigatonDrawerTeam()
         }
