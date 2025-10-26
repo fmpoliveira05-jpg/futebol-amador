@@ -7,6 +7,6 @@ import androidx.compose.runtime.Composable
 @Composable
 fun HomeScreen(){
     Column {
-        Text(text = "Tela Principal")
+        Text(text = "Ecrã Principal")
     }
 }

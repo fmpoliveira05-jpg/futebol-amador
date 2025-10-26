@@ -1,9 +1,5 @@
 package com.example.amfootball.ui
 
-import android.Manifest
-import android.location.Location
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,18 +10,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.material3.Button
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.Divider
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.amfootball.data.Match
 import com.example.amfootball.data.Team
 import com.example.amfootball.data.User
-import com.example.amfootball.ui.components.MyAppTopAppBar
 import com.example.amfootball.viewmodel.MainViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import com.example.amfootball.ui.screens.HomeScreen
+
 @Composable
 fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
     val users by viewModel.users.collectAsState()
