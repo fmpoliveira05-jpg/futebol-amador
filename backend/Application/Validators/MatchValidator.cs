@@ -125,7 +125,7 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não existe ou então não está em progresso");
+                throw new ArgumentException("A match não existe ou então não está em progresso");
             }
 
             if (team == null)

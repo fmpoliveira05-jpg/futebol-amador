@@ -170,7 +170,11 @@ namespace Application.Services
             MatchValidator.validateResultMatch(idTeam, result);
 
             var idMatch = result.IdMatch;
-            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);        
+            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);
+            if (match == null)
+            {
+                throw new ArgumentException("A match não existe ou então não está em progresso");
+            }
             var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = match?.Teams.FirstOrDefault(ts => ts.IdTeam == result.IdOpponent);
          
