@@ -26,6 +26,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchValidator> _validatorMock;
+        private Mock<IPlayerRepository> _playerRepoMock;
         private MatchService _sut;
 
         [SetUp]
@@ -36,13 +37,15 @@ namespace Unit.ApplicationTests.ServicesTests
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchValidator>();
+            _playerRepoMock = new Mock<IPlayerRepository>();
 
             _sut = new MatchService(
                 _matchRepoMock.Object,
                 _teamPostPoneRepoMock.Object,
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _validatorMock.Object
+                _validatorMock.Object,
+                _playerRepoMock.Object
             );
         }
 
@@ -136,6 +139,42 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Should().BeEquivalentTo(filteredMatches, "porque o serviço apenas retorna o resultado do repositório");
             _validatorMock.Verify(v => v.ValidateFilterCalendar(teamId, filter), Times.Once, "porque o filtro deve ser validado antes da procura");
             _matchRepoMock.Verify(r => r.GetAllMatchesTeamWithFilters(teamId, filter), Times.Once, "porque deve chamar o repositório uma única vez com os filtros aplicados");
+        }
+
+        [Test(Description = "GetCalendarWithFilters deve lançar exceção quando a data mínima for maior ou igual à data máxima")]
+        public async Task GetCalendarWithFilters_Should_Throw_Exception_When_MinDate_Is_Greater_Than_MaxDate()
+        {
+            // ARRANGE
+            var idTeam = Guid.NewGuid();
+            var filter = new FilterCalendar
+            {
+                MinDate = new DateOnly(2025, 12, 15),
+                MaxDate = new DateOnly(2025, 12, 14)
+            };
+
+            // ACT
+            Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
+
+            // ASSERT
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("A data minima tem de ser inferior ou igual à data maxima");
+        }
+
+        [Test(Description = "GetCalendarWithFilters deve lançar exceção quando o id da equipa for nulo")]
+        public async Task GetCalendarWithFilters_Should_Throw_Exception_When_Team_Id_Is_Empty()
+        {
+            // ARRANGE
+            var idTeam = Guid.Empty;
+            var filter = new FilterCalendar
+            {
+                MinDate = new DateOnly(2025, 12, 1),
+                MaxDate = new DateOnly(2025, 12, 31)
+            };
+
+            // ACT
+            Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
+
+            // ASSERT
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar nulo");
         }
 
         [Test(Description = "PostPoneMatch deve adiar a partida, atualizar estado e persistir")]
@@ -323,6 +362,99 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once, "porque as mudanças devem ser persistidas");
         }
 
+        [Test(Description = "CancelMatch deve lançar exceção se o estado da partida não for SCHEDULED")]
+        public async Task CancelMatch_Should_Throw_Exception_When_Match_Is_Not_Scheduled()
+        {
+            // ARRANGE
+            var idTeam = Guid.NewGuid();
+            var idMatch = Guid.NewGuid();
+            var description = "Motivo";
+            var team = new Teams("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null));
+            var opponentTeam = new Teams("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null));
+
+            var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("p", "a"))
+            {
+                Id = idMatch,
+                Teams = new List<TeamStatistics>
+        {
+            new TeamStatistics(team) { IdTeam = idTeam, Team = team },
+            new TeamStatistics(opponentTeam) { IdTeam = opponentTeam.Id }
+        },
+                MatchStatus = MatchStatus.IN_PROGRESS
+            };
+
+            _matchRepoMock.Setup(r => r.GetMatchToCancelById(idMatch)).ReturnsAsync(match);
+
+            // ACT
+            Func<Task> act = async () => await _sut.CancelMatch(idTeam, idMatch, description);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ValidationException>().WithMessage("A partida não pode ser cancelada se não estiver no estado SCHEDULED.");
+        }
+
+        [Test(Description = "CancelMatch deve lançar exceção se a match for nula")]
+        public async Task CancelMatch_Should_Throw_Exception_When_Match_Is_Null()
+        {
+            // ARRANGE
+            var idTeam = Guid.NewGuid();
+            var idMatch = Guid.NewGuid();
+            var description = "Motivo";
+            _matchRepoMock.Setup(r => r.GetMatchToCancelById(idMatch)).ReturnsAsync((Matches?)null);
+
+            // ACT
+            Func<Task> act = async () => await _sut.CancelMatch(idTeam, idMatch, description);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match a cancelar não existe ou já não pode ser cancelada.");
+        }
+
+        [Test(Description = "CancelMatch deve lançar exceção se o jogador não for administrador")]
+        public async Task CancelMatch_Should_Throw_Exception_When_Player_Is_Not_Admin()
+        {
+            // ARRANGE
+            var idTeam = Guid.NewGuid();
+            var idMatch = Guid.NewGuid();
+            var description = "Motivo";
+            var team = new Teams("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null));
+            var opponentTeam = new Teams("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null));
+
+            var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("p", "a"))
+            {
+                Id = idMatch,
+                Teams = new List<TeamStatistics>
+        {
+            new TeamStatistics(team) { IdTeam = idTeam, Team = team },
+            new TeamStatistics(opponentTeam) { IdTeam = opponentTeam.Id }
+        },
+                MatchStatus = MatchStatus.SCHEDULED
+            };
+
+            var player = new Player { Id = Guid.NewGuid(), IdTeam = idTeam, IsAdmin = false };
+            _matchRepoMock.Setup(r => r.GetMatchToCancelById(idMatch)).ReturnsAsync(match);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
+
+            // ACT
+            Func<Task> act = async () => await _sut.CancelMatch(player.Id, idMatch, description);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ValidationException>().WithMessage("Apenas administradores podem cancelar partidas.");
+        }
+
+        [Test(Description = "CancelMatch deve lançar exceção se o jogador não estiver associado a um clube")]
+        public async Task CancelMatch_Should_Throw_Exception_When_Player_Is_Not_In_A_Team()
+        {
+            // ARRANGE
+            var idMatch = Guid.NewGuid();
+            var description = "Motivo";
+            var player = new Player { Id = Guid.NewGuid(), IdTeam = Guid.Empty };
+
+            // ACT
+            Func<Task> act = async () => await _sut.CancelMatch(player.Id, idMatch, description);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ValidationException>().WithMessage("O jogador precisa estar associado a uma equipa para cancelar uma partida.");
+        }
+
         [Test(Description = "FinishMatch deve finalizar a partida com sucesso quando os dados são válidos")]
         public async Task FinishMatch_Should_Finish_Match_Successfully_When_Valid()
         {
@@ -375,7 +507,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdOpponent = idOpponent,
                 OpponentGoals = 1
             };
-            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync((Matches)null);
+            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync((Matches?)null);
 
             // ACT
             Func<Task> act = async () => await _sut.FinishMatch(idTeam, result);
@@ -383,6 +515,23 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não existe ou então não está em progresso");
         }
+
+        [Test(Description = "LeaveFinishMatch deve lançar exceção se a partida não for encontrada")]
+        public async Task LeaveFinishMatch_Should_Throw_Exception_When_Match_Not_Found()
+        {
+            // ARRANGE
+            var idTeam = Guid.NewGuid();
+            var idMatch = Guid.NewGuid();
+            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync((Matches?)null);
+
+            // ACT
+            Func<Task> act = async () => await _sut.LeaveFinishMatch(idTeam, idMatch);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não foi encontrada");
+        }
+
+
 
     }
 }

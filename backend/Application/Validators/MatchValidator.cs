@@ -24,7 +24,7 @@ namespace Application.Validators
             {
                 if (dateMin.Value > dateMax.Value)
                 {
-                    throw new InvalidOperationException("A data minima tem de ser inferior à data maxima");
+                    throw new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima");
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace Application.Validators
         public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent) {
             if (match == null)
             {
-                throw new ArgumentNullException("A match a cancelar não existe ou já não pode ser cancelada.");
+                throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
             }
 
             var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;
@@ -153,12 +153,12 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não foi encontrada");
+                throw new ArgumentException("A match não foi encontrada");
             }
 
             if (team == null)
             {
-                throw new ArgumentNullException("A equipa que está a tentar sair do match não faz parte do mesmo");
+                throw new ArgumentException("A equipa que está a tentar sair do match não faz parte do mesmo");
             }
         }
 

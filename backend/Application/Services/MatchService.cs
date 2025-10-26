@@ -23,7 +23,7 @@ namespace Application.Services
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            IMatchValidator MatchValidator)
+            IMatchValidator MatchValidator, IPlayerRepository @object)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
