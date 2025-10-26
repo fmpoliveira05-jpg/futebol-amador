@@ -37,9 +37,8 @@ namespace Api.Controllers
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
         {
             var creatorUserId = GetCurrentUserId();
-            var newTeamId = await TeamService.CreateTeamAsync(teamDto);
+            var newTeamId = await TeamService.CreateTeamAsync(teamDto, creatorUserId);
 
-            // Retorna 201 Created com a localização do novo recurso
             return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
         }
 
