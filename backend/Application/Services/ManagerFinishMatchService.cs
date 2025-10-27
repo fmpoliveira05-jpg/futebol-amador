@@ -183,6 +183,7 @@ namespace Application.Services
 
             return result;
         }
+
         public async Task<bool> LeaveHubAsync(Guid matchId, Guid teamId, string connectionId)
         {
             geralValidator.ValidateIdMatchLeaveMatch(matchId, teamId);

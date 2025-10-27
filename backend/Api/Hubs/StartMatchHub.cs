@@ -18,7 +18,7 @@ namespace Api.Hubs
             this.geralValidator = geralValidator;
         }
 
-        public async Task JoinStartMatch(Guid idMatch)
+        public async Task JoinStartMatch(Guid idMatch, Guid idTeam)
         {
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
@@ -27,7 +27,7 @@ namespace Api.Hubs
             
             try
             {
-                result = await startMatchManager.JoinHubAsync(idMatch, userId, connectionId);
+                result = await startMatchManager.JoinHubAsync(idMatch, userId, idTeam, connectionId);
             }
             catch (ArgumentException ex)
             {
@@ -42,13 +42,11 @@ namespace Api.Hubs
             {
                 await Groups.AddToGroupAsync(connectionId, groupName);
 
-                // guarda no Context para cleanup futuro
                 Context.Items["HubMatchId"] = idMatch;
                 Context.Items["HubTeamId"] = result.TeamId;
             }
             else if (result.MatchStarted)
             {
-                //Como o jogo começou e então removemos o 1º admin do hub e começamos a match
                 if (!string.IsNullOrEmpty(result.FirstAdminConnectionId))
                 {
                     await Groups.RemoveFromGroupAsync(result.FirstAdminConnectionId, groupName);

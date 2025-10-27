@@ -252,7 +252,7 @@ namespace Api.Controllers
             }
 
             await startMatchHubClientService.InitializeAsync(idTeam);
-            await startMatchHubClientService.JoinStartMatchAsync(idMatch);
+            await startMatchHubClientService.JoinStartMatchAsync(idMatch, idTeam);
             return Ok("Conseguiu entrar no hub!");
         }
 

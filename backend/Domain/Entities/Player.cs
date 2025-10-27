@@ -37,58 +37,6 @@ namespace Domain.Entities
             IsAdmin = false;
         }
 
-        /***
-         * Metodo que permite adicionar um pedido de adesão a uma equipa
-         * 
-         * membershipRequests: O pedido de adesão a adicionar
-         * 
-         * Retorna o pedido de adesão adicionado ou null se não for possível adicionar
-         */
-        public MembershipRequests AddMembershipRequest(MembershipRequests membershipRequest)
-        {
-            var existingRequest = MembershipRequests.FirstOrDefault(mr => mr.Id == membershipRequest.Id);
-            if (existingRequest != null)
-            {
-                return null;
-            }
-
-            MembershipRequests.Add(membershipRequest);
-
-            return membershipRequest;
-        }
-
-        /***
-         *  Metodo que permite remover um pedido de adesão a uma equipa
-         *  
-         *  membershipRequests: O pedido de adesão a remover
-         *  
-         *  Retorna o pedido de adesão removido ou null se não for possível remover
-         */
-        public MembershipRequests RemoveMembershipRequest(MembershipRequests membershipRequest)
-        {
-            var existingRequest = MembershipRequests.FirstOrDefault(mr => mr.Id == membershipRequest.Id);
-            if (existingRequest == null)
-            {
-                return null;
-            }
-
-            MembershipRequests.Remove(existingRequest);
-
-            return existingRequest;
-        }
-
-        /***
-         * Metodo que permite obter um pedido de adesão a uma equipa pelo seu id
-         * 
-         * id: O id do pedido de adesão a obter
-         * 
-         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
-         */
-        public MembershipRequests GetMembershipRequestById(Guid id)
-        {
-            return MembershipRequests.FirstOrDefault(mr => mr.Id == id);
-        }
-
         public override string ToString()
         {
             return base.ToString() + $", Position: {Position}, Height: {Height}cm, Team: {(Team != null ? Team.Name : "No Team")}, IsAdmin: {IsAdmin}";

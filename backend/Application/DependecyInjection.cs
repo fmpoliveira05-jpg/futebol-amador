@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Interfaces.Validators.Hub;
 using Application.Services;
+using Application.Services.Hub;
 using Application.Validators;
 using Application.Validators.Hubs;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,8 @@ namespace Application
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
+            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
 
             return services;
         }

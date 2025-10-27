@@ -20,7 +20,7 @@ namespace Application.Services.Hub
             }
 
             connection = new HubConnectionBuilder()
-                .WithUrl($"https://localhost:7003/api/{idTeam}/FinishMatch")
+                .WithUrl($"http://localhost:5218/FinishMatch")
                 .WithAutomaticReconnect()
                 .Build();
 

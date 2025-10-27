@@ -19,7 +19,7 @@ namespace Application.Services.Hub
             }
 
             connection = new HubConnectionBuilder()
-                .WithUrl($"https://localhost:7003/api/{idTeam}/StartMatch")
+                .WithUrl($"http://localhost:5218/StartMatch")
                 .WithAutomaticReconnect()
                 .Build();
 
@@ -55,10 +55,10 @@ namespace Application.Services.Hub
         /**
          * Permite o cliente conectar-se ao Hub
          */
-        public async Task JoinStartMatchAsync(Guid idMatch)
+        public async Task JoinStartMatchAsync(Guid idMatch, Guid idTeam)
         {
             await ConnectAsync();
-            await connection.InvokeAsync("JoinStartMatch", idMatch);
+            await connection.InvokeAsync("JoinStartMatch", idMatch, idTeam);
         }
 
         /**  

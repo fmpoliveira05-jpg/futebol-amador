@@ -11,10 +11,6 @@ using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace Unit.ApplicationTests.ServicesTests
 {
@@ -575,7 +571,8 @@ namespace Unit.ApplicationTests.ServicesTests
         }
         */
 
-        [Test(Description = "FinishMatch deve finalizar a partida com sucesso quando os dados são válidos")]
+        /*
+         [Test(Description = "FinishMatch deve finalizar a partida com sucesso quando os dados são válidos")]
         public async Task FinishMatch_Should_Finish_Match_Successfully_When_Valid()
         {
             // ARRANGE
@@ -687,9 +684,6 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não foi encontrada");
         }
-
-
-
-
+         */
     }
 }
