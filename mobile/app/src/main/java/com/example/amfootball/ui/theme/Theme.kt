@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
@@ -32,6 +33,11 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+
+val GoogleBlue = Color(0xFF4285F4)
+val GoogleWhite = Color(0xFFFFFFFF)
+val FacebookBlue = Color(0xFF1877F2)
+val FacebookWhite = Color(0xFFFFFFFF)
 
 @Composable
 fun AMFootballTheme(

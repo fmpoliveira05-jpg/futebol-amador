@@ -6,11 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.amfootball.ui.AMFootballApp
-import com.example.amfootball.ui.components.NavBar.MainNavigation
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
-import com.example.amfootball.ui.screens.HomePageScreen
+import com.example.amfootball.navigation.MainNavigation
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,8 +16,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MainNavigation()
-            //AMFootballApp()
-            //NavigatonDrawerTeam()
         }
     }
 

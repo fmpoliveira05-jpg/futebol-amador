@@ -1,4 +1,4 @@
-package com.example.amfootball.navigation
+package com.example.amfootball.navigation.Objects
 
 object GeralRoutes {
     const val SETTINGS = "Settings"

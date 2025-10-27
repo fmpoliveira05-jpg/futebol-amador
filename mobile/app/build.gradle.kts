@@ -98,6 +98,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.play.services.location)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -106,6 +108,17 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    //Dependencias FireBas para Auth
+    // Firebase Bill of Materials (BoM) - gere as versões
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    // Dependência do Firebase Authentication
+    implementation("com.google.firebase:firebase-auth-ktx")
+    // Dependência para o Login com Google (necessária)
+    implementation("com.google.android.gms:play-services-auth:21.2.0")
+    // Dependência para o Login com Facebook (necessária para o Facebook)
+    implementation("com.facebook.android:facebook-login:latest.release")
+
+    implementation("androidx.compose.material:material-icons-extended:1.6.7")
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.0")
 // ViewModel + Compose

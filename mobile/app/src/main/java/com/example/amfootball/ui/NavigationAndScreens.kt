@@ -1,4 +1,5 @@
 package com.example.amfootball.ui
+/*
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,7 +14,8 @@ import androidx.compose.material3.Divider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.data.Team
 import com.example.amfootball.data.User
-import com.example.amfootball.viewmodel.MainViewModel
+import com.example.amfootball.ui.components.MapScreenContainer
+import com.example.amfootball.viewModel.MainViewModel
 
 @Composable
 fun AMFootballApp(viewModel: MainViewModel = viewModel()) {
@@ -48,7 +50,6 @@ fun LeaderboardScreen(onBack: () -> Unit, viewModel: MainViewModel) {
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) { Text("Voltar") }
     }
 }
 @Composable
@@ -59,13 +60,14 @@ fun HomeScreen(currentUser: User?, onNavigate: (String) -> Unit, viewModel: Main
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
         Spacer(modifier = Modifier.height(8.dp))
-
         Button(onClick = { onNavigate("leaderboard") }, modifier = Modifier.fillMaxWidth()) { Text("Leaderboard") }
-        Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = { onNavigate("teams") }, modifier = Modifier.fillMaxWidth()) { Text("Equipas") }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = { onNavigate("teams") }, modifier = Modifier.fillMaxWidth()) { Text("Equipas")
+
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { onNavigate("search") }, modifier = Modifier.fillMaxWidth()) { Text("Procurar partidas ranqueadas semelhantes") }
+
         Spacer(modifier = Modifier.height(8.dp))
         Button(onClick = { onNavigate("map") }, modifier = Modifier.fillMaxWidth()) { Text("Mapa / Partidas próximas") }
     }
@@ -134,3 +136,4 @@ fun SearchMatchesScreen(onBack: () -> Unit, viewModel: MainViewModel, currentUse
         }
     }
 }
+* */

@@ -1,4 +1,4 @@
-package com.example.amfootball.navigation
+package com.example.amfootball.navigation.Objects.NavBar
 
 object RouteNavBarHomePage {
     const val HOME_PAGE = "HomePage"

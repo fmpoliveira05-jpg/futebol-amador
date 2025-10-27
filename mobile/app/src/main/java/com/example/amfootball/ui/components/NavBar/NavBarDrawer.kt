@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.components.NavBar
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.NavigationItem
 import kotlinx.coroutines.launch
 import com.example.amfootball.R
@@ -39,7 +39,8 @@ fun NavigatonDrawer(itens: List<NavigationItem>,
                     titleNavBar: String,
                     scaffoldContent: @Composable (NavHostController) -> Unit,
                     internalNavController: NavHostController,
-                    globalNavController: NavHostController
+                    globalNavController: NavHostController,
+                    topBarActions: @Composable RowScope.() -> Unit = {} //Diz há topBar que pode receber ações
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val drawerItemList = itens
@@ -57,7 +58,7 @@ fun NavigatonDrawer(itens: List<NavigationItem>,
                         updatedSelected = { selectedItem = it },
                         internalNavController = internalNavController, // Passa o interno
                         globalNavController = globalNavController,   // Passa o global
-                        drawerState = drawerState
+                        drawerState = drawerState,
                     )
                 }
             }
@@ -67,7 +68,8 @@ fun NavigatonDrawer(itens: List<NavigationItem>,
                 drawerState = drawerState,
                 titleNavBar = titleNavBar,
                 internalNavController = internalNavController,
-                scaffoldContent = scaffoldContent
+                scaffoldContent = scaffoldContent,
+                topBarActions = topBarActions
             )
         }
     )
@@ -106,7 +108,8 @@ fun DrawerItem(item: NavigationItem,
 fun Scaffold(drawerState: DrawerState,
              titleNavBar: String,
              internalNavController: NavHostController,
-             scaffoldContent: @Composable (NavHostController) -> Unit
+             scaffoldContent: @Composable (NavHostController) -> Unit,
+             topBarActions: @Composable RowScope.() -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -118,7 +121,8 @@ fun Scaffold(drawerState: DrawerState,
                         drawerState.open()
                     }
                 },
-                titleNavBar = titleNavBar
+                titleNavBar = titleNavBar,
+                actions = topBarActions
             )
         },
         content = { padding ->
@@ -132,7 +136,10 @@ fun Scaffold(drawerState: DrawerState,
 //Metodo que ao clicar no icon da navBar mostra a mesma
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(onNavIconClick: () -> Unit, titleNavBar: String) {
+fun TopBar(onNavIconClick: () -> Unit,
+           titleNavBar: String,
+           actions: @Composable RowScope.() -> Unit = {}
+) {
     TopAppBar(
         title = { Text(text = titleNavBar) },
         navigationIcon = {
@@ -146,6 +153,7 @@ fun TopBar(onNavIconClick: () -> Unit, titleNavBar: String) {
                     contentDescription = stringResource(R.string.content_Description_NavBar)
                 )
             }
-        }
+        },
+        actions = actions
     )
 }
