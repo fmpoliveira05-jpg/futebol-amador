@@ -115,9 +115,9 @@ namespace Application.Validators
                 throw new ArgumentException("A team que está a tentar cancelar não faz parte do jogo");
             }
 
-            ValidateNumGoals(result.MyTeamGoals);
+            ValidateNumGoals(result.NumGoalsTeam);
 
-            ValidateNumGoals(result.OpponentGoals);
+            ValidateNumGoals(result.NumGoalsOpponent);
         }
 
         public void ValidateFinishMatch(Matches match, TeamStatistics team, Guid idTeam,

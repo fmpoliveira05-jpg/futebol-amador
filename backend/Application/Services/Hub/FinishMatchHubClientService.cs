@@ -10,20 +10,30 @@ namespace Application.Services.Hub
 
         public FinishMatchHubClientService()
         {
-            //Trocar depois para a url correta
+        }
+
+        public async Task InitializeAsync(Guid idTeam)
+        {
+            if (connection != null)
+            {
+                await connection.DisposeAsync();
+            }
+
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/startMatchHub") // URL do Hub
+                .WithUrl($"https://localhost:7003/api/{idTeam}/FinishMatch")
                 .WithAutomaticReconnect()
                 .Build();
 
             RegisterHandlers();
         }
 
-        /**
-         * Permite validar se o hub está ativo e se sim fazer a conexão
-         */
         public async Task ConnectAsync()
         {
+            if (connection == null)
+            {
+                throw new InvalidOperationException("Connection not initialized. Call InitializeAsync(idTeam) first.");
+            }
+
             if (connection.State == HubConnectionState.Disconnected)
                 await connection.StartAsync();
         }
@@ -53,17 +63,16 @@ namespace Application.Services.Hub
          */
         public async Task EditResultMatchAsync(ResultMatchDto result)
         {
-            await ConnectAsync();
+            await ConnectAsync(); 
             await connection.InvokeAsync("EditResult", result);
         }
 
 
-        /**  
-         * Permite o cliete sair do Hub
+        /** * Permite o cliete sair do Hub
          */
         public async Task LeaveFinishMatchAsync()
         {
-            await ConnectAsync();
+            await ConnectAsync(); 
             await connection.InvokeAsync("LeaveFinishMatch");
         }
     }

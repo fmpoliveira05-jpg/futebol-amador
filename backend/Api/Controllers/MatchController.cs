@@ -72,7 +72,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPut("/PostponeMatch")]
+        [HttpPut("PostponeMatch")]
         public async Task<IActionResult> PostponeMatch(Guid idTeam, [FromBody] PostponeMatchDTO dto)
         {
             var listErrors = validatePostPoneMatch(idTeam, dto);
@@ -100,7 +100,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost("/AcceptPostponeMatch")]
+        [HttpPost("AcceptPostponeMatch")]
         public async Task<IActionResult> AcceptPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDTO dto)
         {
             var listErrors = validateAnswerPostPoneMatch(idTeam, dto);
@@ -142,7 +142,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpDelete("/RejectPostponeMatch")]
+        [HttpDelete("RejectPostponeMatch")]
         public async Task<IActionResult> RejectPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDTO dto)
         {
             var listErrors = validateAnswerPostPoneMatch(idTeam, dto);
@@ -184,7 +184,7 @@ namespace Api.Controllers
             }
         }
 
-        [HttpGet("/PostPoneMatchs")]
+        [HttpGet("PostPoneMatchs")]
         public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam)
         {
             if (idTeam == Guid.Empty)
@@ -209,7 +209,7 @@ namespace Api.Controllers
         }
 
         //Falta Testar
-        [HttpDelete("/CancelMatch/{idMatch}")]
+        [HttpDelete("CancelMatch/{idMatch}")]
         public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
             if (idTeam == Guid.Empty)
@@ -243,35 +243,34 @@ namespace Api.Controllers
             }
         }
 
-        //IHUbContext<Hub> para poder chamar o metodo do Hub
-        //Vou ter de utilizar socket (SignalR) para o iniciar partida.
-        //Posso utilizar um backgroundService para que caso a partida não seja aceite em 5 minutos o soocket é desligado
-        [HttpPost("/StartMatch")]
-        public async Task<IActionResult> StartMatch([FromBody] Guid idMatch)
+        [HttpPost("StartMatch")]
+        public async Task<IActionResult> StartMatch(Guid idTeam, [FromBody] Guid idMatch)
         {
             if (idMatch == Guid.Empty)
             {
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
+            await startMatchHubClientService.InitializeAsync(idTeam);
             await startMatchHubClientService.JoinStartMatchAsync(idMatch);
             return Ok("Conseguiu entrar no hub!");
         }
 
-        [HttpPost("/LeaveStartMatch")]
-        public async Task<IActionResult> LeaveStartMatch([FromBody] Guid idMatch)
+        [HttpPost("LeaveStartMatch")]
+        public async Task<IActionResult> LeaveStartMatch(Guid idTeam, [FromBody] Guid idMatch)
         {
             if (idMatch == Guid.Empty)
             {
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
+            await startMatchHubClientService.InitializeAsync(idTeam);
             await startMatchHubClientService.LeaveStartMatchAsync();
             return Ok("Saiu do Hub com sucesso!");
         }
 
         //Falta apenas chamar hub
-        [HttpPost("/FinishMatch")]
+        [HttpPost("FinishMatch")]
         public async Task<IActionResult> FinishMatch(Guid idTeam, [FromBody] ResultMatchDto result)
         {
             if (idTeam == Guid.Empty)
@@ -289,13 +288,13 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
+            await finishMatchHubClientService.InitializeAsync(idTeam);
             await finishMatchHubClientService.JoinFinishMatchAsync(result);
-            //await matchController.FinishMatch(idTeam, result);
 
             return Ok("Resultado submetido!");
         }
 
-        [HttpPut("/UpdateFinishMatch")]
+        [HttpPut("UpdateFinishMatch")]
         public async Task<IActionResult> UpdateFinishMatch(Guid idTeam, [FromBody] ResultMatchDto result)
         {
             if (idTeam == Guid.Empty)
@@ -313,16 +312,16 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
-            //await matchController.FinishMatch(idTeam, result); //Chamo na mesma o Finish que tem as mesmas validações
+            await finishMatchHubClientService.InitializeAsync(idTeam);
             await finishMatchHubClientService.EditResultMatchAsync(result);
   
             return Ok("Resultado alterado com sucesso");
         }
 
-        [HttpPost("/LeaveFinishMatch")]
-        public async Task<IActionResult> LeaveFinishMatch()
+        [HttpPost("LeaveFinishMatch")]
+        public async Task<IActionResult> LeaveFinishMatch(Guid idTeam)
         {
-            //await matchController.LeaveFinishMatch(idTeam, idMatch);
+            await finishMatchHubClientService.InitializeAsync(idTeam);
             await finishMatchHubClientService.LeaveFinishMatchAsync();
 
             return Ok("Saiu do Hub com sucesso!");

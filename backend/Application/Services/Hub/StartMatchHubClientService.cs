@@ -9,20 +9,34 @@ namespace Application.Services.Hub
 
         public StartMatchHubClientService()
         {
-            //Trocar depois para a url correta
+        }
+
+        public async Task InitializeAsync(Guid idTeam)
+        {
+            if (connection != null)
+            {
+                await connection.DisposeAsync();
+            }
+
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:5001/startMatchHub") // URL do Hub
+                .WithUrl($"https://localhost:7003/api/{idTeam}/StartMatch")
                 .WithAutomaticReconnect()
                 .Build();
 
             RegisterHandlers();
         }
 
+
         /**
          * Permite validar se o hub está ativo e se sim fazer a conexão
          */
         public async Task ConnectAsync()
         {
+            if (connection == null)
+            {
+                throw new InvalidOperationException("Connection not initialized. Call InitializeAsync(idTeam) first.");
+            }
+
             if (connection.State == HubConnectionState.Disconnected)
                 await connection.StartAsync();
         }
