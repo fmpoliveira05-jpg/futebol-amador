@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs
 {
@@ -11,12 +12,14 @@ namespace Application.DTOs
         public Guid IdTeam { get; set; }
 
         [Required]
-        public int MyTeamGoals { get; set; }
+        [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
+        public int NumGoalsTeam { get; set; }
 
         [Required]
         public Guid IdOpponent { get; set; }
         
         [Required]
-        public int OpponentGoals { get; set; }
+        [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
+        public int NumGoalsOpponent { get; set; }
     }
 }

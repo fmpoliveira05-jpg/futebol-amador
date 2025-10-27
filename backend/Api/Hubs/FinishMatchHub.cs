@@ -20,18 +20,19 @@ namespace Api.Hubs
             this.geralValidator = geralValidator;
         }
 
-        public async Task JoinStartMatch(Guid idMatch, FinishMatchDTO finishMatch)
+        public async Task JoinFinishMatch(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
             JoinFinishMatch result;
+            var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
 
             try
             {                
                 result = await managerFinishMatchService.JoinHubAsync(idMatch, finishMatch, userId, connectionId);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 throw new HubException(ex.Message);
             }
@@ -54,10 +55,11 @@ namespace Api.Hubs
             return;
         }
 
-        public async Task EditResult(Guid idMatch, FinishMatchDTO finishMatch)
+        public async Task EditResult(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
+            var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
             JoinFinishMatch result;
             
@@ -65,7 +67,7 @@ namespace Api.Hubs
             {
                 result = await managerFinishMatchService.UpdateResult(idMatch, finishMatch, userId, connectionId);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 throw new HubException(ex.Message);
             }
@@ -88,14 +90,14 @@ namespace Api.Hubs
             return;
         }
 
-        public async Task LeaveStartMatch()
+        public async Task LeaveFinishMatch()
         {
             try
             {
                 bool success = await HandleLeaveHub();
                 geralValidator.ValidateLeaveMatch(success);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 throw new HubException(ex.Message);
             }

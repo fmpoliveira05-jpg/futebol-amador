@@ -5,6 +5,7 @@ namespace Application.DTOs
 {
     public class FinishMatchDTO
     {
+        public Guid IdMatch { get; set; }
         public Guid IdTeam { get; set; }
 
         [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]

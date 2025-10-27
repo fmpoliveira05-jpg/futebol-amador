@@ -7,8 +7,6 @@ using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 namespace Application.Services
 {
@@ -39,7 +37,7 @@ namespace Application.Services
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
         }
 
-        private bool CoincideResults(FinishMatchDTO firstResult, FinishMatchDTO secondResult)
+        private bool CoincideResults(ResultMatchDto firstResult, ResultMatchDto secondResult)
         {
             var coincide = false;
             validator.ValidateMatchResultTwoTeams(firstResult, secondResult);
@@ -76,7 +74,7 @@ namespace Application.Services
         }
 
         private async Task FinalizeMatchIfResultsMatch(ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub, 
-            Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, FinishMatchDTO finishMatch)
+            Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
         {
             var first = hub.First();
             var firstTeamId = first.Key;
@@ -101,7 +99,7 @@ namespace Application.Services
         }
 
         //Validar se o IdMatch é o mesmo do da ultima pessoa
-        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, FinishMatchDTO finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
         {  
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
             
@@ -154,7 +152,7 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, FinishMatchDTO finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
    

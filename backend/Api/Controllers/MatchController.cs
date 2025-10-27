@@ -2,13 +2,16 @@
 using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
-using Application.Interfaces.Hub;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Domain.Enums;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+/*
+ Criar urls para o FinishMatch
+ */
 namespace Api.Controllers
 {
     //[Authorize]
@@ -17,11 +20,13 @@ namespace Api.Controllers
     public class MatchController : ControllerBase
     {
         private readonly IMatchService matchController;
-        private readonly IStartMatchHub hub;
-
-        public MatchController(IMatchService matchController)
+        private readonly IStartMatchHubClientService startMatchHubClientService;
+        private readonly IFinishMatchHubClientService finishMatchHubClientService;
+        
+        public MatchController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService)
         {
             this.matchController = matchController;
+            this.startMatchHubClientService = startMatchHubClientService;
         }
 
         [HttpGet]
@@ -249,8 +254,8 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            hub.JoinStartMatch(idMatch);
-            return Ok();
+            await startMatchHubClientService.JoinStartMatchAsync(idMatch);
+            return Ok("Conseguiu entrar no hub!");
         }
 
         [HttpPost("/LeaveStartMatch")]
@@ -261,8 +266,8 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            hub.LeaveStartMatch();
-            return Ok();
+            await startMatchHubClientService.LeaveStartMatchAsync();
+            return Ok("Saiu do Hub com sucesso!");
         }
 
         //Falta apenas chamar hub
@@ -279,10 +284,15 @@ namespace Api.Controllers
                 return BadRequest("Não foi mandado o resultado da equipa");
             }
 
-            await matchController.FinishMatch(idTeam, result);
-            
-            //Chamar Hub finishmatch e utilizar o join
-            return Ok();
+            if (idTeam != result.IdTeam)
+            {
+                return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
+            }
+
+            await finishMatchHubClientService.JoinFinishMatchAsync(result);
+            //await matchController.FinishMatch(idTeam, result);
+
+            return Ok("Resultado submetido!");
         }
 
         [HttpPut("/UpdateFinishMatch")]
@@ -298,29 +308,24 @@ namespace Api.Controllers
                 return BadRequest("Não foi mandado o resultado da equipa");
             }
 
-            await matchController.FinishMatch(idTeam, result); //Chamo na mesma o Finish que tem as mesmas validações
+            if(idTeam != result.IdTeam)
+            {
+                return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
+            }
 
-            //Chamar Hub finishmatch e utilizar um metodo para atualizar se calhar
-            return Ok();
+            //await matchController.FinishMatch(idTeam, result); //Chamo na mesma o Finish que tem as mesmas validações
+            await finishMatchHubClientService.EditResultMatchAsync(result);
+  
+            return Ok("Resultado alterado com sucesso");
         }
 
         [HttpPost("/LeaveFinishMatch")]
-        public async Task<IActionResult> LeaveFinishMatch(Guid idTeam, [FromBody] Guid idMatch)
+        public async Task<IActionResult> LeaveFinishMatch()
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa está vazio");
-            }
+            //await matchController.LeaveFinishMatch(idTeam, idMatch);
+            await finishMatchHubClientService.LeaveFinishMatchAsync();
 
-            if (idMatch == Guid.Empty)
-            {
-                return BadRequest("O id da equipa está vazio");
-            }
-
-            await matchController.LeaveFinishMatch(idTeam, idMatch);
-
-            //Chamar Hub finishMatch e chamar o leave
-            return Ok();
+            return Ok("Saiu do Hub com sucesso!");
         }
 
         private List<string> validatePostPoneMatch(Guid idTeam, PostponeMatchDTO dto)

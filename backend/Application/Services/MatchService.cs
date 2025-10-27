@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
@@ -163,26 +162,6 @@ namespace Application.Services
             match.MatchStatus = MatchStatus.CANCELED;
             
             await UnityOfWork.SaveChangesAsync();
-        }
-
-        public async Task FinishMatch(Guid idTeam, ResultMatchDto result)
-        {
-            MatchValidator.validateResultMatch(idTeam, result);
-
-            var idMatch = result.IdMatch;
-            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);        
-            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
-            var opponent = match?.Teams.FirstOrDefault(ts => ts.IdTeam == result.IdOpponent);
-         
-            MatchValidator.ValidateFinishMatch(match, team, idTeam, opponent, opponent.IdTeam, result);
-        }
-
-        public async Task LeaveFinishMatch(Guid idTeam, Guid idMatch)
-        {
-            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);
-            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam)?.Team;
-
-            MatchValidator.ValidateCancelFinishMatch(match, team);
         }
     }
 }

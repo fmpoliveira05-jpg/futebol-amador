@@ -8,26 +8,26 @@ namespace Application.Validators.Hubs
 {
     public class FinishMatchValidator : IFinishMatchValidator
     {
-        public void ValidateVariableJoinMatch(Guid matchId, FinishMatchDTO finishMatch, Guid userId, string connectionId)
+        public void ValidateVariableJoinMatch(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
         {
             if (matchId == Guid.Empty)
             {
-                throw new ArgumentNullException("O id da partida está null");
+                throw new ArgumentException("O id da partida está null");
             }
 
             if (userId == Guid.Empty)
             {
-                throw new ArgumentNullException("O id do utilizador está a null");
+                throw new ArgumentException("O id do utilizador está a null");
             }
 
             if (string.IsNullOrEmpty(connectionId))
             {
-                throw new ArgumentNullException("A connection string está a null ou vazia");
+                throw new ArgumentException("A connection string está a null ou vazia");
             }
 
             if (finishMatch == null)
             {
-                throw new ArgumentNullException("O resultado da partida não pode estar a vazio ou nulo");
+                throw new ArgumentException("O resultado da partida não pode estar a vazio ou nulo");
             }
 
             if (finishMatch.NumGoalsOpponent < 0 || finishMatch.NumGoalsTeam < 0)
@@ -37,12 +37,12 @@ namespace Application.Validators.Hubs
 
             if (finishMatch.IdTeam == Guid.Empty) 
             {
-                throw new ArgumentNullException("O id da sua equipa é obrigatório");
+                throw new ArgumentException("O id da sua equipa é obrigatório");
             }
 
             if (finishMatch.IdOpponent == Guid.Empty) 
             {
-                throw new ArgumentNullException("O id da equipa adversária é obrigatório");
+                throw new ArgumentException("O id da equipa adversária é obrigatório");
             }
         }
 
@@ -50,7 +50,7 @@ namespace Application.Validators.Hubs
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não existe ou não foi encontrada");
+                throw new ArgumentException("A match não existe ou não foi encontrada");
             }
         }
 
@@ -58,7 +58,7 @@ namespace Application.Validators.Hubs
         {
             if (teamMatchAdmin == null)
             {
-                throw new ArgumentNullException("A equipa do admin não foi encontrada");
+                throw new ArgumentException("A equipa do admin não foi encontrada");
             }
 
             if (teamMatchAdmin.IdTeam != teamId)
@@ -76,7 +76,7 @@ namespace Application.Validators.Hubs
             }
         }
 
-        public void ValidateMatchResultTwoTeams(FinishMatchDTO firstResult, FinishMatchDTO secondResult)
+        public void ValidateMatchResultTwoTeams(ResultMatchDto firstResult, ResultMatchDto secondResult)
         {
             if (firstResult.IdOpponent != secondResult.IdTeam ||
                 firstResult.IdTeam != secondResult.IdOpponent)
@@ -89,7 +89,7 @@ namespace Application.Validators.Hubs
         {
             if (opponent == null)
             {
-                throw new ArgumentNullException("O adversário não existe");
+                throw new ArgumentException("O adversário não existe");
             }
         }
     }

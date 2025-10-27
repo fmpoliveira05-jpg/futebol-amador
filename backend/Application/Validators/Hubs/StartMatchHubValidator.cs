@@ -10,17 +10,17 @@ namespace Application.Validators.Hubs
         {
             if (matchId == Guid.Empty)
             {
-                throw new ArgumentNullException("O id da partida está null");
+                throw new ArgumentException("O id da partida está null");
             }
 
             if (userId == Guid.Empty)
             {
-                throw new ArgumentNullException("O id do utilizador está a null");
+                throw new ArgumentException("O id do utilizador está a null");
             }
 
             if (string.IsNullOrEmpty(connectionId))
             {
-                throw new ArgumentNullException("A connection string está a null ou vazia");
+                throw new ArgumentException("A connection string está a null ou vazia");
             }
         }
 
@@ -28,14 +28,14 @@ namespace Application.Validators.Hubs
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A partida não foi encontrada");
+                throw new ArgumentException("A partida não foi encontrada");
             }
         }
         public void ValidateJoinMatch(TeamStatistics teamMatchAdmin, Guid idTeam, ConcurrentDictionary<Guid, string> hub)
         {
             if (teamMatchAdmin == null)
             {
-                throw new ArgumentNullException("A equipa do admin não foi encontrada");
+                throw new ArgumentException("A equipa do admin não foi encontrada");
             }
 
             if (teamMatchAdmin.IdTeam != idTeam)

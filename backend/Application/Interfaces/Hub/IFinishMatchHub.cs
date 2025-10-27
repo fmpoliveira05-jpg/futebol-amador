@@ -4,8 +4,8 @@ namespace Application.Interfaces.Hub
 {
     public interface IFinishMatchHub
     {
-        public Task JoinMatch(Guid idMatch);
-        public Task EditResult(Guid idMatch, FinishMatchDTO finishMatch);
-        public Task LeaveMatch();
+        public Task JoinFinishMatch(ResultMatchDto finishMatch);
+        public Task EditResult(ResultMatchDto finishMatch);
+        public Task LeaveFinishMatch();
     }
 }

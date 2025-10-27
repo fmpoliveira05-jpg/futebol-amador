@@ -29,7 +29,7 @@ namespace Api.Hubs
             {
                 result = await startMatchManager.JoinHubAsync(idMatch, userId, connectionId);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 throw new HubException(ex.Message);
             }
@@ -53,9 +53,8 @@ namespace Api.Hubs
                 {
                     await Groups.RemoveFromGroupAsync(result.FirstAdminConnectionId, groupName);
                 }
+                await Clients.Group(groupName).ReceiveStartMatch("O jogo começou!");
             }
-
-            return;
         }
 
         public async Task LeaveStartMatch()
@@ -65,7 +64,7 @@ namespace Api.Hubs
                 bool success = await HandleLeaveHub();
                 geralValidator.ValidateLeaveMatch(success);
             }
-            catch (ArgumentNullException ex)
+            catch (ArgumentException ex)
             {
                 throw new HubException(ex.Message);
             }
