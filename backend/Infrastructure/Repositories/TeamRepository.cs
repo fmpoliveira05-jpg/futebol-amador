@@ -162,5 +162,24 @@ namespace Infrastructure.Repositories
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        public Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId)
+        {
+            return DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Include(p => p.Members)
+                .Select(p => p.Id.ToString())
+                .ToListAsync();
+        }
+
+        public Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId)
+        {
+            return DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Include(p => p.Members)
+                .Where(p => p.Members.Any(m => m.IsAdmin))
+                .Select(p => p.Id.ToString())
+                .ToListAsync();
+        }
     }
 }

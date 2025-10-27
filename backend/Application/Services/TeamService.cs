@@ -18,12 +18,12 @@ namespace Application.Services
     {
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
-        private readonly IUserRepository UserRepository;
+        private readonly IPlayerRepository UserRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
 
-        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator, IRankRepository rankRepository)
+        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IPlayerRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator, IRankRepository rankRepository)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;

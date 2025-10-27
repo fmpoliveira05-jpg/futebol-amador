@@ -10,6 +10,8 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
+        Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId);
+        Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId);
         Task<List<Teams>?> GetAllTeamsAsync();
         Task<Teams?> GetTeamByIdAsync(Guid id);
         Task<Teams?> GetTeamByNameAsync(string name);

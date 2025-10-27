@@ -39,6 +39,13 @@ namespace Infrastructure.Repositories
             return await context.Player.FindAsync(id);
         }
 
+        public async Task<List<Player>> GetPlayersListByIdListAsync(List<Guid> playerIdList)
+        {
+            return await context.Player
+                .Where(p => playerIdList.Contains(p.Id))
+                .ToListAsync();
+        }
+
         public void UpdatePlayer(Player updatedPlayer)
         {
             context.Player.Update(updatedPlayer);

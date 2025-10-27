@@ -9,6 +9,8 @@ namespace Application.Interfaces.Repositories
 {
     public interface IPlayerRepository
     {
+        Task<List<Player>> GetPlayersListByIdListAsync(List<Guid> playerIdList);
+
         Task<List<Player>?> GetAllTPlayersAsync();
 
         Task<Player?> GetPlayerByIdAsync(Guid id);
