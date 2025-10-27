@@ -25,6 +25,7 @@ namespace Application
             services.AddScoped<IMatchService, MatchService>();
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
+            services.AddScoped<IPlayerService, PlayerService>();
 
             return services;
         }

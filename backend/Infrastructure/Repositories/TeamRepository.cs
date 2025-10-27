@@ -75,6 +75,11 @@ namespace Infrastructure.Repositories
                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
+        public IQueryable<Teams> GetTeamsQueryable()
+        {
+            return DbContext.Team.AsQueryable();
+        }
+        
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
             return await DbContext.Team

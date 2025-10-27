@@ -19,7 +19,7 @@ namespace Domain.Entities
 
         public Guid? IdTeam { get; set; } //FK
 
-        public bool IsAdmin { get; set; } //Validar se é mesmo necessário
+        public bool IsAdmin { get; set; }
 
         public DateTime? IsAdminLastChangedAt { get; set; }
 
@@ -37,29 +37,24 @@ namespace Domain.Entities
             IsAdmin = false;
         }
 
-        //Falta meter o CRUD básico do MembershipRequests
-        /***
-         * Metodo que permite encontrar um pedido de adesão a uma equipa pelo seu id
-         * 
-         * idMembershipRequest: O id do pedido de adesão a encontrar
-         * 
-         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
-         */
-        private MembershipRequests FindMembershipRequest(Guid idMembershipRequest)
-        {
-            return null;
-        }
-
         /***
          * Metodo que permite adicionar um pedido de adesão a uma equipa
          * 
          * membershipRequests: O pedido de adesão a adicionar
          * 
-         * Retororna o pedido de adesão adicionado ou null se não for possível adicionar
+         * Retorna o pedido de adesão adicionado ou null se não for possível adicionar
          */
-        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests)
+        public MembershipRequests AddMembershipRequest(MembershipRequests membershipRequest)
         {
-            return null;
+            var existingRequest = MembershipRequests.FirstOrDefault(mr => mr.Id == membershipRequest.Id);
+            if (existingRequest != null)
+            {
+                return null;
+            }
+
+            MembershipRequests.Add(membershipRequest);
+
+            return membershipRequest;
         }
 
         /***
@@ -69,9 +64,17 @@ namespace Domain.Entities
          *  
          *  Retorna o pedido de adesão removido ou null se não for possível remover
          */
-        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests)
+        public MembershipRequests RemoveMembershipRequest(MembershipRequests membershipRequest)
         {
-            return null;
+            var existingRequest = MembershipRequests.FirstOrDefault(mr => mr.Id == membershipRequest.Id);
+            if (existingRequest == null)
+            {
+                return null;
+            }
+
+            MembershipRequests.Remove(existingRequest);
+
+            return existingRequest;
         }
 
         /***
@@ -81,9 +84,9 @@ namespace Domain.Entities
          * 
          * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
          */
-        public MembershipRequests getMembershipRequestById(Guid id)
+        public MembershipRequests GetMembershipRequestById(Guid id)
         {
-            return null;
+            return MembershipRequests.FirstOrDefault(mr => mr.Id == id);
         }
 
         public override string ToString()
