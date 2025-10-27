@@ -110,6 +110,8 @@ namespace Unit.ApplicationTests.ServicesTests
             };
 
             var unrankedRank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
+            var adminPlayer = new Player { Id = Guid.NewGuid(), IsAdmin = true };
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
 
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Teams)null);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync(unrankedRank);
@@ -117,7 +119,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
             // ACT
-            var result = await _sut.CreateTeamAsync(dto);
+            var result = await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
             result.Should().NotBeEmpty("porque deve retornar o ID da equipa criada");
@@ -147,11 +149,13 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var rank = new TestRank("Unranked");
             var existingTeam = new Teams(dto.Name, "Outra equipa", new byte[] { 9, 9 }, new Pitch("Campo Antigo", "Rua Antiga"), rank);
+            var adminPlayer = new Player { Id = Guid.NewGuid(), IsAdmin = true };
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync(existingTeam);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync(rank);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
 
             // ACT
-            Func<Task> act = async () => await _sut.CreateTeamAsync(dto);
+            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -174,7 +178,6 @@ namespace Unit.ApplicationTests.ServicesTests
             // ARRANGE
             var rank = new TestRank("Unranked");
             var existingTeam = new Teams("FC Alpha", "Equipa atual", new byte[] { 1 }, new Pitch("Campo 1", "Rua 1"), rank);
-
             var adminPlayer = new Player
             {
                 Id = Guid.NewGuid(),
@@ -185,6 +188,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync("FC Nova")).ReturnsAsync((Teams)null);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync(rank);
+
             var dto = new CreateTeamDto
             {
                 Name = "FC Nova",
@@ -194,17 +198,15 @@ namespace Unit.ApplicationTests.ServicesTests
             };
 
             // ACT
-            Func<Task> act = async () => await _sut.CreateTeamAsync(dto);
+            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*já é administrador*", "porque um jogador admin não pode criar uma nova equipa");
+                     .WithMessage("*ja possui uma equipa*", "porque um jogador admin não pode criar uma nova equipa");
 
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Teams>()), Times.Never, "porque a criação deve ser bloqueada");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
-
-
 
         // TESTE T4GE1: Criar equipa falha se não existir Rank padrão
         /// <summary>
@@ -223,11 +225,13 @@ namespace Unit.ApplicationTests.ServicesTests
                 icon = new byte[] { 9, 9, 9 },
                 HomePitch = new PitchDto { Name = "Campo", Address = "Rua" }
             };
+            var adminPlayer = new Player { Id = Guid.NewGuid(), IsAdmin = true };
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Teams)null);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync((Rank)null!);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
 
             // ACT
-            Func<Task> act = async () => await _sut.CreateTeamAsync(dto);
+            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -372,7 +376,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<NotFoundException>()
-                     .WithMessage("*não foi encontrada*", "porque a equipa não existe na base de dados");
+                     .WithMessage("*não existe*", "porque a equipa não existe na base de dados");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve persistir alterações");
         }
 
@@ -752,15 +756,13 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = Guid.NewGuid();
             var playerId = Guid.NewGuid();
             var rank = new TestRank();
-            var team = new Teams("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
-            {
-                Id = teamId
-            };
+            var team = new Teams("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId);
+            team.MembershipRequests = team.MembershipRequests ?? new List<MembershipRequests>();
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
-            var player = new Player { Id = playerId, IdTeam = Guid.Empty };
-            player.MembershipRequests = new List<MembershipRequests> { request };
+            var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequests> { request } };
+            team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
@@ -770,9 +772,9 @@ namespace Unit.ApplicationTests.ServicesTests
             await _sut.AcceptMembershipRequestAsync(teamId, requestId, adminId);
 
             // ASSERT
-            team.Members.Should().Contain(player, "porque o jogador foi adicionado à equipa");
-            team.MembershipRequests.Should().BeEmpty("porque o pedido foi removido da equipa");
-            player.MembershipRequests.Should().BeEmpty("porque o pedido foi removido do jogador");
+            team.Members.Should().Contain(player);
+            team.MembershipRequests.Should().BeEmpty();
+            player.MembershipRequests.Should().BeEmpty();
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
@@ -794,14 +796,12 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = Guid.NewGuid();
             var playerId = Guid.NewGuid();
             var rank = new TestRank();
-            var team = new Teams("FC Reject", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
-            {
-                Id = teamId
-            };
+            var team = new Teams("FC Reject", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId);
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequests> { request } };
+            team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
@@ -839,6 +839,7 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var nonAdmin = new Player { Id = nonAdminId, IdTeam = team.Id, IsAdmin = false };
             var player = new Player { Id = playerId };
+            team.Members.Add(nonAdmin);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(nonAdminId)).ReturnsAsync(nonAdmin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
@@ -878,8 +879,9 @@ namespace Unit.ApplicationTests.ServicesTests
                 new MemberShipRequestDto { PlayerName = "Jogador 1" },
                 new MemberShipRequestDto { PlayerName = "Jogador 2" }
             };
+            team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(teamId)).ReturnsAsync(admin);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _teamRepoMock.Setup(r => r.GetMembershipRequestsDtoAsync(teamId)).ReturnsAsync(requests);
 
             // ACT

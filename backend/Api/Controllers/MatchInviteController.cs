@@ -21,7 +21,7 @@ namespace Api.Controllers
          *  Vai faltar AUTs
          */
 
-        [HttpPost("/match-invites")]
+        [HttpPost("match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
             if (idTeam == Guid.Empty)
@@ -80,7 +80,7 @@ namespace Api.Controllers
             return error;
         }
 
-        [HttpPost("/AcceptMatchInvite")]
+        [HttpPost("AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
@@ -112,7 +112,7 @@ namespace Api.Controllers
 
         //DELETE
         // api/.../RefuseMatchInvite/id_invite
-        [HttpDelete("/RefuseMatchInvite")]
+        [HttpDelete("RefuseMatchInvite")]
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
@@ -145,7 +145,7 @@ namespace Api.Controllers
             return Ok();
         }
 
-        [HttpPut("/Negociate")]
+        [HttpPut("Negociate")]
         public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
             if (idTeam == Guid.Empty)

@@ -24,7 +24,7 @@ namespace Application.Validators
             {
                 if (dateMin.Value > dateMax.Value)
                 {
-                    throw new InvalidOperationException("A data minima tem de ser inferior à data maxima");
+                    throw new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima");
                 }
             }
         }
@@ -33,7 +33,7 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não pode estar nula");
+                throw new ArgumentException("A match não pode estar nula");
             }
 
             if (match.MatchDate == newDate)
@@ -92,7 +92,7 @@ namespace Application.Validators
         public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent) {
             if (match == null)
             {
-                throw new ArgumentNullException("A match a cancelar não existe ou já não pode ser cancelada.");
+                throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
             }
 
             var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;
@@ -112,12 +112,12 @@ namespace Application.Validators
         {
             if (idTeam != result.IdTeam)
             {
-                throw new ArgumentException("A team que está a tentar cancelar não faz parte do jogo");
+                throw new ArgumentException("A team que está a tentar finalizar não faz parte do jogo");
             }
 
-            ValidateNumGoals(result.MyTeamGoals);
+            ValidateNumGoals(result.NumGoalsTeam);
 
-            ValidateNumGoals(result.OpponentGoals);
+            ValidateNumGoals(result.NumGoalsOpponent);
         }
 
         public void ValidateFinishMatch(Matches match, TeamStatistics team, Guid idTeam,
@@ -125,27 +125,27 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não existe ou então não está em progresso");
+                throw new ArgumentException("A match não existe ou então não está em progresso");
             }
 
             if (team == null)
             {
-                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+                throw new ArgumentException("A team que quer finalizar a partida não foi encontrada ou não existe");
             }
 
             if (idTeam != result.IdTeam)
             {
-                throw new ArgumentException("A team que está a tentar cancelar não faz parte do jogo");
+                throw new ArgumentException("A team que está a tentar finalizar não faz parte do jogo");
             }
 
             if (opponent == null)
             {
-                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+                throw new ArgumentException("A team que quer finalizar a partida não foi encontrada ou não existe");
             }
 
             if (opponent.IdTeam == result.IdOpponent)
             {
-                throw new ArgumentNullException("A team que quer cancelar a partida não foi encontrada ou não existe");
+                throw new ArgumentException("A team que quer finalizar a partida não foi encontrada ou não existe");
             }
         }
 
@@ -153,12 +153,12 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não foi encontrada");
+                throw new ArgumentException("A match não foi encontrada");
             }
 
             if (team == null)
             {
-                throw new ArgumentNullException("A equipa que está a tentar sair do match não faz parte do mesmo");
+                throw new ArgumentException("A equipa que está a tentar sair do match não faz parte do mesmo");
             }
         }
 
@@ -166,12 +166,12 @@ namespace Application.Validators
         {
             if (teamStatistics == null)
             {
-                throw new ArgumentNullException("A equipa não existe neste jogo");
+                throw new ArgumentException("A equipa não existe neste jogo");
             }
 
             if (teamStatistics.Team == null)
             {
-                throw new ArgumentNullException("Não foram carregados os dados da equipa");
+                throw new ArgumentException("Não foram carregados os dados da equipa");
             }
 
             if (teamStatistics.IdTeam != idTeam)
@@ -184,7 +184,7 @@ namespace Application.Validators
         {
             if (postPoneMatch == null)
             {
-                throw new ArgumentNullException("O adiamento da partida está a null");
+                throw new ArgumentException("O adiamento da partida está a null");
             }
 
             if (postPoneMatch.IdTeamPostPone == idTeam)
@@ -197,7 +197,7 @@ namespace Application.Validators
         {
             if (match == null)
             {
-                throw new ArgumentNullException("A match não pode estar nula");
+                throw new ArgumentException("A match não pode estar nula");
             }
 
             if (match.MatchStatus != MatchStatus.POST_PONED)

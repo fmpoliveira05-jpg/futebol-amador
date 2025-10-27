@@ -5,7 +5,8 @@ namespace Application.Interfaces.Validators.Hub
 {
     public interface IStartMatchHubValidator
     {
-        public void ValidateJoinMatch(Matches match, Teams teamMatchAdmin, Guid idTeam, ConcurrentDictionary<Guid, string> lobby);
-        public void ValidateLeaveMatch(bool success);
+        public void ValidateVariableJoinMatch(Guid matchId, Guid userId, string connectionId);
+        public void ValidateMatchJoinMatch(Matches match);
+        public void ValidateJoinMatch(TeamStatistics teamMatchAdmin, Guid idTeam, ConcurrentDictionary<Guid, string> hub);
     }
 }

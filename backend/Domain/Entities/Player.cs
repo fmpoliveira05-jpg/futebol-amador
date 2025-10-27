@@ -19,7 +19,7 @@ namespace Domain.Entities
 
         public Guid? IdTeam { get; set; } //FK
 
-        public bool IsAdmin { get; set; } //Validar se é mesmo necessário
+        public bool IsAdmin { get; set; }
 
         public DateTime? IsAdminLastChangedAt { get; set; }
 
@@ -35,55 +35,6 @@ namespace Domain.Entities
             Position = position;
             Height = height;
             IsAdmin = false;
-        }
-
-        //Falta meter o CRUD básico do MembershipRequests
-        /***
-         * Metodo que permite encontrar um pedido de adesão a uma equipa pelo seu id
-         * 
-         * idMembershipRequest: O id do pedido de adesão a encontrar
-         * 
-         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
-         */
-        private MembershipRequests FindMembershipRequest(Guid idMembershipRequest)
-        {
-            return null;
-        }
-
-        /***
-         * Metodo que permite adicionar um pedido de adesão a uma equipa
-         * 
-         * membershipRequests: O pedido de adesão a adicionar
-         * 
-         * Retororna o pedido de adesão adicionado ou null se não for possível adicionar
-         */
-        public MembershipRequests addMemberShipRequest(MembershipRequests membershipRequests)
-        {
-            return null;
-        }
-
-        /***
-         *  Metodo que permite remover um pedido de adesão a uma equipa
-         *  
-         *  membershipRequests: O pedido de adesão a remover
-         *  
-         *  Retorna o pedido de adesão removido ou null se não for possível remover
-         */
-        public MembershipRequests removeMembershipRequest(MembershipRequests membershipRequests)
-        {
-            return null;
-        }
-
-        /***
-         * Metodo que permite obter um pedido de adesão a uma equipa pelo seu id
-         * 
-         * id: O id do pedido de adesão a obter
-         * 
-         * Retorna o pedido de adesão com o id especificado ou null se não for encontrado
-         */
-        public MembershipRequests getMembershipRequestById(Guid id)
-        {
-            return null;
         }
 
         public override string ToString()

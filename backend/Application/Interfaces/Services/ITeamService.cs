@@ -7,7 +7,7 @@ namespace Application.Interfaces.Services
 {
     public interface ITeamService
     {
-        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto);
+        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid adminUserId);
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 

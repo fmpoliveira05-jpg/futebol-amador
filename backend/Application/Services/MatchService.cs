@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
@@ -7,6 +6,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
+using NUnit.Framework;
 
 /*
  Fazer breves testes para ver se está tudo a dar com estas alterações
@@ -23,7 +23,7 @@ namespace Application.Services
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            IMatchValidator MatchValidator)
+            IMatchValidator MatchValidator, IPlayerRepository @object)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
@@ -154,6 +154,16 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            /*
+             * Nos testes se simular uma match a null,
+             * o campo do opponent vai ser null,
+             * e vai dar NullReferenceException ao tentar aceder a opponent.IdTeam,
+             * estamos a aceder a isso já na linha do ValidateCancelMatch
+            */
+            if (opponent == null)
+            {
+                throw new ArgumentException("Adversário não encontrado na partida.");
+            }
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
             
@@ -163,26 +173,6 @@ namespace Application.Services
             match.MatchStatus = MatchStatus.CANCELED;
             
             await UnityOfWork.SaveChangesAsync();
-        }
-
-        public async Task FinishMatch(Guid idTeam, ResultMatchDto result)
-        {
-            MatchValidator.validateResultMatch(idTeam, result);
-
-            var idMatch = result.IdMatch;
-            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);        
-            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
-            var opponent = match?.Teams.FirstOrDefault(ts => ts.IdTeam == result.IdOpponent);
-         
-            MatchValidator.ValidateFinishMatch(match, team, idTeam, opponent, opponent.IdTeam, result);
-        }
-
-        public async Task LeaveFinishMatch(Guid idTeam, Guid idMatch)
-        {
-            var match = await MatchRepository.GetMatchInProgressByIdAsync(idMatch);
-            var team = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam)?.Team;
-
-            MatchValidator.ValidateCancelFinishMatch(match, team);
         }
     }
 }

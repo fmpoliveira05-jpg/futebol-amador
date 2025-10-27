@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 
@@ -14,7 +13,5 @@ namespace Application.Interfaces.Services
         public Task RejectPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto);
         public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam);
         public Task CancelMatch(Guid idTeam, Guid idMatch, string description);
-        public Task FinishMatch(Guid idTeam, ResultMatchDto result);
-        public Task LeaveFinishMatch(Guid idTeam, Guid idMatch);
     }
 }
