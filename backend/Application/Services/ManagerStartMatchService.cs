@@ -184,5 +184,10 @@ namespace Application.Services
 
             return await Task.FromResult(await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId));
         }
+
+        public Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, string connectionId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
