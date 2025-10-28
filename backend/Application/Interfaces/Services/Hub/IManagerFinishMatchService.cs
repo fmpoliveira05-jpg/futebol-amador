@@ -1,7 +1,7 @@
 ﻿using Application.DTOs;
 using Application.Hubs;
 
-namespace Application.Interfaces.Services
+namespace Application.Interfaces.Services.Hub
 {
     public interface IManagerFinishMatchService
     {

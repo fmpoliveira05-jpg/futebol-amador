@@ -1,10 +1,6 @@
-﻿using Api.Controllers; // Assume que este é o teu namespace
-using Application.DTOs.Team;
+﻿using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {

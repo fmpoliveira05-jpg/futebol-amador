@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Exceptions;
 using Domain.Constants;
+
 /***
  * Entidade que representa uma equipa desportiva.
  */
@@ -12,31 +12,34 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(ModelConstants.TeamConst.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
+        [Required]
+        [StringLength(ModelConstants.TeamConst.MaxNameLength, MinimumLength = ModelConstants.TeamConst.MinNameLength)]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
+        [StringLength(ModelConstants.TeamConst.MaxDescriptionLength)]
+        [MaxLength()]
         public string? Description { get; set; }
 
         public byte[]? Icon { get; set; }
 
         public Pitch Pitch { get; set; }
 
+        [Required]
         [ForeignKey("Pitch")]
         public Guid IdPitch { get; set; } //FK
 
+        [Required]
         public DateTime DataFoundation { get; set; }
 
         public ICollection<Player> Members { get; set; } = new List<Player>();
 
-        [Range(ModelConstants.GeneralConst.MinAge, ModelConstants.GeneralConst.MaxAge, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
-        public float AverageAge { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
+        [Required]
+        [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
         public int CurrentPoints { get; set; }
 
         public Rank Rank { get; set; }
 
+        [Required]
         [ForeignKey("Rank")]
         public Guid IdRank { get; set; } //FK
 
@@ -58,22 +61,21 @@ namespace Domain.Entities
 
         public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
-            Name = name;
-            Description = description;
-            Icon = icon;
-            Pitch = pitch;
-            IdPitch = pitch.Id;
-            DataFoundation = DateTime.Now;
-            AverageAge = ModelConstants.GeneralConst.MinAge;
+            this.Name = name;
+            this.Description = description;
+            this.Icon = icon;
+            this.Pitch = pitch;
+            this.IdPitch = pitch.Id;
+            this.DataFoundation = DateTime.Now;
             this.Rank = DefaultRank;
-            CurrentPoints = 0;
-            Calendar = new Calendar();
-            IdCalendar = Calendar.Id;
+            this.CurrentPoints = 0;
+            this.Calendar = new Calendar();
+            this.IdCalendar = Calendar.Id;
         }
         //
         public override string ToString()
         {
-            return $"Team: {Name}, Description: {Description}, Founded: {DataFoundation.ToShortDateString()}, Average Age: {AverageAge}, Current Points: {CurrentPoints}";
+            return $"Team: {Name}, Description: {Description}, Founded: {DataFoundation.ToShortDateString()}, Current Points: {CurrentPoints}";
         }
     }
 }

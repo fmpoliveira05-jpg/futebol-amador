@@ -1,6 +1,6 @@
 ﻿using Application.Hubs;
 using Application.Interfaces.Hub;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Microsoft.AspNetCore.SignalR;
 

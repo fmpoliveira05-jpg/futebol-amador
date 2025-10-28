@@ -1,7 +1,7 @@
-﻿using Application.Interfaces.Services.Hub;
+﻿using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace Application.Services.Hub
+namespace Application.Services.Hub.ClientService
 {
     public class StartMatchHubClientService: IStartMatchHubClientService
     {

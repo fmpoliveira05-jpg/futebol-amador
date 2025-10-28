@@ -1,12 +1,12 @@
 ﻿using Application.Hubs;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
-namespace Application.Services
+namespace Application.Services.Hub
 {
     public class ManagerStartMatchService : IManagerStartMatchService
     {

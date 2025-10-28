@@ -12,25 +12,28 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
+        [Required]
         public MatchStatus MatchStatus { get; set; } = MatchStatus.SCHEDULED;
 
         public ICollection<TeamStatistics> Teams { get; set; }
 
+        [Required]
         public DateTime MatchDate { get; set; }
 
-        //public DateTime PostPoneDate { get; set; }
-
         public DateTime? TimeStart { get; set; } = null;
-
+        
+        [Required]
         public bool IsCompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
 
         public Pitch Pitch { get; set; }
 
+        [Required]
         [ForeignKey("Pitch")]
         public Guid idPitch { get; set; } //FK
 
         public Chat Chat { get; set; }
 
+        [Required]
         [ForeignKey("Chat")]
         public Guid IdChat { get; set; }
 

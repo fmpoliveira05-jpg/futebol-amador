@@ -21,7 +21,6 @@ namespace Infrastructure.Repositories
             await context.MatchInvite.AddAsync(matchInvite);
         }
 
-        //Ver este error
         public void DeleteMatchInvite(MatchInvite matchInvite)
         {
             context.MatchInvite.Remove(matchInvite);

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
@@ -11,18 +12,23 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(50)]
+        [Required]
+        [StringLength(ModelConstants.RankConts.MaxNameLength, MinimumLength = ModelConstants.RankConts.MinNameLength)] 
         public string Name { get; set; }
 
-        [Range(1, int.MaxValue, ErrorMessage = "O número de pontos ganhos por vitoria deve ser superior ou igual a 1")]
+        [Required]
+        [Range(ModelConstants.RankConts.MinPointsWin, ModelConstants.RankConts.MaxPointsWin, ErrorMessage = "O número de pontos ganhos por vitoria deve ser superior ou igual a 1")]
         public int WinPoints { get; set; }
 
+        [Required]
         public int DrawPoints { get; set; }
 
-        [Range(int.MinValue, 0, ErrorMessage = "O número de pontos perdidos deve ser igual ou inferior a 0")]
+        [Required]
+        [Range(ModelConstants.RankConts.MinPointLose, ModelConstants.RankConts.MaxPointLose, ErrorMessage = "O número de pontos perdidos deve ser igual ou inferior a 0")]
         public int LosePoints { get; set; }
 
-        [Range(0, int.MaxValue, ErrorMessage = "O número de pontos para estar num rank deve ser maior ou igaul a 0")]
+        [Required]
+        [Range(ModelConstants.RankConts.MinPointToPromotion, ModelConstants.RankConts.MaxPointToPromotion, ErrorMessage = "O número de pontos para estar num rank deve ser maior ou igaul a 0")]
         public int PointsToPromotion { get; set; }
 
         public Rank? NextRank { get; set; }

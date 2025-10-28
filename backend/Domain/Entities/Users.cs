@@ -8,24 +8,31 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
+        [Required]
+        [StringLength(ModelConstants.UserConst.MaxNameLength, MinimumLength = ModelConstants.UserConst.MinNameLength)]
         public string Name { get; set; }
 
+        [Required]
         public DateOnly DateOfBirth { get; set; }
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        [Required]
+        [StringLength(ModelConstants.GeneralConst.MaxAddressLength, MinimumLength = ModelConstants.GeneralConst.MinAddressLength)]
         public string Address { get; set; }
 
-        [MaxLength(50)]
+        [Required]
+        [StringLength(ModelConstants.UserConst.MaxEmailLength, MinimumLength = ModelConstants.UserConst.MinEmailLength)]
         [EmailAddress(ErrorMessage = "Invalid email format")] 
         public string Email { get; set; }
 
-        [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
+        [Required]
+        [StringLength(ModelConstants.UserConst.MaxPasswordLength, MinimumLength = ModelConstants.UserConst.MinPasswordLength)]
         public string Password { get; set; }
 
-        [StringLength(9, ErrorMessage = "Phone number must have 9 digits")]
+        [Required]
+        [StringLength(ModelConstants.UserConst.SizePhoneNumber, ErrorMessage = "Phone number must have 9 digits")]
         public string Phone { get; set; }
 
+        [Required]
         public DateTime CreationDate { get; set; }
 
         // Construtor protegido para uso em classes derivadas

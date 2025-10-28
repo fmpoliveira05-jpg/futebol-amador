@@ -339,20 +339,24 @@ namespace Application.Services
                 query = query.Where(t => t.Rank.Name.Contains(filters.Name));
             }
 
-            if (filters.MinAvgAge > 0)
+            /*
+                         if (filters.MinAvgAge > 0)
             {
                 query = query.Where(t => t.AverageAge > filters.MinAvgAge);
             }
+             */
 
             if (filters.MaxAvgAge < filters.MinAvgAge)
             {
                 throw new Exception("Max average age must be higher or equal to Min Average Age.");
             }
 
-            if (filters.MaxAvgAge > 0)
+            /*
+             if (filters.MaxAvgAge > 0)
             {
                 query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
             }
+             */
 
             if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
             {
