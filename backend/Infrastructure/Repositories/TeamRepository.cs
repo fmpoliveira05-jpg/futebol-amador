@@ -159,6 +159,11 @@ namespace Infrastructure.Repositories
             var query = _context.MembershipRequests
                 .Where(mr => mr.IdTeam == teamId);
 
+            if (filters.IsPlayerSender.HasValue)
+            {
+                query = query.Where(mr => mr.IsPlayerSender == filters.IsPlayerSender.Value);
+            }
+
             if (filters.MinDate.HasValue)
             {
                 query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);

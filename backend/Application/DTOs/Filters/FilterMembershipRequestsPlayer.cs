@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Application.DTOs.Filters
 {
-    public class FilterMembershipRequestsTeam
+    public class FilterMembershipRequestsPlayer
     {
         public string? SenderName { get; set; }
 

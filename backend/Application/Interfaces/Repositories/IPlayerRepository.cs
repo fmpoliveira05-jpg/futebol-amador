@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +23,12 @@ namespace Application.Interfaces.Repositories
 
         void UpdatePlayer(Player updatedPlayer);
 
+        Task<Player?> GetPlayerByIdWithRequestsAsync(Guid id);
+
         Task AddAsync(Player player);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(Guid playerId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
     }
 }

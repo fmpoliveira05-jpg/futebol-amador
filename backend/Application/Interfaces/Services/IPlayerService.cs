@@ -1,4 +1,6 @@
-﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Application.DTOs.PlayerDTOs;
 
 namespace Application.Interfaces.Services
 {
@@ -13,5 +15,14 @@ namespace Application.Interfaces.Services
         Task DeletePlayerAsync(Guid playerId);
 
         Task<String> LeaveTeam(Guid playerId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid playerId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
+
+        Task AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
+
+        Task RejectMembershipRequestAsync(Guid playerId, Guid requestId);
+
     }
 }
