@@ -1,6 +1,7 @@
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.DTOs.Filters;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -47,7 +48,7 @@ namespace Infrastructure.Repositories
         //Talvez crie uma variação deste apenas com o send e outro apenas com o receiver
         public async Task<Teams?> GetTeamByIdAsync(Guid id)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Calendar)
                 .Include(t => t.SentInvites)
                 .Include(t => t.ReceivedInvites)
@@ -56,7 +57,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamByNameAsync(string name)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
         }
 
@@ -107,12 +108,12 @@ namespace Infrastructure.Repositories
 
         public IQueryable<Teams> GetTeamsQueryable()
         {
-            return DbContext.Team.AsQueryable();
+            return _context.Team.AsQueryable();
         }
         
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Where(t => t.Id == teamId)
                 .Select(t => new TeamDetailsDto
                 {
@@ -139,7 +140,7 @@ namespace Infrastructure.Repositories
         public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId)
         {
 
-            return await DbContext.MembershipRequests
+            return await _context.MembershipRequests
                         .Where(mr => mr.IdTeam == teamId)
                         .Select(mr => new MemberShipRequestDto
                         {
@@ -153,9 +154,45 @@ namespace Infrastructure.Repositories
                         .ToListAsync();
         }
 
+        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
+        {
+            var query = _context.MembershipRequests
+                .Where(mr => mr.IdTeam == teamId);
+
+            if (filters.MinDate.HasValue)
+            {
+                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);
+            }
+
+            if (filters.MaxDate.HasValue)
+            {
+                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) <= filters.MaxDate.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.SenderName))
+            {
+                var upperName = filters.SenderName.ToUpper();
+                query = query.Where(mr => mr.Player.Name.ToUpper().Contains(upperName));
+            }
+
+            var list = await query
+                .Select(mr => new MemberShipRequestDto
+                {
+                    RequestId = mr.Id,
+                    PlayerName = mr.Player.Name,
+                    PlayerId = mr.IdPlayer,
+                    TeamName = mr.Team.Name,
+                    RequestDate = mr.InviteDate,
+                    IsPlayerSender = mr.IsPlayerSender
+                })
+                .ToListAsync();
+
+            return list;
+        }
+
         public async Task<Teams?> GetTeamForMembershipRequestAsync(Guid id)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Members)
                 .Include(t => t.MembershipRequests)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -163,7 +200,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamForDeletionAsync(Guid id)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Members)
                 .Include(t => t.Calendar)
                     .ThenInclude(c => c.Matches)
@@ -173,7 +210,7 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamForUpdateAsync(Guid id)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Members)
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -181,21 +218,21 @@ namespace Infrastructure.Repositories
 
         public async Task<Teams?> GetTeamByNameWithMembersAsync(string name)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Name == name);
         }
 
         public async Task<Teams?> GetTeamForMemberManagementAsync(Guid id)
         {
-            return await DbContext.Team
+            return await _context.Team
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters)
         {
-            var query = DbContext.Team.AsQueryable();
+            var query = _context.Team.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(filters.Name))
             {

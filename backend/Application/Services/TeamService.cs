@@ -323,7 +323,7 @@ namespace Application.Services
 
             TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
 
-            return await TeamRepository.GetMembershipRequestsDtoAsync(teamId);
+            return await TeamRepository.GetMembershipRequestsDtoAsyncWithFilters(teamId, filters);
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.MemberShip;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Domain.Entities;
 using System;
@@ -22,6 +23,8 @@ namespace Application.Interfaces.Repositories
         Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId);
 
         Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId);
+
+        Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters);
 
         Task<Teams?> GetTeamForMembershipRequestAsync(Guid id);
 
