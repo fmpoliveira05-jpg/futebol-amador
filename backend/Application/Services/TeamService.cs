@@ -327,19 +327,56 @@ namespace Application.Services
         {
             var player = await PlayerRepository.GetPlayerByIdAsync(playerId);
             
-            TeamValidator.SearchTeamsValidation(player, filters);
+            var query = TeamRepository.GetTeamsQueryable();
 
-            var teams = await TeamRepository.GetAllTeamsWithFilters(filters);
+            if (!string.IsNullOrWhiteSpace(filters.Name))
+            {
+                query = query.Where(t => t.Name.Contains(filters.Name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.RankName))
+            {
+                query = query.Where(t => t.Rank.Name.Contains(filters.Name));
+            }
+
+            if (filters.MinAvgAge > 0)
+            {
+                query = query.Where(t => t.AverageAge > filters.MinAvgAge);
+            }
+
+            if (filters.MaxAvgAge < filters.MinAvgAge)
+            {
+                throw new Exception("Max average age must be higher or equal to Min Average Age.");
+            }
+
+            if (filters.MaxAvgAge > 0)
+            {
+                query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
+            {
+                query = query.Where(t => t.Pitch.Address.Contains(filters.PitchAddress));
+            }
+
+            var teams = query
+                .Select(t => new TeamSummaryDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    RankName = t.Rank.Name,
+                    PlayerCount = t.Members.Count,
+                })
+                .ToList();
 
             if (player.IsAdmin)
             {
                 teams.Where(t =>
                     t.PlayerCount > 11
                     );
-            }
-            else if (player.IdTeam == null)
+            }else if (player.IdTeam == null)
                 teams.Where(t =>
-                    t.PlayerCount < 32
+                    t.PlayerCount > 11
                     );
 
             return teams;

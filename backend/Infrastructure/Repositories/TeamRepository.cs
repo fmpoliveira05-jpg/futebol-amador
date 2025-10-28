@@ -10,38 +10,26 @@ namespace Infrastructure.Repositories
 {
     public class TeamRepository : ITeamRepository
     {
-        private readonly AmateurFootballContext _context;
+        private readonly AmateurFootballContext DbContext;
 
-        public TeamRepository(AmateurFootballContext context)
+        public TeamRepository(AmateurFootballContext DbContext)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            this.DbContext = DbContext;
         }
 
-        public Task DeleteTeam(Teams teamToRemove)
+        public void DeleteTeam(Teams teamToRemove)
         {
-            if (teamToRemove == null)
-            {
-                throw new ArgumentNullException(nameof(teamToRemove));
-            }
-
-            _context.Team.Remove(teamToRemove);
-            return Task.CompletedTask;
+            DbContext.Team.Remove(teamToRemove);
         }
 
-        public Task UpdateTeam(Teams updatedTeam)
+        public void UpdateTeam(Teams updatedTeam)
         {
-            if (updatedTeam == null)
-            {
-                throw new ArgumentNullException(nameof(updatedTeam));
-            }
-
-            _context.Team.Update(updatedTeam);
-            return Task.CompletedTask;
+            DbContext.Team.Update(updatedTeam);
         }
 
         public async Task<List<Teams>?> GetAllTeamsAsync()
         {
-            return await _context.Team.ToListAsync();
+            return await DbContext.Team.ToListAsync();
         }
 
         //Talvez crie uma variação deste apenas com o send e outro apenas com o receiver
@@ -53,8 +41,8 @@ namespace Infrastructure.Repositories
                 .Include(t => t.ReceivedInvites)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
-
-        public async Task<Teams?> GetTeamByNameAsync(string name)
+        //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
+        public async Task<Teams?> GetTeamByNameAsync(String name)
         {
             return await DbContext.Team
                 .FirstOrDefaultAsync(t => t.Name == name); // Retorna a equipa ou null
@@ -62,45 +50,27 @@ namespace Infrastructure.Repositories
 
         public async Task AddAsync(Teams team)
         {
-            if (team == null)
-            {
-                throw new ArgumentNullException(nameof(team));
-            }
-
-            await _context.Team.AddAsync(team);
+            await DbContext.Team.AddAsync(team);
         }
 
         public async Task<Teams?> GetTeamByIdWithPitchAsync(Guid id)
         {
-            if (id == Guid.Empty)
-            {
-                return null;
-            }
-
-            return await _context.Team
+            return await DbContext.Team
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
         {
-            if (id == Guid.Empty) {
-                return null;
-            }
-
-            return await _context.Team
+            return await DbContext.Team
                 .Include(t => t.ReceivedInvites)
                 .Include(t => t.Calendar)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
         public async Task<Teams?> GetByIdWithReceivedInvites(Guid id)
         {
-            if (id == Guid.Empty)
-            {
-                return null;
-            }
-
-            return await _context.Team
+            return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
@@ -210,47 +180,6 @@ namespace Infrastructure.Repositories
                 .Where(p => p.Members.Any(m => m.IsAdmin))
                 .Select(p => p.Id.ToString())
                 .ToListAsync();
-        }
-        public async Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters)
-        {
-            var query = DbContext.Team.AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(filters.Name))
-            {
-                query = query.Where(t => t.Name.Contains(filters.Name));
-            }
-
-            if (!string.IsNullOrWhiteSpace(filters.RankName))
-            {
-                query = query.Where(t => t.Rank.Name.Contains(filters.Name));
-            }
-
-            if (filters.MinAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge > filters.MinAvgAge);
-            }
-
-            if (filters.MaxAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
-            {
-                query = query.Where(t => t.Pitch.Address.Contains(filters.PitchAddress));
-            }
-
-            var teams = await query
-                .Select(t => new TeamSummaryDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    RankName = t.Rank.Name,
-                    PlayerCount = t.Members.Count,
-                })
-                .ToListAsync();
-
-            return teams;
         }
     }
 }

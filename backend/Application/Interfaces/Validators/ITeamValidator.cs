@@ -20,8 +20,6 @@ namespace Application.Interfaces.Validators
 
         void GetMembershipRequestsValidation(Teams? team, Player? adminPlayer);
 
-        void SearchTeamsValidation(Player player, TeamSearchFiltersDto filters);
-
         void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete);
 
         void RejectMembershipRequestValidation(Teams? team, Player? playerRejecting, Guid requestToDelete);

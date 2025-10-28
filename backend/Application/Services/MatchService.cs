@@ -6,7 +6,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Exceptions;
 using NUnit.Framework;
 
 /*

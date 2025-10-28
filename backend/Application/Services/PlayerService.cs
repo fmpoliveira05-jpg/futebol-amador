@@ -1,7 +1,6 @@
 ﻿using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Interfaces.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -9,27 +8,18 @@ namespace Application.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository playerRepository;
-        private readonly ITeamService teamService;
+        private readonly ITeamRepository teamRepository;
         private readonly IUnityOfWork unitOfWork;
-        private readonly IPlayerValidator playerValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork)
         {
             this.playerRepository = playerRepository;
-            this.teamService = teamService;
+            this.teamRepository = teamRepository;
             this.unitOfWork = unitOfWork;
-            this.playerValidator = playerValidator;
         }
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
-            var existingPlayers = new Player[] { 
-                await playerRepository.GetPlayerByEmailAsync(playerDto.Email),
-                await playerRepository.GetPlayerByPhoneAsync(playerDto.Phone),
-            };
-
-            playerValidator.CreatePlayerValidator(playerDto, existingPlayers);
-
             var player = new Player
             {
                 Name = playerDto.Name,
@@ -44,9 +34,9 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-
+            
             await unitOfWork.SaveChangesAsync();
-
+            
             return player.Id;
         }
 
@@ -54,7 +44,10 @@ namespace Application.Services
         {
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.DeletePlayerValidator(playerToDelete);
+            if (playerToDelete == null)
+            {
+                throw new Exception($"Player with ID {playerId} not found.");
+            }    
 
             playerRepository.DeletePlayer(playerToDelete);
 
@@ -65,7 +58,10 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(player);
+            if (player == null)
+            {
+                throw new Exception($"Player with ID {playerId} not found.");
+            }
 
             PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
             {
@@ -82,55 +78,75 @@ namespace Application.Services
         public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            if (player == null)
+            {
+                throw new Exception($"Player with ID {playerId} not found.");
+            }
+
             var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
+            if (emailExists != null)
+            {
+                throw new Exception($"The Email {dto.Email} is already being used.");
+            }
 
-            playerValidator.UpdatePlayerValidator(dto, player, emailExists);
+            var updatedPlayer = new Player
+            {
+                Id = playerId,
+                Name = dto.Name,
+                DateOfBirth = dto.DateOfBirth,
+                Address = dto.Address,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Position = dto.Position,
+                Height = dto.Height
+            };
 
-            player.Name = dto.Name;
-            player.DateOfBirth = dto.DateOfBirth;
-            player.Address = dto.Address;
-            player.Email = dto.Email;
-            player.Phone = dto.Phone;
-            player.Position = dto.Position;
-            player.Height = dto.Height;
-
-            playerRepository.UpdatePlayer(player);
+            playerRepository.UpdatePlayer(updatedPlayer);
 
             await unitOfWork.SaveChangesAsync();
         }
 
         public async Task<String> LeaveTeam(Guid playerId)
         {
-            var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.LeaveTeamValidator(existingPlayer);
-
-            if (existingPlayer.IsAdmin)
+            if (player == null)
             {
-                if (existingPlayer.Team.Members.Count == 0)
-                {
-                    await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
-                }
-
-                var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true && p.Id != existingPlayer.Id);
-
-                //if the team has no more admins, choose the oldest account player to be the new admin.
-                if (otherAdmin == null)
-                {
-                    var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
-                    Player newAdmin = existingPlayer.Team.Members.First(p => p.CreationDate == oldestDate);
-                    newAdmin.IsAdmin = true;
-                }
-
-                existingPlayer.IsAdmin = false;
+                throw new Exception($"Player with ID {playerId} not found.");
             }
 
-            string teamName = existingPlayer.Team.Name;
+            if (player.IsAdmin)
+            {
+                player.IsAdmin = false;
 
-            existingPlayer.Team = null;
-            existingPlayer.IdTeam = null;
+                if (player.Team != null)
+                {
+                    if (player.Team.Members.Count == 0)
+                    {
+                        //delete team, there are no more players.
+                        //n sei como vou fazer isso, willkie disse q saberia fazer.
+                    }
+                    
+                    var otherAdmin = player.Team.Members.First(p => p.IsAdmin == true);
 
-            playerRepository.UpdatePlayer(existingPlayer);
+                    //if the team has no more admins, choose the oldest account player to be the new admin.
+                    if (otherAdmin == null)
+                    {
+                        var oldestDate = player.Team.Members.Min(p => p.CreationDate);
+                        Player newAdmin = player.Team.Members.First(p => p.CreationDate == oldestDate);
+                        newAdmin.IsAdmin = true;
+                    }
+                }
+
+            }
+
+            string teamName = player.Team.Name;
+
+            player.Team = null;
+            player.IdTeam = null;
+
+            playerRepository.UpdatePlayer(player);
 
             await unitOfWork.SaveChangesAsync();
 
