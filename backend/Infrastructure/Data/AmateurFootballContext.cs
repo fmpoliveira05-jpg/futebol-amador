@@ -30,7 +30,7 @@ namespace Infrastructure.Data
         {
             //Ligação à base de dados
             optionsBuilder.UseSqlServer(
-                @"Data Source=.;Initial Catalog=AmateurFootball;Integrated Security=True;TrustServerCertificate=True");
+                @"Server=192.168.196.1,1433;Database=FutebolAmadorDbBraga;User Id=ApiLdsLogin;Password=REMOVIDO;TrustServerCertificate=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -31,19 +31,14 @@ namespace Infrastructure.Repositories
             
         }
 
-        public Task DeleteRank(Rank rank)
+        public void DeleteRank(Rank rank)
         {
-            throw new NotImplementedException();
+            DbContext.Remove(rank);
         }
 
-        public Task DeleteRankById(Guid rankId)
+        public async Task<List<Rank>> GetAllRanksAsync()
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Rank>> GetAllRanksAsync()
-        {
-            throw new NotImplementedException();
+            return await DbContext.Rank.ToListAsync();
         }
 
         public async Task<Rank> GetDefaultRankAsync() 
@@ -51,29 +46,29 @@ namespace Infrastructure.Repositories
             return await DbContext.Rank.FirstOrDefaultAsync(r => r.IdPreviousRank == null);
         }
 
-        public Task<Rank> GetNextRankAsync(Rank currentRank)
+        public async Task<Rank> GetNextRankAsync(Rank currentRank)
         {
-            throw new NotImplementedException();
+            return await DbContext.Rank.FirstOrDefaultAsync(r => r.Id == currentRank.IdNextRank);
         }
 
-        public Task<Rank> GetPreviousRankAsync(Rank currentRank)
+        public async Task<Rank> GetPreviousRankAsync(Rank currentRank)
         {
-            throw new NotImplementedException();
+            return await DbContext.Rank.FirstOrDefaultAsync(r => r.Id == currentRank.IdPreviousRank);
         }
 
-        public Task<Rank> GetRankByIdAsync(Guid rankId)
+        public async Task<Rank> GetRankByIdAsync(Guid rankId)
         {
-            throw new NotImplementedException();
+            return await DbContext.Rank.FirstOrDefaultAsync(r => r.Id == rankId);
         }
 
-        public Task<Rank> GetRankByNameAsync(string rankName)
+        public async Task<Rank> GetRankByNameAsync(string rankName)
         {
-            throw new NotImplementedException();
+            return await DbContext.Rank.FirstOrDefaultAsync(r => r.Name == rankName);
         }
 
-        public Task UpdateRank(Rank newRank)
+        public void UpdateRank(Rank newRank)
         {
-            throw new NotImplementedException();
+            DbContext.Rank.Update(newRank);
         }
     }
 }

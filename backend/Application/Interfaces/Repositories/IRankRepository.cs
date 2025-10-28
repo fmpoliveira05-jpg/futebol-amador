@@ -21,11 +21,9 @@ namespace Application.Interfaces.Repositories
 
         Task<Rank> GetPreviousRankAsync(Rank currentRank);
 
-        Task DeleteRank(Rank rank);
+        void DeleteRank(Rank rank);
 
-        Task DeleteRankById(Guid rankId);
-
-        Task UpdateRank(Rank newRank);
+        void UpdateRank(Rank newRank);
 
         Task AddRankAsync(Rank rank);
 

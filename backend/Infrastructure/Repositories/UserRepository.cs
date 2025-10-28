@@ -3,7 +3,7 @@ using Domain.Entities;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository : IPlayerRepository
+    public class UserRepository
     {
         public Task AddAsync(Player player)
         {

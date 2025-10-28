@@ -23,6 +23,5 @@ namespace Application.Interfaces.Services
         Task AddRankInOtherRankPlaceAsync(Rank rank, Rank nextRank);
         Task ChangePreviousRank(Rank rank, Rank newPreviousRank);
 
-
     }
 }

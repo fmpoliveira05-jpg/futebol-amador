@@ -10,6 +10,5 @@ namespace Application.DTOs.Chat
     {
         public string RoomName { get; set; }
         public List<Guid> ParticipantIds { get; set; }
-        public string ChatRoomId { get; set; }
     }
 }
