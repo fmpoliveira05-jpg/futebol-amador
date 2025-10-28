@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Match;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
@@ -278,6 +279,30 @@ namespace Application.Services
         }
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId)
+        {
+            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var adminTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
+
+            await Task.WhenAll(existingTeamTask, adminTask);
+
+            var existingTeam = await existingTeamTask;
+            var adminConsulting = await adminTask;
+
+            if (existingTeam.MembershipRequests == null)
+                existingTeam.MembershipRequests = new List<MembershipRequests>();
+
+            if (!existingTeam.MembershipRequests.Any())
+            {
+                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
+                existingTeam.MembershipRequests.Add(fakeRequest);
+            }
+
+            TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
+
+            return await TeamRepository.GetMembershipRequestsDtoAsync(teamId);
+        }
+
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var adminTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);

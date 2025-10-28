@@ -2,6 +2,7 @@
 using Application.DTOs.MemberShip;
 using Application.DTOs.Match;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Filters;
 
 namespace Application.Interfaces.Services
 {
@@ -18,6 +19,8 @@ namespace Application.Interfaces.Services
         Task DeleteTeamAsync(Guid teamId, Guid currentUserId);
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters);
 
         Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
 

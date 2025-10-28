@@ -1,10 +1,12 @@
 ﻿using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Team;
+using Application.DTOs.Filters;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
+using Application.DTOs.MemberShip;
 
 namespace Api.Controllers
 {
@@ -103,6 +105,51 @@ namespace Api.Controllers
             var adminUserId = GetCurrentUserId();
             var requests = await TeamService.GetMembershipRequestsAsync(teamId, adminUserId);
             return Ok(requests);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MembershipRequests(Guid idTeam, Guid adminUserId, [FromQuery] FilterMembershipRequestsTeam filters)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa é obrigatorio");
+            }
+
+            if (adminUserId == Guid.Empty)
+            {
+                return BadRequest("O id do admin é obrigatorio");
+            }
+
+            try
+            {
+                IEnumerable<MemberShipRequestDto> membershipRequests;
+                var hasFilter = filters.MinDate.HasValue ||
+                    filters.MaxDate.HasValue ||
+                    !string.IsNullOrEmpty(filters.SenderName);
+
+                if (hasFilter)
+                {
+                    membershipRequests = await TeamService.GetMembershipRequestsAsyncWithFilters(idTeam, adminUserId, filters);
+                }
+                else
+                {
+                    membershipRequests = await TeamService.GetMembershipRequestsAsync(idTeam, adminUserId);
+                }
+
+                return Ok(membershipRequests);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
         }
 
 
