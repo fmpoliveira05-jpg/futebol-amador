@@ -21,6 +21,7 @@ namespace Domain.Entities
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
 
+        // Data do convite/pedido (usar UTC para consistência)
         public DateTime InviteDate { get; set; }
 
         public bool IsPlayerSender { get; set; } // true - Player, false - Team
@@ -29,6 +30,16 @@ namespace Domain.Entities
 
         public MembershipRequests(Player player, Teams team, bool sender)
         {
+            if (player == null)
+            {
+                throw new ArgumentNullException(nameof(player));
+            }
+
+            if (team == null)
+            {
+                throw new ArgumentNullException(nameof(team));
+            }
+
             Player = player;
             IdPlayer = player.Id;
             Team = team;

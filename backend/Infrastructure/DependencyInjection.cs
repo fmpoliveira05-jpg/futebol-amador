@@ -28,6 +28,7 @@ namespace Infrastructure
             services.AddScoped<ITeamPostPoneGameRepository, TeamPostPoneGame>();
             services.AddScoped<IRankRepository, RankRepository>();
             services.AddScoped<IUnityOfWork, UnityOfWork>();
+            services.AddScoped<IMembershipRequestRepository, MembershipRequestRepository>();
 
             return services;
         }

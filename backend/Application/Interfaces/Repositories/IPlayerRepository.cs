@@ -17,6 +17,8 @@ namespace Application.Interfaces.Repositories
 
         Task<Player?> GetPlayerByEmailAsync(string email);
 
+        Task<Player?> GetPlayerByPhoneAsync(string phone);
+
         void DeletePlayer(Player playerToRemove);
 
         void UpdatePlayer(Player updatedPlayer);

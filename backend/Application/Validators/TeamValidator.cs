@@ -244,6 +244,17 @@ namespace Application.Validators
             }
         }
 
+        public void SearchTeamsValidation(Player player, TeamSearchFiltersDto filters)
+        {
+            PlayerValidator.PlayerExists(player);
+
+            if (filters.MaxAvgAge < filters.MinAvgAge)
+            {
+                throw new ValidationException("Max average age must be higher or equal to Min Average Age.");
+            }
+        }
+
+
         private void ValidatePlayerAndTeamExists(Teams? team, Player? Player)
         {
             if (!TeamExists(team))

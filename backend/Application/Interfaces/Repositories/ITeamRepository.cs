@@ -15,8 +15,11 @@ namespace Application.Interfaces.Repositories
         Task<List<Teams>?> GetAllTeamsAsync();
         Task<Teams?> GetTeamByIdAsync(Guid id);
         Task<Teams?> GetTeamByNameAsync(string name);
-        void DeleteTeam(Teams teamToRemove);
-        void UpdateTeam(Teams updatedTeam);
+
+        Task DeleteTeam(Teams teamToRemove);
+
+        Task UpdateTeam(Teams updatedTeam);
+
         Task AddAsync(Teams team);
         Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId);
 
@@ -38,6 +41,6 @@ namespace Application.Interfaces.Repositories
 
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
 
-        IQueryable<Teams> GetTeamsQueryable();
+        Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters);
     }
 }
