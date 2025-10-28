@@ -26,6 +26,13 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.amfootball.ui.components.Buttons.BackButton
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
+import android.util.Log
+import com.example.amfootball.data.ApiClient.chamarApiDotNet
+
+private lateinit var auth: FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +83,9 @@ fun LoginScreen(navController: NavHostController){
             )
 
             //Depois meter logica para validar dados
-            Button(onClick = {  }) {
+            Button(onClick = {
+                loginParaTestarAPI(email, password)
+            }) {
                 Text("Entrar")
             }
         }
@@ -125,4 +134,38 @@ private fun determineKeyboardOptions(isPassword: Boolean = false): KeyboardOptio
             KeyboardType.Text
         }
     )
+}
+
+private fun loginParaTestarAPI(email: String, password: String) {
+
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // 1. LOGIN COM SUCESSO
+                Log.d("LoginTeste", "Login bem-sucedido!")
+                val user = auth.currentUser
+
+                // 2. OBTER O TOKEN DE ID (JWT)
+                user?.getIdToken(true) // O 'true' força a atualização do token
+                    ?.addOnCompleteListener { tokenTask ->
+                        if (tokenTask.isSuccessful) {
+                            val token = tokenTask.result?.token
+
+                            if (token != null) {
+                                Log.d("LoginTeste", "--- TOKEN DO FIREBASE ---")
+                                Log.d("LoginTeste", token)
+                                Log.d("LoginTeste", "-------------------------")
+
+                                // 3. ENVIAR O TOKEN PARA A SUA API .NET
+                                chamarApiDotNet(token)
+                            }
+                        } else {
+                            Log.w("LoginTeste", "Falha ao obter token:", tokenTask.exception)
+                        }
+                    }
+            } else {
+                // Falha no login
+                Log.w("LoginTeste", "Falha no login:") // apos a mensagem (segundo campo) adicionar uma , e por uma exceptiomn
+            }
+        }
 }

@@ -4,16 +4,17 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     id("org.sonarqube")
     id("jacoco")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "com.example.amfootball"
+    namespace = "com.exemple.amfootball"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.amfootball"
+        applicationId = "com.exemple.amfootball"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -110,26 +111,34 @@ dependencies {
 
     //Dependencias FireBas para Auth
     // Firebase Bill of Materials (BoM) - gere as versões
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     // Dependência do Firebase Authentication
-    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-auth")
     // Dependência para o Login com Google (necessária)
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     // Dependência para o Login com Facebook (necessária para o Facebook)
     implementation("com.facebook.android:facebook-login:latest.release")
 
+    // 3. (Opcional, mas recomendado) Analytics
+    implementation("com.google.firebase:firebase-analytics")
+
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.0")
-// ViewModel + Compose
+    // ViewModel + Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-// Coroutines
+    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
-// Google Maps Compose & Play Services
+    // Google Maps Compose & Play Services
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:maps-compose:2.12.0")
-// Optional: Coil for images
+    // Coil for images
     implementation("io.coil-kt:coil-compose:2.4.0")
+
+    // Bibliotecas para chamadas de rede
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
