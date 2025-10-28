@@ -4,9 +4,9 @@ namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDTO);
+        Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto);
 
-        Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid teamId);
+        Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid playerId);
 
         Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto);
 

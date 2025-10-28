@@ -10,14 +10,14 @@ namespace Application.Services
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamService teamService;
-        private readonly IUnityOfWork unitOfWork;
+        private readonly IUnityOfWork unityOfWork;
         private readonly IPlayerValidator playerValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator)
+        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unityOfWork, IPlayerValidator playerValidator)
         {
             this.playerRepository = playerRepository;
             this.teamService = teamService;
-            this.unitOfWork = unitOfWork;
+            this.unityOfWork = unityOfWork;
             this.playerValidator = playerValidator;
         }
 
@@ -45,7 +45,7 @@ namespace Application.Services
 
             await playerRepository.AddAsync(player);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return player.Id;
         }
@@ -58,7 +58,7 @@ namespace Application.Services
 
             playerRepository.DeletePlayer(playerToDelete);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
         }
 
         public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid playerId)
@@ -82,9 +82,13 @@ namespace Application.Services
         public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
 
-            playerValidator.UpdatePlayerValidator(dto, player, emailExists);
+            var existingPlayers = new Player[] {
+                await playerRepository.GetPlayerByEmailAsync(dto.Email),
+                await playerRepository.GetPlayerByPhoneAsync(dto.Phone),
+            };
+
+            playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
 
             player.Name = dto.Name;
             player.DateOfBirth = dto.DateOfBirth;
@@ -96,7 +100,7 @@ namespace Application.Services
 
             playerRepository.UpdatePlayer(player);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
         }
 
         public async Task<String> LeaveTeam(Guid playerId)
@@ -132,7 +136,7 @@ namespace Application.Services
 
             playerRepository.UpdatePlayer(existingPlayer);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return teamName;
         }

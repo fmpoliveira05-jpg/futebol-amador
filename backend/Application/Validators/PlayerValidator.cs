@@ -74,15 +74,24 @@ namespace Application.Validators
             throw new NotImplementedException();
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player playerEmail)
+        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player[] players)
         {
             PlayerExists(player);
 
             if (updatePlayerDTO.Email != player.Email)
             {
-                if (playerEmail != null)
+                if (players[0] != null)
                 {
-                    throw new ValidationException($"The email '{updatePlayerDTO.Email}' is already in use.");
+                    throw new ValidationException($"The email '{players[0].Email}' is already in use.");
+                }
+
+            }
+
+            if (updatePlayerDTO.Phone != player.Phone)
+            {
+                if (players[1] != null)
+                {
+                    throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
                 }
             }
 
@@ -142,7 +151,7 @@ namespace Application.Validators
             {
                 valid = false;
             }
-            
+
             if (!email.EndsWith(".com"))
             {
                 valid = false;

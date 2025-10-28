@@ -13,7 +13,7 @@ namespace Application.Interfaces.Validators
 
         void GetPlayerByIdValidator(Player player);
 
-        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Player playerEmail);
+        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Player[] existingPlayers);
 
         void LeaveTeamValidator(Player player);
 
