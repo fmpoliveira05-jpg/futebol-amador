@@ -162,5 +162,47 @@ namespace Infrastructure.Repositories
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        public async Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters)
+        {
+            var query = DbContext.Team.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(filters.Name))
+            {
+                query = query.Where(t => t.Name.Contains(filters.Name));
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.RankName))
+            {
+                query = query.Where(t => t.Rank.Name.Contains(filters.Name));
+            }
+
+            if (filters.MinAvgAge > 0)
+            {
+                query = query.Where(t => t.AverageAge > filters.MinAvgAge);
+            }
+
+            if (filters.MaxAvgAge > 0)
+            {
+                query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
+            {
+                query = query.Where(t => t.Pitch.Address.Contains(filters.PitchAddress));
+            }
+
+            var teams = await query
+                .Select(t => new TeamSummaryDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    RankName = t.Rank.Name,
+                    PlayerCount = t.Members.Count,
+                })
+                .ToListAsync();
+
+            return teams;
+        }
     }
 }
