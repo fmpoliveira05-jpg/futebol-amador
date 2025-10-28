@@ -3,7 +3,7 @@ using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.Hub;
+using Application.Interfaces.Services.Hub.ClienteService;
 using Domain.Enums;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;

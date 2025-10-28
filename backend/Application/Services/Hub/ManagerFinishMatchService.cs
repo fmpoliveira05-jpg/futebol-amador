@@ -1,14 +1,14 @@
 ﻿using Application.DTOs;
 using Application.Hubs;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 
-namespace Application.Services
+namespace Application.Services.Hub
 {
     public class ManagerFinishMatchService: IManagerFinishMatchService
     {
@@ -25,77 +25,6 @@ namespace Application.Services
             this.validator = validator;
             this.geralValidator = geralValidator;
             this.cache = cache;
-        }
-        private string GetHubCacheKey(Guid matchId)
-        {
-            return $"hubFinishMatch-{matchId}";
-        }
-
-        private MemoryCacheEntryOptions GetCacheOptions()
-        {
-            return new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
-        }
-
-        private bool CoincideResults(ResultMatchDto firstResult, ResultMatchDto secondResult)
-        {
-            var coincide = false;
-            validator.ValidateMatchResultTwoTeams(firstResult, secondResult);
-           
-            if (firstResult.NumGoalsTeam == secondResult.NumGoalsOpponent &&
-                firstResult.NumGoalsOpponent == secondResult.NumGoalsTeam)
-            {
-                coincide = true;
-            }
-
-            return coincide;
-        }
-
-        private void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
-        {
-            var numGoalsTeam = team.NumGoals;
-            var numGoalsOpponent = opponent.NumGoals;
-
-            if (numGoalsTeam > numGoalsOpponent)
-            {
-                team.MatchResult = MatchResult.WIN;
-                opponent.MatchResult = MatchResult.LOSE;
-            }
-            else if (numGoalsTeam < numGoalsOpponent) 
-            {
-                team.MatchResult = MatchResult.LOSE;
-                opponent.MatchResult = MatchResult.WIN;
-            }
-            else
-            {
-                team.MatchResult = MatchResult.DRAW;
-                opponent.MatchResult = MatchResult.DRAW;
-            }
-        }
-
-        private async Task FinalizeMatchIfResultsMatch(ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub, 
-            Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
-        {
-            var first = hub.First();
-            var firstTeamId = first.Key;
-            var firstConnectionId = first.Value.ConnectionId;
-            var firstResult = first.Value.Result.ResultMatch;
-
-            var coincideResult = CoincideResults(firstResult, finishMatch);
-            
-            if (coincideResult)
-            {
-                var opponent = match.Teams.FirstOrDefault(ts => ts.IdTeam == finishMatch.IdTeam);
-                validator.ValidateOpponentTeam(opponent);
-
-                DefineWinnerMatch(team, opponent);
-                match.MatchStatus = MatchStatus.DONE;
-
-                await unityOfWork.SaveChangesAsync();
-                result.IsCoincides = true;
-
-                cache.Remove(hubCacheKey);
-            }   
         }
 
         //Validar se o IdMatch é o mesmo do da ultima pessoa
@@ -216,6 +145,122 @@ namespace Application.Services
             }
 
             return await Task.FromResult(await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId));
+        }
+
+        private string GetHubCacheKey(Guid matchId)
+        {
+            return $"hubFinishMatch-{matchId}";
+        }
+
+        private MemoryCacheEntryOptions GetCacheOptions()
+        {
+            return new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+        }
+
+        private bool CoincideResults(ResultMatchDto firstResult, ResultMatchDto secondResult)
+        {
+            var coincide = false;
+            validator.ValidateMatchResultTwoTeams(firstResult, secondResult);
+
+            if (firstResult.NumGoalsTeam == secondResult.NumGoalsOpponent &&
+                firstResult.NumGoalsOpponent == secondResult.NumGoalsTeam)
+            {
+                coincide = true;
+            }
+
+            return coincide;
+        }
+
+        private async Task FinalizeMatchIfResultsMatch(ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub,
+            Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
+        {
+            var first = hub.First();
+            var firstTeamId = first.Key;
+            var firstConnectionId = first.Value.ConnectionId;
+            var firstResult = first.Value.Result.ResultMatch;
+
+            var coincideResult = CoincideResults(firstResult, finishMatch);
+
+            if (coincideResult)
+            {
+                var opponent = match.Teams.FirstOrDefault(ts => ts.IdTeam == finishMatch.IdTeam);
+                validator.ValidateOpponentTeam(opponent);
+
+                DefineWinnerMatch(team, opponent);
+                match.MatchStatus = MatchStatus.DONE;
+
+
+                await unityOfWork.SaveChangesAsync();
+                result.IsCoincides = true;
+
+                cache.Remove(hubCacheKey);
+            }
+        }
+
+        private void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
+        {
+            var numGoalsTeam = team.NumGoals;
+            var numGoalsOpponent = opponent.NumGoals;
+
+            if (numGoalsTeam > numGoalsOpponent)
+            {
+                team.MatchResult = MatchResult.WIN;
+                opponent.MatchResult = MatchResult.LOSE;
+            }
+            else if (numGoalsTeam < numGoalsOpponent)
+            {
+                team.MatchResult = MatchResult.LOSE;
+                opponent.MatchResult = MatchResult.WIN;
+            }
+            else
+            {
+                team.MatchResult = MatchResult.DRAW;
+                opponent.MatchResult = MatchResult.DRAW;
+            }
+
+            updatePointsTeams(team);
+            updatePointsTeams(opponent);
+        }
+
+        private void updatePointsTeams(TeamStatistics teamStatistic)
+        {
+            var team = teamStatistic.Team;
+            var rank = team.Rank;
+
+            switch(teamStatistic.MatchResult) {
+                case MatchResult.WIN:
+                {
+                    team.CurrentPoints += rank.WinPoints;
+                    break;
+                }
+                case MatchResult.DRAW: 
+                {
+                    team.CurrentPoints += rank.DrawPoints;  
+                    break;
+                }
+                case MatchResult.LOSE:
+                {
+                    team.CurrentPoints += rank.LosePoints;
+                    break;
+                }
+            }
+
+            ValidatePromotionOrDepromotionTeam(team);
+        }
+
+        private void ValidatePromotionOrDepromotionTeam(Teams team)
+        {
+            var nextRank = team.Rank.NextRank;
+            var previousRank = team.Rank.PreviousRank;
+
+            if (team.CurrentPoints >= team.Rank.PointsToPromotion) {
+                team.Rank = nextRank;
+            }
+            else if (team.CurrentPoints < previousRank.PointsToPromotion)
+            {
+                team.Rank = previousRank;
+            }
         }
     }
 }

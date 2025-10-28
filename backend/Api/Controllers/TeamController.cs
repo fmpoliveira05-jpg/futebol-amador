@@ -6,8 +6,6 @@ using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {

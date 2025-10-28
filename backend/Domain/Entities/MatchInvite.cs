@@ -12,22 +12,29 @@ namespace Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public Teams Sender { get; set; }
+
+        [Required]
+        [ForeignKey("Sender")]
+        public Guid IdSender { get; set; } //FK
+        
         public Teams Receiver { get; set; }
 
-        [ForeignKey("Sender")]
-        public Guid IdSender { get; set; } //FK e
-        
+        [Required]
         [ForeignKey("Receiver")]
         public Guid IdReceiver { get; set; } //FK 
+
+        [Required]
         public DateTime GameDate { get; set; }
 
         public Pitch Pitch { get; set; }
 
+        [Required]
         [ForeignKey("Pitch")]
         public Guid IdPitch { get; set; } //FK
 
         public Chat Chat { get; set; } //FK
 
+        [Required]
         [ForeignKey("Chat")]
         public Guid IdChat { get; set; } //FK
 

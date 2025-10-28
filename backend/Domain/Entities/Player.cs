@@ -10,8 +10,10 @@ namespace Domain.Entities
 {
     public class Player : Users
     {
+        [Required]
         public Position Position { get; set; }
 
+        [Required]
         [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight, ErrorMessage = "Um jogador deve ter entre {0} e {1} centimetors")]
         public int Height { get; set; }
 
@@ -19,6 +21,7 @@ namespace Domain.Entities
 
         public Guid? IdTeam { get; set; } //FK
 
+        [Required]
         public bool IsAdmin { get; set; }
 
         public DateTime? IsAdminLastChangedAt { get; set; }

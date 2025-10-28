@@ -10,14 +10,17 @@ namespace Domain.Entities
 
         public Teams Team { get; set; }
 
+        [Required]
         [ForeignKey("Team")]
         public Guid IdTeamPostPone { get; set; }
 
         public Matches Match { get; set; }
 
+        [Required]
         [ForeignKey("Match")]
         public Guid IdMatch { get; set; }
 
+        [Required]
         public DateTime PostPoneDate { get; set; }
 
         public PostPoneMatch() { }

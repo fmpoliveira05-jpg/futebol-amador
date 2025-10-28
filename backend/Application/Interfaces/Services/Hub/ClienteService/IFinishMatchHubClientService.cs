@@ -1,6 +1,6 @@
 ﻿using Application.DTOs;
 
-namespace Application.Interfaces.Services.Hub
+namespace Application.Interfaces.Services.Hub.ClienteService
 {
     public interface IFinishMatchHubClientService
     {

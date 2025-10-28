@@ -1,8 +1,8 @@
 ﻿using Application.DTOs;
-using Application.Interfaces.Services.Hub;
+using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.SignalR.Client;
 
-namespace Application.Services.Hub
+namespace Application.Services.Hub.ClientService
 {
     internal class FinishMatchHubClientService: IFinishMatchHubClientService
     {

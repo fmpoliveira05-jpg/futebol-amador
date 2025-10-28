@@ -13,17 +13,20 @@ namespace Domain.Entities
 
         public Player Player { get; set; }
 
+        [Required]
         [ForeignKey("Player")]
         public Guid IdPlayer { get; set; } //FK
 
         public Teams Team { get; set; }
 
+        [Required]
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
 
-        // Data do convite/pedido (usar UTC para consistência)
+        [Required]
         public DateTime InviteDate { get; set; }
 
+        [Required]
         public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
         protected MembershipRequests() { }

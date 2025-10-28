@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
@@ -11,15 +12,17 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(50)]
         public Users Actor { get; set; }
 
+        [Required]
         [ForeignKey("Actor")]
         public Guid IdUser { get; set; } //FK
 
-        [MaxLength(250)]
+        [Required]
+        [StringLength(ModelConstants.MessageConst.MaxMessageLength, MinimumLength = ModelConstants.MessageConst.MinMessageLength)]
         public string MessageText { get; set; }
 
+        [Required]
         public DateTime timeStamp { get; set; }
 
         protected Message() { }
