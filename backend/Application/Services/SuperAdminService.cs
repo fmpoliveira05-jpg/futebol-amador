@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.SuperAdmin;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
 using Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,13 @@ namespace Application.Services
     {
         ISuperAdminRepository superAdminRepository;
         IUnityOfWork unityOfWork;
+        ISuperAdminValidator superAdminValidator;
 
-        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUnityOfWork unityOfWork)
+        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator)
         {
             this.superAdminRepository = superAdminRepository;
             this.unityOfWork = unityOfWork;
+            this.superAdminValidator = superAdminValidator;
         }
 
         public async Task<Guid> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
@@ -28,7 +31,7 @@ namespace Application.Services
                 await superAdminRepository.GetSuperAdminByPhoneAsync(dto.Phone),
             };
 
-            //validator
+            superAdminValidator.CreateSuperAdminValidator(dto, existingSadmin);
 
             var superAdmin = new SuperAdmin
             {
@@ -51,7 +54,7 @@ namespace Application.Services
         {
             var superAdminToDelete = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
 
-            //validator
+            superAdminValidator.DeleteSuperAdminValidator(superAdminToDelete);
 
             superAdminRepository.DeleteSuperAdmin(superAdminToDelete);
 
@@ -62,7 +65,7 @@ namespace Application.Services
         {
             var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
 
-            //validator
+            superAdminValidator.GetSuperAdminByIdValidator(superAdmin);
 
             SuperAdminDetailsDTO superAdminDetails = new SuperAdminDetailsDTO
             {
@@ -82,7 +85,7 @@ namespace Application.Services
                 await superAdminRepository.GetSuperAdminByPhoneAsync(dto.Phone),
             };
 
-            //validator
+            superAdminValidator.UpdateSuperAdminValidator(dto, superAdmin, existingSadmin);
 
             superAdmin.Name = dto.Name;
             superAdmin.DateOfBirth = dto.DateOfBirth;

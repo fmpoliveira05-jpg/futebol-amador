@@ -30,7 +30,7 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
-            if (!IsValidEmail(createPlayerDTO.Email))
+            if (!EmailValidator.IsValid(createPlayerDTO.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
@@ -71,7 +71,7 @@ namespace Application.Validators
 
         public void GetPlayerByIdValidator(Player player)
         {
-            throw new NotImplementedException();
+            PlayerExists(player);
         }
 
         public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player[] players)
@@ -95,7 +95,7 @@ namespace Application.Validators
                 }
             }
 
-            if (!IsValidEmail(updatePlayerDTO.Email))
+            if (!EmailValidator.IsValid(updatePlayerDTO.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
@@ -137,27 +137,6 @@ namespace Application.Validators
             }
 
             PlayerExists(player);
-        }
-
-        private bool IsValidEmail(string email)
-        {
-            var valid = true;
-
-            try
-            {
-                var emailAddress = new MailAddress(email);
-            }
-            catch
-            {
-                valid = false;
-            }
-
-            if (!email.EndsWith(".com"))
-            {
-                valid = false;
-            }
-
-            return valid;
         }
     }
 }

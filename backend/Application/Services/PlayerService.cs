@@ -65,7 +65,7 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(player);
+            playerValidator.GetPlayerByIdValidator(player);
 
             PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
             {
