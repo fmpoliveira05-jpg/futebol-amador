@@ -12,10 +12,10 @@ namespace Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
 
         public Teams Sender { get; set; }
-        public Teams Receiver { get; set; }
-
         [ForeignKey("Sender")]
-        public Guid IdSender { get; set; } //FK e
+        public Guid IdSender { get; set; } //FK
+
+        public Teams Receiver { get; set; }
         
         [ForeignKey("Receiver")]
         public Guid IdReceiver { get; set; } //FK 

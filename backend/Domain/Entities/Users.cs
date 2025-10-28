@@ -13,10 +13,10 @@ namespace Domain.Entities
 
         public DateOnly DateOfBirth { get; set; }
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string Address { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(ModelConstants.UserConst.MaxNameLengthEmail)]
         [EmailAddress(ErrorMessage = "Invalid email format")] 
         public string Email { get; set; }
 

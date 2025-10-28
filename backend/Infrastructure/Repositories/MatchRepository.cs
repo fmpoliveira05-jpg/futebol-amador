@@ -102,7 +102,6 @@ namespace Infrastructure.Repositories
                          let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == idTeam)
                          let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != idTeam)
 
-
                          select new InfoMatchCalendar
                          {
                              IdMatch = m.Id,

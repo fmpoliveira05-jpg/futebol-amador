@@ -8,6 +8,7 @@
             public const int MinAge = 18;
             public const int MaxAge = 70;
             public const int MaxGoals = 100;
+            public const int MinAddressLength = 10;
             public const int MaxAddressLength = 250;
             public const string DefaultRankName = "Unranked";
 

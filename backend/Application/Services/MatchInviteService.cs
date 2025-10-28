@@ -230,8 +230,7 @@ namespace Application.Services
 
             MatchInviteValidator.ValidateNegociateMatchInvite(namePitch, pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
             
-            hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); //Meter isto como private aqui para não estar na entidades 
-
+            hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch);
             MatchInviteValidator.ValidateHasChangeNegociateMatchInvite(hasChanged);
           
             var sendMatchInviteDto = new InfoMatchInviteDTO
