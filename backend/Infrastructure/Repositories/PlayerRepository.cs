@@ -34,6 +34,11 @@ namespace Infrastructure.Repositories
             return await context.Player.FirstOrDefaultAsync(p => p.Email == email);
         }
 
+        public async Task<Player?> GetPlayerByPhoneAsync(string phone)
+        {
+            return await context.Player.FirstOrDefaultAsync(p => p.Phone == phone);
+        }
+
         public async Task<Player?> GetPlayerByIdAsync(Guid id)
         {
             return await context.Player.FindAsync(id);

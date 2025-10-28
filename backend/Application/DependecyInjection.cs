@@ -42,7 +42,8 @@ namespace Application
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
-
+            services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IPlayerValidator, PlayerValidator>();
             return services;
         }
     }

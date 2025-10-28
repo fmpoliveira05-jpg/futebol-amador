@@ -36,6 +36,6 @@ namespace Application.Interfaces.Repositories
 
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
 
-        IQueryable<Teams> GetTeamsQueryable();
+        Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters);
     }
 }
