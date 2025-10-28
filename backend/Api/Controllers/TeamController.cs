@@ -1,12 +1,13 @@
 ﻿using Api.Controllers; // Assume que este é o teu namespace
-using Application.DTOs.Team;
 using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
-using Application.DTOs.MemberShip;
 
 namespace Api.Controllers
 {
@@ -22,17 +23,13 @@ namespace Api.Controllers
             TeamService = teamService;
         }
 
+        [Authorize]
         private Guid GetCurrentUserId()
         {
-            /*
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-            {
-                throw new ValidationException("Token de utilizador inválido ou em falta.");
-            }
-            return userId;
-             */
-            return Guid.Empty;
+            if (Guid.TryParse(userIdString, out Guid userId))
+                return userId;
+            throw new ValidationException("Token de utilizador inválido ou em falta.");
         }
 
         [HttpPost]

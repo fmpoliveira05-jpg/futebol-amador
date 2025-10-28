@@ -4,6 +4,10 @@ namespace Application.Interfaces.Repositories
 {
     public interface IUserRepository
     {
-        Task<Teams?> GetUserByIdAsync(Guid userId);
+        Task<Player?> GetUserByEmailAsync(string email);
+
+        Task<Player?> GetUserByIdAsync(Guid id);
+
+        void UpdateUser(Player player);
     }
 }

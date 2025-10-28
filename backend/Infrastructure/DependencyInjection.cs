@@ -13,11 +13,9 @@ namespace Infrastructure
             this IServiceCollection services,
             IConfiguration configuration)
         {
-            // 1. Registar o DbContext
             services.AddDbContext<AmateurFootballContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            //Registar os repositórios
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IMatchInviteRepository, MatchInviteRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
@@ -33,6 +31,5 @@ namespace Infrastructure
 
             return services;
         }
-
     }
 }

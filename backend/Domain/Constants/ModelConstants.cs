@@ -27,7 +27,7 @@
             public const int MinNameLength = 3;
             public const int MaxNameLengthEmail = 50;
             public const int MinPasswordLength = 8;
-            public const int MaxPasswordLength = 16;
+            public const int MaxPasswordLength = 100;
         }
 
         public static class PlayerConst

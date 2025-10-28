@@ -4,7 +4,9 @@ using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Services;
 using Application.Services;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -73,7 +75,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{playerId:guid}/membership-requests")]
-        public async Task<IActionResult> GetMembershipRequests(Guid playerId, [FromQuery] FilterMembershipRequestsTeam filters)
+        public async Task<IActionResult> GetMembershipRequests(Guid playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
             try
             {

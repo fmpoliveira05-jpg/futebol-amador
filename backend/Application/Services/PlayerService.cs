@@ -4,6 +4,7 @@ using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Services;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -16,14 +17,16 @@ namespace Application.Services
         private readonly IUnityOfWork unitOfWork;
         private readonly IPlayerValidator playerValidator;
         private readonly ITeamRepository teamRepository;
+        private readonly IPasswordHasher passwordHasher;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator, ITeamRepository teamRepository)
+        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator, ITeamRepository teamRepository, IPasswordHasher passwordHasher)
         {
             this.playerRepository = playerRepository;
             this.teamService = teamService;
             this.unitOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.teamRepository = teamRepository;
+            this.passwordHasher = passwordHasher;
         }
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
@@ -41,7 +44,7 @@ namespace Application.Services
                 DateOfBirth = playerDto.DateOfBirth,
                 Address = playerDto.Address,
                 Email = playerDto.Email,
-                Password = playerDto.Password,
+                Password = passwordHasher.HashPassword(playerDto.Password),
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,
