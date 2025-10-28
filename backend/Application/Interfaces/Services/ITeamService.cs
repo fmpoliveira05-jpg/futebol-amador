@@ -28,12 +28,13 @@ namespace Application.Interfaces.Services
 
         Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId);
 
-        //Gestão de admins
         Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromoteId, Guid playerPromotingId);
 
         Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid currentAdminId);
 
         Task<List<PlayerDetailsDTO>> GetTeamPlayersAsync(Guid teamId);
+
+        Task<List<PlayerDetailsDTO>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
 
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
     }

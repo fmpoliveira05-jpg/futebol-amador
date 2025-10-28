@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Membership;
+using Application.DTOs.MemberShip;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -26,7 +27,7 @@ namespace Application.Services
             this.unityOfWork = unityOfWork ?? throw new ArgumentNullException(nameof(unityOfWork));
         }
 
-        public async Task<IEnumerable<MembershipRequestDTO>> GetRequestsReceivedByPlayerFromTeams(Guid idPlayer)
+        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsReceivedByPlayerFromTeams(Guid idPlayer)
         {
             if (idPlayer == Guid.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
@@ -38,23 +39,23 @@ namespace Application.Services
             var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
 
             var invitesFromTeams = list
-                .Where(m => m.Sender == false)
-                .Select(m => new MembershipRequestDTO
+                .Where(m => m.IsPlayerSender == false)
+                .Select(m => new MemberShipRequestDto
                 {
-                    Id = m.Id,
-                    IdPlayer = m.IdPlayer,
+                    RequestId = m.Id,
+                    PlayerId = m.IdPlayer,
                     PlayerName = m.Player?.Name,
-                    IdTeam = m.IdTeam,
+                    TeamId = m.IdTeam,
                     TeamName = m.Team?.Name,
-                    InviteDate = m.InviteDate,
-                    Sender = m.Sender,
+                    RequestDate = m.InviteDate,
+                    IsPlayerSender = m.IsPlayerSender,
                     Message = null
                 });
 
             return invitesFromTeams;
         }
 
-        public async Task<IEnumerable<MembershipRequestDTO>> GetRequestsSentByPlayer(Guid idPlayer)
+        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(Guid idPlayer)
         {
             if (idPlayer == Guid.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
@@ -66,16 +67,16 @@ namespace Application.Services
             var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
 
             var sentByPlayer = list
-                .Where(m => m.Sender == true)
-                .Select(m => new MembershipRequestDTO
+                .Where(m => m.IsPlayerSender == true)
+                .Select(m => new MemberShipRequestDto
                 {
-                    Id = m.Id,
-                    IdPlayer = m.IdPlayer,
+                    RequestId = m.Id,
+                    PlayerId = m.IdPlayer,
                     PlayerName = m.Player?.Name,
-                    IdTeam = m.IdTeam,
+                    TeamId = m.IdTeam,
                     TeamName = m.Team?.Name,
-                    InviteDate = m.InviteDate,
-                    Sender = m.Sender,
+                    RequestDate = m.InviteDate,
+                    IsPlayerSender = m.IsPlayerSender,
                     Message = null
                 });
 
@@ -144,11 +145,10 @@ namespace Application.Services
                 throw new ArgumentNullException("A equipa do pedido não foi encontrada");
 
             player.Team = team;
-            player.idTeam = team.Id;
+            player.IdTeam = team.Id;
 
             await membershipRequestRepository.DeleteMembershipRequest(request);
 
-            await playerRepository.UpdatePlayer(player);
             await teamRepository.UpdateTeam(team);
 
             await unityOfWork.SaveChangesAsync();

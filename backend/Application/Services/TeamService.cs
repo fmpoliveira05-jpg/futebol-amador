@@ -203,6 +203,15 @@ namespace Application.Services
 
         }
 
+        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters)
+        {
+            var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+
+            TeamValidator.GetTeamMembersValidation(team);
+
+            return await TeamRepository.GetTeamPlayersDtoAsyncWithFilters(teamId, filters);
+        }
+
         public async Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);

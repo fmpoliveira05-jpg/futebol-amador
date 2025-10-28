@@ -75,6 +75,14 @@ namespace Api.Controllers
                 return Ok(players);
         }
 
+        [HttpGet("{teamId}/members/filter")]
+        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
+        {
+            var players = await TeamService.GetTeamPlayersAsyncWithFilters(teamId, filters);
+            return Ok(players);
+        }
+
+
         [HttpDelete("{teamId}/members/{playerIdToRemove}")]
         public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, Guid playerIdToRemove)
         {

@@ -271,5 +271,62 @@ namespace Infrastructure.Repositories
 
             return teams;
         }
+
+        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter)
+        {
+            var team = await _context.Team
+                .Include(t => t.Members)
+                .FirstOrDefaultAsync(t => t.Id == teamId);
+            if (team == null)
+                return new List<PlayerDetailsDTO>();
+            var playersQuery = team.Members.AsQueryable();
+
+            if (filter.IsAdmin.HasValue)
+            {
+                playersQuery = playersQuery.Where(p => p.IsAdmin == filter.IsAdmin.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Name))
+            {
+                var upperName = filter.Name.ToUpper();
+                playersQuery = playersQuery.Where(p => p.Name.ToUpper().Contains(upperName));
+            }
+
+            if (filter.Position.HasValue)
+            {
+                playersQuery = playersQuery.Where(p => p.Position == filter.Position.Value);
+            }
+
+            if (filter.MinAge.HasValue || filter.MaxAge.HasValue)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+
+                if (filter.MinAge.HasValue)
+                {
+                    var maxBirthDate = today.AddYears(-filter.MinAge.Value);
+                    playersQuery = playersQuery.Where(p => p.DateOfBirth <= maxBirthDate);
+                }
+
+                if (filter.MaxAge.HasValue)
+                {
+                    var minBirthDate = today.AddYears(-filter.MaxAge.Value);
+                    playersQuery = playersQuery.Where(p => p.DateOfBirth >= minBirthDate);
+                }
+            }
+
+            return playersQuery
+                .Select(player => new PlayerDetailsDTO
+                {
+                    PlayerId = player.Id,
+                    Name = player.Name,
+                    DateOfBirth = player.DateOfBirth,
+                    Address = player.Address,
+                    Position = player.Position,
+                    Height = player.Height,
+                    IdTeam = player.IdTeam,
+                    IsAdmin = player.IsAdmin
+                })
+                .ToList();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Domain.Entities;
 using System;
@@ -43,5 +44,7 @@ namespace Application.Interfaces.Repositories
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
 
         Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters);
+
+        Task<List<PlayerDetailsDTO>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter);
     }
 }
