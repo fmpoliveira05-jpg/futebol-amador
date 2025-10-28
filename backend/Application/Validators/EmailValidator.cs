@@ -10,7 +10,7 @@ namespace Application.Validators
 {
     public class EmailValidator: IEmailValidator
     {
-        public static bool IsValid(string email)
+        public bool IsValid(string email)
         {
             var valid = true;
 

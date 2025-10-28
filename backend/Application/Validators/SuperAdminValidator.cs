@@ -15,6 +15,12 @@ namespace Application.Validators
 {
     public class SuperAdminValidator : ISuperAdminValidator
     {
+        IEmailValidator emailValidator;
+        public SuperAdminValidator(IEmailValidator emailValidator)
+        {
+            this.emailValidator = emailValidator;
+        }
+
         public void SuperAdminExists(SuperAdmin sadmin)
         {
             if (sadmin == null)
@@ -35,7 +41,7 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{sadmins[1].Phone}' is already in use.");
             }
 
-            if (!EmailValidator.IsValid(dto.Email))
+            if (!emailValidator.IsValid(dto.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
@@ -83,7 +89,7 @@ namespace Application.Validators
                 }
             }
 
-            if (!EmailValidator.IsValid(dto.Email))
+            if (!emailValidator.IsValid(dto.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }

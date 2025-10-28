@@ -10,6 +10,17 @@ namespace Application.Validators
 {
     internal class PlayerValidator : IPlayerValidator
     {
+        IEmailValidator emailValidator;
+
+        public PlayerValidator()
+        {
+
+        }
+        public PlayerValidator(IEmailValidator emailValidator)
+        {
+            this.emailValidator = emailValidator;
+        }
+
         public void PlayerExists(Player? player)
         {
             if (player == null)
@@ -30,7 +41,7 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
-            if (!EmailValidator.IsValid(createPlayerDTO.Email))
+            if (!emailValidator.IsValid(createPlayerDTO.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
@@ -95,7 +106,7 @@ namespace Application.Validators
                 }
             }
 
-            if (!EmailValidator.IsValid(updatePlayerDTO.Email))
+            if (!emailValidator.IsValid(updatePlayerDTO.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
