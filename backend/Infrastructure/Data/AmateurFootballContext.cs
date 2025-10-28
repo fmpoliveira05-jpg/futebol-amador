@@ -14,12 +14,13 @@ namespace Infrastructure.Data
         public DbSet<Pitch> Pitch { get; set; } = null;
         public DbSet<Calendar> Calendar { get; set; } = null;
         public DbSet<Matches> Match { get; set; } = null;
+        public DbSet<PostPoneMatch> PostPoneMatch { get; set; } = null;
+        public DbSet<CancelledMatch> CancelledMatch { get; set; } = null;
         public DbSet<TeamStatistics> TeamStatistics { get; set; } = null;
         public DbSet<Message> Message { get; set; } = null;
         public DbSet<Chat> Chat { get; set; } = null;     
         public DbSet<MatchInvite> MatchInvite { get; set; } = null;
         public DbSet<MembershipRequests> MembershipRequests { get; set; } = null;
-
         public AmateurFootballContext(DbContextOptions<AmateurFootballContext> options)
         : base(options)
         {
@@ -35,40 +36,93 @@ namespace Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            
+            // 🔹 PostPoneMatch → Team
+            modelBuilder.Entity<PostPoneMatch>()
+                .HasOne(p => p.Team)
+                .WithMany()
+                .HasForeignKey(p => p.IdTeamPostPone)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            // Configuração da relação do Sender (quem envia)
+            // 🔹 PostPoneMatch → Match
+            modelBuilder.Entity<PostPoneMatch>()
+                .HasOne(p => p.Match)
+                .WithMany()
+                .HasForeignKey(p => p.IdMatch)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 CancelledMatch → Team
+            modelBuilder.Entity<CancelledMatch>()
+                .HasOne(p => p.Team)
+                .WithMany()
+                .HasForeignKey(p => p.IdTeam)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 CancelledMatch → Match
+            modelBuilder.Entity<CancelledMatch>()
+                .HasOne(p => p.Match)
+                .WithMany()
+                .HasForeignKey(p => p.IdMatch)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 TeamStatistics → Match
+            modelBuilder.Entity<TeamStatistics>()
+                .HasOne(ts => ts.Match)
+                .WithMany(m => m.Teams)
+                .HasForeignKey(ts => ts.MatchesId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 MatchInvite → Sender (Team)
             modelBuilder.Entity<MatchInvite>()
                 .HasOne(mi => mi.Sender)
-                .WithMany(t => t.SentInvites) // <-- Aponta para a lista de convites enviados
+                .WithMany(t => t.SentInvites)
                 .HasForeignKey(mi => mi.IdSender)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Configuração da relação do Receiver (quem recebe)
+            // 🔹 MatchInvite → Receiver (Team)
             modelBuilder.Entity<MatchInvite>()
                 .HasOne(mi => mi.Receiver)
-                .WithMany(t => t.ReceivedInvites) // <-- Aponta para a lista de convites recebidos
+                .WithMany(t => t.ReceivedInvites)
                 .HasForeignKey(mi => mi.IdReceiver)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            // Relação 1: De um Rank para o seu NextRank, usando a FK IdNextRank
+            // 🔹 Matches → Pitch
+            modelBuilder.Entity<Matches>()
+                .HasOne(m => m.Pitch)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 Matches → Chat
+            modelBuilder.Entity<Matches>()
+                .HasOne(m => m.Chat)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 Team → Calendar
+            modelBuilder.Entity<Teams>()
+                .HasOne(t => t.Calendar)
+                .WithMany()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // 🔹 Rank → NextRank
             modelBuilder.Entity<Rank>()
                 .HasOne(rank => rank.NextRank)
-                .WithOne() // Não há propriedade de navegação de volta para ESTA relação
-                .HasForeignKey<Rank>(rank => rank.IdNextRank) // A FK é IdNextRank
-                .IsRequired(false) // Pode ser nulo
-                .OnDelete(DeleteBehavior.Restrict); // Evita apagar em cascata
-
-            // Relação 2: De um Rank para o seu PreviousRank, usando a FK IdPreviousRank
-            modelBuilder.Entity<Rank>()
-                .HasOne(rank => rank.PreviousRank)
-                .WithOne() // Também não há propriedade de navegação de volta para ESTA relação
-                .HasForeignKey<Rank>(rank => rank.IdPreviousRank) // A FK é IdPreviousRank
-                .IsRequired(false) // Também pode ser nulo
+                .WithOne()
+                .HasForeignKey<Rank>(rank => rank.IdNextRank)
+                .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            //Herança — TPH: uma tabela Users com discriminator
+            // 🔹 Rank → PreviousRank
+            modelBuilder.Entity<Rank>()
+                .HasOne(rank => rank.PreviousRank)
+                .WithOne()
+                .HasForeignKey<Rank>(rank => rank.IdPreviousRank)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // 🔹 Herança — TPT
             modelBuilder.Entity<Users>()
-                    .UseTptMappingStrategy();
+                .UseTptMappingStrategy();
 
         }
     }

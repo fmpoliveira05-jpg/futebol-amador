@@ -1,0 +1,67 @@
+name: Build, Test e Analyze (.NET 8)
+
+on:
+  push:
+    branches: [ master, developer ]
+  pull_request: {}
+
+jobs:
+  build-test-analyze:
+    name: Build, Test e Analyze
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: 'zulu'
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Cache dos pacotes NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-dotnet-
+
+      - name: Cache SonarQube scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarQube scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
+
+      - name: Build, Test and Analyze
+        shell: powershell
+        run: |
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"LDS-Backend" `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
+            /d:sonar.cs.opencover.reportsPaths="**\coverage.opencover.xml" `
+            /d:sonar.cs.junit.reportsPaths="**\test-results.xml"
+
+          dotnet restore FutebolAmador.sln
+
+          dotnet build FutebolAmador.sln --configuration Release --no-restore
+
+          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage" --logger "junit;LogFileName=test-results.xml"
+
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

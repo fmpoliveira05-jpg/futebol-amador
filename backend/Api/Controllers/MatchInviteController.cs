@@ -1,7 +1,8 @@
-﻿using Application.DTOs;
-using Domain.Exceptions;
+﻿using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces.Services;
+using Application.DTOs.MatchInvites;
+using Application.DTOs.Filters;
 
 namespace Api.Controllers
 {
@@ -20,7 +21,7 @@ namespace Api.Controllers
          *  Vai faltar AUTs
          */
 
-        [HttpPost("/match-invites")]
+        [HttpPost("match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
             if (idTeam == Guid.Empty)
@@ -45,7 +46,9 @@ namespace Api.Controllers
 
             try
             {
-                await matchInviteService.SendMatchInvite(dto);
+                var sendInvite = await matchInviteService.SendMatchInvite(dto);
+
+                return Ok(sendInvite);
             }
             catch (BusinessRuleException ex)
             {
@@ -59,8 +62,6 @@ namespace Api.Controllers
             {
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
-
-            return Ok(dto);
         }
 
         private List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
@@ -79,7 +80,7 @@ namespace Api.Controllers
             return error;
         }
 
-        [HttpPost("/AcceptMatchInvite")]
+        [HttpPost("AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
@@ -111,7 +112,7 @@ namespace Api.Controllers
 
         //DELETE
         // api/.../RefuseMatchInvite/id_invite
-        [HttpDelete("/RefuseMatchInvite")]
+        [HttpDelete("RefuseMatchInvite")]
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
@@ -132,6 +133,10 @@ namespace Api.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
@@ -140,7 +145,7 @@ namespace Api.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("Negociate")]
         public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
         {
             if (idTeam == Guid.Empty)
@@ -163,7 +168,7 @@ namespace Api.Controllers
                 return BadRequest("O id do campo não pode ser nulo");
             }
 
-            if (idTeam != dto.IdSender)
+            if (idTeam != dto.IdReceiver)
             {
                 return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
             }
@@ -178,7 +183,7 @@ namespace Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-            catch (NullReferenceException ex)
+            catch (InvalidOperationException ex)
             {
                 return NotFound(new { message = ex.Message });
             }
@@ -187,5 +192,47 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam, [FromQuery] FilterMatchInvitesDto filter)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa não pode ser nulo");
+            }
+
+            try
+            {
+                IEnumerable<InfoMatchInviteDTO> matchesInvite;
+
+                bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
+                                 filter.MinDate.HasValue ||
+                                 filter.MaxDate.HasValue;
+
+                if (hasFilter)
+                {
+                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
+                }
+                else
+                {
+                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
+                }
+
+                return Ok(matchesInvite);
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
     }
 }

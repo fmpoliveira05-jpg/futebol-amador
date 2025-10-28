@@ -1,14 +1,24 @@
-﻿namespace Application.DTOs.Membership
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Domain.Entities;
+
+namespace Application.DTOs.MemberShip
 {
-    public class MembershipRequestDTO
+    public class MemberShipRequestDto
     {
-        public Guid Id { get; set; }
-        public Guid IdPlayer { get; set; }
-        public string? PlayerName { get; set; }
-        public Guid IdTeam { get; set; }
-        public string? TeamName { get; set; }
-        public DateTime InviteDate { get; set; }
-        public bool Sender { get; set; }
-        public string? Message { get; set; }
+        public Guid RequestId { get; set; }
+
+        public string PlayerName { get; set; }
+        public Guid PlayerId { get; set; }
+
+        public string TeamName { get; set; }
+
+        public DateTime RequestDate { get; set; }
+
+        public bool IsPlayerSender { get; set; }
+
     }
 }

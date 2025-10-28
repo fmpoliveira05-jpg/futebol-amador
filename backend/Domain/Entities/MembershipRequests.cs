@@ -24,9 +24,7 @@ namespace Domain.Entities
         // Data do convite/pedido (usar UTC para consistência)
         public DateTime InviteDate { get; set; }
 
-        // true  => enviado pelo Player (player pediu entrar na team)
-        // false => enviado pela Team  (team convidou o player)
-        public bool Sender { get; set; }
+        public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
         protected MembershipRequests() { }
 
@@ -46,13 +44,13 @@ namespace Domain.Entities
             IdPlayer = player.Id;
             Team = team;
             IdTeam = team.Id;
-            InviteDate = DateTime.UtcNow;
-            Sender = sender;
+            InviteDate = DateTime.Now;
+            IsPlayerSender = sender;
         }
 
         public override string ToString()
         {
-            return $"[MembershipRequests: Id={Id}, PlayerId={IdPlayer}, TeamId={IdTeam}, InviteDate={InviteDate:u}, Sender={(Sender ? "Player" : "Team")}]";
+            return $"[MembershipRequests: Id={Id}, Player={Player}, idPlayer={IdPlayer}, Team={Team}, idTeam={IdTeam}, inviteDate={InviteDate}, sender={IsPlayerSender}]";
         }
     }
 }

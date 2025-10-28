@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="DTOs\NovaPasta1\**" />
+    <EmbeddedResource Remove="DTOs\NovaPasta1\**" />
+    <None Remove="DTOs\NovaPasta1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="Interfaces\Repositories\IUnitOfWork.cs" />
   </ItemGroup>
 
@@ -16,7 +22,11 @@
 
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="12.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.10" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
+    <PackageReference Include="NUnit" Version="4.2.2" />
   </ItemGroup>
 
 </Project>

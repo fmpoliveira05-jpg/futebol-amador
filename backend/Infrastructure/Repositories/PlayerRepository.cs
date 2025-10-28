@@ -7,39 +7,46 @@ namespace Infrastructure.Repositories
 {
     public class PlayerRepository : IPlayerRepository
     {
-        private readonly AmateurFootballContext _context;
+        private readonly AmateurFootballContext context;
 
         public PlayerRepository(AmateurFootballContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
+            this.context = context;
+        }
+
+        public async Task AddAsync(Player player)
+        {
+            await context.Player.AddAsync(player);
+        }
+
+        public void DeletePlayer(Player playerToRemove)
+        {
+            context.Player.Remove(playerToRemove);
+        }
+
+        public async Task<List<Player>?> GetAllTPlayersAsync()
+        {
+            return await context.Player.ToListAsync();
+        }
+
+        public async Task<Player?> GetPlayerByEmailAsync(string email)
+        {
+            return await context.Player.FirstOrDefaultAsync(p => p.Email == email);
+        }
+
+        public async Task<Player?> GetPlayerByPhoneAsync(string phone)
+        {
+            return await context.Player.FirstOrDefaultAsync(p => p.Phone == phone);
         }
 
         public async Task<Player?> GetPlayerByIdAsync(Guid id)
         {
-            if (id == Guid.Empty) return null;
-
-            return await _context.Player
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+            return await context.Player.FindAsync(id);
         }
 
-        public async Task<Player?> GetPlayerByIdWithMembershipRequests(Guid id)
+        public void UpdatePlayer(Player updatedPlayer)
         {
-            if (id == Guid.Empty) return null;
-
-            return await _context.Player
-                .Include(p => p.MembershipRequests)
-                    .ThenInclude(mr => mr.Team)
-                .Include(p => p.Team)
-                .FirstOrDefaultAsync(p => p.Id == id);
-        }
-
-        public Task UpdatePlayer(Player player)
-        {
-            if (player == null) throw new ArgumentNullException(nameof(player));
-
-            _context.Player.Update(player);
-            return Task.CompletedTask;
+            context.Player.Update(updatedPlayer);
         }
     }
 }

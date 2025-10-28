@@ -8,7 +8,7 @@ namespace Domain.Entities
         protected SuperAdmin() { }
 
         public SuperAdmin(string name, DateOnly dateOfBirth, string address, string email, 
-            string password, int phoneNumber)
+            string password, string phoneNumber)
             : base(name, dateOfBirth, address, email, password, phoneNumber)
         {
 
@@ -16,7 +16,7 @@ namespace Domain.Entities
 
         public override string ToString()
         {
-            return $"SuperAdmin: {Name}, Email: {Email}, Phone: {PhoneNumber}";
+            return $"SuperAdmin: {Name}, Email: {Email}, Phone: {Phone}";
         }
     }
 }
