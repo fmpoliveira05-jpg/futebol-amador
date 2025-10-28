@@ -23,9 +23,12 @@ namespace Application.Services
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
-            var existingPlayer = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
+            var existingPlayers = new Player[] { 
+                await playerRepository.GetPlayerByEmailAsync(playerDto.Email),
+                await playerRepository.GetPlayerByPhoneAsync(playerDto.Phone),
+            };
 
-            playerValidator.CreatePlayerValidator(playerDto, existingPlayer);
+            playerValidator.CreatePlayerValidator(playerDto, existingPlayers);
 
             var player = new Player
             {

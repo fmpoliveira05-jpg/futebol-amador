@@ -4,6 +4,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
+using System.Numerics;
 
 namespace Application.Validators
 {
@@ -17,11 +18,16 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player player)
+        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players)
         {
-            if (player != null)
+            if (players[0] != null)
             {
-                throw new ValidationException($"The email '{player.Email}' is already in use.");
+                throw new ValidationException($"The email '{players[0].Email}' is already in use.");
+            }
+
+            if (players[1] != null)
+            {
+                throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
             if (!IsValidEmail(createPlayerDTO.Email))

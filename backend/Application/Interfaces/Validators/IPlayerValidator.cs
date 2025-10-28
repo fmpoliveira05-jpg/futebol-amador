@@ -7,7 +7,7 @@ namespace Application.Interfaces.Validators
     {
         void PlayerExists(Player? player);
 
-        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player player);
+        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players);
 
         void DeletePlayerValidator(Player? player);
 
