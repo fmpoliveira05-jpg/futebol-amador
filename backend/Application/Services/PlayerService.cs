@@ -18,9 +18,15 @@ namespace Application.Services
         private readonly IPlayerValidator playerValidator;
         private readonly ITeamRepository teamRepository;
         private readonly IPasswordHasher passwordHasher;
+<<<<<<< Updated upstream
         private readonly IUserRepository userRepository;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator, ITeamRepository teamRepository, IPasswordHasher passwordHasher, IUserRepository userRepository)
+=======
+        private readonly IMembershipRequestRepository membershipRequestRepository;
+
+        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator, ITeamRepository teamRepository, IPasswordHasher passwordHasher, IMembershipRequestRepository membershipRequestRepository)
+>>>>>>> Stashed changes
         {
             this.playerRepository = playerRepository;
             this.teamService = teamService;
@@ -28,7 +34,12 @@ namespace Application.Services
             this.playerValidator = playerValidator;
             this.teamRepository = teamRepository;
             this.passwordHasher = passwordHasher;
+<<<<<<< Updated upstream
             this.userRepository = userRepository;
+=======
+            this.membershipRequestRepository = membershipRequestRepository;
+
+>>>>>>> Stashed changes
         }
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
@@ -152,15 +163,6 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
 
-            if (player.MembershipRequests == null)
-                player.MembershipRequests = new List<MembershipRequests>();
-
-            if (!player.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
-                player.MembershipRequests.Add(fakeRequest);
-            }
-
             return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
         }
 
@@ -168,15 +170,6 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
-
-            if (player.MembershipRequests == null)
-                player.MembershipRequests = new List<MembershipRequests>();
-
-            if (!player.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
-                player.MembershipRequests.Add(fakeRequest);
-            }
 
             return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
         }
@@ -218,6 +211,41 @@ namespace Application.Services
                 throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
 
             player.MembershipRequests.Remove(request);
+
+            await unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task SendMembershipRequestAsync(Guid playerId, Guid teamId)
+        {
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+            var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
+
+            playerValidator.PlayerExists(player);
+
+            if (team == null)
+                throw new ValidationException("A equipa especificada não existe.");
+
+            if (player.IdTeam == teamId)
+                throw new ValidationException("O jogador já pertence a esta equipa.");
+
+            var existingRequest = await membershipRequestRepository
+                .GetMembershipRequestByPlayerAndTeam(playerId, teamId);
+
+            if (existingRequest != null)
+                throw new ValidationException("Já existe um pedido de adesão pendente para esta equipa.");
+
+            var newRequest = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = playerId,
+                IdTeam = teamId,
+                Player = player,
+                Team = team,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = true
+            };
+
+            await membershipRequestRepository.AddMembershipRequest(newRequest);
 
             await unitOfWork.SaveChangesAsync();
         }
