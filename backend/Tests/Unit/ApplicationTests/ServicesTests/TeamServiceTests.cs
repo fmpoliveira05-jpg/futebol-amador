@@ -35,6 +35,8 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IRankRepository> _rankRepoMock;
         private ITeamValidator _validatorReal;
         private TeamService _sut;
+        private readonly Mock<IMembershipRequestRepository> _membershipRequestRepoMock = new();
+        private readonly Mock<IPlayerValidator> _playerValidatorMock = new();
 
         /// <summary>
         /// Classe auxiliar interna para criar instâncias de Rank em contexto de teste.
@@ -79,12 +81,14 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorReal = new TeamValidator();
 
             _sut = new TeamService(
-                _teamRepoMock.Object,
-                _playerRepoMock.Object,
-                _userRepoMock.Object,
-                _unitOfWorkMock.Object,
-                _validatorReal,
-                _rankRepoMock.Object
+            _teamRepoMock.Object,
+            _playerRepoMock.Object,
+            _userRepoMock.Object,
+            _unitOfWorkMock.Object,
+            _validatorReal,
+            _rankRepoMock.Object,
+            _membershipRequestRepoMock.Object,
+            _playerValidatorMock.Object
             );
         }
 
