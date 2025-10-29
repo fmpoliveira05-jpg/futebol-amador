@@ -37,5 +37,7 @@ namespace Application.Interfaces.Services
         Task<List<PlayerDetailsDTO>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
 
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
+
+        Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId);
     }
 }

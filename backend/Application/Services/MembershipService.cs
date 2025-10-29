@@ -48,8 +48,7 @@ namespace Application.Services
                     TeamId = m.IdTeam,
                     TeamName = m.Team?.Name,
                     RequestDate = m.InviteDate,
-                    IsPlayerSender = m.IsPlayerSender,
-                    Message = null
+                    IsPlayerSender = m.IsPlayerSender
                 });
 
             return invitesFromTeams;
@@ -76,8 +75,7 @@ namespace Application.Services
                     TeamId = m.IdTeam,
                     TeamName = m.Team?.Name,
                     RequestDate = m.InviteDate,
-                    IsPlayerSender = m.IsPlayerSender,
-                    Message = null
+                    IsPlayerSender = m.IsPlayerSender
                 });
 
             return sentByPlayer;

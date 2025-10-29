@@ -18,8 +18,16 @@ namespace Application.Services
         private readonly IPlayerValidator playerValidator;
         private readonly ITeamRepository teamRepository;
         private readonly IPasswordHasher passwordHasher;
+        private readonly IMembershipRequestRepository membershipRequestRepository;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unitOfWork, IPlayerValidator playerValidator, ITeamRepository teamRepository, IPasswordHasher passwordHasher)
+        public PlayerService(
+            IPlayerRepository playerRepository,
+            ITeamService teamService,
+            IUnityOfWork unitOfWork,
+            IPlayerValidator playerValidator,
+            ITeamRepository teamRepository,
+            IPasswordHasher passwordHasher,
+            IMembershipRequestRepository membershipRequestRepository)
         {
             this.playerRepository = playerRepository;
             this.teamService = teamService;
@@ -27,11 +35,13 @@ namespace Application.Services
             this.playerValidator = playerValidator;
             this.teamRepository = teamRepository;
             this.passwordHasher = passwordHasher;
+            this.membershipRequestRepository = membershipRequestRepository;
         }
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
-            var existingPlayers = new Player[] { 
+            var existingPlayers = new Player[]
+            {
                 await playerRepository.GetPlayerByEmailAsync(playerDto.Email),
                 await playerRepository.GetPlayerByPhoneAsync(playerDto.Phone),
             };
@@ -48,11 +58,10 @@ namespace Application.Services
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,
-                CreationDate = DateTime.Now
+                CreationDate = DateTime.UtcNow
             };
 
             await playerRepository.AddAsync(player);
-
             await unitOfWork.SaveChangesAsync();
 
             return player.Id;
@@ -107,7 +116,7 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<String> LeaveTeam(Guid playerId)
+        public async Task<string> LeaveTeam(Guid playerId)
         {
             var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -120,9 +129,10 @@ namespace Application.Services
                     await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
                 }
 
-                var otherAdmin = existingPlayer.Team.Members.First(p => p.IsAdmin == true && p.Id != existingPlayer.Id);
+                var otherAdmin = existingPlayer.Team.Members
+                    .FirstOrDefault(p => p.IsAdmin && p.Id != existingPlayer.Id);
 
-                //if the team has no more admins, choose the oldest account player to be the new admin.
+                // If the team has no more admins, choose the oldest account player to be the new admin.
                 if (otherAdmin == null)
                 {
                     var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
@@ -150,15 +160,6 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
 
-            if (player.MembershipRequests == null)
-                player.MembershipRequests = new List<MembershipRequests>();
-
-            if (!player.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
-                player.MembershipRequests.Add(fakeRequest);
-            }
-
             return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
         }
 
@@ -166,15 +167,6 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
-
-            if (player.MembershipRequests == null)
-                player.MembershipRequests = new List<MembershipRequests>();
-
-            if (!player.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
-                player.MembershipRequests.Add(fakeRequest);
-            }
 
             return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
         }
@@ -217,6 +209,40 @@ namespace Application.Services
 
             player.MembershipRequests.Remove(request);
 
+            await unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task SendMembershipRequestAsync(Guid playerId, Guid teamId)
+        {
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+            var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
+
+            playerValidator.PlayerExists(player);
+
+            if (team == null)
+                throw new ValidationException("A equipa especificada não existe.");
+
+            if (player.IdTeam == teamId)
+                throw new ValidationException("O jogador já pertence a esta equipa.");
+
+            var existingRequest = await membershipRequestRepository
+                .GetMembershipRequestByPlayerAndTeam(playerId, teamId);
+
+            if (existingRequest != null)
+                throw new ValidationException("Já existe um pedido de adesão pendente para esta equipa.");
+
+            var newRequest = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = playerId,
+                IdTeam = teamId,
+                Player = player,
+                Team = team,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = true
+            };
+
+            await membershipRequestRepository.AddMembershipRequest(newRequest);
             await unitOfWork.SaveChangesAsync();
         }
     }

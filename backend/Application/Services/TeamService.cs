@@ -8,41 +8,45 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
-
 using Domain.Exceptions;
 
 namespace Application.Services
-//criar/editar/remover equipas; gerir admins e membros.
 {
-    //verificar necessidade de ser public (rever protection level)
     public class TeamService : ITeamService
     {
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
         private readonly IUserRepository UserRepository;
-        private readonly IUnityOfWork UnityOfWork;
+        private readonly IUnityOfWork UnitOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
+        private readonly IMembershipRequestRepository MembershipRequestRepository;
+        private readonly IPlayerValidator PlayerValidator;
 
-        public TeamService(ITeamRepository teamRepository, IPlayerRepository playerRepository, IUserRepository userRepository, IUnityOfWork unitOfWork, ITeamValidator teamValidator, IRankRepository rankRepository)
+        public TeamService(
+            ITeamRepository teamRepository,
+            IPlayerRepository playerRepository,
+            IUserRepository userRepository,
+            IUnityOfWork unitOfWork,
+            ITeamValidator teamValidator,
+            IRankRepository rankRepository,
+            IMembershipRequestRepository membershipRequestRepository,
+            IPlayerValidator playerValidator)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             UserRepository = userRepository;
-            UnityOfWork = unitOfWork;
+            UnitOfWork = unitOfWork;
             TeamValidator = teamValidator;
             RankRepository = rankRepository;
-
+            MembershipRequestRepository = membershipRequestRepository;
+            PlayerValidator = playerValidator;
         }
+
         public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
-            var playerAcceptingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, playerAcceptingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerAccepting = await playerAcceptingTask;
+            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId);
+            var playerAccepting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
                 existingTeam.MembershipRequests = new List<MembershipRequests>();
@@ -66,7 +70,7 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             existingTeam.Members.Add(playerAccepted);
 
-            await UnityOfWork.SaveChangesAsync();
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid playerId)
@@ -89,18 +93,23 @@ namespace Application.Services
             );
 
             await TeamRepository.AddAsync(newTeam);
-            await UnityOfWork.SaveChangesAsync();
+
+            playerCreating.IsAdmin = true;
+            playerCreating.IdTeam = newTeam.Id;
+            playerCreating.Team = newTeam;
+            newTeam.Members ??= new List<Player>();
+            newTeam.Members.Add(playerCreating);
+
+            PlayerRepository.UpdatePlayer(playerCreating);
+
+            await UnitOfWork.SaveChangesAsync();
             return newTeam.Id;
         }
 
         public async Task DeleteTeamAsync(Guid teamId, Guid currentUserId)
         {
-            var teamToDeleteTask = TeamRepository.GetTeamForDeletionAsync(teamId);
-            var playerTryingToDeleteTask = PlayerRepository.GetPlayerByIdAsync(currentUserId);
-            await Task.WhenAll(teamToDeleteTask, playerTryingToDeleteTask);
-
-            var teamToDelete = await teamToDeleteTask;
-            var playerTryingToDelete = await playerTryingToDeleteTask;
+            var teamToDelete = await TeamRepository.GetTeamForDeletionAsync(teamId);
+            var playerTryingToDelete = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
 
             TeamValidator.DeleteTeamValidation(teamToDelete, playerTryingToDelete);
             foreach (var member in teamToDelete.Members)
@@ -114,33 +123,19 @@ namespace Application.Services
             }
             TeamRepository.DeleteTeam(teamToDelete);
 
-            await UnityOfWork.SaveChangesAsync();
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, Guid currentUserId)
         {
-            var teamToUpdateTask = TeamRepository.GetTeamForUpdateAsync(teamId);
-            var playerTryingToUpdateTask = PlayerRepository.GetPlayerByIdAsync(currentUserId);
+            var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
+            var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
 
-            Task<Teams> teamWithSameNameTask = null; 
             Teams teamWithSameName = null;
-
-            var tasksToAwait = new List<Task> { teamToUpdateTask, playerTryingToUpdateTask };
 
             if (dto.Name != null)
             {
-                teamWithSameNameTask = TeamRepository.GetTeamByNameAsync(dto.Name);
-                tasksToAwait.Add(teamWithSameNameTask);
-            }
-
-            await Task.WhenAll(tasksToAwait);
-
-            var teamToUpdate = await teamToUpdateTask;
-            var playerTryingToUpdate = await playerTryingToUpdateTask;
-
-            if (teamWithSameNameTask != null)
-            {
-                teamWithSameName = await teamWithSameNameTask;
+                teamWithSameName = await TeamRepository.GetTeamByNameAsync(dto.Name);
             }
 
             TeamValidator.UpdateTeamValidation(teamWithSameName, teamToUpdate, playerTryingToUpdate);
@@ -149,31 +144,24 @@ namespace Application.Services
             teamToUpdate.Description = dto.Description ?? teamToUpdate.Description;
             teamToUpdate.Icon = dto.icon ?? teamToUpdate.Icon;
             teamToUpdate.Pitch.Name = dto.PitchName ?? teamToUpdate.Pitch.Name;
-            teamToUpdate.Pitch.Address = dto.PitchLocation?? teamToUpdate.Pitch.Address;
-
+            teamToUpdate.Pitch.Address = dto.PitchLocation ?? teamToUpdate.Pitch.Address;
 
             TeamRepository.UpdateTeam(teamToUpdate);
 
-            await UnityOfWork.SaveChangesAsync();
-
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid adminDemotingId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var playerToDemoteTask = PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
-            var playerDemotingTask = PlayerRepository.GetPlayerByIdAsync(adminDemotingId);
-            await Task.WhenAll(existingTeamTask, playerToDemoteTask, playerDemotingTask);
+            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var playerToDemote = await PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
+            var playerDemoting = await PlayerRepository.GetPlayerByIdAsync(adminDemotingId);
 
-            var existingTeam = await existingTeamTask;
-            var playerDemoted = await playerToDemoteTask;
-            var playerDemoting = await playerDemotingTask;
+            TeamValidator.DemoteAdminToMemberValidation(existingTeam, playerToDemote, playerDemoting);
 
-            TeamValidator.DemoteAdminToMemberValidation(existingTeam, playerDemoted, playerDemoting);
-
-            playerDemoted.IsAdmin = false;
-            playerDemoted.IsAdminLastChangedAt = DateTime.UtcNow;
-            await UnityOfWork.SaveChangesAsync();
+            playerToDemote.IsAdmin = false;
+            playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
@@ -200,7 +188,6 @@ namespace Application.Services
                 IsAdmin = player.IsAdmin
             }).ToList();
             return playerDtos;
-
         }
 
         public async Task<List<PlayerDetailsDTO>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters)
@@ -214,14 +201,9 @@ namespace Application.Services
 
         public async Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var playerToRemoveTask = PlayerRepository.GetPlayerByIdAsync(playerIdToRemove);
-            var playerRemovingTask = PlayerRepository.GetPlayerByIdAsync(playerRemovingId);
-            await Task.WhenAll(existingTeamTask, playerToRemoveTask, playerRemovingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerToRemove = await playerToRemoveTask;
-            var playerRemoving = await playerRemovingTask;
+            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var playerToRemove = await PlayerRepository.GetPlayerByIdAsync(playerIdToRemove);
+            var playerRemoving = await PlayerRepository.GetPlayerByIdAsync(playerRemovingId);
 
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
 
@@ -233,36 +215,27 @@ namespace Application.Services
                 playerToRemove.IsAdminLastChangedAt = DateTime.UtcNow;
             }
 
-            await UnityOfWork.SaveChangesAsync();
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromoteId, Guid playerIdToPromotingId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var playerToPromoteTask = PlayerRepository.GetPlayerByIdAsync(playerIdToPromoteId);
-            var playerPromotingTask = PlayerRepository.GetPlayerByIdAsync(playerIdToPromotingId);
-            await Task.WhenAll(existingTeamTask, playerToPromoteTask, playerPromotingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerToPromote = await playerToPromoteTask;
-            var playerPromoting = await playerPromotingTask;
+            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var playerToPromote = await PlayerRepository.GetPlayerByIdAsync(playerIdToPromoteId);
+            var playerPromoting = await PlayerRepository.GetPlayerByIdAsync(playerIdToPromotingId);
 
             TeamValidator.PromoteMemberToAdminValidation(existingTeam, playerToPromote, playerPromoting);
 
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
-            await UnityOfWork.SaveChangesAsync();
+            await UnitOfWork.SaveChangesAsync();
         }
+
         public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
-            var playerRejectingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, playerRejectingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerRejecting = await playerRejectingTask;
+            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId);
+            var playerRejecting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
                 existingTeam.MembershipRequests = new List<MembershipRequests>();
@@ -284,18 +257,13 @@ namespace Application.Services
                     playerRejected.MembershipRequests.Remove(playerRequest);
             }
 
-            await UnityOfWork.SaveChangesAsync();
+            await UnitOfWork.SaveChangesAsync();
         }
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var adminTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, adminTask);
-
-            var existingTeam = await existingTeamTask;
-            var adminConsulting = await adminTask;
+            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var adminConsulting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
                 existingTeam.MembershipRequests = new List<MembershipRequests>();
@@ -313,13 +281,8 @@ namespace Application.Services
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters)
         {
-            var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var adminTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, adminTask);
-
-            var existingTeam = await existingTeamTask;
-            var adminConsulting = await adminTask;
+            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
                 existingTeam.MembershipRequests = new List<MembershipRequests>();
@@ -330,32 +293,15 @@ namespace Application.Services
                 existingTeam.MembershipRequests.Add(fakeRequest);
             }
 
-            TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
+            TeamValidator.GetMembershipRequestsValidation(existingTeam, admin);
 
             return await TeamRepository.GetMembershipRequestsDtoAsyncWithFilters(teamId, filters);
         }
 
-
-
         public Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId)
         {
-                        throw new NotImplementedException();
-/*
-            var existingTeamTask = await TeamRepository.GetTeamByIdAsync(teamId);
-
-            TeamValidator.GetTeamScheduleValidation(existingTeamTask);
-            var matchDtos = existingTeamTask.Calendar.Matches.Select(match => new MatchDto
-            {
-                MatchId = match.Id,
-                AwayTeamName = match.Teams.Name, 
-                HomeTeamName = match.HomeTeam.Name,
-                MatchDate = match.MatchDate,
-                PitchName = match.Pitch.Name,
-                Location = match.Pitch.Address,
-            }).ToList();
-*/
+            throw new NotImplementedException();
         }
-
 
         public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
         {
@@ -367,16 +313,44 @@ namespace Application.Services
 
             if (player.IsAdmin)
             {
-                teams.Where(t =>
-                    t.PlayerCount > 11
-                    );
+                teams.Where(t => t.PlayerCount > 11);
             }
             else if (player.IdTeam == null)
-                teams.Where(t =>
-                    t.PlayerCount < 32
-                    );
+            {
+                teams.Where(t => t.PlayerCount < 32);
+            }
 
             return teams;
+        }
+
+        public async Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId)
+        {
+            var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
+            var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
+
+            TeamValidator.SendMembershipRequestValidation(team, admin, playerToInvite);
+            PlayerValidator.PlayerExists(playerToInvite);
+
+            if (playerToInvite.IdTeam == teamId)
+                throw new ValidationException("O jogador já pertence a esta equipa.");
+
+            var existing = await MembershipRequestRepository
+                .GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
+            if (existing != null)
+                throw new ValidationException("Já existe um pedido/convite pendente entre a equipa e este jogador.");
+
+            var invite = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = playerIdToInvite,
+                IdTeam = teamId,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = false
+            };
+
+            await MembershipRequestRepository.AddMembershipRequest(invite);
+            await UnitOfWork.SaveChangesAsync();
         }
     }
 }

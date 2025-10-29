@@ -249,16 +249,6 @@ namespace Infrastructure.Repositories
                 query = query.Where(t => t.Rank.Name.Contains(filters.Name));
             }
 
-            if (filters.MinAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge > filters.MinAvgAge);
-            }
-
-            if (filters.MaxAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
-            }
-
             if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
             {
                 query = query.Where(t => t.Pitch.Address.Contains(filters.PitchAddress));

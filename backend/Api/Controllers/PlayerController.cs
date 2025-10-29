@@ -122,5 +122,27 @@ namespace Api.Controllers
             await playerService.RejectMembershipRequestAsync(playerId, requestId);
             return Ok("Pedido de adesão de equipa rejeitado pelo jogador.");
         }
+
+        [HttpPost("{playerId:guid}/membership-requests/send/{teamId:guid}")]
+        public async Task<IActionResult> SendMembershipRequest(Guid playerId, Guid teamId)
+        {
+            try
+            {
+                await playerService.SendMembershipRequestAsync(playerId, teamId);
+                return Ok("Pedido de adesão enviado com sucesso.");
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
+            }
+        }
     }
 }

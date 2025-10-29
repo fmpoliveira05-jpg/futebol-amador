@@ -23,7 +23,5 @@ namespace Application.DTOs.MemberShip
 
         public bool IsPlayerSender { get; set; }
 
-        public string Message { get; set; }
-
     }
 }

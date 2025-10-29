@@ -62,7 +62,7 @@ namespace Infrastructure.Repositories
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(Guid playerId)
         {
             return await context.MembershipRequests
-                .Where(mr => mr.IdPlayer == playerId)
+                .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false)
                 .Select(mr => new MemberShipRequestDto
                 {
                     RequestId = mr.Id,
@@ -78,12 +78,7 @@ namespace Infrastructure.Repositories
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters)
         {
             var query = context.MembershipRequests
-                .Where(mr => mr.IdPlayer == playerId);
-
-            if (filters.IsPlayerSender.HasValue)
-            {
-                query = query.Where(mr => mr.IsPlayerSender == filters.IsPlayerSender.Value);
-            }
+                .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false);
 
             if (filters.MinDate.HasValue)
                 query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);

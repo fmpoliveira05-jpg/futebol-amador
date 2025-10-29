@@ -12,34 +12,30 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [Required]
-        [StringLength(ModelConstants.TeamConst.MaxNameLength, MinimumLength = ModelConstants.TeamConst.MinNameLength)]
+        [MaxLength(ModelConstants.TeamConst.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
         public string Name { get; set; }
 
-        [StringLength(ModelConstants.TeamConst.MaxDescriptionLength)]
-        [MaxLength()]
+        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
+
         public string? Description { get; set; }
 
         public byte[]? Icon { get; set; }
 
         public Pitch Pitch { get; set; }
 
-        [Required]
         [ForeignKey("Pitch")]
         public Guid IdPitch { get; set; } //FK
 
-        [Required]
         public DateTime DataFoundation { get; set; }
 
         public ICollection<Player> Members { get; set; } = new List<Player>();
 
-        [Required]
-        [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
+        [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
+
         public int CurrentPoints { get; set; }
 
         public Rank Rank { get; set; }
 
-        [Required]
         [ForeignKey("Rank")]
         public Guid IdRank { get; set; } //FK
 
@@ -61,16 +57,16 @@ namespace Domain.Entities
 
         public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
-            this.Name = name;
-            this.Description = description;
-            this.Icon = icon;
-            this.Pitch = pitch;
-            this.IdPitch = pitch.Id;
-            this.DataFoundation = DateTime.Now;
+            Name = name;
+            Description = description;
+            Icon = icon;
+            Pitch = pitch;
+            IdPitch = pitch.Id;
+            DataFoundation = DateTime.Now;
             this.Rank = DefaultRank;
-            this.CurrentPoints = 0;
-            this.Calendar = new Calendar();
-            this.IdCalendar = Calendar.Id;
+            CurrentPoints = 0;
+            Calendar = new Calendar();
+            IdCalendar = Calendar.Id;
         }
         //
         public override string ToString()

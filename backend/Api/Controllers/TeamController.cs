@@ -1,11 +1,13 @@
-﻿using Api.Controllers; // Assume que este é o teu namespace
+using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
+using Application.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -184,5 +186,29 @@ namespace Api.Controllers
             
         }
 
+        [HttpPost("{teamId:guid}/membership-requests/send/{playerId:guid}")]
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, Guid playerId)
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+
+                await TeamService.SendMembershipRequestAsync(teamId, playerId, adminId);
+
+                return Ok("Pedido de adesão enviado com sucesso.");
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
+            }
+        }
     }
 }

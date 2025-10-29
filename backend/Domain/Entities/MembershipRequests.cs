@@ -29,7 +29,7 @@ namespace Domain.Entities
         [Required]
         public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
-        protected MembershipRequests() { }
+        public MembershipRequests() { }
 
         public MembershipRequests(Player player, Teams team, bool sender)
         {

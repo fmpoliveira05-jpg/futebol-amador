@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {
@@ -23,6 +24,8 @@ namespace Application.Interfaces.Services
         Task AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
 
         Task RejectMembershipRequestAsync(Guid playerId, Guid requestId);
+
+        Task SendMembershipRequestAsync(Guid playerId, Guid teamId);
 
     }
 }
