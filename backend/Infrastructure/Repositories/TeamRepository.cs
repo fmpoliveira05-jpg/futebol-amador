@@ -141,7 +141,7 @@ namespace Infrastructure.Repositories
         {
 
             return await _context.MembershipRequests
-                        .Where(mr => mr.IdTeam == teamId)
+                        .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true)
                         .Select(mr => new MemberShipRequestDto
                         {
                             RequestId = mr.Id,
@@ -157,7 +157,7 @@ namespace Infrastructure.Repositories
         public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
         {
             var query = _context.MembershipRequests
-                .Where(mr => mr.IdTeam == teamId);
+                .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true);
 
             if (filters.IsPlayerSender.HasValue)
             {

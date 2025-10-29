@@ -90,7 +90,8 @@ namespace Application.Services
                 DateOfBirth = player.DateOfBirth,
                 Address = player.Address,
                 Position = player.Position,
-                Height = player.Height
+                Height = player.Height,
+                IdTeam = player.IdTeam
             };
 
             return playerDetails;
