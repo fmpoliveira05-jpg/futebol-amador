@@ -26,17 +26,6 @@ namespace Application.Services.Hub
             this.cache = cache;
         }
 
-        private string GetHubCacheKey(Guid matchId)
-        {
-            return $"hub-{matchId}";
-        } 
-
-        private MemoryCacheEntryOptions GetCacheOptions()
-        {
-            return new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
-        }
-
         public async Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, Guid userId, Guid idTeam, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, userId, connectionId);
@@ -62,7 +51,7 @@ namespace Application.Services.Hub
                 Match = match
             };
 
-            if (hub.Count() == 0)
+            if (hub.Count == 0)
             {
                 //Adicionar admin ao hub
                 hub.TryAdd(idTeam, connectionId);
@@ -90,66 +79,6 @@ namespace Application.Services.Hub
 
             return result;
         }
-
-        /*
-         public async Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, Guid userId, string connectionId)
-        {
-            Guid teamId = Guid.Empty;
-            
-            validator.ValidateVariableJoinMatch(matchId, userId, connectionId);
-            
-            var match = await matchRepository.GetMatchWithListPlayerById(matchId);
-            validator.ValidateMatchJoinMatch(match);
-
-            var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
-                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
-            );
-
-            teamId = teamMatchAdmin.IdTeam;
-
-            var hubCacheKey = GetHubCacheKey(matchId);
-            if (!cache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, string>? hub))
-            {
-                hub = new ConcurrentDictionary<Guid, string>();
-            }
-
-            validator.ValidateJoinMatch(teamMatchAdmin, teamId, hub);
-
-            var result = new JoinStartMatchResult
-            {
-                TeamId = teamId,
-                Match = match
-            };
-
-            if (hub.Count() == 0)
-            {
-                //Adicionar admin ao hub
-                hub.TryAdd(teamId, connectionId);
-                cache.Set(hubCacheKey, hub, GetCacheOptions());
-                result.IsFirstAdmin = true;
-                result.MatchStarted = false;
-            }
-            else
-            {
-                //Adicionar 2º admin e fechar hub
-                var first = hub.First();
-                var firstTeamId = first.Key;
-                var firstConnectionId = first.Value;
-
-                match.MatchStatus = MatchStatus.IN_PROGRESS;
-                match.TimeStart = DateTime.UtcNow;
-                await unityOfWork.SaveChangesAsync();
-
-                cache.Remove(hubCacheKey);
-
-                result.IsFirstAdmin = false;
-                result.MatchStarted = true;
-                result.FirstAdminConnectionId = firstConnectionId;
-            }
-
-            return result;
-        }
-         */
 
         public async Task<bool> LeaveHubAsync(Guid matchId, Guid idTeam, string connectionId)
         {
@@ -185,9 +114,15 @@ namespace Application.Services.Hub
             return await Task.FromResult(await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId));
         }
 
-        public Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, string connectionId)
+        private static string GetHubCacheKey(Guid matchId)
         {
-            throw new NotImplementedException();
+            return $"hub-{matchId}";
+        }
+
+        private static MemoryCacheEntryOptions GetCacheOptions()
+        {
+            return new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
         }
     }
 }

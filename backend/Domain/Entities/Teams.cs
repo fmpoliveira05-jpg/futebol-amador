@@ -57,7 +57,7 @@ namespace Domain.Entities
         public Guid IdCalendar { get; set; } //FK
 
         //EF
-        protected Teams() { }
+        public Teams() { }
 
         public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {

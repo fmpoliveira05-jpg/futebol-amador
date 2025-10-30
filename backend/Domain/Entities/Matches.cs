@@ -37,12 +37,11 @@ namespace Domain.Entities
         [ForeignKey("Chat")]
         public Guid IdChat { get; set; }
 
-        protected Matches() { }
+        public Matches() { }
 
         public Matches(DateTime matchDate, bool isCompetive, Pitch pitch)
         {
             this.MatchDate = matchDate;
-            //this.PostPoneDate = matchDate
             this.IsCompetive = isCompetive;
             this.Pitch = pitch;
             this.Teams = new List<TeamStatistics>();

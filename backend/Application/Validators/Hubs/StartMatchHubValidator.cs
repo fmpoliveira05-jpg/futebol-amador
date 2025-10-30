@@ -48,7 +48,7 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida");
             }
 
-            if (hub.Count() >= 2)
+            if (hub.Count >= 2)
             {
                 throw new InvalidOperationException("Apenas do 2 admins (um de cada equipa) pode aceder a esta funcionalidade");
             }
