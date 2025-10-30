@@ -323,5 +323,20 @@ namespace Infrastructure.Repositories
                 })
                 .ToList();
         }
+
+        public async Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top)
+        {
+            return await _context.Team
+                .Include(t => t.Rank)
+                .OrderByDescending(t => t.CurrentPoints)
+                .Take(top)
+                .Select(t => new TeamLeaderboardDto
+                {
+                    TeamName = t.Name,
+                    CurrentPoints = t.CurrentPoints,
+                    RankName = t.Rank.Name
+                })
+                .ToListAsync();
+        }
     }
 }

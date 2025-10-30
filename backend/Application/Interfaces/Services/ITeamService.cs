@@ -39,5 +39,7 @@ namespace Application.Interfaces.Services
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
 
         Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId);
+
+        Task<List<TeamLeaderboardDto>> GetLeaderboardAsync();
     }
 }

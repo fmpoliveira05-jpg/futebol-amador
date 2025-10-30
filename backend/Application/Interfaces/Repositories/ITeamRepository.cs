@@ -46,5 +46,7 @@ namespace Application.Interfaces.Repositories
         Task<List<TeamSummaryDto>> GetAllTeamsWithFilters(TeamSearchFiltersDto filters);
 
         Task<List<PlayerDetailsDTO>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter);
+
+        Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top);
     }
 }
