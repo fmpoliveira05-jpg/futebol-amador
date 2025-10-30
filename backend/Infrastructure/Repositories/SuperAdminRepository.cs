@@ -9,6 +9,11 @@ namespace Infrastructure.Repositories
     {
         private readonly AmateurFootballContext context;
 
+        public SuperAdminRepository(AmateurFootballContext context)
+        {
+            this.context = context;
+        }
+
         public async Task AddAsync(SuperAdmin superAdmin)
         {
             await context.AddAsync(superAdmin);
@@ -26,16 +31,12 @@ namespace Infrastructure.Repositories
 
         public async Task<SuperAdmin?> GetSuperAdminByEmailAsync(string email)
         {
-            var superAdmin = await context.SuperAdmin.FirstOrDefaultAsync(s => s.Email == email);
-
-            return superAdmin;
+            return await context.SuperAdmin.FirstOrDefaultAsync(s => s.Email == email);
         }
 
         public async Task<SuperAdmin?> GetSuperAdminByIdAsync(Guid sadminId)
         {
-            var superAdmin = await context.SuperAdmin.FirstOrDefaultAsync(s => s.Id == sadminId);
-
-            return superAdmin;
+            return await context.SuperAdmin.FindAsync(sadminId);
         }
 
         public async Task<SuperAdmin?> GetSuperAdminByPhoneAsync(string phone)

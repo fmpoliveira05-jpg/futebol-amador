@@ -28,6 +28,7 @@ namespace Application
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<ISuperAdminService, SuperAdminService>();
             services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
             services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
 
@@ -42,8 +43,10 @@ namespace Application
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
-            services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IPlayerValidator, PlayerValidator>();
+            services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
+            services.AddScoped<IEmailValidator, EmailValidator>();
+
             return services;
         }
     }

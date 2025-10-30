@@ -29,11 +29,12 @@ namespace Api.Controllers
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    playerDto);
+                    playerDto
+                    );
         }
 
         [HttpDelete("{playerId:guid}")]
-        public async Task<IActionResult> DeletePlayer(Guid playerId) 
+        public async Task<IActionResult> DeletePlayer(Guid playerId)
         {
             await playerService.DeletePlayerAsync(playerId);
 
