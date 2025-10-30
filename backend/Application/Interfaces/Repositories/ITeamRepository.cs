@@ -1,11 +1,6 @@
 ﻿using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
@@ -29,6 +24,8 @@ namespace Application.Interfaces.Repositories
         Task<Teams?> GetTeamByNameWithMembersAsync(string name);
 
         Task<Teams?> GetTeamForMemberManagementAsync(Guid id);
+
+        Task<Teams?> GetTeamWitchMemberRankAndPitchAsync(Guid id);
 
         Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
 

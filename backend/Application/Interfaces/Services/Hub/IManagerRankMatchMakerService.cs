@@ -1,11 +1,14 @@
 ﻿using Application.DTOs.RankMatchMaker;
+using Domain.Entities;
 
 namespace Application.Interfaces.Services.Hub
 {
     public interface IManagerRankMatchMakerService
     {
-        public Task<InfoTeamRankMatchMakerDto> JoinRankMatchMaker(Guid idPlayer, Guid idTeam, string connectionId);
+        public Task<EntryRankMatchMakerHub> JoinRankMatchMaker(Guid idPlayer, Guid idTeam, TimeOnly hoursGame, string connectionId);
         public Task<bool> LeaveRankMatchMakerAsync(Guid teamId, string connectionId);
         public Task<bool> HandleDisconnectAsync(Guid? maybeTeamId, string connectionId);
+        public Task<Dictionary<EntryRankMatchMakerHub, EntryRankMatchMakerHub>> MatchMaker(CriteriaMatchMaker criteria);
+        public float CalculateAverageAge(Teams team);
     }
 }

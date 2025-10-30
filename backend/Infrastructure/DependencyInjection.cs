@@ -9,15 +9,24 @@ namespace Infrastructure
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddInfrastructureServices(
-            this IServiceCollection services,
-            IConfiguration configuration)
+        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
         {
-            // 1. Registar o DbContext
+            services.AddDbContext(configuration);
+            services.AddRepositorys();
+
+            return services;
+        }
+
+        private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration) 
+        {
             services.AddDbContext<AmateurFootballContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-            //Registar os repositórios
+            return services;
+        }
+
+        private static IServiceCollection AddRepositorys(this IServiceCollection services) 
+        {
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IMatchInviteRepository, MatchInviteRepository>();
             services.AddScoped<IMatchRepository, MatchRepository>();
@@ -31,7 +40,7 @@ namespace Infrastructure
             services.AddScoped<IUnityOfWork, UnityOfWork>();
 
             return services;
-        }
+        } 
 
     }
 }

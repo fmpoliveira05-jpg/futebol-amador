@@ -162,5 +162,14 @@ namespace Infrastructure.Repositories
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
+        public async Task<Teams?> GetTeamWitchMemberRankAndPitchAsync(Guid id)
+        {
+            return await DbContext.Team
+                .Include(t => t.Members)
+                .Include (t => t.Rank)
+                .Include (t => t.Pitch)
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
     }
 }

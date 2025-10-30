@@ -17,16 +17,18 @@ namespace Api.Controllers
     //[Authorize]
     [Route("api/{idTeam:guid}/[controller]")]
     [ApiController]
-    public class MatchController : ControllerBase
+    public class CalendarController : ControllerBase
     {
         private readonly IMatchService matchController;
         private readonly IStartMatchHubClientService startMatchHubClientService;
         private readonly IFinishMatchHubClientService finishMatchHubClientService;
         
-        public MatchController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService)
+        public CalendarController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService,
+            IFinishMatchHubClientService finishMatchHubClientService)
         {
             this.matchController = matchController;
             this.startMatchHubClientService = startMatchHubClientService;
+            this.finishMatchHubClientService = finishMatchHubClientService;
         }
 
         [HttpGet]
@@ -251,7 +253,7 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            await startMatchHubClientService.InitializeAsync(idTeam);
+            await startMatchHubClientService.InitializeAsync();
             await startMatchHubClientService.JoinStartMatchAsync(idMatch, idTeam);
             return Ok("Conseguiu entrar no hub!");
         }
@@ -264,7 +266,7 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            await startMatchHubClientService.InitializeAsync(idTeam);
+            await startMatchHubClientService.InitializeAsync();
             await startMatchHubClientService.LeaveStartMatchAsync();
             return Ok("Saiu do Hub com sucesso!");
         }
@@ -288,7 +290,7 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.JoinFinishMatchAsync(result);
 
             return Ok("Resultado submetido!");
@@ -312,7 +314,7 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.EditResultMatchAsync(result);
   
             return Ok("Resultado alterado com sucesso");
@@ -321,13 +323,13 @@ namespace Api.Controllers
         [HttpPost("LeaveFinishMatch")]
         public async Task<IActionResult> LeaveFinishMatch(Guid idTeam)
         {
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.LeaveFinishMatchAsync();
 
             return Ok("Saiu do Hub com sucesso!");
         }
 
-        private List<string> validatePostPoneMatch(Guid idTeam, PostponeMatchDTO dto)
+        private static List<string> validatePostPoneMatch(Guid idTeam, PostponeMatchDTO dto)
         {
             List<string> errors = new List<string>();
             if (idTeam == Guid.Empty)
@@ -358,7 +360,7 @@ namespace Api.Controllers
             return errors;
         }
 
-        private List<string> validateAnswerPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDTO dto)
+        private static List<string> validateAnswerPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDTO dto)
         {
             List<string> errors = new List<string>();
             if (idTeam == Guid.Empty)

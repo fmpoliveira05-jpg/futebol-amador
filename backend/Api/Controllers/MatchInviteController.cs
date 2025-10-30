@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Application.Interfaces.Services;
 using Application.DTOs.MatchInvites;
 using Application.DTOs.Filters;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
+    //[Authorize]
     [Route("api/{idTeam:guid}/[controller]")]
     [ApiController]
     public class MatchInviteController : ControllerBase
@@ -64,7 +66,7 @@ namespace Api.Controllers
             }
         }
 
-        private List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
+        private static List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
         {
             var error = new List<string>();
             if (idTeam == Guid.Empty)
@@ -84,7 +86,7 @@ namespace Api.Controllers
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
-            if (validator.Count() > 0)
+            if (validator.Any())
             {
                 return BadRequest(validator);
             }
@@ -116,7 +118,7 @@ namespace Api.Controllers
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
             List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
-            if (validator.Count() > 0)
+            if (validator.Any())
             {
                 return BadRequest(validator);
             }

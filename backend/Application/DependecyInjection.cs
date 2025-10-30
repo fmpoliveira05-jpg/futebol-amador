@@ -16,27 +16,45 @@ namespace Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddBusinessServices();
-            services.AddBusinessValidators();
+            services.AddServices();
+            services.AddValidators();
 
             return services;
         }
 
-        private static IServiceCollection AddBusinessServices(this IServiceCollection services)
+        private static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
-            services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
-            services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
-            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
-            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
+            services.AddScoped<IMatchMakerService, MatchMakerService>();
+
+            services.AddManagerHubService();
+            services.AddHubServiceClients();
 
             return services;
         }
 
-        private static IServiceCollection AddBusinessValidators(this IServiceCollection services)
+        private static IServiceCollection AddHubServiceClients(this IServiceCollection services)
+        {
+            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
+            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
+            services.AddTransient<IRankMatchMakerHubClientService, RankMatchMakerHubClientService>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddManagerHubService(this IServiceCollection services)
+        {
+            services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
+            services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
+            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>(); //É singleteon por causa do BackGroundService
+
+            return services;
+        }
+
+        private static IServiceCollection AddValidators(this IServiceCollection services)
         {
             services.AddScoped<ITeamValidator, TeamValidator>();
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
@@ -44,8 +62,10 @@ namespace Application
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
+            services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
 
             return services;
         }
+
     }
 }

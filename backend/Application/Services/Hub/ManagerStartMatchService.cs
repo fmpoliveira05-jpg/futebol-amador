@@ -10,7 +10,7 @@ namespace Application.Services.Hub
 {
     public class ManagerStartMatchService : IManagerStartMatchService
     {
-        private readonly IMatchRepository matchRepository; //Atualizar match
+        private readonly IMatchRepository matchRepository;
         private readonly IUnityOfWork unityOfWork;
         private readonly IStartMatchHubValidator validator;
         private readonly IGeralHubValidator geralValidator;
@@ -45,7 +45,7 @@ namespace Application.Services.Hub
             validator.ValidateMatchJoinMatch(match);
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam &&
-                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
+                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
             );
 
             var hubCacheKey = GetHubCacheKey(matchId);

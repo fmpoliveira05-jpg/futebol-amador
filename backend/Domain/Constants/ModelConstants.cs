@@ -82,6 +82,27 @@
 
         public static class RankMatchMakerHubConst {
             public const string ContentTeamId = "HubTeamId";
+            public const string TeamGroupPrefix = "RankMatchhub-";
+        }
+
+        public static class GeralTimeInHubConst
+        {
+            public const int timeInMatchMackerHub = 30; //minutos
+        }
+
+        public static class DeafultCriteriaMatchMaker
+        {
+            public const float differenceAverageAge = 3f;
+            public const float maxDifferenceAverageAge = 4.5f;
+            public const int differencePoint = 9;
+            public const int maxDifferencePoint = 20;
+        }
+
+        public static class HoursValidToCompetitiveMatch 
+        {
+            public static readonly TimeOnly MORNING = new TimeOnly(10, 0, 0);
+            public static readonly TimeOnly AFTERNOON = new TimeOnly(16, 0, 0);
+            public static readonly TimeOnly NIGHT = new TimeOnly(19, 0, 0);
         }
     }
 }
