@@ -8,11 +8,12 @@ using Moq;
 using NUnit.Framework;
 using System.Collections.Concurrent;
 
-namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
+namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 {
     [TestFixture]
-    public class JoinHubTests
+    public class StartMatchHubTests
     {
+        #region Variables
         private Mock<IMatchRepository> matchRepositoryMock;
         private Mock<IUnityOfWork> unityOfWorkMock;
         private Mock<IStartMatchHubValidator> validatorMock;
@@ -28,6 +29,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
         private string connectionId1;
         private string connectionId2;
 
+        #endregion
+
+        #region Setup
         [SetUp]
         public void Setup()
         {
@@ -53,7 +57,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
             connectionId1 = "conn-1";
             connectionId2 = "conn-2";
         }
+        #endregion
 
+        #region Methods Suporrt
         private Matches CreateMatch()
         {
             var now = DateTime.UtcNow;
@@ -158,7 +164,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
                 }
             };
         }
+        #endregion
 
+        #region JoinHub Tests
         [Test(Description = "1º admin entra e cria o hub")]
         public async Task JoinHubAsync_FirstAdmin_ShouldCreateHubAndReturnIsFirstAdminTrue()
         {
@@ -193,63 +201,54 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
             unityOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se o ID da partida estiver vazio")]
         public void JoinHubAsync_ShouldThrow_WhenMatchIdIsEmpty()
         {
-            // ARRANGE: Diz ao mock para lançar a exceção quando for chamado com Guid.Empty
             validatorMock.Setup(v => v.ValidateVariableJoinMatch(Guid.Empty, userId1, connectionId1))
                 .Throws(new ArgumentException("O id da partida está null"));
 
-            // ACT & ASSERT
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(Guid.Empty, userId1, teamId1, connectionId1)
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se o ID do utilizador estiver vazio")]
         public void JoinHubAsync_ShouldThrow_WhenUserIdIsEmpty()
         {
-            // ARRANGE: Diz ao mock para lançar a exceção quando for chamado com Guid.Empty
             validatorMock.Setup(v => v.ValidateVariableJoinMatch(matchId, Guid.Empty, connectionId1))
                 .Throws(new ArgumentException("O id do utilizador está a null"));
 
-            // ACT & ASSERT
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, Guid.Empty, teamId1, connectionId1)
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se o ID da conexão estiver nulo ou vazio")]
         public void JoinHubAsync_ShouldThrow_WhenConnectionIdIsNullOrEmpty()
         {
-            // ARRANGE: Diz ao mock para lançar a exceção quando for chamado com string vazia
             validatorMock.Setup(v => v.ValidateVariableJoinMatch(matchId, userId1, ""))
                 .Throws(new ArgumentException("A connection string está a null ou vazia"));
 
-            // ACT & ASSERT
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, "")
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se a partida não for encontrada (repositório devolve nulo)")]
         public void JoinHubAsync_ShouldThrow_WhenMatchNotFound()
         {
-            // ARRANGE 1: Configura o repositório para devolver null
             matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId))
                 .ReturnsAsync((Matches?)null);
 
-            // ARRANGE 2: Diz ao mock do validador para lançar a exceção quando receber null
             validatorMock.Setup(v => v.ValidateMatchJoinMatch(null))
                 .Throws(new ArgumentException("A partida não foi encontrada"));
 
-            // ACT & ASSERT
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se o utilizador que tenta entrar não for admin da equipa")]
         public void JoinHubAsync_ShouldThrow_WhenUserIsNotAdmin()
         {
             var match = CreateMatch();
@@ -265,7 +264,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se uma equipa (admin) tentar entrar no hub duas vezes")]
         public async Task JoinHubAsync_ShouldThrow_WhenTeamAlreadyInHub()
         {
             var match = CreateMatch();
@@ -281,7 +280,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se o hub já estiver cheio (2 admins) e um terceiro tentar entrar")]
         public async Task JoinHubAsync_ShouldThrow_WhenHubAlreadyHasTwoAdmins()
         {
             var match = CreateMatch();
@@ -300,7 +299,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
             );
         }
 
-        [Test]
+        [Test(Description = "Lança exceção se houver uma discrepância no ID da equipa durante a validação")]
         public void JoinHubAsync_ShouldThrow_WhenIdTeamMismatch()
         {
             var match = CreateMatch();
@@ -316,5 +315,140 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.StartMatchHubTests
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
             );
         }
+        #endregion
+
+        #region Leave Tests
+        [Test(Description = "Lança exceção se o matchId for inválido")]
+        public void LeaveHubAsync_ShouldThrow_WhenMatchIdIsEmpty()
+        {
+            geralValidatorMock.Setup(v => v.ValidateIdMatchLeaveMatch(Guid.Empty, teamId1))
+                .Throws(new ArgumentException("Match ID cannot be empty"));
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await service.LeaveHubAsync(Guid.Empty, teamId1, connectionId1)
+            );
+        }
+
+        [Test(Description = "Lança exceção se o teamId for inválido")]
+        public void LeaveHubAsync_ShouldThrow_WhenTeamIdIsEmpty()
+        {
+            geralValidatorMock.Setup(v => v.ValidateIdMatchLeaveMatch(matchId, Guid.Empty))
+                .Throws(new ArgumentException("Team ID cannot be empty"));
+
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await service.LeaveHubAsync(matchId, Guid.Empty, connectionId1)
+            );
+        }
+
+        [Test(Description = "Retorna 'false' se o hub não existir no cache")]
+        public async Task LeaveHubAsync_WhenHubNotInCache_ShouldReturnFalse()
+        {
+            var result = await service.LeaveHubAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test(Description = "Retorna 'false' se o hub existir mas a equipa não estiver lá")]
+        public async Task LeaveHubAsync_WhenTeamNotInHub_ShouldReturnFalse()
+        {
+            var hubCacheKey = $"hub-{matchId}";
+            var hub = new ConcurrentDictionary<Guid, string>();
+            hub.TryAdd(teamId2, connectionId2); 
+            memoryCache.Set(hubCacheKey, hub);
+
+            var result = await service.LeaveHubAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.False);
+
+            Assert.That(memoryCache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, string>? cachedHub), Is.True);
+            Assert.That(cachedHub.Count, Is.EqualTo(1));
+            Assert.That(cachedHub.ContainsKey(teamId2), Is.True);
+        }
+
+        [Test(Description = "Remove a equipa e atualiza o cache (quando o hub não fica vazio)")]
+        public async Task LeaveHubAsync_WhenTeamIsNotLastInHub_ShouldRemoveTeamAndUpdateCache_AndReturnTrue()
+        {
+            var hubCacheKey = $"hub-{matchId}";
+            var hub = new ConcurrentDictionary<Guid, string>();
+            hub.TryAdd(teamId1, connectionId1);
+            hub.TryAdd(teamId2, connectionId2);
+            memoryCache.Set(hubCacheKey, hub);
+
+            var result = await service.LeaveHubAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.True);
+
+            Assert.That(memoryCache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, string>? updatedHub), Is.True);
+            Assert.That(updatedHub, Is.Not.Null);
+            Assert.That(updatedHub.Count, Is.EqualTo(1)); 
+            Assert.That(updatedHub.ContainsKey(teamId1), Is.False); 
+            Assert.That(updatedHub.ContainsKey(teamId2), Is.True); 
+        }
+
+        [Test(Description = "Remove a equipa e remove o hub do cache (quando o hub fica vazio)")]
+        public async Task LeaveHubAsync_WhenTeamIsLastInHub_ShouldRemoveTeamAndHubFromCache_AndReturnTrue()
+        {
+            var hubCacheKey = $"hub-{matchId}";
+            var hub = new ConcurrentDictionary<Guid, string>();
+            hub.TryAdd(teamId1, connectionId1);
+            memoryCache.Set(hubCacheKey, hub);
+
+            var result = await service.LeaveHubAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.True);
+
+            Assert.That(memoryCache.TryGetValue(hubCacheKey, out _), Is.False);
+        }
+
+        #endregion
+
+        #region HandleDisconnect Tests
+
+        [Test(Description = "Retorna 'false' se o matchId for nulo")]
+        public async Task HandleDisconnectAsync_WhenMatchIdIsNull_ShouldReturnFalse()
+        {
+            var result = await service.HandleDisconnectAsync(null, teamId1, connectionId1);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test(Description = "Retorna 'false' se o teamId for nulo")]
+        public async Task HandleDisconnectAsync_WhenTeamIdIsNull_ShouldReturnFalse()
+        {
+            var result = await service.HandleDisconnectAsync(matchId, null, connectionId1);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test(Description = "Retorna 'false' se ambos os IDs forem nulos")]
+        public async Task HandleDisconnectAsync_WhenBothIdsAreNull_ShouldReturnFalse()
+        {
+            var result = await service.HandleDisconnectAsync(null, null, connectionId1);
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test(Description = "Passa a chamada para LeaveHubAsync e retorna 'true' em caso de sucesso")]
+        public async Task HandleDisconnectAsync_WithValidIds_WhenLeaveIsSuccessful_ShouldReturnTrue()
+        {
+            var hubCacheKey = $"hub-{matchId}";
+            var hub = new ConcurrentDictionary<Guid, string>();
+            hub.TryAdd(teamId1, connectionId1); 
+            memoryCache.Set(hubCacheKey, hub);
+
+            var result = await service.HandleDisconnectAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.True);
+            Assert.That(memoryCache.TryGetValue(hubCacheKey, out _), Is.False);
+        }
+
+        [Test(Description = "Passa a chamada para LeaveHubAsync e retorna 'false' se falhar (ex: hub não encontrado)")]
+        public async Task HandleDisconnectAsync_WithValidIds_WhenLeaveFails_ShouldReturnFalse()
+        {
+            var result = await service.HandleDisconnectAsync(matchId, teamId1, connectionId1);
+
+            Assert.That(result, Is.False);
+        }
+        #endregion
     }
 }

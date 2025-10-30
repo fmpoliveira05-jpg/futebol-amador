@@ -111,7 +111,7 @@ namespace Application.Services.Hub
                 return false;
             }
 
-            return await Task.FromResult(await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId));
+            return await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId);
         }
 
         private static string GetHubCacheKey(Guid matchId)
