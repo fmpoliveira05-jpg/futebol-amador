@@ -321,6 +321,42 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
             );
         }
+
+        [Test(Description = "Lança exceção se a equipa do admin tiver menos de 11 membros")]
+        public void JoinHubAsync_ShouldThrow_WhenTeamHasLessThanElevenMembers()
+        {
+            var match = CreateMatch();
+            var teamToModify = match.Teams.First(t => t.IdTeam == teamId1).Team;
+            teamToModify.Members.Clear();
+            for (int i = 0; i < 10; i++)
+            {
+                teamToModify.Members.Add(new Player
+                {
+                    Id = i == 0 ? userId1 : Guid.NewGuid(), 
+                    IsAdmin = i == 0
+                });
+            }
+
+            matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId)).ReturnsAsync(match);
+
+            validatorMock.Setup(v => v.ValidateJoinMatch(
+                    It.Is<TeamStatistics>(ts => ts.Team.Members.Count < 11), 
+                    teamId1,
+                    It.IsAny<ConcurrentDictionary<Guid, string>>()))
+                .Throws(new InvalidOperationException("Só pode dar inicio a partida se a equipa tiver 11 jogadores"));
+
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
+            );
+
+            Assert.That(ex.Message, Is.EqualTo("Só pode dar inicio a partida se a equipa tiver 11 jogadores"));
+
+            validatorMock.Verify(v => v.ValidateJoinMatch(
+                It.Is<TeamStatistics>(ts => ts.Team.Members.Count == 10),
+                teamId1,
+                It.IsAny<ConcurrentDictionary<Guid, string>>()), Times.Once);
+        }
+
         #endregion
 
         #region Leave Tests

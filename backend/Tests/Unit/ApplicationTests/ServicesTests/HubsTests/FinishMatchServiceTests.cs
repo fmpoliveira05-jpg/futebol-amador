@@ -303,6 +303,29 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
             Assert.That(ex.Message, Is.EqualTo("Já existe um admin desta equipa"));
         }
+
+        [Test(Description = "Testa se o método falha (lança InvalidOperationException) se a partida começou há menos de 90 minutos.")]
+        public void JoinHubAsync_MatchNotYet90Minutes_ThrowsInvalidOperationException()
+        {
+            testMatch.TimeStart = DateTime.UtcNow.AddMinutes(-80); 
+
+            var expectedMessage = "Ainda não passaram 90 minutos";
+            mockValidator.Setup(v => v.ValidateMatchJoinMatch(testMatch))
+                .Throws(new InvalidOperationException(expectedMessage)); 
+
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
+                service.JoinHubAsync(matchId, resultDtoTeam1, adminId1, connId1)
+            );
+
+            Assert.That(ex.Message, Does.StartWith(expectedMessage));
+
+            mockMatchRepository.Verify(r => r.GetMatchWithListPlayerById(matchId), Times.Once);
+            mockValidator.Verify(v => v.ValidateMatchJoinMatch(testMatch), Times.Once);
+
+            mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Never);
+            Assert.That(cache.TryGetValue(GetHubCacheKey(matchId), out _), Is.False);
+        }
+
         #endregion
 
         #endregion
@@ -402,6 +425,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 service.UpdateResult(matchId, resultDtoTeam1, nonAdminId, connId1));
         }
         #endregion
+       
         #endregion
 
         #region Tests LeaveHub

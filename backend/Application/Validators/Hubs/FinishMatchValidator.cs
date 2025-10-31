@@ -52,6 +52,12 @@ namespace Application.Validators.Hubs
             {
                 throw new ArgumentException("A match não existe ou não foi encontrada");
             }
+
+            var timeMatch = (DateTime.UtcNow - match.TimeStart.Value).TotalMinutes;
+            if (timeMatch < 90)
+            {
+                throw new InvalidOperationException($"Ainda não passaram 90 minutos (Tempo Atual: {timeMatch} minutos / Tempo restante: {90 - timeMatch} minutos)");
+            }
         }
 
         public void ValidateJoinMatch(TeamStatistics teamMatchAdmin, Guid teamId, ConcurrentDictionary<Guid, EntryHubFinishMatch> hub)

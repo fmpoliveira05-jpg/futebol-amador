@@ -43,6 +43,11 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("O id da team é diferente do da team que está a entrar no hub");
             }
 
+            if (teamMatchAdmin.Team.Members.Count < 11)
+            {
+                throw new InvalidOperationException("Só pode dar inicio a partida se a equipa tiver 11 jogadores");
+            }
+
             if (hub.ContainsKey(idTeam))
             {
                 throw new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida");
