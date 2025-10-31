@@ -71,8 +71,31 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida");
             }
 
-            if (hub.Count() >= 2) {
+            if (hub.Count >= 2) {
                 throw new InvalidOperationException("Apenas do 2 admins (um de cada equipa) pode aceder a esta funcionalidade");
+            }
+        }
+
+        public void ValidateUpdateResult(TeamStatistics teamMatchAdmin, Guid teamId, ConcurrentDictionary<Guid, EntryHubFinishMatch> hub)
+        {
+            if (teamMatchAdmin == null)
+            {
+                throw new ArgumentException("A equipa do admin não foi encontrada");
+            }
+
+            if (teamMatchAdmin.IdTeam != teamId)
+            {
+                throw new InvalidOperationException("O id da team é diferente do da team que está a entrar no hub");
+            }
+
+            if (!hub.ContainsKey(teamId))
+            {
+                throw new InvalidOperationException("Não existe nenhum administrador dessa equipa no hub dessa match, logo não dá para alterar resultado nenhum");
+            }
+
+            if (hub.Count == 0)
+            {
+                throw new InvalidOperationException("O hub está vazio.");
             }
         }
 

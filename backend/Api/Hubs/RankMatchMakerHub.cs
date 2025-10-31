@@ -116,7 +116,7 @@ namespace Api.Hubs
 
         private static string GetGroupName(Guid idTeam)
         {
-            return ModelConstants.RankMatchMakerHubConst.TeamGroupPrefix + idTeam;
+            return ModelConstants.RankMatchMakerHubConst.PrefixGroupName + idTeam;
         }
 
         private async Task CleanHub(string groupName, string? fisrtAdminConnectionId, string SecondAdminConnectionId)

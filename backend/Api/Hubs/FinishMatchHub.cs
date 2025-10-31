@@ -124,11 +124,6 @@ namespace Api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private string GetGroupName(Guid idMatch)
-        {
-            return $"hubFinishMatch-{idMatch}";
-        }
-
         /*
          * Contém a lógica de limpeza que é partilhada
          * Retorna 'true' se limpou algo, 'false' se não encontrou nada
@@ -159,6 +154,11 @@ namespace Api.Hubs
             }
 
             return false;
+        }
+
+        private static string GetGroupName(Guid idMatch)
+        {
+            return ModelConstants.FinishMatchHubConst.PrefixGroupName + idMatch;
         }
 
         private async Task CleanHub(string groupName, string? fisrtAdminConnectionId, string SecondAdminConnectionId)

@@ -1,6 +1,7 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators.Hub;
 using Application.Services.Hub;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
@@ -11,7 +12,7 @@ using System.Collections.Concurrent;
 namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 {
     [TestFixture]
-    public class StartMatchHubTests
+    public class StartMatchTests
     {
         #region Variables
         private Mock<IMatchRepository> matchRepositoryMock;
@@ -164,6 +165,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 }
             };
         }
+
+        private static string GetHubCacheKey(Guid matchId)
+        {
+            return ModelConstants.StartMatchHubConst.PrefixHubCache + matchId;
+        }
         #endregion
 
         #region JoinHub Tests
@@ -180,7 +186,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             Assert.That(result.IsFirstAdmin, Is.True);
             Assert.That(result.MatchStarted, Is.False);
             Assert.That(result.TeamId, Is.EqualTo(teamId1));
-            Assert.That(memoryCache.TryGetValue($"hub-{matchId}", out ConcurrentDictionary<Guid, string>? hub), Is.True);
+            Assert.That(memoryCache.TryGetValue(GetHubCacheKey(matchId), out ConcurrentDictionary<Guid, string>? hub), Is.True);
             Assert.That(hub.ContainsKey(teamId1), Is.True);
             Assert.That(hub[teamId1], Is.EqualTo(connectionId1));
         }
@@ -289,7 +295,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             var hub = new ConcurrentDictionary<Guid, string>();
             hub.TryAdd(Guid.NewGuid(), "conn1");
             hub.TryAdd(Guid.NewGuid(), "conn2");
-            memoryCache.Set($"hub-{matchId}", hub);
+            memoryCache.Set(GetHubCacheKey(matchId), hub);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(It.IsAny<TeamStatistics>(), teamId1, hub))
                 .Throws(new InvalidOperationException("Apenas dois admins podem aceder"));
@@ -306,7 +312,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId)).ReturnsAsync(match);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(
-                 It.IsAny<TeamStatistics>(), // <-- AQUI ESTÁ A MUDANÇA
+                 It.IsAny<TeamStatistics>(), 
                  teamId1,
                  It.IsAny<ConcurrentDictionary<Guid, string>>()))
             .Throws(new InvalidOperationException("O id da team é diferente"));
@@ -351,7 +357,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Retorna 'false' se o hub existir mas a equipa não estiver lá")]
         public async Task LeaveHubAsync_WhenTeamNotInHub_ShouldReturnFalse()
         {
-            var hubCacheKey = $"hub-{matchId}";
+            var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
             hub.TryAdd(teamId2, connectionId2); 
             memoryCache.Set(hubCacheKey, hub);
@@ -368,7 +374,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Remove a equipa e atualiza o cache (quando o hub não fica vazio)")]
         public async Task LeaveHubAsync_WhenTeamIsNotLastInHub_ShouldRemoveTeamAndUpdateCache_AndReturnTrue()
         {
-            var hubCacheKey = $"hub-{matchId}";
+            var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
             hub.TryAdd(teamId1, connectionId1);
             hub.TryAdd(teamId2, connectionId2);
@@ -388,7 +394,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Remove a equipa e remove o hub do cache (quando o hub fica vazio)")]
         public async Task LeaveHubAsync_WhenTeamIsLastInHub_ShouldRemoveTeamAndHubFromCache_AndReturnTrue()
         {
-            var hubCacheKey = $"hub-{matchId}";
+            var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
             hub.TryAdd(teamId1, connectionId1);
             memoryCache.Set(hubCacheKey, hub);
@@ -431,7 +437,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Passa a chamada para LeaveHubAsync e retorna 'true' em caso de sucesso")]
         public async Task HandleDisconnectAsync_WithValidIds_WhenLeaveIsSuccessful_ShouldReturnTrue()
         {
-            var hubCacheKey = $"hub-{matchId}";
+            var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
             hub.TryAdd(teamId1, connectionId1); 
             memoryCache.Set(hubCacheKey, hub);

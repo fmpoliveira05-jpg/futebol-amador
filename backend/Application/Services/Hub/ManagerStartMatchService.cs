@@ -2,6 +2,7 @@
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
+using Domain.Constants;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
@@ -116,7 +117,7 @@ namespace Application.Services.Hub
 
         private static string GetHubCacheKey(Guid matchId)
         {
-            return $"hub-{matchId}";
+            return ModelConstants.StartMatchHubConst.PrefixHubCache + matchId;
         }
 
         private static MemoryCacheEntryOptions GetCacheOptions()

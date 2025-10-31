@@ -3,6 +3,7 @@ using Application.Hubs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
@@ -12,6 +13,7 @@ namespace Application.Services.Hub
 {
     public class ManagerFinishMatchService: IManagerFinishMatchService
     {
+        #region Initialization
         private readonly IMatchRepository matchRepository; 
         private readonly IUnityOfWork unityOfWork;
         private readonly IFinishMatchValidator validator;
@@ -26,8 +28,9 @@ namespace Application.Services.Hub
             this.geralValidator = geralValidator;
             this.cache = cache;
         }
+        #endregion
 
-        //Validar se o IdMatch é o mesmo do da ultima pessoa
+        #region public Methods
         public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
         {  
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
@@ -37,7 +40,7 @@ namespace Application.Services.Hub
             validator.ValidateMatchJoinMatch(match);
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts => 
-                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
+                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
             );
 
             var teamId = teamMatchAdmin.IdTeam;
@@ -56,26 +59,32 @@ namespace Application.Services.Hub
                 ResultMatch = finishMatch,
             };
 
-            if (hub.Count() == 0)
+            if (hub.Count == 0)
             {
                 result.IsFirstAdmin = true;
                 result.MatchFinish = false;
+            }
+            else 
+            {
+                result.IsFirstAdmin = false;
+                result.MatchFinish = true;
 
+                result.FirstAdminConnectionId = hub.First().Value.ConnectionId;
+                await FinalizeMatchIfResultsMatch(hub, match, teamMatchAdmin, result, hubCacheKey, finishMatch);
+            }
+
+            //Só guarda uma team em cache se o resultado das partidas não coincidirem
+            if (!result.IsCoincides.GetValueOrDefault(false))
+            {
                 entry = new EntryHubFinishMatch
                 {
                     ConnectionId = connectionId,
                     Result = result
                 };
 
+                //Guardo em cache o id da equipa e a sua entrada
                 hub.TryAdd(teamId, entry);
                 cache.Set(hubCacheKey, hub, GetCacheOptions());
-            }
-            else 
-            {
-                result.IsFirstAdmin = false;
-                result.MatchFinish = true;
-                result.FirstAdminConnectionId = hub.First().Value.ConnectionId;
-                await FinalizeMatchIfResultsMatch(hub, match, teamMatchAdmin, result, hubCacheKey, finishMatch);
             }
 
             return result;
@@ -89,7 +98,7 @@ namespace Application.Services.Hub
             validator.ValidateMatchJoinMatch(match);
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
-                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin == true)
+                ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
             );
 
             var teamId = teamMatchAdmin.IdTeam;
@@ -100,13 +109,17 @@ namespace Application.Services.Hub
                 hub = new ConcurrentDictionary<Guid, EntryHubFinishMatch>();
             }
 
-            validator.ValidateJoinMatch(teamMatchAdmin, teamId, hub);
+            validator.ValidateUpdateResult(teamMatchAdmin, teamId, hub);
 
             var result = new JoinFinishMatch
             {
                 IdTeam = teamId,
                 ResultMatch = finishMatch,
             };
+
+            //Atualizar o resultado do hub
+            hub[teamId].Result.ResultMatch = finishMatch;
+            cache.Set(hubCacheKey, hub);
 
             await FinalizeMatchIfResultsMatch(hub, match, teamMatchAdmin, result, hubCacheKey, finishMatch);
 
@@ -144,15 +157,17 @@ namespace Application.Services.Hub
                 return false;
             }
 
-            return await Task.FromResult(await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId));
+            return await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId);
         }
-
-        private string GetHubCacheKey(Guid matchId)
+        #endregion
+        
+        #region private Methods
+        private static string GetHubCacheKey(Guid matchId)
         {
-            return $"hubFinishMatch-{matchId}";
+            return ModelConstants.FinishMatchHubConst.PrefixHubCache + matchId;
         }
 
-        private MemoryCacheEntryOptions GetCacheOptions()
+        private static MemoryCacheEntryOptions GetCacheOptions()
         {
             return new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
@@ -175,21 +190,35 @@ namespace Application.Services.Hub
         private async Task FinalizeMatchIfResultsMatch(ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub,
             Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
         {
-            var first = hub.First();
-            var firstTeamId = first.Key;
-            var firstConnectionId = first.Value.ConnectionId;
-            var firstResult = first.Value.Result.ResultMatch;
+            var opponententry = hub?.FirstOrDefault(kvp => kvp.Key != team.IdTeam).Value;
+            
+            if (opponententry == null)
+            {
+                result.IsCoincides = false;
+                return;
+            }
 
-            var coincideResult = CoincideResults(firstResult, finishMatch);
+            var opponentResult = opponententry.Result.ResultMatch;
+
+            if (opponentResult == null)
+            {
+                result.IsCoincides = false;
+                return;
+            }
+
+            var coincideResult = CoincideResults(opponentResult, finishMatch);
 
             if (coincideResult)
             {
-                var opponent = match.Teams.FirstOrDefault(ts => ts.IdTeam == finishMatch.IdTeam);
+                var opponent = match.Teams.FirstOrDefault(ts => ts.IdTeam == finishMatch.IdOpponent);
                 validator.ValidateOpponentTeam(opponent);
+
+                //Atualização do numero de golos das equipas
+                team.NumGoals = finishMatch.NumGoalsTeam;
+                opponent.NumGoals = finishMatch.NumGoalsOpponent;
 
                 DefineWinnerMatch(team, opponent);
                 match.MatchStatus = MatchStatus.DONE;
-
 
                 await unityOfWork.SaveChangesAsync();
                 result.IsCoincides = true;
@@ -198,7 +227,7 @@ namespace Application.Services.Hub
             }
         }
 
-        private void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
+        private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
         {
             var numGoalsTeam = team.NumGoals;
             var numGoalsOpponent = opponent.NumGoals;
@@ -223,7 +252,7 @@ namespace Application.Services.Hub
             updatePointsTeams(opponent);
         }
 
-        private void updatePointsTeams(TeamStatistics teamStatistic)
+        private static void updatePointsTeams(TeamStatistics teamStatistic)
         {
             var team = teamStatistic.Team;
             var rank = team.Rank;
@@ -249,7 +278,7 @@ namespace Application.Services.Hub
             ValidatePromotionOrDepromotionTeam(team);
         }
 
-        private void ValidatePromotionOrDepromotionTeam(Teams team)
+        private static void ValidatePromotionOrDepromotionTeam(Teams team)
         {
             var nextRank = team.Rank.NextRank;
             var previousRank = team.Rank.PreviousRank;
@@ -262,5 +291,7 @@ namespace Application.Services.Hub
                 team.Rank = previousRank;
             }
         }
+
+        #endregion
     }
 }

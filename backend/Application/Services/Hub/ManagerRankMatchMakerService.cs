@@ -20,19 +20,11 @@ namespace Application.Services.Hub
         private readonly IMatchRepository matchRepository;
         private readonly IUnityOfWork unityOfWork;
         private readonly IRankMatchMakerValidator validator;
-        private readonly IMemoryCache cache; //Agora guarda as teams e a sua globalKey
-
-        /*
-         Utilizada para que ao obter todas as teams em chace também seja possível o 
-        backgroundService saber qual é o hubCacheKey de cada um das teams, para que depois
-        seja possivel em caso de match juntar as equipas num grupo
-         */
-        private const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
-
+        private readonly IMemoryCache cache;
 
         public ManagerRankMatchMakerService(IMatchMakerService serviceMatchMaker, ITeamRepository teamRepository,
             IMatchRepository matchRepository, IUnityOfWork unityOfWork, IRankMatchMakerValidator validator, 
-            IGeralHubValidator geralValidator, IMemoryCache cache)
+            IMemoryCache cache)
         {
             this.serviceMatchMaker = serviceMatchMaker;
             this.teamRepository = teamRepository;
@@ -117,13 +109,13 @@ namespace Application.Services.Hub
                 hub?.TryAdd(idTeam, entry);
                 cache.Set(hubCacheKey, hub, GetCacheOptions());
 
-                if (!cache.TryGetValue(GlobalHubKeysCacheKey, out HashSet<string>? globalKeys))
+                if (!cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? globalKeys))
                 {
                     globalKeys = new HashSet<string>();
                 }
 
                 globalKeys?.Add(hubCacheKey);
-                cache.Set(GlobalHubKeysCacheKey, globalKeys, GetCacheOptions());
+                cache.Set(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, globalKeys, GetCacheOptions());
             }
             else
             {
@@ -131,6 +123,19 @@ namespace Application.Services.Hub
             }
 
             return entry;
+        }
+
+        public async Task<Dictionary<EntryRankMatchMakerHub, EntryRankMatchMakerHub>> MatchMaker(CriteriaMatchMaker criteria)
+        {
+            var teamsInCache = GetAllEntryInCache();
+            var result = serviceMatchMaker.LogicMatchMaker(teamsInCache, criteria);
+
+            if (result?.Count > 0)
+            {
+                await CreateMatchMaking(result);
+            }
+
+            return result;
         }
 
         public async Task<bool> LeaveRankMatchMakerAsync(Guid teamId, string connectionId)
@@ -152,10 +157,10 @@ namespace Application.Services.Hub
                         cache.Set(hubCacheKey, hub);
                     }
 
-                    if (cache.TryGetValue(GlobalHubKeysCacheKey, out HashSet<string>? globalKeys))
+                    if (cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? globalKeys))
                     {
                         globalKeys?.Remove(hubCacheKey);
-                        cache.Set(GlobalHubKeysCacheKey, globalKeys, GetCacheOptions());
+                        cache.Set(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, globalKeys, GetCacheOptions());
                     }
 
                     return true;
@@ -172,22 +177,11 @@ namespace Application.Services.Hub
                 return false;
             }
 
-            return await Task.FromResult(await LeaveRankMatchMakerAsync(maybeTeamId.Value, connectionId));
+            return await LeaveRankMatchMakerAsync(maybeTeamId.Value, connectionId);
         }
 
-        public async Task<Dictionary<EntryRankMatchMakerHub, EntryRankMatchMakerHub>> MatchMaker(CriteriaMatchMaker criteria)
-        {
-            var teamsInCache = GetAllEntryInCache();
-            var result = serviceMatchMaker.LogicMatchMaker(teamsInCache, criteria);
 
-            if (result?.Count > 0)
-            {
-                await CreateMatchMaking(result);
-            }
-
-            return result;
-        }
-
+        #region Private Methods
         /*
          metodo que é cahamdo pelo backGroundService onde se o mesmo achar teams para fazer
          uma match ele chama este metodo para criar as partidas e notificar as equipas
@@ -211,7 +205,7 @@ namespace Application.Services.Hub
         {
             var allTeams = new List<EntryRankMatchMakerHub>();
 
-            if (cache.TryGetValue(GlobalHubKeysCacheKey, out HashSet<string>? hubKeys))
+            if (cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? hubKeys))
             {
                 foreach (var hubCacheKey in hubKeys)
                 {
@@ -233,7 +227,7 @@ namespace Application.Services.Hub
         {
             var allTeams = new List<InfoTeamRankMatchMakerDto>();
 
-            if (cache.TryGetValue(GlobalHubKeysCacheKey, out HashSet<string>? hubKeys))
+            if (cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? hubKeys))
             {
                 foreach (var hubCacheKey in hubKeys)
                 {
@@ -250,7 +244,7 @@ namespace Application.Services.Hub
             return allTeams;
         }
 
-        private MemoryCacheEntryOptions GetCacheOptions()
+        private static MemoryCacheEntryOptions GetCacheOptions()
         {
             return new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(30));
@@ -258,7 +252,7 @@ namespace Application.Services.Hub
 
         private static string GetHubCacheKey(Guid idTeam)
         {
-            return $"matchRankMaker-{idTeam}";
+            return ModelConstants.ManagerRankMatchMakerServiceConst.PrefixHubCache + idTeam;
         }
 
         private static DateTime GetNextSunday(DateTime startDate)
@@ -275,8 +269,7 @@ namespace Application.Services.Hub
             return startDate.Date.AddDays(daysToAdd);
         }
 
-        //Poderá ser que isto seja rebaixado a private static
-        public float CalculateAverageAge(Teams team)
+        private static float CalculateAverageAge(Teams team)
         {
             var dateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
             double averageDays = team.Members.Average(m => (dateOnly.DayNumber - m.DateOfBirth.DayNumber));
@@ -314,14 +307,10 @@ namespace Application.Services.Hub
         private async Task CreateMatch(Guid teamMatchId, Teams team, DateTime gameDate)
         {
             var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId);
-            //Validar se realmente existe mesmo esta team
 
             var teamStatistics = new List<TeamStatistics>();
             var team1 = new TeamStatistics(team);
             var teamFind = new TeamStatistics(teamMatchFind);
-            //Fazer find da Team com repostiory, preciso disso para fazer o match
-
-            //DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics, Chat chat
             var match = new Matches(gameDate, true, teamMatchFind.Pitch.Id, teamStatistics);
 
             team1.MatchesId = match.Id;
@@ -334,14 +323,10 @@ namespace Application.Services.Hub
         {
             var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId);
             var team = await teamRepository.GetTeamByIdAsync(idTeam2);
-            //Validar se realmente existe mesmo esta team
 
             var teamStatistics = new List<TeamStatistics>();
             var team1 = new TeamStatistics(team);
             var teamFind = new TeamStatistics(teamMatchFind);
-            //Fazer find da Team com repostiory, preciso disso para fazer o match
-
-            //DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics, Chat chat
             var match = new Matches(gameDate, true, teamMatchFind.Pitch.Id, teamStatistics);
 
             team1.MatchesId = match.Id;
@@ -349,5 +334,7 @@ namespace Application.Services.Hub
 
             await unityOfWork.SaveChangesAsync();
         }
+
+        #endregion
     }
 }

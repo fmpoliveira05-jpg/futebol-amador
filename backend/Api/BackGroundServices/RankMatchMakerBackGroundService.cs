@@ -134,7 +134,7 @@ namespace Application.Services.BackGroundServices
                 return;
             }
 
-            var groupName = ModelConstants.RankMatchMakerHubConst.TeamGroupPrefix + teamId;
+            var groupName = ModelConstants.RankMatchMakerHubConst.PrefixGroupName + teamId;
 
             try
             {

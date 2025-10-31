@@ -162,7 +162,8 @@ namespace Application.Validators
             }
         }
 
-        private void ValidateTeam(Guid idTeam, TeamStatistics? teamStatistics)
+        #region Private Validations
+        private static void ValidateTeam(Guid idTeam, TeamStatistics? teamStatistics)
         {
             if (teamStatistics == null)
             {
@@ -180,7 +181,7 @@ namespace Application.Validators
             }
         }
 
-        private void ValidatePostPoneMatch(PostPoneMatch postPoneMatch, Guid idTeam)
+        private static void ValidatePostPoneMatch(PostPoneMatch postPoneMatch, Guid idTeam)
         {
             if (postPoneMatch == null)
             {
@@ -193,7 +194,7 @@ namespace Application.Validators
             }
         }
 
-        private void ValidateStatusPostPoneMatch(Matches? match)
+        private static void ValidateStatusPostPoneMatch(Matches? match)
         {
             if (match == null)
             {
@@ -206,11 +207,13 @@ namespace Application.Validators
             }
         }
 
-        private void ValidateNumGoals(int numGoals) {
+        private static void ValidateNumGoals(int numGoals) {
             if (numGoals < 0)
             {
                 throw new InvalidOperationException("O número de golos de uma equipa não pode ser menor que 0");
             }
         }
+
+        #endregion
     }
 }

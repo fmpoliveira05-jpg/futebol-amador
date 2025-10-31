@@ -29,7 +29,6 @@ namespace Application.Services
                                            .OrderByDescending(t => t.timeEntry);
             }
 
-            //Meter que o dia e hora de jogo tem de ser o mesmo
             teamFind = orderTeams.FirstOrDefault(t => t.City == finder.City &&
             t.GameDate == finder.GameDate &&
             Math.Abs(finder.AverageAge - t.AverageAge) <= ModelConstants.DeafultCriteriaMatchMaker.differenceAverageAge &&
@@ -43,7 +42,6 @@ namespace Application.Services
             return teamFind.IdTeam;
         }
 
-        //Validar se está feito, testar e corrigir erro
         public Dictionary<EntryRankMatchMakerHub, EntryRankMatchMakerHub>? LogicMatchMaker(
             IEnumerable<EntryRankMatchMakerHub> teamsInSearch,
             CriteriaMatchMaker criteria)
@@ -100,7 +98,7 @@ namespace Application.Services
 
                         if (criteriaPass == 2)
                         {
-                            if (result[entry] == null)
+                            if (!result.ContainsKey(entry))
                             {
                                 result[entry] = entryRight;
                             }

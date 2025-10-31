@@ -74,16 +74,30 @@
             public const int MaxDescriptionLength = 50;
         }
 
+        public static class StartMatchHubConst 
+        {
+            public const string PrefixGroupName = "StartMatchhub-";
+            public const string PrefixHubCache = "StartMatchhub-";
+        }
+       
         public static class FinishMatchHubConst
         {
             public const string ContentMatchId = "HubMatchId";
             public const string ContentTeamId = "HubTeamId";
+            public const string PrefixHubCache = "hubFinishMatch-";
+            public const string PrefixGroupName = "hubFinishMatch-";
         }
 
         public static class RankMatchMakerHubConst {
             public const string ContentTeamId = "HubTeamId";
-            public const string TeamGroupPrefix = "RankMatchhub-";
+            public const string PrefixGroupName = "RankMatchhub-";
         }
+
+        public static class ManagerRankMatchMakerServiceConst {
+            public const string PrefixHubCache = "matchRankMaker-";
+            public const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
+        }
+
 
         public static class GeralTimeInHubConst
         {
