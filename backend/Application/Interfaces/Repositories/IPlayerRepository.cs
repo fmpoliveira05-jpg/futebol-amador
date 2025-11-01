@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
 {

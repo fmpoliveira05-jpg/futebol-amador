@@ -1,14 +1,13 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
-using Domain.Entities;
 using Application.DTOs.Team;
 
 namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDTO);
+        Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto);
         Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid teamId);
         Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto);
         Task DeletePlayerAsync(Guid playerId);

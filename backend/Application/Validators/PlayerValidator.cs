@@ -1,15 +1,15 @@
-using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Filters;
+using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
-using System.Numerics;
+using System.Text.RegularExpressions;
 
 namespace Application.Validators
 {
-    internal class PlayerValidator : IPlayerValidator
+    public class PlayerValidator : IPlayerValidator
     {
         public void PlayerExists(Player? player)
         {
@@ -19,7 +19,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players)
+        public void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Player[] players)
         {
             if (players[0] != null)
             {
@@ -33,7 +33,7 @@ namespace Application.Validators
 
             if (!IsValidEmail(createPlayerDTO.Email))
             {
-                throw new ValidationException($"Email format is invalid.");
+                throw new ValidationException($"Email format is invalid ({createPlayerDTO.Email}).");
             }
 
             if (createPlayerDTO.Height < 100
@@ -53,6 +53,16 @@ namespace Application.Validators
                 throw new ValidationException("Phone number must have 9 digits.");
             }
 
+            if (!createPlayerDTO.Phone.All(char.IsDigit))
+            {
+                throw new ValidationException("Phone number must only contain digits (0-9).");
+            }
+
+            if (createPlayerDTO.Phone.StartsWith("0"))
+            {
+                throw new ValidationException("Phone number cannot start with '0'.");
+            }
+
             if (!int.TryParse(createPlayerDTO.Phone, out _))
             {
                 throw new ValidationException("Phone number must only have numbers.");
@@ -62,17 +72,13 @@ namespace Application.Validators
             {
                 throw new ValidationException("Position invalid.");
             }
+
+            ValidateAddress(createPlayerDTO.Address);
         }
 
         public void DeletePlayerValidator(Player? player)
         {
             PlayerExists(player);
-            //check if admin? if only player on team and have matches?
-        }
-
-        public void GetPlayerByIdValidator(Player player)
-        {
-            throw new NotImplementedException();
         }
 
         public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player playerEmail)
@@ -109,6 +115,16 @@ namespace Application.Validators
                 throw new ValidationException("Phone number must have 9 digits.");
             }
 
+            if (!updatePlayerDTO.Phone.All(char.IsDigit))
+            {
+                throw new ValidationException("Phone number must only contain digits (0-9).");
+            }
+
+            if (updatePlayerDTO.Phone.StartsWith("0"))
+            {
+                throw new ValidationException("Phone number cannot start with '0'.");
+            }
+
             if (!int.TryParse(updatePlayerDTO.Phone, out _))
             {
                 throw new ValidationException("Phone number must only have numbers.");
@@ -117,6 +133,16 @@ namespace Application.Validators
             if (!Enum.IsDefined(typeof(Position), updatePlayerDTO.Position))
             {
                 throw new ValidationException("Position invalid.");
+            }
+
+            ValidateAddress(updatePlayerDTO.Address);
+        }
+
+        public void ValidateHasChangeDataPlayer(bool hasChange)
+        {
+            if (!hasChange)
+            {
+                throw new ValidationException("Não foi atualizado nenhuma informação do utilizador.");
             }
         }
 
@@ -131,26 +157,6 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        private bool IsValidEmail(string email)
-        {
-            var valid = true;
-
-            try
-            {
-                var emailAddress = new MailAddress(email);
-            }
-            catch
-            {
-                valid = false;
-            }
-            
-            if (!email.EndsWith(".com"))
-            {
-                valid = false;
-            }
-
-            return valid;
-        }
         public void ValidateFiltersListTeams(FilterListTeamDto filter)
         {
             if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
@@ -177,5 +183,46 @@ namespace Application.Validators
                 }
             }
         }
+
+        #region Private Validations
+        private static bool IsValidEmail(string email)
+        {
+            var valid = true;
+
+            try
+            {
+                var emailAddress = new MailAddress(email);
+            }
+            catch
+            {
+                valid = false;
+            }
+
+            if (!email.EndsWith(".com"))
+            {
+                valid = false;
+            }
+
+            return valid;
+        }
+
+        private static void ValidateAddress(string addressTeam)
+        {
+            if (string.IsNullOrWhiteSpace(addressTeam))
+            {
+                throw new ValidationException("O endereço não pode estar vazio.");
+            }
+
+            var pattern = new Regex(@",\s(?<city>.+)$", RegexOptions.Compiled);
+
+            var match = pattern.Match(addressTeam);
+
+            if (!match.Success)
+            {
+                throw new ValidationException($"Formato de endereço inválido. O endereço deve terminar com ', [NomeDaCidade]'. (Ex: 'Rua x, Lisboa')");
+            }
+
+        }
+        #endregion
     }
 }

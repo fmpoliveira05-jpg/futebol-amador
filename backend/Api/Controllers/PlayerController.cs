@@ -2,12 +2,9 @@
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Services;
-using Application.Services;
 using Domain.Exceptions;
-using Microsoft.AspNetCore.Authorization;
 using Application.DTOs.Team;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -23,7 +20,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTO playerDto)
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
             if (!ModelState.IsValid)
             {

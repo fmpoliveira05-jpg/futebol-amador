@@ -280,9 +280,10 @@ namespace Application.Services.Hub
         private static string GetCityTeam(string addressTeam)
         {
             var city = "";
-            var pattern = new Regex(@"^(?<street>.*),(?<number>.*),(?<floor>.*),(?<postalCode>.*),(?<city>.*),(?<parish>.*),(?<district>.*)$", RegexOptions.Compiled);
-            var validateAddres = pattern.Match(addressTeam);
-            city = validateAddres.Groups["city"].Value;       
+            var pattern = new Regex(@",\s(?<city>.+)$", RegexOptions.Compiled);
+            var validateAddress = pattern.Match(addressTeam);
+
+            city = validateAddress.Groups["city"].Value;       
             
             return city;
         }
