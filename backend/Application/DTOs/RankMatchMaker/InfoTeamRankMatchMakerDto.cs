@@ -25,7 +25,7 @@ namespace Application.DTOs.RankMatchMaker
         public int NumberPointsTeam { get; set; }
 
         [Required]
-        [MinLength(ModelConstants.GeneralConst.MinCityLength), MaxLength(ModelConstants.GeneralConst.MaxCityLength)]]
+        [MinLength(ModelConstants.GeneralConst.MinCityLength), MaxLength(ModelConstants.GeneralConst.MaxCityLength)]
         public string City { get; set; } = null!;
 
         [Required]

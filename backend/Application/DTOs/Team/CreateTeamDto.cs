@@ -7,7 +7,7 @@ namespace Application.DTOs.Team
     public class CreateTeamDto
     {
         [Required]
-        [Length(ModelConstants.TeamConst.MinNameLength, ModelConstants.TeamConst.MaxNameLength), Required(ErrorMessage = "O nome do time é obrigatorio.")]
+        [Length(ModelConstants.TeamConst.MinNameLength, ModelConstants.TeamConst.MaxNameLength)]
         public string Name { get; set; } = null!;
 
         [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
