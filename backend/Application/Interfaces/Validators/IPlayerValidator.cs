@@ -8,16 +8,18 @@ namespace Application.Interfaces.Validators
     {
         void PlayerExists(Player? player);
 
-        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Users[] players);
+        void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Users[] players);
 
         void DeletePlayerValidator(Player? player);
 
         void GetPlayerByIdValidator(Player player);
 
-        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Users[] existingPlayers);
+        void UpdatePlayerValidator(UpdatePlayerDto updatePlayerDTO,Player player, Users[] existingPlayers);
 
         void LeaveTeamValidator(Player player);
-        void PlayerExists(Player player);
+        
         void ValidateFiltersListTeams(FilterListTeamDto filter);
+
+        void ValidateHasChangeDataPlayer(bool hasChange);
     }
 }

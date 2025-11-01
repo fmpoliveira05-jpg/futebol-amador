@@ -31,7 +31,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Users[] players)
+        public void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Users[] players)
         {
             if (players[0] != null)
             {
@@ -69,11 +69,11 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Users[] players)
+        public void UpdatePlayerValidator(UpdatePlayerDto updatePlayerDto, Player player, Users[] players)
         {
             PlayerExists(player);
 
-            if (UpdatePlayerDto.Email != player.Email)
+            if (updatePlayerDto.Email != player.Email)
             {
                 if (players[0] != null)
                 {
@@ -82,7 +82,7 @@ namespace Application.Validators
 
             }
 
-            if (updatePlayerDTO.Phone != player.Phone)
+            if (updatePlayerDto.Phone != player.Phone)
             {
                 if (players[1] != null)
                 {
@@ -90,22 +90,22 @@ namespace Application.Validators
                 }
             }
 
-            if (!emailValidator.IsValid(updatePlayerDTO.Email))
+            if (!emailValidator.IsValid(updatePlayerDto.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
 
-            ValidateHeigth(UpdatePlayerDto.Height);
+            ValidateHeigth(updatePlayerDto.Height);
 
-            ValidateAge(UpdatePlayerDto.DateOfBirth);
+            ValidateAge(updatePlayerDto.DateOfBirth);
 
-            ValidatePhone(UpdatePlayerDto.Phone);
+            ValidatePhone(updatePlayerDto.Phone);
 
-            ValidatePosition(UpdatePlayerDto.Position);
+            ValidatePosition(updatePlayerDto.Position);
 
-            ValidateAddress(UpdatePlayerDto.Address);
+            ValidateAddress(updatePlayerDto.Address);
 
-            ValidateAddress(UpdatePlayerDto.Address);
+            ValidateAddress(updatePlayerDto.Address);
         }
 
         public void ValidateHasChangeDataPlayer(bool hasChange)

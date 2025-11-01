@@ -27,7 +27,6 @@ namespace Application
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
-            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMatchMakerService, MatchMakerService>();
 
