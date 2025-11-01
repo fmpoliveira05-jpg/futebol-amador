@@ -226,14 +226,5 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
             }
         }
-
-        [HttpGet("leaderboard")]
-        [AllowAnonymous] // qualquer jogador pode ver
-        public async Task<IActionResult> GetLeaderboard()
-        {
-            var leaderboard = await TeamService.GetLeaderboardAsync();
-            return Ok(leaderboard);
-        }
-
     }
 }

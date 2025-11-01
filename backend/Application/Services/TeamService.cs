@@ -373,20 +373,5 @@ namespace Application.Services
                 IsPlayerSender = invite.IsPlayerSender
             };
         }
-
-        public async Task<List<TeamLeaderboardDto>> GetLeaderboardAsync()
-        {
-            var teams = await TeamRepository.GetTopTeamsAsync(100);
-            return teams
-                .Select((t, index) => new TeamLeaderboardDto
-                {
-                    Position = index + 1,
-                    TeamName = t.TeamName,
-                    CurrentPoints = t.CurrentPoints,
-                    RankName = t.RankName
-                })
-                .ToList();
-        }
-
     }
 }
