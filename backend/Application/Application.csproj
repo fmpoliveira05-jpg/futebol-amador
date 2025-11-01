@@ -8,11 +8,15 @@
 
   <ItemGroup>
     <Compile Remove="DTOs\NovaPasta1\**" />
+    <Compile Remove="Interfaces\Entities\**" />
     <EmbeddedResource Remove="DTOs\NovaPasta1\**" />
+    <EmbeddedResource Remove="Interfaces\Entities\**" />
     <None Remove="DTOs\NovaPasta1\**" />
+    <None Remove="Interfaces\Entities\**" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Interfaces\IMembershipRequest.cs" />
     <Compile Remove="Interfaces\Repositories\IUnitOfWork.cs" />
   </ItemGroup>
 

@@ -15,6 +15,6 @@ namespace Application.DTOs.MatchInvites
 
         [Required(ErrorMessage = "É obrigatório especificar o id do Campo")]
         [MaxLength(50)]
-        public string namePitch { get; set; }
+        public string namePitch { get; set; } = null!;
     }
 }

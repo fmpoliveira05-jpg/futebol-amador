@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
@@ -14,6 +15,8 @@ namespace Application.Services
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamService teamService;
+        private readonly ITeamRepository teamRepository;
+        private readonly IPlayerValidator playerValidator;
         private readonly IUnityOfWork unitOfWork;
         private readonly IPlayerValidator playerValidator;
         private readonly ITeamRepository teamRepository;
@@ -245,6 +248,15 @@ namespace Application.Services
 
             await membershipRequestRepository.AddMembershipRequest(newRequest);
             await unitOfWork.SaveChangesAsync();
+        public async Task<List<InfoTeamsDto>> GetListTeams()
+        {
+            return await teamRepository.GetListTeamsPlayer();
+        }
+
+        public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter)
+        {
+            playerValidator.ValidateFiltersListTeams(filter);
+            return await teamRepository.GetListTeamsPlayersWithFilters(filter); 
         }
     }
 }

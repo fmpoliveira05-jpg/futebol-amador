@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Domain.Constants;
-namespace Application.DTOs
+namespace Application.DTOs.Pitch
 {
     public class PitchDto
     {

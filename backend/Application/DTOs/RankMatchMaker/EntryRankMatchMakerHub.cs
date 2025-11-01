@@ -5,12 +5,9 @@ namespace Application.DTOs.RankMatchMaker
     public class EntryRankMatchMakerHub
     {
         [Required]
-        public string ConnectionId { get; set; }
+        public string ConnectionId { get; set; } = null!;
 
         [Required]
-        public InfoTeamRankMatchMakerDto Team { get; set; }
-
-        [Required]
-        public DateTime EnteredAt { get; set; } = DateTime.UtcNow;
+        public InfoTeamRankMatchMakerDto Team { get; set; } = null!;
     }
 }

@@ -1,17 +1,24 @@
 ﻿using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.DTOs
+namespace Application.DTOs.Match
 {
-    public class FinishMatchDTO
+    public class ResultMatchDto
     {
-        public Guid IdMatch { get; set; }
+        [Required]
+        public Guid IdMatch {  get; set; }
+
+        [Required]
         public Guid IdTeam { get; set; }
 
+        [Required]
         [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoalsTeam { get; set; }
-        public Guid IdOpponent { get; set; }
 
+        [Required]
+        public Guid IdOpponent { get; set; }
+        
+        [Required]
         [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoalsOpponent { get; set; }
     }

@@ -176,14 +176,32 @@ namespace Api.Controllers
         }
 
 
+        //Depois adaptar para o teamId, o player é Aut
         [HttpGet("{teamId}/search")] // Responde a GET /api/team
-        public async Task<IActionResult> SearchTeams([FromQuery] TeamSearchFiltersDto filters)
+        public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
 
-            // var teams = await _teamService.SearchTeamsAsync(filters);
-            // return Ok(teams);
-            return Ok("Endpoint 'SearchTeams' ainda não implementado no serviço.");
-            
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await TeamService.SearchTeamsWithFiltersAsync(teamId, filter);
+            }
+            else
+            {
+                list = await TeamService.SearchTeamsAsync(teamId);
+            }
+
+            return Ok(list);
         }
 
         [HttpPost("{teamId:guid}/membership-requests/send/{playerId:guid}")]

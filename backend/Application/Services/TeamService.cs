@@ -6,7 +6,6 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
 
@@ -303,24 +302,26 @@ namespace Application.Services
             throw new NotImplementedException();
         }
 
-        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
+        public async Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam)
         {
-            var player = await PlayerRepository.GetPlayerByIdAsync(playerId);
-            
-            TeamValidator.SearchTeamsValidation(player, filters);
+            TeamValidator.ValidateVariableSearchTeam(idTeam);
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
 
-            var teams = await TeamRepository.GetAllTeamsWithFilters(filters);
+            TeamValidator.ValidateTeamSearch(team);
 
-            if (player.IsAdmin)
-            {
-                teams.Where(t => t.PlayerCount > 11);
-            }
-            else if (player.IdTeam == null)
-            {
-                teams.Where(t => t.PlayerCount < 32);
-            }
 
-            return teams;
+            return await TeamRepository.GetListTeamsForTeams(idTeam);
+        }
+
+        public async Task<List<InfoTeamsDto>> SearchTeamsWithFiltersAsync(Guid idTeam, FilterListTeamDto filters)
+        {
+            TeamValidator.ValidateVaribleSearchTeamWithFilters(idTeam, filters);
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
+
+            //Quando houver players descomentar
+            TeamValidator.ValidateTeamSearch(team);
+
+            return await TeamRepository.GetListTeamsByTeamsWithFilters(idTeam, filters);
         }
 
         public async Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId)

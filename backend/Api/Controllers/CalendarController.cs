@@ -1,12 +1,9 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub.ClienteService;
-using Domain.Enums;
 using Domain.Exceptions;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 /*
@@ -17,26 +14,24 @@ namespace Api.Controllers
     //[Authorize]
     [Route("api/{idTeam:guid}/[controller]")]
     [ApiController]
-    public class MatchController : ControllerBase
+    public class CalendarController : ControllerBase
     {
         private readonly IMatchService matchController;
         private readonly IStartMatchHubClientService startMatchHubClientService;
         private readonly IFinishMatchHubClientService finishMatchHubClientService;
         
-        public MatchController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService)
+        public CalendarController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService,
+            IFinishMatchHubClientService finishMatchHubClientService)
         {
             this.matchController = matchController;
             this.startMatchHubClientService = startMatchHubClientService;
+            this.finishMatchHubClientService = finishMatchHubClientService;
         }
 
+        #region Calendar
         [HttpGet]
-        public async Task<IActionResult> CalendarTeam(Guid idTeam, [FromQuery] FilterCalendar filters)
+        public async Task<IActionResult> CalendarTeam(Guid idTeam, [FromQuery] FilterCalendarDto filters)
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa é obrigatorio");
-            }
-
             try
             {
                 IEnumerable<InfoMatchCalendar> matches;
@@ -72,17 +67,15 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPut("PostponeMatch")]
-        public async Task<IActionResult> PostponeMatch(Guid idTeam, [FromBody] PostponeMatchDTO dto)
-        {
-            var listErrors = validatePostPoneMatch(idTeam, dto);
-            if (listErrors.Count > 0) { 
-                return BadRequest(listErrors); 
-            }
+        #endregion
 
+        #region PostPoneMatch
+        [HttpPut("PostponeMatch")]
+        public async Task<IActionResult> PostponeMatch(Guid idTeam, [FromBody] PostPoneMatchDto dto)
+        {
             try
             {
-                var matchPostPone = await matchController.PostPoneMatch(dto);
+                var matchPostPone = await matchController.PostPoneMatch(idTeam, dto);
 
                 return Ok(matchPostPone);
             }
@@ -101,19 +94,8 @@ namespace Api.Controllers
         }
 
         [HttpPost("AcceptPostponeMatch")]
-        public async Task<IActionResult> AcceptPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDTO dto)
+        public async Task<IActionResult> AcceptPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDto dto)
         {
-            var listErrors = validateAnswerPostPoneMatch(idTeam, dto);
-            if (listErrors.Count > 0)
-            {
-                return BadRequest(listErrors);
-            }
-
-            if (dto.StatusPostPone != StatusPostPone.ACCEPT)
-            {
-                return BadRequest("Para poder aceitar um convite ele precisa de estar aceite");
-            }
-
             try
             {
                 var match = await matchController.AcceptPostPoneMatch(idTeam, dto);
@@ -143,19 +125,8 @@ namespace Api.Controllers
         }
 
         [HttpDelete("RejectPostponeMatch")]
-        public async Task<IActionResult> RejectPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDTO dto)
+        public async Task<IActionResult> RejectPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDto dto)
         {
-            var listErrors = validateAnswerPostPoneMatch(idTeam, dto);
-            if (listErrors.Count > 0)
-            {
-                return BadRequest(listErrors);
-            }
-
-            if (dto.StatusPostPone != StatusPostPone.REJECT)
-            {
-                return BadRequest("Para poder rejeitar um convite ele precisa de estar como rejeitado");
-            }
-
             try
             {
                 await matchController.RejectPostPoneMatch(idTeam, dto);
@@ -184,17 +155,28 @@ namespace Api.Controllers
             }
         }
 
+        //Falta testar agora
         [HttpGet("PostPoneMatchs")]
-        public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam)
+        public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam, [FromQuery] FilterPostPoneMatchDto filter)
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa não pode estar vazio");
-            } 
-
             try
             {
-                var listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
+                IEnumerable<InfoPostPoneMatch> listPostPone;
+
+                var isFilter = !string.IsNullOrEmpty(filter.NameOpponent) ||
+                                filter.IsHome.HasValue ||
+                                filter.MinDateGame.HasValue ||
+                                filter.MaxDateGame.HasValue ||
+                                filter.MinDatePostPoneGame.HasValue ||
+                                filter.MaxDatePostPoneGame.HasValue;
+                if (isFilter)
+                {
+                    listPostPone = await matchController.GetListPostPoneMatchTeamWithFilters(idTeam, filter);
+                }
+                else
+                {
+                    listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
+                }    
 
                 return Ok(listPostPone);
             }
@@ -208,7 +190,9 @@ namespace Api.Controllers
             }
         }
 
-        //Falta Testar
+        #endregion
+
+        #region CancelMatch
         [HttpDelete("CancelMatch/{idMatch}")]
         public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
@@ -243,6 +227,9 @@ namespace Api.Controllers
             }
         }
 
+        #endregion
+
+        #region StartMatch
         [HttpPost("StartMatch")]
         public async Task<IActionResult> StartMatch(Guid idTeam, [FromBody] Guid idMatch)
         {
@@ -251,7 +238,7 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            await startMatchHubClientService.InitializeAsync(idTeam);
+            await startMatchHubClientService.InitializeAsync();
             await startMatchHubClientService.JoinStartMatchAsync(idMatch, idTeam);
             return Ok("Conseguiu entrar no hub!");
         }
@@ -264,12 +251,13 @@ namespace Api.Controllers
                 return BadRequest("O id de admin não pode estar vazio");
             }
 
-            await startMatchHubClientService.InitializeAsync(idTeam);
+            await startMatchHubClientService.InitializeAsync();
             await startMatchHubClientService.LeaveStartMatchAsync();
             return Ok("Saiu do Hub com sucesso!");
         }
+        #endregion
 
-        //Falta apenas chamar hub
+        #region FinishMatch
         [HttpPost("FinishMatch")]
         public async Task<IActionResult> FinishMatch(Guid idTeam, [FromBody] ResultMatchDto result)
         {
@@ -288,7 +276,7 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.JoinFinishMatchAsync(result);
 
             return Ok("Resultado submetido!");
@@ -312,7 +300,7 @@ namespace Api.Controllers
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.EditResultMatchAsync(result);
   
             return Ok("Resultado alterado com sucesso");
@@ -321,67 +309,11 @@ namespace Api.Controllers
         [HttpPost("LeaveFinishMatch")]
         public async Task<IActionResult> LeaveFinishMatch(Guid idTeam)
         {
-            await finishMatchHubClientService.InitializeAsync(idTeam);
+            await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.LeaveFinishMatchAsync();
 
             return Ok("Saiu do Hub com sucesso!");
         }
-
-        private List<string> validatePostPoneMatch(Guid idTeam, PostponeMatchDTO dto)
-        {
-            List<string> errors = new List<string>();
-            if (idTeam == Guid.Empty)
-            {
-                errors.Add("O id da Team está vazio");
-            }
-
-            if (dto.IdMatch == Guid.Empty)
-            {
-                errors.Add("O id da match não pode estar vazio");
-            }
-
-            if (dto.IdTeam == Guid.Empty)
-            {
-                errors.Add("O id da equipa não pode estar vazio");
-            }
-
-            if (dto.IdTeam != idTeam)
-            {
-                errors.Add("O id da equipa que quer adiar é diferente da que está no url");
-            }
-
-            if (dto.IdOpponent == Guid.Empty)
-            {
-                errors.Add("O id do opponete não pode estar vazio");
-            }
-
-            return errors;
-        }
-
-        private List<string> validateAnswerPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDTO dto)
-        {
-            List<string> errors = new List<string>();
-            if (idTeam == Guid.Empty)
-            {
-                errors.Add("O id da Team está vazio");
-            }
-
-            if (dto.IdMatch == Guid.Empty)
-            {
-                errors.Add("O id da match não pode estar vazio");
-            }
-
-            if (dto.IdTeam == Guid.Empty)
-            {
-                errors.Add("O id da equipa não pode estar vazio");
-            }
-
-            if (dto.IdOpponent == Guid.Empty)
-            {
-                errors.Add("O id do opponete não pode estar vazio");
-            }
-
-            return errors;
-        }
+        #endregion
     }
 }

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.PostPoneGame
 {
-    public class AcceptRefusePostPoneDTO
+    public class AcceptRefusePostPoneDto
     {
         [Required(ErrorMessage = "O id da partida tem de estar preenchido")]
         public Guid IdMatch { get; set; }

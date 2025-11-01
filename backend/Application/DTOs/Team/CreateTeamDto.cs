@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.DTOs.Pitch;
+using Domain.Constants;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

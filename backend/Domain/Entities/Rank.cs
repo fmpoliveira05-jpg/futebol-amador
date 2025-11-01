@@ -42,7 +42,7 @@ namespace Domain.Entities
         public Guid? IdPreviousRank { get; set; } //FK
 
         // EF
-        protected Rank() { }
+        public Rank() { }
 
         public Rank(string name, int winPoints, int drawPoints, int losePoints, int pointsToPromotion, Rank nextRank, Rank previousRank)
         {

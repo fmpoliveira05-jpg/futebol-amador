@@ -18,8 +18,10 @@
             public const int MaxNameLength = 50;
             public const int MinNameLength = 3;
             public const int MaxDescriptionLength = 250;
-            public const int MaxPlayers = 32;
             public const int MaxAdmins = 4;
+            public const int MinAdmins = 1;
+            public const int MinMembers = 1;
+            public const int MaxMembers = 32;
             public const int MinNumberPoints = 0;
             public const int MaxNumberPoints = int.MaxValue;
             public const float MinAverageAge = GeneralConst.MinAge;
@@ -74,14 +76,49 @@
             public const int MaxDescriptionLength = 50;
         }
 
+        public static class StartMatchHubConst 
+        {
+            public const string PrefixGroupName = "StartMatchhub-";
+            public const string PrefixHubCache = "StartMatchhub-";
+        }
+       
         public static class FinishMatchHubConst
         {
             public const string ContentMatchId = "HubMatchId";
             public const string ContentTeamId = "HubTeamId";
+            public const string PrefixHubCache = "hubFinishMatch-";
+            public const string PrefixGroupName = "hubFinishMatch-";
         }
 
         public static class RankMatchMakerHubConst {
             public const string ContentTeamId = "HubTeamId";
+            public const string PrefixGroupName = "RankMatchhub-";
+        }
+
+        public static class ManagerRankMatchMakerServiceConst {
+            public const string PrefixHubCache = "matchRankMaker-";
+            public const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
+        }
+
+
+        public static class GeralTimeInHubConst
+        {
+            public const int timeInMatchMackerHub = 30; //minutos
+        }
+
+        public static class DeafultCriteriaMatchMaker
+        {
+            public const float differenceAverageAge = 3f;
+            public const float maxDifferenceAverageAge = 4.5f;
+            public const int differencePoint = 9;
+            public const int maxDifferencePoint = 20;
+        }
+
+        public static class HoursValidToCompetitiveMatch 
+        {
+            public static readonly TimeOnly MORNING = new TimeOnly(10, 0, 0);
+            public static readonly TimeOnly AFTERNOON = new TimeOnly(16, 0, 0);
+            public static readonly TimeOnly NIGHT = new TimeOnly(19, 0, 0);
         }
     }
 }

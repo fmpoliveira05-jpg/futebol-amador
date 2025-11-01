@@ -2,7 +2,7 @@
 
 namespace Application.DTOs.PostPoneGame
 {
-    public class PostponeMatchDTO
+    public class PostPoneMatchDto
     {
         [Required(ErrorMessage = "O id da partida tem de estar preenchido")]
         public Guid IdMatch { get; set; }
