@@ -1078,8 +1078,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         }
 
         [Test]
-        public async Task SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam()
+        public void SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam()
         {
+            // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
 
@@ -1089,18 +1090,21 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 .Setup(v => v.SendMembershipRequestValidator(player, team))
                 .Throws(new BusinessRuleException("Player is already on a team and can't send membership requests."));
 
+            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
         }
 
+
         [Test]
-        public async Task SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull()
+        public void SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull()
         {
+            // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
 
-            FillTeam(team);
+            FillTeam(team); // Simulates a full team
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
@@ -1108,29 +1112,31 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 .Setup(v => v.SendMembershipRequestValidator(player, team))
                 .Throws(new BusinessRuleException("Team is full and cannot accept new requests."));
 
+            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
         }
 
         [Test]
-        public async Task SendMembershipRequestAsync_ShouldThrow_WhileAlreadySentRequestToSameTeam()
+        public void SendMembershipRequestAsync_ShouldThrow_WhileAlreadySentRequestToSameTeam()
         {
+            // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-
-            FillTeam(team);
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
             validatorMock
                 .Setup(v => v.SendMembershipRequestValidator(player, team))
-                .Throws(new BusinessRuleException("Player already has a pending request for this Team"));
+                .Throws(new BusinessRuleException("Player already has a pending request for this Team."));
 
+            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
         }
+
         #endregion
 
         #region Test RejectMembershipRequests
