@@ -12,6 +12,17 @@ namespace Application.Validators
 {
     public class PlayerValidator : IPlayerValidator
     {
+        IEmailValidator emailValidator;
+
+        public PlayerValidator()
+        {
+
+        }
+        public PlayerValidator(IEmailValidator emailValidator)
+        {
+            this.emailValidator = emailValidator;
+        }
+
         public void PlayerExists(Player? player)
         {
             if (player == null)
@@ -20,7 +31,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Player[] players)
+        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Users[] players)
         {
             if (players[0] != null)
             {
@@ -32,7 +43,10 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
-            ValidateEmail(createPlayerDTO.Email);
+            if (!emailValidator.IsValid(createPlayerDTO.Email))
+            {
+                throw new ValidationException($"Email format is invalid.");
+            }
 
             ValidateHeigth(createPlayerDTO.Height);
 
@@ -50,19 +64,36 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto, Player player, Player playerEmail)
+        public void GetPlayerByIdValidator(Player player)
+        {
+            PlayerExists(player);
+        }
+
+        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Users[] players)
         {
             PlayerExists(player);
 
             if (UpdatePlayerDto.Email != player.Email)
             {
-                if (playerEmail != null)
+                if (players[0] != null)
                 {
-                    throw new ValidationException($"The email '{UpdatePlayerDto.Email}' is already in use.");
+                    throw new ValidationException($"The email '{players[0].Email}' is already in use.");
+                }
+
+            }
+
+            if (updatePlayerDTO.Phone != player.Phone)
+            {
+                if (players[1] != null)
+                {
+                    throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
                 }
             }
 
-            ValidateEmail(UpdatePlayerDto.Email);
+            if (!emailValidator.IsValid(updatePlayerDTO.Email))
+            {
+                throw new ValidationException($"Email format is invalid.");
+            }
 
             ValidateHeigth(UpdatePlayerDto.Height);
 
@@ -108,7 +139,7 @@ namespace Application.Validators
 
             if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
             {
-                if(filter.MinAge.Value > filter.MaxAge.Value)
+                if (filter.MinAge.Value > filter.MaxAge.Value)
                 {
                     throw new InvalidOperationException("O numero minimo de idade minima tem de ser inferior à idade media maxima");
                 }

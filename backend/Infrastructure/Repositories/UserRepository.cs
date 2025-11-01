@@ -2,6 +2,11 @@
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
@@ -14,19 +19,24 @@ namespace Infrastructure.Repositories
             this.context = context;
         }
 
-        public async Task<Player?> GetUserByEmailAsync(string email)
+        public async Task<List<Users?>> GetAllUsersAsync()
         {
-            return await context.Player.FirstOrDefaultAsync(p => p.Email.ToUpper() == email.ToUpper());
+            return await context.User.ToListAsync();
         }
 
-        public async Task<Player?> GetUserByIdAsync(Guid id)
+        public async Task<Users?> GetUserByIdAsync(Guid id)
         {
-            return await context.Player.FirstOrDefaultAsync(p => p.Id == id);
+            return await context.User.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public void UpdateUser(Player player)
+        public async Task<Users?> GetUserByEmailAsync(string email)
         {
-            context.Player.Update(player);
+            return await context.User.FirstOrDefaultAsync(p => p.Email == email);
+        }
+
+        public async Task<Users?> GetUserByPhoneAsync(string phone)
+        {
+            return await context.User.FirstOrDefaultAsync(p => p.Phone == phone);
         }
     }
 }

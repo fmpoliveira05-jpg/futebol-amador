@@ -33,6 +33,9 @@ namespace Application
 
             services.AddManagerHubService();
             services.AddHubServiceClients();
+            services.AddScoped<ISuperAdminService, SuperAdminService>();
+            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
+            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
 
             return services;
         }
@@ -65,6 +68,8 @@ namespace Application
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
             services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
+            services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
+            services.AddScoped<IEmailValidator, EmailValidator>();
 
             return services;
         }

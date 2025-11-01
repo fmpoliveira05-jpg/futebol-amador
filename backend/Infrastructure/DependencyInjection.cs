@@ -34,11 +34,12 @@ namespace Infrastructure
             services.AddScoped<IPitchRepository, PitchRepository>();
             services.AddScoped<ITeamStatisticsRepository, TeamStatisticsRepository>();
             services.AddScoped<IPlayerRepository, PlayerRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
             services.AddScoped<ITeamPostPoneGameRepository, TeamPostPoneGame>();
             services.AddScoped<IRankRepository, RankRepository>();
             services.AddScoped<IUnityOfWork, UnityOfWork>();
             services.AddScoped<IMembershipRequestRepository, MembershipRequestRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
         } 

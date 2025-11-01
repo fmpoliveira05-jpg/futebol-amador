@@ -5,7 +5,7 @@ namespace Domain.Entities
 {
     public class SuperAdmin : Users
     {
-        protected SuperAdmin() { }
+        public SuperAdmin() { }
 
         public SuperAdmin(string name, DateOnly dateOfBirth, string address, string email, 
             string password, string phoneNumber)

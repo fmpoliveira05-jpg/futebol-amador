@@ -13,25 +13,28 @@ namespace Application.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository playerRepository;
+        private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
         private readonly ITeamRepository teamRepository;
         private readonly IPlayerValidator playerValidator;
-        private readonly IUnityOfWork unitOfWork;
+        private readonly IUnityOfWork unityOfWork;
         private readonly IPasswordHasher passwordHasher;
         private readonly IMembershipRequestRepository membershipRequestRepository;
 
         public PlayerService(
             IPlayerRepository playerRepository,
             ITeamService teamService,
-            IUnityOfWork unitOfWork,
+            IUserRepository userRepository,
+            IUnityOfWork unityOfWork,
             IPlayerValidator playerValidator,
             ITeamRepository teamRepository,
             IPasswordHasher passwordHasher,
             IMembershipRequestRepository membershipRequestRepository)
         {
             this.playerRepository = playerRepository;
+            this.userRepository = userRepository;
             this.teamService = teamService;
-            this.unitOfWork = unitOfWork;
+            this.unityOfWork = unityOfWork;
             this.playerValidator = playerValidator;
             this.teamRepository = teamRepository;
             this.passwordHasher = passwordHasher;
@@ -40,10 +43,9 @@ namespace Application.Services
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto)
         {
-            var existingPlayers = new Player[]
-            {
-                await playerRepository.GetPlayerByEmailAsync(playerDto.Email),
-                await playerRepository.GetPlayerByPhoneAsync(playerDto.Phone),
+            var existingPlayers = new Users[] {
+                await userRepository.GetUserByEmailAsync(playerDto.Email),
+                await userRepository.GetUserByPhoneAsync(playerDto.Phone),
             };
 
             playerValidator.CreatePlayerValidator(playerDto, existingPlayers);
@@ -62,7 +64,7 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return player.Id;
         }
@@ -75,14 +77,14 @@ namespace Application.Services
 
             playerRepository.DeletePlayer(playerToDelete);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
         }
 
         public async Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(player);
+            playerValidator.GetPlayerByIdValidator(player);
 
             PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {
@@ -100,14 +102,18 @@ namespace Application.Services
         public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
 
-            playerValidator.UpdatePlayerValidator(dto, player, emailExists);
+            var existingPlayers = new Users[] {
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
+            };
+
+            playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
 
             bool hasChange = hasChangePlayer(dto, player);
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
         }
 
         public async Task<string> LeaveTeam(Guid playerId)
@@ -143,12 +149,13 @@ namespace Application.Services
 
             string teamName = existingPlayer.Team.Name;
 
+            existingPlayer.Team.Members.Remove(existingPlayer);
             existingPlayer.Team = null;
             existingPlayer.IdTeam = null;
 
             playerRepository.UpdatePlayer(existingPlayer);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return teamName;
         }
@@ -188,7 +195,7 @@ namespace Application.Services
             player.MembershipRequests.Remove(request);
             team.MembershipRequests?.Remove(request);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
             var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
@@ -220,7 +227,7 @@ namespace Application.Services
 
             player.MembershipRequests.Remove(request);
 
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return new MemberShipRequestDto
             {
@@ -265,7 +272,7 @@ namespace Application.Services
             };
 
             await membershipRequestRepository.AddMembershipRequest(newRequest);
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
 
             return new MemberShipRequestDto
             {
@@ -287,7 +294,7 @@ namespace Application.Services
         public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter)
         {
             playerValidator.ValidateFiltersListTeams(filter);
-            return await teamRepository.GetListTeamsPlayersWithFilters(filter); 
+            return await teamRepository.GetListTeamsPlayersWithFilters(filter);
         }
 
         #region Private Methods

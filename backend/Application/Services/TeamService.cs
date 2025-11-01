@@ -16,8 +16,7 @@ namespace Application.Services
     {
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
-        private readonly IUserRepository UserRepository;
-        private readonly IUnityOfWork UnitOfWork;
+        private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
         private readonly IMembershipRequestRepository MembershipRequestRepository;
@@ -26,8 +25,7 @@ namespace Application.Services
         public TeamService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
-            IUserRepository userRepository,
-            IUnityOfWork unitOfWork,
+            IUnityOfWork unityOfWork,
             ITeamValidator teamValidator,
             IRankRepository rankRepository,
             IMembershipRequestRepository membershipRequestRepository,
@@ -35,8 +33,7 @@ namespace Application.Services
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            UserRepository = userRepository;
-            UnitOfWork = unitOfWork;
+            UnityOfWork = unityOfWork;
             TeamValidator = teamValidator;
             RankRepository = rankRepository;
             MembershipRequestRepository = membershipRequestRepository;
@@ -66,7 +63,7 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             existingTeam.Members.Add(playerAccepted);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return new MemberShipRequestDto
             {
@@ -109,7 +106,7 @@ namespace Application.Services
 
             PlayerRepository.UpdatePlayer(playerCreating);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
             return newTeam.Id;
         }
 
@@ -130,7 +127,7 @@ namespace Application.Services
             }
             TeamRepository.DeleteTeam(teamToDelete);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, Guid currentUserId)
@@ -155,7 +152,7 @@ namespace Application.Services
 
             TeamRepository.UpdateTeam(teamToUpdate);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid adminDemotingId)
@@ -168,7 +165,7 @@ namespace Application.Services
 
             playerToDemote.IsAdmin = false;
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId)
@@ -222,7 +219,7 @@ namespace Application.Services
                 playerToRemove.IsAdminLastChangedAt = DateTime.UtcNow;
             }
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromoteId, Guid playerIdToPromotingId)
@@ -236,7 +233,7 @@ namespace Application.Services
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
         }
 
         public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
@@ -257,7 +254,7 @@ namespace Application.Services
 
             playerRejected.MembershipRequests?.Remove(requestToRemove);
 
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return new MemberShipRequestDto
             {
@@ -363,7 +360,7 @@ namespace Application.Services
             };
 
             await MembershipRequestRepository.AddMembershipRequest(invite);
-            await UnitOfWork.SaveChangesAsync();
+            await UnityOfWork.SaveChangesAsync();
 
             return new MemberShipRequestDto
             {
