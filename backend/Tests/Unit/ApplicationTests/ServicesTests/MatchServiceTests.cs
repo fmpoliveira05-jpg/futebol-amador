@@ -517,7 +517,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.CancelMatch(idTeam, idMatch, description);
 
             // ASSERT
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("Adversário não encontrado na partida.");
+            await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match a cancelar não existe ou já não pode ser cancelada.");
         }
 
         /*

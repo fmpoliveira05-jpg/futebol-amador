@@ -143,6 +143,7 @@ namespace Application.Services
         public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
         {
             var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
+            MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
 
             MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
 
@@ -152,15 +153,22 @@ namespace Application.Services
         public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
         {
             var match = await MatchRepository.GetMatchToCancelById(idMatch);
+            if (match == null)
+            {
+                throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
+            }
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+<<<<<<< Updated upstream
             /*
              * Nos testes se simular uma match a null,
              * o campo do opponent vai ser null,
              * e vai dar NullReferenceException ao tentar aceder a opponent.IdTeam,
              * estamos a aceder a isso já na linha do ValidateCancelMatch
             */
+=======
+>>>>>>> Stashed changes
             if (opponent == null)
             {
                 throw new ArgumentException("Adversário não encontrado na partida.");
