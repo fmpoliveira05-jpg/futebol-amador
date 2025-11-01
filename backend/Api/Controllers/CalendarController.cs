@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
 {
     //[Authorize]
-    [Route("api/{idTeam:guid}/[controller]")]
+    [Route("api/[controller]/{idTeam:guid}")]
     [ApiController]
     public class CalendarController : ControllerBase
     {

@@ -11,7 +11,7 @@ namespace Application.DTOs.Filters
         public DateOnly? MinDate { get; set; }
         public DateOnly? MaxDate { get; set; }
 
-        [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
+        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? NameOpponent { get; set; }
     }
 }

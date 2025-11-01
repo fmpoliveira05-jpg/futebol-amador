@@ -5,7 +5,7 @@ namespace Application.DTOs.Filters
 {
     public class FilterPostPoneMatchDto
     {
-        [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
+        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? NameOpponent { get; set; }
         public bool? IsHome { get; set; }
         public DateOnly? MinDateGame { get; set; }

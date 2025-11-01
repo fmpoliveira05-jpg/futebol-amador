@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
-    [Route("api/{idPlayer:guid}/[controller]")]
+    [Route("api/[controller]/{idPlayer:guid}")]
     [ApiController]
     public class MembershipRequestsController : ControllerBase
     {
@@ -107,7 +107,7 @@ namespace Api.Controllers
         }
 
         // POST: api/{idTeam}/MembershipRequests/accept
-        [HttpPost("/api/{idTeam:guid}/MembershipRequests/accept")]
+        [HttpPost("accept")]
         public async Task<IActionResult> AcceptRequest(Guid idTeam, [FromBody] Guid idMembershipRequest)
         {
             if (idTeam == Guid.Empty)
@@ -136,7 +136,7 @@ namespace Api.Controllers
         }
 
         // DELETE: api/{idTeam}/MembershipRequests/refuse
-        [HttpDelete("/api/{idTeam:guid}/MembershipRequests/refuse")]
+        [HttpDelete("MembershipRequests/refuse")]
         public async Task<IActionResult> RefuseRequest(Guid idTeam, [FromBody] Guid idMembershipRequest)
         {
             if (idTeam == Guid.Empty)
