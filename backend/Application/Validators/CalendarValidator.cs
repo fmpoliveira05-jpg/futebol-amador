@@ -1,5 +1,5 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Validators;
 using Domain.Entities;
@@ -8,17 +8,22 @@ using Domain.Exceptions;
 
 namespace Application.Validators
 {
-    public class MatchValidator: IMatchValidator
+    public class CalendarValidator: ICalendarValidator
     {
-        public void ValidateFilterCalendar(Guid idTeam, FilterCalendar filter)
+        public void ValidateTeamCalendar(Guid idTeam)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                throw new InvalidOperationException("O id da equipa não pode estar vazio");
+            }
+        }
+
+        public void ValidateFilterCalendar(Guid idTeam, FilterCalendarDto filter)
         {
             var dateMin = filter.MinDate;
             var dateMax = filter.MaxDate;
 
-            if (idTeam == Guid.Empty)
-            {
-                throw new InvalidOperationException("O id da equipa não pode estar nulo");
-            }
+            ValidateTeamCalendar(idTeam);
 
             if (dateMin.HasValue && dateMax.HasValue)
             {
@@ -26,6 +31,29 @@ namespace Application.Validators
                 {
                     throw new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima");
                 }
+            }
+        }
+
+        public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto) 
+        {
+            if (dto.IdMatch == Guid.Empty)
+            {
+                throw new ArgumentException("O id da partida a adiar está vazio");
+            }
+
+            if (dto.IdTeam == Guid.Empty)
+            {
+                throw new ArgumentException("O id da equipa está vazio");
+            }
+
+            if (idTeam != dto.IdTeam)
+            {
+                throw new InvalidOperationException("O id da equipa não é o mesmo do url");
+            }
+
+            if (dto.IdOpponent == Guid.Empty)
+            {
+                throw new ArgumentException("O id do opponent está vazio");
             }
         }
         public void ValidatorPostPoneMatch(Matches match, DateTime newDate, TeamStatistics team, Guid idTeam, 
@@ -56,6 +84,16 @@ namespace Application.Validators
             ValidateTeam(idOpponnent, opponetTeam);
         }
 
+        public void ValidateAcceptPostPoneMatchDto(Guid idTeam, AcceptRefusePostPoneDto dto)
+        {
+            ValidateAcceptOrRefusePostPoneMatch(idTeam, dto);
+
+            if (dto.StatusPostPone != StatusPostPone.ACCEPT)
+            {
+                throw new InvalidOperationException("Não está a acitar o pedido de adiamento");
+            }
+        }
+
         public void ValidatorAcceptPostPoneMatch(PostPoneMatch postPoneMatch, Matches match, TeamStatistics team, Guid idTeam,
             TeamStatistics opponetTeam, Guid idOpponnent)
         {
@@ -66,6 +104,16 @@ namespace Application.Validators
             ValidateTeam(idOpponnent, opponetTeam);
 
             ValidatePostPoneMatch(postPoneMatch, idTeam);
+        }
+
+        public void ValidateRejectPostPoneMatchDTO(Guid idTeam, AcceptRefusePostPoneDto dto)
+        {
+            ValidateAcceptOrRefusePostPoneMatch(idTeam, dto);
+
+            if (dto.StatusPostPone != StatusPostPone.REJECT)
+            {
+                throw new InvalidOperationException("Não está a rejeitar o pedido de adiamento");
+            }
         }
 
         public void ValidatorRejectPostPoneMatch(PostPoneMatch postPoneMatch, Matches match, TeamStatistics team, Guid idTeam,
@@ -162,6 +210,36 @@ namespace Application.Validators
             }
         }
 
+        public void ValidateFilterPostPoneMatch(FilterPostPoneMatchDto filter)
+        {
+            if (filter.MinDatePostPoneGame.HasValue && filter.MinDatePostPoneGame.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+            {
+                throw new InvalidOperationException("A data mínima de adiamento do jogo, não pode ser menor que agora");
+            }
+
+            if (filter.MinDatePostPoneGame.HasValue && filter.MaxDatePostPoneGame.HasValue)
+            {
+                if (filter.MinDatePostPoneGame.Value > filter.MaxDatePostPoneGame.Value)
+                {
+                    throw new InvalidOperationException("A data minima de adiamento não pode superior há data máxima");
+                }
+            }
+
+            if (filter.MinDateGame.HasValue && filter.MinDateGame.Value < DateOnly.FromDateTime(DateTime.UtcNow))
+            {
+                throw new InvalidOperationException("A data mínima do jogo, não pode ser menor que hoje");
+            }
+
+            if (filter.MinDateGame.HasValue && filter.MaxDateGame.HasValue)
+            {
+                if (filter.MinDateGame.Value > filter.MaxDateGame.Value) 
+                {
+                    throw new InvalidOperationException("A data minima de jogo não pode superior há data máxima");
+                }
+            }
+
+        }
+
         #region Private Validations
         private static void ValidateTeam(Guid idTeam, TeamStatistics? teamStatistics)
         {
@@ -191,6 +269,29 @@ namespace Application.Validators
             if (postPoneMatch.IdTeamPostPone == idTeam)
             {
                 throw new BusinessRuleException("Apenas a equipa que recebeu o convite pode aceita-lo ou rejeita-lo");
+            }
+        }
+
+        private static void ValidateAcceptOrRefusePostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                throw new ArgumentException("O id da Team está vazio");
+            }
+
+            if (dto.IdMatch == Guid.Empty)
+            {
+                throw new ArgumentException("O id da match não pode estar vazio");
+            }
+
+            if (dto.IdTeam == Guid.Empty)
+            {
+                throw new ArgumentException("O id da equipa não pode estar vazio");
+            }
+
+            if (dto.IdOpponent == Guid.Empty)
+            {
+                throw new ArgumentException("O id do opponete não pode estar vazio");
             }
         }
 

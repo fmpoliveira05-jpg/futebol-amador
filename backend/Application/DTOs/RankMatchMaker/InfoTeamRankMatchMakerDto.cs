@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.DTOs.Rank;
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.RankMatchMaker
@@ -17,7 +18,7 @@ namespace Application.DTOs.RankMatchMaker
         public float AverageAge { get; set; }
 
         [Required]
-        public InfoRankMatchMakerDto Rank { get; set; }
+        public InfoRankDto Rank { get; set; }
 
         [Required]
         [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints, ErrorMessage = "Um equipa tem 0 ou mais pontos")]

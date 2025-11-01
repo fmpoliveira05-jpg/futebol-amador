@@ -21,7 +21,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
-        private Mock<IMatchValidator> _validatorMock;
+        private Mock<ICalendarValidator> _validatorMock;
         private Mock<IPlayerRepository> _playerRepoMock;
         private MatchService _sut;
 
@@ -32,7 +32,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
-            _validatorMock = new Mock<IMatchValidator>();
+            _validatorMock = new Mock<ICalendarValidator>();
             _playerRepoMock = new Mock<IPlayerRepository>();
 
             _sut = new MatchService(
@@ -97,7 +97,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var teamId = Guid.NewGuid();
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 IsRealized = true,
                 IsRanqued = true,
@@ -142,12 +142,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var idTeam = Guid.NewGuid();
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 MinDate = new DateOnly(2025, 12, 15),
                 MaxDate = new DateOnly(2025, 12, 14)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendar>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
+            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
@@ -161,12 +161,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var idTeam = Guid.Empty;
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 MinDate = new DateOnly(2025, 12, 1),
                 MaxDate = new DateOnly(2025, 12, 31)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendar>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
+            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.MemberShip;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Domain.Entities;
 namespace Application.Interfaces.Repositories
@@ -30,9 +31,10 @@ namespace Application.Interfaces.Repositories
         Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
 
         Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id);
-
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
-
-        IQueryable<Teams> GetTeamsQueryable();
+        Task<List<InfoTeamsDto>> GetListTeamsPlayer();
+        Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters);
+        Task<List<InfoTeamsDto>> GetListTeamsForTeams(Guid idTeam);
+        Task<List<InfoTeamsDto>> GetListTeamsByTeamsWithFilters(Guid idTeam, FilterListTeamDto filters);
     }
 }

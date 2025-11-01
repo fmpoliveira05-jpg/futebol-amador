@@ -1,11 +1,10 @@
-﻿using Application.DTOs.Match;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 
 using Domain.Exceptions;
@@ -301,89 +300,26 @@ namespace Application.Services
             return await TeamRepository.GetMembershipRequestsDtoAsync(teamId);
         }
 
-
-
-        public Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId)
+        public async Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam)
         {
-                        throw new NotImplementedException();
-/*
-            var existingTeamTask = await TeamRepository.GetTeamByIdAsync(teamId);
+            TeamValidator.ValidateVariableSearchTeam(idTeam);
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
 
-            TeamValidator.GetTeamScheduleValidation(existingTeamTask);
-            var matchDtos = existingTeamTask.Calendar.Matches.Select(match => new MatchDto
-            {
-                MatchId = match.Id,
-                AwayTeamName = match.Teams.Name, 
-                HomeTeamName = match.HomeTeam.Name,
-                MatchDate = match.MatchDate,
-                PitchName = match.Pitch.Name,
-                Location = match.Pitch.Address,
-            }).ToList();
-*/
+            TeamValidator.ValidateTeamSearch(team);
+
+
+            return await TeamRepository.GetListTeamsForTeams(idTeam);
         }
 
-
-        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
+        public async Task<List<InfoTeamsDto>> SearchTeamsWithFiltersAsync(Guid idTeam, FilterListTeamDto filters)
         {
-            var player = await PlayerRepository.GetPlayerByIdAsync(playerId);
-            
-            var query = TeamRepository.GetTeamsQueryable();
+            TeamValidator.ValidateVaribleSearchTeamWithFilters(idTeam, filters);
+            var team = await TeamRepository.GetTeamByIdAsync(idTeam);
 
-            if (!string.IsNullOrWhiteSpace(filters.Name))
-            {
-                query = query.Where(t => t.Name.Contains(filters.Name));
-            }
+            //Quando houver players descomentar
+            TeamValidator.ValidateTeamSearch(team);
 
-            if (!string.IsNullOrWhiteSpace(filters.RankName))
-            {
-                query = query.Where(t => t.Rank.Name.Contains(filters.Name));
-            }
-
-            /*
-                         if (filters.MinAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge > filters.MinAvgAge);
-            }
-             */
-
-            if (filters.MaxAvgAge < filters.MinAvgAge)
-            {
-                throw new Exception("Max average age must be higher or equal to Min Average Age.");
-            }
-
-            /*
-             if (filters.MaxAvgAge > 0)
-            {
-                query = query.Where(t => t.AverageAge < filters.MaxAvgAge);
-            }
-             */
-
-            if (!string.IsNullOrWhiteSpace(filters.PitchAddress))
-            {
-                query = query.Where(t => t.Pitch.Address.Contains(filters.PitchAddress));
-            }
-
-            var teams = query
-                .Select(t => new TeamSummaryDto
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    RankName = t.Rank.Name,
-                    PlayerCount = t.Members.Count,
-                })
-                .ToList();
-
-            if (player.IsAdmin)
-            {
-                teams.Where(t =>
-                    t.PlayerCount > 11
-                    );
-            }else if (player.IdTeam == null)
-                teams.Where(t =>
-                    t.PlayerCount > 11
-                    );
-
-            return teams;
+            return await TeamRepository.GetListTeamsByTeamsWithFilters(idTeam, filters);
         }
     }
 }

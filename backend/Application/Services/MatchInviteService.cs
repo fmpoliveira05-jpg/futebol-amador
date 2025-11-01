@@ -201,7 +201,7 @@ namespace Application.Services
         }
 
         #region Private Methods
-        private async Task<List<TeamStatistics>> ListTeamsStatistics(Teams sender, Teams receiver)
+        private static async Task<List<TeamStatistics>> ListTeamsStatistics(Teams sender, Teams receiver)
         {
             var list = new List<TeamStatistics>();
 
@@ -209,9 +209,6 @@ namespace Application.Services
             TeamStatistics receiverTeam = new TeamStatistics(receiver);
             list.Add(sendTeam);
             list.Add(receiverTeam);
-
-            await TeamStatisticsRepository.AddTeamStatistics(sendTeam);
-            await TeamStatisticsRepository.AddTeamStatistics(receiverTeam);
 
             return list;
         }

@@ -34,7 +34,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             return new InfoTeamRankMatchMakerDto
             {
                 IdTeam = id,
-                Rank = new InfoRankMatchMakerDto { Name = rank },
+                Rank = new InfoRankDto { Name = rank },
                 City = city,
                 AverageAge = age,
                 NumberPointsTeam = points,

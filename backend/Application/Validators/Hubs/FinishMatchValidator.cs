@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
 using Application.Hubs;
 using Application.Interfaces.Validators.Hub;
 using Domain.Entities;

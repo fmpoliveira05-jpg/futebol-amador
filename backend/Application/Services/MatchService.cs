@@ -6,7 +6,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
-using NUnit.Framework;
 
 /*
  Fazer breves testes para ver se está tudo a dar com estas alterações
@@ -15,15 +14,15 @@ namespace Application.Services
 {
     public class MatchService: IMatchService
     {
-        IMatchRepository MatchRepository;
-        ITeamPostPoneGameRepository TeamPostPoneGameRepository;
-        ICancelledMatchRepository CancelledMatchRepository;
-        IUnityOfWork UnityOfWork;
-        IMatchValidator MatchValidator;
+        private readonly IMatchRepository MatchRepository;
+        private readonly ITeamPostPoneGameRepository TeamPostPoneGameRepository;
+        private readonly ICancelledMatchRepository CancelledMatchRepository;
+        private readonly IUnityOfWork UnityOfWork;
+        private readonly ICalendarValidator MatchValidator;
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            IMatchValidator MatchValidator, IPlayerRepository @object)
+            ICalendarValidator MatchValidator, IPlayerRepository @object)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
@@ -34,20 +33,22 @@ namespace Application.Services
 
         public async Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam)
         {
+            MatchValidator.ValidateTeamCalendar(idTeam);
             return await MatchRepository.GetAllMatchesTeam(idTeam);
         }
 
-        public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendar filter)
+        public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendarDto filter)
         {
             MatchValidator.ValidateFilterCalendar(idTeam, filter);
             return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
         }
 
-        public async Task<InfoPostPoneMatch> PostPoneMatch(PostponeMatchDTO dto)
+        public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
+            MatchValidator.ValidatePostPoneMatchDto(idTeam, dto);
+            
             var idMatch = dto.IdMatch;
             var newDate = dto.PostPoneDate;
-            var idTeam = dto.IdTeam;
             var idOpponnent = dto.IdOpponent;
             PostPoneMatch postPoneDate;
             Teams team;
@@ -82,9 +83,9 @@ namespace Application.Services
         }
 
         //Vou ter que implementar aquele find na database para ver se quem adiou tem um jogo já marcado a pelo menos 12 horas
-        public async Task<MatchDto> AcceptPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto)
+        public async Task<MatchDto> AcceptPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
         {
-            var idTeam = dto.IdTeam;
+            MatchValidator.ValidateAcceptPostPoneMatchDto(idTeam, dto);
             var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
             DateTime newDate;
@@ -119,10 +120,11 @@ namespace Application.Services
         /**
          * O jogo fica cancelado, chama o cancelMatch
          */
-        public async Task RejectPostPoneMatch(Guid idTeamUrl, AcceptRefusePostPoneDTO dto)
+        public async Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
         {
+            MatchValidator.ValidateRejectPostPoneMatchDTO(idTeam, dto);
+            
             var idMatch = dto.IdMatch;
-            var idTeam = dto.IdTeam;
             var idOpponnent = dto.IdOpponent;
 
             var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatch(idOpponnent, idMatch);
@@ -132,7 +134,6 @@ namespace Application.Services
 
             MatchValidator.ValidatorRejectPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
-            //Cancelamento do match
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
             match.MatchStatus = MatchStatus.CANCELED;
 
@@ -141,9 +142,17 @@ namespace Application.Services
 
         public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
         {
+            MatchValidator.ValidateTeamCalendar(idTeam);
             var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
 
-            MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
+            return listPostPone;
+        }
+
+        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter)
+        {
+            MatchValidator.ValidateTeamCalendar(idTeam);
+            MatchValidator.ValidateFilterPostPoneMatch(filter);
+            var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
 
             return listPostPone;
         }
@@ -154,22 +163,12 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
-            /*
-             * Nos testes se simular uma match a null,
-             * o campo do opponent vai ser null,
-             * e vai dar NullReferenceException ao tentar aceder a opponent.IdTeam,
-             * estamos a aceder a isso já na linha do ValidateCancelMatch
-            */
-            if (opponent == null)
-            {
-                throw new ArgumentException("Adversário não encontrado na partida.");
-            }
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
             
-            //Cancelamento do jogo
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
             await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
+            
             match.MatchStatus = MatchStatus.CANCELED;
             
             await UnityOfWork.SaveChangesAsync();

@@ -18,8 +18,10 @@
             public const int MaxNameLength = 50;
             public const int MinNameLength = 3;
             public const int MaxDescriptionLength = 250;
-            public const int MaxPlayers = 32;
             public const int MaxAdmins = 4;
+            public const int MinAdmins = 1;
+            public const int MinMembers = 1;
+            public const int MaxMembers = 32;
             public const int MinNumberPoints = 0;
             public const int MaxNumberPoints = int.MaxValue;
             public const float MinAverageAge = GeneralConst.MinAge;

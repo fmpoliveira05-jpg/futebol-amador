@@ -1,6 +1,7 @@
-﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -30,6 +31,32 @@ namespace Api.Controllers
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
                     playerDto);
+        }
+
+        [HttpGet("listTeamsToMemberShipRequest")]
+        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        {
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await playerService.GetTeamListWithFilters(filter);
+            }
+            else 
+            {
+                list = await playerService.GetListTeams();
+            }
+
+            return Ok(list);
         }
 
         [HttpDelete("{playerId:guid}")]

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.RankMatchMaker;
+﻿using Application.DTOs.Rank;
+using Application.DTOs.RankMatchMaker;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -75,18 +76,18 @@ namespace Application.Services.Hub
             }
             
             validator.ValidateJoinRankMatchMaker(team, averageAge, city, findUser, hub);
-            
+
             InfoTeam = new InfoTeamRankMatchMakerDto
             {
                 IdTeam = idTeam,
                 Name = team.Name,
-                Rank = new InfoRankMatchMakerDto
-                {   
+                Rank = new InfoRankDto
+                {
                     IdRank = team.IdRank,
                     Name = team.Name,
                 },
                 NumberPointsTeam = team.CurrentPoints,
-                AverageAge = averageAge, 
+                AverageAge = averageAge,
                 City = city,
                 GameDate = gameDate,
                 NextOrPreviousRank = previousOrNextRank,
@@ -292,7 +293,7 @@ namespace Application.Services.Hub
             var nextOrPreviewsRank = "";
             var previousRankTeam = rankTeam.PreviousRank;
 
-            if(rankTeam.PointsToPromotion - numberPointsTeam <= differencePoints)
+            if (rankTeam.PointsToPromotion - numberPointsTeam <= differencePoints)
             {
                 nextOrPreviewsRank = rankTeam.NextRank.Name;
             }
@@ -311,11 +312,12 @@ namespace Application.Services.Hub
             var teamStatistics = new List<TeamStatistics>();
             var team1 = new TeamStatistics(team);
             var teamFind = new TeamStatistics(teamMatchFind);
+            teamStatistics.Add(team1);
+            teamStatistics.Add(teamFind);
+
             var match = new Matches(gameDate, true, teamMatchFind.Pitch.Id, teamStatistics);
 
-            team1.MatchesId = match.Id;
-            teamFind.MatchesId = match.Id;
-
+            await matchRepository.AddMatch(match);
             await unityOfWork.SaveChangesAsync();
         }
 

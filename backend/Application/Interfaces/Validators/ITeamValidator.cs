@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Team;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Team;
 using Domain.Entities;
 
 namespace Application.Interfaces.Validators
@@ -31,5 +32,8 @@ namespace Application.Interfaces.Validators
         void PromoteMemberToAdminValidation(Teams? team, Player? memberToPromote, Player? memberPromoting);
 
         void GetTeamScheduleValidation(Teams? team);
+        public void ValidateVariableSearchTeam(Guid idTeam);
+        public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter);
+        public void ValidateTeamSearch(Teams team);
     }
 }

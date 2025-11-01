@@ -1,6 +1,9 @@
-﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -9,12 +12,15 @@ namespace Application.Services
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;
+        private readonly IPlayerValidator playerValidator;
         private readonly IUnityOfWork unitOfWork;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
+            IPlayerValidator playerValidator, IUnityOfWork unitOfWork)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
+            this.playerValidator = playerValidator;
             this.unitOfWork = unitOfWork;
         }
 
@@ -151,6 +157,17 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
 
             return teamName;
+        }
+
+        public async Task<List<InfoTeamsDto>> GetListTeams()
+        {
+            return await teamRepository.GetListTeamsPlayer();
+        }
+
+        public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter)
+        {
+            playerValidator.ValidateFiltersListTeams(filter);
+            return await teamRepository.GetListTeamsPlayersWithFilters(filter); 
         }
     }
 }

@@ -56,9 +56,10 @@ namespace Application
 
         private static IServiceCollection AddValidators(this IServiceCollection services)
         {
+            services.AddScoped<IPlayerValidator, PlayerValidator>();
             services.AddScoped<ITeamValidator, TeamValidator>();
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
-            services.AddScoped<IMatchValidator, MatchValidator>();
+            services.AddScoped<ICalendarValidator, CalendarValidator>();
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();

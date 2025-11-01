@@ -1,4 +1,6 @@
-﻿using Domain.Enums;
+﻿using Application.DTOs.Pitch;
+using Application.DTOs.Team;
+using Domain.Enums;
 
 namespace Application.DTOs.Match
 {

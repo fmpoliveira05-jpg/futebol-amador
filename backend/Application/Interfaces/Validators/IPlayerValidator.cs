@@ -1,9 +1,11 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.Filters;
+using Domain.Entities;
 
 namespace Application.Interfaces.Validators
 {
-    internal interface IPlayerValidator
+    public interface IPlayerValidator
     {
         void PlayerExists(Player player);
+        void ValidateFiltersListTeams(FilterListTeamDto filter);
     }
 }

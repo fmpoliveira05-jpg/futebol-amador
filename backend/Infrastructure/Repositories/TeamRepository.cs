@@ -1,7 +1,10 @@
+using Application.DTOs.Rank;
+using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
+using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -73,11 +76,6 @@ namespace Infrastructure.Repositories
             return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
-        }
-
-        public IQueryable<Teams> GetTeamsQueryable()
-        {
-            return DbContext.Team.AsQueryable();
         }
         
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
@@ -170,6 +168,272 @@ namespace Infrastructure.Repositories
                 .Include (t => t.Rank)
                 .Include (t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task<List<InfoTeamsDto>> GetListTeamsPlayer()
+        {
+            var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = (from t in DbContext.Team
+                         join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
+                         join rank in DbContext.Rank on t.IdRank equals rank.Id
+
+                         where t.Members.Count < ModelConstants.TeamConst.MaxMembers
+                         let averageAge = t.Members.Any()
+                                    ? t.Members.Average(m =>
+                                        ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                                    : 0.0
+
+                         select new InfoTeamsDto
+                         {
+                             Id = t.Id,
+                             Name = t.Name,
+                             Description = t.Description,
+                             Address = pitch.Address,
+                             PlayerCount = t.Members.Count,
+                             AverageAge = (float)averageAge,
+                             Rank = new InfoRankDto
+                             {
+                                 IdRank = t.IdRank,
+                                 Name = rank.Name
+                             },
+                             CurrentPoints = t.CurrentPoints,
+                         }
+                )
+                .ToListAsync();
+
+            return await query;
+        }
+
+        public async Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters)
+        {
+            var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = DbContext.Team
+                            .Include(t => t.Pitch)
+                            .Include(t => t.Rank)
+                            .Where(t => t.Members.Count < ModelConstants.TeamConst.MaxMembers);
+
+            if (!string.IsNullOrEmpty(filters.NameTeam))
+            {
+                var upperCase = filters.NameTeam.ToUpper();
+                query = query.Where(t => t.Name.ToUpper().Contains(upperCase));
+            }
+
+            if (!string.IsNullOrEmpty(filters.NameRank))
+            {
+                var upperCase = filters.NameRank.ToUpper();
+                query = query.Where(t => t.Rank.Name.ToUpper().Contains(upperCase));
+            }
+
+            if(!string.IsNullOrEmpty(filters.City))
+            {
+                var upperCase = filters.City.ToUpper();
+                query = query.Where(t => t.Pitch.Address.ToUpper().Contains(upperCase));
+            }
+
+            if (filters.MinNumberPoints.HasValue)
+            {
+                query = query.Where(t => t.CurrentPoints >= filters.MinNumberPoints.Value);
+            }
+
+            if (filters.MaxNumberPoints.HasValue)
+            {
+                query = query.Where(t => t.CurrentPoints <= filters.MaxNumberPoints.Value);
+            }
+
+            if (filters.MinAge.HasValue)
+            {
+                query = query.Where(t =>
+                     (t.Members.Any()
+                         ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                         : 0.0) >= filters.MinAge.Value
+                );
+            }
+
+            if (filters.MaxAge.HasValue)
+            {
+                query = query.Where(t =>
+                    (t.Members.Any()
+                        ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                        : 0.0) <= filters.MaxAge.Value
+                );
+            }
+
+            if (filters.MinNumberPlayers.HasValue)
+            {
+                query = query.Where(t => t.Members.Count >= filters.MinNumberPlayers.Value);
+            }
+
+            if (filters.MaxNumberPlayers.HasValue)
+            {
+                query = query.Where(t => t.Members.Count <= filters.MaxNumberPlayers.Value);
+            }
+
+            var list = await query
+                .Select (t => new
+                {
+                    Team = t,
+                    AverageAge = t.Members.Any()
+                        ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                        : 0.0,
+                    NumMembers = t.Members.Count,
+                    Pitch = t.Pitch,
+                    Rank = t.Rank,
+                })
+                .Select(x => new InfoTeamsDto
+                {
+                    Id = x.Team.Id,
+                    Name = x.Team.Name,
+                    Description = x.Team.Description,
+                    Address = x.Pitch.Address,
+                    AverageAge = (float)x.AverageAge,
+                    CurrentPoints = x.Team.CurrentPoints,
+                    PlayerCount = x.NumMembers,
+                    Rank = new InfoRankDto
+                    {
+                        IdRank = x.Rank.Id,
+                        Name = x.Rank.Name
+                    }
+                })
+                .ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<InfoTeamsDto>> GetListTeamsForTeams(Guid idTeam)
+        {
+            var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = (from t in DbContext.Team
+                         join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
+                         join rank in DbContext.Rank on t.IdRank equals rank.Id
+
+                         where t.Members.Count > 11
+                            && t.Id != idTeam
+
+
+                         let averageAge = t.Members.Any()
+                                    ? t.Members.Average(m =>
+                                        ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                                    : 0.0
+
+                         select new InfoTeamsDto
+                         {
+                             Id = t.Id,
+                             Name = t.Name,
+                             Description = t.Description,
+                             Address = pitch.Address,
+                             PlayerCount = t.Members.Count,
+                             AverageAge = (float)averageAge,
+                             Rank = new InfoRankDto
+                             {
+                                 IdRank = t.IdRank,
+                                 Name = rank.Name
+                             },
+                             CurrentPoints = t.CurrentPoints,
+                         }
+                )
+                .ToListAsync();
+
+            return await query;
+        }
+
+        public async Task<List<InfoTeamsDto>> GetListTeamsByTeamsWithFilters(Guid idTeam, FilterListTeamDto filters)
+        {
+            var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = DbContext.Team
+                            .Include(t => t.Pitch)
+                            .Include(t => t.Rank)
+                            .Where(t => t.Id != idTeam 
+                                && t.Members.Count < ModelConstants.TeamConst.MaxMembers);
+
+            if (!string.IsNullOrEmpty(filters.NameTeam))
+            {
+                var upperCase = filters.NameTeam.ToUpper();
+                query = query.Where(t => t.Name.ToUpper().Contains(upperCase));
+            }
+
+            if (!string.IsNullOrEmpty(filters.NameRank))
+            {
+                var upperCase = filters.NameRank.ToUpper();
+                query = query.Where(t => t.Rank.Name.ToUpper().Contains(upperCase));
+            }
+
+            if (!string.IsNullOrEmpty(filters.City))
+            {
+                var upperCase = filters.City.ToUpper();
+                query = query.Where(t => t.Pitch.Address.ToUpper().Contains(upperCase));
+            }
+
+            if (filters.MinNumberPoints.HasValue)
+            {
+                query = query.Where(t => t.CurrentPoints >= filters.MinNumberPoints.Value);
+            }
+
+            if (filters.MaxNumberPoints.HasValue)
+            {
+                query = query.Where(t => t.CurrentPoints <= filters.MaxNumberPoints.Value);
+            }
+
+            if (filters.MinAge.HasValue)
+            {
+                query = query.Where(t =>
+                     (t.Members.Any()
+                         ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                         : 0.0) >= filters.MinAge.Value
+                );
+            }
+
+            if (filters.MaxAge.HasValue)
+            {
+                query = query.Where(t =>
+                    (t.Members.Any()
+                        ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                        : 0.0) <= filters.MaxAge.Value
+                );
+            }
+
+            if (filters.MinNumberPlayers.HasValue)
+            {
+                query = query.Where(t => t.Members.Count >= filters.MinNumberPlayers.Value);
+            }
+
+            if (filters.MaxNumberPlayers.HasValue)
+            {
+                query = query.Where(t => t.Members.Count <= filters.MaxNumberPlayers.Value);
+            }
+
+            var list = await query
+                .Select(t => new
+                {
+                    Team = t,
+                    AverageAge = t.Members.Any()
+                        ? t.Members.Average(m => ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
+                        : 0.0,
+                    NumMembers = t.Members.Count,
+                    Pitch = t.Pitch,
+                    Rank = t.Rank,
+                })
+                .Select(x => new InfoTeamsDto
+                {
+                    Id = x.Team.Id,
+                    Name = x.Team.Name,
+                    Description = x.Team.Description,
+                    Address = x.Pitch.Address,
+                    AverageAge = (float)x.AverageAge,
+                    CurrentPoints = x.Team.CurrentPoints,
+                    PlayerCount = x.NumMembers,
+                    Rank = new InfoRankDto
+                    {
+                        IdRank = x.Rank.Id,
+                        Name = x.Rank.Name
+                    }
+                })
+                .ToListAsync();
+
+            return list;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
 using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.SignalR.Client;
 
