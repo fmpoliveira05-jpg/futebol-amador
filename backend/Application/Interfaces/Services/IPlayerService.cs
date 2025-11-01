@@ -8,11 +8,17 @@ namespace Application.Interfaces.Services
     public interface IPlayerService
     {
         Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto);
+
         Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid teamId);
+
         Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto);
+
         Task DeletePlayerAsync(Guid playerId);
+
         Task<String> LeaveTeam(Guid playerId);
+
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid playerId);
+
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
 
         Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
@@ -20,6 +26,10 @@ namespace Application.Interfaces.Services
         Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid playerId, Guid requestId);
 
         Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid playerId, Guid teamId);
+
+        Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter);
+
+        Task<List<InfoTeamsDto>> GetListTeams();
 
     }
 }

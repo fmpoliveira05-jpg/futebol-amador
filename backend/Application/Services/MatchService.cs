@@ -173,5 +173,10 @@ namespace Application.Services
             
             await UnityOfWork.SaveChangesAsync();
         }
+
+        Task<List<InfoPostPoneMatch>> IMatchService.GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
