@@ -1,6 +1,7 @@
 using Application.DTOs.Filters;
 using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Validators;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -31,47 +32,15 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
-            if (!IsValidEmail(createPlayerDTO.Email))
-            {
-                throw new ValidationException($"Email format is invalid ({createPlayerDTO.Email}).");
-            }
+            ValidateEmail(createPlayerDTO.Email);
 
-            if (createPlayerDTO.Height < 100
-                || createPlayerDTO.Height > 250)
-            {
-                throw new ValidationException("Height value is invalid");
-            }
+            ValidateHeigth(createPlayerDTO.Height);
 
-            if (createPlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
-                || createPlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
-            {
-                throw new ValidationException("Invalid Date of birth");
-            }
+            ValidateAge(createPlayerDTO.DateOfBirth);
 
-            if (createPlayerDTO.Phone.Length != 9)
-            {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
+            ValidatePhone(createPlayerDTO.Phone);
 
-            if (!createPlayerDTO.Phone.All(char.IsDigit))
-            {
-                throw new ValidationException("Phone number must only contain digits (0-9).");
-            }
-
-            if (createPlayerDTO.Phone.StartsWith("0"))
-            {
-                throw new ValidationException("Phone number cannot start with '0'.");
-            }
-
-            if (!int.TryParse(createPlayerDTO.Phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
-            }
-
-            if (!Enum.IsDefined(typeof(Position), createPlayerDTO.Position))
-            {
-                throw new ValidationException("Position invalid.");
-            }
+            ValidatePosition(createPlayerDTO.Position);
 
             ValidateAddress(createPlayerDTO.Address);
         }
@@ -93,47 +62,17 @@ namespace Application.Validators
                 }
             }
 
-            if (!IsValidEmail(updatePlayerDTO.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
+            ValidateEmail(updatePlayerDTO.Email);
 
-            if (updatePlayerDTO.Height < 100
-                || updatePlayerDTO.Height > 250)
-            {
-                throw new ValidationException("Height value is invalid");
-            }
+            ValidateHeigth(updatePlayerDTO.Height);
 
-            if (updatePlayerDTO.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
-                || updatePlayerDTO.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
-            {
-                throw new ValidationException("Invalid Date of birth");
-            }
+            ValidateAge(updatePlayerDTO.DateOfBirth);
 
-            if (updatePlayerDTO.Phone.Length != 9)
-            {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
+            ValidatePhone(updatePlayerDTO.Phone);
 
-            if (!updatePlayerDTO.Phone.All(char.IsDigit))
-            {
-                throw new ValidationException("Phone number must only contain digits (0-9).");
-            }
+            ValidatePosition(updatePlayerDTO.Position);
 
-            if (updatePlayerDTO.Phone.StartsWith("0"))
-            {
-                throw new ValidationException("Phone number cannot start with '0'.");
-            }
-
-            if (!int.TryParse(updatePlayerDTO.Phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
-            }
-
-            if (!Enum.IsDefined(typeof(Position), updatePlayerDTO.Position))
-            {
-                throw new ValidationException("Position invalid.");
-            }
+            ValidateAddress(updatePlayerDTO.Address);
 
             ValidateAddress(updatePlayerDTO.Address);
         }
@@ -206,6 +145,61 @@ namespace Application.Validators
             return valid;
         }
 
+        private static void ValidateHeigth(int heigth)
+        {
+            if (heigth < ModelConstants.PlayerConst.MinHeight || heigth > ModelConstants.PlayerConst.MaxHeight)
+            {
+                throw new ValidationException("Height value is invalid");
+            }
+        }
+
+        private static void ValidateEmail(string email)
+        {
+            if (!IsValidEmail(email))
+            {
+                throw new ValidationException($"Email format is invalid ({email}).");
+            }
+        }
+
+        private static void ValidateAge(DateOnly dateOfBirth)
+        {
+            if (dateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MinAge)
+                || dateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MaxAge))
+            {
+                throw new ValidationException("Invalid Date of birth");
+            }
+        }
+
+        private static void ValidatePhone(string phone)
+        {
+            if (phone.Length != 9)
+            {
+                throw new ValidationException("Phone number must have 9 digits.");
+            }
+
+            if (!phone.All(char.IsDigit))
+            {
+                throw new ValidationException("Phone number must only contain digits (0-9).");
+            }
+
+            if (phone.StartsWith("0"))
+            {
+                throw new ValidationException("Phone number cannot start with '0'.");
+            }
+
+            if (!int.TryParse(phone, out _))
+            {
+                throw new ValidationException("Phone number must only have numbers.");
+            }
+        }
+
+        private static void ValidatePosition(Position position)
+        {
+            if (!Enum.IsDefined(typeof(Position), position))
+            {
+                throw new ValidationException("Position invalid.");
+            }
+        }
         private static void ValidateAddress(string addressTeam)
         {
             if (string.IsNullOrWhiteSpace(addressTeam))
