@@ -21,11 +21,11 @@ namespace Application.Interfaces.Services
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
 
-        Task AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
+        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
 
-        Task RejectMembershipRequestAsync(Guid playerId, Guid requestId);
+        Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid playerId, Guid requestId);
 
-        Task SendMembershipRequestAsync(Guid playerId, Guid teamId);
+        Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid playerId, Guid teamId);
 
     }
 }

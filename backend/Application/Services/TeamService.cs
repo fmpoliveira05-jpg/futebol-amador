@@ -9,6 +9,7 @@ using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
+using System.Net;
 
 namespace Application.Services
 {
@@ -43,34 +44,41 @@ namespace Application.Services
             PlayerValidator = playerValidator;
         }
 
-        public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
+        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
-            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId);
+            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId)
+                ?? throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
+
             var playerAccepting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
-
-            var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-            if (requestToRemove == null)
-                throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
-
             TeamValidator.ApproveMembershipRequestValidation(existingTeam, playerAccepting, requestId);
 
-            var playerAccepted = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer);
+            var requestToRemove = existingTeam.MembershipRequests.FirstOrDefault(r => r.Id == requestId)
+                ?? throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
+
+            var playerAccepted = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer)
+                ?? throw new ValidationException("O jogador associado ao pedido não foi encontrado.");
+
+            var teamEntity = existingTeam;
 
             existingTeam.MembershipRequests.Remove(requestToRemove);
-            if (playerAccepted?.MembershipRequests != null)
-            {
-                var playerRequest = playerAccepted.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-                if (playerRequest != null)
-                    playerAccepted.MembershipRequests.Remove(playerRequest);
-            }
+
+            playerAccepted.MembershipRequests?.Remove(requestToRemove);
 
             playerAccepted.IdTeam = teamId;
             existingTeam.Members.Add(playerAccepted);
 
             await UnitOfWork.SaveChangesAsync();
+
+            return new MemberShipRequestDto
+            {
+                RequestId = requestToRemove.Id,
+                PlayerId = playerAccepted.Id,
+                PlayerName = playerAccepted.Name,
+                TeamId = teamEntity.Id,
+                TeamName = teamEntity.Name,
+                RequestDate = requestToRemove.InviteDate,
+                IsPlayerSender = requestToRemove.IsPlayerSender
+            };
         }
 
         public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid playerId)
@@ -232,32 +240,36 @@ namespace Application.Services
             await UnitOfWork.SaveChangesAsync();
         }
 
-        public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
+        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
         {
-            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId);
+            var existingTeam = await TeamRepository.GetTeamForMembershipRequestAsync(teamId)
+                ?? throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
+
             var playerRejecting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
-
-            var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-            if (requestToRemove == null)
-                throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
-
             TeamValidator.RejectMembershipRequestValidation(existingTeam, playerRejecting, requestId);
 
-            var playerRejected = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer);
+            var requestToRemove = existingTeam.MembershipRequests.FirstOrDefault(r => r.Id == requestId)
+                ?? throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
+
+            var playerRejected = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer)
+                ?? throw new ValidationException("O jogador associado ao pedido não foi encontrado.");
 
             existingTeam.MembershipRequests.Remove(requestToRemove);
 
-            if (playerRejected?.MembershipRequests != null)
-            {
-                var playerRequest = playerRejected.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-                if (playerRequest != null)
-                    playerRejected.MembershipRequests.Remove(playerRequest);
-            }
+            playerRejected.MembershipRequests?.Remove(requestToRemove);
 
             await UnitOfWork.SaveChangesAsync();
+
+            return new MemberShipRequestDto
+            {
+                RequestId = requestToRemove.Id,
+                PlayerId = playerRejected.Id,
+                PlayerName = playerRejected.Name,
+                TeamId = existingTeam.Id,
+                TeamName = existingTeam.Name,
+                RequestDate = requestToRemove.InviteDate,
+                IsPlayerSender = requestToRemove.IsPlayerSender
+            };
         }
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId)
@@ -323,7 +335,7 @@ namespace Application.Services
             return teams;
         }
 
-        public async Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId)
+        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId)
         {
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
@@ -351,6 +363,17 @@ namespace Application.Services
 
             await MembershipRequestRepository.AddMembershipRequest(invite);
             await UnitOfWork.SaveChangesAsync();
+
+            return new MemberShipRequestDto
+            {
+                RequestId = invite.Id,
+                PlayerId = invite.IdPlayer,
+                PlayerName = invite.Player.Name,
+                TeamId = invite.IdTeam,
+                TeamName = invite.Team.Name,
+                RequestDate = invite.InviteDate,
+                IsPlayerSender = invite.IsPlayerSender
+            };
         }
 
         public async Task<List<TeamLeaderboardDto>> GetLeaderboardAsync()

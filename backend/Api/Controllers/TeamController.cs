@@ -163,16 +163,16 @@ namespace Api.Controllers
         {
 
             var adminUserId = GetCurrentUserId();
-            await TeamService.AcceptMembershipRequestAsync(teamId, requestId, adminUserId);
-            return Ok("Pedido de adesão aceite.");
+            var dto = await TeamService.AcceptMembershipRequestAsync(teamId, requestId, adminUserId);
+            return Ok(dto);
         }
 
         [HttpPost("{teamId}/members/requests/{requestId}/reject")]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
             var adminUserId = GetCurrentUserId();
-            await TeamService.RejectMembershipRequestAsync(teamId, requestId, adminUserId);
-            return Ok("Pedido de adesão rejeitado.");
+            var dto = await TeamService.RejectMembershipRequestAsync(teamId, requestId, adminUserId);
+            return Ok(dto);
         }
 
 
@@ -193,9 +193,9 @@ namespace Api.Controllers
             {
                 var adminId = GetCurrentUserId();
 
-                await TeamService.SendMembershipRequestAsync(teamId, playerId, adminId);
+                var dto = await TeamService.SendMembershipRequestAsync(teamId, playerId, adminId);
 
-                return Ok("Pedido de adesão enviado com sucesso.");
+                return Ok(dto);
             }
             catch (ValidationException ex)
             {

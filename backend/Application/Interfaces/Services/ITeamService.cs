@@ -22,9 +22,9 @@ namespace Application.Interfaces.Services
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters);
 
-        Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
+        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
 
-        Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
+        Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
 
         Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId);
 
@@ -38,7 +38,7 @@ namespace Application.Interfaces.Services
 
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
 
-        Task SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId);
+        Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId);
 
         Task<List<TeamLeaderboardDto>> GetLeaderboardAsync();
     }

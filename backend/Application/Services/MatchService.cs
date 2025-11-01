@@ -145,8 +145,6 @@ namespace Application.Services
             var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
             MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
 
-            MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
-
             return listPostPone;
         }
 
@@ -160,15 +158,6 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
-<<<<<<< Updated upstream
-            /*
-             * Nos testes se simular uma match a null,
-             * o campo do opponent vai ser null,
-             * e vai dar NullReferenceException ao tentar aceder a opponent.IdTeam,
-             * estamos a aceder a isso já na linha do ValidateCancelMatch
-            */
-=======
->>>>>>> Stashed changes
             if (opponent == null)
             {
                 throw new ArgumentException("Adversário não encontrado na partida.");

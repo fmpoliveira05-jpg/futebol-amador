@@ -198,8 +198,9 @@ namespace Infrastructure.Repositories
         public async Task<Teams?> GetTeamForMembershipRequestAsync(Guid id)
         {
             return await _context.Team
-                .Include(t => t.Members)
                 .Include(t => t.MembershipRequests)
+                    .ThenInclude(r => r.Player)
+                .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 

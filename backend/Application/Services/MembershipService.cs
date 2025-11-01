@@ -1,5 +1,4 @@
-﻿using Application.DTOs.Membership;
-using Application.DTOs.MemberShip;
+﻿using Application.DTOs.MemberShip;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -34,7 +33,7 @@ namespace Application.Services
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
             if (player == null)
-                throw new ArgumentNullException("O jogador não foi encontrado");
+                throw new ArgumentException("O jogador não foi encontrado");
 
             var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
 
@@ -61,7 +60,7 @@ namespace Application.Services
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
             if (player == null)
-                throw new ArgumentNullException("O jogador não foi encontrado");
+                throw new ArgumentException("O jogador não foi encontrado");
 
             var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
 
@@ -81,28 +80,28 @@ namespace Application.Services
             return sentByPlayer;
         }
 
-        public async Task SendMembershipRequest(SendMembershipRequestDTO dto)
+        public async Task SendMembershipRequest(MemberShipRequestDto dto)
         {
             if (dto == null)
                 throw new BusinessRuleException("DTO inválido");
 
-            if (dto.IdPlayer == Guid.Empty)
+            if (dto.PlayerId == Guid.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
-            if (dto.IdTeam == Guid.Empty)
+            if (dto.TeamId == Guid.Empty)
                 throw new BusinessRuleException("O id da equipa não pode estar vazio");
 
-            bool senderFlag = dto.Sender ?? true;
+            bool senderFlag = dto.IsPlayerSender;
 
-            var player = await playerRepository.GetPlayerByIdAsync(dto.IdPlayer);
+            var player = await playerRepository.GetPlayerByIdAsync(dto.PlayerId);
             if (player == null)
-                throw new ArgumentNullException("O jogador não foi encontrado");
+                throw new ArgumentException("O jogador não foi encontrado");
 
-            var team = await teamRepository.GetTeamByIdAsync(dto.IdTeam);
+            var team = await teamRepository.GetTeamByIdAsync(dto.TeamId);
             if (team == null)
-                throw new ArgumentNullException("A equipa não foi encontrada");
+                throw new ArgumentException("A equipa não foi encontrada");
 
-            var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(dto.IdPlayer, dto.IdTeam);
+            var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(dto.PlayerId, dto.TeamId);
             if (existing != null)
             {
                 throw new BusinessRuleException("Já existe um pedido de adesão entre este jogador e esta equipa");
@@ -129,18 +128,18 @@ namespace Application.Services
 
             var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
             if (request == null)
-                throw new ArgumentNullException("O pedido de adesão não existe");
+                throw new ArgumentException("O pedido de adesão não existe");
 
             if (request.IdTeam != idTeam)
                 throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");
 
             var player = request.Player;
             if (player == null)
-                throw new ArgumentNullException("O jogador do pedido não foi encontrado");
+                throw new ArgumentException("O jogador do pedido não foi encontrado");
 
             var team = request.Team;
             if (team == null)
-                throw new ArgumentNullException("A equipa do pedido não foi encontrada");
+                throw new ArgumentException("A equipa do pedido não foi encontrada");
 
             player.Team = team;
             player.IdTeam = team.Id;
@@ -164,7 +163,7 @@ namespace Application.Services
 
             var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
             if (request == null)
-                throw new ArgumentNullException("O pedido de adesão não existe");
+                throw new ArgumentException("O pedido de adesão não existe");
 
             if (request.IdTeam != idTeam)
                 throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");

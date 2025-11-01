@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Membership;
+﻿using Application.DTOs.MemberShip;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -70,7 +70,7 @@ namespace Api.Controllers
 
         // POST: api/{idPlayer}/MembershipRequests
         [HttpPost]
-        public async Task<IActionResult> SendRequest(Guid idPlayer, [FromBody] SendMembershipRequestDTO dto)
+        public async Task<IActionResult> SendRequest(Guid idPlayer, [FromBody] MemberShipRequestDto dto)
         {
             if (idPlayer == Guid.Empty)
                 return BadRequest("O id do jogador não pode ser vazio");
@@ -78,13 +78,13 @@ namespace Api.Controllers
             if (dto == null)
                 return BadRequest("DTO inválido");
 
-            if (dto.IdPlayer == Guid.Empty)
+            if (dto.PlayerId == Guid.Empty)
                 return BadRequest("O id do jogador no DTO não pode ser nulo");
 
-            if (dto.IdTeam == Guid.Empty)
+            if (dto.TeamId == Guid.Empty)
                 return BadRequest("O id da equipa no DTO não pode ser nulo");
 
-            if (dto.IdPlayer != idPlayer)
+            if (dto.PlayerId != idPlayer)
                 return BadRequest("O id do jogador no DTO não bate com o id do url");
 
             try

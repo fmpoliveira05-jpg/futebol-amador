@@ -1,5 +1,4 @@
-﻿using Application.DTOs.Membership;
-using Application.DTOs.MemberShip;
+﻿using Application.DTOs.MemberShip;
 using Domain.Entities;
 
 namespace Application.Interfaces.Services
@@ -10,7 +9,7 @@ namespace Application.Interfaces.Services
 
         Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(Guid idPlayer);
 
-        Task SendMembershipRequest(SendMembershipRequestDTO dto);
+        Task SendMembershipRequest(MemberShipRequestDto dto);
 
         Task<Player> AcceptMembershipRequest(Guid idTeam, Guid idMembershipRequest);
 
