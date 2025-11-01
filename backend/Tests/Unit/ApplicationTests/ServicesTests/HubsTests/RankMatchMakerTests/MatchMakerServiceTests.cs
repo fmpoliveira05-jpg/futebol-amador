@@ -1,4 +1,5 @@
-﻿using Application.DTOs.RankMatchMaker;
+﻿using Application.DTOs.Rank;
+using Application.DTOs.RankMatchMaker;
 using Application.Services;
 using NUnit.Framework;
 

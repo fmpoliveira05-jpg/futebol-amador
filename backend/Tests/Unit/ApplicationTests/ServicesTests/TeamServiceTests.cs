@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Pitch;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;

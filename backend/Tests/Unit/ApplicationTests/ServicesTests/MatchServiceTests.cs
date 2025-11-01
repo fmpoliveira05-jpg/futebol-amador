@@ -1,7 +1,9 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Filters;
 using Application.DTOs.Match;
+using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
 using Application.Services;
@@ -183,7 +185,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO
+            var dto = new PostPoneMatchDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
@@ -210,7 +212,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.PostPoneMatch(dto);
+            var result = await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             result.IdMatch.Should().Be(idMatch);
@@ -233,12 +235,12 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             _matchRepoMock.Setup(r => r.GetMatchById(idMatch)).ReturnsAsync((Matches?)null);
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new ArgumentException("A match não pode estar nula"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não pode estar nula");
@@ -252,7 +254,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var matchDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = matchDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = matchDate };
             var match = new Matches(matchDate, true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -264,7 +266,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("A data de adiamento não pode ser a mesma da data já marcada");
@@ -278,7 +280,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.UtcNow.AddHours(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             var match = new Matches(DateTime.UtcNow.AddHours(5), true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -289,7 +291,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
@@ -303,7 +305,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -314,7 +316,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("Só podem ser adiadas partidas marcadas ou em estado de adiamento");
@@ -328,7 +330,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(2);
-            var dto = new AcceptRefusePostPoneDTO
+            var dto = new AcceptRefusePostPoneDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
@@ -373,7 +375,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idMatch = Guid.NewGuid();
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
-            var dto = new AcceptRefusePostPoneDTO
+            var dto = new AcceptRefusePostPoneDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
