@@ -1,7 +1,8 @@
 ﻿using Application.Hubs;
 using Application.Interfaces.Hub;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
+using Domain.Constants;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
@@ -70,8 +71,6 @@ namespace Api.Hubs
             {
                 throw new HubException(ex.Message);
             }
-
-            return;
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -92,11 +91,6 @@ namespace Api.Hubs
 
             await startMatchManager.HandleDisconnectAsync(matchId, teamId, Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
-        }
-
-        private string GetGroupName(Guid idMatch)
-        {
-            return $"match-{idMatch}";
         }
 
         /*
@@ -129,6 +123,11 @@ namespace Api.Hubs
             }
 
             return false;
+        }
+
+        private static string GetGroupName(Guid idMatch)
+        {
+            return ModelConstants.StartMatchHubConst.PrefixGroupName + idMatch;
         }
     }
 }

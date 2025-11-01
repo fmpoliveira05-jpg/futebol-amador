@@ -9,13 +9,15 @@ namespace Domain.Entities {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(ModelConstants.PitchConst.MaxNameLength)]
+        [Required]
+        [StringLength(ModelConstants.PitchConst.MaxNameLength, MinimumLength = ModelConstants.PitchConst.MinNameLength)]
         public string Name { get; set; }
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        [Required]
+        [StringLength(ModelConstants.GeneralConst.MaxAddressLength, MinimumLength = ModelConstants.GeneralConst.MinAddressLength)]
         public string Address { get; set; }
 
-        protected Pitch() { }
+        public Pitch() { }
 
         public Pitch(string name, string address)
         {

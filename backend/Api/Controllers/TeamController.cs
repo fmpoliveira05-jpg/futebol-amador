@@ -1,9 +1,10 @@
-﻿using Api.Controllers; // Assume que este é o teu namespace
+using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -20,17 +21,13 @@ namespace Api.Controllers
             TeamService = teamService;
         }
 
+        [Authorize]
         private Guid GetCurrentUserId()
         {
-            /*
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-            {
-                throw new ValidationException("Token de utilizador inválido ou em falta.");
-            }
-            return userId;
-             */
-            return Guid.Empty;
+            if (Guid.TryParse(userIdString, out Guid userId))
+                return userId;
+            throw new ValidationException("Token de utilizador inválido ou em falta.");
         }
 
         [HttpPost]
@@ -69,9 +66,17 @@ namespace Api.Controllers
         [HttpGet("{teamId}/members")]
         public async Task<IActionResult> GetTeamPlayers(Guid teamId)
         {
-                var players = await TeamService.GetTeamPlayersAsync(teamId);
+                var players = await TeamService.SearchTeamsAsync(teamId);
                 return Ok(players);
         }
+
+        [HttpGet("{teamId}/members/filter")]
+        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterListTeamDto filters)
+        {
+            var players = await TeamService.SearchTeamsWithFiltersAsync(teamId, filters);
+            return Ok(players);
+        }
+
 
         [HttpDelete("{teamId}/members/{playerIdToRemove}")]
         public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, Guid playerIdToRemove)
@@ -105,6 +110,51 @@ namespace Api.Controllers
             return Ok(requests);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> MembershipRequests(Guid idTeam, Guid adminUserId, [FromQuery] FilterMembershipRequestsTeam filters)
+        {
+            if (idTeam == Guid.Empty)
+            {
+                return BadRequest("O id da equipa é obrigatorio");
+            }
+
+            if (adminUserId == Guid.Empty)
+            {
+                return BadRequest("O id do admin é obrigatorio");
+            }
+
+            try
+            {
+                IEnumerable<MemberShipRequestDto> membershipRequests;
+                var hasFilter = filters.MinDate.HasValue ||
+                    filters.MaxDate.HasValue ||
+                    !string.IsNullOrEmpty(filters.SenderName);
+
+                if (hasFilter)
+                {
+                    membershipRequests = await TeamService.GetMembershipRequestsAsyncWithFilters(idTeam, adminUserId, filters);
+                }
+                else
+                {
+                    membershipRequests = await TeamService.GetMembershipRequestsAsync(idTeam, adminUserId);
+                }
+
+                return Ok(membershipRequests);
+            }
+            catch (BusinessRuleException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NullReferenceException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
 
         [HttpPost("{teamId}/members/requests/{requestId}/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, Guid requestId)
@@ -124,14 +174,65 @@ namespace Api.Controllers
         }
 
 
+        //Depois adaptar para o teamId, o player é Aut
         [HttpGet("{teamId}/search")] // Responde a GET /api/team
-        public async Task<IActionResult> SearchTeams([FromQuery] TeamSearchFiltersDto filters)
+        public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
 
-            // var teams = await _teamService.SearchTeamsAsync(filters);
-            // return Ok(teams);
-            return Ok("Endpoint 'SearchTeams' ainda não implementado no serviço.");
-            
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await TeamService.SearchTeamsWithFiltersAsync(teamId, filter);
+            }
+            else
+            {
+                list = await TeamService.SearchTeamsAsync(teamId);
+            }
+
+            return Ok(list);
+        }
+
+        [HttpPost("{teamId:guid}/membership-requests/send/{playerId:guid}")]
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, Guid playerId)
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+
+                await TeamService.SendMembershipRequestAsync(teamId, playerId, adminId);
+
+                return Ok("Pedido de adesão enviado com sucesso.");
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (NotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
+            }
+        }
+
+        [HttpGet("leaderboard")]
+        [AllowAnonymous] // qualquer jogador pode ver
+        public async Task<IActionResult> GetLeaderboard()
+        {
+            var leaderboard = await TeamService.GetLeaderboardAsync();
+            return Ok(leaderboard);
         }
 
     }

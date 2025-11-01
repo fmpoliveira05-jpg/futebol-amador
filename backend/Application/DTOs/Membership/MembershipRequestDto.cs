@@ -12,7 +12,10 @@ namespace Application.DTOs.MemberShip
         public Guid RequestId { get; set; }
 
         public string PlayerName { get; set; }
+
         public Guid PlayerId { get; set; }
+
+        public Guid TeamId { get; set; }
 
         public string TeamName { get; set; }
 

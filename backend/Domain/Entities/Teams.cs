@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Exceptions;
 using Domain.Constants;
+
 /***
  * Entidade que representa uma equipa desportiva.
  */
@@ -16,6 +16,7 @@ namespace Domain.Entities
         public string Name { get; set; }
 
         [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
+
         public string? Description { get; set; }
 
         public byte[]? Icon { get; set; }
@@ -29,10 +30,8 @@ namespace Domain.Entities
 
         public ICollection<Player> Members { get; set; } = new List<Player>();
 
-        [Range(ModelConstants.GeneralConst.MinAge, ModelConstants.GeneralConst.MaxAge, ErrorMessage = "A idade média deve estar entre os 18 e 70 anos")]
-        public float AverageAge { get; set; }
-
         [Range(0, int.MaxValue, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
+
         public int CurrentPoints { get; set; }
 
         public Rank Rank { get; set; }
@@ -54,7 +53,7 @@ namespace Domain.Entities
         public Guid IdCalendar { get; set; } //FK
 
         //EF
-        protected Teams() { }
+        public Teams() { }
 
         public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
@@ -64,7 +63,6 @@ namespace Domain.Entities
             Pitch = pitch;
             IdPitch = pitch.Id;
             DataFoundation = DateTime.Now;
-            AverageAge = ModelConstants.GeneralConst.MinAge;
             this.Rank = DefaultRank;
             CurrentPoints = 0;
             Calendar = new Calendar();
@@ -73,7 +71,7 @@ namespace Domain.Entities
         //
         public override string ToString()
         {
-            return $"Team: {Name}, Description: {Description}, Founded: {DataFoundation.ToShortDateString()}, Average Age: {AverageAge}, Current Points: {CurrentPoints}";
+            return $"Team: {Name}, Description: {Description}, Founded: {DataFoundation.ToShortDateString()}, Current Points: {CurrentPoints}";
         }
     }
 }

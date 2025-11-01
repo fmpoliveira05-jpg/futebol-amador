@@ -1,7 +1,9 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Filters;
 using Application.DTOs.Match;
+using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
 using Application.Services;
@@ -21,7 +23,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
-        private Mock<IMatchValidator> _validatorMock;
+        private Mock<ICalendarValidator> _validatorMock;
         private Mock<IPlayerRepository> _playerRepoMock;
         private MatchService _sut;
 
@@ -32,7 +34,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
-            _validatorMock = new Mock<IMatchValidator>();
+            _validatorMock = new Mock<ICalendarValidator>();
             _playerRepoMock = new Mock<IPlayerRepository>();
 
             _sut = new MatchService(
@@ -97,7 +99,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var teamId = Guid.NewGuid();
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 IsRealized = true,
                 IsRanqued = true,
@@ -142,12 +144,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var idTeam = Guid.NewGuid();
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 MinDate = new DateOnly(2025, 12, 15),
                 MaxDate = new DateOnly(2025, 12, 14)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendar>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
+            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
@@ -161,12 +163,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var idTeam = Guid.Empty;
-            var filter = new FilterCalendar
+            var filter = new FilterCalendarDto
             {
                 MinDate = new DateOnly(2025, 12, 1),
                 MaxDate = new DateOnly(2025, 12, 31)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendar>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
+            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
@@ -183,7 +185,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO
+            var dto = new PostPoneMatchDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
@@ -210,7 +212,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.PostPoneMatch(dto);
+            var result = await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             result.IdMatch.Should().Be(idMatch);
@@ -233,12 +235,12 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             _matchRepoMock.Setup(r => r.GetMatchById(idMatch)).ReturnsAsync((Matches?)null);
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new ArgumentException("A match não pode estar nula"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não pode estar nula");
@@ -252,7 +254,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var matchDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = matchDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = matchDate };
             var match = new Matches(matchDate, true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -264,7 +266,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("A data de adiamento não pode ser a mesma da data já marcada");
@@ -278,7 +280,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.UtcNow.AddHours(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             var match = new Matches(DateTime.UtcNow.AddHours(5), true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -289,7 +291,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
@@ -303,7 +305,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(1);
-            var dto = new PostponeMatchDTO { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
+            var dto = new PostPoneMatchDto { IdMatch = idMatch, IdTeam = idTeam, IdOpponent = idOpponent, PostPoneDate = newDate };
             var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("Campo", "Rua"))
             {
                 Id = idMatch,
@@ -314,7 +316,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(It.IsAny<Matches>(), It.IsAny<DateTime>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>(), It.IsAny<TeamStatistics>(), It.IsAny<Guid>())).Throws(new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento"));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(idTeam, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>().WithMessage("Só podem ser adiadas partidas marcadas ou em estado de adiamento");
@@ -328,7 +330,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
             var newDate = DateTime.Now.AddDays(2);
-            var dto = new AcceptRefusePostPoneDTO
+            var dto = new AcceptRefusePostPoneDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
@@ -373,7 +375,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var idMatch = Guid.NewGuid();
             var idTeam = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
-            var dto = new AcceptRefusePostPoneDTO
+            var dto = new AcceptRefusePostPoneDto
             {
                 IdMatch = idMatch,
                 IdTeam = idTeam,
@@ -570,120 +572,5 @@ namespace Unit.ApplicationTests.ServicesTests
             await act.Should().ThrowAsync<ValidationException>().WithMessage("O jogador precisa estar associado a uma equipa para cancelar uma partida.");
         }
         */
-
-        /*
-         [Test(Description = "FinishMatch deve finalizar a partida com sucesso quando os dados são válidos")]
-        public async Task FinishMatch_Should_Finish_Match_Successfully_When_Valid()
-        {
-            // ARRANGE
-            var idTeam = Guid.NewGuid();
-            var idOpponent = Guid.NewGuid();
-            var idMatch = Guid.NewGuid();
-            var result = new ResultMatchDto
-            {
-                IdMatch = idMatch,
-                IdTeam = idTeam,
-                MyTeamGoals = 1,
-                IdOpponent = idOpponent,
-                OpponentGoals = 1
-            };
-            var team = new Teams("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idTeam };
-            var opponent = new Teams("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idOpponent };
-            var teamStat = new TeamStatistics(team) { IdTeam = idTeam };
-            var opponentStat = new TeamStatistics(opponent) { IdTeam = idOpponent };
-            var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("p", "a"))
-            {
-                Id = idMatch,
-                MatchStatus = MatchStatus.IN_PROGRESS,
-                Teams = new List<TeamStatistics> { teamStat, opponentStat }
-            };
-            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync(match);
-            _validatorMock.Setup(v => v.validateResultMatch(idTeam, result));
-            _validatorMock.Setup(v => v.ValidateFinishMatch(match, teamStat, idTeam, opponentStat, idOpponent, result));
-
-            // ACT
-            await _sut.FinishMatch(idTeam, result);
-
-            // ASSERT
-            _validatorMock.Verify(v => v.validateResultMatch(idTeam, result), Times.Once);
-            _validatorMock.Verify(v => v.ValidateFinishMatch(match, teamStat, idTeam, opponentStat, idOpponent, result), Times.Once);
-        }
-
-        [Test(Description = "FinishMatch deve lançar exceção quando o número de golos de uma equipa for negativo")]
-        public async Task FinishMatch_Should_Throw_Exception_When_Goals_Are_Negative()
-        {
-            // ARRANGE
-            var idTeam = Guid.NewGuid();
-            var idOpponent = Guid.NewGuid();
-            var idMatch = Guid.NewGuid();
-            var result = new ResultMatchDto
-            {
-                IdMatch = idMatch,
-                IdTeam = idTeam,
-                MyTeamGoals = -1,
-                IdOpponent = idOpponent,
-                OpponentGoals = 2
-            };
-            var team = new Teams("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idTeam };
-            var opponent = new Teams("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idOpponent };
-            var teamStat = new TeamStatistics(team) { IdTeam = idTeam };
-            var opponentStat = new TeamStatistics(opponent) { IdTeam = idOpponent };
-            var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("p", "a"))
-            {
-                Id = idMatch,
-                MatchStatus = MatchStatus.IN_PROGRESS,
-                Teams = new List<TeamStatistics> { teamStat, opponentStat }
-            };
-            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync(match);
-            _validatorMock.Setup(v => v.validateResultMatch(idTeam, result)).Throws(new InvalidOperationException("O número de golos de uma equipa não pode ser menor que 0"));
-
-            // ACT
-            Func<Task> act = async () => await _sut.FinishMatch(idTeam, result);
-
-            // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O número de golos de uma equipa não pode ser menor que 0");
-            _validatorMock.Verify(v => v.validateResultMatch(idTeam, result), Times.Once, "O validador de resultados deve ser chamado uma vez para validar os gols.");
-        }
-
-        [Test(Description = "FinishMatch deve lançar exceção se a partida não for encontrada")]
-        public async Task FinishMatch_Should_Throw_Exception_When_Match_Not_Found()
-        {
-            // ARRANGE
-            var idTeam = Guid.NewGuid();
-            var idOpponent = Guid.NewGuid();
-            var idMatch = Guid.NewGuid();
-            var result = new ResultMatchDto
-            {
-                IdMatch = idMatch,
-                IdTeam = idTeam,
-                MyTeamGoals = 1,
-                IdOpponent = idOpponent,
-                OpponentGoals = 1
-            };
-            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync((Matches?)null);
-
-            // ACT
-            Func<Task> act = async () => await _sut.FinishMatch(idTeam, result);
-
-            // ASSERT
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não existe ou então não está em progresso");
-        }
-
-        [Test(Description = "LeaveFinishMatch deve lançar exceção se a partida não for encontrada")]
-        public async Task LeaveFinishMatch_Should_Throw_Exception_When_Match_Not_Found()
-        {
-            // ARRANGE
-            var idTeam = Guid.NewGuid();
-            var idMatch = Guid.NewGuid();
-            _matchRepoMock.Setup(r => r.GetMatchInProgressByIdAsync(idMatch)).ReturnsAsync((Matches?)null);
-            _validatorMock.Setup(v => v.ValidateCancelFinishMatch(It.IsAny<Matches>(), It.IsAny<Teams>())).Throws(new ArgumentException("A match não foi encontrada"));
-
-            // ACT
-            Func<Task> act = async () => await _sut.LeaveFinishMatch(idTeam, idMatch);
-
-            // ASSERT
-            await act.Should().ThrowAsync<ArgumentException>().WithMessage("A match não foi encontrada");
-        }
-         */
     }
 }

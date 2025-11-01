@@ -8,6 +8,8 @@ namespace Api.Extensions
         {
             app.MapHub<StartMatchHub>("/StartMatch");
             app.MapHub<FinishMatchHub>("/FinishMatch");
+            app.MapHub<RankMatchMakerHub>("/MatchMaker");
+
             return app;
         }
     }
