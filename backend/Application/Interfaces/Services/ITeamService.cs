@@ -33,8 +33,6 @@ namespace Application.Interfaces.Services
 
         Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId);
 
-        Task<List<TeamLeaderboardDto>> GetLeaderboardAsync();
-
         Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam);
 
         Task<List<InfoTeamsDto>> SearchTeamsWithFiltersAsync(Guid idTeam, FilterListTeamDto filters);
