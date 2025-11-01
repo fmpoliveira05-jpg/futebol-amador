@@ -8,7 +8,7 @@ namespace Application.Validators
 {
     public class MatchInviteValidator: IMatchInviteValidator
     {
-        public void ValidateSenderMatchInvite(SendMatchInviteDTO dto, Guid idSender)
+        public void ValidateSenderMatchInvite(SendMatchInviteDto dto, Guid idSender)
         {
             if (dto.IdSender == Guid.Empty)
             {

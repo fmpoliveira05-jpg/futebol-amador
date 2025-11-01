@@ -3,27 +3,30 @@ using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
-public class UserRepository : IUserRepository
+namespace Infrastructure.Repositories
 {
-    private readonly AmateurFootballContext _context;
-
-    public UserRepository(AmateurFootballContext context)
+    public class UserRepository : IUserRepository
     {
-        _context = context;
-    }
+        private readonly AmateurFootballContext context;
 
-    public async Task<Player?> GetUserByEmailAsync(string email)
-    {
-        return await _context.Player.FirstOrDefaultAsync(p => p.Email.ToUpper() == email.ToUpper());
-    }
+        public UserRepository(AmateurFootballContext context)
+        {
+            this.context = context;
+        }
 
-    public async Task<Player?> GetUserByIdAsync(Guid id)
-    {
-        return await _context.Player.FirstOrDefaultAsync(p => p.Id == id);
-    }
+        public async Task<Player?> GetUserByEmailAsync(string email)
+        {
+            return await context.Player.FirstOrDefaultAsync(p => p.Email.ToUpper() == email.ToUpper());
+        }
 
-    public void UpdateUser(Player player)
-    {
-        _context.Player.Update(player);
+        public async Task<Player?> GetUserByIdAsync(Guid id)
+        {
+            return await context.Player.FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public void UpdateUser(Player player)
+        {
+            context.Player.Update(player);
+        }
     }
 }

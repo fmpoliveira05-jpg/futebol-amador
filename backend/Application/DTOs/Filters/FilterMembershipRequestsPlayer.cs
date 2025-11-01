@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Filters
 {
     public class FilterMembershipRequestsPlayer
     {
+        [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? SenderName { get; set; }
 
         public DateOnly? MinDate { get; set; }

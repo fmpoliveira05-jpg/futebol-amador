@@ -5,7 +5,6 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Services;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,8 +17,6 @@ namespace Application.Services
         private readonly ITeamRepository teamRepository;
         private readonly IPlayerValidator playerValidator;
         private readonly IUnityOfWork unitOfWork;
-        private readonly IPlayerValidator playerValidator;
-        private readonly ITeamRepository teamRepository;
         private readonly IPasswordHasher passwordHasher;
         private readonly IMembershipRequestRepository membershipRequestRepository;
 
@@ -248,6 +245,8 @@ namespace Application.Services
 
             await membershipRequestRepository.AddMembershipRequest(newRequest);
             await unitOfWork.SaveChangesAsync();
+        }
+
         public async Task<List<InfoTeamsDto>> GetListTeams()
         {
             return await teamRepository.GetListTeamsPlayer();

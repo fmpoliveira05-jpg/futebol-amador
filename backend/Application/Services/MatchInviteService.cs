@@ -37,7 +37,7 @@ namespace Application.Services
             this.UnityOfWork = unityOfWork;
         }
 
-        public async Task<InfoMatchInviteDTO> SendMatchInvite(Guid idSender, SendMatchInviteDTO dto)
+        public async Task<InfoMatchInviteDto> SendMatchInvite(Guid idSender, SendMatchInviteDto dto)
         {
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
@@ -65,7 +65,7 @@ namespace Application.Services
 
             await MatchInviteRepository.AddMatchInvite(matchInvite);
             
-            var sendMatchInviteDto = new InfoMatchInviteDTO
+            var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
                 IdSender = matchInvite.IdSender,
@@ -147,7 +147,7 @@ namespace Application.Services
         }
 
 
-        public async Task<InfoMatchInviteDTO> NegociateMatchInvite(Guid idSender, SendMatchInviteDTO dto)
+        public async Task<InfoMatchInviteDto> NegociateMatchInvite(Guid idSender, SendMatchInviteDto dto)
         {
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
@@ -167,7 +167,7 @@ namespace Application.Services
 
             MatchInviteValidator.ValidateHasChangeNegociateMatchInvite(hasChanged);
           
-            var sendMatchInviteDto = new InfoMatchInviteDTO
+            var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
                 IdSender = matchInvite.IdSender,
@@ -183,7 +183,7 @@ namespace Application.Services
             return sendMatchInviteDto;
         }
 
-        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeam(Guid idTeam)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(Guid idTeam)
         {
             MatchInviteValidator.ValidateTeamCalendar(idTeam);
 
@@ -192,7 +192,7 @@ namespace Application.Services
             return listMatchInvites;
         }
 
-        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
         {
             MatchInviteValidator.ValidateFilterMatchInvite(idTeam, filter);
 

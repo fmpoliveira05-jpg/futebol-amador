@@ -2,7 +2,7 @@
 
 namespace Application.DTOs.MatchInvites
 {
-    public class SendMatchInviteDTO
+    public class SendMatchInviteDto
     {
         [Required(ErrorMessage = "O Id da equipa que enviou é obrigatório!")]
         public Guid IdSender { get; set; }

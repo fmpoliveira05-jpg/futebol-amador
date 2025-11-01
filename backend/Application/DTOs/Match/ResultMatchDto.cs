@@ -12,14 +12,14 @@ namespace Application.DTOs.Match
         public Guid IdTeam { get; set; }
 
         [Required]
-        [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
+        [Range(ModelConstants.GeneralConst.MinGoals, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoalsTeam { get; set; }
 
         [Required]
         public Guid IdOpponent { get; set; }
         
         [Required]
-        [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
+        [Range(ModelConstants.GeneralConst.MinGoals, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoalsOpponent { get; set; }
     }
 }

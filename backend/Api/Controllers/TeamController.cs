@@ -1,9 +1,7 @@
-using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,14 +66,14 @@ namespace Api.Controllers
         [HttpGet("{teamId}/members")]
         public async Task<IActionResult> GetTeamPlayers(Guid teamId)
         {
-                var players = await TeamService.GetTeamPlayersAsync(teamId);
+                var players = await TeamService.SearchTeamsAsync(teamId);
                 return Ok(players);
         }
 
         [HttpGet("{teamId}/members/filter")]
-        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
+        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterListTeamDto filters)
         {
-            var players = await TeamService.GetTeamPlayersAsyncWithFilters(teamId, filters);
+            var players = await TeamService.SearchTeamsWithFiltersAsync(teamId, filters);
             return Ok(players);
         }
 

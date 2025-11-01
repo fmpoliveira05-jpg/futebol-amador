@@ -6,7 +6,6 @@ namespace Application.Interfaces.Validators
 {
     public interface IPlayerValidator
     {
-        void PlayerExists(Player? player);
         void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players);
         void DeletePlayerValidator(Player? player);
         void GetPlayerByIdValidator(Player player);

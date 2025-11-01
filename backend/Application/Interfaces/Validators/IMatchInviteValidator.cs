@@ -6,7 +6,7 @@ namespace Application.Interfaces.Validators
 {
     public interface IMatchInviteValidator
     {
-        public void ValidateSenderMatchInvite(SendMatchInviteDTO dto, Guid idSender);
+        public void ValidateSenderMatchInvite(SendMatchInviteDto dto, Guid idSender);
         public void ValidateAcceptRefuseMatchInvite(Guid idReceiver, Guid idMatchInvite);
         public void ValidateTeamCalendar(Guid idTeam);
         public void ValidateSendMatchInvite(Teams receiver, Teams sender, MatchInvite matchInviteFind, Matches findMatchWith12hours, string namePitch);

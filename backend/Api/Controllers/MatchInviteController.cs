@@ -24,7 +24,7 @@ namespace Api.Controllers
          */
 
         [HttpPost("match-invites")]
-        public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+        public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
             try
             {
@@ -97,7 +97,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("Negociate")]
-        public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+        public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
             try
             {
@@ -124,7 +124,7 @@ namespace Api.Controllers
         {
             try
             {
-                IEnumerable<InfoMatchInviteDTO> matchesInvite;
+                IEnumerable<InfoMatchInviteDto> matchesInvite;
 
                 bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
                                  filter.MinDate.HasValue ||

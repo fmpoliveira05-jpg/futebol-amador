@@ -5,8 +5,7 @@
     {
         public static class GeneralConst
         {
-            public const int MinAge = 18;
-            public const int MaxAge = 70;
+            public const int MinGoals = 0;
             public const int MaxGoals = 100;
             public const int MinAddressLength = 5;
             public const int MaxAddressLength = 250;
@@ -24,8 +23,8 @@
             public const int MaxMembers = 32;
             public const int MinNumberPoints = 0;
             public const int MaxNumberPoints = int.MaxValue;
-            public const float MinAverageAge = GeneralConst.MinAge;
-            public const float MaxAverageAge = GeneralConst.MaxAge;
+            public const float MinAverageAge = UserConst.MinAge;
+            public const float MaxAverageAge = UserConst.MaxAge;
         }
 
         public static class UserConst
@@ -37,6 +36,8 @@
             public const int MinPasswordLength = 8;
             public const int MaxPasswordLength = 100;
             public const int SizePhoneNumber = 9;
+            public const int MinAge = 18;
+            public const int MaxAge = 70;
         }
 
         public static class PlayerConst

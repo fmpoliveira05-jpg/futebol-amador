@@ -10,7 +10,8 @@ namespace Application.Validators
 {
     public class TeamValidator : ITeamValidator
     {
-        private IPlayerValidator PlayerValidator = new PlayerValidator();
+        private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
+
         public void CreateTeamValidation(CreateTeamDto? createTeamDto, Teams? team, Player? playerCreating)
         {
             PlayerValidator.PlayerExists(playerCreating);
@@ -368,6 +369,5 @@ namespace Application.Validators
             return true;
         }
         #endregion
-
     }
 }
