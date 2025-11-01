@@ -322,7 +322,6 @@ namespace Application.Services
 */
         }
 
-
         public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
         {
             var player = await PlayerRepository.GetPlayerByIdAsync(playerId);

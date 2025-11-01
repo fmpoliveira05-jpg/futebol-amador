@@ -16,6 +16,7 @@ namespace Application.Validators
     public class SuperAdminValidator : ISuperAdminValidator
     {
         IEmailValidator emailValidator;
+
         public SuperAdminValidator(IEmailValidator emailValidator)
         {
             this.emailValidator = emailValidator;
@@ -29,7 +30,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, SuperAdmin[] sadmins)
+        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, Users[] sadmins)
         {
             if (sadmins[0] != null)
             {
@@ -69,7 +70,7 @@ namespace Application.Validators
         }
 
 
-        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto, SuperAdmin sadmin, SuperAdmin[] sadmins)
+        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto, SuperAdmin sadmin, Users[] sadmins)
         {
             SuperAdminExists(sadmin);
 

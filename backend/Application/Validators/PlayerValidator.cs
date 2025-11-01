@@ -29,7 +29,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players)
+        public void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Users[] players)
         {
             if (players[0] != null)
             {
@@ -85,7 +85,7 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player[] players)
+        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Users[] players)
         {
             PlayerExists(player);
 

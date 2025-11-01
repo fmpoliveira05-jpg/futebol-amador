@@ -7,13 +7,13 @@ namespace Application.Interfaces.Validators
     {
         void PlayerExists(Player? player);
 
-        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players);
+        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Users[] players);
 
         void DeletePlayerValidator(Player? player);
 
         void GetPlayerByIdValidator(Player player);
 
-        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Player[] existingPlayers);
+        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Users[] existingPlayers);
 
         void LeaveTeamValidator(Player player);
 

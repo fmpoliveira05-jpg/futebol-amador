@@ -12,12 +12,12 @@ namespace Application.Interfaces.Validators
     {
         public void SuperAdminExists(SuperAdmin sadmin);
 
-        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto,SuperAdmin[] sadmins);
+        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto,Users[] sadmins);
 
         public void GetSuperAdminByIdValidator(SuperAdmin sadmin);
 
         public void DeleteSuperAdminValidator(SuperAdmin sadmin);
 
-        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto,SuperAdmin sadmin, SuperAdmin[] sadmins);
+        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto,SuperAdmin sadmin, Users[] sadmins);
     }
 }

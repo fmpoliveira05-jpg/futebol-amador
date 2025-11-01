@@ -13,22 +13,24 @@ namespace Application.Services
 {
     public class SuperAdminService : ISuperAdminService
     {
-        ISuperAdminRepository superAdminRepository;
-        IUnityOfWork unityOfWork;
-        ISuperAdminValidator superAdminValidator;
+        private readonly ISuperAdminRepository superAdminRepository;
+        private readonly IUserRepository userRepository;
+        private readonly IUnityOfWork unityOfWork;
+        private readonly ISuperAdminValidator superAdminValidator;
 
-        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator)
+        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUserRepository userRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator)
         {
             this.superAdminRepository = superAdminRepository;
+            this.userRepository = userRepository;
             this.unityOfWork = unityOfWork;
             this.superAdminValidator = superAdminValidator;
         }
 
         public async Task<Guid> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
         {
-            var existingSadmin = new SuperAdmin[]{
-                await superAdminRepository.GetSuperAdminByEmailAsync(dto.Email),
-                await superAdminRepository.GetSuperAdminByPhoneAsync(dto.Phone),
+            var existingSadmin = new Users[]{
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
             };
 
             superAdminValidator.CreateSuperAdminValidator(dto, existingSadmin);
@@ -80,9 +82,9 @@ namespace Application.Services
         public async Task UpdateSuperAdminAsync(Guid superAdminId, UpdateSuperAdminDTO dto)
         {
             var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
-            var existingSadmin = new SuperAdmin[]{
-                await superAdminRepository.GetSuperAdminByEmailAsync(dto.Email),
-                await superAdminRepository.GetSuperAdminByPhoneAsync(dto.Phone),
+            var existingSadmin = new Users[]{
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
             };
 
             superAdminValidator.UpdateSuperAdminValidator(dto, superAdmin, existingSadmin);

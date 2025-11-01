@@ -9,13 +9,15 @@ namespace Application.Services
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepository playerRepository;
+        private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
         private readonly IUnityOfWork unityOfWork;
         private readonly IPlayerValidator playerValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamService teamService, IUnityOfWork unityOfWork, IPlayerValidator playerValidator)
+        public PlayerService(IPlayerRepository playerRepository, IUserRepository userRepository, ITeamService teamService, IUnityOfWork unityOfWork, IPlayerValidator playerValidator)
         {
             this.playerRepository = playerRepository;
+            this.userRepository = userRepository;
             this.teamService = teamService;
             this.unityOfWork = unityOfWork;
             this.playerValidator = playerValidator;
@@ -23,9 +25,9 @@ namespace Application.Services
 
         public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
         {
-            var existingPlayers = new Player[] { 
-                await playerRepository.GetPlayerByEmailAsync(playerDto.Email),
-                await playerRepository.GetPlayerByPhoneAsync(playerDto.Phone),
+            var existingPlayers = new Users[] {
+                await userRepository.GetUserByEmailAsync(playerDto.Email),
+                await userRepository.GetUserByPhoneAsync(playerDto.Phone),
             };
 
             playerValidator.CreatePlayerValidator(playerDto, existingPlayers);
@@ -83,9 +85,9 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            var existingPlayers = new Player[] {
-                await playerRepository.GetPlayerByEmailAsync(dto.Email),
-                await playerRepository.GetPlayerByPhoneAsync(dto.Phone),
+            var existingPlayers = new Users[] {
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
             };
 
             playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
@@ -131,6 +133,7 @@ namespace Application.Services
 
             string teamName = existingPlayer.Team.Name;
 
+            existingPlayer.Team.Members.Remove(existingPlayer);
             existingPlayer.Team = null;
             existingPlayer.IdTeam = null;
 
