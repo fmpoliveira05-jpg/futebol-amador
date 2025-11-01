@@ -21,5 +21,7 @@ namespace Application.Interfaces.Validators
         void ValidateFiltersListTeams(FilterListTeamDto filter);
 
         void ValidateHasChangeDataPlayer(bool hasChange);
+
+        void SendMembershipRequestValidator(Player player, Teams team);
     }
 }

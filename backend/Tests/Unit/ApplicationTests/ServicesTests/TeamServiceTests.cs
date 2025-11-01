@@ -31,7 +31,6 @@ namespace Unit.ApplicationTests.ServicesTests
         // DEPENDÊNCIAS E CAMPOS COMUNS
         private Mock<ITeamRepository> _teamRepoMock;
         private Mock<IPlayerRepository> _playerRepoMock;
-        private Mock<ISuperAdminRepository> _userRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IRankRepository> _rankRepoMock;
         private ITeamValidator _validatorReal;
@@ -76,7 +75,6 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             _teamRepoMock = new Mock<ITeamRepository>();
             _playerRepoMock = new Mock<IPlayerRepository>();
-            _userRepoMock = new Mock<ISuperAdminRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _rankRepoMock = new Mock<IRankRepository>();
             _validatorReal = new TeamValidator();
@@ -84,7 +82,6 @@ namespace Unit.ApplicationTests.ServicesTests
             _sut = new TeamService(
             _teamRepoMock.Object,
             _playerRepoMock.Object,
-            _userRepoMock.Object,
             _unitOfWorkMock.Object,
             _validatorReal,
             _rankRepoMock.Object,

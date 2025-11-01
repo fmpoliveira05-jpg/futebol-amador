@@ -241,12 +241,14 @@ namespace Application.Services
             };
         }
 
+        //faz validation de se o player ja tem equipa
         public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid playerId, Guid teamId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
             playerValidator.PlayerExists(player);
+            playerValidator.SendMembershipRequestValidator(player, team);
 
             if (team == null)
                 throw new ValidationException("A equipa especificada não existe.");
