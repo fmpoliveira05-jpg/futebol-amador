@@ -5,7 +5,7 @@ namespace Application.DTOs.Filters
 {
     public class FilterMembershipRequestsPlayer
     {
-        [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
+        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? SenderName { get; set; }
 
         public DateOnly? MinDate { get; set; }

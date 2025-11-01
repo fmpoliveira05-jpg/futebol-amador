@@ -7,8 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers
 {
-    //[Authorize]
-    [Route("api/{idTeam:guid}/[controller]")]
+    [Authorize]
+    [Route("api/[controller]/{idTeam:guid}")]
     [ApiController]
     public class MatchInviteController : ControllerBase
     {
@@ -18,10 +18,6 @@ namespace Api.Controllers
         {
             this.matchInviteService = matchInviteService;
         }
-
-        /***
-         *  Vai faltar AUTs
-         */
 
         [HttpPost("match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)

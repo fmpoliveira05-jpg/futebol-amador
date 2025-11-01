@@ -11,8 +11,9 @@ namespace Application.DTOs.Filters
         [MinLength(ModelConstants.RankConts.MinNameLength), MaxLength(ModelConstants.RankConts.MaxNameLength)]
         public string? NameRank { get; set; }
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        [MinLength(ModelConstants.GeneralConst.MinCityLength), MaxLength(ModelConstants.GeneralConst.MaxCityLength)]
         public string? City { get; set; }
+
         [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints)]
         public int? MinNumberPoints { get; set; }
 

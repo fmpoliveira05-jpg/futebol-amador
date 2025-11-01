@@ -9,6 +9,8 @@
             public const int MaxGoals = 100;
             public const int MinAddressLength = 5;
             public const int MaxAddressLength = 250;
+            public const int MinCityLength = 2;
+            public const int MaxCityLength = 50;
             public const string DefaultRankName = "Unranked";
 
         }
@@ -120,6 +122,12 @@
             public static readonly TimeOnly MORNING = new TimeOnly(10, 0, 0);
             public static readonly TimeOnly AFTERNOON = new TimeOnly(16, 0, 0);
             public static readonly TimeOnly NIGHT = new TimeOnly(19, 0, 0);
+        }
+
+        public static class TeamLeaderBoardConst
+        {
+            public const int FirstPosition = 1;
+            public const int LastPosition = 100;
         }
     }
 }

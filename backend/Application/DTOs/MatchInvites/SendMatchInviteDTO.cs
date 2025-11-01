@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.MatchInvites
 {
@@ -14,7 +15,7 @@ namespace Application.DTOs.MatchInvites
         public DateTime GameDate { get; set; }
 
         [Required(ErrorMessage = "É obrigatório especificar o id do Campo")]
-        [MaxLength(50)]
+        [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string namePitch { get; set; } = null!;
     }
 }
