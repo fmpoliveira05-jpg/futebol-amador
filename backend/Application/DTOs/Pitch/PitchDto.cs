@@ -4,14 +4,12 @@ namespace Application.DTOs.Pitch
 {
     public class PitchDto
     {
-        [MaxLength(ModelConstants.PitchConst.MaxNameLength), Required(ErrorMessage = "É Obrigatorio o nome do campo.")]
-        public string Name { get; set; }
+        [Required]
+        [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
+        public string Name { get; set; } = null!;
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength), Required(ErrorMessage = "É Obrigatorio o Endereço do campo.")]
-        public string Address { get; set; }
-
-        public PitchDto()
-        {
-        }
+        [Required]
+        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        public string Address { get; set; } = null!;
     }
 }

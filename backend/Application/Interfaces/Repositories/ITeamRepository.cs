@@ -25,7 +25,7 @@ namespace Application.Interfaces.Repositories
         Task<Teams?> GetTeamByIdWithPitchAsync(Guid id);
         Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id);
         Task<Teams?> GetByIdWithReceivedInvites(Guid id);
-        Task<List<PlayerDetailsDTO>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter);
+        Task<List<PlayerDetailsDto>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter);
         Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top);
         Task<List<InfoTeamsDto>> GetListTeamsPlayer();
         Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters);

@@ -172,13 +172,13 @@ namespace Application.Services
             return team;
         }
 
-        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersAsync(Guid teamId)
+        public async Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId)
         {
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
 
             TeamValidator.GetTeamMembersValidation(team);
 
-            var playerDtos = team.Members.Select(player => new PlayerDetailsDTO
+            var playerDtos = team.Members.Select(player => new PlayerDetailsDto
             {
                 Name = player.Name,
                 Height = player.Height,
@@ -189,7 +189,7 @@ namespace Application.Services
             return playerDtos;
         }
 
-        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters)
+        public async Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters)
         {
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
 

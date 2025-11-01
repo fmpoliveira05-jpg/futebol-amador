@@ -78,13 +78,13 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid playerId)
+        public async Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
             playerValidator.PlayerExists(player);
 
-            PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
+            PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {
                 Name = player.Name,
                 DateOfBirth = player.DateOfBirth,

@@ -121,7 +121,7 @@ namespace Infrastructure.Repositories
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
                     PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",
-                    Players = t.Members.Select(player => new PlayerDetailsDTO
+                    Players = t.Members.Select(player => new PlayerDetailsDto
                     {
                         PlayerId = player.Id,
                         Name = player.Name,
@@ -232,7 +232,7 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<List<PlayerDetailsDTO>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter)
+        public async Task<List<PlayerDetailsDto>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter)
         {
             var team = await context.Team
                 .Include(t => t.Members)
@@ -240,7 +240,7 @@ namespace Infrastructure.Repositories
 
             if (team == null)
             {
-                return new List<PlayerDetailsDTO>();
+                return new List<PlayerDetailsDto>();
             }
 
             var playersQuery = team.Members.AsQueryable();
@@ -279,7 +279,7 @@ namespace Infrastructure.Repositories
             }
 
             return playersQuery
-                .Select(player => new PlayerDetailsDTO
+                .Select(player => new PlayerDetailsDto
                 {
                     PlayerId = player.Id,
                     Name = player.Name,

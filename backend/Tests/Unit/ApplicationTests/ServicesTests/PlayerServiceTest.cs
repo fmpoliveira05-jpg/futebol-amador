@@ -418,7 +418,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         #region Tests GetPlayerByIdAsync
 
         [Test(Description = "Caminho feliz: encontra um jogador e retorna os seus detalhes (DTO)")]
-        public async Task GetPlayerByIdAsync_PlayerExists_ReturnsPlayerDetailsDTO()
+        public async Task GetPlayerByIdAsync_PlayerExists_ReturnsPlayerDetailsDto()
         {
             var playerId = Guid.NewGuid();
             var teamId = Guid.NewGuid();
@@ -441,7 +441,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var resultDto = await service.GetPlayerByIdAsync(playerId);
 
             Assert.That(resultDto, Is.Not.Null);
-            Assert.That(resultDto, Is.TypeOf<PlayerDetailsDTO>());
+            Assert.That(resultDto, Is.TypeOf<PlayerDetailsDto>());
             Assert.That(resultDto.Name, Is.EqualTo(mockPlayer.Name));
             Assert.That(resultDto.DateOfBirth, Is.EqualTo(mockPlayer.DateOfBirth));
             Assert.That(resultDto.Address, Is.EqualTo(mockPlayer.Address));

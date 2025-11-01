@@ -1,22 +1,31 @@
 ﻿using Application.DTOs.PlayerDTOs;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Team
 {
     public class TeamDetailsDto
     {
+        [Required]
         public Guid Id { get; set; }
-        public string Name { get; set; } 
-        public string? Description { get; set; } 
-        public DateTime FoundationDate { get; set; } 
+
+        [Required]
+        public string Name { get; set; } = null!;
+        
+        public string? Description { get; set; }
+
+        [Required]
+        public DateTime FoundationDate { get; set; }
+        
+        [Required]
         public int TotalPoints { get; set; }
 
-        //Alterar para o enum dos nomes dos ranks
-        public string? RankName { get; set; }
+        [Required]
+        public string RankName { get; set; } = null!;
 
-        public string PitchDto { get; set; }
+        [Required]
+        public string PitchDto { get; set; } = null!;
 
-        public List<PlayerDetailsDTO> Players { get; set; }
+        [Required]
+        public List<PlayerDetailsDto> Players { get; set; } = null!;
     }
-
-
 }
