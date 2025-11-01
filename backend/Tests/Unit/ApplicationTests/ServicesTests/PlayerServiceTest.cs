@@ -107,9 +107,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             return player;
         }
-        private UpdatePlayerDTO BuildValidUpdateDto()
+        private UpdatePlayerDto BuildValidUpdateDto()
         {
-            return new UpdatePlayerDTO
+            return new UpdatePlayerDto
             {
                 Name = "João Silva",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-25)),

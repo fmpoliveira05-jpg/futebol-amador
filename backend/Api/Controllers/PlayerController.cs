@@ -78,7 +78,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{playerId:guid}")]
-        public async Task<IActionResult> UpdateUser(Guid playerId, [FromBody] UpdatePlayerDTO dto)
+        public async Task<IActionResult> UpdateUser(Guid playerId, [FromBody] UpdatePlayerDto dto)
         {
             if (!ModelState.IsValid)
             {

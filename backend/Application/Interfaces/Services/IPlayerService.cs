@@ -9,7 +9,7 @@ namespace Application.Interfaces.Services
     {
         Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto);
         Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid teamId);
-        Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto);
+        Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto);
         Task DeletePlayerAsync(Guid playerId);
         Task<String> LeaveTeam(Guid playerId);
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid playerId);

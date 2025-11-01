@@ -50,31 +50,31 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO, Player player, Player playerEmail)
+        public void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto, Player player, Player playerEmail)
         {
             PlayerExists(player);
 
-            if (updatePlayerDTO.Email != player.Email)
+            if (UpdatePlayerDto.Email != player.Email)
             {
                 if (playerEmail != null)
                 {
-                    throw new ValidationException($"The email '{updatePlayerDTO.Email}' is already in use.");
+                    throw new ValidationException($"The email '{UpdatePlayerDto.Email}' is already in use.");
                 }
             }
 
-            ValidateEmail(updatePlayerDTO.Email);
+            ValidateEmail(UpdatePlayerDto.Email);
 
-            ValidateHeigth(updatePlayerDTO.Height);
+            ValidateHeigth(UpdatePlayerDto.Height);
 
-            ValidateAge(updatePlayerDTO.DateOfBirth);
+            ValidateAge(UpdatePlayerDto.DateOfBirth);
 
-            ValidatePhone(updatePlayerDTO.Phone);
+            ValidatePhone(UpdatePlayerDto.Phone);
 
-            ValidatePosition(updatePlayerDTO.Position);
+            ValidatePosition(UpdatePlayerDto.Position);
 
-            ValidateAddress(updatePlayerDTO.Address);
+            ValidateAddress(UpdatePlayerDto.Address);
 
-            ValidateAddress(updatePlayerDTO.Address);
+            ValidateAddress(UpdatePlayerDto.Address);
         }
 
         public void ValidateHasChangeDataPlayer(bool hasChange)

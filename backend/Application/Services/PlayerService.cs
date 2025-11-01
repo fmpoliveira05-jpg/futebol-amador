@@ -97,7 +97,7 @@ namespace Application.Services
             return playerDetails;
         }
 
-        public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
+        public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
@@ -256,7 +256,7 @@ namespace Application.Services
         }
 
         #region Private Methods
-        private static bool hasChangePlayer(UpdatePlayerDTO dto, Player player)
+        private static bool hasChangePlayer(UpdatePlayerDto dto, Player player)
         {
             bool hasChange = false;
 
