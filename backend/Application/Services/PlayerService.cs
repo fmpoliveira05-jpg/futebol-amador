@@ -1,10 +1,10 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Services;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -14,9 +14,9 @@ namespace Application.Services
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamService teamService;
-        private readonly IUnityOfWork unitOfWork;
-        private readonly IPlayerValidator playerValidator;
         private readonly ITeamRepository teamRepository;
+        private readonly IPlayerValidator playerValidator;
+        private readonly IUnityOfWork unitOfWork;
         private readonly IPasswordHasher passwordHasher;
         private readonly IMembershipRequestRepository membershipRequestRepository;
 
@@ -38,7 +38,7 @@ namespace Application.Services
             this.membershipRequestRepository = membershipRequestRepository;
         }
 
-        public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
+        public async Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto)
         {
             var existingPlayers = new Player[]
             {
@@ -78,13 +78,13 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid playerId)
+        public async Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
             playerValidator.PlayerExists(player);
 
-            PlayerDetailsDTO playerDetails = new PlayerDetailsDTO
+            PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {
                 Name = player.Name,
                 DateOfBirth = player.DateOfBirth,
@@ -97,22 +97,15 @@ namespace Application.Services
             return playerDetails;
         }
 
-        public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
+        public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             var emailExists = await playerRepository.GetPlayerByEmailAsync(dto.Email);
 
             playerValidator.UpdatePlayerValidator(dto, player, emailExists);
 
-            player.Name = dto.Name;
-            player.DateOfBirth = dto.DateOfBirth;
-            player.Address = dto.Address;
-            player.Email = dto.Email;
-            player.Phone = dto.Phone;
-            player.Position = dto.Position;
-            player.Height = dto.Height;
-
-            playerRepository.UpdatePlayer(player);
+            bool hasChange = hasChangePlayer(dto, player);
+            playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
             await unitOfWork.SaveChangesAsync();
         }
@@ -125,23 +118,27 @@ namespace Application.Services
 
             if (existingPlayer.IsAdmin)
             {
-                if (existingPlayer.Team.Members.Count == 0)
+                if (existingPlayer.Team.Members.Count == 1)
                 {
                     await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
                 }
-
-                var otherAdmin = existingPlayer.Team.Members
-                    .FirstOrDefault(p => p.IsAdmin && p.Id != existingPlayer.Id);
-
-                // If the team has no more admins, choose the oldest account player to be the new admin.
-                if (otherAdmin == null)
+                else
                 {
-                    var oldestDate = existingPlayer.Team.Members.Min(p => p.CreationDate);
-                    Player newAdmin = existingPlayer.Team.Members.First(p => p.CreationDate == oldestDate);
-                    newAdmin.IsAdmin = true;
-                }
+                    var otherAdmin = existingPlayer.Team.Members
+                        .FirstOrDefault(p => p.IsAdmin && p.Id != existingPlayer.Id);
 
-                existingPlayer.IsAdmin = false;
+                    if (otherAdmin == null)
+                    {
+                        var otherMembers = existingPlayer.Team.Members
+                            .Where(p => p.Id != existingPlayer.Id)
+                            .ToList();
+                        var oldestDate = otherMembers.Min(p => p.CreationDate);
+                        Player newAdmin = otherMembers.First(p => p.CreationDate == oldestDate);
+                        newAdmin.IsAdmin = true;
+                    }
+
+                    existingPlayer.IsAdmin = false;
+                }
             }
 
             string teamName = existingPlayer.Team.Name;
@@ -281,5 +278,68 @@ namespace Application.Services
                 IsPlayerSender = newRequest.IsPlayerSender
             };
         }
+
+        public async Task<List<InfoTeamsDto>> GetListTeams()
+        {
+            return await teamRepository.GetListTeamsPlayer();
+        }
+
+        public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter)
+        {
+            playerValidator.ValidateFiltersListTeams(filter);
+            return await teamRepository.GetListTeamsPlayersWithFilters(filter); 
+        }
+
+        #region Private Methods
+        private static bool hasChangePlayer(UpdatePlayerDto dto, Player player)
+        {
+            bool hasChange = false;
+
+            if (dto.Name != player.Name)
+            {
+                player.Name = dto.Name;
+                hasChange = true;
+            }
+
+            if (dto.DateOfBirth != player.DateOfBirth)
+            {
+                player.DateOfBirth = dto.DateOfBirth;
+                hasChange = true;
+            }
+
+            if (dto.Address != player.Address)
+            {
+                player.Address = dto.Address;
+                hasChange = true;
+            }
+
+            if (dto.Email != player.Email)
+            {
+                player.Email = dto.Email;
+                hasChange = true;
+            }
+
+            if (dto.Phone != player.Phone)
+            {
+                player.Phone = dto.Phone;
+                hasChange = true;
+            }
+
+            if (dto.Position != player.Position)
+            {
+                player.Position = dto.Position;
+                hasChange = true;
+            }
+
+            if (dto.Height != player.Height)
+            {
+                player.Height = dto.Height;
+                hasChange = true;
+            }
+
+            return hasChange;
+        }
+
+        #endregion
     }
 }

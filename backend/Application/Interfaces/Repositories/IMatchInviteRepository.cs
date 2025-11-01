@@ -11,7 +11,7 @@ namespace Application.Interfaces.Repositories
         public Task<MatchInvite?> GetMatchInviteById(Guid id);
         public Task<MatchInvite?> GetMatchInviteWithPitchByTeams(Guid idSender, Guid idReceiver);
         public Task<MatchInvite?> GetMatchInvite(Guid idSender, Guid idReceiver, DateTime gameDate);
-        public Task<List<InfoMatchInviteDTO>> GetAllMatchInviteReceiverById(Guid idReceiver);
-        public Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter);
+        public Task<List<InfoMatchInviteDto>> GetAllMatchInviteReceiverById(Guid idReceiver);
+        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter);
     }
 }

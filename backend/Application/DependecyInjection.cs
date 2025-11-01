@@ -16,39 +16,58 @@ namespace Application
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddBusinessServices();
-            services.AddBusinessValidators();
+            services.AddServices();
+            services.AddValidators();
+
             return services;
         }
 
-        private static IServiceCollection AddBusinessServices(this IServiceCollection services)
+        private static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<ITeamService, TeamService>();
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
-            services.AddScoped<IMembershipRequestService, MembershipService>();
-            services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
-            services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
-            services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IMatchMakerService, MatchMakerService>();
 
-            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
-            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
+            services.AddManagerHubService();
+            services.AddHubServiceClients();
 
             return services;
         }
 
-        private static IServiceCollection AddBusinessValidators(this IServiceCollection services)
+        private static IServiceCollection AddHubServiceClients(this IServiceCollection services)
         {
+            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
+            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
+            services.AddTransient<IRankMatchMakerHubClientService, RankMatchMakerHubClientService>();
+
+            return services;
+        }
+
+        private static IServiceCollection AddManagerHubService(this IServiceCollection services)
+        {
+            services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
+            services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
+            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>(); 
+
+            return services;
+        }
+
+        private static IServiceCollection AddValidators(this IServiceCollection services)
+        {
+            services.AddScoped<IPlayerValidator, PlayerValidator>();
             services.AddScoped<ITeamValidator, TeamValidator>();
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
-            services.AddScoped<IMatchValidator, MatchValidator>();
+            services.AddScoped<ICalendarValidator, CalendarValidator>();
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
-            services.AddScoped<IPlayerValidator, PlayerValidator>();
+            services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
 
             return services;
         }
+
     }
 }

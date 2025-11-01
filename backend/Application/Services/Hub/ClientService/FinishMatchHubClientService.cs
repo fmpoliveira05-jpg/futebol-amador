@@ -1,18 +1,18 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
 using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
 {
-    internal class FinishMatchHubClientService: IFinishMatchHubClientService
+    public class FinishMatchHubClientService: IFinishMatchHubClientService
     {
-        private HubConnection connection;
+        private HubConnection connection = null!;
 
         public FinishMatchHubClientService()
         {
         }
 
-        public async Task InitializeAsync(Guid idTeam)
+        public async Task InitializeAsync()
         {
             if (connection != null)
             {

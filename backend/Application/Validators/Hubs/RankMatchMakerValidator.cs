@@ -9,7 +9,7 @@ namespace Application.Validators.Hubs
 {
     public class RankMatchMakerValidator : IRankMatchMakerValidator
     {
-        public void ValidateVariableJoinRankMatchMaker(Guid idPlayer, Guid idTeam, string connectionId)
+        public void ValidateVariableJoinRankMatchMaker(Guid idPlayer, Guid idTeam, TimeOnly hoursGame, string connectionId)
         {
             if (idPlayer == Guid.Empty)
             {
@@ -21,9 +21,29 @@ namespace Application.Validators.Hubs
                 throw new ArgumentException("O id da equipa está vazio");
             }
 
+            if (hoursGame != ModelConstants.HoursValidToCompetitiveMatch.MORNING &&
+                hoursGame != ModelConstants.HoursValidToCompetitiveMatch.AFTERNOON &&
+                hoursGame != ModelConstants.HoursValidToCompetitiveMatch.NIGHT)
+            {
+                throw new ArgumentException($"A hora da partida não corrresponde a uma hora válida para uma partida (horas válidas {ModelConstants.HoursValidToCompetitiveMatch.MORNING}, {ModelConstants.HoursValidToCompetitiveMatch.AFTERNOON} ou {ModelConstants.HoursValidToCompetitiveMatch.NIGHT}");
+            }
+
             if (string.IsNullOrEmpty(connectionId))
             {
                 throw new ArgumentException("A connection string está vazia");
+            }
+        }
+
+        public void ValidateHoursToMatch(double differenteHoursNowAndGame, Matches match)
+        {
+            if (match != null)
+            {
+                throw new InvalidOperationException("Não pode marcar um jogo para este domingo uma vez que já tem um jogo marcado a pelo menos 12 horas do jogo a marcar");
+            }
+
+            if(differenteHoursNowAndGame <= 12)
+            {
+                throw new InvalidOperationException("Não pode marcar um jogo para este domingo, porque está a menos de 12 horas da hora do jogo");
             }
         }
 
@@ -35,7 +55,7 @@ namespace Application.Validators.Hubs
             }
         }
 
-        public void ValidateJoinRankMatchMaker(Teams team, float averageAge, bool? findUser, ConcurrentDictionary<Guid, EntryRankMatchMakerHub>? hub)
+        public void ValidateJoinRankMatchMaker(Teams team, float averageAge, string city, bool? findUser, ConcurrentDictionary<Guid, EntryRankMatchMakerHub>? hub)
         {
             if(!findUser.HasValue || !findUser.Value)
             {
@@ -52,6 +72,11 @@ namespace Application.Validators.Hubs
                 throw new ArgumentException($"A equipa não possui a idade média permitida ({averageAge})");
             }
 
+            if (string.IsNullOrEmpty(city))
+            {
+                throw new ArgumentException("A cidade do campo da equipa está ou não foi encontrada na morada");
+            }
+
             if (hub.ContainsKey(team.Id))
             {
                 throw new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida");
@@ -60,7 +85,10 @@ namespace Application.Validators.Hubs
 
         public void ValidateLeaveRankMatchMaker(Guid idTeam)
         {
-            throw new NotImplementedException();
+            if (idTeam == Guid.Empty)
+            {
+                throw new ArgumentException("O id da equipa está vazio");
+            }
         }
     }
 }

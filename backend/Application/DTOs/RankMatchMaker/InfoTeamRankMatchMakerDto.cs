@@ -1,4 +1,4 @@
-﻿
+﻿using Application.DTOs.Rank;
 using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,12 +18,28 @@ namespace Application.DTOs.RankMatchMaker
         public float AverageAge { get; set; }
 
         [Required]
-        public InfoRankMatchMakerDto Rank { get; set; }
+        public InfoRankDto Rank { get; set; }
 
         [Required]
         [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints, ErrorMessage = "Um equipa tem 0 ou mais pontos")]
         public int NumberPointsTeam { get; set; }
 
-        public string cidade { get; set; }
+        [Required]
+        public string City { get; set; }
+
+        [Required]
+        public DateTime timeEntry = DateTime.UtcNow;
+
+        [Required]
+        public DateTime GameDate { get; set; }
+        /**
+         True --> pode subir ou descer
+         False --> vai jogar apenas com teams do mesmo rank
+         */
+        [Required]
+        public bool isNearToChangeRank { get; set; }
+
+        [Required]
+        public string NextOrPreviousRank { get; set; } = "";
     }
 }

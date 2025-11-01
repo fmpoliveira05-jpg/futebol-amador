@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Pitch;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
@@ -719,7 +720,7 @@ namespace Unit.ApplicationTests.ServicesTests
         /// <summary>
         /// Verifica que o método devolve corretamente a lista de jogadores de uma equipa.
         /// Este teste assegura que:
-        /// - Todos os membros da equipa são convertidos em DTOs <see cref="PlayerDetailsDTO"/>.
+        /// - Todos os membros da equipa são convertidos em DTOs <see cref="PlayerDetailsDto"/>.
         /// - O número e os nomes dos jogadores estão corretos.
         /// </summary>
         [Test(Description = "GetTeamPlayersAsync deve devolver a lista de jogadores da equipa")]

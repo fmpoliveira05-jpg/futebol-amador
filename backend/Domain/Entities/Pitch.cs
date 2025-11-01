@@ -17,7 +17,7 @@ namespace Domain.Entities {
         [StringLength(ModelConstants.GeneralConst.MaxAddressLength, MinimumLength = ModelConstants.GeneralConst.MinAddressLength)]
         public string Address { get; set; }
 
-        protected Pitch() { }
+        public Pitch() { }
 
         public Pitch(string name, string address)
         {

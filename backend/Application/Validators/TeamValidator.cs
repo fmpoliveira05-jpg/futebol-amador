@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Team;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Team;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
@@ -9,7 +10,8 @@ namespace Application.Validators
 {
     public class TeamValidator : ITeamValidator
     {
-        private IPlayerValidator PlayerValidator = new PlayerValidator();
+        private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
+
         public void CreateTeamValidation(CreateTeamDto? createTeamDto, Teams? team, Player? playerCreating)
         {
             PlayerValidator.PlayerExists(playerCreating);
@@ -244,17 +246,52 @@ namespace Application.Validators
             }
         }
 
-        public void SearchTeamsValidation(Player player, TeamSearchFiltersDto filters)
+        public void ValidateVariableSearchTeam(Guid idTeam)
         {
-            PlayerValidator.PlayerExists(player);
-
-            if (filters.MaxAvgAge < filters.MinAvgAge)
+            if (idTeam == Guid.Empty)
             {
-                throw new ValidationException("Max average age must be higher or equal to Min Average Age.");
+                throw new ArgumentException("O id da equipa está vazio");
             }
         }
 
+        public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter)
+        {
+            ValidateVariableSearchTeam(idTeam);
 
+            if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
+            {
+                if (filter.MinNumberPoints > filter.MaxNumberPoints)
+                {
+                    throw new InvalidOperationException("O numero minimo de pontos de uma equipa, não deve ser superior ao numero maximo");
+                }
+            }
+
+            if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
+            {
+                if (filter.MinAge.Value > filter.MaxAge.Value)
+                {
+                    throw new InvalidOperationException("O numero minimo de idade minima tem de ser inferior à idade media maxima");
+                }
+            }
+
+            if (filter.MinNumberPlayers.HasValue && filter.MaxNumberPlayers.HasValue)
+            {
+                if (filter.MinNumberPlayers.Value > filter.MaxNumberPlayers.Value)
+                {
+                    throw new InvalidOperationException("O número minimo de membros deve ser superior ao numero maximo de membros");
+                }
+            }
+        }
+
+        public void ValidateTeamSearch(Teams team)
+        {
+            if (team == null)
+            {
+                throw new ArgumentException("A equipa não existe");
+            }
+        }
+
+        #region Private Methods
         private void ValidatePlayerAndTeamExists(Teams? team, Player? Player)
         {
             if (!TeamExists(team))
@@ -265,7 +302,7 @@ namespace Application.Validators
             PlayerValidator.PlayerExists(Player);
         }
 
-        private void ValidatePlayerBelongToTeamAndIsAdmin(Teams? team, Player? Player)
+        private static void ValidatePlayerBelongToTeamAndIsAdmin(Teams? team, Player? Player)
         {
             if (!PlayerExistsInTeam(team, Player))
             {
@@ -277,7 +314,7 @@ namespace Application.Validators
             }
         }
 
-        private void ValidateTeamFull(Teams? team)
+        private static void ValidateTeamFull(Teams? team)
         {
             if (TeamIsFull(team))
             {
@@ -285,7 +322,7 @@ namespace Application.Validators
             }
         }
 
-        private bool TeamExists(Teams? team)
+        private static bool TeamExists(Teams? team)
         {
             if (team == null)
             {
@@ -294,7 +331,7 @@ namespace Application.Validators
             return true;
         }
 
-        private bool PlayerExistsInTeam(Teams? team, Player? Player)
+        private static bool PlayerExistsInTeam(Teams? team, Player? Player)
         {
             if (!team.Members.Contains(Player))
             {
@@ -304,16 +341,16 @@ namespace Application.Validators
             return true;
         }
 
-        private bool TeamIsFull(Teams? team)
+        private static bool TeamIsFull(Teams? team)
         {
-            if (team.Members.Count >= ModelConstants.TeamConst.MaxPlayers)
+            if (team.Members.Count >= ModelConstants.TeamConst.MaxMembers)
             {
                 return true;
             }
             return false;
         }
 
-        private bool AdminOlderThanSecondAdmin(Player? adminToDemote, Player? adminDemoting)
+        private static bool AdminOlderThanSecondAdmin(Player? adminToDemote, Player? adminDemoting)
         {
             if (adminToDemote.IsAdminLastChangedAt >= adminDemoting.IsAdminLastChangedAt)
             {
@@ -323,7 +360,7 @@ namespace Application.Validators
             return true;
         }
 
-        private bool CreateTeamDtoIsValid(CreateTeamDto createTeamDto)
+        private static bool CreateTeamDtoIsValid(CreateTeamDto createTeamDto)
         {
             if (string.IsNullOrWhiteSpace(createTeamDto.Name) || createTeamDto.HomePitch == null)
             {
@@ -331,7 +368,6 @@ namespace Application.Validators
             }
             return true;
         }
-
-
+        #endregion
     }
 }

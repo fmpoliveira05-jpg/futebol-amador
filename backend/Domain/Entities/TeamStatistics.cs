@@ -33,7 +33,7 @@ namespace Domain.Entities
         public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;
 
         // EF
-        protected TeamStatistics() { }
+        public TeamStatistics() { }
 
         public TeamStatistics(Teams team)
         {

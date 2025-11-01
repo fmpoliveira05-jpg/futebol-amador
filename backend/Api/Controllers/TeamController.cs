@@ -1,9 +1,7 @@
-using Api.Controllers; // Assume que este é o teu namespace
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -68,14 +66,14 @@ namespace Api.Controllers
         [HttpGet("{teamId}/members")]
         public async Task<IActionResult> GetTeamPlayers(Guid teamId)
         {
-                var players = await TeamService.GetTeamPlayersAsync(teamId);
+                var players = await TeamService.SearchTeamsAsync(teamId);
                 return Ok(players);
         }
 
         [HttpGet("{teamId}/members/filter")]
-        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
+        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterListTeamDto filters)
         {
-            var players = await TeamService.GetTeamPlayersAsyncWithFilters(teamId, filters);
+            var players = await TeamService.SearchTeamsWithFiltersAsync(teamId, filters);
             return Ok(players);
         }
 
@@ -176,14 +174,32 @@ namespace Api.Controllers
         }
 
 
+        //Depois adaptar para o teamId, o player é Aut
         [HttpGet("{teamId}/search")] // Responde a GET /api/team
-        public async Task<IActionResult> SearchTeams([FromQuery] TeamSearchFiltersDto filters)
+        public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
 
-            // var teams = await _teamService.SearchTeamsAsync(filters);
-            // return Ok(teams);
-            return Ok("Endpoint 'SearchTeams' ainda não implementado no serviço.");
-            
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await TeamService.SearchTeamsWithFiltersAsync(teamId, filter);
+            }
+            else
+            {
+                list = await TeamService.SearchTeamsAsync(teamId);
+            }
+
+            return Ok(list);
         }
 
         [HttpPost("{teamId:guid}/membership-requests/send/{playerId:guid}")]

@@ -47,13 +47,13 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(mi => mi.IdSender == idSender && mi.IdReceiver == idReceiver);
         }
 
-        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInviteReceiverById(Guid idReceiver)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInviteReceiverById(Guid idReceiver)
         {
             var query = await context.MatchInvite
                 .Where(mi => mi.IdReceiver == idReceiver)
                 .Include(mi => mi.Sender)
                 .Include(mi => mi.Pitch)
-                .Select(mi => new InfoMatchInviteDTO
+                .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
                     IdSender = mi.IdSender,
@@ -67,7 +67,7 @@ namespace Infrastructure.Repositories
             return query;
         }
 
-        public async Task<List<InfoMatchInviteDTO>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter)
         {
             var senderName = filter.SenderName;
             var minDate = filter.MinDate;
@@ -96,7 +96,7 @@ namespace Infrastructure.Repositories
             }
 
             var list = await query
-                .Select(mi => new InfoMatchInviteDTO
+                .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
                     IdSender = mi.IdSender,

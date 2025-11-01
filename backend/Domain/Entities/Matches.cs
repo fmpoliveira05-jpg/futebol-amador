@@ -37,12 +37,11 @@ namespace Domain.Entities
         [ForeignKey("Chat")]
         public Guid IdChat { get; set; }
 
-        protected Matches() { }
+        public Matches() { }
 
         public Matches(DateTime matchDate, bool isCompetive, Pitch pitch)
         {
             this.MatchDate = matchDate;
-            //this.PostPoneDate = matchDate
             this.IsCompetive = isCompetive;
             this.Pitch = pitch;
             this.Teams = new List<TeamStatistics>();
@@ -78,6 +77,25 @@ namespace Domain.Entities
             if (Chat != null)
             {
                 this.Chat = chat;
+                this.IdChat = idPitch;
+            }
+            else
+            {
+                this.Chat = new Chat();
+                this.IdChat = this.Chat.Id;
+            }
+        }
+
+        public Matches(DateTime matchDate, bool isCompetive, Guid idPitch, List<TeamStatistics> teamStatistics)
+        {
+            this.MatchDate = matchDate;
+            this.IsCompetive = isCompetive;
+            this.idPitch = idPitch;
+            this.Teams = teamStatistics;
+
+            if (Chat != null)
+            {
+                this.Chat = new Chat();
                 this.IdChat = idPitch;
             }
             else

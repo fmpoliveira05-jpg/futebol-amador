@@ -1,22 +1,17 @@
 ﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Filters;
 using Domain.Entities;
 
 namespace Application.Interfaces.Validators
 {
     public interface IPlayerValidator
     {
-        void PlayerExists(Player? player);
-
-        void CreatePlayerValidator(CreatePlayerDTO createPlayerDTO, Player[] players);
-
+        void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Player[] players);
         void DeletePlayerValidator(Player? player);
-
-        void GetPlayerByIdValidator(Player player);
-
-        void UpdatePlayerValidator(UpdatePlayerDTO updatePlayerDTO,Player player, Player playerEmail);
-
+        void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto,Player player, Player playerEmail);
+        void ValidateHasChangeDataPlayer(bool hasChange);
         void LeaveTeamValidator(Player player);
-
-
+        void PlayerExists(Player player);
+        void ValidateFiltersListTeams(FilterListTeamDto filter);
     }
 }

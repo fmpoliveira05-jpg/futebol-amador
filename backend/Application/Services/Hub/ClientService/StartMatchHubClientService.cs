@@ -5,13 +5,13 @@ namespace Application.Services.Hub.ClientService
 {
     public class StartMatchHubClientService: IStartMatchHubClientService
     {
-        private HubConnection connection;
+        private HubConnection connection = null!;
 
         public StartMatchHubClientService()
         {
         }
 
-        public async Task InitializeAsync(Guid idTeam)
+        public async Task InitializeAsync()
         {
             if (connection != null)
             {

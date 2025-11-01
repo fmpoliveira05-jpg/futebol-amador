@@ -1,29 +1,39 @@
-﻿using Domain.Entities;
+﻿using Domain.Constants;
 using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.PlayerDTOs
 {
-    public class CreatePlayerDTO
+    public class CreatePlayerDto
     {
-        public string Name {  get; set; }
-
+        [Required]
+        [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
+        public string Name { get; set; } = null!;
+        
+        [Required]
         public DateOnly DateOfBirth { get; set; }
 
-        public string Address { get; set; }
-        
-        public string Email { get; set; }
+        [Required]
+        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        public string Address { get; set; } = null!;
 
-        public string Password { get; set; }
+        [Required]
+        [MinLength(ModelConstants.UserConst.MinEmailLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
+        public string Email { get; set; } = null!;
 
-        public string Phone {  get; set; }
+        [Required]
+        [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
+        public string Password { get; set; } = null!;
 
+        [Required]
+        [MinLength(9), MaxLength(9)]
+        public string Phone {  get; set; } = null!;
+
+        [Required]
         public Position Position { get; set; }
 
+        [Required]
+        [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight)]
         public int Height { get; set; }
     }
 }

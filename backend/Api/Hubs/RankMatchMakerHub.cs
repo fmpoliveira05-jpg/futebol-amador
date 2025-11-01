@@ -3,10 +3,12 @@ using Application.Interfaces.Hub;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
 {
+    //[Authorize]
     public class RankMatchMakerHub: Hub<IRankMatchMakerHub>
     {
         private readonly IManagerRankMatchMakerService service;
@@ -19,17 +21,17 @@ namespace Api.Hubs
             this.geralValidator = geralValidator;
         }
 
-        public async Task JoinRankMatchMaker(Guid idPlayer, Guid idTeam)
+        public async Task JoinRankMatchMaker(Guid idTeam, TimeOnly hoursGame)
         {
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
-            InfoTeamRankMatchMakerDto result;
-            var groupName = GetGroupName(idTeam);
+            EntryRankMatchMakerHub result;
+            string groupName = "";
 
             //Ver se tenho mais alguma exception
             try
             {
-                result = await service.JoinRankMatchMaker(idPlayer, idTeam, connectionId);
+                result = await service.JoinRankMatchMaker(userId, idTeam, hoursGame, connectionId);
             }
             catch (ArgumentException ex)
             {
@@ -40,11 +42,24 @@ namespace Api.Hubs
                 throw new HubException(ex.Message);
             }
 
-            await Groups.AddToGroupAsync(connectionId, groupName);
+            Context.Items[ModelConstants.RankMatchMakerHubConst.ContentTeamId] = idTeam;
 
-            Context.Items[ModelConstants.RankMatchMakerHubConst.ContentTeamId] = result.IdTeam;
-         
-            //Chmamar metodo ou inciar lógica para o team inciar a procura por outro team durante 5 minutos
+            if (result.ConnectionId == connectionId)
+            {
+                groupName = GetGroupName(idTeam);
+            }
+            else
+            {
+                groupName = GetGroupName(result.Team.IdTeam);
+            }
+
+            await Groups.AddToGroupAsync(connectionId, groupName);
+            
+            if (result.ConnectionId != connectionId) 
+            {
+                //Notificar os dois teams, ver no startMatch
+                await CleanHub(groupName, result.ConnectionId, connectionId);
+            }
         }
 
         public async Task LeaveRankMatchMaker() {
@@ -63,7 +78,6 @@ namespace Api.Hubs
             }
         }
 
-        //Adaptar para depois isto
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             Guid? idTeam = null;
@@ -100,9 +114,21 @@ namespace Api.Hubs
             return false;
         }
 
-        private string GetGroupName(Guid idMatch)
+        private static string GetGroupName(Guid idTeam)
         {
-            return $"matchRankMaker-{idMatch}";
+            return ModelConstants.RankMatchMakerHubConst.PrefixGroupName + idTeam;
+        }
+
+        private async Task CleanHub(string groupName, string? fisrtAdminConnectionId, string SecondAdminConnectionId)
+        {
+            if (!string.IsNullOrEmpty(fisrtAdminConnectionId))
+            {
+                await Groups.RemoveFromGroupAsync(fisrtAdminConnectionId, groupName);
+            }
+
+            await Groups.RemoveFromGroupAsync(SecondAdminConnectionId, groupName);
+
+            Context.Items.Remove(ModelConstants.RankMatchMakerHubConst.ContentTeamId);
         }
     }
 }
