@@ -8,13 +8,13 @@ plugins {
 }
 
 android {
-    namespace = "com.exemple.amfootball"
+    namespace = "com.example.amfootball"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.exemple.amfootball"
+        applicationId = "com.example.amfootball"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
@@ -113,13 +113,13 @@ dependencies {
     // Firebase Bill of Materials (BoM) - gere as versões
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     // Dependência do Firebase Authentication
-    implementation("com.google.firebase:firebase-auth")
+    implementation("com.google.firebase:firebase-auth:24.0.1")
     // Dependência para o Login com Google (necessária)
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     // Dependência para o Login com Facebook (necessária para o Facebook)
     implementation("com.facebook.android:facebook-login:latest.release")
 
-    // 3. (Opcional, mas recomendado) Analytics
+    // 3.  Analytics
     implementation("com.google.firebase:firebase-analytics")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")

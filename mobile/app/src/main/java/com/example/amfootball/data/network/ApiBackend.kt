@@ -1,0 +1,34 @@
+package com.example.amfootball.data.network
+
+import com.example.amfootball.data.dtos.CreateRoomRequest
+import com.example.amfootball.data.dtos.CreateRoomResponse
+import com.example.amfootball.data.dtos.CreateProfileDto
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+
+// Isto é apenas um contrato, não tem lógica
+interface ApiBackend {
+    /**
+     * Chama o nosso endpoint de backend /api/users/create-profile
+     * para sincronizar o perfil do Firebase com a nossa base de dados SQL Server.
+     *
+     * @param authToken O token JWT obtido do Firebase
+     * @param request O corpo da requisição com os dados do perfil
+     */
+    //confirmar se não precisa da / antes da api na rota
+    @POST("api/Player/create-profile")
+    suspend fun createProfile(
+        @Body request: CreateProfileDto
+    ): Response<Unit> //alterar o Unit pra retornar o perfil!
+
+    @POST("/api/chat/create-room")
+    suspend fun createChatRoom(
+        @Body request: CreateRoomRequest
+    ): Response<CreateRoomResponse>
+
+    @GET("api/Player/get-my-profile")
+    suspend fun getMyProfile(
+    ): Response<CreateProfileDto>
+}

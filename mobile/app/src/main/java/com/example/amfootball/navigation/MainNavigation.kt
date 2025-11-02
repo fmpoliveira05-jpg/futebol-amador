@@ -12,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.User.LoginScreen
-import com.example.amfootball.ui.screens.User.SignInScreen
+import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import com.example.amfootball.navigation.Objects.AutRoutes
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
@@ -88,6 +88,6 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
     }
 
     composable(AutRoutes.SIGN_IN) {
-        SignInScreen()
+        SignUpScreen(globalNavController)
     }
 }

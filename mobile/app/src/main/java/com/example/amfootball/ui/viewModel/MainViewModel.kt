@@ -1,4 +1,4 @@
-package com.example.amfootball.viewModel
+package com.example.amfootball.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

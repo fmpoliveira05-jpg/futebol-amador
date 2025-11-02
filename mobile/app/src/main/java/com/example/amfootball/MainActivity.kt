@@ -9,6 +9,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import com.example.amfootball.navigation.MainNavigation
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)
