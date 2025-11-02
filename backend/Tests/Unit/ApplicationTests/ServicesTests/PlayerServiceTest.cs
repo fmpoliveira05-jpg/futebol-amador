@@ -1065,9 +1065,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
+            teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
             validatorMock.Setup(v => v.PlayerExists(player));
-            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id));
+            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
 
             membershipReqRepoMock.Setup(r => r.AddMembershipRequest(request)).Returns(Task.CompletedTask);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
@@ -1083,12 +1083,24 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
+            var request = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = player.Id,
+                IdTeam = team.Id,
+                Team = team,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = true
+            };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
+            teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
+            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
             validatorMock
-                .Setup(v => v.SendMembershipRequestValidator(player, team))
+                .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Player is already on a team and can't send membership requests."));
+
+
 
             // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
@@ -1103,13 +1115,23 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
+            var request = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = player.Id,
+                IdTeam = team.Id,
+                Team = team,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = true
+            };
 
             FillTeam(team); // Simulates a full team
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
+            teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
+            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
             validatorMock
-                .Setup(v => v.SendMembershipRequestValidator(player, team))
+                .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Team is full and cannot accept new requests."));
 
             // Act & Assert
@@ -1124,11 +1146,21 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
+            var request = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = player.Id,
+                IdTeam = team.Id,
+                Team = team,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = true
+            };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            teamRepoMock.Setup(r => r.GetTeamByIdAsync(team.Id)).ReturnsAsync(team);
+            teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
+            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
             validatorMock
-                .Setup(v => v.SendMembershipRequestValidator(player, team))
+                .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Player already has a pending request for this Team."));
 
             // Act & Assert

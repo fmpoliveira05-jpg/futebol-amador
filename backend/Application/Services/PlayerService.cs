@@ -247,20 +247,10 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
-            playerValidator.PlayerExists(player);
-            playerValidator.SendMembershipRequestValidator(player, team);
-
-            if (team == null)
-                throw new ValidationException("A equipa especificada não existe.");
-
-            if (player.IdTeam == teamId)
-                throw new ValidationException("O jogador já pertence a esta equipa.");
-
             var existingRequest = await membershipRequestRepository
                 .GetMembershipRequestByPlayerAndTeam(playerId, teamId);
 
-            if (existingRequest != null)
-                throw new ValidationException("Já existe um pedido de adesão pendente para esta equipa.");
+            playerValidator.SendMembershipRequestValidator(player, team, existingRequest);
 
             var newRequest = new MembershipRequests
             {

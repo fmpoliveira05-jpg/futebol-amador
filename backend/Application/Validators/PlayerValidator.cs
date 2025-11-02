@@ -155,16 +155,28 @@ namespace Application.Validators
             }
         }
 
-        public void SendMembershipRequestValidator(Player player, Teams team)
+        public void SendMembershipRequestValidator(Player player, Teams team, MembershipRequests request)
         {
-            if(player.Team != null)
+            PlayerExists(player);
+
+            if (team == null)
+            {
+                throw new NotFoundException("Team doesn't exist.");
+            }
+
+            if (player.Team != null)
             {
                 throw new BusinessRuleException("Player is already on a team and can't send membership requests.");
             }
 
-            if(team.Members.Count >= TeamConst.MaxMembers)
+            if (team.Members.Count >= TeamConst.MaxMembers)
             {
                 throw new BusinessRuleException("Team is full and cannot accept new requests.");
+            }
+
+            if (request != null)
+            {
+                throw new BusinessRuleException("Já existe um pedido de adesão pendente para esta equipa.");
             }
         }
 

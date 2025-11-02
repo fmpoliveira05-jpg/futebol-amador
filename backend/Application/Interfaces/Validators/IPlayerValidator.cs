@@ -22,6 +22,6 @@ namespace Application.Interfaces.Validators
 
         void ValidateHasChangeDataPlayer(bool hasChange);
 
-        void SendMembershipRequestValidator(Player player, Teams team);
+        void SendMembershipRequestValidator(Player player, Teams team, MembershipRequests request);
     }
 }
