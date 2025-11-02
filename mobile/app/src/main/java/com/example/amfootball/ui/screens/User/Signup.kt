@@ -29,9 +29,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
@@ -40,6 +42,7 @@ import com.example.amfootball.ui.components.InputFields.DatePickerModalInput
 import com.example.amfootball.ui.components.InputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
+import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -292,5 +295,14 @@ fun SignUpScreen(navController: NavHostController) {
                 }
             }
         }
+    }
+}
+
+@Preview(name = "SignUp Screen - EN", locale = "en", showBackground = true)
+@Preview(name = "SignUp Screen - PT", locale = "pt", showBackground = true)
+@Composable
+fun SignUpScreenContentPreview() {
+    AMFootballTheme {
+        SignUpScreen(rememberNavController())
     }
 }

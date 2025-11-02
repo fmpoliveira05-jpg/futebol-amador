@@ -150,7 +150,7 @@ fun TopBar(onNavIconClick: () -> Unit,
             ) {
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    contentDescription = stringResource(R.string.content_Description_NavBar)
+                    contentDescription = stringResource(R.string.content_description_navbar)
                 )
             }
         },

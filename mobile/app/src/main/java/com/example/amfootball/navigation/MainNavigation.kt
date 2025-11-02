@@ -15,8 +15,10 @@ import com.example.amfootball.ui.screens.User.LoginScreen
 import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import com.example.amfootball.navigation.Objects.AutRoutes
+import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
+import com.example.amfootball.ui.screens.User.ProfileScreen
 
 @Composable
 fun MainNavigation() {
@@ -73,6 +75,9 @@ private fun NavGraphBuilder.NavBars(
 
 private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
     //Provavelmente para futuro vai ser importante o NavHostController
+    composable(RotasUser.USER_PROFILE) {
+        ProfileScreen(globalNavController)
+    }
 
     AutPages(globalNavController = globalNavController)
 }
@@ -82,7 +87,6 @@ private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
  * */
 private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
     //Depois meter para os dois verificações para só user não autenticados
-    // poderem aceder a esta página
     composable(AutRoutes.LOGIN) {
         LoginScreen(globalNavController)
     }

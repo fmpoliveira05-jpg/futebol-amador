@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.user
+package com.example.amfootball.ui.screens.User
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -25,7 +25,7 @@ fun ProfileScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             BackTopBar(
-                navController = navController,
+                navHostController = navController,
                 title = stringResource(id = R.string.page_profile_user)
             )
         },

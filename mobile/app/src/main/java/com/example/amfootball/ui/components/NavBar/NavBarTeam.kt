@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,6 +21,7 @@ import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.Team.CalendarScreen
+import com.example.amfootball.ui.theme.AMFootballTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,17 +68,17 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     val drawerItemsList = arrayListOf<NavigationItem>()
 
     drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_home_page_team),
-        description = stringResource(R.string.description_NavBar_HomePageTeam),
+        description = stringResource(R.string.description_navbar_homepage_team),
         icon = Icons.Filled.Home,
         route = RoutesNavBarTeam.HOME_PAGE_TEAM,
         isGlobalRoute = false))
-    drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_Calendar),
-        description = stringResource(R.string.descritpion_NavBar_Calendar),
+    drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_calendar),
+        description = stringResource(R.string.description_navbar_calendar),
         icon = Icons.Filled.DateRange,
         route = RoutesNavBarTeam.CALENDAR,
         isGlobalRoute = false))
-    drawerItemsList.add(NavigationItem(label = "Home",
-        description = "Página inicial",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_home),
+        description = stringResource(id = R.string.item_home_description),
         icon = Icons.Filled.Home,
         route = RouteNavBarHomePage.HOME_PAGE,
         isGlobalRoute = true))
@@ -95,5 +97,31 @@ private fun RowScope.HomePageTeamTopBarActions(
                 contentDescription = "Logout"
             )
         }
+    }
+}
+
+@Preview(name = "Team Navigation - EN", locale = "en", showBackground = true)
+@Preview(name = "Team Navigation - PT", locale = "pt", showBackground = true)
+@Composable
+fun NavigatonDrawerTeamPreviewLogged() {
+    AMFootballTheme {
+        NavigatonDrawerTeam(
+            globalNavController = rememberNavController(),
+            isLoggedIn = true,
+            onLogout = {}
+        )
+    }
+}
+
+@Preview(name = "Team Navigation - EN", locale = "en", showBackground = true)
+@Preview(name = "Team Navigation - PT", locale = "pt", showBackground = true)
+@Composable
+fun NavigatonDrawerTeamPreviewLogout() {
+    AMFootballTheme {
+        NavigatonDrawerTeam(
+            globalNavController = rememberNavController(),
+            isLoggedIn = false,
+            onLogout = {}
+        )
     }
 }

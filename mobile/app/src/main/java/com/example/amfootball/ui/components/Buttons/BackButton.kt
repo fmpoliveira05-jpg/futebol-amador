@@ -14,13 +14,12 @@ fun BackButton(
     modifier: Modifier = Modifier
 ) {
     IconButton(
-        onClick = { navController.navigateUp() }, // Ação padrão: voltar na pilha de navegação
+        onClick = { navController.navigateUp() },
         modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Ícone padrão de "Voltar"
-            contentDescription = "Voltar" // Importante para acessibilidade
-            // contentDescription = stringResource(id = R.string.back_button_description) // Melhor ainda: usar recurso de string
+            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+            contentDescription = "Voltar"
         )
     }
 }

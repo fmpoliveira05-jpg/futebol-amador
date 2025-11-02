@@ -36,10 +36,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.navigation.Objects.AutRoutes
 import com.example.amfootball.navigation.Objects.GeralRoutes
+import com.example.amfootball.navigation.Objects.RotasUser
+import com.example.amfootball.R
+import com.example.amfootball.ui.theme.AMFootballTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +65,7 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
         scaffoldContent = { innerNav ->
             ScaffoldContentNavBarHomePage(navController = innerNav)
         },
-        internalNavController = internalNavController, // Passa o interno
+        internalNavController = internalNavController,
         globalNavController = globalNavController,
         topBarActions = {
             HomePageTopBarActions(
@@ -106,41 +111,46 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
 private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     val drawerItemsList = arrayListOf<NavigationItem>()
 
-    drawerItemsList.add(NavigationItem(label = "Home",
-        description = "Página inicial",
+    drawerItemsList.add(NavigationItem(label = stringResource(R.string.item_home),
+        description = stringResource(id = R.string.item_home_description),
         icon = Icons.Filled.Home,
         route = RouteNavBarHomePage.HOME_PAGE,
         isGlobalRoute = false))
-    drawerItemsList.add(NavigationItem(label = "Home My Team",
-        description = "Página da sua equipa",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_team),
+        description = stringResource(id = R.string.item_team_description),
         icon = Icons.Filled.Home,
         route = RoutesNavBarTeam.HOME_PAGE_TEAM,
         isGlobalRoute =  true))
-    drawerItemsList.add(NavigationItem(label = "Equipas",
-        description = "Lista com as equipas da app",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_list_team),
+        description = stringResource(id = R.string.item_list_team_description),
         icon = Icons.Filled.List,
         route = RouteNavBarHomePage.EQUIPAS,
         isGlobalRoute =  false))
-    drawerItemsList.add(NavigationItem(label = "Jogadores",
-        description = "Lista com todos os jogadores do app",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_list_players),
+        description = stringResource(id = R.string.item_list_players_description),
         icon = Icons.Filled.List,
         route = RouteNavBarHomePage.PLAYERS,
         isGlobalRoute =  false))
-    drawerItemsList.add(NavigationItem(label = "LeadBoard",
-        description = "Tabela das melhores equipas do app",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_leadboard),
+        description = stringResource(id = R.string.item_leadboard_description),
         icon = Icons.Filled.List, //Depois sacar
         route = RouteNavBarHomePage.LEADBOARD,
         isGlobalRoute =  false))
-    drawerItemsList.add(NavigationItem(label = "Configurações",
-        description = "Configrações do app",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_settings),
+        description = stringResource(id = R.string.item_settings_description),
         icon = Icons.Filled.Settings,
         route = GeralRoutes.SETTINGS,
         isGlobalRoute =  false))
-    drawerItemsList.add(NavigationItem(label = "Preferencias",
-        description = "Preferencias do site",
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_preference),
+        description = stringResource(id = R.string.item_preference_description),
         icon = Icons.Filled.Person, //Depois trocar
         route = GeralRoutes.PREFERENCE,
         isGlobalRoute =  false))
+    drawerItemsList.add(NavigationItem(label = "Perfil",
+        description = "PErfil de utilizador",
+        icon = Icons.Filled.Person, //Depois trocar
+        route = RotasUser.USER_PROFILE,
+        isGlobalRoute = true))
     return drawerItemsList
 }
 
@@ -185,8 +195,7 @@ private fun RowScope.HomePageTopBarActions(
 private fun LoginButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onClick,
-        // REMOVE .fillMaxWidth() DAQUI
-        modifier = modifier // Aplica apenas o modifier passado
+        modifier = modifier
     ) {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.Login,
@@ -202,8 +211,7 @@ private fun LoginButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
 private fun RegisterButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
     OutlinedButton(
         onClick = onClick,
-        // REMOVE .fillMaxWidth() DAQUI
-        modifier = modifier // Aplica apenas o modifier passado
+        modifier = modifier
     ) {
         Icon(
             imageVector = Icons.Default.PersonAdd,
@@ -212,5 +220,31 @@ private fun RegisterButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
         )
         Spacer(Modifier.size(ButtonDefaults.IconSpacing))
         Text("Registar")
+    }
+}
+
+@Preview(name = "Team Navigation - EN", locale = "en", showBackground = true)
+@Preview(name = "Team Navigation - PT", locale = "pt", showBackground = true)
+@Composable
+fun NavigatonDrawerNavBarPreviewLogged() {
+    AMFootballTheme {
+        NavigatonDrawerNavBarHomePage(
+            globalNavController = rememberNavController(),
+            isLoggedIn = true,
+            onLogout = {}
+        )
+    }
+}
+
+@Preview(name = "Team Navigation - EN", locale = "en", showBackground = true)
+@Preview(name = "Team Navigation - PT", locale = "pt", showBackground = true)
+@Composable
+fun NavigatonDrawerNavBarPreviewLogout() {
+    AMFootballTheme {
+        NavigatonDrawerNavBarHomePage(
+            globalNavController = rememberNavController(),
+            isLoggedIn = false,
+            onLogout = {}
+        )
     }
 }
