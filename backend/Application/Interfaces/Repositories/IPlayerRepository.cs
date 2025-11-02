@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
@@ -25,5 +26,7 @@ namespace Application.Interfaces.Repositories
         Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(Guid playerId);
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }
 }

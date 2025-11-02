@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -101,6 +102,21 @@ namespace Infrastructure.Repositories
                     TeamName = mr.Team.Name,
                     RequestDate = mr.InviteDate,
                     IsPlayerSender = mr.IsPlayerSender
+                })
+                .ToListAsync();
+        }
+
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync()
+        {
+            return await context.Player
+                .Where(p => p.IdTeam == null || p.IdTeam == Guid.Empty)
+                .Select(p => new PlayerWithoutTeamInfoDto
+                {
+                    PlayerId = p.Id,
+                    Name = p.Name,
+                    Age = DateTime.Now.Year - p.DateOfBirth.Year -
+                          ((DateTime.Now.DayOfYear < p.DateOfBirth.DayOfYear) ? 1 : 0),
+                    Position = p.Position
                 })
                 .ToListAsync();
         }

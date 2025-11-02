@@ -162,17 +162,10 @@ namespace Application.Services
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
             var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            var existing = await MembershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            TeamValidator.SendMembershipRequestValidation(team, admin, playerToInvite);
+            TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
             PlayerValidator.PlayerExists(playerToInvite);
-
-            if (playerToInvite.IdTeam == teamId)
-                throw new ValidationException("O jogador já pertence a esta equipa.");
-
-            var existing = await MembershipRequestRepository
-                .GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
-            if (existing != null)
-                throw new ValidationException("Já existe um pedido/convite pendente entre a equipa e este jogador.");
 
             var invite = new MembershipRequests
             {
@@ -270,9 +263,6 @@ namespace Application.Services
         {
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var adminConsulting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
 
             if (!existingTeam.MembershipRequests.Any())
             {
@@ -383,38 +373,12 @@ namespace Application.Services
         #region List Player To MemberShipRequest
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam()
         {
-            var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-            var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
-            var existing = await MembershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
+            var playersWithoutTeam = await PlayerRepository.GetPlayersWithoutTeamAsync();
 
-            TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
-            PlayerValidator.PlayerExists(playerToInvite);
+            if (playersWithoutTeam == null || !playersWithoutTeam.Any())
+                throw new NotFoundException("Não existem jogadores sem equipa no momento.");
 
-            var invite = new MembershipRequests
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = playerIdToInvite,
-                IdTeam = teamId,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = false,
-                Player = playerToInvite,
-                Team = team
-            };
-
-            await MembershipRequestRepository.AddMembershipRequest(invite);
-            await UnitOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = invite.Id,
-                PlayerId = invite.IdPlayer,
-                PlayerName = invite.Player?.Name ?? string.Empty,
-                TeamId = invite.IdTeam,
-                TeamName = invite.Team?.Name ?? string.Empty,
-                RequestDate = invite.InviteDate,
-                IsPlayerSender = invite.IsPlayerSender
-            };
+            return playersWithoutTeam;
         }
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter)

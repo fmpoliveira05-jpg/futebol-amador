@@ -196,6 +196,10 @@ namespace Application.Validators
             {
                 throw new ValidationException("Já existe um pedido pendente entre a equipa e este jogador.");
             }
+            if (playerReceiving == null)
+            {
+                throw new ValidationException("O jogador convidado não foi encontrado.");
+            }
             if (playerReceiving.IdTeam != Guid.Empty)
             {
                 if (playerReceiving.IdTeam == team.Id)
