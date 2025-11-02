@@ -27,7 +27,6 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<ITeamRepository> teamRepoMock;
         private Mock<IPasswordHasher> passwordHasherMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
-        private Mock<IUserRepository> userRepoMock;
 
         private PlayerService service;
 
@@ -633,7 +632,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
 
             // Verifica se o método de validação foi chamado corretamente
-            validatorMock.Verify(v => v.UpdatePlayerValidator(dto, null, null), Times.Once);
+            validatorMock.Verify(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()),
+                Times.Once);
         }
 
         [Test(Description = "Validação: lança exceção quando o novo email já está em uso por outro jogador")]
