@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_navbar_homepage">Pagina Inicial</string>
+    <string name="item_home">Pagina Inicial</string>
+    <string name="item_home_description">Pagina inicial da aplicacao</string>
+
+    <string name="item_team">Minha Equipa</string>
+    <string name="item_team_description">Pagina inicial da equipa do utilizador</string>
+
+    <string name="item_list_team">Equipas</string>
+    <string name="item_list_team_description">Pagina com a lista de equipas</string>
+
+    <string name="item_list_players">Jogadores</string>
+    <string name="item_list_players_description">Lista de jogadores sem clube</string>
+
+    <string name="item_leadboard">Tabela de Equipas</string>
+    <string name="item_leadboard_description">Tabela de classificacao das equipas</string>
+
+    <string name="item_settings">Configuracoes</string>
+    <string name="item_settings_description">Configuracoes da aplicacao</string>
+
+    <string name="item_preference">Preferencias</string>
+    <string name="item_preference_description">Preferencias do utilizador</string>
+</resources>

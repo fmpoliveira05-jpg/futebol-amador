@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="content_description_navbar">Abrir itens da nav bar</string>
+    <string name="navbar_home_page_team">Pagina Inicial Equipa</string>
+    <string name="description_navbar_homepage_team">Pagina inicial da equipa</string>
+    <string name="navbar_calendar">Calendario</string>
+    <string name="description_navbar_calendar">Calendario de jogos da equipa</string>
+</resources>
