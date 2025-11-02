@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Api.Controllers
 {
     [Authorize]
-    [Route("api/Team/{idTeam:guid}[controller]")]
+    [Route("api/Team/{idTeam:guid}/[controller]")]
     [ApiController]
     public class PostPoneMatchController: ControllerBase
     {

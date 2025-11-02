@@ -1,7 +1,8 @@
-﻿using Application.DTOs.Team;
-using Application.DTOs.MemberShip;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
+using Application.DTOs.MemberShip;
+using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 
 namespace Application.Interfaces.Services
 {
@@ -15,13 +16,17 @@ namespace Application.Interfaces.Services
 
         Task DeleteTeamAsync(Guid teamId, Guid currentUserId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid idAdmin);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid idAdmin, FilterMembershipRequestsTeam filters);
 
         Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
 
         Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId);
+
+        Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId);
+
+        Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
 
         Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId);
 

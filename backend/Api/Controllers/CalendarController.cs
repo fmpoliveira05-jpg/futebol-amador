@@ -133,6 +133,7 @@ namespace Api.Controllers
         #endregion
 
         #region StartMatch
+
         [HttpPost("StartMatch")]
         public async Task<IActionResult> StartMatch(Guid idTeam, [FromBody] Guid idMatch)
         {
@@ -147,17 +148,13 @@ namespace Api.Controllers
         }
 
         [HttpPost("LeaveStartMatch")]
-        public async Task<IActionResult> LeaveStartMatch(Guid idTeam, [FromBody] Guid idMatch)
+        public async Task<IActionResult> LeaveStartMatch(Guid idTeam)
         {
-            if (idMatch == Guid.Empty)
-            {
-                return BadRequest("O id de admin não pode estar vazio");
-            }
-
             await startMatchHubClientService.InitializeAsync();
             await startMatchHubClientService.LeaveStartMatchAsync();
             return Ok("Saiu do Hub com sucesso!");
         }
+
         #endregion
 
         #region FinishMatch

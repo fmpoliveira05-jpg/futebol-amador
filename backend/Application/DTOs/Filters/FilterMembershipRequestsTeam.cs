@@ -8,8 +8,6 @@ namespace Application.DTOs.Filters
         [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? SenderName { get; set; }
 
-        public bool? IsPlayerSender { get; set; }
-
         public DateOnly? MinDate { get; set; }
 
         public DateOnly? MaxDate { get; set; }

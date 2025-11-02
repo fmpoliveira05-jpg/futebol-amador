@@ -19,6 +19,7 @@ namespace Api.Controllers
             this.playerService = playerService;
         }
 
+        #region CRUD Player
         [HttpPost]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
@@ -34,32 +35,6 @@ namespace Api.Controllers
                     new { playerId = newPlayerId },
                     playerDto
                     );
-        }
-
-        [HttpGet("listTeamsToMemberShipRequest")]
-        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
-        {
-            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
-                           !string.IsNullOrEmpty(filter.NameRank) ||
-                           !string.IsNullOrEmpty(filter.City) ||
-                           filter.MinNumberPoints.HasValue ||
-                           filter.MaxNumberPoints.HasValue ||
-                           filter.MinAge.HasValue ||
-                           filter.MaxAge.HasValue ||
-                           filter.MinNumberPlayers.HasValue ||
-                           filter.MaxNumberPlayers.HasValue;
-
-            IEnumerable<InfoTeamsDto> list;
-            if (isFilter)
-            {
-                list = await playerService.GetTeamListWithFilters(filter);
-            }
-            else 
-            {
-                list = await playerService.GetListTeams();
-            }
-
-            return Ok(list);
         }
 
         [HttpDelete("{playerId:guid}")]
@@ -89,6 +64,34 @@ namespace Api.Controllers
             await playerService.UpdatePlayerAsync(playerId, dto);
 
             return Ok("Player information updated succesfully.");
+        }
+
+        #endregion
+
+        [HttpGet("listTeamsToMemberShipRequest")]
+        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        {
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await playerService.GetTeamListWithFilters(filter);
+            }
+            else 
+            {
+                list = await playerService.GetListTeams();
+            }
+
+            return Ok(list);
         }
 
         [HttpPut("{playerId:guid}/leave-team")]

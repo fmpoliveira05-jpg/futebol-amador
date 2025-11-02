@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services.Hub.ClienteService;
+﻿using Application.DTOs.RankMatchMaker;
+using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
@@ -51,10 +52,10 @@ namespace Application.Services.Hub.ClientService
         /**
          * Permite o cliente conectar-se ao Hub
          */
-        public async Task JoinRankMatchMakerAsync(Guid idPlayer, Guid idTeam, TimeOnly hoursGame)
+        public async Task JoinRankMatchMakerAsync(StartSearchDto startSearch)
         {
             await ConnectAsync();
-            await connection.InvokeAsync("JoinRankMatchMaker", idPlayer, idTeam, hoursGame);
+            await connection.InvokeAsync("JoinRankMatchMaker", startSearch);
         }
 
         /**

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
 {
-    //[Authorize]
+    [Authorize]
     public class RankMatchMakerHub: Hub<IRankMatchMakerHub>
     {
         private readonly IManagerRankMatchMakerService service;
@@ -21,12 +21,14 @@ namespace Api.Hubs
             this.geralValidator = geralValidator;
         }
 
-        public async Task JoinRankMatchMaker(Guid idTeam, TimeOnly hoursGame)
+        public async Task JoinRankMatchMaker(StartSearchDto startSearch)
         {
             var connectionId = Context.ConnectionId;
             var userId = Guid.Parse(Context.User.Identity.Name);
             EntryRankMatchMakerHub result;
             string groupName = "";
+            var idTeam = startSearch.IdTeam;
+            var hoursGame = startSearch.HoursGame;
 
             //Ver se tenho mais alguma exception
             try

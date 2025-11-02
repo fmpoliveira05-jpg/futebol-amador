@@ -290,6 +290,7 @@ namespace Application.Services
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, Guid adminUserId, FilterMembershipRequestsTeam filters)
         {
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
