@@ -28,7 +28,7 @@ namespace Unit.ApplicationTests.ServicesTests
     [TestFixture]
     public class TeamServiceTests
     {
-        // DEPENDÊNCIAS E CAMPOS COMUNS
+        #region Variables
         private Mock<ITeamRepository> _teamRepoMock;
         private Mock<IPlayerRepository> _playerRepoMock;
         private Mock<IUserRepository> _userRepoMock;
@@ -38,39 +38,9 @@ namespace Unit.ApplicationTests.ServicesTests
         private TeamService _sut;
         private readonly Mock<IMembershipRequestRepository> _membershipRequestRepoMock = new();
         private readonly Mock<IPlayerValidator> _playerValidatorMock = new();
+        #endregion
 
-        /// <summary>
-        /// Classe auxiliar interna para criar instâncias de Rank em contexto de teste.
-        /// O construtor de <see cref="Rank"/> é protegido.
-        /// </summary>
-        private class TestRank : Rank
-        {
-            public TestRank(string name = "Bronze")
-            {
-                typeof(Rank).GetProperty(nameof(Name))!.SetValue(this, name);
-                typeof(Rank).GetProperty(nameof(WinPoints))!.SetValue(this, 3);
-                typeof(Rank).GetProperty(nameof(DrawPoints))!.SetValue(this, 1);
-                typeof(Rank).GetProperty(nameof(LosePoints))!.SetValue(this, 0);
-                typeof(Rank).GetProperty(nameof(PointsToPromotion))!.SetValue(this, 100);
-            }
-        }
-
-        /// <summary>
-        /// Classe auxiliar interna para criar instâncias de pedidos de adesão em contexto de teste.
-        /// O construtor de <see cref="MembershipRequests"/> é protegido.
-        /// </summary>
-        private static MembershipRequests CreateMembershipRequest(Guid id, Guid playerId)
-        {
-            var request = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
-            request.GetType().GetProperty(nameof(MembershipRequests.Id))!.SetValue(request, id);
-            request.GetType().GetProperty(nameof(MembershipRequests.IdPlayer))!.SetValue(request, playerId);
-            return request;
-        }
-
-
-        /// <summary>
-        /// Executa antes de cada teste.
-        /// </summary>
+        #region SetUp
         [SetUp]
         public void SetUp()
         {
@@ -92,7 +62,33 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerValidatorMock.Object
             );
         }
+        #endregion
 
+        #region Methods Support
+        private class TestRank : Rank
+        {
+            public TestRank(string name = "Bronze")
+            {
+                typeof(Rank).GetProperty(nameof(Name))!.SetValue(this, name);
+                typeof(Rank).GetProperty(nameof(WinPoints))!.SetValue(this, 3);
+                typeof(Rank).GetProperty(nameof(DrawPoints))!.SetValue(this, 1);
+                typeof(Rank).GetProperty(nameof(LosePoints))!.SetValue(this, 0);
+                typeof(Rank).GetProperty(nameof(PointsToPromotion))!.SetValue(this, 100);
+            }
+        }
+
+        private static MembershipRequests CreateMembershipRequest(Guid id, Guid playerId)
+        {
+            var request = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
+            request.GetType().GetProperty(nameof(MembershipRequests.Id))!.SetValue(request, id);
+            request.GetType().GetProperty(nameof(MembershipRequests.IdPlayer))!.SetValue(request, playerId);
+            return request;
+        }
+        #endregion
+
+        #region Tests
+        // MUDAR ESTE TESTE! NÃO SE PASSA RANK, A EQUIPA POR DEFEITO JÁ É INICIALIZADA COM UNRANKED!
+        // POSSO É TER UM OUTRO TESTE EM QUE TENTO LHE PASSAR UM RANK E DÁ THROW
         // TESTE T1GE1: Criar equipa com sucesso (Rank padrão "Unranked")
         /// <summary>
         /// Garante que uma nova equipa é criada corretamente quando o Rank padrão "Unranked" existe.
@@ -213,6 +209,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
+        // MUDAR TESTE!
         // TESTE T4GE1: Criar equipa falha se não existir Rank padrão
         /// <summary>
         /// Garante que o método <see cref="TeamService.CreateTeamAsync"/> lança uma exceção de validação
@@ -457,17 +454,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once, "porque a operação deve ser persistida na base de dados");
         }
 
-
-        // TESTE 3B: Eliminar equipa (não sendo admin)
-        /// <summary>
-        /// Garante que um jogador comum (não administrador) não tem permissão para eliminar uma equipa.
-        /// Este teste assegura que:
-        /// - O método <see cref="TeamService.DeleteTeamAsync"/> lança uma <see cref="ValidationException"/>.
-        /// - A exceção contém uma mensagem informando que o jogador não é administrador.
-        /// - Nenhuma operação de persistência é realizada.
-        /// </summary>
-        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o utilizador não é administrador")]
-        public async Task DeleteTeamAsync_Should_Throw_If_Not_Admin()
+        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador pertence à equipa mas não é administrador")]
+        public async Task DeleteTeamAsync_Should_Throw_When_Player_Is_Not_Admin()
         {
             // ARRANGE
             var rank = new TestRank();
@@ -482,8 +470,73 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*", "porque apenas administradores podem eliminar equipas");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve ser feita nenhuma alteração à base de dados");
+                .WithMessage("*não é administrador*");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+        [Test(Description = "DeleteTeamAsync deve lançar exceção quando a equipa não existe")]
+        public async Task DeleteTeamAsync_Should_Throw_When_Team_Not_Found()
+        {
+            // ARRANGE
+            var player = new Player { Id = Guid.NewGuid(), IsAdmin = true };
+            _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(It.IsAny<Guid>()))
+                         .ReturnsAsync((Teams?)null);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id))
+                           .ReturnsAsync(player);
+
+            // ACT
+            Func<Task> act = async () => await _sut.DeleteTeamAsync(Guid.NewGuid(), player.Id);
+
+            // ASSERT
+            await act.Should().ThrowAsync<NotFoundException>()
+                .WithMessage("*não existe*");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador é admin de outra equipa e tenta eliminar uma equipa que não administra")]
+        public async Task DeleteTeamAsync_Should_Throw_When_Player_Is_Admin_Of_Another_Team()
+        {
+            // ARRANGE
+            var rank = new TestRank();
+            var teamX = new Teams("TeamX", "Desc X", new byte[1], new Pitch("Campo X", "Rua X"), rank);
+            var teamY = new Teams("TeamY", "Desc Y", new byte[1], new Pitch("Campo Y", "Rua Y"), rank);
+            var playerAdmin = new Player { Id = Guid.NewGuid(), IdTeam = teamX.Id, IsAdmin = true };
+            teamX.Members.Add(playerAdmin);
+            _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(teamY.Id)).ReturnsAsync(teamY);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerAdmin.Id)).ReturnsAsync(playerAdmin);
+
+            // ACT
+            Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, playerAdmin.Id);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ValidationException>()
+                .WithMessage("*não pertence*");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+        }
+
+        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador pertence a outra equipa e não é administrador")]
+        public async Task DeleteTeamAsync_Should_Throw_When_Player_Belongs_To_Other_Team_And_Not_Admin()
+        {
+            // ARRANGE
+            var rank = new TestRank();
+            var teamX = new Teams("TeamX", "Desc X", new byte[1], new Pitch("Campo X", "Rua X"), rank);
+            var teamY = new Teams("TeamY", "Desc Y", new byte[1], new Pitch("Campo Y", "Rua Y"), rank);
+            var player = new Player
+            {
+                Id = Guid.NewGuid(),
+                IdTeam = teamX.Id,
+                IsAdmin = false
+            };
+            _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(teamY.Id)).ReturnsAsync(teamY);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
+
+            // ACT
+            Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, player.Id);
+
+            // ASSERT
+            await act.Should().ThrowAsync<ValidationException>()
+                .WithMessage("*não pertence à equipa*");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
         // TESTE 4A: Remover jogador da equipa (sendo admin)
@@ -556,6 +609,12 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve haver persistência sem permissões");
         }
 
+        // FALTA O TENTAR REMOVER JOGADOR DA EQUIPA X SENDO ADMIN DA EQUIPA Y
+
+        // TENTAR REMOVER UM JOGADOR QUE NÃO PERTENCE À EQUIPA
+
+        // TENTAR REMOVER UM JOGADOR QUANDO A EQUIPA TEM 11 JOGADORES
+
         // TESTE 5A: Promover jogador da equipa (sendo admin)
         /// <summary>
         /// Garante que um administrador pode promover um jogador comum a administrador.
@@ -616,6 +675,13 @@ namespace Unit.ApplicationTests.ServicesTests
                      .WithMessage("*não é administrador*");
         }
 
+        // TENTAR PROMOVER UM JOGADOR QUE JÁ É ADMIN DA EQUIPA
+
+        // A PESSOA QUE TENTA PROMOVER JOGADOR DA EQUIPA PARA ADMIN NÃO PERTENCE À EQUIPA
+
+        // TENTAR PROMOVER UM JOGADOR QUE NÃO PERTENCE À EQUIPA (PODE ESTAR SEM CLUBE OU FAZER PARTE DE OUTRA EQUIPA)
+
+        // TENTAR PROMOVER JOGADOR PARA ADMIN QUANDO A EQUIPA JÁ TEM O LIMITE DE ADMINS
 
         // TESTE 6A: Rebaixar admin da equipa (sendo admin)
         /// <summary>
@@ -675,6 +741,12 @@ namespace Unit.ApplicationTests.ServicesTests
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administrador*");
         }
+
+        // TENTAR REMOVER UM ADMIN DA EQUIPA SENDO ADMIN DE OUTRA EQUIPA
+
+        // TENTAR REMOVER UM ADMIN DA EQUIPA COM JOGOS MARCADOS
+
+        // TENTAR AUTO REMOVER-SE
 
 
         // TESTE 7A: Obter equipa por ID
@@ -742,6 +814,8 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Select(p => p.Name).Should().Contain(new[] { "A", "B" });
         }
 
+        // FALTA O TENTAR CONSULTAR LISTA DE PLAYERS DE UMA EQUIPA QUE NÃO EXISTE
+
         // ==========================================================
         // TESTE 9: Aceitar pedido de adesão (sendo admin)
         // ==========================================================
@@ -782,6 +856,8 @@ namespace Unit.ApplicationTests.ServicesTests
             player.MembershipRequests.Should().BeEmpty();
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
+
+        // Tentar aceitar um pedido de adesão não sendo um administrador da equipa 
 
         // ==========================================================
         // TESTE 10A: Rejeitar pedido de adesão (sendo admin)
@@ -897,5 +973,13 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Select(r => r.PlayerName).Should().Contain(new[] { "Jogador 1", "Jogador 2" });
         }
 
+        // TESTE DE CONSULTAR LISTA DE PEDIDOS DE ADESÃO COM EQUIPA CHEIA
+
+        // TESTE TENTAR CONSULTAR SENDO JOGADOR NÃO ADMIN
+
+        // TESTE TENTAR CONSULTAR SENDO ADMIN DE OUTRO CLUBE
+
+        // TESTE PARA CONSULTAR LISTA DE ADMINS
+        #endregion
     }
 }

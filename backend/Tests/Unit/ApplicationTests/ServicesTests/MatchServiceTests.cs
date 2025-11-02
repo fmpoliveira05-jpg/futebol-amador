@@ -19,6 +19,7 @@ namespace Unit.ApplicationTests.ServicesTests
     [TestFixture]
     public class MatchServiceTests
     {
+        #region Variables
         private Mock<IMatchRepository> _matchRepoMock;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
@@ -26,7 +27,9 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICalendarValidator> _validatorMock;
         private Mock<IPlayerRepository> _playerRepoMock;
         private MatchService _sut;
+        #endregion
 
+        #region SetUp
         [SetUp]
         public void SetUp()
         {
@@ -46,7 +49,9 @@ namespace Unit.ApplicationTests.ServicesTests
                 _playerRepoMock.Object
             );
         }
+        #endregion
 
+        #region Tests
         [Test(Description = "GetCalendar deve devolver todas as partidas para uma equipa")]
         public async Task GetCalendar_Should_Return_All_Matches_For_Team()
         {
@@ -572,5 +577,6 @@ namespace Unit.ApplicationTests.ServicesTests
             await act.Should().ThrowAsync<ValidationException>().WithMessage("O jogador precisa estar associado a uma equipa para cancelar uma partida.");
         }
         */
+        #endregion
     }
 }
