@@ -1,12 +1,12 @@
-package com.example.amfootball.ui.screens.User
+package com.example.amfootball.ui.screens.user
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 
 @Composable
-fun Settings(){
+fun UpdateDataUserScreen(){
     Column {
-        Text(text = "Tela Principal")
+        Text(text = "Ecrã Principal")
     }
 }

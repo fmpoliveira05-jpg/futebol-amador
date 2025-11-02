@@ -56,8 +56,8 @@ fun NavigatonDrawer(itens: List<NavigationItem>,
                         item = item,
                         selectedItem = selectedItem,
                         updatedSelected = { selectedItem = it },
-                        internalNavController = internalNavController, // Passa o interno
-                        globalNavController = globalNavController,   // Passa o global
+                        internalNavController = internalNavController,
+                        globalNavController = globalNavController,
                         drawerState = drawerState,
                     )
                 }
@@ -150,7 +150,7 @@ fun TopBar(onNavIconClick: () -> Unit,
             ) {
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    contentDescription = stringResource(R.string.content_Description_NavBar)
+                    contentDescription = stringResource(R.string.content_description_navbar)
                 )
             }
         },

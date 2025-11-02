@@ -67,12 +67,12 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     val drawerItemsList = arrayListOf<NavigationItem>()
 
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_home_page_team),
-        description = stringResource(id= R.string.description_NavBar_HomePageTeam),
+        description = stringResource(id= R.string.description_navbar_homepage_team),
         icon = Icons.Filled.Home,
         route = RoutesNavBarTeam.HOME_PAGE_TEAM,
         isGlobalRoute = false))
-    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_Calendar),
-        description = stringResource(id = R.string.descritpion_NavBar_Calendar),
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_calendar),
+        description = stringResource(id = R.string.description_navbar_calendar),
         icon = Icons.Filled.DateRange,
         route = RoutesNavBarTeam.CALENDAR,
         isGlobalRoute = false))
@@ -100,15 +100,18 @@ private fun RowScope.HomePageTeamTopBarActions(
 }
 
 @Preview(
-    name = "Default (EN)",
+    name = "NavBar HomePage Team EN",
     locale = "en",
-    showBackground = true,
+    showBackground = true
 )
 @Preview(
-    name = "Português (PT)",
+    name = "NavBar HomePage Team PT",
     locale = "pt",
-    showBackground = true,
+    showBackground = true
 )
+annotation class LocalePreviews
+
+@LocalePreviews
 @Composable
 fun PreviewNavigatonDrawerTeamLogged() {
     val fakeGlobalNavController = rememberNavController()
@@ -120,16 +123,7 @@ fun PreviewNavigatonDrawerTeamLogged() {
     )
 }
 
-@Preview(
-    name = "Default (EN)",
-    locale = "en",
-    showBackground = true,
-)
-@Preview(
-    name = "Português (PT)",
-    locale = "pt",
-    showBackground = true,
-)
+@LocalePreviews
 @Composable
 fun PreviewNavigatonDrawerTeamLogout() {
     val fakeGlobalNavController = rememberNavController()

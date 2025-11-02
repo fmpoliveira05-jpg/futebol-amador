@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.User
+package com.example.amfootball.ui.screens.user
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,14 +33,21 @@ import com.example.amfootball.ui.components.BackTopBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navController: NavHostController){
-
     Scaffold(
-        topBar = { BackTopBar(navController = navController, title = stringResource(id = R.string.back_button_title)) }
-    ) { paddingValues ->
-        LoginContent(modifier = Modifier
-            .padding(paddingValues)
-            .padding(16.dp))
-    }
+        topBar = {
+            BackTopBar(
+                navController = navController,
+                title = stringResource(id = R.string.back_button_title)
+            )
+        },
+        content = { paddingValues ->
+            LoginContent(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            )
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +61,7 @@ private fun LoginContent(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally
     ) {
-        Text(text = stringResource(id = R.string.login_Title))
+        Text(text = stringResource(id = R.string.login_title))
         Spacer(Modifier.height(20.dp))
 
         LoginInputFields(
@@ -152,6 +159,5 @@ private fun determineKeyboardOptions(isPassword: Boolean = false): KeyboardOptio
 )
 @Composable
 fun PreviewLoginScreen() {
-    val fakeNavController = rememberNavController()
-    LoginScreen(navController = fakeNavController)
+    LoginScreen(navController = rememberNavController())
 }

@@ -11,12 +11,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
-import com.example.amfootball.ui.screens.User.LoginScreen
-import com.example.amfootball.ui.screens.User.SignInScreen
+import com.example.amfootball.ui.screens.user.LoginScreen
+import com.example.amfootball.ui.screens.user.SignInScreen
 import androidx.navigation.NavGraphBuilder
 import com.example.amfootball.navigation.Objects.AutRoutes
+import com.example.amfootball.navigation.Objects.UserPages
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
+import com.example.amfootball.ui.screens.user.ProfileScreen
 
 @Composable
 fun MainNavigation() {
@@ -73,6 +75,9 @@ private fun NavGraphBuilder.NavBars(
 
 private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
     //Provavelmente para futuro vai ser importante o NavHostController
+    composable(UserPages.PERFIL_USER) {
+        ProfileScreen(globalNavController)
+    }
 
     AutPages(globalNavController = globalNavController)
 }
