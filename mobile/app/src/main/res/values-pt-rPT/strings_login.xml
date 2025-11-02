@@ -1,0 +1,9 @@
+<resources>
+    <string name="back_button_title" translatable="false">Login</string>
+    <string name="login_Title" translatable="false">Login</string>
+    <string name="email_field" translatable="false">Email</string>
+    <string name="email_label">Escreva o seu email</string>
+    <string name="password_field" translatable="false">Palavra Passe</string>
+    <string name="password_label">Escreva a sua palavra passe</string>
+    <string name="login_button">Entrar</string>
+</resources>

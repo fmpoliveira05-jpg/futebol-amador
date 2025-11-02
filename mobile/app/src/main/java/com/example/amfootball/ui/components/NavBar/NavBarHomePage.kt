@@ -36,10 +36,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.navigation.Objects.AutRoutes
 import com.example.amfootball.navigation.Objects.GeralRoutes
+import com.example.amfootball.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +108,7 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
 private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     val drawerItemsList = arrayListOf<NavigationItem>()
 
-    drawerItemsList.add(NavigationItem(label = "Home",
+    drawerItemsList.add(NavigationItem(label = stringResource(R.st),
         description = "Página inicial",
         icon = Icons.Filled.Home,
         route = RouteNavBarHomePage.HOME_PAGE,

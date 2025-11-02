@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -65,13 +66,13 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController) {
 private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     val drawerItemsList = arrayListOf<NavigationItem>()
 
-    drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_home_page_team),
-        description = stringResource(R.string.description_NavBar_HomePageTeam),
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_home_page_team),
+        description = stringResource(id= R.string.description_NavBar_HomePageTeam),
         icon = Icons.Filled.Home,
         route = RoutesNavBarTeam.HOME_PAGE_TEAM,
         isGlobalRoute = false))
-    drawerItemsList.add(NavigationItem(label = stringResource(R.string.navbar_Calendar),
-        description = stringResource(R.string.descritpion_NavBar_Calendar),
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_Calendar),
+        description = stringResource(id = R.string.descritpion_NavBar_Calendar),
         icon = Icons.Filled.DateRange,
         route = RoutesNavBarTeam.CALENDAR,
         isGlobalRoute = false))
@@ -96,4 +97,46 @@ private fun RowScope.HomePageTeamTopBarActions(
             )
         }
     }
+}
+
+@Preview(
+    name = "Default (EN)",
+    locale = "en",
+    showBackground = true,
+)
+@Preview(
+    name = "Português (PT)",
+    locale = "pt",
+    showBackground = true,
+)
+@Composable
+fun PreviewNavigatonDrawerTeamLogged() {
+    val fakeGlobalNavController = rememberNavController()
+
+    NavigatonDrawerTeam(
+        globalNavController = fakeGlobalNavController,
+        isLoggedIn = true,
+        onLogout = {}
+    )
+}
+
+@Preview(
+    name = "Default (EN)",
+    locale = "en",
+    showBackground = true,
+)
+@Preview(
+    name = "Português (PT)",
+    locale = "pt",
+    showBackground = true,
+)
+@Composable
+fun PreviewNavigatonDrawerTeamLogout() {
+    val fakeGlobalNavController = rememberNavController()
+
+    NavigatonDrawerTeam(
+        globalNavController = fakeGlobalNavController,
+        isLoggedIn = true,
+        onLogout = {}
+    )
 }
