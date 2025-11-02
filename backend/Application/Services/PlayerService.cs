@@ -18,15 +18,15 @@ namespace Application.Services
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDto)
+        public async Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDTO playerDto)
         {
             var player = new Player
             {
+                Id = userId,
                 Name = playerDto.Name,
                 DateOfBirth = playerDto.DateOfBirth,
                 Address = playerDto.Address,
-                Email = playerDto.Email,
-                Password = playerDto.Password,
+                Email = email,
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,
@@ -40,7 +40,7 @@ namespace Application.Services
             return player.Id;
         }
 
-        public async Task DeletePlayerAsync(Guid playerId)
+        public async Task DeletePlayerAsync(string playerId)
         {
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -54,7 +54,7 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid playerId)
+        public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -75,7 +75,7 @@ namespace Application.Services
             return playerDetails;
         }
 
-        public async Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto)
+        public async Task UpdatePlayerAsync(string playerId, UpdatePlayerDTO dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -107,7 +107,8 @@ namespace Application.Services
             await unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<String> LeaveTeam(Guid playerId)
+        //Falta tirar o player da lista de players do team
+        public async Task<String> LeaveTeam(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 

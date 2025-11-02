@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Constants;
 using Domain.Entities;
 
 namespace Application.DTOs.MemberShip
@@ -12,7 +14,8 @@ namespace Application.DTOs.MemberShip
         public Guid RequestId { get; set; }
 
         public string PlayerName { get; set; }
-        public Guid PlayerId { get; set; }
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string PlayerId { get; set; }
 
         public string TeamName { get; set; }
 

@@ -1,11 +1,8 @@
-using FirebaseAdmin;
-using Google.Apis.Auth.OAuth2;
 using Api.Extensions;
-using Application;
-using Infrastructure;
 using Api.Middlewares;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
+using Application;
+using Google.Cloud.Firestore;
+using Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,36 +16,53 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Define a informação básica do Swagger
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Api", Version = "v1" });
+
+    // 1. Definir o esquema de segurança (Security Scheme) que o Swagger vai usar
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Autenticação JWT (Bearer). Insira 'Bearer' [espaço] e depois o seu token.\r\n\r\nExemplo: 'Bearer eyJhbGciOi...'"
+    });
+
+    // 2. Tornar o esquema de segurança obrigatório para os endpoints
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 //adiciona o Tratador de exceções global
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
-// 1. INICIALIZAR O SDK DO FIREBASE USANDO AS CREDENCIAIS PADRÃO DA APLICAÇÃO
-var firebaseCredentialPath = builder.Configuration["Firebase:CredentialPath"];
-
-// 2. INICIALIZAR O SDK DO FIREBASE USANDO O FICHEIRO
-FirebaseApp.Create(new AppOptions()
-{
-    Credential = GoogleCredential.FromFile(firebaseCredentialPath)
-});
 
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
+if (string.IsNullOrEmpty(firebaseProjectId))
+{
+    throw new ArgumentNullException(nameof(firebaseProjectId), "Firebase:ProjectId não pode ser nulo no appsettings.json");
+}
 
-// 3. CONFIGURAR A AUTENTICAÇÃO JWT (O próximo passo da receita original)
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = $"https://securetoken.google.com/{firebaseProjectId}",
-            ValidateAudience = true,
-            ValidAudience = firebaseProjectId,
-            ValidateLifetime = true
-        };
-    });
+//Autenticação com Firebase
+builder.Services.AddFirebaseAuthentication(builder.Configuration);
+
+builder.Services.AddSingleton(provider => FirestoreDb.Create(firebaseProjectId));
 
 var app = builder.Build();
 
@@ -60,6 +74,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
 }
 
 app.UseHttpsRedirection();

@@ -4,14 +4,14 @@ namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<Guid> CreatePlayerAsync(CreatePlayerDTO playerDTO);
+        Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDTO playerDTO);
 
-        Task<PlayerDetailsDTO> GetPlayerByIdAsync(Guid teamId);
+        Task<PlayerDetailsDTO> GetPlayerByIdAsync(string teamId);
 
-        Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDTO dto);
+        Task UpdatePlayerAsync(string playerId, UpdatePlayerDTO dto);
 
-        Task DeletePlayerAsync(Guid playerId);
+        Task DeletePlayerAsync(string playerId);
 
-        Task<String> LeaveTeam(Guid playerId);
+        Task<String> LeaveTeam(string playerId);
     }
 }

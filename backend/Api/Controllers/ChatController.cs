@@ -7,7 +7,7 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // Exige que o utilizador esteja autenticado via Firebase
+[Authorize] // Exige que o utilizador esteja autenticado
 public class ChatController : ControllerBase
 {
     private readonly IChatRoomService ChatService;
@@ -31,5 +31,15 @@ public class ChatController : ControllerBase
         var roomId = await ChatService.CreateRoomAsync(request, userId);
 
         return Ok(new { roomId = roomId });
+    }
+
+    [HttpGet("my-rooms")]
+    public async Task<IActionResult> GetMyRooms()
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var rooms = await ChatService.GetMyRoomsAsync(userId);
+        return Ok(rooms);
     }
 }

@@ -33,7 +33,7 @@ namespace Application.Services
             RankRepository = rankRepository;
 
         }
-        public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
+        public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
             var playerAcceptingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
@@ -68,7 +68,7 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, Guid playerId)
+        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, string playerId)
         {
             var existingTeam = await TeamRepository.GetTeamByNameAsync(teamDto.Name);
             var rank = await RankRepository.GetDefaultRankAsync();
@@ -92,7 +92,7 @@ namespace Application.Services
             return newTeam.Id;
         }
 
-        public async Task DeleteTeamAsync(Guid teamId, Guid currentUserId)
+        public async Task DeleteTeamAsync(Guid teamId, string currentUserId)
         {
             var teamToDeleteTask = TeamRepository.GetTeamForDeletionAsync(teamId);
             var playerTryingToDeleteTask = PlayerRepository.GetPlayerByIdAsync(currentUserId);
@@ -116,7 +116,7 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, Guid currentUserId)
+        public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId)
         {
             var teamToUpdateTask = TeamRepository.GetTeamForUpdateAsync(teamId);
             var playerTryingToUpdateTask = PlayerRepository.GetPlayerByIdAsync(currentUserId);
@@ -157,7 +157,7 @@ namespace Application.Services
 
         }
 
-        public async Task DemoteAdminToPlayerAsync(Guid teamId, Guid adminIdToDemote, Guid adminDemotingId)
+        public async Task DemoteAdminToPlayerAsync(Guid teamId, string adminIdToDemote, string adminDemotingId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToDemoteTask = PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
@@ -202,7 +202,7 @@ namespace Application.Services
 
         }
 
-        public async Task RemovePlayerFromTeamAsync(Guid teamId, Guid playerIdToRemove, Guid playerRemovingId)
+        public async Task RemovePlayerFromTeamAsync(Guid teamId, string playerIdToRemove, string playerRemovingId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToRemoveTask = PlayerRepository.GetPlayerByIdAsync(playerIdToRemove);
@@ -226,7 +226,7 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task PromotePlayerToAdminAsync(Guid teamId, Guid playerIdToPromoteId, Guid playerIdToPromotingId)
+        public async Task PromotePlayerToAdminAsync(Guid teamId, string playerIdToPromoteId, string playerIdToPromotingId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToPromoteTask = PlayerRepository.GetPlayerByIdAsync(playerIdToPromoteId);
@@ -244,7 +244,7 @@ namespace Application.Services
 
             await UnityOfWork.SaveChangesAsync();
         }
-        public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, Guid adminUserId)
+        public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
             var playerRejectingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
@@ -277,7 +277,7 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, Guid adminUserId)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string adminUserId)
         {
             var existingTeamTask = TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var adminTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
@@ -323,7 +323,7 @@ namespace Application.Services
         }
 
 
-        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(Guid playerId, TeamSearchFiltersDto filters)
+        public async Task<List<TeamSummaryDto>> SearchTeamsAsync(string playerId, TeamSearchFiltersDto filters)
         {
             var player = await PlayerRepository.GetPlayerByIdAsync(playerId);
             

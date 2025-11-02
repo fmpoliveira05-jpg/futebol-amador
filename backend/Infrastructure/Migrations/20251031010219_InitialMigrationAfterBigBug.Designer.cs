@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AmateurFootballContext))]
-    [Migration("20251021132618_CreateTableCancelledMatch")]
-    partial class CreateTableCancelledMatch
+    [Migration("20251031010219_InitialMigrationAfterBigBug")]
+    partial class InitialMigrationAfterBigBug
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -154,8 +154,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdPlayer")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdPlayer")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("IdTeam")
                         .HasColumnType("uniqueidentifier");
@@ -163,7 +165,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("InviteDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Sender")
+                    b.Property<bool>("IsPlayerSender")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -184,8 +186,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("ChatId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdUser")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("MessageText")
                         .IsRequired()
@@ -346,7 +350,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("IdPitch")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("IdRank")
+                    b.Property<Guid>("IdRank")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -367,9 +371,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Users", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -384,25 +388,22 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<int>("PhoneNumber")
-                        .HasColumnType("int");
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
 
                     b.UseTptMappingStrategy();
                 });
@@ -414,16 +415,19 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("IdTeam")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("IsAdminLastChangedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("idTeam")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("TeamId");
@@ -443,13 +447,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Matches", "Match")
                         .WithMany()
                         .HasForeignKey("IdMatch")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Teams", "Team")
                         .WithMany()
                         .HasForeignKey("IdTeam")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Match");
@@ -620,7 +624,9 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.Rank", "Rank")
                         .WithMany()
-                        .HasForeignKey("IdRank");
+                        .HasForeignKey("IdRank")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Calendar");
 

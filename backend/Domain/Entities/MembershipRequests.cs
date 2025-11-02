@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
@@ -14,7 +15,8 @@ namespace Domain.Entities
         public Player Player { get; set; }
 
         [ForeignKey("Player")]
-        public Guid IdPlayer { get; set; } //FK
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string IdPlayer { get; set; } //FK
 
         public Teams Team { get; set; }
 

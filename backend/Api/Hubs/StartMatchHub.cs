@@ -21,7 +21,7 @@ namespace Api.Hubs
         public async Task JoinStartMatch(Guid idMatch, Guid idTeam)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Guid.Parse(Context.User.Identity.Name);
+            var userId = Context.User.Identity.Name;
             var groupName = GetGroupName(idMatch);
             JoinStartMatchResult result;
             

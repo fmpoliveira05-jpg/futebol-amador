@@ -2,6 +2,7 @@
 using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Google.Api;
 using Google.Cloud.Firestore;
 
 namespace Application.Services
@@ -13,9 +14,9 @@ namespace Application.Services
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
 
-        public FirebaseChatService(ITeamRepository teamRepository, IPlayerRepository playerRepository)
+        public FirebaseChatService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository)
         {
-            DbContext = FirestoreDb.Create();
+            DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
         }

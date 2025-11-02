@@ -20,7 +20,7 @@ namespace Api.Controllers
             TeamService = teamService;
         }
 
-        private Guid GetCurrentUserId()
+        private string? GetCurrentUserId()
         {
             /*
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -30,7 +30,7 @@ namespace Api.Controllers
             }
             return userId;
              */
-            return Guid.Empty;
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
         [HttpPost]
@@ -74,7 +74,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{teamId}/members/{playerIdToRemove}")]
-        public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, Guid playerIdToRemove)
+        public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, string playerIdToRemove)
         {
                 var playerRemovingId = GetCurrentUserId();
                 await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
@@ -82,7 +82,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("{teamId}/members/{playerIdToPromote}/promote")]
-        public async Task<IActionResult> PromotePlayerToAdmin(Guid teamId, Guid playerIdToPromote)
+        public async Task<IActionResult> PromotePlayerToAdmin(Guid teamId, string playerIdToPromote)
         {
                 var playerPromotingId = GetCurrentUserId();
                 await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, playerPromotingId);
@@ -90,7 +90,7 @@ namespace Api.Controllers
         }
 
         [HttpPost("{teamId}/members/{adminIdToDemote}/demote")]
-        public async Task<IActionResult> DemoteAdminToPlayer(Guid teamId, Guid adminIdToDemote)
+        public async Task<IActionResult> DemoteAdminToPlayer(Guid teamId, string adminIdToDemote)
         {
             var adminDemotingId = GetCurrentUserId();
             await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, adminDemotingId);

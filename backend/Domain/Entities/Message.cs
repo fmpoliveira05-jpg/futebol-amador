@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
- * Entidade que representa uma mensagem no sistema.
+ * Deprecated
  */
 namespace Domain.Entities
 {
@@ -15,7 +16,8 @@ namespace Domain.Entities
         public Users Actor { get; set; }
 
         [ForeignKey("Actor")]
-        public Guid IdUser { get; set; } //FK
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string IdUser { get; set; } //FK
 
         [MaxLength(250)]
         public string MessageText { get; set; }

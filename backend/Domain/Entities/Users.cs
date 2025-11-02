@@ -6,7 +6,8 @@ namespace Domain.Entities
     public abstract class Users
     {
         [Key]
-        public Guid Id { get; set; } = Guid.NewGuid();
+        [MaxLength(128)]
+        public string Id { get; set; }
 
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string Name { get; set; }
@@ -16,12 +17,9 @@ namespace Domain.Entities
         [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string Address { get; set; }
 
-        [MaxLength(50)]
+        [MaxLength(256)]
         [EmailAddress(ErrorMessage = "Invalid email format")] 
         public string Email { get; set; }
-
-        [MinLength(ModelConstants.UserConst.MinPasswordLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
-        public string Password { get; set; }
 
         [StringLength(9, ErrorMessage = "Phone number must have 9 digits")]
         public string Phone { get; set; }
@@ -32,13 +30,13 @@ namespace Domain.Entities
         protected Users() { }
 
         // Construtor público para inicializar todas as propriedades obrigatórias
-        public Users(string name, DateOnly dateOfBirth, string address, string email, string password, string phone)
+        public Users(string Id,string name, DateOnly dateOfBirth, string address, string email, string phone)
         {
+            this.Id = Id;
             this.Name = name;
             this.DateOfBirth = dateOfBirth;
             this.Address = address;
             this.Email = email;
-            this.Password = password;
             this.Phone = phone;
             this.CreationDate = DateTime.Now;
         }

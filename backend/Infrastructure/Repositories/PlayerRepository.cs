@@ -34,12 +34,12 @@ namespace Infrastructure.Repositories
             return await context.Player.FirstOrDefaultAsync(p => p.Email == email);
         }
 
-        public async Task<Player?> GetPlayerByIdAsync(Guid id)
+        public async Task<Player?> GetPlayerByIdAsync(string id)
         {
             return await context.Player.FindAsync(id);
         }
 
-        public async Task<List<Player>> GetPlayersListByIdListAsync(List<Guid> playerIdList)
+        public async Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList)
         {
             return await context.Player
                 .Where(p => playerIdList.Contains(p.Id))

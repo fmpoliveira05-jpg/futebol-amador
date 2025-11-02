@@ -99,7 +99,7 @@ namespace Application.Services
         }
 
         //Validar se o IdMatch é o mesmo do da ultima pessoa
-        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {  
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
             
@@ -152,7 +152,7 @@ namespace Application.Services
             return result;
         }
 
-        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
    

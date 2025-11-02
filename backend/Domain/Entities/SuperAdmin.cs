@@ -7,9 +7,9 @@ namespace Domain.Entities
     {
         protected SuperAdmin() { }
 
-        public SuperAdmin(string name, DateOnly dateOfBirth, string address, string email, 
+        public SuperAdmin(string userId,string name, DateOnly dateOfBirth, string address, string email, 
             string password, string phoneNumber)
-            : base(name, dateOfBirth, address, email, password, phoneNumber)
+            : base(userId,name, dateOfBirth, address, email, phoneNumber)
         {
 
         }

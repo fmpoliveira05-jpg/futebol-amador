@@ -8,7 +8,8 @@ namespace Application.DTOs.Chat
 {
     public class CreateChatRoomDto
     {
+        public string? roomId {get; set;}
         public string RoomName { get; set; }
-        public List<Guid> ParticipantIds { get; set; }
+        public List<string> ParticipantIds { get; set; }
     }
 }

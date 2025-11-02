@@ -11,8 +11,8 @@ namespace Application.DTOs.PlayerDTOs
     {
         public string Name { get; set; }
 
-        public Guid PlayerId { get; set; }
-
+        public string PlayerId { get; set; }
+        //Lembrar de retirar e por no playerDataComplete
         public DateOnly DateOfBirth { get; set; }
 
         public string Address { get; set; }
