@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Team;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
@@ -12,8 +13,13 @@ namespace Application.Validators
     {
         private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
 
-        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Teams? team, Player? playerCreating)
+        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank,Teams? team, Player? playerCreating)
         {
+            if (rank == null)
+            {
+                throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
+            }
+
             PlayerValidator.PlayerExists(playerCreating);
             if (TeamExists(team))
             {
@@ -121,6 +127,14 @@ namespace Application.Validators
                     throw new ValidationException($"O Player?? de id '{playerRemoving.Id}' não pode expulsar o jogador com id '{playerRemoved.Id}' porque este é administrador há mais tempo.");
                 }
             }
+
+            team.Members.Remove(playerRemoved);
+            playerRemoved.IdTeam = null;
+            if (playerRemoved.IsAdmin)
+            {
+                playerRemoved.IsAdmin = false;
+                playerRemoved.IsAdminLastChangedAt = DateTime.UtcNow;
+            }
         }
 
         // Não validar se o team tem membros, porque adicionamos verificação no Player e quando o ultimo membro sair a equipa é eliminada!
@@ -152,6 +166,10 @@ namespace Application.Validators
         //não validar se o playerApproved pertence à equipa, porque a validação deve ser feita quando ele tenta aceitar o pedido!
         public void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete)
         {
+            if (!TeamExists(team))
+            {
+                throw new ValidationException($"A equipa não existe.");
+            }
             ValidatePlayerAndTeamExists(team, playerApproving);
             ValidatePlayerBelongToTeamAndIsAdmin(team, playerApproving);
             if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
@@ -172,8 +190,20 @@ namespace Application.Validators
             }
         }
 
-        public void SendMembershipRequestValidation(Teams? team, Player? playerSending, Player? playerReceiving)
+        public void SendMembershipRequestValidation(MembershipRequests? mr, Teams? team, Player? playerSending, Player? playerReceiving)
         {
+            if (mr != null)
+            {
+                throw new ValidationException("Já existe um pedido pendente entre a equipa e este jogador.");
+            }
+            if (playerReceiving.IdTeam != Guid.Empty)
+            {
+                if (playerReceiving.IdTeam == team.Id)
+                    throw new ValidationException("O jogador já pertence a esta equipa.");
+                else
+                    throw new ValidationException("O jogador já pertence a outra equipa e não pode ser convidado.");
+            }
+
             ValidatePlayerAndTeamExists(team, playerSending);
             PlayerValidator.PlayerExists(playerReceiving);
             ValidatePlayerBelongToTeamAndIsAdmin(team, playerSending);
@@ -231,6 +261,17 @@ namespace Application.Validators
             if (!PlayerExistsInTeam(team,memberToPromote))
             {
                 throw new ValidationException($"O Player? de id '{memberToPromote.Id}' não pertence a equipa '{team.Name}'.");
+            }
+
+            if (memberToPromote.IsAdmin)
+            {
+                throw new ValidationException($"O jogador '{memberToPromote.Name}' já é administrador da equipa '{team.Name}'.");
+            }
+
+            var adminCount = team.Members.Count(m => m.IsAdmin);
+            if (adminCount >= 3)
+            {
+                throw new ValidationException($"A equipa '{team.Name}' já tem o número máximo de administradores.");
             }
         }
 

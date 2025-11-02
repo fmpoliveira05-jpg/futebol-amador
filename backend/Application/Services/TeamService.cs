@@ -47,10 +47,7 @@ namespace Application.Services
             var rank = await RankRepository.GetDefaultRankAsync();
             var playerCreating = await PlayerRepository.GetPlayerByIdAsync(playerId);
 
-            TeamValidator.CreateTeamValidation(teamDto, existingTeam, playerCreating);
-
-            if (rank == null)
-                throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
+            TeamValidator.CreateTeamValidation(teamDto, rank, existingTeam, playerCreating);
 
             var newTeam = new Teams(
                 teamDto.Name,
@@ -98,7 +95,6 @@ namespace Application.Services
         {
             var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
-
             Teams teamWithSameName = null;
 
             if (dto.Name != null)
@@ -326,6 +322,7 @@ namespace Application.Services
                 Position = player.Position,
                 IsAdmin = player.IsAdmin
             }).ToList();
+
             return playerDtos;
         }
 
@@ -386,8 +383,38 @@ namespace Application.Services
         #region List Player To MemberShipRequest
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam()
         {
-            //Depois se for aqui falta validar aut do user
-            return await TeamRepository.GetListPlayersWithoutTeam();
+            var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
+            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
+            var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            var existing = await MembershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
+
+            TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
+            PlayerValidator.PlayerExists(playerToInvite);
+
+            var invite = new MembershipRequests
+            {
+                Id = Guid.NewGuid(),
+                IdPlayer = playerIdToInvite,
+                IdTeam = teamId,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = false,
+                Player = playerToInvite,
+                Team = team
+            };
+
+            await MembershipRequestRepository.AddMembershipRequest(invite);
+            await UnitOfWork.SaveChangesAsync();
+
+            return new MemberShipRequestDto
+            {
+                RequestId = invite.Id,
+                PlayerId = invite.IdPlayer,
+                PlayerName = invite.Player?.Name ?? string.Empty,
+                TeamId = invite.IdTeam,
+                TeamName = invite.Team?.Name ?? string.Empty,
+                RequestDate = invite.InviteDate,
+                IsPlayerSender = invite.IsPlayerSender
+            };
         }
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter)

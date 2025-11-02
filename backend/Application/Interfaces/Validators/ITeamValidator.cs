@@ -6,7 +6,7 @@ namespace Application.Interfaces.Validators
 {
     public interface ITeamValidator
     {
-        void CreateTeamValidation(CreateTeamDto createTeamDto, Teams? team, Player? playerCreating);
+        void CreateTeamValidation(CreateTeamDto createTeamDto, Rank rank, Teams? team, Player? playerCreating);
         void UpdateTeamValidation(Teams? existingTeamNewName, Teams? team, Player? playerEditing);
         void DeleteTeamValidation(Teams? team, Player? playerDeleting);
         void GetTeamByIdValidation(TeamDetailsDto team);
@@ -17,7 +17,7 @@ namespace Application.Interfaces.Validators
         void GetMembershipRequestsValidation(Teams? team, Player? adminPlayer);
         void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete);
         void RejectMembershipRequestValidation(Teams? team, Player? playerRejecting, Guid requestToDelete);
-        void SendMembershipRequestValidation(Teams? team, Player? playerSending, Player? playerReceiving);
+        void SendMembershipRequestValidation(MembershipRequests? mr, Teams? team, Player? playerSending, Player? playerReceiving);
         void DemoteAdminToMemberValidation(Teams? team, Player? adminToDemote, Player? adminDemoting);
         void PromoteMemberToAdminValidation(Teams? team, Player? memberToPromote, Player? memberPromoting);
         void GetTeamScheduleValidation(Teams? team);
