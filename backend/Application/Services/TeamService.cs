@@ -86,10 +86,7 @@ namespace Application.Services
             var rank = await RankRepository.GetDefaultRankAsync();
             var playerCreating = await PlayerRepository.GetPlayerByIdAsync(playerId);
 
-            TeamValidator.CreateTeamValidation(teamDto, existingTeam, playerCreating);
-
-            if (rank == null)
-                throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
+            TeamValidator.CreateTeamValidation(teamDto, rank, existingTeam, playerCreating);
 
             var newTeam = new Teams(
                 teamDto.Name,
@@ -137,7 +134,6 @@ namespace Application.Services
         {
             var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
-
             Teams teamWithSameName = null;
 
             if (dto.Name != null)
@@ -194,6 +190,7 @@ namespace Application.Services
                 Position = player.Position,
                 IsAdmin = player.IsAdmin
             }).ToList();
+
             return playerDtos;
         }
 
@@ -213,14 +210,6 @@ namespace Application.Services
             var playerRemoving = await PlayerRepository.GetPlayerByIdAsync(playerRemovingId);
 
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
-
-            existingTeam.Members.Remove(playerToRemove);
-            playerToRemove.IdTeam = null;
-            if (playerToRemove.IsAdmin)
-            {
-                playerToRemove.IsAdmin = false;
-                playerToRemove.IsAdminLastChangedAt = DateTime.UtcNow;
-            }
 
             await UnitOfWork.SaveChangesAsync();
         }
@@ -276,8 +265,7 @@ namespace Application.Services
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var adminConsulting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
+            TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
 
             if (!existingTeam.MembershipRequests.Any())
             {
@@ -285,7 +273,8 @@ namespace Application.Services
                 existingTeam.MembershipRequests.Add(fakeRequest);
             }
 
-            TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
+            if (existingTeam.MembershipRequests == null)
+                existingTeam.MembershipRequests = new List<MembershipRequests>();
 
             return await TeamRepository.GetMembershipRequestsDtoAsync(teamId);
         }
@@ -341,17 +330,10 @@ namespace Application.Services
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
             var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            var existing = await MembershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            TeamValidator.SendMembershipRequestValidation(team, admin, playerToInvite);
+            TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
             PlayerValidator.PlayerExists(playerToInvite);
-
-            if (playerToInvite.IdTeam == teamId)
-                throw new ValidationException("O jogador já pertence a esta equipa.");
-
-            var existing = await MembershipRequestRepository
-                .GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
-            if (existing != null)
-                throw new ValidationException("Já existe um pedido/convite pendente entre a equipa e este jogador.");
 
             var invite = new MembershipRequests
             {
@@ -359,7 +341,9 @@ namespace Application.Services
                 IdPlayer = playerIdToInvite,
                 IdTeam = teamId,
                 InviteDate = DateTime.UtcNow,
-                IsPlayerSender = false
+                IsPlayerSender = false,
+                Player = playerToInvite,
+                Team = team
             };
 
             await MembershipRequestRepository.AddMembershipRequest(invite);
@@ -369,9 +353,9 @@ namespace Application.Services
             {
                 RequestId = invite.Id,
                 PlayerId = invite.IdPlayer,
-                PlayerName = invite.Player.Name,
+                PlayerName = invite.Player?.Name ?? string.Empty,
                 TeamId = invite.IdTeam,
-                TeamName = invite.Team.Name,
+                TeamName = invite.Team?.Name ?? string.Empty,
                 RequestDate = invite.InviteDate,
                 IsPlayerSender = invite.IsPlayerSender
             };
