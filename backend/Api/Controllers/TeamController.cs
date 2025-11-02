@@ -1,5 +1,6 @@
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
@@ -144,6 +145,43 @@ namespace Api.Controllers
         #endregion
 
         #region Membership Requests Management
+
+        //Falta também validar se a team existe mas isso a principio a Aut faz
+        //Falta fazer validação de autentificação e autorização aqui ou se for no service, no proprio service
+        [HttpGet("{teamId}/playersWithoutTeam")]
+        public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterPlayersWithoutTeamDto filter)
+        {
+            IEnumerable<PlayerWithoutTeamInfoDto> players;
+            var hasFilter = !string.IsNullOrEmpty(filter.PlayerName) ||
+                            !string.IsNullOrEmpty(filter.City) ||
+                            filter.MinAge.HasValue ||
+                            filter.MaxAge.HasValue ||
+                            filter.MinHeight.HasValue ||
+                            filter.MaxHeight.HasValue ||
+                            filter.Position.HasValue;
+
+
+            try 
+            {
+                if (hasFilter)
+                {
+                    players = await TeamService.GetPlayersWithoutTeamWithFilters(filter);
+                }
+                else
+                {
+                    players = await TeamService.GetPlayersWithoutTeam();
+                }
+                return Ok(players);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
+        }
 
         [HttpGet("{teamId}/membership-request")]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)

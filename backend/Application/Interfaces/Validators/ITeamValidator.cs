@@ -24,5 +24,7 @@ namespace Application.Interfaces.Validators
         public void ValidateVariableSearchTeam(Guid idTeam);
         public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter);
         public void ValidateTeamSearch(Teams team);
+
+        public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto filter);
     }
 }

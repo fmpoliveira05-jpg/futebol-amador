@@ -1,7 +1,8 @@
-using Application.DTOs.Rank;
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Rank;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Constants;
@@ -581,6 +582,87 @@ namespace Infrastructure.Repositories
                         IdRank = x.Rank.Id,
                         Name = x.Rank.Name
                     }
+                })
+                .ToListAsync();
+
+            return list;
+        }
+
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam()
+        {
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow); 
+
+            var query = await context.Player.Where(p => !p.IsAdmin 
+                                                    && p.IdTeam == null)
+                .Select(p => new PlayerWithoutTeamInfoDto
+                {
+                    PlayerId = p.Id,
+                    Name = p.Name,
+                    Address = p.Address,
+                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                    Height = p.Height,
+                    Position = p.Position
+                })
+                .ToListAsync();
+
+            return query;
+        }
+
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterPlayersWithoutTeamDto filters)
+        {
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+
+            var query = context.Player.Where(p => !p.IsAdmin && p.IdTeam == null);
+              
+            if (!string.IsNullOrEmpty(filters.PlayerName))
+            {
+                var upperCase = filters.PlayerName.ToLower();
+                query = query.Where(p => p.Name.ToLower().Contains(upperCase));
+            }
+
+            if (!string.IsNullOrEmpty(filters.City))
+            {
+                var fragment = filters.City.ToLower();
+                query = query.Where(p =>
+                    EF.Functions.Like(p.Address.ToLower(), "%, %" + fragment + "%")
+                    &&
+                    !EF.Functions.Like(p.Address.ToLower(), "%, %" + fragment + "%,%")
+                );
+            }
+
+            if (filters.MinAge.HasValue)
+            {
+                query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) >= filters.MinAge);
+            }
+
+            if (filters.MaxAge.HasValue)
+            {
+                query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) <= filters.MaxAge);
+            }
+
+            if (filters.MinHeight.HasValue)
+            {
+                query = query.Where(p => p.Height >= filters.MinHeight);
+            }
+
+            if (filters.MaxHeight.HasValue)
+            {
+                query = query.Where(p => p.Height <= filters.MaxHeight);
+            }
+
+            if (filters.Position.HasValue)
+            {
+                query = query.Where(p => p.Position == filters.Position);
+            }
+
+            var list = await query.Select(p => new PlayerWithoutTeamInfoDto
+                {
+                    PlayerId = p.Id,
+                    Name = p.Name,
+                    Address = p.Address,
+                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                    Height = p.Height,
+                    Position = p.Position
                 })
                 .ToListAsync();
 

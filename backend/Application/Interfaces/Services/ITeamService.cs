@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 
@@ -41,5 +42,9 @@ namespace Application.Interfaces.Services
         Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam);
 
         Task<List<InfoTeamsDto>> SearchTeamsWithFiltersAsync(Guid idTeam, FilterListTeamDto filters);
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam();
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter);
     }
 }

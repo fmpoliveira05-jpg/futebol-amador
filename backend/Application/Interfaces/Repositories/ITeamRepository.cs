@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Domain.Entities;
@@ -31,5 +32,9 @@ namespace Application.Interfaces.Repositories
         Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters);
         Task<List<InfoTeamsDto>> GetListTeamsForTeams(Guid idTeam);
         Task<List<InfoTeamsDto>> GetListTeamsByTeamsWithFilters(Guid idTeam, FilterListTeamDto filters);
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam();
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterPlayersWithoutTeamDto filters);
     }
 }
