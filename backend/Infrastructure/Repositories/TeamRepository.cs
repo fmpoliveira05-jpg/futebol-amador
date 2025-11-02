@@ -371,8 +371,12 @@ namespace Infrastructure.Repositories
 
             if(!string.IsNullOrEmpty(filters.City))
             {
-                var upperCase = filters.City.ToUpper();
-                query = query.Where(t => t.Pitch.Address.ToUpper().Contains(upperCase));
+                var fragment = filters.City.ToLower();
+                query = query.Where(t =>
+                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%")
+                    &&
+                    !EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%,%")
+                );
             }
 
             if (filters.MinNumberPoints.HasValue)
@@ -506,8 +510,12 @@ namespace Infrastructure.Repositories
 
             if (!string.IsNullOrEmpty(filters.City))
             {
-                var upperCase = filters.City.ToUpper();
-                query = query.Where(t => t.Pitch.Address.ToUpper().Contains(upperCase));
+                var fragment = filters.City.ToLower();
+                query = query.Where(t =>
+                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%") 
+                    &&
+                    !EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%,%")
+                );
             }
 
             if (filters.MinNumberPoints.HasValue)

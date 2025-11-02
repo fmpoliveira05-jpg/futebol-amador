@@ -70,6 +70,32 @@ namespace Api.Controllers
 
         #region MemberShipRequest
 
+        [HttpGet("listTeamsToMemberShipRequest")]
+        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        {
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await playerService.GetTeamListWithFilters(filter);
+            }
+            else
+            {
+                list = await playerService.GetListTeams();
+            }
+
+            return Ok(list);
+        }
+
         [HttpGet("{playerId:guid}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(Guid playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
@@ -105,22 +131,22 @@ namespace Api.Controllers
             }
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/{requestId:guid}/accept")]
-        public async Task<IActionResult> AcceptMembershipRequest(Guid playerId, Guid requestId)
+        [HttpPost("{playerId:guid}/membership-requests/accept")]
+        public async Task<IActionResult> AcceptMembershipRequest(Guid playerId, [FromBody] Guid requestId)
         {
             var dto = await playerService.AcceptMembershipRequestAsync(playerId, requestId);
             return Ok(dto);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/{requestId:guid}/reject")]
+        [HttpDelete("{playerId:guid}/membership-requests/reject/{requestId:guid}")]
         public async Task<IActionResult> RejectMembershipRequest(Guid playerId, Guid requestId)
         {
             var dto = await playerService.RejectMembershipRequestAsync(playerId, requestId);
             return Ok(dto);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/send/{teamId:guid}")]
-        public async Task<IActionResult> SendMembershipRequest(Guid playerId, Guid teamId)
+        [HttpPost("{playerId:guid}/membership-requests/send")]
+        public async Task<IActionResult> SendMembershipRequest(Guid playerId, [FromBody] Guid teamId)
         {
             try
             {
@@ -145,32 +171,6 @@ namespace Api.Controllers
 
 
         #region Teams Operations
-
-        [HttpGet("listTeamsToMemberShipRequest")]
-        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
-        {
-            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
-                           !string.IsNullOrEmpty(filter.NameRank) ||
-                           !string.IsNullOrEmpty(filter.City) ||
-                           filter.MinNumberPoints.HasValue ||
-                           filter.MaxNumberPoints.HasValue ||
-                           filter.MinAge.HasValue ||
-                           filter.MaxAge.HasValue ||
-                           filter.MinNumberPlayers.HasValue ||
-                           filter.MaxNumberPlayers.HasValue;
-
-            IEnumerable<InfoTeamsDto> list;
-            if (isFilter)
-            {
-                list = await playerService.GetTeamListWithFilters(filter);
-            }
-            else
-            {
-                list = await playerService.GetListTeams();
-            }
-
-            return Ok(list);
-        }
 
         [HttpPut("{playerId:guid}/leave-team")]
         public async Task<IActionResult> LeaveTeam(Guid playerId)
