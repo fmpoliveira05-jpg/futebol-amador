@@ -68,39 +68,7 @@ namespace Api.Controllers
 
         #endregion
 
-        [HttpGet("listTeamsToMemberShipRequest")]
-        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
-        {
-            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
-                           !string.IsNullOrEmpty(filter.NameRank) ||
-                           !string.IsNullOrEmpty(filter.City) ||
-                           filter.MinNumberPoints.HasValue ||
-                           filter.MaxNumberPoints.HasValue ||
-                           filter.MinAge.HasValue ||
-                           filter.MaxAge.HasValue ||
-                           filter.MinNumberPlayers.HasValue ||
-                           filter.MaxNumberPlayers.HasValue;
-
-            IEnumerable<InfoTeamsDto> list;
-            if (isFilter)
-            {
-                list = await playerService.GetTeamListWithFilters(filter);
-            }
-            else 
-            {
-                list = await playerService.GetListTeams();
-            }
-
-            return Ok(list);
-        }
-
-        [HttpPut("{playerId:guid}/leave-team")]
-        public async Task<IActionResult> LeaveTeam(Guid playerId)
-        {
-            string teamName = await playerService.LeaveTeam(playerId);
-
-            return Ok("Player succesfully left the team" + teamName + ".");
-        }
+        #region MemberShipRequest
 
         [HttpGet("{playerId:guid}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(Guid playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
@@ -172,5 +140,45 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
             }
         }
+
+        #endregion
+
+
+        #region Teams Operations
+
+        [HttpGet("listTeamsToMemberShipRequest")]
+        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        {
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await playerService.GetTeamListWithFilters(filter);
+            }
+            else
+            {
+                list = await playerService.GetListTeams();
+            }
+
+            return Ok(list);
+        }
+
+        [HttpPut("{playerId:guid}/leave-team")]
+        public async Task<IActionResult> LeaveTeam(Guid playerId)
+        {
+            string teamName = await playerService.LeaveTeam(playerId);
+
+            return Ok("Player succesfully left the team" + teamName + ".");
+        }
+        #endregion
     }
 }
