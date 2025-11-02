@@ -7,6 +7,7 @@ using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
+using static Domain.Constants.ModelConstants;
 
 namespace Application.Validators
 {
@@ -151,6 +152,31 @@ namespace Application.Validators
                 {
                     throw new InvalidOperationException("O número minimo de membros deve ser superior ao numero maximo de membros");
                 }
+            }
+        }
+
+        public void SendMembershipRequestValidator(Player player, Teams team, MembershipRequests request)
+        {
+            PlayerExists(player);
+
+            if (team == null)
+            {
+                throw new NotFoundException("Team doesn't exist.");
+            }
+
+            if (player.Team != null)
+            {
+                throw new BusinessRuleException("Player is already on a team and can't send membership requests.");
+            }
+
+            if (team.Members.Count >= TeamConst.MaxMembers)
+            {
+                throw new BusinessRuleException("Team is full and cannot accept new requests.");
+            }
+
+            if (request != null)
+            {
+                throw new BusinessRuleException("Já existe um pedido de adesão pendente para esta equipa.");
             }
         }
 

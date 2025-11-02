@@ -33,7 +33,6 @@ namespace Unit.ApplicationTests.ServicesTests
         #region Variables
         private Mock<ITeamRepository> _teamRepoMock;
         private Mock<IPlayerRepository> _playerRepoMock;
-        private Mock<ISuperAdminRepository> _userRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IRankRepository> _rankRepoMock;
         private ITeamValidator _validatorReal;
