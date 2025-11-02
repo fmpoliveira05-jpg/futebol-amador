@@ -253,9 +253,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         {
             var dto = BuildValidDto();
 
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email))
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email))
                    .ReturnsAsync((Player)null);
-            playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(dto.Phone))
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone))
                    .ReturnsAsync((Player)null);
 
             passwordHasherMock.Setup(h => h.HashPassword(dto.Password))
@@ -272,7 +272,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            validatorMock.Setup(v => v.CreatePlayerValidator(It.IsAny<CreatePlayerDto>(), It.IsAny<Player[]>()))
+            validatorMock.Setup(v => v.CreatePlayerValidator(
+                It.IsAny<CreatePlayerDto>(), 
+                It.IsAny<Users[]>()))
                    .Verifiable();
 
             var resultId = await service.CreatePlayerAsync(dto);
@@ -286,7 +288,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             )), Times.Once);
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
-            validatorMock.Verify(v => v.CreatePlayerValidator(It.IsAny<CreatePlayerDto>(), It.IsAny<Player[]>()), Times.Once);
+            validatorMock.Verify(v => v.CreatePlayerValidator(
+                It.IsAny<CreatePlayerDto>(), 
+                It.IsAny<Users[]>()), 
+                Times.Once);
             passwordHasherMock.Verify(h => h.HashPassword(dto.Password), Times.Once);
         }
 
@@ -301,8 +306,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(dto.Phone))
                    .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.CreatePlayerValidator(It.IsAny<CreatePlayerDto>(), It.IsAny<Player[]>()))
-                   .Throws(new ValidationException($"The email '{dto.Email}' is already in use."));
+            string expectedError = $"The email '{dto.Email}' is already in use.";
+
+            validatorMock.Setup(v => v.CreatePlayerValidator(
+                It.IsAny<CreatePlayerDto>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
             Assert.That(ex.Message, Does.Contain("already in use"));
@@ -321,8 +330,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(dto.Phone))
                    .ReturnsAsync(existingByPhone);
 
-            validatorMock.Setup(v => v.CreatePlayerValidator(It.IsAny<CreatePlayerDto>(), It.IsAny<Player[]>()))
-                   .Throws(new ValidationException($"The phone number '{dto.Phone}' is already in use."));
+            string expectedError = $"The phone number '{dto.Phone}' is already in use.";
+
+            validatorMock.Setup(v => v.CreatePlayerValidator(
+                It.IsAny<CreatePlayerDto>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
             Assert.That(ex.Message, Does.Contain("already in use"));
@@ -383,13 +396,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                     break;
             }
 
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(It.IsAny<string>()))
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(It.IsAny<string>()))
                    .ReturnsAsync((Player)null);
-            playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(It.IsAny<string>()))
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(It.IsAny<string>()))
                    .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.CreatePlayerValidator(It.IsAny<CreatePlayerDto>(), It.IsAny<Player[]>()))
-                   .Throws(new ValidationException(expectedError));
+            validatorMock.Setup(v => v.CreatePlayerValidator(
+                It.IsAny<CreatePlayerDto>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
             Assert.That(ex.Message, Does.Contain(expectedError));
@@ -476,7 +491,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
                    .ReturnsAsync(mockPlayer);
 
-            validatorMock.Setup(v => v.PlayerExists(mockPlayer)).Verifiable();
+            validatorMock.Setup(v => v.GetPlayerByIdValidator(mockPlayer)).Verifiable();
 
             var resultDto = await service.GetPlayerByIdAsync(playerId);
 
@@ -490,7 +505,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(resultDto.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            validatorMock.Verify(v => v.PlayerExists(mockPlayer), Times.Once);
+            validatorMock.Verify(v => v.GetPlayerByIdValidator(mockPlayer), Times.Once);
         }
 
         [Test(Description = "Validação: lança ValidationException quando o jogador não é encontrado")]
@@ -502,7 +517,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
                    .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.PlayerExists(null))
+            validatorMock.Setup(v => v.GetPlayerByIdValidator(null))
                    .Throws(new ValidationException(exceptionMessage));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
@@ -511,7 +526,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            validatorMock.Verify(v => v.PlayerExists(null), Times.Once);
+            validatorMock.Verify(v => v.GetPlayerByIdValidator(null), Times.Once);
         }
 
         #endregion
@@ -524,13 +539,25 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
 
+            var otherPlayers = new Player[]
+            {
+                BuildValidPlayer(),
+                BuildValidPlayer()
+            };
+
             dto.Name = "João Silva Alterado";
             dto.Address = "Morada Nova";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player);
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, player)).Verifiable();
+            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, otherPlayers)).Verifiable();
+            validatorMock.Setup(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()
+            )).Verifiable();
             validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable();
 
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -541,8 +568,13 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(player.Address, Is.EqualTo(dto.Address));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            playerRepoMock.Verify(r => r.GetPlayerByEmailAsync(dto.Email), Times.Once);
-            //validatorMock.Verify(v => v.UpdatePlayerValidator(dto, player, player), Times.Once);
+            userRepoMock.Verify(r => r.GetUserByEmailAsync(dto.Email), Times.Once);
+            userRepoMock.Verify(r => r.GetUserByPhoneAsync(dto.Phone), Times.Once);
+            validatorMock.Verify(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()), 
+                Times.Once);
             validatorMock.Verify(v => v.ValidateHasChangeDataPlayer(true), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
@@ -576,11 +608,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var dto = BuildValidUpdateDto();
             string exceptionMessage = "Player doesn't exist.";
 
-            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync((Player)null);
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync((Player)null);
+            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync((Player)null);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.UpdatePlayerValidator(dto, null, null))
-             .Throws(new ValidationException(exceptionMessage));
+            validatorMock.Setup(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(exceptionMessage));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
@@ -595,20 +630,28 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var playerId = Guid.NewGuid();
             var player = BuildValidPlayer(playerId);
 
-            var otherPlayer = BuildValidPlayer(Guid.NewGuid());
-            otherPlayer.Email = "email.usado@example.com";
+            var otherPlayers = new Player[]
+            {
+                BuildValidPlayer(),
+                BuildValidPlayer()
+            };
+
+            otherPlayers[0].Email = "email.usado@example.com";
 
             var dto = BuildValidUpdateDto();
             dto.Email = "email.usado@example.com";
             string exceptionMessage = $"The email '{dto.Email}' is already in use.";
 
-            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync(player);
 
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(otherPlayer);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(otherPlayers[0]);
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, otherPlayer))
-            // .Throws(new ValidationException(exceptionMessage));
-
+            validatorMock.Setup(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(exceptionMessage));
+            
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
 
@@ -622,12 +665,19 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var playerId = Guid.NewGuid();
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
+
+            var otherPlayers = new Player[]
+            {
+                BuildValidPlayer(),
+                BuildValidPlayer()
+            };
+
             string exceptionMessage = "Não foi atualizado nenhuma informação do utilizador.";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
             playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(player);
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, player)).Verifiable();
+            validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, otherPlayers)).Verifiable();
 
             validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(false))
              .Throws(new ValidationException(exceptionMessage));
@@ -646,15 +696,24 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
 
+            var otherPlayers = new Player[]
+            {
+                BuildValidPlayer(),
+                BuildValidPlayer()
+            };
+
             dto.Address = "Avenida sem cidade";
             string expectedError = "Formato de endereço inválido";
 
-            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync(player);
 
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player);
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, player))
-            // .Throws(new ValidationException(expectedError));
+            validatorMock.Setup(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
@@ -670,7 +729,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [TestCase("valid@email.com", "012345678", 180, "cannot start with '0'")]
         [TestCase("valid@email.com", "912345678", 99, "Height value is invalid")]
         [TestCase("valid@email.com", "912345678", 251, "Height value is invalid")]
-        public void UpdatePlayerAsync_InvalidDtoData_ThrowsValidationException(string email, string phone, int height, string expectedError)
+        public async Task UpdatePlayerAsync_InvalidDtoData_ThrowsValidationException(string email, string phone, int height, string expectedError)
         {
             var playerId = Guid.NewGuid();
             var player = BuildValidPlayer(playerId);
@@ -680,14 +739,19 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             dto.Phone = phone;
             dto.Height = height;
 
+            // Arrange repository mocks
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Users?)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync((Users?)null);
 
-            Player emailCheckResult = (dto.Email == player.Email) ? player : null;
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(emailCheckResult);
+            // The validator is mocked — it will throw for invalid data
+            validatorMock.Setup(v => v.UpdatePlayerValidator(
+                It.IsAny<UpdatePlayerDto>(),
+                It.IsAny<Player>(),
+                It.IsAny<Users[]>()
+            )).Throws(new ValidationException(expectedError));
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, emailCheckResult))
-            //    .Throws(new ValidationException(expectedError));
-
+            // Act & Assert
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
 
