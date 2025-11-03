@@ -22,19 +22,22 @@ namespace Application.Services
         private readonly ITeamService teamService;
 
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository, IUserRepository userRepository, ITeamService teamService)
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
+            IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
+            IPlayerValidator playerValidator, IUserRepository userRepository, 
+            ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
             this.membershipRequestRepository = membershipRequestRepository;
             this.unityOfWork = unitOfWork;
-            this.playerValidator = new PlayerValidator();
+            this.playerValidator = playerValidator;
             this.userRepository = userRepository;
             this.teamService = teamService;
 
         }
 
-        public async Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDto playerDto)
+        public async Task<string> CreatePlayerAsync(string userId, string email, CreatePlayerDto playerDto)
         {
             var player = new Player
             {

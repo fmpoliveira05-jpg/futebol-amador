@@ -14,7 +14,7 @@ using System.Collections.Concurrent;
 
 namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTests
 {
-    [TestFixture] 
+    [TestFixture]
     public class ManagerRankMatchMakerManagerServiceTests
     {
         #region Variables
@@ -28,7 +28,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
         private ManagerRankMatchMakerService service;
 
         private const string GlobalHubKeysCacheKey = ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey;
-        private readonly Guid idPlayer = Guid.NewGuid();
+        // CORRIGIDO: idPlayer agora é string
+        private readonly string idPlayer = "player-id-123";
         private readonly Guid idTeam = Guid.NewGuid();
         private readonly string connectionId = "conn-123";
         private readonly TimeOnly hoursGame = new TimeOnly(10, 0, 0);
@@ -80,7 +81,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
 
             members.Add(new Player
             {
-                Id = idPlayer,
+                Id = idPlayer, // Isto agora é uma string
                 IsAdmin = isMainPlayerAdmin,
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-25))
             });
@@ -99,7 +100,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
 
                 members.Add(new Player
                 {
-                    Id = Guid.NewGuid(),
+                    // CORRIGIDO: Id de Player agora é string
+                    Id = $"other-player-{Guid.NewGuid().ToString("N")}",
                     IsAdmin = makeThisOneAdmin,
                     DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-23))
                 });
@@ -123,7 +125,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
         {
             object outValue = value;
             cacheMock.Setup(c => c.TryGetValue(key, out outValue))
-                        .Returns(returns);
+                         .Returns(returns);
         }
 
         private static DateTime GetNextSunday(DateTime startDate)
@@ -131,10 +133,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             int currentDayOfWeek = (int)startDate.DayOfWeek;
             int targetDayOfWeek = (int)DayOfWeek.Sunday;
             int daysToAdd = targetDayOfWeek - currentDayOfWeek;
-            
-            if (daysToAdd <= 0) 
-            { 
-                daysToAdd += 7; 
+
+            if (daysToAdd <= 0)
+            {
+                daysToAdd += 7;
             }
 
             return startDate.Date.AddDays(daysToAdd);
@@ -190,6 +192,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var team = CreateMockTeam(isMainPlayerAdmin: true, memberCount: 11);
             var hubCacheKey = GetHubCacheKey(idTeam);
 
+            // idPlayer (string) é passado aqui
             validatorMock.Setup(v => v.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
             matchRepositoryMock.Setup(r => r.GetMatchProxim12HoursMatchs(idTeam, gameDate))
@@ -205,11 +208,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             SetupCacheTryGetValue(hubCacheKey, false, (ConcurrentDictionary<Guid, EntryRankMatchMakerHub>)null);
 
             validatorMock.Setup(v => v.ValidateJoinRankMatchMaker(
-               team,
-               It.IsAny<float>(),
-               It.IsAny<string>(),
-               true,
-               It.IsAny<ConcurrentDictionary<Guid, EntryRankMatchMakerHub>>()));
+                team,
+                It.IsAny<float>(),
+                It.IsAny<string>(),
+                true,
+                It.IsAny<ConcurrentDictionary<Guid, EntryRankMatchMakerHub>>()));
 
             SetupCacheTryGetValue(GlobalHubKeysCacheKey, false, (HashSet<string>)null);
             serviceMatchMakerMock.Setup(s => s.LogicMatchMakerJoinHub(It.IsAny<InfoTeamRankMatchMakerDto>(), It.IsAny<IEnumerable<InfoTeamRankMatchMakerDto>>(), gameDate))
@@ -237,6 +240,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             cacheMock.Setup(c => c.CreateEntry(hubCacheKey)).Returns(hubCacheEntryMock.Object);
             cacheMock.Setup(c => c.CreateEntry(GlobalHubKeysCacheKey)).Returns(globalKeysCacheEntryMock.Object);
 
+            // idPlayer (string) é passado aqui
             var result = await service.JoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId);
             Assert.That(result, Is.Not.Null);
             Assert.That(result.ConnectionId, Is.EqualTo(connectionId));
@@ -252,6 +256,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var teamWith10Players = CreateMockTeam(isMainPlayerAdmin: true, memberCount: 10);
             var hubCacheKey = GetHubCacheKey(idTeam);
 
+            // idPlayer (string) é passado aqui
             validatorMock.Setup(v => v.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
             matchRepositoryMock.Setup(r => r.GetMatchProxim12HoursMatchs(idTeam, gameDate))
@@ -274,6 +279,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
                     It.IsAny<ConcurrentDictionary<Guid, EntryRankMatchMakerHub>>()))
                 .Throws(new InvalidOperationException("A equipa não pode jogar partidas rankeadas, porque ainda não tem no mínimo 11 jogadores"));
 
+            // idPlayer (string) é passado aqui
             var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await service.JoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
@@ -286,13 +292,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var team = CreateMockTeam(isMainPlayerAdmin: false, memberCount: 11, additionalAdminCount: 2);
             var hubCacheKey = GetHubCacheKey(idTeam);
 
+            // idPlayer (string) é passado aqui
             validatorMock.Setup(v => v.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
             matchRepositoryMock.Setup(r => r.GetMatchProxim12HoursMatchs(idTeam, gameDate)).ReturnsAsync((Matches)null);
-            
+
             validatorMock.Setup(v => v.ValidateHoursToMatch(It.IsAny<double>(), null));
             teamRepositoryMock.Setup(r => r.GetTeamWitchMemberRankAndPitchAsync(idTeam)).ReturnsAsync(team);
-            
+
             validatorMock.Setup(v => v.ValidateTeamJoinRankMatchMaker(team));
             SetupCacheTryGetValue(hubCacheKey, false, (ConcurrentDictionary<Guid, EntryRankMatchMakerHub>)null);
 
@@ -304,6 +311,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
                 It.IsAny<ConcurrentDictionary<Guid, EntryRankMatchMakerHub>>()))
             .Throws(new NotFindException("O administrador que quer procurar uma partida ranqueada não existe"));
 
+            // idPlayer (string) é passado aqui
             var exception = Assert.ThrowsAsync<NotFindException>(async () =>
                 await service.JoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
@@ -319,25 +327,27 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var existingHub = new ConcurrentDictionary<Guid, EntryRankMatchMakerHub>();
             existingHub.TryAdd(idTeam, new EntryRankMatchMakerHub());
 
+            // idPlayer (string) é passado aqui
             validatorMock.Setup(v => v.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
             matchRepositoryMock.Setup(r => r.GetMatchProxim12HoursMatchs(idTeam, gameDate)).ReturnsAsync((Matches)null);
 
             validatorMock.Setup(v => v.ValidateHoursToMatch(It.IsAny<double>(), null));
             teamRepositoryMock.Setup(r => r.GetTeamWitchMemberRankAndPitchAsync(idTeam)).ReturnsAsync(team);
-            
+
             validatorMock.Setup(v => v.ValidateTeamJoinRankMatchMaker(team));
 
             SetupCacheTryGetValue(hubCacheKey, true, existingHub);
 
 
             validatorMock.Setup(v => v.ValidateJoinRankMatchMaker(
-                  team,
-                  It.IsAny<float>(),
-                  It.IsAny<string>(),
-                  true,
-                  existingHub))
-              .Throws(new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida"));
-            
+                    team,
+                    It.IsAny<float>(),
+                    It.IsAny<string>(),
+                    true,
+                    existingHub))
+                .Throws(new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida"));
+
+            // idPlayer (string) é passado aqui
             var exception = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await service.JoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId));
 
@@ -347,11 +357,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
         [Test(Description = "Testa se a validação inicial de variáveis (ex: ID de jogador vazio) falha corretamente.")]
         public void JoinRankMatchMaker_WhenInputValidationFails_ThrowsArgumentException()
         {
-            var invalidPlayerId = Guid.Empty;
+            // CORRIGIDO: invalidPlayerId agora é string.Empty
+            var invalidPlayerId = string.Empty;
 
+            // Setup espera uma string
             validatorMock.Setup(v => v.ValidateVariableJoinRankMatchMaker(invalidPlayerId, idTeam, hoursGame, connectionId))
                 .Throws(new ArgumentException("O id do jogador está vazio"));
 
+            // Chamada de serviço com string
             var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinRankMatchMaker(invalidPlayerId, idTeam, hoursGame, connectionId));
 
@@ -503,11 +516,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
         {
             var hubCacheKey = GetHubCacheKey(idTeam);
             var hub = new ConcurrentDictionary<Guid, EntryRankMatchMakerHub>();
-            hub.TryAdd(Guid.NewGuid(), CreateMockEntry(Guid.NewGuid(), gameDate)); 
+            hub.TryAdd(Guid.NewGuid(), CreateMockEntry(Guid.NewGuid(), gameDate));
 
             SetupCacheTryGetValue(hubCacheKey, true, hub);
 
-            var result = await service.LeaveRankMatchMakerAsync(idTeam, connectionId); 
+            var result = await service.LeaveRankMatchMakerAsync(idTeam, connectionId);
 
             Assert.That(result, Is.False);
         }
@@ -532,7 +545,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var result = await service.LeaveRankMatchMakerAsync(idTeam, connectionId);
 
             Assert.That(result, Is.True);
-            Assert.That(hub.IsEmpty, Is.True); 
+            Assert.That(hub.IsEmpty, Is.True);
             Assert.That(globalKeys.Contains(hubCacheKey), Is.False);
 
             cacheMock.Verify(c => c.Remove(hubCacheKey), Times.Once);
@@ -562,8 +575,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var result = await service.LeaveRankMatchMakerAsync(idTeam, connectionId);
 
             Assert.That(result, Is.True);
-            Assert.That(hub.IsEmpty, Is.False); 
-            Assert.That(hub.ContainsKey(otherTeamId), Is.True); 
+            Assert.That(hub.IsEmpty, Is.False);
+            Assert.That(hub.ContainsKey(otherTeamId), Is.True);
 
             cacheMock.Verify(c => c.Remove(hubCacheKey), Times.Never);
 

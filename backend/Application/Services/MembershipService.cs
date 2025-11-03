@@ -7,7 +7,7 @@ using Domain.Exceptions;
 namespace Application.Services
 //pedidos e convites
 {
-    internal class MembershipService
+    public class MembershipService
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;

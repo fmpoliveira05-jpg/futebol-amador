@@ -25,7 +25,6 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<IUnityOfWork> uowMock;
         private Mock<IPlayerValidator> validatorMock;
         private Mock<ITeamRepository> teamRepoMock;
-        private Mock<IPasswordHasher> passwordHasherMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
 
         private PlayerService service;
@@ -42,24 +41,18 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock = new Mock<IUnityOfWork>();
             validatorMock = new Mock<IPlayerValidator>();
             teamRepoMock = new Mock<ITeamRepository>();
-            passwordHasherMock = new Mock<IPasswordHasher>();
             membershipReqRepoMock = new Mock<IMembershipRequestRepository>();
 
             service = new PlayerService(
                 playerRepoMock.Object,
-                teamServiceMock.Object,
-                userRepoMock.Object,
-                uowMock.Object,
-                validatorMock.Object,
                 teamRepoMock.Object,
-                passwordHasherMock.Object,
-                membershipReqRepoMock.Object
+                uowMock.Object,
+                membershipReqRepoMock.Object,
+                validatorMock.Object,
+                userRepoMock.Object,
+                teamServiceMock.Object
             );
-
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User)null);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(It.IsAny<string>())).ReturnsAsync((User)null);
         }
-
         #endregion
 
         #region Methods Support
@@ -71,7 +64,6 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-25)),
                 Address = "Rua Exemplo 1, Lisboa",
                 Email = "joao.silva@example.com",
-                Password = "StrongPassword123!",
                 Phone = "912345678",
                 Position = Position.FORWARD,
                 Height = 180
@@ -88,16 +80,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
         }
 
-        private Player BuildValidPlayer(Guid? id = null, Team team = null, bool isAdmin = false, DateTime? creationDate = null)
+        private Player BuildValidPlayer(string id = null, Team team = null, bool isAdmin = false, DateTime? creationDate = null)
         {
             var player = new Player
             {
-                Id = id ?? Guid.NewGuid(),
+                Id = id ?? $"player-id-{Guid.NewGuid().ToString("N")}",
                 Name = "João Silva",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-25)),
                 Address = "Rua Exemplo 1, Lisboa",
                 Email = "joao.silva@example.com",
-                Password = "hashed-password",
                 Phone = "912345678",
                 Position = Position.FORWARD,
                 Height = 180,
@@ -140,80 +131,71 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         {
             return new List<InfoTeamsDto>
             {
-          new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Leões de Lisboa", Description = "Equipa da capital",
-                      Address = "Rua do Leão, Lisboa", PlayerCount = 10, AverageAge = 25.5f, CurrentPoints = 1500,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Ouro" }
+                    Id = Guid.NewGuid(), Name = "Leões de Lisboa", Description = "Equipa da capital",
+                    Address = "Rua do Leão, Lisboa", PlayerCount = 10, AverageAge = 25.5f, CurrentPoints = 1500,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Ouro" }
                 },
-          new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Dragões do Porto", Description = "Equipa do norte",
-                      Address = "Avenida do Dragão, Porto", PlayerCount = 12, AverageAge = 28.0f, CurrentPoints = 1450,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Ouro" }
+                    Id = Guid.NewGuid(), Name = "Dragões do Porto", Description = "Equipa do norte",
+                    Address = "Avenida do Dragão, Porto", PlayerCount = 12, AverageAge = 28.0f, CurrentPoints = 1450,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Ouro" }
                 },
-
-        new InfoTeamsDto
+                new InfoTeamsDto
                 {
                     Id = Guid.NewGuid(), Name = "Águias de Braga", Description = "Equipa de Braga",
                     Address = "Praça da Águia, Braga", PlayerCount = 8, AverageAge = 22.1f, CurrentPoints = 1200,
                     Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
                 },
-
-          new InfoTeamsDto
+                    new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Panteras de Coimbra", Description = "Equipa de estudantes",
-                      Address = "Largo da Pantera, Coimbra", PlayerCount = 15, AverageAge = 30.5f, CurrentPoints = 800,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                    Id = Guid.NewGuid(), Name = "Panteras de Coimbra", Description = "Equipa de estudantes",
+                    Address = "Largo da Pantera, Coimbra", PlayerCount = 15, AverageAge = 30.5f, CurrentPoints = 800,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
                 },
-
-        new InfoTeamsDto
-                {
-                      Id = Guid.NewGuid(), Name = "Lobos de Faro", Description = "Equipa do sul",
-                      Address = "Rua do Lobo, Faro", PlayerCount = 9, AverageAge = 24.0f, CurrentPoints = 1100,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
-                },
-
                 new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Falcões de Viseu", Description = "Equipa da beira",
-                      Address = "Avenida do Falcão, Viseu", PlayerCount = 11, AverageAge = 26.2f, CurrentPoints = 750,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                    Id = Guid.NewGuid(), Name = "Lobos de Faro", Description = "Equipa do sul",
+                    Address = "Rua do Lobo, Faro", PlayerCount = 9, AverageAge = 24.0f, CurrentPoints = 1100,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
                 },
-
-        new InfoTeamsDto
+                    new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Tigres de Aveiro", Description = "Equipa da ria",
-                      Address = "Cais do Tigre, Aveiro", PlayerCount = 10, AverageAge = 23.8f, CurrentPoints = 1150,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
+                    Id = Guid.NewGuid(), Name = "Falcões de Viseu", Description = "Equipa da beira",
+                    Address = "Avenida do Falcão, Viseu", PlayerCount = 11, AverageAge = 26.2f, CurrentPoints = 750,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
                 },
-
-        new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Tubarões de Setúbal", Description = "Equipa do sado",
-                      Address = "Doca do Tubarão, Setúbal", PlayerCount = 13, AverageAge = 29.1f, CurrentPoints = 600,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                    Id = Guid.NewGuid(), Name = "Tigres de Aveiro", Description = "Equipa da ria",
+                    Address = "Cais do Tigre, Aveiro", PlayerCount = 10, AverageAge = 23.8f, CurrentPoints = 1150,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
                 },
-
-        new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Gigantes do Porto", Description = "Segunda equipa do Porto",
-                      Address = "Rua dos Gigantes, Porto", PlayerCount = 7, AverageAge = 21.5f, CurrentPoints = 1300,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
+                    Id = Guid.NewGuid(), Name = "Tubarões de Setúbal", Description = "Equipa do sado",
+                    Address = "Doca do Tubarão, Setúbal", PlayerCount = 13, AverageAge = 29.1f, CurrentPoints = 600,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
                 },
-
-        new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Estrelas de Lisboa", Description = "Segunda equipa de Lisboa",
-                      Address = "Avenida das Estrelas, Lisboa", PlayerCount = 14, AverageAge = 27.7f, CurrentPoints = 900,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                    Id = Guid.NewGuid(), Name = "Gigantes do Porto", Description = "Segunda equipa do Porto",
+                    Address = "Rua dos Gigantes, Porto", PlayerCount = 7, AverageAge = 21.5f, CurrentPoints = 1300,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Prata" }
                 },
-
-        new InfoTeamsDto
+                new InfoTeamsDto
                 {
-                      Id = Guid.NewGuid(), Name = "Equipa Vazia", Description = "Sem membros",
-                      Address = "Rua Deserta, Nenhures", PlayerCount = 0, AverageAge = 0.0f, CurrentPoints = 0,
-                      Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                    Id = Guid.NewGuid(), Name = "Estrelas de Lisboa", Description = "Segunda equipa de Lisboa",
+                    Address = "Avenida das Estrelas, Lisboa", PlayerCount = 14, AverageAge = 27.7f, CurrentPoints = 900,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
+                },
+                new InfoTeamsDto
+                {
+                    Id = Guid.NewGuid(), Name = "Equipa Vazia", Description = "Sem membros",
+                    Address = "Rua Deserta, Nenhures", PlayerCount = 0, AverageAge = 0.0f, CurrentPoints = 0,
+                    Rank = new InfoRankDto { IdRank = Guid.NewGuid(), Name = "Bronze" }
                 }
             };
         }
@@ -251,180 +233,45 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
         #region Tests CreatePlayerAsync
 
-        
-        [Test(Description = "Caminho feliz: cria um jogador válido e retorna o Id gerado")]
+        [Test(Description = "Caminho feliz: cria um jogador válido e retorna o Id gerado")]
         public async Task CreatePlayerAsync_WithValidDto_CreatesPlayerAndReturnsId()
         {
             var dto = BuildValidDto();
+            var authId = "simulated-user-id-123"; 
 
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email))
-                   .ReturnsAsync((Player)null);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone))
-                   .ReturnsAsync((Player)null);
-
-            passwordHasherMock.Setup(h => h.HashPassword(dto.Password))
-                .Returns("hashed-password");
-
-            Guid createdId = Guid.Empty;
+            string createdId = null;
             playerRepoMock.Setup(r => r.AddAsync(It.IsAny<Player>()))
                 .Callback<Player>(p =>
                 {
-                    p.Id = Guid.NewGuid();
+                    p.Id = authId; 
                     createdId = p.Id;
                 })
                 .Returns(Task.CompletedTask);
 
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            validatorMock.Setup(v => v.CreatePlayerValidator(
-                It.IsAny<CreatePlayerDto>(), 
-                It.IsAny<User[]>()))
-                   .Verifiable();
+            var resultId = await service.CreatePlayerAsync(authId, dto.Email, dto);
 
-            var resultId = await service.CreatePlayerAsync(dto);
+            Assert.That(resultId, Is.EqualTo(authId));
 
-            Assert.That(resultId, Is.EqualTo(createdId));
             playerRepoMock.Verify(r => r.AddAsync(It.Is<Player>(p =>
-                p.Email == dto.Email &&
+                p.Id == authId && 
+                p.Email == dto.Email && 
                 p.Phone == dto.Phone &&
-                p.Name == dto.Name &&
-                p.Password == "hashed-password"
+                p.Name == dto.Name
             )), Times.Once);
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
-            validatorMock.Verify(v => v.CreatePlayerValidator(
-                It.IsAny<CreatePlayerDto>(), 
-                It.IsAny<User[]>()), 
-                Times.Once);
-            passwordHasherMock.Verify(h => h.HashPassword(dto.Password), Times.Once);
         }
 
-        [Test(Description = "Validação: lança ValidationException quando o email já existe")]
-        public void CreatePlayerAsync_EmailAlreadyExists_ThrowsValidationException()
-        {
-            var dto = BuildValidDto();
-
-            var existingPlayerByEmail = new Player { Email = dto.Email };
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email))
-                   .ReturnsAsync(existingPlayerByEmail);
-            playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(dto.Phone))
-                   .ReturnsAsync((Player)null);
-
-            string expectedError = $"The email '{dto.Email}' is already in use.";
-
-            validatorMock.Setup(v => v.CreatePlayerValidator(
-                It.IsAny<CreatePlayerDto>(),
-                It.IsAny<User[]>()
-            )).Throws(new ValidationException(expectedError));
-
-            var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
-            Assert.That(ex.Message, Does.Contain("already in use"));
-            playerRepoMock.Verify(r => r.AddAsync(It.IsAny<Player>()), Times.Never);
-            uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-        }
-
-        [Test(Description = "Validação: lança ValidationException quando o telefone já existe")]
-        public void CreatePlayerAsync_PhoneAlreadyExists_ThrowsValidationException()
-        {
-            var dto = BuildValidDto();
-
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email))
-                   .ReturnsAsync((Player)null);
-            var existingByPhone = new Player { Phone = dto.Phone };
-            playerRepoMock.Setup(r => r.GetPlayerByPhoneAsync(dto.Phone))
-                   .ReturnsAsync(existingByPhone);
-
-            string expectedError = $"The phone number '{dto.Phone}' is already in use.";
-
-            validatorMock.Setup(v => v.CreatePlayerValidator(
-                It.IsAny<CreatePlayerDto>(),
-                It.IsAny<User[]>()
-            )).Throws(new ValidationException(expectedError));
-
-            var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
-            Assert.That(ex.Message, Does.Contain("already in use"));
-            playerRepoMock.Verify(r => r.AddAsync(It.IsAny<Player>()), Times.Never);
-            uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-        }
-
-        [Test(Description = "Validação: lança ValidationException para vários dados inválidos no DTO")]
-        [TestCase("Name", null, "Name is required")]
-        [TestCase("Email", "invalid-email", "Email format is invalid")]
-        [TestCase("Email", "joao@@gmail.com", "Email format is invalid")]
-        [TestCase("Phone", "12345", "9 digits")]
-        [TestCase("Phone", "012345678", "cannot start with '0'")]
-        [TestCase("Phone", "91A345678", "must only contain digits")]
-        [TestCase("Password", "PasswordWithoutNumber!", "Password must contain at least one digit")]
-        [TestCase("Position", (Position)999, "Position invalid")]
-        [TestCase("Height", 90, "Height value is invalid")]
-        [TestCase("Height", 251, "Height value is invalid")]
-        [TestCase("DateOfBirth", "Underage", "Invalid Date of birth")]
-        [TestCase("DateOfBirth", "TooOld", "Invalid Date of birth")]
-        [TestCase("Address", "Rua invalida sem cidade", "Formato de endereço inválido")]
-        public void CreatePlayerAsync_InvalidDtoData_ThrowsValidationException(string propertyToChange, object invalidValue, string expectedError)
-        {
-            var dto = BuildValidDto();
-
-            switch (propertyToChange)
-            {
-                case "Name":
-                    dto.Name = (string)invalidValue;
-                    break;
-                case "Email":
-                    dto.Email = (string)invalidValue;
-                    break;
-                case "Phone":
-                    dto.Phone = (string)invalidValue;
-                    break;
-                case "Password":
-                    dto.Password = (string)invalidValue;
-                    break;
-                case "Position":
-                    dto.Position = (Position)invalidValue;
-                    break;
-                case "Height":
-                    dto.Height = (int)invalidValue;
-                    break;
-                case "DateOfBirth":
-                    if (invalidValue.ToString() == "Underage")
-                    {
-                        dto.DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-16));
-                    }
-                    else if (invalidValue.ToString() == "TooOld")
-                    {
-                        dto.DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow.AddYears(-75));
-                    }
-                    break;
-                case "Address":
-                    dto.Address = (string)invalidValue;
-                    break;
-            }
-
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(It.IsAny<string>()))
-                   .ReturnsAsync((Player)null);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(It.IsAny<string>()))
-                   .ReturnsAsync((Player)null);
-
-            validatorMock.Setup(v => v.CreatePlayerValidator(
-                It.IsAny<CreatePlayerDto>(),
-                It.IsAny<User[]>()
-            )).Throws(new ValidationException(expectedError));
-
-            var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
-            Assert.That(ex.Message, Does.Contain(expectedError));
-
-            playerRepoMock.Verify(r => r.AddAsync(It.IsAny<Player>()), Times.Never);
-            uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-        }
-
-        #endregion
+        #endregion
 
         #region Tests DeltePlayerAsync
 
         [Test(Description = "Caminho feliz: elimina um jogador existente com sucesso")]
         public async Task DeletePlayerAsync_PlayerExists_DeletesPlayerSuccessfully()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-to-delete-1";
             var existingPlayer = new Player
             {
                 Id = playerId,
@@ -432,42 +279,34 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                   .ReturnsAsync(existingPlayer);
-
-            validatorMock.Setup(v => v.DeletePlayerValidator(existingPlayer))
-                   .Verifiable();
+                    .ReturnsAsync(existingPlayer);
 
             playerRepoMock.Setup(r => r.DeletePlayer(existingPlayer))
-                   .Verifiable();
+                    .Verifiable();
 
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             await service.DeletePlayerAsync(playerId);
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            validatorMock.Verify(v => v.DeletePlayerValidator(existingPlayer), Times.Once);
             playerRepoMock.Verify(r => r.DeletePlayer(existingPlayer), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "Validação: lança ValidationException quando o jogador não é encontrado")]
-        public void DeletePlayerAsync_PlayerNotFound_ThrowsValidationException()
+        [Test(Description = "Validação: lança Exception quando o jogador não é encontrado")]
+        public void DeletePlayerAsync_PlayerNotFound_ThrowsException()
         {
-            var playerId = Guid.NewGuid();
-            string exceptionMessage = "Player not found.";
+            var playerId = "player-not-found-1";
+            string exceptionMessage = $"Player with ID {playerId} not found."; 
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                   .ReturnsAsync((Player)null);
+                    .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.DeletePlayerValidator(null))
-                   .Throws(new ValidationException(exceptionMessage));
-
-            var ex = Assert.ThrowsAsync<ValidationException>(async () =>
-                      await service.DeletePlayerAsync(playerId));
+            var ex = Assert.ThrowsAsync<Exception>(async () =>
+                                await service.DeletePlayerAsync(playerId));
 
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            validatorMock.Verify(v => v.DeletePlayerValidator(null), Times.Once);
             playerRepoMock.Verify(r => r.DeletePlayer(It.IsAny<Player>()), Times.Never);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -479,7 +318,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Caminho feliz: encontra um jogador e retorna os seus detalhes (DTO)")]
         public async Task GetPlayerByIdAsync_PlayerExists_ReturnsPlayerDetailsDto()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-to-get-1";
             var teamId = Guid.NewGuid();
             var mockPlayer = new Player
             {
@@ -493,39 +332,34 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                   .ReturnsAsync(mockPlayer);
+                    .ReturnsAsync(mockPlayer);
 
-            validatorMock.Setup(v => v.GetPlayerByIdValidator(mockPlayer)).Verifiable();
+            validatorMock.Setup(v => v.GetPlayerByIdValidator(mockPlayer)).Verifiable(); 
 
             var resultDto = await service.GetPlayerByIdAsync(playerId);
 
             Assert.That(resultDto, Is.Not.Null);
             Assert.That(resultDto, Is.TypeOf<PlayerDetailsDto>());
             Assert.That(resultDto.Name, Is.EqualTo(mockPlayer.Name));
-            Assert.That(resultDto.DateOfBirth, Is.EqualTo(mockPlayer.DateOfBirth));
-            Assert.That(resultDto.Address, Is.EqualTo(mockPlayer.Address));
-            Assert.That(resultDto.Position, Is.EqualTo(mockPlayer.Position));
-            Assert.That(resultDto.Height, Is.EqualTo(mockPlayer.Height));
             Assert.That(resultDto.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             validatorMock.Verify(v => v.GetPlayerByIdValidator(mockPlayer), Times.Once);
         }
 
-        [Test(Description = "Validação: lança ValidationException quando o jogador não é encontrado")]
-        public void GetPlayerByIdAsync_PlayerNotFound_ThrowsValidationException()
+        [Test(Description = "Validação: lança Exception quando o jogador não é encontrado")]
+        public void GetPlayerByIdAsync_PlayerNotFound_ThrowsException()
         {
-            var playerId = Guid.NewGuid();
-            string exceptionMessage = "Player doesn't exist.";
+            var playerId = "player-not-found-2";
+            string exceptionMessage = $"Player with ID {playerId} not found."; 
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                   .ReturnsAsync((Player)null);
+                    .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.GetPlayerByIdValidator(null))
-                   .Throws(new ValidationException(exceptionMessage));
+            validatorMock.Setup(v => v.GetPlayerByIdValidator(null)).Verifiable();
 
-            var ex = Assert.ThrowsAsync<ValidationException>(async () =>
-                      await service.GetPlayerByIdAsync(playerId));
+            var ex = Assert.ThrowsAsync<Exception>(async () =>
+                                await service.GetPlayerByIdAsync(playerId));
 
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
 
@@ -539,30 +373,23 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Caminho feliz: atualiza dados válidos do jogador")]
         public async Task UpdatePlayerAsync_WithValidChanges_UpdatesPlayerAndSaves()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-to-update-1";
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
-
-            var otherPlayers = new Player[]
-            {
-                BuildValidPlayer(),
-                BuildValidPlayer()
-            };
 
             dto.Name = "João Silva Alterado";
             dto.Address = "Morada Nova";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player); 
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player); 
 
-            //validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, otherPlayers)).Verifiable();
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
                 It.IsAny<User[]>()
             )).Verifiable();
-            validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable();
+            validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable(); 
 
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -577,7 +404,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<User[]>()), 
+                It.IsAny<User[]>()),
                 Times.Once);
             validatorMock.Verify(v => v.ValidateHasChangeDataPlayer(true), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -586,17 +413,18 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Caminho feliz: atualiza o email para um que está disponível")]
         public async Task UpdatePlayerAsync_WithValidNewEmail_UpdatesPlayerAndSaves()
         {
-            var playerId = Guid.NewGuid();
-            var player = BuildValidPlayer(playerId);
+            var playerId = "player-to-update-2";
+            var player = BuildValidPlayer(playerId); 
             var dto = BuildValidUpdateDto();
-            dto.Email = "novo.email@example.com";
+            dto.Email = "novo.email@example.com"; 
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync((Player)null);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Player)null); 
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player); 
 
-            validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, null)).Verifiable();
-            validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable();
+            validatorMock.Setup(v => v.UpdatePlayerValidator(It.IsAny<UpdatePlayerDto>(), It.IsAny<Player>(), It.IsAny<User[]>())).Verifiable();
+            validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable(); 
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             await service.UpdatePlayerAsync(playerId, dto);
@@ -608,65 +436,49 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Validação: lança exceção quando o jogador a atualizar não existe")]
         public void UpdatePlayerAsync_PlayerNotFound_ThrowsValidationException()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-not-found-3";
             var dto = BuildValidUpdateDto();
             string exceptionMessage = "Player doesn't exist.";
 
-            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync((Player)null);
+            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync((Player)null);
             userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Player)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync((Player)null);
 
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
-                It.IsAny<Player>(),
+                null, 
                 It.IsAny<User[]>()
             )).Throws(new ValidationException(exceptionMessage));
 
-            // Chama o método para verificar se a exceção é lançada
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
 
-            // Verifica se a mensagem da exceção é a esperada
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
-
-            // Verifica se não houve tentativa de salvar as alterações
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-
-            // Verifica se o método de validação foi chamado corretamente
-            validatorMock.Verify(v => v.UpdatePlayerValidator(
-                It.IsAny<UpdatePlayerDto>(),
-                It.IsAny<Player>(),
-                It.IsAny<User[]>()),
-                Times.Once);
         }
 
         [Test(Description = "Validação: lança exceção quando o novo email já está em uso por outro jogador")]
         public void UpdatePlayerAsync_EmailAlreadyInUse_ThrowsValidationException()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-to-update-3";
             var player = BuildValidPlayer(playerId);
-
-            var otherPlayers = new Player[]
-            {
-                BuildValidPlayer(),
-                BuildValidPlayer()
-            };
-
-            otherPlayers[0].Email = "email.usado@example.com";
+            var otherPlayer = BuildValidPlayer("other-player");
+            otherPlayer.Email = "email.usado@example.com";
 
             var dto = BuildValidUpdateDto();
-            dto.Email = "email.usado@example.com";
+            dto.Email = "email.usado@example.com"; 
             string exceptionMessage = $"The email '{dto.Email}' is already in use.";
 
-            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync(player);
-
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(otherPlayers[0]);
+            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(otherPlayer); 
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player); 
 
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
                 It.IsAny<User[]>()
             )).Throws(new ValidationException(exceptionMessage));
-            
+
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
 
@@ -677,25 +489,20 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Validação: lança exceção quando não há nenhuma alteração nos dados")]
         public void UpdatePlayerAsync_NoChangesMade_ThrowsValidationException()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-no-changes-1";
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
-
-            var otherPlayers = new Player[]
-            {
-                BuildValidPlayer(),
-                BuildValidPlayer()
-            };
 
             string exceptionMessage = "Não foi atualizado nenhuma informação do utilizador.";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
-            playerRepoMock.Setup(r => r.GetPlayerByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player);
 
-            validatorMock.Setup(v => v.UpdatePlayerValidator(dto, player, otherPlayers)).Verifiable();
+            validatorMock.Setup(v => v.UpdatePlayerValidator(It.IsAny<UpdatePlayerDto>(), It.IsAny<Player>(), It.IsAny<User[]>())).Verifiable();
 
             validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(false))
-             .Throws(new ValidationException(exceptionMessage));
+                   .Throws(new ValidationException(exceptionMessage));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
@@ -707,22 +514,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Validação: lança ValidationException quando a morada tem formato inválido no update")]
         public void UpdatePlayerAsync_InvalidAddressFormat_ThrowsValidationException()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-invalid-address-1";
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
-
-            var otherPlayers = new Player[]
-            {
-                BuildValidPlayer(),
-                BuildValidPlayer()
-            };
-
             dto.Address = "Avenida sem cidade";
             string expectedError = "Formato de endereço inválido";
 
-            userRepoMock.Setup(r => r.GetUserByIdAsync(playerId)).ReturnsAsync(player);
-
+            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
             userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player);
 
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
@@ -746,7 +546,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [TestCase("valid@email.com", "912345678", 251, "Height value is invalid")]
         public async Task UpdatePlayerAsync_InvalidDtoData_ThrowsValidationException(string email, string phone, int height, string expectedError)
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-invalid-dto-1";
             var player = BuildValidPlayer(playerId);
             var dto = BuildValidUpdateDto();
 
@@ -754,19 +554,16 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             dto.Phone = phone;
             dto.Height = height;
 
-            // Arrange repository mocks
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
             userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((User?)null);
             userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync((User?)null);
 
-            // The validator is mocked — it will throw for invalid data
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
                 It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
-            // Act & Assert
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
                 await service.UpdatePlayerAsync(playerId, dto));
 
@@ -777,19 +574,19 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
         #region Tests LeaveTeamAsync
 
-        [Test(Description = "Validação: lança exceção quando o jogador não é encontrado")]
+        [Test(Description = "Validação: lança exceção quando o jogador não é encontrado")]
         public void LeaveTeam_PlayerNotFound_ThrowsValidationException()
         {
-            var playerId = Guid.NewGuid();
+            var playerId = "player-not-found-4";
             string exceptionMessage = "Player doesn't exist.";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync((Player)null);
 
             validatorMock.Setup(v => v.LeaveTeamValidator(null))
-                   .Throws(new ValidationException(exceptionMessage));
+                    .Throws(new ValidationException(exceptionMessage));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
-                      await service.LeaveTeam(playerId));
+                                await service.LeaveTeam(playerId));
 
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -798,16 +595,16 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         [Test(Description = "Validação: lança exceção quando o jogador não pertence a nenhuma equipa")]
         public void LeaveTeam_PlayerNotInTeam_ThrowsValidationException()
         {
-            var player = BuildValidPlayer(id: Guid.NewGuid(), team: null);
+            var player = BuildValidPlayer(id: "player-no-team-1", team: null);
             string exceptionMessage = "Player does not belong to any team.";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
 
             validatorMock.Setup(v => v.LeaveTeamValidator(player))
-                   .Throws(new ValidationException(exceptionMessage));
+                    .Throws(new ValidationException(exceptionMessage));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
-                      await service.LeaveTeam(player.Id));
+                                await service.LeaveTeam(player.Id));
 
             Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -817,7 +614,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         public async Task LeaveTeam_RegularMember_LeavesSuccessfully()
         {
             var team = BuildValidTeam();
-            var player = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: false);
+            var player = BuildValidPlayer(id: "player-leaving-1", team: team, isAdmin: false);
             string expectedTeamName = team.Name;
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
@@ -831,18 +628,19 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(player.IdTeam, Is.Null);
             Assert.That(player.Team, Is.Null);
             Assert.That(player.IsAdmin, Is.False);
+            Assert.That(team.Members, Does.Not.Contain(player));
 
             playerRepoMock.Verify(r => r.UpdatePlayer(player), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
-            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test(Description = "Caminho feliz: Admin sai da equipa, mas existe outro admin")]
         public async Task LeaveTeam_AdminLeaves_AnotherAdminExists_LeavesSuccessfully()
         {
             var team = BuildValidTeam();
-            var playerLeaving = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: true);
-            var otherAdmin = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: true);
+            var playerLeaving = BuildValidPlayer(id: "admin-leaving-1", team: team, isAdmin: true);
+            var otherAdmin = BuildValidPlayer(id: "admin-staying-1", team: team, isAdmin: true);
             string expectedTeamName = team.Name;
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
@@ -854,20 +652,21 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             Assert.That(resultTeamName, Is.EqualTo(expectedTeamName));
             Assert.That(playerLeaving.IdTeam, Is.Null);
-            Assert.That(playerLeaving.IsAdmin, Is.False);
+            Assert.That(playerLeaving.IsAdmin, Is.False); 
             Assert.That(otherAdmin.IsAdmin, Is.True);
+            Assert.That(team.Members, Does.Not.Contain(playerLeaving)); 
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
-            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test(Description = "Caminho feliz: Último admin sai, promove o membro mais antigo (que não ele próprio)")]
         public async Task LeaveTeam_LastAdminLeaves_OtherMembersExist_PromotesOldestMember()
         {
             var team = BuildValidTeam();
-            var oldestMember = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-2));
-            var otherMember = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-1));
-            var playerLeaving = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: true, creationDate: DateTime.UtcNow.AddMonths(-6));
+            var oldestMember = BuildValidPlayer(id: "oldest-member-1", team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-2));
+            var otherMember = BuildValidPlayer(id: "other-member-1", team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-1));
+            var playerLeaving = BuildValidPlayer(id: "last-admin-leaving-1", team: team, isAdmin: true, creationDate: DateTime.UtcNow.AddMonths(-6));
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
             validatorMock.Setup(v => v.LeaveTeamValidator(playerLeaving)).Verifiable();
@@ -878,26 +677,29 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             Assert.That(playerLeaving.IdTeam, Is.Null);
             Assert.That(playerLeaving.IsAdmin, Is.False);
-            Assert.That(oldestMember.IsAdmin, Is.True);
+            Assert.That(oldestMember.IsAdmin, Is.True); 
             Assert.That(otherMember.IsAdmin, Is.False);
+            Assert.That(team.Members, Does.Not.Contain(playerLeaving)); 
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
-            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
+            teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test(Description = "Caminho feliz: Último admin e único membro sai, eliminando a equipa")]
         public async Task LeaveTeam_LastAdminAndOnlyMember_DeletesTeamSuccessfully()
         {
             var team = BuildValidTeam();
-            var playerLeaving = BuildValidPlayer(id: Guid.NewGuid(), team: team, isAdmin: true);
+            var playerLeaving = BuildValidPlayer(id: "only-member-leaving-1", team: team, isAdmin: true);
             string expectedTeamName = team.Name;
+
+            Assert.That(team.Members.Count, Is.EqualTo(1)); 
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
             validatorMock.Setup(v => v.LeaveTeamValidator(playerLeaving)).Verifiable();
 
             teamServiceMock.Setup(s => s.DeleteTeamAsync(team.Id, playerLeaving.Id))
-             .Returns(Task.CompletedTask)
-             .Verifiable();
+                   .Returns(Task.CompletedTask)
+                   .Verifiable();
 
             playerRepoMock.Setup(r => r.UpdatePlayer(playerLeaving)).Verifiable();
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1).Verifiable();
@@ -906,6 +708,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             Assert.That(resultTeamName, Is.EqualTo(expectedTeamName));
             Assert.That(playerLeaving.IdTeam, Is.Null);
+            Assert.That(team.Members, Is.Empty); 
 
             teamServiceMock.Verify(s => s.DeleteTeamAsync(team.Id, playerLeaving.Id), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -1060,7 +863,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             }
 
             validatorMock.Setup(v => v.ValidateFiltersListTeams(filter))
-             .Throws(new InvalidOperationException(expectedError));
+                   .Throws(new InvalidOperationException(expectedError));
 
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await service.GetTeamListWithFilters(filter));
@@ -1074,7 +877,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
         #region Tests GetMembershipRequestsAsync
 
-        [Test(Description = "Get player membership requests should work")]
+        [Test(Description = "Caminho feliz: Get player membership requests should work")]
         public async Task GetMembershipRequests_Should_Work()
         {
             var player = BuildValidPlayer();
@@ -1092,7 +895,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(result[0].TeamName, Is.EqualTo("Botafogo"));
         }
 
-        [Test(Description = "Try consulting membership requests while player has team")]
+        [Test(Description = "Validação: Try consulting membership requests while player has team")]
         public async Task GetMembershipRequests_ShouldThrow_WhilePlayerHasTeam()
         {
             var player = BuildValidPlayer(null, BuildValidTeam(), false, null);
@@ -1110,7 +913,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             );
         }
 
-        [Test]
+        [Test(Description = "Validação: GetMembershipRequests_ShouldThrow_TryingToAcessAnotherPlayerRequests")]
         public async Task GetMembershipRequests_ShouldThrow_TryingToAcessAnotherPlayerRequests()
         {
             var otherPlayer = BuildValidPlayer();
@@ -1128,121 +931,97 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region Test SendMemberShipRequestAsync
-        [Test]
+        [Test(Description = "Caminho feliz: SendMembershipRequestAsync_ShouldWork")]
         public async Task SendMembershipRequestAsync_ShouldWork()
         {
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = player.Id,
-                IdTeam = team.Id,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
-            };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
-            validatorMock.Setup(v => v.PlayerExists(player));
-            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
 
-            membershipReqRepoMock.Setup(r => r.AddMembershipRequest(request)).Returns(Task.CompletedTask);
+            membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id))
+                .ReturnsAsync((MembershipRequest)null);
+
+            validatorMock.Setup(v => v.SendMembershipRequestValidator(player, team, null)).Verifiable();
+
+            membershipReqRepoMock.Setup(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>())).Returns(Task.CompletedTask);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            var result = service.SendMembershipRequestAsync(player.Id, team.Id);
+            var result = await service.SendMembershipRequestAsync(player.Id, team.Id);
 
             Assert.That(result, Is.Not.Null);
+            Assert.That(result.PlayerId, Is.EqualTo(player.Id));
+            Assert.That(result.TeamId, Is.EqualTo(team.Id));
+            Assert.That(result.IsPlayerSender, Is.True);
+
+            membershipReqRepoMock.Verify(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>()), Times.Once);
+            uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+            validatorMock.Verify(v => v.SendMembershipRequestValidator(player, team, null), Times.Once);
         }
 
-        [Test]
+        [Test(Description = "Validação: SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam")]
         public void SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam()
         {
-            // Arrange
-            var player = BuildValidPlayer();
+            var player = BuildValidPlayer(null, BuildValidTeam()); 
             var team = BuildValidTeam();
-            var request = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = player.Id,
-                IdTeam = team.Id,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
-            };
+            var request = (MembershipRequest)null;
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
             membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
+
             validatorMock
                 .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Player is already on a team and can't send membership requests."));
 
-
-
-            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
         }
 
 
-        [Test]
+        [Test(Description = "Validação: SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull")]
         public void SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull()
         {
-            // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = player.Id,
-                IdTeam = team.Id,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
-            };
-
-            FillTeam(team); // Simulates a full team
+            FillTeam(team); 
+            var request = (MembershipRequest)null;
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
             membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
+
             validatorMock
                 .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Team is full and cannot accept new requests."));
 
-            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
         }
 
-        [Test]
+        [Test(Description = "Validação: SendMembershipRequestAsync_ShouldThrow_WhileAlreadySentRequestToSameTeam")]
         public void SendMembershipRequestAsync_ShouldThrow_WhileAlreadySentRequestToSameTeam()
         {
-            // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequest
+            var request = new MembershipRequest 
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = player.Id,
-                IdTeam = team.Id,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
+                IdTeam = team.Id
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
             membershipReqRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
+
             validatorMock
                 .Setup(v => v.SendMembershipRequestValidator(player, team, request))
                 .Throws(new BusinessRuleException("Player already has a pending request for this Team."));
 
-            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.SendMembershipRequestAsync(player.Id, team.Id)
             );
@@ -1251,11 +1030,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region Test RejectMembershipRequests
-        [Test]
+        [Test(Description = "Caminho feliz: RejectMembershipRequest_Should_Work_When_PlayerWithoutTeam")]
         public async Task RejectMembershipRequest_Should_Work_When_PlayerWithoutTeam()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-rejecting-1";
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
@@ -1287,10 +1065,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(team);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             var result = await service.RejectMembershipRequestAsync(playerId, requestId);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(result.RequestId, Is.EqualTo(requestId));
             Assert.That(result.TeamName, Is.EqualTo("Team A"));
@@ -1298,11 +1074,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test]
+        [Test(Description = "Validação: RejectMembershipRequest_Should_Throw_When_PlayerHasTeam")]
         public void RejectMembershipRequest_Should_Throw_When_PlayerHasTeam()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-rejecting-2-has-team";
             var requestId = Guid.NewGuid();
 
             var player = new Player
@@ -1318,16 +1093,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.PlayerExists(player))
                 .Throws(new BusinessRuleException("Jogador já pertence a uma equipa"));
 
-            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.RejectMembershipRequestAsync(playerId, requestId));
         }
 
-        [Test]
+        [Test(Description = "Caminho feliz: RejectMembershipRequest_Should_RemoveRequestFromList")]
         public async Task RejectMembershipRequest_Should_RemoveRequestFromList()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-rejecting-3";
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
@@ -1357,21 +1130,18 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(team);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await service.RejectMembershipRequestAsync(playerId, requestId);
 
-            // Assert
             Assert.That(player.MembershipRequests.Count, Is.EqualTo(0), "The request should be removed after rejection.");
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
         #endregion
 
         #region Test AcceptMembershipRequest
-        [Test]
+        [Test(Description = "Caminho feliz: AcceptMembershipRequest_Should_Work_When_PlayerWithoutTeam")]
         public async Task AcceptMembershipRequest_Should_Work_When_PlayerWithoutTeam()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-accepting-1";
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
@@ -1407,10 +1177,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             teamRepoMock.Setup(r => r.GetTeamByIdAsync(teamId)).ReturnsAsync(team);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             var result = await service.AcceptMembershipRequestAsync(playerId, requestId);
 
-            // Assert
             Assert.That(result, Is.Not.Null);
             Assert.That(player.IdTeam, Is.EqualTo(teamId));
             Assert.That(team.Members, Does.Contain(player));
@@ -1419,11 +1187,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test]
+        [Test(Description = "Validação: AcceptMembershipRequest_Should_Throw_When_PlayerAlreadyHasTeam")]
         public void AcceptMembershipRequest_Should_Throw_When_PlayerAlreadyHasTeam()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-accepting-2-has-team";
             var requestId = Guid.NewGuid();
 
             var player = new Player
@@ -1437,16 +1204,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.PlayerExists(player))
                 .Throws(new BusinessRuleException("Jogador já pertence a uma equipa"));
 
-            // Act & Assert
             Assert.ThrowsAsync<BusinessRuleException>(async () =>
                 await service.AcceptMembershipRequestAsync(playerId, requestId));
         }
 
-        [Test]
+        [Test(Description = "Caminho feliz: AcceptMembershipRequest_Should_RemoveRequestFromLists")]
         public async Task AcceptMembershipRequest_Should_RemoveRequestFromLists()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-accepting-3";
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
@@ -1460,12 +1225,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = new Player
             {
                 Id = playerId,
+                Name = "Player",
                 MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
             var team = new Team
             {
                 Id = teamId,
+                Name = "Team",
                 Members = new List<Player>(),
                 MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
@@ -1477,46 +1244,34 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             teamRepoMock.Setup(r => r.GetTeamByIdAsync(teamId)).ReturnsAsync(team);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await service.AcceptMembershipRequestAsync(playerId, requestId);
 
-            // Assert
             Assert.That(player.MembershipRequests, Is.Empty);
             Assert.That(team.MembershipRequests, Is.Empty);
         }
 
-        [Test]
+        [Test(Description = "BUG: Este teste deve falhar. O serviço não limpa os outros pedidos.")]
         public async Task AcceptMembershipRequest_Should_RemoveOtherRequests_When_JoiningTeam()
         {
-            // Arrange
-            var playerId = Guid.NewGuid();
+            var playerId = "player-accepting-4";
             var teamId1 = Guid.NewGuid();
             var teamId2 = Guid.NewGuid();
             var acceptedRequestId = Guid.NewGuid();
 
-            var acceptedRequest = new MembershipRequest
-            {
-                Id = acceptedRequestId,
-                IdPlayer = playerId,
-                IdTeam = teamId1
-            };
-
-            var otherRequest = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = playerId,
-                IdTeam = teamId2
-            };
+            var acceptedRequest = new MembershipRequest { Id = acceptedRequestId, IdPlayer = playerId, IdTeam = teamId1 };
+            var otherRequest = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = playerId, IdTeam = teamId2 };
 
             var player = new Player
             {
                 Id = playerId,
-                MembershipRequests = new List<MembershipRequest> { acceptedRequest, otherRequest }
+                Name = "Player",
+                MembershipRequests = new List<MembershipRequest> { acceptedRequest, otherRequest } 
             };
 
             var team = new Team
             {
                 Id = teamId1,
+                Name = "Team 1",
                 Members = new List<Player>(),
                 MembershipRequests = new List<MembershipRequest> { acceptedRequest }
             };
@@ -1528,10 +1283,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             teamRepoMock.Setup(r => r.GetTeamByIdAsync(teamId1)).ReturnsAsync(team);
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            // Act
             await service.AcceptMembershipRequestAsync(playerId, acceptedRequestId);
 
-            // Assert
             Assert.That(player.MembershipRequests, Is.Empty, "All other membership requests should be cleared when joining a team.");
             Assert.That(player.IdTeam, Is.EqualTo(teamId1));
         }

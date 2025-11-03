@@ -25,8 +25,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         private Guid matchId;
         private Guid teamId1;
         private Guid teamId2;
-        private Guid userId1;
-        private Guid userId2;
+        private string userId1;
+        private string userId2;
         private string connectionId1;
         private string connectionId2;
 
@@ -53,8 +53,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             matchId = Guid.NewGuid();
             teamId1 = Guid.NewGuid();
             teamId2 = Guid.NewGuid();
-            userId1 = Guid.NewGuid();
-            userId2 = Guid.NewGuid();
+            userId1 = "user-id-1";
+            userId2 = "user-id-2";
             connectionId1 = "conn-1";
             connectionId2 = "conn-2";
         }
@@ -89,7 +89,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             {
                 team1Players.Add(new Player
                 {
-                    Id = i == 0 ? userId1 : Guid.NewGuid(),
+                    Id = i == 0 ? userId1 : $"other-player-1-{Guid.NewGuid().ToString("N")}",
                     IsAdmin = i == 0
                 });
             }
@@ -99,7 +99,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             {
                 team2Players.Add(new Player
                 {
-                    Id = i == 0 ? userId2 : Guid.NewGuid(),
+                    Id = i == 0 ? userId2 : $"other-player-2-{Guid.NewGuid().ToString("N")}",
                     IsAdmin = i == 0
                 });
             }
@@ -211,9 +211,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         public void JoinHubAsync_ShouldThrow_WhenMatchIdIsEmpty()
         {
             validatorMock.Setup(v => v.ValidateVariableJoinMatch(Guid.Empty, userId1, connectionId1))
-                .Throws(new ArgumentException("O id da partida está null"));
+                 .Throws(new ArgumentException("O id da partida está null"));
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
+            Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(Guid.Empty, userId1, teamId1, connectionId1)
             );
         }
@@ -221,11 +221,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Lança exceção se o ID do utilizador estiver vazio")]
         public void JoinHubAsync_ShouldThrow_WhenUserIdIsEmpty()
         {
-            validatorMock.Setup(v => v.ValidateVariableJoinMatch(matchId, Guid.Empty, connectionId1))
-                .Throws(new ArgumentException("O id do utilizador está a null"));
+            validatorMock.Setup(v => v.ValidateVariableJoinMatch(matchId, string.Empty, connectionId1))
+                 .Throws(new ArgumentException("O id do utilizador está a null"));
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
-                await service.JoinHubAsync(matchId, Guid.Empty, teamId1, connectionId1)
+            Assert.ThrowsAsync<ArgumentException>(async () =>
+                await service.JoinHubAsync(matchId, string.Empty, teamId1, connectionId1)
             );
         }
 
@@ -233,7 +233,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         public void JoinHubAsync_ShouldThrow_WhenConnectionIdIsNullOrEmpty()
         {
             validatorMock.Setup(v => v.ValidateVariableJoinMatch(matchId, userId1, ""))
-                .Throws(new ArgumentException("A connection string está a null ou vazia"));
+                 .Throws(new ArgumentException("A connection string está a null ou vazia"));
 
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, "")
@@ -247,9 +247,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 .ReturnsAsync((Matches?)null);
 
             validatorMock.Setup(v => v.ValidateMatchJoinMatch(null))
-                .Throws(new ArgumentException("A partida não foi encontrada"));
+                 .Throws(new ArgumentException("A partida não foi encontrada"));
 
-            Assert.ThrowsAsync<ArgumentException>(async () =>
+            Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
             );
         }
@@ -263,7 +263,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
             matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId)).ReturnsAsync(match);
             validatorMock.Setup(v => v.ValidateJoinMatch(null, teamId1, It.IsAny<ConcurrentDictionary<Guid, string>>()))
-                .Throws(new ArgumentException("A equipa do admin não foi encontrada"));
+                 .Throws(new ArgumentException("A equipa do admin não foi encontrada"));
 
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
@@ -279,7 +279,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(It.IsAny<TeamStatistics>(), teamId1, It.IsAny<ConcurrentDictionary<Guid, string>>()))
-                .Throws(new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida"));
+                 .Throws(new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida"));
 
             Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, "conn-dup")
@@ -298,7 +298,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             memoryCache.Set(GetHubCacheKey(matchId), hub);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(It.IsAny<TeamStatistics>(), teamId1, hub))
-                .Throws(new InvalidOperationException("Apenas dois admins podem aceder"));
+                 .Throws(new InvalidOperationException("Apenas dois admins podem aceder"));
 
             Assert.ThrowsAsync<InvalidOperationException>(async () =>
                 await service.JoinHubAsync(matchId, userId1, teamId1, connectionId1)
@@ -312,9 +312,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId)).ReturnsAsync(match);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(
-                 It.IsAny<TeamStatistics>(), 
-                 teamId1,
-                 It.IsAny<ConcurrentDictionary<Guid, string>>()))
+                   It.IsAny<TeamStatistics>(),
+                   teamId1,
+                   It.IsAny<ConcurrentDictionary<Guid, string>>()))
             .Throws(new InvalidOperationException("O id da team é diferente"));
 
             Assert.ThrowsAsync<InvalidOperationException>(async () =>
@@ -332,7 +332,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             {
                 teamToModify.Members.Add(new Player
                 {
-                    Id = i == 0 ? userId1 : Guid.NewGuid(), 
+                    Id = i == 0 ? userId1 : $"other-player-3-{Guid.NewGuid().ToString("N")}",
                     IsAdmin = i == 0
                 });
             }
@@ -340,7 +340,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             matchRepositoryMock.Setup(r => r.GetMatchWithListPlayerById(matchId)).ReturnsAsync(match);
 
             validatorMock.Setup(v => v.ValidateJoinMatch(
-                    It.Is<TeamStatistics>(ts => ts.Team.Members.Count < 11), 
+                    It.Is<TeamStatistics>(ts => ts.Team.Members.Count < 11),
                     teamId1,
                     It.IsAny<ConcurrentDictionary<Guid, string>>()))
                 .Throws(new InvalidOperationException("Só pode dar inicio a partida se a equipa tiver 11 jogadores"));
@@ -364,7 +364,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         public void LeaveHubAsync_ShouldThrow_WhenMatchIdIsEmpty()
         {
             geralValidatorMock.Setup(v => v.ValidateIdMatchLeaveMatch(Guid.Empty, teamId1))
-                .Throws(new ArgumentException("Match ID cannot be empty"));
+                 .Throws(new ArgumentException("Match ID cannot be empty"));
 
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.LeaveHubAsync(Guid.Empty, teamId1, connectionId1)
@@ -375,7 +375,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         public void LeaveHubAsync_ShouldThrow_WhenTeamIdIsEmpty()
         {
             geralValidatorMock.Setup(v => v.ValidateIdMatchLeaveMatch(matchId, Guid.Empty))
-                .Throws(new ArgumentException("Team ID cannot be empty"));
+                 .Throws(new ArgumentException("Team ID cannot be empty"));
 
             Assert.ThrowsAsync<ArgumentException>(async () =>
                 await service.LeaveHubAsync(matchId, Guid.Empty, connectionId1)
@@ -395,7 +395,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         {
             var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
-            hub.TryAdd(teamId2, connectionId2); 
+            hub.TryAdd(teamId2, connectionId2);
             memoryCache.Set(hubCacheKey, hub);
 
             var result = await service.LeaveHubAsync(matchId, teamId1, connectionId1);
@@ -422,9 +422,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
             Assert.That(memoryCache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, string>? updatedHub), Is.True);
             Assert.That(updatedHub, Is.Not.Null);
-            Assert.That(updatedHub.Count, Is.EqualTo(1)); 
-            Assert.That(updatedHub.ContainsKey(teamId1), Is.False); 
-            Assert.That(updatedHub.ContainsKey(teamId2), Is.True); 
+            Assert.That(updatedHub.Count, Is.EqualTo(1));
+            Assert.That(updatedHub.ContainsKey(teamId1), Is.False);
+            Assert.That(updatedHub.ContainsKey(teamId2), Is.True);
         }
 
         [Test(Description = "Remove a equipa e remove o hub do cache (quando o hub fica vazio)")]
@@ -475,7 +475,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         {
             var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, string>();
-            hub.TryAdd(teamId1, connectionId1); 
+            hub.TryAdd(teamId1, connectionId1);
             memoryCache.Set(hubCacheKey, hub);
 
             var result = await service.HandleDisconnectAsync(matchId, teamId1, connectionId1);

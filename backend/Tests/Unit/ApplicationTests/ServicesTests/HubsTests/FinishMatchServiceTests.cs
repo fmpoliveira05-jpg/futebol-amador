@@ -26,7 +26,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
         private Guid matchId;
         private Guid teamId1, teamId2;
-        private Guid adminId1, adminId2;
+        // CORRIGIDO: Alterado de Guid para string
+        private string adminId1, adminId2;
         private string connId1, connId2;
         private Rank goldRank, bronzeRank, silverRank;
         private Matches testMatch;
@@ -57,8 +58,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             matchId = Guid.NewGuid();
             teamId1 = Guid.NewGuid();
             teamId2 = Guid.NewGuid();
-            adminId1 = Guid.NewGuid();
-            adminId2 = Guid.NewGuid();
+            // CORRIGIDO: Inicializado como string
+            adminId1 = "admin-id-1";
+            adminId2 = "admin-id-2";
             connId1 = "conn1";
             connId2 = "conn2";
 
@@ -109,6 +111,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 PreviousRank = bronzeRank
             };
 
+            // CORRIGIDO: adminId1 e adminId2 são strings
             var admin1 = new Player { Id = adminId1, IsAdmin = true };
             var admin2 = new Player { Id = adminId2, IsAdmin = true };
 
@@ -156,6 +159,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         public async Task JoinHubAsync_FirstAdminJoins_ReturnsIsFirstAdminTrueAndAddsToCache()
         {
             var hubCacheKey = GetHubCacheKey(matchId);
+            // CORRIGIDO: adminId1 é string
             var result = await service.JoinHubAsync(matchId, resultDtoTeam1, adminId1, connId1);
 
             Assert.That(result.IsFirstAdmin, Is.True);
@@ -190,6 +194,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             hub.TryAdd(teamId1, firstEntry);
             cache.Set(hubCacheKey, hub);
 
+            // CORRIGIDO: adminId2 é string
             var result = await service.JoinHubAsync(matchId, resultDtoTeam2Mismatch, adminId2, connId2);
 
             Assert.That(result.IsFirstAdmin, Is.False);
@@ -219,6 +224,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             hub.TryAdd(teamId1, firstEntry);
             cache.Set(hubCacheKey, hub);
 
+            // CORRIGIDO: adminId2 é string
             var result = await service.JoinHubAsync(matchId, resultDtoTeam2Match, adminId2, connId2);
 
             Assert.That(result.IsFirstAdmin, Is.False);
@@ -251,14 +257,17 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Testa se o método falha (lança ArgumentException) quando os parâmetros de entrada básicos são inválidos.")]
         public void JoinHubAsync_InvalidInputVariables_ThrowsArgumentException()
         {
-            mockValidator.Setup(v => v.ValidateVariableJoinMatch(Guid.Empty, null, Guid.Empty, null))
+            // CORRIGIDO: adminId é string.Empty
+            mockValidator.Setup(v => v.ValidateVariableJoinMatch(Guid.Empty, null, string.Empty, null))
                 .Throws(new ArgumentException("Test Exception"));
 
+            // CORRIGIDO: adminId é string.Empty
             Assert.ThrowsAsync<ArgumentException>(() =>
-                service.JoinHubAsync(Guid.Empty, null, Guid.Empty, null));
+                service.JoinHubAsync(Guid.Empty, null, string.Empty, null));
 
+            // CORRIGIDO: adminId é string.Empty
             mockValidator.Verify(v =>
-                v.ValidateVariableJoinMatch(Guid.Empty, null, Guid.Empty, null), Times.Once);
+                v.ValidateVariableJoinMatch(Guid.Empty, null, string.Empty, null), Times.Once);
         }
 
         [Test(Description = "Testa se o método falha (lança ArgumentException) se a partida (matchId) não for encontrada no repositório.")]
@@ -270,6 +279,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockValidator.Setup(v => v.ValidateMatchJoinMatch(null))
                 .Throws(new ArgumentException("A match não existe"));
 
+            // CORRIGIDO: adminId1 é string
             var ex = Assert.ThrowsAsync<ArgumentException>(() =>
                 service.JoinHubAsync(matchId, resultDtoTeam1, adminId1, connId1));
 
@@ -280,10 +290,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Testa se o método falha (lança ArgumentException) quando o utilizador que tenta entrar no hub não é admin de nenhuma equipa na partida.")]
         public void JoinHubAsync_UserIsNotAdmin_ThrowsArgumentException()
         {
-            var nonAdminId = Guid.NewGuid();
+            // CORRIGIDO: nonAdminId é string
+            var nonAdminId = "non-admin-id";
 
+            // CORRIGIDO: adminId é string
             Assert.ThrowsAsync<NullReferenceException>(() =>
-        service.JoinHubAsync(matchId, resultDtoTeam1, nonAdminId, connId1));
+                service.JoinHubAsync(matchId, resultDtoTeam1, nonAdminId, connId1));
         }
 
         [Test(Description = "Testa se o método falha (lança InvalidOperationException) se um admin da mesma equipa já estiver no hub.")]
@@ -298,6 +310,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockValidator.Setup(v => v.ValidateJoinMatch(It.IsAny<TeamStatistics>(), teamId1, hub))
                 .Throws(new InvalidOperationException("Já existe um admin desta equipa"));
 
+            // CORRIGIDO: adminId1 é string
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.JoinHubAsync(matchId, resultDtoTeam1, adminId1, "another_connection"));
 
@@ -307,12 +320,13 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Testa se o método falha (lança InvalidOperationException) se a partida começou há menos de 90 minutos.")]
         public void JoinHubAsync_MatchNotYet90Minutes_ThrowsInvalidOperationException()
         {
-            testMatch.TimeStart = DateTime.UtcNow.AddMinutes(-80); 
+            testMatch.TimeStart = DateTime.UtcNow.AddMinutes(-80);
 
             var expectedMessage = "Ainda não passaram 90 minutos";
             mockValidator.Setup(v => v.ValidateMatchJoinMatch(testMatch))
-                .Throws(new InvalidOperationException(expectedMessage)); 
+                .Throws(new InvalidOperationException(expectedMessage));
 
+            // CORRIGIDO: adminId1 é string
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.JoinHubAsync(matchId, resultDtoTeam1, adminId1, connId1)
             );
@@ -345,11 +359,13 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             hub.TryAdd(teamId2, admin2Entry_Old);
             cache.Set(hubCacheKey, hub);
 
+            // CORRIGIDO: adminId2 é string
             var result = await service.UpdateResult(matchId, resultDtoTeam2Match, adminId2, connId2);
 
             Assert.That(result.IsCoincides, Is.True);
             Assert.That(result.IdTeam, Is.EqualTo(teamId2));
 
+            // CORRIGIDO: adminId2 é string
             mockValidator.Verify(v => v.ValidateVariableJoinMatch(matchId, resultDtoTeam2Match, adminId2, connId2), Times.Once);
             mockValidator.Verify(v => v.ValidateUpdateResult(It.IsAny<TeamStatistics>(), teamId2, hub), Times.Once);
             mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -370,6 +386,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             cache.Set(hubCacheKey, hub);
 
             var newMismatchDto = new ResultMatchDto { IdTeam = teamId2, IdOpponent = teamId1, NumGoalsTeam = 10, NumGoalsOpponent = 10 };
+            // CORRIGIDO: adminId2 é string
             var result = await service.UpdateResult(matchId, newMismatchDto, adminId2, connId2);
 
             Assert.That(result.IsCoincides, Is.Not.True);
@@ -390,13 +407,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             var hubCacheKey = GetHubCacheKey(matchId);
             var hub = new ConcurrentDictionary<Guid, EntryHubFinishMatch>();
             var admin1Entry = new EntryHubFinishMatch { ConnectionId = connId1, Result = new JoinFinishMatch { IdTeam = teamId1, ResultMatch = resultDtoTeam1 } };
-            
+
             hub.TryAdd(teamId1, admin1Entry);
             cache.Set(hubCacheKey, hub);
 
             mockValidator.Setup(v => v.ValidateUpdateResult(It.IsAny<TeamStatistics>(), teamId2, hub))
                 .Throws(new InvalidOperationException("Este admin não está no hub"));
 
+            // CORRIGIDO: adminId2 é string
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.UpdateResult(matchId, resultDtoTeam2Match, adminId2, connId2));
 
@@ -410,6 +428,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockValidator.Setup(v => v.ValidateUpdateResult(It.IsAny<TeamStatistics>(), teamId1, It.Is<ConcurrentDictionary<Guid, EntryHubFinishMatch>>(h => h.Count == 0)))
                 .Throws(new InvalidOperationException("O hub está vazio."));
 
+            // CORRIGIDO: adminId1 é string
             var ex = Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.UpdateResult(matchId, resultDtoTeam1, adminId1, connId1));
 
@@ -419,13 +438,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Testa se UpdateResult falha se o utilizador não for um admin (NullReference).")]
         public void UpdateResult_UserIsNotAdmin_ThrowsNullReferenceException()
         {
-            var nonAdminId = Guid.NewGuid();
+            // CORRIGIDO: nonAdminId é string
+            var nonAdminId = "non-admin-id-2";
 
+            // CORRIGIDO: nonAdminId é string
             Assert.ThrowsAsync<NullReferenceException>(() =>
                 service.UpdateResult(matchId, resultDtoTeam1, nonAdminId, connId1));
         }
         #endregion
-       
+
         #endregion
 
         #region Tests LeaveHub
@@ -481,7 +502,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
             hub.TryAdd(teamId1, new EntryHubFinishMatch { ConnectionId = connId1, Result = new JoinFinishMatch() });
             cache.Set(hubCacheKey, hub);
-            
+
             var result = await service.LeaveHubAsync(matchId, teamId1, "conn1");
 
             Assert.That(result, Is.True);

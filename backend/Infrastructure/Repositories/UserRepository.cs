@@ -13,35 +13,6 @@ namespace Infrastructure.Repositories
         {
             this.context = context;
         }
-        public Task AddAsync(Player player)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void DeletePlayer(Player playerToRemove)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Player>?> GetAllTPlayersAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Player?> GetPlayerByEmailAsync(string email)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Player?> GetPlayerByIdAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Player>> GetPlayersListByIdListAsync(List<Guid> playerIdList)
-        {
-            throw new NotImplementedException();
-        }
 
         public async Task<List<User?>> GetAllUsersAsync()
         {
