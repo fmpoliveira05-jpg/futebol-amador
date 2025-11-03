@@ -37,7 +37,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{sadminId:guid}")]
-        public async Task<IActionResult> DeleteSuperAdmin(Guid sadminId)
+        public async Task<IActionResult> DeleteSuperAdmin(string sadminId)
         {
             await superAdminService.DeleteSuperAdminAsync(sadminId);
 
@@ -45,7 +45,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{sadminId:guid}")]
-        public async Task<IActionResult> GetSuperAdmin(Guid sadminId)
+        public async Task<IActionResult> GetSuperAdmin(string sadminId)
         {
             var superAdminDetails = await superAdminService.GetSuperAdminByIdAsync(sadminId);
 
@@ -53,7 +53,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{sadminId:guid}")]
-        public async Task<IActionResult> UpdateSuperAdmin(Guid sadminId, [FromBody] UpdateSuperAdminDTO dto)
+        public async Task<IActionResult> UpdateSuperAdmin(string sadminId, [FromBody] UpdateSuperAdminDTO dto)
         {
             if (!ModelState.IsValid)
             {

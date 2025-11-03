@@ -21,50 +21,50 @@ namespace Infrastructure.Repositories
             this.DbContext = DbContext;
         }
 
-        public void DeleteTeam(Teams teamToRemove)
+        public void DeleteTeam(Team teamToRemove)
         {
             DbContext.Team.Remove(teamToRemove);
         }
 
-        public void UpdateTeam(Teams updatedTeam)
+        public void UpdateTeam(Team updatedTeam)
         {
             DbContext.Team.Update(updatedTeam);
         }
 
-        public async Task<List<Teams>?> GetAllTeamsAsync()
+        public async Task<List<Team>?> GetAllTeamsAsync()
         {
             return await DbContext.Team.ToListAsync();
         }
 
         //Talvez crie uma variação deste apenas com o send e outro apenas com o receiver
-        public async Task<Teams?> GetTeamByIdAsync(Guid id)
+        public async Task<Team?> GetTeamByIdAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Calendar)
                 .Include(t => t.SentInvites)
                 .Include(t => t.ReceivedInvites)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
         //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
-        public async Task<Teams?> GetTeamByNameAsync(String name)
+        public async Task<Team?> GetTeamByNameAsync(String name)
         {
-            return await context.Team
+            return await DbContext.Team
                 .FirstOrDefaultAsync(t => t.Name == name); 
         }
 
-        public async Task AddAsync(Teams team)
+        public async Task AddAsync(Team team)
         {
             await DbContext.Team.AddAsync(team);
         }
 
-        public async Task<Teams?> GetTeamByIdWithPitchAsync(Guid id)
+        public async Task<Team?> GetTeamByIdWithPitchAsync(Guid id)
         {
             return await DbContext.Team
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
+        public async Task<Team?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
         {
             return await DbContext.Team
                 .Include(t => t.ReceivedInvites)
@@ -72,7 +72,7 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Teams?> GetByIdWithReceivedInvites(Guid id)
+        public async Task<Team?> GetByIdWithReceivedInvites(Guid id)
         {
             return await DbContext.Team
                .Include(t => t.ReceivedInvites)
@@ -81,7 +81,7 @@ namespace Infrastructure.Repositories
         
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Where(t => t.Id == teamId)
                 .Select(t => new TeamDetailsDto
                 {
@@ -108,7 +108,7 @@ namespace Infrastructure.Repositories
         public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId)
         {
 
-            return await context.MembershipRequests
+            return await DbContext.MembershipRequests
                         .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true)
                         .Select(mr => new MemberShipRequestDto
                         {
@@ -124,7 +124,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
         {
-            var query = context.MembershipRequests
+            var query = DbContext.MembershipRequests
                 .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true);
 
             if (filters.MinDate.HasValue)
@@ -158,18 +158,18 @@ namespace Infrastructure.Repositories
             return list;
         }
 
-        public async Task<Teams?> GetTeamForMembershipRequestAsync(Guid id)
+        public async Task<Team?> GetTeamForMembershipRequestAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.MembershipRequests)
                     .ThenInclude(r => r.Player)
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Teams?> GetTeamForDeletionAsync(Guid id)
+        public async Task<Team?> GetTeamForDeletionAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Members)
                 .Include(t => t.Calendar)
                     .ThenInclude(c => c.Matches)
@@ -177,31 +177,31 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Teams?> GetTeamForUpdateAsync(Guid id)
+        public async Task<Team?> GetTeamForUpdateAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Members)
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<Teams?> GetTeamByNameWithMembersAsync(string name)
+        public async Task<Team?> GetTeamByNameWithMembersAsync(string name)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Name == name);
         }
 
-        public async Task<Teams?> GetTeamForMemberManagementAsync(Guid id)
+        public async Task<Team?> GetTeamForMemberManagementAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<List<PlayerDetailsDto>> GetTeamPlayersDtoAsyncWithFilters(Guid teamId, FilterTeamPlayers filter)
         {
-            var team = await context.Team
+            var team = await DbContext.Team
                 .Include(t => t.Members)
                 .FirstOrDefaultAsync(t => t.Id == teamId);
 
@@ -262,7 +262,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Rank)
                 .OrderByDescending(t => t.CurrentPoints)
                 .Take(top)
@@ -275,9 +275,9 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<Teams?> GetTeamWitchMemberRankAndPitchAsync(Guid id)
+        public async Task<Team?> GetTeamWitchMemberRankAndPitchAsync(Guid id)
         {
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Members)
                 .Include (t => t.Rank)
                 .Include (t => t.Pitch)
@@ -288,9 +288,9 @@ namespace Infrastructure.Repositories
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = (from t in context.Team
-                         join pitch in context.Pitch on t.IdPitch equals pitch.Id
-                         join rank in context.Rank on t.IdRank equals rank.Id
+            var query = (from t in DbContext.Team
+                         join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
+                         join rank in DbContext.Rank on t.IdRank equals rank.Id
 
                          where t.Members.Count < ModelConstants.TeamConst.MaxMembers
                          let averageAge = t.Members.Any()
@@ -323,7 +323,7 @@ namespace Infrastructure.Repositories
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = context.Team
+            var query = DbContext.Team
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
                             .Where(t => t.Members.Count < ModelConstants.TeamConst.MaxMembers);
@@ -433,9 +433,9 @@ namespace Infrastructure.Repositories
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = (from t in context.Team
-                         join pitch in context.Pitch on t.IdPitch equals pitch.Id
-                         join rank in context.Rank on t.IdRank equals rank.Id
+            var query = (from t in DbContext.Team
+                         join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
+                         join rank in DbContext.Rank on t.IdRank equals rank.Id
 
                          where t.Members.Count > 11
                             && t.Id != idTeam
@@ -471,7 +471,7 @@ namespace Infrastructure.Repositories
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = context.Team
+            var query = DbContext.Team
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
                             .Where(t => t.Id != idTeam 
@@ -572,7 +572,7 @@ namespace Infrastructure.Repositories
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow); 
 
-            var query = await context.Player.Where(p => !p.IsAdmin 
+            var query = await DbContext.Player.Where(p => !p.IsAdmin 
                                                     && p.IdTeam == null)
                 .Select(p => new PlayerWithoutTeamInfoDto
                 {
@@ -592,7 +592,7 @@ namespace Infrastructure.Repositories
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = context.Player.Where(p => !p.IsAdmin && p.IdTeam == null);
+            var query = DbContext.Player.Where(p => !p.IsAdmin && p.IdTeam == null);
 
             if (!string.IsNullOrEmpty(filters.PlayerName))
             {

@@ -61,7 +61,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
 
         #region Support Methods
 
-        private Teams CreateMockTeam(bool isMainPlayerAdmin, int memberCount = 11, int additionalAdminCount = 0)
+        private Team CreateMockTeam(bool isMainPlayerAdmin, int memberCount = 11, int additionalAdminCount = 0)
         {
             var members = new List<Player>();
 
@@ -107,7 +107,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
 
             var rank = new Rank { Id = Guid.NewGuid(), Name = "Gold", PointsToPromotion = 1000, NextRank = new Rank { Name = "Platinum" }, PreviousRank = new Rank { Name = "Silver", PreviousRank = new Rank { PointsToPromotion = 200 } } };
 
-            return new Teams
+            return new Team
             {
                 Id = idTeam,
                 Name = "Test Team",
@@ -374,8 +374,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var teamEntry2 = CreateMockEntry(Guid.NewGuid(), gameDate);
             var teamEntry3 = CreateMockEntry(Guid.NewGuid(), gameDate);
 
-            var team1 = new Teams { Id = teamEntry1.Team.IdTeam, Pitch = new Pitch { Id = Guid.NewGuid() } };
-            var team2 = new Teams { Id = teamEntry2.Team.IdTeam, Pitch = new Pitch { Id = Guid.NewGuid() } };
+            var team1 = new Team { Id = teamEntry1.Team.IdTeam, Pitch = new Pitch { Id = Guid.NewGuid() } };
+            var team2 = new Team { Id = teamEntry2.Team.IdTeam, Pitch = new Pitch { Id = Guid.NewGuid() } };
 
             var key1 = GetHubCacheKey(teamEntry1.Team.IdTeam);
             var key2 = GetHubCacheKey(teamEntry2.Team.IdTeam);

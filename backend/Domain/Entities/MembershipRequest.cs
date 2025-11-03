@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations.Schema;
  */
 namespace Domain.Entities
 {
-    public class MembershipRequests
+    public class MembershipRequest
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -19,7 +19,7 @@ namespace Domain.Entities
         [MaxLength(ModelConstants.UserConst.MaxIdLength)]
         public string IdPlayer { get; set; } //FK
 
-        public Teams Team { get; set; }
+        public Team Team { get; set; }
 
         [Required]
         [ForeignKey("Team")]
@@ -31,9 +31,9 @@ namespace Domain.Entities
         [Required]
         public bool IsPlayerSender { get; set; } // true - Player, false - Team
 
-        public MembershipRequests() { }
+        public MembershipRequest() { }
 
-        public MembershipRequests(Player player, Teams team, bool sender)
+        public MembershipRequest(Player player, Team team, bool sender)
         {
             Player = player;
             IdPlayer = player.Id;

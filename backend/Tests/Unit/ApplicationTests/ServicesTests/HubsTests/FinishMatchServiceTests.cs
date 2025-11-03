@@ -112,8 +112,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             var admin1 = new Player { Id = adminId1, IsAdmin = true };
             var admin2 = new Player { Id = adminId2, IsAdmin = true };
 
-            var team1 = new Teams { Id = teamId1, Rank = silverRank, Members = new List<Player> { admin1 }, CurrentPoints = 28 };
-            var team2 = new Teams { Id = teamId2, Rank = silverRank, Members = new List<Player> { admin2 }, CurrentPoints = 21 };
+            var team1 = new Team { Id = teamId1, Rank = silverRank, Members = new List<Player> { admin1 }, CurrentPoints = 28 };
+            var team2 = new Team { Id = teamId2, Rank = silverRank, Members = new List<Player> { admin2 }, CurrentPoints = 21 };
 
             var teamStat1 = new TeamStatistics { IdTeam = teamId1, Team = team1 };
             var teamStat2 = new TeamStatistics { IdTeam = teamId2, Team = team2 };

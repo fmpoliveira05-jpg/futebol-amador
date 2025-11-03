@@ -54,15 +54,15 @@ namespace Infrastructure.Repositories
             context.Player.Update(updatedPlayer);
         }
 
-        public async Task<Player?> GetPlayerByIdWithRequestsAsync(Guid id)
+        public async Task<Player?> GetPlayerByIdWithRequestsAsync(string playerId)
         {
             return await context.Player
                 .Include(p => p.MembershipRequests)
                     .ThenInclude(r => r.Team)
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == playerId);
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(Guid playerId)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(string playerId)
         {
             return await context.MembershipRequests
                 .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false)
@@ -78,7 +78,7 @@ namespace Infrastructure.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
             var query = context.MembershipRequests
                 .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false);

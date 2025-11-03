@@ -26,9 +26,9 @@ namespace Application.Services
             this.unityOfWork = unityOfWork ?? throw new ArgumentNullException(nameof(unityOfWork));
         }
 
-        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsReceivedByPlayerFromTeams(Guid idPlayer)
+        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsReceivedByPlayerFromTeams(string idPlayer)
         {
-            if (idPlayer == Guid.Empty)
+            if (idPlayer == string.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
@@ -53,9 +53,9 @@ namespace Application.Services
             return invitesFromTeams;
         }
 
-        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(Guid idPlayer)
+        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(string idPlayer)
         {
-            if (idPlayer == Guid.Empty)
+            if (idPlayer == string.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
@@ -85,7 +85,7 @@ namespace Application.Services
             if (dto == null)
                 throw new BusinessRuleException("DTO inválido");
 
-            if (dto.PlayerId == Guid.Empty)
+            if (dto.PlayerId == string.Empty)
                 throw new BusinessRuleException("O id do jogador não pode estar vazio");
 
             if (dto.TeamId == Guid.Empty)
@@ -107,7 +107,7 @@ namespace Application.Services
                 throw new BusinessRuleException("Já existe um pedido de adesão entre este jogador e esta equipa");
             }
 
-            var membershipRequest = new MembershipRequests(player, team, senderFlag)
+            var membershipRequest = new MembershipRequest(player, team, senderFlag)
             {
             };
 
@@ -146,7 +146,7 @@ namespace Application.Services
 
             await membershipRequestRepository.DeleteMembershipRequest(request);
 
-            await teamRepository.UpdateTeam(team);
+            teamRepository.UpdateTeam(team);
 
             await unityOfWork.SaveChangesAsync();
 

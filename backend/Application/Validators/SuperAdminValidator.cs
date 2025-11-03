@@ -30,7 +30,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, Users[] sadmins)
+        public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, User[] sadmins)
         {
             if (sadmins[0] != null)
             {
@@ -70,7 +70,7 @@ namespace Application.Validators
         }
 
 
-        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto, SuperAdmin sadmin, Users[] sadmins)
+        public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto, SuperAdmin sadmin, User[] sadmins)
         {
             SuperAdminExists(sadmin);
 

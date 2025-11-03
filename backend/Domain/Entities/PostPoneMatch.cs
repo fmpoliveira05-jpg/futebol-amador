@@ -8,7 +8,7 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = new Guid();
 
-        public Teams Team { get; set; }
+        public Team Team { get; set; }
 
         [Required]
         [ForeignKey("Team")]
@@ -24,7 +24,7 @@ namespace Domain.Entities
         public DateTime PostPoneDate { get; set; }
 
         public PostPoneMatch() { }
-        public PostPoneMatch(Teams team, Matches match, DateTime postPoneDate) {
+        public PostPoneMatch(Team team, Matches match, DateTime postPoneDate) {
             this.Team = team;
             this.IdTeamPostPone = team.Id;
             this.Match = match;

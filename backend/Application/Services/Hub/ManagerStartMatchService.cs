@@ -27,7 +27,7 @@ namespace Application.Services.Hub
             this.cache = cache;
         }
 
-        public async Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, Guid userId, Guid idTeam, string connectionId)
+        public async Task<JoinStartMatchResult> JoinHubAsync(Guid matchId, string userId, Guid idTeam, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, userId, connectionId);
 

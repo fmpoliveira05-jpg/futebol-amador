@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AmateurFootballContext context;
 
@@ -43,27 +43,22 @@ namespace Infrastructure.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Teams?> GetUserByIdAsync(Guid userId)
-        {
-            this.context = context;
-        }
-
-        public async Task<List<Users?>> GetAllUsersAsync()
+        public async Task<List<User?>> GetAllUsersAsync()
         {
             return await context.User.ToListAsync();
         }
 
-        public async Task<Users?> GetUserByIdAsync(Guid id)
+        public async Task<User?> GetUserByIdAsync(string userId)
         {
-            return await context.User.FirstOrDefaultAsync(p => p.Id == id);
+            return await context.User.FirstOrDefaultAsync(p => p.Id == userId);
         }
 
-        public async Task<Users?> GetUserByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
             return await context.User.FirstOrDefaultAsync(p => p.Email == email);
         }
 
-        public async Task<Users?> GetUserByPhoneAsync(string phone)
+        public async Task<User?> GetUserByPhoneAsync(string phone)
         {
             return await context.User.FirstOrDefaultAsync(p => p.Phone == phone);
         }

@@ -230,16 +230,14 @@ namespace Api.Controllers
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var dto = await TeamService.AcceptMembershipRequestAsync(teamId, requestId, userId);
-            return Ok(dto);
+            return Ok();
         }
 
         [HttpDelete("{teamId}/membership-request/{requestId}/reject")]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var dto = await TeamService.RejectMembershipRequestAsync(teamId, requestId, userId);
-            return Ok(dto);
+            return Ok();
         }
 
         [HttpPost("{teamId}/membership-requests/send")]
@@ -269,12 +267,11 @@ namespace Api.Controllers
 
         #region private Methods
         [Authorize]
-        private Guid GetCurrentUserId()
+        private string GetCurrentUserId()
         {
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (Guid.TryParse(userIdString, out Guid userId))
-                return userId;
-            throw new ValidationException("Token de utilizador inválido ou em falta.");
+            //validar null
+        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
         }
         #endregion
     }

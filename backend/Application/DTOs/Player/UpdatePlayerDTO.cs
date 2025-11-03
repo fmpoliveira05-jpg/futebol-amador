@@ -18,7 +18,7 @@ namespace Application.DTOs.PlayerDTOs
         public string Address { get; set; } = null!;
 
         [Required]
-        [MinLength(ModelConstants.UserConst.MinEmailLength), MaxLength(ModelConstants.UserConst.MaxPasswordLength)]
+        [MinLength(ModelConstants.UserConst.MinEmailLength), MaxLength(ModelConstants.UserConst.MaxEmailLength)]
         public string Email { get; set; } = null!;
 
         [Required]

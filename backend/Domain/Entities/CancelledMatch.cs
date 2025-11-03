@@ -10,7 +10,7 @@ namespace Domain.Entities
         public Guid Id { get; set; } = new Guid();
 
         [Required]
-        public Teams Team { get; set; }
+        public Team Team { get; set; }
 
         [Required]
         [ForeignKey("Team")]
@@ -30,7 +30,7 @@ namespace Domain.Entities
 
         public CancelledMatch() { }
 
-        public CancelledMatch(Teams team, Matches match, string description) { 
+        public CancelledMatch(Team team, Matches match, string description) { 
             this.Team = team;
             this.IdTeam = team.Id;
             this.Match = match;

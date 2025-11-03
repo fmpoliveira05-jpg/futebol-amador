@@ -13,7 +13,7 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Teams Team { get; set; } //FK
+        public Team Team { get; set; } //FK
 
         [Required]
         [ForeignKey("Team")]
@@ -35,7 +35,7 @@ namespace Domain.Entities
         // EF
         public TeamStatistics() { }
 
-        public TeamStatistics(Teams team)
+        public TeamStatistics(Team team)
         {
             this.Team = team;
         }

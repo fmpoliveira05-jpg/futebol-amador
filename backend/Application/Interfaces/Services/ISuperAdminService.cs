@@ -9,12 +9,12 @@ namespace Application.Interfaces.Services
 {
     public interface ISuperAdminService
     {
-        Task<Guid> CreateSuperAdminAsync(CreateSuperAdminDTO dto);
+        Task<string> CreateSuperAdminAsync(CreateSuperAdminDTO dto);
 
-        Task<SuperAdminDetailsDTO> GetSuperAdminByIdAsync(Guid superAdminId);
+        Task<SuperAdminDetailsDTO> GetSuperAdminByIdAsync(string superAdminId);
 
-        Task UpdateSuperAdminAsync(Guid superAdminId, UpdateSuperAdminDTO dto);
+        Task UpdateSuperAdminAsync(string superAdminId, UpdateSuperAdminDTO dto);
 
-        Task DeleteSuperAdminAsync(Guid superAdminId);
+        Task DeleteSuperAdminAsync(string superAdminId);
     }
 }

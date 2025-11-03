@@ -4,6 +4,8 @@ using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,18 +15,26 @@ namespace Application.Services
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;
-        private readonly IUnityOfWork unitOfWork;
+        private readonly IUnityOfWork unityOfWork;
         private readonly IPlayerValidator playerValidator;
+        private readonly IMembershipRequestRepository membershipRequestRepository;
+        private readonly IUserRepository userRepository;
+        private readonly ITeamService teamService;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork)
+
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository, IUserRepository userRepository, ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
-            this.unitOfWork = unitOfWork;
+            this.membershipRequestRepository = membershipRequestRepository;
+            this.unityOfWork = unitOfWork;
             this.playerValidator = new PlayerValidator();
+            this.userRepository = userRepository;
+            this.teamService = teamService;
+
         }
 
-        public async Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDTO playerDto)
+        public async Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDto playerDto)
         {
             var player = new Player
             {
@@ -41,7 +51,7 @@ namespace Application.Services
 
             await playerRepository.AddAsync(player);
             
-            await unitOfWork.SaveChangesAsync();
+            await unityOfWork.SaveChangesAsync();
             
             return player.Id;
         }
@@ -60,7 +70,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public async Task<PlayerDetailsDTO> GetPlayerByIdAsync(string playerId)
+        public async Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.GetPlayerByIdValidator(player);
@@ -87,7 +97,7 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            var existingPlayers = new Users[] {
+            var existingPlayers = new User[] {
                 await userRepository.GetUserByEmailAsync(dto.Email),
                 await userRepository.GetUserByPhoneAsync(dto.Phone),
             };
@@ -103,9 +113,11 @@ namespace Application.Services
         //Falta tirar o player da lista de players do team
         public async Task<string> LeaveTeam(string playerId)
         {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+            var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            if (player == null)
+            playerValidator.LeaveTeamValidator(existingPlayer);
+
+            if (existingPlayer.IsAdmin)
             {
                 if (existingPlayer.Team.Members.Count == 1)
                 {
@@ -130,38 +142,20 @@ namespace Application.Services
                 }
             }
 
-            if (player.IsAdmin)
-            {
-                player.IsAdmin = false;
+            string teamName = existingPlayer.Team.Name;
 
             existingPlayer.Team.Members.Remove(existingPlayer);
             existingPlayer.Team = null;
             existingPlayer.IdTeam = null;
 
-                    //if the team has no more admins, choose the oldest account player to be the new admin.
-                    if (otherAdmin == null)
-                    {
-                        var oldestDate = player.Team.Members.Min(p => p.CreationDate);
-                        Player newAdmin = player.Team.Members.First(p => p.CreationDate == oldestDate);
-                        newAdmin.IsAdmin = true;
-                    }
-            }
-
-            
-
-            string teamName = player.Team.Name;
-
-            player.Team = null;
-            player.IdTeam = null;
-
-            playerRepository.UpdatePlayer(player);
+            playerRepository.UpdatePlayer(existingPlayer);
 
             await unityOfWork.SaveChangesAsync();
 
             return teamName;
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid playerId)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
@@ -169,7 +163,7 @@ namespace Application.Services
             return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
@@ -177,7 +171,7 @@ namespace Application.Services
             return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
         }
 
-        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid playerId, Guid requestId)
+        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId)
         {
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
@@ -213,7 +207,7 @@ namespace Application.Services
             };
         }
 
-        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid playerId, Guid requestId)
+        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId)
         {
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
@@ -243,7 +237,7 @@ namespace Application.Services
         }
 
         //faz validation de se o player ja tem equipa
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid playerId, Guid teamId)
+        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
@@ -253,7 +247,7 @@ namespace Application.Services
 
             playerValidator.SendMembershipRequestValidator(player, team, existingRequest);
 
-            var newRequest = new MembershipRequests
+            var newRequest = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = playerId,

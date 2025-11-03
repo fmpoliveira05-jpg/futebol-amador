@@ -6,7 +6,7 @@ namespace Application.Interfaces.Repositories
     {
         Task<List<SuperAdmin>> GetAllSuperAdminsAsync();
 
-        Task<SuperAdmin?> GetSuperAdminByIdAsync(Guid sadminId);
+        Task<SuperAdmin?> GetSuperAdminByIdAsync(string sadminId);
 
         Task<SuperAdmin?> GetSuperAdminByEmailAsync(string email);
 

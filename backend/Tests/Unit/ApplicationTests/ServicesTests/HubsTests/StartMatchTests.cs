@@ -104,7 +104,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 });
             }
 
-            var team1 = new Teams
+            var team1 = new Team
             {
                 Id = teamId1,
                 Name = "Team One",
@@ -125,7 +125,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 Members = team1Players
             };
 
-            var team2 = new Teams
+            var team2 = new Team
             {
                 Id = teamId2,
                 Name = "Team Two",

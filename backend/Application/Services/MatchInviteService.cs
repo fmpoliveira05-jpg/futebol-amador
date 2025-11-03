@@ -201,7 +201,7 @@ namespace Application.Services
         }
 
         #region Private Methods
-        private static async Task<List<TeamStatistics>> ListTeamsStatistics(Teams sender, Teams receiver)
+        private static async Task<List<TeamStatistics>> ListTeamsStatistics(Team sender, Team receiver)
         {
             var list = new List<TeamStatistics>();
 

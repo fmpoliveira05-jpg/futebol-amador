@@ -3,12 +3,12 @@
  */
 namespace Domain.Entities
 {
-    public class SuperAdmin : Users
+    public class SuperAdmin : User
     {
         public SuperAdmin() { }
 
         public SuperAdmin(string userId,string name, DateOnly dateOfBirth, string address, string email, 
-            string password, string phoneNumber)
+            string phoneNumber)
             : base(userId,name, dateOfBirth, address, email, phoneNumber)
         {
 

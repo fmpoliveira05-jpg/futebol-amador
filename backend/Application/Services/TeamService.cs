@@ -50,7 +50,7 @@ namespace Application.Services
 
             TeamValidator.CreateTeamValidation(teamDto, rank, existingTeam, playerCreating);
 
-            var newTeam = new Teams(
+            var newTeam = new Team(
                 teamDto.Name,
                 teamDto.Description,
                 teamDto.icon,
@@ -100,7 +100,7 @@ namespace Application.Services
         {
             var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
-            Teams teamWithSameName = null;
+            Team teamWithSameName = null;
 
             if (dto.Name != null)
             {
@@ -162,7 +162,7 @@ namespace Application.Services
         #endregion
 
         #region MemberShipRequest
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, Guid playerIdToInvite, Guid adminUserId)
+        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, string playerIdToInvite, string adminUserId)
         {
             var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
@@ -172,7 +172,7 @@ namespace Application.Services
             TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
             PlayerValidator.PlayerExists(playerToInvite);
 
-            var invite = new MembershipRequests
+            var invite = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = playerIdToInvite,
@@ -207,7 +207,7 @@ namespace Application.Services
             var playerAccepting = await playerAcceptingTask;
 
             if (existingTeam.MembershipRequests == null) { 
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
+                existingTeam.MembershipRequests = new List<MembershipRequest>();
             }
 
             var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
@@ -224,7 +224,7 @@ namespace Application.Services
             //Apaga os pedidos de adesão que o jogador enviou e deixa os que o mesmo recebeu
             if (playerAccepted?.MembershipRequests != null)
             {
-                foreach (MembershipRequests request in playerAccepted.MembershipRequests)
+                foreach (MembershipRequest request in playerAccepted.MembershipRequests)
                 {
                     if (request.IsPlayerSender)
                     {
@@ -251,7 +251,7 @@ namespace Application.Services
             var playerRejecting = await playerRejectingTask;
 
             if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
+                existingTeam.MembershipRequests = new List<MembershipRequest>();
 
             var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
             if (requestToRemove == null)
@@ -280,7 +280,7 @@ namespace Application.Services
 
             if (!existingTeam.MembershipRequests.Any())
             {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
+                var fakeRequest = (MembershipRequest)Activator.CreateInstance(typeof(MembershipRequest), nonPublic: true)!;
                 existingTeam.MembershipRequests.Add(fakeRequest);
             }
 
@@ -296,11 +296,11 @@ namespace Application.Services
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequests>();
+                existingTeam.MembershipRequests = new List<MembershipRequest>();
 
             if (!existingTeam.MembershipRequests.Any())
             {
-                var fakeRequest = (MembershipRequests)Activator.CreateInstance(typeof(MembershipRequests), nonPublic: true)!;
+                var fakeRequest = (MembershipRequest)Activator.CreateInstance(typeof(MembershipRequest), nonPublic: true)!;
                 existingTeam.MembershipRequests.Add(fakeRequest);
             }
 

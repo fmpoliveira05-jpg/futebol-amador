@@ -35,12 +35,12 @@ namespace Application.Services.Hub
             this.cache = cache;
         }
 
-        public async Task<EntryRankMatchMakerHub?> JoinRankMatchMaker(Guid idPlayer, 
+        public async Task<EntryRankMatchMakerHub?> JoinRankMatchMaker(string idPlayer, 
             Guid idTeam, TimeOnly hoursGame, string connectionId)
         {
             validator.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId);
             
-            Teams? team;
+            Team? team;
             string hubCacheKey = "";
             bool? findUser = false;
             float averageAge = 0;
@@ -270,7 +270,7 @@ namespace Application.Services.Hub
             return startDate.Date.AddDays(daysToAdd);
         }
 
-        private static float CalculateAverageAge(Teams team)
+        private static float CalculateAverageAge(Team team)
         {
             var dateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
             double averageDays = team.Members.Average(m => (dateOnly.DayNumber - m.DateOfBirth.DayNumber));
@@ -306,7 +306,7 @@ namespace Application.Services.Hub
             return nextOrPreviewsRank;
         }
 
-        private async Task CreateMatch(Guid teamMatchId, Teams team, DateTime gameDate)
+        private async Task CreateMatch(Guid teamMatchId, Team team, DateTime gameDate)
         {
             var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId);
 

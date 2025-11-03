@@ -19,13 +19,13 @@ namespace Application.Interfaces.Repositories
 
         void UpdatePlayer(Player updatedPlayer);
 
-        Task<Player?> GetPlayerByIdWithRequestsAsync(Guid id);
+        Task<Player?> GetPlayerByIdWithRequestsAsync(string userId);
 
         Task AddAsync(Player player);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(Guid playerId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(string playerId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
 
         Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }

@@ -10,6 +10,6 @@ namespace Application.DTOs.Player
 
         //quando remover a data de nascimento do playerdetails passar para ca
 
-        public required PlayerDetailsDTO PlayerDetails { get; set; }
+        public required PlayerDetailsDto PlayerDetails { get; set; }
     }
 }

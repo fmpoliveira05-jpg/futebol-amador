@@ -9,12 +9,12 @@ namespace Application.Interfaces.Repositories
 {
     public interface IUserRepository
     {
-        Task<List<Users?>> GetAllUsersAsync();
+        Task<List<User?>> GetAllUsersAsync();
 
-        Task<Users?> GetUserByIdAsync(Guid id);
+        Task<User?> GetUserByIdAsync(string userId);
 
-        Task<Users?> GetUserByEmailAsync(string email);
+        Task<User?> GetUserByEmailAsync(string email);
 
-        Task<Users?> GetUserByPhoneAsync(string phone);
+        Task<User?> GetUserByPhoneAsync(string phone);
     }
 }

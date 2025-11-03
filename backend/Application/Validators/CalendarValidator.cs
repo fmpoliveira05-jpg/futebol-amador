@@ -197,7 +197,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateCancelFinishMatch(Matches match, Teams team)
+        public void ValidateCancelFinishMatch(Matches match, Team team)
         {
             if (match == null)
             {

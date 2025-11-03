@@ -7,7 +7,7 @@ namespace Application.DTOs.Player
     public class PlayerWithoutTeamInfoDto
     {
         [Required]
-        public Guid PlayerId { get; set; }
+        public string PlayerId { get; set; } = null!;
 
         [Required]
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]

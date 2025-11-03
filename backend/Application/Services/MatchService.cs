@@ -51,7 +51,7 @@ namespace Application.Services
             var newDate = dto.PostPoneDate;
             var idOpponnent = dto.IdOpponent;
             PostPoneMatch postPoneDate;
-            Teams team;
+            Team team;
 
             var match = await MatchRepository.GetMatchById(idMatch);
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);

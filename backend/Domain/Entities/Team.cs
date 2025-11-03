@@ -7,7 +7,7 @@ using Domain.Constants;
  */
 namespace Domain.Entities
 {
-    public class Teams
+    public class Team
     {
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
@@ -39,7 +39,7 @@ namespace Domain.Entities
         [ForeignKey("Rank")]
         public Guid IdRank { get; set; } //FK
 
-        public ICollection<MembershipRequests> MembershipRequests { get; set; } = new List<MembershipRequests>();
+        public ICollection<MembershipRequest> MembershipRequests { get; set; } = new List<MembershipRequest>();
 
         [InverseProperty("Sender")]
         public ICollection<MatchInvite> SentInvites { get; set; } = new List<MatchInvite>();
@@ -53,9 +53,9 @@ namespace Domain.Entities
         public Guid IdCalendar { get; set; } //FK
 
         //EF
-        public Teams() { }
+        public Team() { }
 
-        public Teams(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
+        public Team(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
             Name = name;
             Description = description;

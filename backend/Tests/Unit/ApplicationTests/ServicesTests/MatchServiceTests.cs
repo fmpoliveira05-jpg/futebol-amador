@@ -199,8 +199,8 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var pitch = new Pitch("Campo A", "Rua A");
             var rank = new Rank("R", 0, 0, 0, 0, null!, null!);
-            var teamA = new Teams("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
-            var teamB = new Teams("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
+            var teamA = new Team("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
+            var teamB = new Team("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
             var teamStat = new TeamStatistics(teamA) { IdTeam = idTeam };
             var oppStat = new TeamStatistics(teamB) { IdTeam = idOpponent };
             var match = new Matches(DateTime.Now.AddHours(2), true, pitch)
@@ -343,8 +343,8 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var pitch = new Pitch("p", "a");
             var rank = new Rank("R", 0, 0, 0, 0, null!, null!);
-            var teamA = new Teams("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
-            var teamB = new Teams("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
+            var teamA = new Team("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
+            var teamB = new Team("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
             var teamStat = new TeamStatistics(teamA) { IdTeam = idTeam };
             var oppStat = new TeamStatistics(teamB) { IdTeam = idOpponent };
             var match = new Matches(DateTime.Now.AddHours(2), true, pitch)
@@ -388,8 +388,8 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var pitch = new Pitch("p", "a");
             var rank = new Rank("R", 0, 0, 0, 0, null!, null!);
-            var teamA = new Teams("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
-            var teamB = new Teams("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
+            var teamA = new Team("TeamA", "desc", new byte[] { 1 }, pitch, rank) { Id = idTeam };
+            var teamB = new Team("TeamB", "desc", new byte[] { 1 }, pitch, rank) { Id = idOpponent };
             var teamStat = new TeamStatistics(teamA) { IdTeam = idTeam };
             var oppStat = new TeamStatistics(teamB) { IdTeam = idOpponent };
             var match = new Matches(DateTime.Now.AddDays(3), true, pitch)
@@ -454,8 +454,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var idTeam = Guid.NewGuid();
             var idMatch = Guid.NewGuid();
             var description = "Motivo";
-            var team = new Teams("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idTeam };
-            var opponentTeam = new Teams("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = Guid.NewGuid() };
+            var team = new Team("TeamA", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = idTeam };
+            var opponentTeam = new Team("TeamB", "desc", new byte[] { 1 }, new Pitch("p", "a"), new Rank("R", 0, 0, 0, 0, null, null)) { Id = Guid.NewGuid() };
             var match = new Matches(DateTime.Now.AddDays(1), true, new Pitch("p", "a"))
             {
                 Id = idMatch,

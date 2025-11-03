@@ -26,9 +26,9 @@ namespace Application.Services
             this.superAdminValidator = superAdminValidator;
         }
 
-        public async Task<Guid> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
+        public async Task<string> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
         {
-            var existingSadmin = new Users[]{
+            var existingSadmin = new User[]{
                 await userRepository.GetUserByEmailAsync(dto.Email),
                 await userRepository.GetUserByPhoneAsync(dto.Phone),
             };
@@ -42,7 +42,6 @@ namespace Application.Services
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
-                Password = dto.Password,
             };
 
             await superAdminRepository.AddAsync(superAdmin);
@@ -52,7 +51,7 @@ namespace Application.Services
             return superAdmin.Id;
         }
 
-        public async Task DeleteSuperAdminAsync(Guid superAdminId)
+        public async Task DeleteSuperAdminAsync(string superAdminId)
         {
             var superAdminToDelete = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
 
@@ -63,7 +62,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public async Task<SuperAdminDetailsDTO> GetSuperAdminByIdAsync(Guid superAdminId)
+        public async Task<SuperAdminDetailsDTO> GetSuperAdminByIdAsync(string superAdminId)
         {
             var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
 
@@ -79,10 +78,10 @@ namespace Application.Services
             return superAdminDetails;
         }
 
-        public async Task UpdateSuperAdminAsync(Guid superAdminId, UpdateSuperAdminDTO dto)
+        public async Task UpdateSuperAdminAsync(string superAdminId, UpdateSuperAdminDTO dto)
         {
             var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
-            var existingSadmin = new Users[]{
+            var existingSadmin = new User[]{
                 await userRepository.GetUserByEmailAsync(dto.Email),
                 await userRepository.GetUserByPhoneAsync(dto.Phone),
             };

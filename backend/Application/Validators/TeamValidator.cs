@@ -13,7 +13,7 @@ namespace Application.Validators
     {
         private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
 
-        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank,Teams? team, Player? playerCreating)
+        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank,Team? team, Player? playerCreating)
         {
             if (rank == null)
             {
@@ -46,7 +46,7 @@ namespace Application.Validators
             - O novo nome da equipa (se for alterado) não deve ser igual ao nome de outra equipa existente.
          
          */
-        public void UpdateTeamValidation(Teams? existingTeamNewName, Teams? updatingTeam, Player? playerEditing)
+        public void UpdateTeamValidation(Team? existingTeamNewName, Team? updatingTeam, Player? playerEditing)
         {
             ValidatePlayerAndTeamExists(updatingTeam, playerEditing);
 
@@ -68,7 +68,7 @@ namespace Application.Validators
             - O jogador que está a tentar eliminar a equipa deve ser um administrador da equipa.
             - A equipa não deve ter partidas agendadas ou em progresso.
          */
-        public void DeleteTeamValidation(Teams? team, Player? playerDeleting)
+        public void DeleteTeamValidation(Team? team, Player? playerDeleting)
         {
             ValidatePlayerAndTeamExists(team, playerDeleting);
 
@@ -88,7 +88,7 @@ namespace Application.Validators
             }
         }
 
-        public void GetAllTeamsValidation(IEnumerable<Teams?> Teams)
+        public void GetAllTeamsValidation(IEnumerable<Team?> Teams)
         {
             if (Teams == null || !Teams.Any())
             {
@@ -107,7 +107,7 @@ namespace Application.Validators
             - O jogador que está a remover não pode ser o mesmo que está a ser removido.
             - O jogador que está a remover deve ser administrador por mais tempo do que o jogador que está a ser removido.
          */
-        public void RemovePlayerFromTeamValidation(Teams? team, Player? playerRemoving, Player? playerRemoved)
+        public void RemovePlayerFromTeamValidation(Team? team, Player? playerRemoving, Player? playerRemoved)
         {
             ValidatePlayerAndTeamExists(team, playerRemoving);
             PlayerValidator.PlayerExists(playerRemoved);
@@ -138,7 +138,7 @@ namespace Application.Validators
         }
 
         // Não validar se o team tem membros, porque adicionamos verificação no Player e quando o ultimo membro sair a equipa é eliminada!
-        public void GetTeamMembersValidation(Teams? team)
+        public void GetTeamMembersValidation(Team? team)
         {
             if (!TeamExists(team))
             {
@@ -147,7 +147,7 @@ namespace Application.Validators
 
         }
 
-        public void GetMembershipRequestsValidation(Teams? team, Player? adminPlayer)
+        public void GetMembershipRequestsValidation(Team? team, Player? adminPlayer)
         {
             if (!TeamExists(team))
             {
@@ -164,7 +164,7 @@ namespace Application.Validators
         }
 
         //não validar se o playerApproved pertence à equipa, porque a validação deve ser feita quando ele tenta aceitar o pedido!
-        public void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete)
+        public void ApproveMembershipRequestValidation(Team? team, Player? playerApproving, Guid requestToDelete)
         {
             if (!TeamExists(team))
             {
@@ -180,7 +180,7 @@ namespace Application.Validators
 
         }
 
-        public void RejectMembershipRequestValidation(Teams? team, Player? playerRejecting, Guid requestToDelete)
+        public void RejectMembershipRequestValidation(Team? team, Player? playerRejecting, Guid requestToDelete)
         {
             ValidatePlayerAndTeamExists(team, playerRejecting);
             ValidatePlayerBelongToTeamAndIsAdmin(team, playerRejecting);
@@ -190,7 +190,7 @@ namespace Application.Validators
             }
         }
 
-        public void SendMembershipRequestValidation(MembershipRequests? mr, Teams? team, Player? playerSending, Player? playerReceiving)
+        public void SendMembershipRequestValidation(MembershipRequest? mr, Team? team, Player? playerSending, Player? playerReceiving)
         {
             if (mr != null)
             {
@@ -230,7 +230,7 @@ namespace Application.Validators
             - O jogador que está a rebaixar deve ser um administrador da equipa.
             - O jogador que está a rebaixar deve ter sido administrador por mais tempo do que o jogador que está a ser demitido.
          */
-        public void DemoteAdminToMemberValidation(Teams? team, Player? adminToDemote, Player? adminDemoting)
+        public void DemoteAdminToMemberValidation(Team? team, Player? adminToDemote, Player? adminDemoting)
         {
             ValidatePlayerAndTeamExists(team, adminToDemote);
 
@@ -250,7 +250,7 @@ namespace Application.Validators
             }
         }
 
-        public void PromoteMemberToAdminValidation(Teams? team, Player? memberToPromote, Player? memberPromoting) {
+        public void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting) {
             ValidatePlayerAndTeamExists(team, memberToPromote);
 
             PlayerValidator.PlayerExists(memberPromoting);
@@ -279,7 +279,7 @@ namespace Application.Validators
             }
         }
 
-        public void GetTeamScheduleValidation(Teams? team)
+        public void GetTeamScheduleValidation(Team? team)
         {
             if (!TeamExists(team))
             {
@@ -328,7 +328,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateTeamSearch(Teams team)
+        public void ValidateTeamSearch(Team team)
         {
             if (team == null)
             {
@@ -361,7 +361,7 @@ namespace Application.Validators
         }
 
         #region Private Methods
-        private void ValidatePlayerAndTeamExists(Teams? team, Player? Player)
+        private void ValidatePlayerAndTeamExists(Team? team, Player? Player)
         {
             if (!TeamExists(team))
             {
@@ -371,7 +371,7 @@ namespace Application.Validators
             PlayerValidator.PlayerExists(Player);
         }
 
-        private static void ValidatePlayerBelongToTeamAndIsAdmin(Teams? team, Player? Player)
+        private static void ValidatePlayerBelongToTeamAndIsAdmin(Team? team, Player? Player)
         {
             if (!PlayerExistsInTeam(team, Player))
             {
@@ -383,7 +383,7 @@ namespace Application.Validators
             }
         }
 
-        private static void ValidateTeamFull(Teams? team)
+        private static void ValidateTeamFull(Team? team)
         {
             if (TeamIsFull(team))
             {
@@ -391,7 +391,7 @@ namespace Application.Validators
             }
         }
 
-        private static bool TeamExists(Teams? team)
+        private static bool TeamExists(Team? team)
         {
             if (team == null)
             {
@@ -400,7 +400,7 @@ namespace Application.Validators
             return true;
         }
 
-        private static bool PlayerExistsInTeam(Teams? team, Player? Player)
+        private static bool PlayerExistsInTeam(Team? team, Player? Player)
         {
             if (!team.Members.Contains(Player))
             {
@@ -410,7 +410,7 @@ namespace Application.Validators
             return true;
         }
 
-        private static bool TeamIsFull(Teams? team)
+        private static bool TeamIsFull(Team? team)
         {
             if (team.Members.Count >= ModelConstants.TeamConst.MaxMembers)
             {

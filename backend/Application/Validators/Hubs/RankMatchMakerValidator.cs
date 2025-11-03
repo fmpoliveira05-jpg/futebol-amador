@@ -9,9 +9,9 @@ namespace Application.Validators.Hubs
 {
     public class RankMatchMakerValidator : IRankMatchMakerValidator
     {
-        public void ValidateVariableJoinRankMatchMaker(Guid idPlayer, Guid idTeam, TimeOnly hoursGame, string connectionId)
+        public void ValidateVariableJoinRankMatchMaker(string idPlayer, Guid idTeam, TimeOnly hoursGame, string connectionId)
         {
-            if (idPlayer == Guid.Empty)
+            if (idPlayer == string.Empty)
             {
                 throw new ArgumentException("O id do jogador está vazio");
             }
@@ -47,7 +47,7 @@ namespace Application.Validators.Hubs
             }
         }
 
-        public void ValidateTeamJoinRankMatchMaker(Teams? team)
+        public void ValidateTeamJoinRankMatchMaker(Team? team)
         {
             if (team == null)
             {
@@ -55,7 +55,7 @@ namespace Application.Validators.Hubs
             }
         }
 
-        public void ValidateJoinRankMatchMaker(Teams team, float averageAge, string city, bool? findUser, ConcurrentDictionary<Guid, EntryRankMatchMakerHub>? hub)
+        public void ValidateJoinRankMatchMaker(Team team, float averageAge, string city, bool? findUser, ConcurrentDictionary<Guid, EntryRankMatchMakerHub>? hub)
         {
             if(!findUser.HasValue || !findUser.Value)
             {

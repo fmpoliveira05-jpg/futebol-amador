@@ -1,11 +1,13 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Domain.Exceptions;
 
 namespace Api.Controllers
 {
@@ -25,7 +27,7 @@ namespace Api.Controllers
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTO playerDto)
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -80,7 +82,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{playerId:required}")]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDTO dto)
+        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
@@ -131,7 +133,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{playerId:guid}/membership-requests")]
-        public async Task<IActionResult> GetMembershipRequests(Guid playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
+        public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
             try
             {
@@ -166,21 +168,21 @@ namespace Api.Controllers
         }
 
         [HttpPost("{playerId:guid}/membership-requests/accept")]
-        public async Task<IActionResult> AcceptMembershipRequest(Guid playerId, [FromBody] Guid requestId)
+        public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
         {
             var dto = await playerService.AcceptMembershipRequestAsync(playerId, requestId);
             return Ok(dto);
         }
 
         [HttpDelete("{playerId:guid}/membership-requests/reject/{requestId:guid}")]
-        public async Task<IActionResult> RejectMembershipRequest(Guid playerId, Guid requestId)
+        public async Task<IActionResult> RejectMembershipRequest(string playerId, Guid requestId)
         {
             var dto = await playerService.RejectMembershipRequestAsync(playerId, requestId);
             return Ok(dto);
         }
 
         [HttpPost("{playerId:guid}/membership-requests/send")]
-        public async Task<IActionResult> SendMembershipRequest(Guid playerId, [FromBody] Guid teamId)
+        public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
         {
             try
             {

@@ -34,7 +34,7 @@ namespace Infrastructure.Repositories
             return await context.SuperAdmin.FirstOrDefaultAsync(s => s.Email == email);
         }
 
-        public async Task<SuperAdmin?> GetSuperAdminByIdAsync(Guid sadminId)
+        public async Task<SuperAdmin?> GetSuperAdminByIdAsync(string sadminId)
         {
             return await context.SuperAdmin.FindAsync(sadminId);
         }

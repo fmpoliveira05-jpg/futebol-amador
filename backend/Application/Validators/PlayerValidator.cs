@@ -7,6 +7,7 @@ using Domain.Exceptions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static Domain.Constants.ModelConstants;
+using Domain.Enums;
 
 namespace Application.Validators
 {
@@ -31,7 +32,7 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Users[] players)
+        public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User[] players)
         {
             if (players[0] != null)
             {
@@ -43,20 +44,20 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
             }
 
-            if (!emailValidator.IsValid(createPlayerDTO.Email))
+            if (!emailValidator.IsValid(CreatePlayerDto.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
 
-            ValidateHeigth(createPlayerDTO.Height);
+            ValidateHeigth(CreatePlayerDto.Height);
 
-            ValidateAge(createPlayerDTO.DateOfBirth);
+            ValidateAge(CreatePlayerDto.DateOfBirth);
 
-            ValidatePhone(createPlayerDTO.Phone);
+            ValidatePhone(CreatePlayerDto.Phone);
 
-            ValidatePosition(createPlayerDTO.Position);
+            ValidatePosition(CreatePlayerDto.Position);
 
-            ValidateAddress(createPlayerDTO.Address);
+            ValidateAddress(CreatePlayerDto.Address);
         }
 
         public void DeletePlayerValidator(Player? player)
@@ -69,11 +70,11 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void UpdatePlayerValidator(UpdatePlayerDto updatePlayerDto, Player player, Users[] players)
+        public void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto, Player player, User[] players)
         {
             PlayerExists(player);
 
-            if (updatePlayerDto.Email != player.Email)
+            if (UpdatePlayerDto.Email != player.Email)
             {
                 if (players[0] != null)
                 {
@@ -82,7 +83,7 @@ namespace Application.Validators
 
             }
 
-            if (updatePlayerDto.Phone != player.Phone)
+            if (UpdatePlayerDto.Phone != player.Phone)
             {
                 if (players[1] != null)
                 {
@@ -90,22 +91,22 @@ namespace Application.Validators
                 }
             }
 
-            if (!emailValidator.IsValid(updatePlayerDto.Email))
+            if (!emailValidator.IsValid(UpdatePlayerDto.Email))
             {
                 throw new ValidationException($"Email format is invalid.");
             }
 
-            ValidateHeigth(updatePlayerDto.Height);
+            ValidateHeigth(UpdatePlayerDto.Height);
 
-            ValidateAge(updatePlayerDto.DateOfBirth);
+            ValidateAge(UpdatePlayerDto.DateOfBirth);
 
-            ValidatePhone(updatePlayerDto.Phone);
+            ValidatePhone(UpdatePlayerDto.Phone);
 
-            ValidatePosition(updatePlayerDto.Position);
+            ValidatePosition(UpdatePlayerDto.Position);
 
-            ValidateAddress(updatePlayerDto.Address);
+            ValidateAddress(UpdatePlayerDto.Address);
 
-            ValidateAddress(updatePlayerDto.Address);
+            ValidateAddress(UpdatePlayerDto.Address);
         }
 
         public void ValidateHasChangeDataPlayer(bool hasChange)
@@ -154,7 +155,7 @@ namespace Application.Validators
             }
         }
 
-        public void SendMembershipRequestValidator(Player player, Teams team, MembershipRequests request)
+        public void SendMembershipRequestValidator(Player player, Team team, MembershipRequest request)
         {
             PlayerExists(player);
 
@@ -197,6 +198,8 @@ namespace Application.Validators
             {
                 valid = false;
             }
+            return valid;
+        }
         public void PlayerHasChatRoomsValidation(Player player) {
             PlayerExists(player);
             

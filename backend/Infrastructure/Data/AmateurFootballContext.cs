@@ -6,10 +6,10 @@ namespace Infrastructure.Data
     //Esta classe herda de DbContext e funciona como uma sessão de trabalho DB
     public class AmateurFootballContext : DbContext
     {
-        public DbSet<Users> User { get; set; } = null!;
+        public DbSet<User> User { get; set; } = null!;
         public DbSet<Player> Player { get; set; } = null!;
         public DbSet<SuperAdmin> SuperAdmin { get; set; } = null!;
-        public DbSet<Teams> Team { get; set; } = null!;
+        public DbSet<Team> Team { get; set; } = null!;
         public DbSet<Rank> Rank { get; set; } = null!;
         public DbSet<Pitch> Pitch { get; set; } = null!;
         public DbSet<Calendar> Calendar { get; set; } = null!;
@@ -20,7 +20,7 @@ namespace Infrastructure.Data
         public DbSet<Message> Message { get; set; } = null!;
         public DbSet<Chat> Chat { get; set; } = null!;     
         public DbSet<MatchInvite> MatchInvite { get; set; } = null!;
-        public DbSet<MembershipRequests> MembershipRequests { get; set; } = null!;
+        public DbSet<MembershipRequest> MembershipRequests { get; set; } = null!;
         public AmateurFootballContext(DbContextOptions<AmateurFootballContext> options)
         : base(options)
         {
@@ -99,7 +99,7 @@ namespace Infrastructure.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
             // 🔹 Team → Calendar
-            modelBuilder.Entity<Teams>()
+            modelBuilder.Entity<Team>()
                 .HasOne(t => t.Calendar)
                 .WithMany()
                 .OnDelete(DeleteBehavior.NoAction);
@@ -121,7 +121,7 @@ namespace Infrastructure.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // 🔹 Herança — TPT
-            modelBuilder.Entity<Users>()
+            modelBuilder.Entity<User>()
                 .UseTptMappingStrategy()
                 .ToTable("User");
 

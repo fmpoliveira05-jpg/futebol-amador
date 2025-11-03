@@ -50,7 +50,7 @@ namespace Application.Validators
         }
 
         //Talvez falte validar se pelo menos o sender já tem um convite igual
-        public void ValidateSendMatchInvite(Teams receiver, Teams sender, MatchInvite matchInviteFind,
+        public void ValidateSendMatchInvite(Team receiver, Team sender, MatchInvite matchInviteFind,
             Matches findMatchWith12hours, string namePitch)
         {
             const string msgNullErrorReceiver = "A equipa que receberá o convite não foi encontrada";
@@ -81,7 +81,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateAcceptMatchInvite(Teams sender, Matches twentyhoursMatch, MatchInvite matchInvite, Pitch pitch)
+        public void ValidateAcceptMatchInvite(Team sender, Matches twentyhoursMatch, MatchInvite matchInvite, Pitch pitch)
         {
             const string msgError = "O jogo não pode ser aceite a essa hora, por causa que já tem um jogo a pelo menos 12 horas desse";
             ValidateTwentyHoursMatch(twentyhoursMatch, msgError);
@@ -95,7 +95,7 @@ namespace Application.Validators
             ValidateNullPitch(pitch, msgNullPitch);
         }
 
-        public void ValidateReciever(Teams receiver)
+        public void ValidateReciever(Team receiver)
         {
             const string messageNull = "O recetor do convite não foi encontrado ou não exsite";
             ValidateNullTeam(receiver, messageNull);
@@ -108,15 +108,15 @@ namespace Application.Validators
         }
 
         //Crias constante
-        public void ValidateRefuseMatchInvite(Teams sender, MatchInvite matchInvite)
+        public void ValidateRefuseMatchInvite(Team sender, MatchInvite matchInvite)
         {
             const string errorMsg = "Não dá para rejeitar o convite porque ele não existe";
             const string errorMsgNullSender = "O emissor do convite a rejeitar não foi encontrado ou não existe";
             ValidateSender(sender, matchInvite, errorMsgNullSender, errorMsg);
         }
 
-        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Teams senderTeam, 
-            Teams receiverTeam, Matches findMatchWith12hour)
+        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Team senderTeam, 
+            Team receiverTeam, Matches findMatchWith12hour)
         {
             const string msgNullPitch = "O campo da partida não pode estar a nulo";
             ValidateNullPitch(pitch, msgNullPitch);
@@ -175,7 +175,7 @@ namespace Application.Validators
             }
         }
 
-        private static void ValidateSender(Teams sender, MatchInvite matchInvite, string messageNull, string messageError)
+        private static void ValidateSender(Team sender, MatchInvite matchInvite, string messageNull, string messageError)
         {
             ValidateNullTeam(sender, messageNull);
             if (sender.SentInvites.FirstOrDefault(matchInvite) == null)
@@ -185,7 +185,7 @@ namespace Application.Validators
         }
 
         //Meter para receber mensagem de error (Talvez apagar par aque cada null tenha uma mensagem diferentes ou adaptar o de cima e este para receber mensagem)
-        private static void ValidateNullTeam(Teams team, string msgError)
+        private static void ValidateNullTeam(Team team, string msgError)
         {
             if (team == null)
             {

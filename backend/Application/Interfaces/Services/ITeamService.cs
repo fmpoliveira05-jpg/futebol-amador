@@ -13,28 +13,20 @@ namespace Application.Interfaces.Services
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 
-        Task<List<TeamSummaryDto>> SearchTeamsAsync(string playerId, TeamSearchFiltersDto filters);
-
         Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId);
 
         Task DeleteTeamAsync(Guid teamId, string currentUserId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string idAdmin);
-
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, string idAdmin, FilterMembershipRequestsTeam filters);
 
-        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
+        Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
 
-        Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
+        Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
 
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId);
 
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string adminUserId);
-
-        Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
-
-        Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
 
         Task RemovePlayerFromTeamAsync(Guid teamId, string playerIdToRemove, string playerRemovingId);
 

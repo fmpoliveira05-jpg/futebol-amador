@@ -4,17 +4,17 @@ using Domain.Entities;
 
 namespace Application.Interfaces.Validators
 {
-    internal interface IPlayerValidator
+    public interface IPlayerValidator
     {
         void PlayerExists(Player? player);
 
-        void CreatePlayerValidator(CreatePlayerDto createPlayerDTO, Users[] players);
+        void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User[] players);
 
         void DeletePlayerValidator(Player? player);
 
         void GetPlayerByIdValidator(Player player);
 
-        void UpdatePlayerValidator(UpdatePlayerDto updatePlayerDTO,Player player, Users[] existingPlayers);
+        void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto,Player player, User[] existingPlayers);
 
         void LeaveTeamValidator(Player player);
         
@@ -22,6 +22,6 @@ namespace Application.Interfaces.Validators
 
         void ValidateHasChangeDataPlayer(bool hasChange);
 
-        void SendMembershipRequestValidator(Player player, Teams team, MembershipRequests request);
+        void SendMembershipRequestValidator(Player player, Team team, MembershipRequest request);
     }
 }

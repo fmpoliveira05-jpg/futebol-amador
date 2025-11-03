@@ -31,7 +31,7 @@ namespace Application.Services.Hub
         #endregion
 
         #region public Methods
-        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {  
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
             
@@ -278,7 +278,7 @@ namespace Application.Services.Hub
             ValidatePromotionOrDepromotionTeam(team);
         }
 
-        private static void ValidatePromotionOrDepromotionTeam(Teams team)
+        private static void ValidatePromotionOrDepromotionTeam(Team team)
         {
             var nextRank = team.Rank.NextRank;
             var previousRank = team.Rank.PreviousRank;

@@ -56,8 +56,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 membershipReqRepoMock.Object
             );
 
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((Users)null);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(It.IsAny<string>())).ReturnsAsync((Users)null);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(It.IsAny<string>())).ReturnsAsync((User)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(It.IsAny<string>())).ReturnsAsync((User)null);
         }
 
         #endregion
@@ -78,9 +78,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
         }
 
-        private Teams BuildValidTeam(Guid? teamId = null)
+        private Team BuildValidTeam(Guid? teamId = null)
         {
-            return new Teams
+            return new Team
             {
                 Id = teamId ?? Guid.NewGuid(),
                 Name = "Equipa Teste",
@@ -88,7 +88,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
         }
 
-        private Player BuildValidPlayer(Guid? id = null, Teams team = null, bool isAdmin = false, DateTime? creationDate = null)
+        private Player BuildValidPlayer(Guid? id = null, Team team = null, bool isAdmin = false, DateTime? creationDate = null)
         {
             var player = new Player
             {
@@ -128,7 +128,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
         }
 
-        private void FillTeam(Teams team)
+        private void FillTeam(Team team)
         {
             for (int i = 0; i < 32; i++)
             {
@@ -278,7 +278,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             validatorMock.Setup(v => v.CreatePlayerValidator(
                 It.IsAny<CreatePlayerDto>(), 
-                It.IsAny<Users[]>()))
+                It.IsAny<User[]>()))
                    .Verifiable();
 
             var resultId = await service.CreatePlayerAsync(dto);
@@ -294,7 +294,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
             validatorMock.Verify(v => v.CreatePlayerValidator(
                 It.IsAny<CreatePlayerDto>(), 
-                It.IsAny<Users[]>()), 
+                It.IsAny<User[]>()), 
                 Times.Once);
             passwordHasherMock.Verify(h => h.HashPassword(dto.Password), Times.Once);
         }
@@ -314,7 +314,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             validatorMock.Setup(v => v.CreatePlayerValidator(
                 It.IsAny<CreatePlayerDto>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
@@ -338,7 +338,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             validatorMock.Setup(v => v.CreatePlayerValidator(
                 It.IsAny<CreatePlayerDto>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
@@ -407,7 +407,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             validatorMock.Setup(v => v.CreatePlayerValidator(
                 It.IsAny<CreatePlayerDto>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.CreatePlayerAsync(dto));
@@ -560,7 +560,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Verifiable();
             validatorMock.Setup(v => v.ValidateHasChangeDataPlayer(true)).Verifiable();
 
@@ -577,7 +577,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()), 
+                It.IsAny<User[]>()), 
                 Times.Once);
             validatorMock.Verify(v => v.ValidateHasChangeDataPlayer(true), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
@@ -618,7 +618,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(exceptionMessage));
 
             // Chama o método para verificar se a exceção é lançada
@@ -635,7 +635,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()),
+                It.IsAny<User[]>()),
                 Times.Once);
         }
 
@@ -664,7 +664,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(exceptionMessage));
             
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
@@ -727,7 +727,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
             var ex = Assert.ThrowsAsync<ValidationException>(async () =>
@@ -756,14 +756,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             // Arrange repository mocks
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
-            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Users?)null);
-            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync((Users?)null);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((User?)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync((User?)null);
 
             // The validator is mocked — it will throw for invalid data
             validatorMock.Setup(v => v.UpdatePlayerValidator(
                 It.IsAny<UpdatePlayerDto>(),
                 It.IsAny<Player>(),
-                It.IsAny<Users[]>()
+                It.IsAny<User[]>()
             )).Throws(new ValidationException(expectedError));
 
             // Act & Assert
@@ -1133,7 +1133,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         {
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequests
+            var request = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = player.Id,
@@ -1162,7 +1162,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequests
+            var request = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = player.Id,
@@ -1194,7 +1194,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequests
+            var request = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = player.Id,
@@ -1225,7 +1225,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             // Arrange
             var player = BuildValidPlayer();
             var team = BuildValidTeam();
-            var request = new MembershipRequests
+            var request = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = player.Id,
@@ -1259,7 +1259,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
-            var membershipRequest = new MembershipRequests
+            var membershipRequest = new MembershipRequest
             {
                 Id = requestId,
                 IdPlayer = playerId,
@@ -1273,10 +1273,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 Id = playerId,
                 Name = "John",
                 Team = null,
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
-            var team = new Teams { Id = teamId, Name = "Team A" };
+            var team = new Team { Id = teamId, Name = "Team A" };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId))
                 .ReturnsAsync(player);
@@ -1309,7 +1309,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             {
                 Id = playerId,
                 Name = "PlayerWithTeam",
-                Team = new Teams { Id = Guid.NewGuid(), Name = "ExistingTeam" }
+                Team = new Team { Id = Guid.NewGuid(), Name = "ExistingTeam" }
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId))
@@ -1331,7 +1331,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
-            var membershipRequest = new MembershipRequests
+            var membershipRequest = new MembershipRequest
             {
                 Id = requestId,
                 IdPlayer = playerId,
@@ -1343,10 +1343,10 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             {
                 Id = playerId,
                 Name = "John",
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
-            var team = new Teams { Id = teamId, Name = "Team A" };
+            var team = new Team { Id = teamId, Name = "Team A" };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId))
                 .ReturnsAsync(player);
@@ -1375,7 +1375,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
-            var membershipRequest = new MembershipRequests
+            var membershipRequest = new MembershipRequest
             {
                 Id = requestId,
                 IdPlayer = playerId,
@@ -1389,15 +1389,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 Id = playerId,
                 Name = "John",
                 Team = null,
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
-            var team = new Teams
+            var team = new Team
             {
                 Id = teamId,
                 Name = "Team A",
                 Members = new List<Player>(),
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId)).ReturnsAsync(player);
@@ -1430,7 +1430,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             {
                 Id = playerId,
                 Name = "PlayerWithTeam",
-                Team = new Teams { Id = Guid.NewGuid(), Name = "ExistingTeam" }
+                Team = new Team { Id = Guid.NewGuid(), Name = "ExistingTeam" }
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId)).ReturnsAsync(player);
@@ -1450,7 +1450,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var requestId = Guid.NewGuid();
 
-            var membershipRequest = new MembershipRequests
+            var membershipRequest = new MembershipRequest
             {
                 Id = requestId,
                 IdPlayer = playerId,
@@ -1460,14 +1460,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = new Player
             {
                 Id = playerId,
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
-            var team = new Teams
+            var team = new Team
             {
                 Id = teamId,
                 Members = new List<Player>(),
-                MembershipRequests = new List<MembershipRequests> { membershipRequest }
+                MembershipRequests = new List<MembershipRequest> { membershipRequest }
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId)).ReturnsAsync(player);
@@ -1494,14 +1494,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var teamId2 = Guid.NewGuid();
             var acceptedRequestId = Guid.NewGuid();
 
-            var acceptedRequest = new MembershipRequests
+            var acceptedRequest = new MembershipRequest
             {
                 Id = acceptedRequestId,
                 IdPlayer = playerId,
                 IdTeam = teamId1
             };
 
-            var otherRequest = new MembershipRequests
+            var otherRequest = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
                 IdPlayer = playerId,
@@ -1511,14 +1511,14 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = new Player
             {
                 Id = playerId,
-                MembershipRequests = new List<MembershipRequests> { acceptedRequest, otherRequest }
+                MembershipRequests = new List<MembershipRequest> { acceptedRequest, otherRequest }
             };
 
-            var team = new Teams
+            var team = new Team
             {
                 Id = teamId1,
                 Members = new List<Player>(),
-                MembershipRequests = new List<MembershipRequests> { acceptedRequest }
+                MembershipRequests = new List<MembershipRequest> { acceptedRequest }
             };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId)).ReturnsAsync(player);

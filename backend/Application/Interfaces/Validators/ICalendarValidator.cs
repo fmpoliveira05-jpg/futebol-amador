@@ -23,7 +23,7 @@ namespace Application.Interfaces.Validators
         public void validateResultMatch(Guid idTeam, ResultMatchDto result);
         public void ValidateFinishMatch(Matches match, TeamStatistics team, Guid idTeam,
             TeamStatistics opponent, Guid idOponnent, ResultMatchDto result);
-        public void ValidateCancelFinishMatch(Matches match, Teams team);
+        public void ValidateCancelFinishMatch(Matches match, Team team);
         public void ValidateFilterPostPoneMatch(FilterPostPoneMatchDto filter);
     }
 }

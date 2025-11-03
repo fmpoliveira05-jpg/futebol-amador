@@ -6,24 +6,24 @@ namespace Application.Interfaces.Validators
 {
     public interface ITeamValidator
     {
-        void CreateTeamValidation(CreateTeamDto createTeamDto, Rank rank, Teams? team, Player? playerCreating);
-        void UpdateTeamValidation(Teams? existingTeamNewName, Teams? team, Player? playerEditing);
-        void DeleteTeamValidation(Teams? team, Player? playerDeleting);
+        void CreateTeamValidation(CreateTeamDto createTeamDto, Rank rank, Team? team, Player? playerCreating);
+        void UpdateTeamValidation(Team? existingTeamNewName, Team? team, Player? playerEditing);
+        void DeleteTeamValidation(Team? team, Player? playerDeleting);
         void GetTeamByIdValidation(TeamDetailsDto team);
         //validar depois se fica ca!
-        void GetAllTeamsValidation(IEnumerable<Teams?> Teams);
-        void RemovePlayerFromTeamValidation(Teams? team, Player? playerRemoving, Player? playerRemoved);
-        void GetTeamMembersValidation(Teams? team);
-        void GetMembershipRequestsValidation(Teams? team, Player? adminPlayer);
-        void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete);
-        void RejectMembershipRequestValidation(Teams? team, Player? playerRejecting, Guid requestToDelete);
-        void SendMembershipRequestValidation(MembershipRequests? mr, Teams? team, Player? playerSending, Player? playerReceiving);
-        void DemoteAdminToMemberValidation(Teams? team, Player? adminToDemote, Player? adminDemoting);
-        void PromoteMemberToAdminValidation(Teams? team, Player? memberToPromote, Player? memberPromoting);
-        void GetTeamScheduleValidation(Teams? team);
+        void GetAllTeamsValidation(IEnumerable<Team?> Teams);
+        void RemovePlayerFromTeamValidation(Team? team, Player? playerRemoving, Player? playerRemoved);
+        void GetTeamMembersValidation(Team? team);
+        void GetMembershipRequestsValidation(Team? team, Player? adminPlayer);
+        void ApproveMembershipRequestValidation(Team? team, Player? playerApproving, Guid requestToDelete);
+        void RejectMembershipRequestValidation(Team? team, Player? playerRejecting, Guid requestToDelete);
+        void SendMembershipRequestValidation(MembershipRequest? mr, Team? team, Player? playerSending, Player? playerReceiving);
+        void DemoteAdminToMemberValidation(Team? team, Player? adminToDemote, Player? adminDemoting);
+        void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting);
+        void GetTeamScheduleValidation(Team? team);
         public void ValidateVariableSearchTeam(Guid idTeam);
         public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter);
-        public void ValidateTeamSearch(Teams team);
+        public void ValidateTeamSearch(Team team);
 
         public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto filter);
     }

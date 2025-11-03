@@ -7,11 +7,11 @@ namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDTO playerDTO);
+        Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDto playerDTO);
 
-        Task<PlayerDetailsDTO> GetPlayerByIdAsync(string teamId);
+        Task<PlayerDetailsDto> GetPlayerByIdAsync(string teamId);
 
-        Task UpdatePlayerAsync(string playerId, UpdatePlayerDTO dto);
+        Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
 
         Task DeletePlayerAsync(string playerId);
 

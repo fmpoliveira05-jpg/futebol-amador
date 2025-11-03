@@ -12,7 +12,7 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Users Actor { get; set; }
+        public User Actor { get; set; }
 
         [Required]
         [ForeignKey("Actor")]
@@ -28,7 +28,7 @@ namespace Domain.Entities
 
         protected Message() { }
 
-        public Message(Users actor, string messageText)
+        public Message(User actor, string messageText)
         {
             this.Actor = actor;
             this.IdUser = actor.Id;

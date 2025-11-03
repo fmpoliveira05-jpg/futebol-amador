@@ -3,7 +3,7 @@ using Domain.Constants;
 
 namespace Domain.Entities
 {
-    public abstract class Users
+    public abstract class User
     {
         [Key]
         [MaxLength(128)]
@@ -33,10 +33,10 @@ namespace Domain.Entities
         public DateTime CreationDate { get; set; }
 
         // Construtor protegido para uso em classes derivadas
-        protected Users() { }
+        protected User() { }
 
         // Construtor público para inicializar todas as propriedades obrigatórias
-        public Users(string Id,string name, DateOnly dateOfBirth, string address, string email, string phone)
+        public User(string Id,string name, DateOnly dateOfBirth, string address, string email, string phone)
         {
             this.Id = Id;
             this.Name = name;

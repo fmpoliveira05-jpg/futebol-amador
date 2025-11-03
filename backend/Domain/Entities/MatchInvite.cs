@@ -11,13 +11,13 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Teams Sender { get; set; }
+        public Team Sender { get; set; }
 
         [Required]
         [ForeignKey("Sender")]
         public Guid IdSender { get; set; } //FK
         
-        public Teams Receiver { get; set; }
+        public Team Receiver { get; set; }
 
         [Required]
         [ForeignKey("Receiver")]
@@ -41,7 +41,7 @@ namespace Domain.Entities
         //FK
         protected MatchInvite() { }
 
-        public MatchInvite(Teams sender, Teams receiver, DateTime gameDate, Pitch pitch)
+        public MatchInvite(Team sender, Team receiver, DateTime gameDate, Pitch pitch)
         {
             Sender = sender;
             IdSender = sender.Id;
