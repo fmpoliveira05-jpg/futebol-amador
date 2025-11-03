@@ -5,9 +5,9 @@ using Domain.Entities;
 using Domain.Exceptions;
 
 namespace Application.Services
+//pedidos e convites
 {
-    // mudar o nome do ficheiro para MembershipRequestService
-    public class MembershipService : IMembershipRequestService
+    internal class MembershipService
     {
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;

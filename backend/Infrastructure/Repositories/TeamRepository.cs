@@ -14,38 +14,26 @@ namespace Infrastructure.Repositories
 {
     public class TeamRepository : ITeamRepository
     {
-        private readonly AmateurFootballContext context;
+        private readonly AmateurFootballContext DbContext;
 
-        public TeamRepository(AmateurFootballContext context)
+        public TeamRepository(AmateurFootballContext DbContext)
         {
-            this.context = context;
+            this.DbContext = DbContext;
         }
 
-        public Task DeleteTeam(Teams teamToRemove)
+        public void DeleteTeam(Teams teamToRemove)
         {
-            if (teamToRemove == null)
-            {
-                throw new ArgumentNullException(nameof(teamToRemove));
-            }
-
-            context.Team.Remove(teamToRemove);
-            return Task.CompletedTask;
+            DbContext.Team.Remove(teamToRemove);
         }
 
-        public Task UpdateTeam(Teams updatedTeam)
+        public void UpdateTeam(Teams updatedTeam)
         {
-            if (updatedTeam == null)
-            {
-                throw new ArgumentNullException(nameof(updatedTeam));
-            }
-
-            context.Team.Update(updatedTeam);
-            return Task.CompletedTask;
+            DbContext.Team.Update(updatedTeam);
         }
 
         public async Task<List<Teams>?> GetAllTeamsAsync()
         {
-            return await context.Team.ToListAsync();
+            return await DbContext.Team.ToListAsync();
         }
 
         //Talvez crie uma variação deste apenas com o send e outro apenas com o receiver
@@ -57,8 +45,8 @@ namespace Infrastructure.Repositories
                 .Include(t => t.ReceivedInvites)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
-
-        public async Task<Teams?> GetTeamByNameAsync(string name)
+        //verificar se o nome é unico, caso não seja, alterar pra retornar uma lista
+        public async Task<Teams?> GetTeamByNameAsync(String name)
         {
             return await context.Team
                 .FirstOrDefaultAsync(t => t.Name == name); 
@@ -66,45 +54,27 @@ namespace Infrastructure.Repositories
 
         public async Task AddAsync(Teams team)
         {
-            if (team == null)
-            {
-                throw new ArgumentNullException(nameof(team));
-            }
-
-            await context.Team.AddAsync(team);
+            await DbContext.Team.AddAsync(team);
         }
 
         public async Task<Teams?> GetTeamByIdWithPitchAsync(Guid id)
         {
-            if (id == Guid.Empty)
-            {
-                return null;
-            }
-
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<Teams?> GetByIdWithReceivedInvitesAndCalendar(Guid id)
         {
-            if (id == Guid.Empty) {
-                return null;
-            }
-
-            return await context.Team
+            return await DbContext.Team
                 .Include(t => t.ReceivedInvites)
                 .Include(t => t.Calendar)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+
         public async Task<Teams?> GetByIdWithReceivedInvites(Guid id)
         {
-            if (id == Guid.Empty)
-            {
-                return null;
-            }
-
-            return await context.Team
+            return await DbContext.Team
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
@@ -370,7 +340,7 @@ namespace Infrastructure.Repositories
                 query = query.Where(t => t.Rank.Name.ToUpper().Contains(upperCase));
             }
 
-            if(!string.IsNullOrEmpty(filters.City))
+            if (!string.IsNullOrEmpty(filters.City))
             {
                 var fragment = filters.City.ToLower();
                 query = query.Where(t =>
@@ -419,7 +389,7 @@ namespace Infrastructure.Repositories
             }
 
             var list = await query
-                .Select (t => new
+                .Select(t => new
                 {
                     Team = t,
                     AverageAge = t.Members.Any()
@@ -443,10 +413,20 @@ namespace Infrastructure.Repositories
                         IdRank = x.Rank.Id,
                         Name = x.Rank.Name
                     }
-                })
-                .ToListAsync();
+                }).ToListAsync();
+
+
 
             return list;
+        }
+        
+        public Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId)
+        {
+            return DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Include(p => p.Members)
+                .Select(p => p.Id.ToString())
+                .ToListAsync();
         }
 
         public async Task<List<InfoTeamsDto>> GetListTeamsForTeams(Guid idTeam)
@@ -613,7 +593,7 @@ namespace Infrastructure.Repositories
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
 
             var query = context.Player.Where(p => !p.IsAdmin && p.IdTeam == null);
-              
+
             if (!string.IsNullOrEmpty(filters.PlayerName))
             {
                 var upperCase = filters.PlayerName.ToLower();
@@ -656,17 +636,26 @@ namespace Infrastructure.Repositories
             }
 
             var list = await query.Select(p => new PlayerWithoutTeamInfoDto
-                {
-                    PlayerId = p.Id,
-                    Name = p.Name,
-                    Address = p.Address,
-                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
-                    Height = p.Height,
-                    Position = p.Position
-                })
+            {
+                PlayerId = p.Id,
+                Name = p.Name,
+                Address = p.Address,
+                Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                Height = p.Height,
+                Position = p.Position
+            })
                 .ToListAsync();
 
             return list;
+        }
+        public Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId)
+        {
+            return DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Include(p => p.Members)
+                .Where(p => p.Members.Any(m => m.IsAdmin))
+                .Select(p => p.Id.ToString())
+                .ToListAsync();
         }
     }
 }

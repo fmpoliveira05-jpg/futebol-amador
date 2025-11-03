@@ -3,7 +3,6 @@ using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
@@ -28,7 +27,7 @@ namespace Application.Validators
         {
             if (player == null)
             {
-                throw new NotFoundException("Player doesn't exist.");
+                throw new NotFoundException("O Player não existe");
             }
         }
 
@@ -198,8 +197,15 @@ namespace Application.Validators
             {
                 valid = false;
             }
+        public void PlayerHasChatRoomsValidation(Player player) {
+            PlayerExists(player);
+            
+            
+        }
 
-            return valid;
+        // acabar! falta ver como buscar as chatrooms do firebase e ver se faz sentido guardar no db do backend tambem
+        private void PlayerHasChatRooms(Player player) { 
+            //if(player.)
         }
 
         private static void ValidateHeigth(int heigth)

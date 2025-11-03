@@ -2,14 +2,16 @@
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Services;
-using Domain.Exceptions;
-using Application.DTOs.Team;
+using Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PlayerController : ControllerBase
     {
         private readonly IPlayerService playerService;
@@ -21,14 +23,20 @@ namespace Api.Controllers
 
         #region CRUD Player
         [HttpPost]
-        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
+        [Route("create-profile")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTO playerDto)
         {
-            if (!ModelState.IsValid)
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
             {
-                return BadRequest(ModelState);
+                return Unauthorized();
             }
 
-            var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
+            var newPlayerId = await playerService.CreatePlayerAsync(userId,email,playerDto);
 
             return CreatedAtAction(
                     nameof(GetPlayer),
@@ -37,31 +45,57 @@ namespace Api.Controllers
                     );
         }
 
-        [HttpDelete("{playerId:guid}")]
-        public async Task<IActionResult> DeletePlayer(Guid playerId)
+        [HttpDelete("{playerId:required}")]
+        public async Task<IActionResult> DeletePlayer(string playerId) 
         {
             await playerService.DeletePlayerAsync(playerId);
 
             return NoContent();
         }
 
-        [HttpGet("{playerId:guid}")]
-        public async Task<IActionResult> GetPlayer(Guid playerId)
+        [HttpGet("{playerId:required}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPlayer(string playerId)
         {
             var playerDetails = await playerService.GetPlayerByIdAsync(playerId);
 
             return Ok(playerDetails);
         }
 
-        [HttpPut("{playerId:guid}")]
-        public async Task<IActionResult> UpdateUser(Guid playerId, [FromBody] UpdatePlayerDto dto)
+        [HttpGet()]
+        [Route("get-my-profile")]
+        public async Task<IActionResult> GetFullProfile()
         {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var playerDetails = await playerService.GetPlayerByIdAsync(userId);
+
+            return Ok(playerDetails);
+        }
+
+        [HttpPut("{playerId:required}")]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDTO dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            await playerService.UpdatePlayerAsync(playerId, dto);
+            await playerService.UpdatePlayerAsync(userId, dto);
 
             return Ok("Player information updated succesfully.");
         }
@@ -172,8 +206,8 @@ namespace Api.Controllers
 
         #region Teams Operations
 
-        [HttpPut("{playerId:guid}/leave-team")]
-        public async Task<IActionResult> LeaveTeam(Guid playerId)
+        [HttpPut("{playerId:required}/leave-team")]
+        public async Task<IActionResult> LeaveTeam(string playerId)
         {
             string teamName = await playerService.LeaveTeam(playerId);
 

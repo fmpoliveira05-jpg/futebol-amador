@@ -5,28 +5,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Interfaces.Repositories
+namespace Application.Interfaces.Services
 {
-    public interface IRankRepository
+    internal interface IRankService
     {
+        //ACABAR DE VER ISTO TAMBÉM
         Task<Rank> GetDefaultRankAsync();
-
         Task<List<Rank>> GetAllRanksAsync();
-
         Task<Rank> GetRankByIdAsync(Guid rankId);
-
         Task<Rank> GetRankByNameAsync(string rankName);
-
         Task<Rank> GetNextRankAsync(Rank currentRank);
-
         Task<Rank> GetPreviousRankAsync(Rank currentRank);
-
-        void DeleteRank(Rank rank);
-
-        void UpdateRank(Rank newRank);
-
+        Task DeleteRank(Rank rank);
+        Task DeleteRankById(Guid rankId);
+        Task<Rank> UpdateRank(Rank newRank);
         Task AddRankAsync(Rank rank);
-
         Task AddRankInOtherRankPlaceAsync(Rank rank, Rank nextRank);
+        Task ChangePreviousRank(Rank rank, Rank newPreviousRank);
+
     }
 }

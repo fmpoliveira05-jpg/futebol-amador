@@ -7,29 +7,29 @@ namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<Guid> CreatePlayerAsync(CreatePlayerDto playerDto);
+        Task<string> CreatePlayerAsync(string userId,string email,CreatePlayerDTO playerDTO);
 
-        Task<PlayerDetailsDto> GetPlayerByIdAsync(Guid playerId);
+        Task<PlayerDetailsDTO> GetPlayerByIdAsync(string teamId);
 
-        Task UpdatePlayerAsync(Guid playerId, UpdatePlayerDto dto);
+        Task UpdatePlayerAsync(string playerId, UpdatePlayerDTO dto);
 
-        Task DeletePlayerAsync(Guid playerId);
+        Task DeletePlayerAsync(string playerId);
 
-        Task<String> LeaveTeam(Guid playerId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid playerId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid playerId, FilterMembershipRequestsPlayer filters);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
 
-        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(Guid playerId, Guid requestId);
+        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId);
 
-        Task<MemberShipRequestDto> RejectMembershipRequestAsync(Guid playerId, Guid requestId);
+        Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId);
 
-        Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid playerId, Guid teamId);
+        Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId);
 
         Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter);
 
         Task<List<InfoTeamsDto>> GetListTeams();
 
+        Task<string> LeaveTeam(string playerId);
     }
 }

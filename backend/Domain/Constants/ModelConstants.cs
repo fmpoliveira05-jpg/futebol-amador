@@ -34,12 +34,17 @@
             public const int MaxNameLength = 100;
             public const int MinNameLength = 3;
             public const int MinEmailLength = 4;
-            public const int MaxEmailLength = 50;
+            public const int MaxEmailLength = 256;
             public const int MinPasswordLength = 8;
             public const int MaxPasswordLength = 100;
             public const int SizePhoneNumber = 9;
             public const int MinAge = 18;
             public const int MaxAge = 70;
+            //APAGAR
+            public const int MaxNameLengthEmail = 256;
+            public const int MinPasswordLength = 8;
+            public const int MaxPasswordLength = 16;
+            public const int MaxIdLength = 128;
         }
 
         public static class PlayerConst

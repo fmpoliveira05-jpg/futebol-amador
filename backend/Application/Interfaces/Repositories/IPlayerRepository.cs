@@ -7,13 +7,13 @@ namespace Application.Interfaces.Repositories
 {
     public interface IPlayerRepository
     {
+        Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList);
+
         Task<List<Player>?> GetAllTPlayersAsync();
 
-        Task<Player?> GetPlayerByIdAsync(Guid id);
+        Task<Player?> GetPlayerByIdAsync(string id);
 
         Task<Player?> GetPlayerByEmailAsync(string email);
-
-        Task<Player?> GetPlayerByPhoneAsync(string phone);
 
         void DeletePlayer(Player playerToRemove);
 

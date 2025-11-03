@@ -34,8 +34,8 @@ namespace Domain.Entities
         // EF
         public Player() { }
 
-        public Player(string name, DateOnly dateOfBirth, string address, string email, string password, string phoneNumber, Position position, int height)
-            : base(name, dateOfBirth, address, email, password, phoneNumber)
+        public Player(string userId, string name, DateOnly dateOfBirth, string address, string email, string phoneNumber, Position position, int height)
+            : base(userId, name, dateOfBirth, address, email, phoneNumber)
         {
             Position = position;
             Height = height;

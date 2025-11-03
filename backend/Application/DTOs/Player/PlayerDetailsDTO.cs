@@ -7,7 +7,7 @@ namespace Application.DTOs.PlayerDTOs
     public class PlayerDetailsDto
     {
         [Required]
-        public Guid PlayerId { get; set; }
+        public string PlayerId { get; set; }
 
         [Required]
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]

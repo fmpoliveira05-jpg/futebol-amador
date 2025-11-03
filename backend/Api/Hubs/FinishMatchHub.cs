@@ -25,7 +25,7 @@ namespace Api.Hubs
         public async Task JoinFinishMatch(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Guid.Parse(Context.User.Identity.Name);
+            var userId = Context.User.Identity.Name;
             JoinFinishMatch result;
             var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
@@ -57,7 +57,7 @@ namespace Api.Hubs
         public async Task EditResult(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Guid.Parse(Context.User.Identity.Name);
+            var userId = Context.User.Identity.Name;
             var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
             JoinFinishMatch result;

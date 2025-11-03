@@ -8,11 +8,13 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
+        Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId);
+        Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId);
         Task<List<Teams>?> GetAllTeamsAsync();
         Task<Teams?> GetTeamByIdAsync(Guid id);
         Task<Teams?> GetTeamByNameAsync(string name);
-        Task DeleteTeam(Teams teamToRemove);
-        Task UpdateTeam(Teams updatedTeam);
+        void DeleteTeam(Teams teamToRemove);
+        void UpdateTeam(Teams updatedTeam);
         Task AddAsync(Teams team);
         Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId);
         Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId);

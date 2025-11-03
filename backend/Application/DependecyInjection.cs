@@ -35,7 +35,8 @@ namespace Application
             services.AddScoped<ISuperAdminService, SuperAdminService>();
             services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
             services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
-
+            services.AddScoped<IChatRoomService, FirebaseChatService>();
+            
             return services;
         }
 

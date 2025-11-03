@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
@@ -15,7 +16,8 @@ namespace Domain.Entities
 
         [Required]
         [ForeignKey("Player")]
-        public Guid IdPlayer { get; set; } //FK
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string IdPlayer { get; set; } //FK
 
         public Teams Team { get; set; }
 
@@ -33,16 +35,6 @@ namespace Domain.Entities
 
         public MembershipRequests(Player player, Teams team, bool sender)
         {
-            if (player == null)
-            {
-                throw new ArgumentNullException(nameof(player));
-            }
-
-            if (team == null)
-            {
-                throw new ArgumentNullException(nameof(team));
-            }
-
             Player = player;
             IdPlayer = player.Id;
             Team = team;

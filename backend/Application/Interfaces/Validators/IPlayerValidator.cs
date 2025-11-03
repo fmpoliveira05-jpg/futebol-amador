@@ -4,7 +4,7 @@ using Domain.Entities;
 
 namespace Application.Interfaces.Validators
 {
-    public interface IPlayerValidator
+    internal interface IPlayerValidator
     {
         void PlayerExists(Player? player);
 

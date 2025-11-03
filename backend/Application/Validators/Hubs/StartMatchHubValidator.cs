@@ -6,14 +6,14 @@ namespace Application.Validators.Hubs
 {
     public class StartMatchHubValidator: IStartMatchHubValidator
     {
-        public void ValidateVariableJoinMatch(Guid matchId, Guid userId, string connectionId)
+        public void ValidateVariableJoinMatch(Guid matchId, string userId, string connectionId)
         {
             if (matchId == Guid.Empty)
             {
                 throw new ArgumentException("O id da partida está null");
             }
 
-            if (userId == Guid.Empty)
+            if (userId == string.Empty)
             {
                 throw new ArgumentException("O id do utilizador está a null");
             }

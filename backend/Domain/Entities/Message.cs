@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /***
- * Entidade que representa uma mensagem no sistema.
+ * Deprecated
  */
 namespace Domain.Entities
 {
@@ -16,7 +16,8 @@ namespace Domain.Entities
 
         [Required]
         [ForeignKey("Actor")]
-        public Guid IdUser { get; set; } //FK
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string IdUser { get; set; } //FK
 
         [Required]
         [StringLength(ModelConstants.MessageConst.MaxMessageLength, MinimumLength = ModelConstants.MessageConst.MinMessageLength)]

@@ -90,7 +90,7 @@ namespace Application.Services.Hub
             return result;
         }
 
-        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
+        public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
    

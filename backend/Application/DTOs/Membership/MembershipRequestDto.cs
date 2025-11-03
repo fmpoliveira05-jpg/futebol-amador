@@ -1,5 +1,11 @@
-﻿using Domain.Constants;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Domain.Constants;
+using Domain.Entities;
 
 namespace Application.DTOs.MemberShip
 {
@@ -13,7 +19,7 @@ namespace Application.DTOs.MemberShip
         public string PlayerName { get; set; } = null!;
 
         [Required]
-        public Guid PlayerId { get; set; }
+        public string PlayerId { get; set; }
 
         [Required]
         public Guid TeamId { get; set; }

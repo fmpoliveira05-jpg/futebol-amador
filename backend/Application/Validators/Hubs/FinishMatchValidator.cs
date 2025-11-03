@@ -8,14 +8,14 @@ namespace Application.Validators.Hubs
 {
     public class FinishMatchValidator : IFinishMatchValidator
     {
-        public void ValidateVariableJoinMatch(Guid matchId, ResultMatchDto finishMatch, Guid userId, string connectionId)
+        public void ValidateVariableJoinMatch(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             if (matchId == Guid.Empty)
             {
                 throw new ArgumentException("O id da partida está null");
             }
 
-            if (userId == Guid.Empty)
+            if (userId == string.Empty)
             {
                 throw new ArgumentException("O id do utilizador está a null");
             }

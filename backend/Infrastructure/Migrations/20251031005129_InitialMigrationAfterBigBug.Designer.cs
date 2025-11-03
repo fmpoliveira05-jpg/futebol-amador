@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AmateurFootballContext))]
-    [Migration("20251016144044_UpdateDataBaseRankAndRemoveCounts")]
-    partial class UpdateDataBaseRankAndRemoveCounts
+    [Migration("20251031005129_InitialMigrationAfterBigBug")]
+    partial class InitialMigrationAfterBigBug
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -34,6 +34,35 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Calendar");
+                });
+
+            modelBuilder.Entity("Domain.Entities.CancelledMatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<Guid>("IdMatch")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdTeam")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("TimeCancellation")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdMatch");
+
+                    b.HasIndex("IdTeam");
+
+                    b.ToTable("CancelledMatch");
                 });
 
             modelBuilder.Entity("Domain.Entities.Chat", b =>
@@ -102,7 +131,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("MatchStatus")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TimeStart")
+                    b.Property<DateTime?>("TimeStart")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("idPitch")
@@ -125,8 +154,10 @@ namespace Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdPlayer")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdPlayer")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("IdTeam")
                         .HasColumnType("uniqueidentifier");
@@ -134,7 +165,7 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("InviteDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("Sender")
+                    b.Property<bool>("IsPlayerSender")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
@@ -155,8 +186,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("ChatId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdUser")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("MessageText")
                         .IsRequired()
@@ -194,6 +227,30 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Pitch");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PostPoneMatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdMatch")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdTeamPostPone")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("PostPoneDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdMatch");
+
+                    b.HasIndex("IdTeamPostPone");
+
+                    b.ToTable("PostPoneMatch");
                 });
 
             modelBuilder.Entity("Domain.Entities.Rank", b =>
@@ -250,7 +307,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("MatchResult")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("MatchesId")
+                    b.Property<Guid>("MatchesId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("NumGoals")
@@ -293,7 +350,7 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("IdPitch")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("IdRank")
+                    b.Property<Guid>("IdRank")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
@@ -314,9 +371,9 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.Users", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -331,25 +388,22 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("Phone")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("nvarchar(16)");
-
-                    b.Property<int>("PhoneNumber")
-                        .HasColumnType("int");
+                        .HasMaxLength(9)
+                        .HasColumnType("nvarchar(9)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
 
                     b.UseTptMappingStrategy();
                 });
@@ -361,16 +415,19 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Height")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("IdTeam")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("bit");
+
+                    b.Property<DateTime?>("IsAdminLastChangedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
                     b.Property<Guid?>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("idTeam")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasIndex("TeamId");
@@ -383,6 +440,25 @@ namespace Infrastructure.Migrations
                     b.HasBaseType("Domain.Entities.Users");
 
                     b.ToTable("SuperAdmin");
+                });
+
+            modelBuilder.Entity("Domain.Entities.CancelledMatch", b =>
+                {
+                    b.HasOne("Domain.Entities.Matches", "Match")
+                        .WithMany()
+                        .HasForeignKey("IdMatch")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Teams", "Team")
+                        .WithMany()
+                        .HasForeignKey("IdTeam")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Domain.Entities.MatchInvite", b =>
@@ -429,13 +505,13 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Chat", "Chat")
                         .WithMany()
                         .HasForeignKey("IdChat")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Pitch", "Pitch")
                         .WithMany()
                         .HasForeignKey("idPitch")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Chat");
@@ -477,6 +553,25 @@ namespace Infrastructure.Migrations
                     b.Navigation("Actor");
                 });
 
+            modelBuilder.Entity("Domain.Entities.PostPoneMatch", b =>
+                {
+                    b.HasOne("Domain.Entities.Matches", "Match")
+                        .WithMany()
+                        .HasForeignKey("IdMatch")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Teams", "Team")
+                        .WithMany()
+                        .HasForeignKey("IdTeamPostPone")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("Domain.Entities.Rank", b =>
                 {
                     b.HasOne("Domain.Entities.Rank", "NextRank")
@@ -502,9 +597,13 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Matches", null)
+                    b.HasOne("Domain.Entities.Matches", "Match")
                         .WithMany("Teams")
-                        .HasForeignKey("MatchesId");
+                        .HasForeignKey("MatchesId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
 
                     b.Navigation("Team");
                 });
@@ -514,7 +613,7 @@ namespace Infrastructure.Migrations
                     b.HasOne("Domain.Entities.Calendar", "Calendar")
                         .WithMany()
                         .HasForeignKey("IdCalendar")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.Pitch", "Pitch")
@@ -525,7 +624,9 @@ namespace Infrastructure.Migrations
 
                     b.HasOne("Domain.Entities.Rank", "Rank")
                         .WithMany()
-                        .HasForeignKey("IdRank");
+                        .HasForeignKey("IdRank")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Calendar");
 

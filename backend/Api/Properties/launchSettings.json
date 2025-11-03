@@ -5,7 +5,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Faculdade\\3ano\\LDS\\Project\\secrets\\frontend-amfootball-firebase-adminsdk-fbsvc-22c123204f.json"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5218"
@@ -15,7 +16,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Faculdade\\3ano\\LDS\\Project\\secrets\\frontend-amfootball-firebase-adminsdk-fbsvc-22c123204f.json"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7003;http://localhost:5218"
@@ -25,7 +27,8 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\Faculdade\\3ano\\LDS\\Project\\secrets\\frontend-amfootball-firebase-adminsdk-fbsvc-22c123204f.json"
       }
     },
     "Container (Dockerfile)": {
