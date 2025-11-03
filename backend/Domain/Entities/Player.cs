@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Domain.Constants;
 using Domain.Enums;
 
@@ -19,6 +20,7 @@ namespace Domain.Entities
 
         public Teams? Team { get; set; }
 
+        [ForeignKey("Team")]
         public Guid? IdTeam { get; set; } //FK
 
         [Required]

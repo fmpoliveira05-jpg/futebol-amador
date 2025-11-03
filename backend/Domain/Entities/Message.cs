@@ -23,7 +23,7 @@ namespace Domain.Entities
         public string MessageText { get; set; }
 
         [Required]
-        public DateTime timeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
 
         protected Message() { }
 
@@ -32,12 +32,12 @@ namespace Domain.Entities
             this.Actor = actor;
             this.IdUser = actor.Id;
             this.MessageText = messageText;
-            this.timeStamp = DateTime.Now;
+            this.TimeStamp = DateTime.Now;
         }
 
         public override string ToString()
         {
-            return $"[{timeStamp}] {Actor.Name}: {MessageText}";
+            return $"[{TimeStamp}] {Actor.Name}: {MessageText}";
         }
     }
 }
