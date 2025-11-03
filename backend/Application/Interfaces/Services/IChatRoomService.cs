@@ -5,7 +5,7 @@ namespace Application.Interfaces.Services
     {
         Task<string> CreateRoomAsync(CreateChatRoomDto request, string createdByUserId);
         Task<string> CreateMatchRoomAsync(CreateChatRoomRequestDto request, string createdByUserId);
-        Task<List<CreateChatRoomDto>> GetMyRoomsAsync(string userId);
+        Task<List<ChatRoomDto>> GetMyRoomsAsync(string userId);
 
     }
 }

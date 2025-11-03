@@ -43,23 +43,32 @@ namespace Application.Services
             var existingTeam = await existingTeamTask;
             var playerAccepting = await playerAcceptingTask;
 
-            if (existingTeam.MembershipRequests == null)
+            if (existingTeam.MembershipRequests == null) { 
                 existingTeam.MembershipRequests = new List<MembershipRequests>();
+            }
 
             var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
             if (requestToRemove == null)
+            {
                 throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
+            }
 
             TeamValidator.ApproveMembershipRequestValidation(existingTeam, playerAccepting, requestId);
 
             var playerAccepted = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer);
 
             existingTeam.MembershipRequests.Remove(requestToRemove);
+            //Apaga os pedidos de adesão que o jogador enviou e deixa os que o mesmo recebeu
             if (playerAccepted?.MembershipRequests != null)
             {
-                var playerRequest = playerAccepted.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-                if (playerRequest != null)
-                    playerAccepted.MembershipRequests.Remove(playerRequest);
+                foreach (MembershipRequests request in playerAccepted.MembershipRequests)
+                {
+                    if (request.IsPlayerSender)
+                    {
+                        playerAccepted.MembershipRequests.Remove(request);
+                        break;
+                    }
+                }
             }
 
             playerAccepted.IdTeam = teamId;
@@ -86,6 +95,10 @@ namespace Application.Services
                 new Pitch(teamDto.HomePitch.Name, teamDto.HomePitch.Address),
                 rank
             );
+
+            playerCreating.IdTeam = newTeam.Id;
+            playerCreating.IsAdmin = true;
+            playerCreating.IsAdminLastChangedAt = DateTime.UtcNow;
 
             await TeamRepository.AddAsync(newTeam);
             await UnityOfWork.SaveChangesAsync();
