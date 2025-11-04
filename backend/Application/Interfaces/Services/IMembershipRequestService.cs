@@ -1,18 +1,26 @@
-﻿using Application.DTOs.MemberShip;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
 using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {
     public interface IMembershipRequestService
     {
-        Task<IEnumerable<MemberShipRequestDto>> GetRequestsReceivedByPlayerFromTeams(Guid idPlayer);
+        Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId);
 
-        Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(Guid idPlayer);
+        Task AcceptMembershipRequest(Guid teamId, Guid requestId, string adminUserId);
 
-        Task SendMembershipRequest(MemberShipRequestDto dto);
+        Task RejectMembershipRequest(Guid teamId, Guid requestId, string adminUserId);
 
-        Task<Player> AcceptMembershipRequest(Guid idTeam, Guid idMembershipRequest);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId);
 
-        Task RefuseMembershipRequest(Guid idTeam, Guid idMembershipRequest);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId, FilterMembershipRequestsPlayer filters);
+
+        Task<MemberShipRequestDto> PlayerSendMembershipRequest(string playerId, Guid teamId);
+
     }
 }

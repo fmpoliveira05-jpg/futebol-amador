@@ -5,7 +5,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
-using NUnit.Framework;
+using System.Numerics;
 
 namespace Application.Validators
 {
@@ -349,7 +349,12 @@ namespace Application.Validators
                 exists = false;
             }
 
-            return exists;
+        private static bool PlayerExistsInTeam(Team? team, Player? Player)
+        {
+            if (team == null || Player == null)
+                return false;
+
+            return team.Members.Any(m => m.Id == Player.Id);
         }
 
         private static bool TeamIsFull(Team? team)
