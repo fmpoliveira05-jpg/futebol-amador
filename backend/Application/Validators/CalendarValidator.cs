@@ -74,7 +74,7 @@ namespace Application.Validators
                 throw new BusinessRuleException("O horario da partida deve ser pelo menos 12 horas apos a hora atual");
             }
 
-            if (match.MatchStatus != MatchStatus.SCHEDULED && match.MatchStatus != MatchStatus.POST_PONED)
+            if (match.MatchStatus != MatchStatus.SCHEDULED || match.MatchStatus != MatchStatus.POST_PONED)
             {
                 throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento");
             }
@@ -137,7 +137,8 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent) {
+        public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent)
+        {
             if (match == null)
             {
                 throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
@@ -152,7 +153,6 @@ namespace Application.Validators
             }
 
             ValidateTeam(idTeam, team);
-
             ValidateTeam(idOpponent, opponent);
         }
 

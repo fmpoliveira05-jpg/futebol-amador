@@ -24,10 +24,8 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IPitchRepository> _pitchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchInviteValidator> _validatorMock;
-        private Mock<ICalendarValidator> _validatorMock2;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private MatchInviteService _sut;
-        private MatchService _sut2;
         private Rank _defaultRank;
         #endregion
 
@@ -42,7 +40,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _pitchRepoMock = new Mock<IPitchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchInviteValidator>();
-            _validatorMock2 = new Mock<ICalendarValidator>();
+            _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
 
             _sut = new MatchInviteService(
                 _teamRepoMock.Object,
@@ -51,17 +49,9 @@ namespace Unit.ApplicationTests.ServicesTests
                 _teamStatsRepoMock.Object,
                 _pitchRepoMock.Object,
                 _validatorMock.Object,
-                _unitOfWorkMock.Object
-            );
-
-            _sut2 = new MatchService(
-                _matchRepoMock.Object,
-                _teamPostPoneRepoMock.Object,
-                Mock.Of<ICancelledMatchRepository>(),
                 _unitOfWorkMock.Object,
-                _validatorMock2.Object,
-                Mock.Of<IPlayerRepository>()
-             );
+                _teamPostPoneRepoMock.Object
+            );
 
             // rank mínimo válido para testes
             _defaultRank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);

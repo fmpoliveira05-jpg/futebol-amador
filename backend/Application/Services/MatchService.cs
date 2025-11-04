@@ -6,6 +6,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Exceptions;
 
 /*
  Fazer breves testes para ver se está tudo a dar com estas alterações
@@ -52,7 +53,7 @@ namespace Application.Services
         public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
             MatchValidator.ValidatePostPoneMatchDto(idTeam, dto);
-            
+
             var idMatch = dto.IdMatch;
             var newDate = dto.PostPoneDate;
             var idOpponnent = dto.IdOpponent;
@@ -63,10 +64,31 @@ namespace Application.Services
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
-            //Valida os dados carregados
-            MatchValidator.ValidatorPostPoneMatch(match, newDate, teamStatistic, idTeam, opponentStatistics, idOpponnent);
+            if (match == null)
+            {
+                throw new BusinessRuleException("A partida não foi encontrada.");
+            }
 
-            //Criação do adiamento e atualização do estado da equipa
+            if (teamStatistic == null || opponentStatistics == null)
+            {
+                throw new BusinessRuleException("A partida não possui equipas válidas.");
+            }
+
+            if (match.MatchStatus != MatchStatus.SCHEDULED && match.MatchStatus != MatchStatus.POST_PONED)
+            {
+                throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento.");
+            }
+
+            if (newDate <= DateTime.UtcNow)
+            {
+                throw new BusinessRuleException("A nova data não pode ser igual ou antes da data atual.");
+            }
+
+            if (newDate == match.MatchDate)
+            {
+                throw new BusinessRuleException("A data de adiamento não pode ser a mesma da data já marcada.");
+            }
+
             team = teamStatistic.Team;
             postPoneDate = new PostPoneMatch(team, match, newDate);
             await TeamPostPoneGameRepository.AddTeamPostPoneMatch(postPoneDate);
@@ -162,21 +184,33 @@ namespace Application.Services
             {
                 throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
             }
+
             var teamsStatistics = match?.Teams;
-            var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
-            var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            if (teamsStatistics == null || !teamsStatistics.Any())
+            {
+                throw new ArgumentException("As estatísticas da equipe não foram encontradas.");
+            }
+
+            var team = teamsStatistics.FirstOrDefault(ts => ts.IdTeam == idTeam);
+            var opponent = teamsStatistics.FirstOrDefault(ts => ts.IdTeam != idTeam);
+
+            if (team == null)
+            {
+                throw new ValidationException("A equipa não pertence à partida.");
+            }
             if (opponent == null)
             {
-                throw new ArgumentException("Adversário não encontrado na partida.");
+                throw new ValidationException("O adversário não foi encontrado na partida.");
             }
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
-            
+
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
+
             await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
-            
+
             match.MatchStatus = MatchStatus.CANCELED;
-            
+
             await UnityOfWork.SaveChangesAsync();
         }
 

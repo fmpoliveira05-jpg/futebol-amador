@@ -13,6 +13,7 @@ using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using System.Runtime.ConstrainedExecution;
 
 namespace Unit.ApplicationTests.ServicesTests
 {
@@ -57,6 +58,7 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T1GP5 - Player Admin de equipa adia partida SCHEDULED para data futura (12h depois).")]
         public async Task PostPoneMatch_Should_ReturnInfoPostPoneMatch_When_AdminPostponesSuccessfully()
         {
+            // ARRANGE
             var pitch = new Pitch("Campo Central", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
@@ -65,26 +67,26 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            var teamStats = new TeamStatistics(team);
-            var opponentStats = new TeamStatistics(opponent);
+            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
+            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
             match.Teams.Add(teamStats);
             match.Teams.Add(opponentStats);
-
             var dto = new PostPoneMatchDto
             {
                 IdMatch = match.Id,
                 PostPoneDate = DateTime.UtcNow.AddHours(13),
                 IdOpponent = opponent.Id
             };
-
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
             _validatorMock.Setup(v => v.ValidatePostPoneMatchDto(team.Id, dto));
             _validatorMock.Setup(v => v.ValidatorPostPoneMatch(match, dto.PostPoneDate, teamStats, team.Id, opponentStats, opponent.Id));
             _teamPostPoneRepoMock.Setup(r => r.AddTeamPostPoneMatch(It.IsAny<PostPoneMatch>()));
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
+            // ACT
             var result = await _sut.PostPoneMatch(team.Id, dto);
 
+            // ASSERT
             result.Should().NotBeNull();
             result.Should().BeOfType<InfoPostPoneMatch>();
             result.IdMatch.Should().Be(match.Id);
@@ -129,83 +131,113 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T4GP5 - Tenta adiar partida com estado CANCELLED, DONE ou IN_PROGRESS.")]
         public async Task PostPoneMatch_Should_Throw_When_MatchHasInvalidStatus()
         {
+            // ARRANGE
             var teamId = Guid.NewGuid();
+            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.DONE
             };
-            var dto = new PostPoneMatchDto { IdMatch = match.Id, PostPoneDate = DateTime.UtcNow.AddDays(2) };
-
+            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
+            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
+            match.Teams.Add(teamStats);
+            match.Teams.Add(opponentStats);
+            var dto = new PostPoneMatchDto
+            {
+                IdMatch = match.Id,
+                PostPoneDate = DateTime.UtcNow.AddDays(2),
+                IdOpponent = opponent.Id
+            };
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidatorPostPoneMatch(match, dto.PostPoneDate, It.IsAny<TeamStatistics>(), teamId, It.IsAny<TeamStatistics>(), It.IsAny<Guid>()))
-                .Throws(new BusinessRuleException("Não é possível adiar partidas concluídas, canceladas ou em andamento."));
 
-            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
+            // ACT
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
+            // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
-                     .WithMessage("*não é possível adiar*");
+                     .WithMessage("Só podem ser adiadas partidas marcadas ou em estado de adiamento.");
         }
 
         [Test(Description = "T5GP5 - Tentar adiar partida para a mesma data definida.")]
         public async Task PostPoneMatch_Should_Throw_When_NewDateIsSame()
         {
+            // ARRANGE
             var teamId = Guid.NewGuid();
             var sameDate = DateTime.UtcNow.AddDays(1);
+            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
             var match = new Matches(sameDate, false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            var dto = new PostPoneMatchDto { IdMatch = match.Id, PostPoneDate = sameDate };
-
+            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
+            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
+            match.Teams.Add(teamStats);
+            match.Teams.Add(opponentStats);
+            var dto = new PostPoneMatchDto {
+                IdMatch = match.Id,
+                PostPoneDate = sameDate,
+                IdOpponent = opponent.Id
+            };
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidatorPostPoneMatch(match, sameDate, It.IsAny<TeamStatistics>(), teamId, It.IsAny<TeamStatistics>(), It.IsAny<Guid>()))
-                .Throws(new BusinessRuleException("A nova data não pode ser igual à atual."));
 
-            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
+            // ACT
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
+            // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
-                     .WithMessage("*igual à atual*");
+                     .WithMessage("A data de adiamento não pode ser a mesma da data já marcada.");
         }
 
         [Test(Description = "T6GP5 - Tentar adiar partida inexistente.")]
         public async Task PostPoneMatch_Should_Throw_When_MatchDoesNotExist()
         {
+            // ARRANGE
             var teamId = Guid.NewGuid();
             var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
-
             _matchRepoMock.Setup(r => r.GetMatchById(dto.IdMatch)).ReturnsAsync((Matches?)null);
             _validatorMock
                 .Setup(v => v.ValidatorPostPoneMatch(null, dto.PostPoneDate, null, teamId, null, dto.IdOpponent))
                 .Throws(new ArgumentException("Partida não encontrada."));
 
+            // ACT
             Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
-            await act.Should().ThrowAsync<ArgumentException>()
-                     .WithMessage("*não encontrada*");
+            // ASSERT
+            await act.Should().ThrowAsync<BusinessRuleException>()
+                     .WithMessage("A partida não foi encontrada.");
         }
 
-        [Test(Description = "T7GP5 - Tentar adiar partida para 12h antes da atual.")]
+        [Test(Description = "T7GP5 - Tentar adiar partida para a mesma data ou uma data anterior à data que estava marcada.")]
         public async Task PostPoneMatch_Should_Throw_When_NewDateIsBeforeCurrent()
         {
+            // ARRANGE
             var teamId = Guid.NewGuid();
+            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
+            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
+            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
+            match.Teams.Add(teamStats);
+            match.Teams.Add(opponentStats);
             var invalidDate = DateTime.UtcNow.AddHours(-12);
-            var dto = new PostPoneMatchDto { IdMatch = match.Id, PostPoneDate = invalidDate };
-
+            var dto = new PostPoneMatchDto {
+                IdMatch = match.Id,
+                PostPoneDate = invalidDate,
+                IdOpponent = opponent.Id
+            };
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidatorPostPoneMatch(match, invalidDate, It.IsAny<TeamStatistics>(), teamId, It.IsAny<TeamStatistics>(), It.IsAny<Guid>()))
-                .Throws(new BusinessRuleException("A nova data não pode ser antes da data atual."));
 
-            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
+            // ACT
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
+            // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
-                     .WithMessage("*antes da data atual*");
+                     .WithMessage("A nova data não pode ser igual ou antes da data atual.");
         }
         #endregion
 
@@ -213,6 +245,7 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T1GP6 - Player Admin cancela partida com estado SCHEDULED.")]
         public async Task CancelMatch_Should_CancelScheduledMatch_When_AdminTeam()
         {
+            // ARRANGE
             var pitch = new Pitch("Campo Central", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
@@ -221,17 +254,18 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            var teamStats = new TeamStatistics(team);
-            var opponentStats = new TeamStatistics(opponent);
+            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
+            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
             match.Teams.Add(teamStats);
             match.Teams.Add(opponentStats);
-
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
             _validatorMock.Setup(v => v.ValidateCancelMatch(match, teamStats, team.Id, opponentStats, opponentStats.IdTeam));
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
+            // ACT
             await _sut.CancelMatch(team.Id, match.Id, "Cancelado por motivos técnicos");
 
+            // ASSERT
             match.MatchStatus.Should().Be(MatchStatus.CANCELED);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
@@ -239,6 +273,7 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T2GP6 - Tenta cancelar partida com outro estado além de SCHEDULED.")]
         public async Task CancelMatch_Should_Throw_When_MatchHasInvalidStatus()
         {
+            // ARRANGE
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
@@ -247,16 +282,18 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 MatchStatus = MatchStatus.DONE
             };
-            match.Teams.Add(new TeamStatistics(team));
-            match.Teams.Add(new TeamStatistics(opponent));
-
+            match.Teams.Add(new TeamStatistics(team) { IdTeam = team.Id });
+            match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponent.Id });
+            var dto = new PostPoneMatchDto { IdMatch = match.Id, PostPoneDate = DateTime.UtcNow.AddDays(2) };
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
             _validatorMock
                 .Setup(v => v.ValidateCancelMatch(match, It.IsAny<TeamStatistics>(), team.Id, It.IsAny<TeamStatistics>(), opponent.Id))
                 .Throws(new ValidationException("A partida não pode ser cancelada pois já foi concluída."));
 
+            // ACT
             Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
 
+            // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não pode ser cancelada*");
         }
@@ -286,16 +323,17 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            match.Teams.Add(new TeamStatistics(team));
-            match.Teams.Add(new TeamStatistics(opponent));
-
+            match.Teams.Add(new TeamStatistics(team) { IdTeam = team.Id });
+            match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponent.Id });
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
             _validatorMock
                 .Setup(v => v.ValidateCancelMatch(match, It.IsAny<TeamStatistics>(), team.Id, It.IsAny<TeamStatistics>(), opponent.Id))
                 .Throws(new ValidationException("A equipa não é administradora da partida."));
 
+            // ACT
             Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
 
+            // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administradora*");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -304,6 +342,7 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T5GP6 - Player não pertencente à equipa tenta cancelar partida.")]
         public async Task CancelMatch_Should_Throw_When_TeamDoesNotBelongToMatch()
         {
+            // ARRANGE
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
@@ -313,16 +352,17 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            match.Teams.Add(new TeamStatistics(teamA));
-            match.Teams.Add(new TeamStatistics(teamB));
-
+            match.Teams.Add(new TeamStatistics(teamA) { IdTeam = teamA.Id });
+            match.Teams.Add(new TeamStatistics(teamB) { IdTeam = teamB.Id });
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
             _validatorMock
                 .Setup(v => v.ValidateCancelMatch(match, null, outsider.Id, It.IsAny<TeamStatistics>(), It.IsAny<Guid>()))
                 .Throws(new ValidationException("A equipa não pertence à partida."));
 
+            // ACT
             Func<Task> act = async () => await _sut.CancelMatch(outsider.Id, match.Id, "Tentativa indevida");
 
+            // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não pertence*");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);

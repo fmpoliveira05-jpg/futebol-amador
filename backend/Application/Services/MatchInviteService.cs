@@ -27,7 +27,7 @@ namespace Application.Services
         public MatchInviteService(ITeamRepository teamRepository, IMatchInviteRepository matchInviteRepository, 
             IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository,
             IPitchRepository pitchRepository, IMatchInviteValidator matchInviteValidator,
-            IUnityOfWork unityOfWork) {
+            IUnityOfWork unityOfWork, ITeamPostPoneGameRepository @object) {
             this.TeamRepository = teamRepository; 
             this.MatchInviteRepository = matchInviteRepository;
             this.MatchRepository = matchRepository;
