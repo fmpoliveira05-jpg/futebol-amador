@@ -19,6 +19,7 @@ namespace Application.Services
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
+        private object @object;
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
@@ -29,6 +30,11 @@ namespace Application.Services
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
+        }
+
+        public MatchService(object @object)
+        {
+            this.@object = @object;
         }
 
         public async Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam)
