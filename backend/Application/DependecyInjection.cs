@@ -29,14 +29,13 @@ namespace Application
             services.AddScoped<IMatchService, MatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMatchMakerService, MatchMakerService>();
+            services.AddScoped<ISuperAdminService, SuperAdminService>();
+            services.AddScoped<IChatRoomService, FirebaseChatService>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
 
             services.AddManagerHubService();
             services.AddHubServiceClients();
-            services.AddScoped<ISuperAdminService, SuperAdminService>();
-            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
-            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
-            services.AddScoped<IChatRoomService, FirebaseChatService>();
-            
+
             return services;
         }
 
@@ -70,6 +69,7 @@ namespace Application
             services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
             services.AddScoped<IEmailValidator, EmailValidator>();
+            services.AddScoped<IAuthorizationValidator, AuthorizationValidator>();
 
             return services;
         }

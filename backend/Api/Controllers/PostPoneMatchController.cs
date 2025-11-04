@@ -3,8 +3,8 @@ using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -13,12 +13,14 @@ namespace Api.Controllers
     [ApiController]
     public class PostPoneMatchController: ControllerBase
     {
+        #region Initialization
         private readonly IMatchService matchController;
 
         public PostPoneMatchController(IMatchService matchController)
         {
             this.matchController = matchController;
         }
+        #endregion
 
         #region PostPoneMatch
         [HttpGet]
@@ -34,13 +36,15 @@ namespace Api.Controllers
                                 filter.MaxDateGame.HasValue ||
                                 filter.MinDatePostPoneGame.HasValue ||
                                 filter.MaxDatePostPoneGame.HasValue;
+
+                var userId = GetCurrentUserId();
                 if (isFilter)
                 {
-                    listPostPone = await matchController.GetListPostPoneMatchTeamWithFilters(idTeam, filter);
+                    listPostPone = await matchController.GetListPostPoneMatchTeamWithFilters(userId, idTeam, filter);
                 }
                 else
                 {
-                    listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
+                    listPostPone = await matchController.GetListPostPoneMatchTeam(userId, idTeam);
                 }
 
                 return Ok(listPostPone);
@@ -60,7 +64,7 @@ namespace Api.Controllers
         {
             try
             {
-                var match = await matchController.AcceptPostPoneMatch(idTeam, dto);
+                var match = await matchController.AcceptPostPoneMatch(GetCurrentUserId(), idTeam, dto);
 
                 return Ok(match);
             }
@@ -91,7 +95,7 @@ namespace Api.Controllers
         {
             try
             {
-                await matchController.RejectPostPoneMatch(idTeam, dto);
+                await matchController.RejectPostPoneMatch(GetCurrentUserId(), idTeam, dto);
 
                 return Ok();
             }
@@ -117,6 +121,20 @@ namespace Api.Controllers
             }
         }
 
+        #endregion
+
+        #region private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
         #endregion
     }
 }

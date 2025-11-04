@@ -6,6 +6,7 @@ namespace Application.Services
 {
     public class MatchMakerService : IMatchMakerService
     {
+        #region MatchMaker Methods
         /**
          Metodo que procura uma partida para uma equipa que acabou de começar a procura por
          */
@@ -118,7 +119,9 @@ namespace Application.Services
 
             return result;
         }
+        #endregion
 
+        #region Private Methods
         private static Dictionary<DateTime, List<EntryRankMatchMakerHub>> GetDicitonaryTeamGroupByMatchDate(IEnumerable<EntryRankMatchMakerHub> teamsInSearch) 
         {
             var dicionary = teamsInSearch
@@ -127,5 +130,6 @@ namespace Application.Services
 
             return dicionary;
         }
+        #endregion
     }
 }

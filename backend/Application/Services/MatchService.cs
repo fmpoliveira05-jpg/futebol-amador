@@ -7,46 +7,58 @@ using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
 
-/*
- Fazer breves testes para ver se está tudo a dar com estas alterações
- */
 namespace Application.Services
 {
     public class MatchService: IMatchService
     {
+        #region Inicializer
         private readonly IMatchRepository MatchRepository;
         private readonly ITeamPostPoneGameRepository TeamPostPoneGameRepository;
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
+        private readonly IPlayerRepository PlayerRepository;
+        private readonly IAuthorizationService AuthorizationService;
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            ICalendarValidator MatchValidator, IPlayerRepository @object)
+            ICalendarValidator MatchValidator, IPlayerRepository playerRepository,
+            IAuthorizationService AuthorizationService)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
+            this.PlayerRepository = playerRepository;
+            this.AuthorizationService = AuthorizationService;
         }
+        #endregion
 
-        public async Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam)
+        #region Calendar
+        public async Task<List<InfoMatchCalendar>> GetCalendar(string userId, Guid idTeam)
         {
+            await AuthorizationService.UserAuthorizationIsMemberTeamById(userId, idTeam);
             MatchValidator.ValidateTeamCalendar(idTeam);
             return await MatchRepository.GetAllMatchesTeam(idTeam);
         }
 
-        public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendarDto filter)
+        public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(string userId, Guid idTeam, FilterCalendarDto filter)
         {
+            await AuthorizationService.UserAuthorizationIsMemberTeamById(userId, idTeam);
             MatchValidator.ValidateFilterCalendar(idTeam, filter);
             return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
         }
 
-        public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
+        #endregion
+
+        #region PostPoneMatch
+        public async Task<InfoPostPoneMatch> PostPoneMatch(string userId, Guid idTeam, PostPoneMatchDto dto)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+
             MatchValidator.ValidatePostPoneMatchDto(idTeam, dto);
-            
+
             var idMatch = dto.IdMatch;
             var newDate = dto.PostPoneDate;
             var idOpponnent = dto.IdOpponent;
@@ -83,20 +95,22 @@ namespace Application.Services
         }
 
         //Vou ter que implementar aquele find na database para ver se quem adiou tem um jogo já marcado a pelo menos 12 horas
-        public async Task<MatchDto> AcceptPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
+        public async Task<MatchDto> AcceptPostPoneMatch(string userId, Guid idTeam, AcceptRefusePostPoneDto dto)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+
             MatchValidator.ValidateAcceptPostPoneMatchDto(idTeam, dto);
             var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
             DateTime newDate;
-
             var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idOpponnent, idMatch);
             var match = postPoneMatch?.Match;
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
-
+            var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(idTeam, match.MatchDate);
+            
             //Validator
-            MatchValidator.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
+            MatchValidator.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent, validateMatch);
 
             //Adiamento da partida
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
@@ -120,8 +134,9 @@ namespace Application.Services
         /**
          * O jogo fica cancelado, chama o cancelMatch
          */
-        public async Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
+        public async Task RejectPostPoneMatch(string userId, Guid idTeam, AcceptRefusePostPoneDto dto)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
             MatchValidator.ValidateRejectPostPoneMatchDTO(idTeam, dto);
             
             var idMatch = dto.IdMatch;
@@ -140,29 +155,40 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
+        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(string userId, Guid idTeam)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
             MatchValidator.ValidateTeamCalendar(idTeam);
             var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverById(idTeam);
-            MatchValidator.ValidatorGetListPostPoneMatchTeam(listPostPone);
 
             return listPostPone;
         }
 
-        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
+        public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(string userId, Guid idTeam, FilterPostPoneMatchDto filter)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+            MatchValidator.ValidateTeamCalendar(idTeam);
+            MatchValidator.ValidateFilterPostPoneMatch(filter);
+            var listPostPone = await MatchRepository.GetAllMatchPostPoneReceiverByIdWithFilters(idTeam, filter);
+
+            return listPostPone;
+        }
+
+        #endregion
+
+        #region CancelMatch
+        public async Task CancelMatch(string userId, Guid idTeam, Guid idMatch, string description)
+        {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+
             var match = await MatchRepository.GetMatchToCancelById(idMatch);
-            if (match == null)
-            {
-                throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
-            }
+            MatchValidator.ExistsMatch(match);
+
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
-            if (opponent == null)
-            {
-                throw new ArgumentException("Adversário não encontrado na partida.");
-            }
+
+            MatchValidator.ExistsTeamStatistics(opponent);
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
             
@@ -173,10 +199,6 @@ namespace Application.Services
             
             await UnityOfWork.SaveChangesAsync();
         }
-
-        Task<List<InfoPostPoneMatch>> IMatchService.GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
     }
 }

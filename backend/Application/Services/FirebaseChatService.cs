@@ -1,10 +1,8 @@
 ﻿using Application.DTOs.Chat;
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
-using Google.Api;
 using Google.Cloud.Firestore;
 
 namespace Application.Services

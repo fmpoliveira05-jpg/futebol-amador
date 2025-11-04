@@ -270,8 +270,14 @@ namespace Api.Controllers
         private string GetCurrentUserId()
         {
             //validar null
-        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
         }
         #endregion
     }
