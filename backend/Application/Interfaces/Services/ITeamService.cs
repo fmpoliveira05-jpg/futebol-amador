@@ -17,16 +17,9 @@ namespace Application.Interfaces.Services
 
         Task DeleteTeamAsync(Guid teamId, string currentUserId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, string idAdmin, FilterMembershipRequestsTeam filters);
-
-        Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
-
-        Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
-
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId);
 
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string adminUserId);
 
         Task RemovePlayerFromTeamAsync(Guid teamId, string playerIdToRemove, string playerRemovingId);
 
@@ -36,8 +29,6 @@ namespace Application.Interfaces.Services
         Task DemoteAdminToPlayerAsync(Guid teamId, string adminIdToDemote, string currentAdminId);
 
         Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
-
-        Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, string playerIdToInvite, string adminUserId);
 
         Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam);
 

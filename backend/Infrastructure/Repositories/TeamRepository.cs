@@ -105,59 +105,6 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId)
-        {
-
-            return await DbContext.MembershipRequests
-                        .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true)
-                        .Select(mr => new MemberShipRequestDto
-                        {
-                            RequestId = mr.Id,
-                            PlayerName = mr.Player.Name, 
-                            PlayerId = mr.IdPlayer,
-                            TeamName = mr.Team.Name,     
-                            RequestDate = mr.InviteDate,
-                            IsPlayerSender = mr.IsPlayerSender
-                        })
-                        .ToListAsync();
-        }
-
-        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
-        {
-            var query = DbContext.MembershipRequests
-                .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true);
-
-            if (filters.MinDate.HasValue)
-            {
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);
-            }
-
-            if (filters.MaxDate.HasValue)
-            {
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) <= filters.MaxDate.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filters.SenderName))
-            {
-                var upperName = filters.SenderName.ToUpper();
-                query = query.Where(mr => mr.Player.Name.ToUpper().Contains(upperName));
-            }
-
-            var list = await query
-                .Select(mr => new MemberShipRequestDto
-                {
-                    RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    RequestDate = mr.InviteDate,
-                    IsPlayerSender = mr.IsPlayerSender
-                })
-                .ToListAsync();
-
-            return list;
-        }
-
         public async Task<Team?> GetTeamForMembershipRequestAsync(Guid id)
         {
             return await DbContext.Team

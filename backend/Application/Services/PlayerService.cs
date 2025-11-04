@@ -17,19 +17,17 @@ namespace Application.Services
         private readonly ITeamRepository teamRepository;
         private readonly IUnityOfWork unityOfWork;
         private readonly IPlayerValidator playerValidator;
-        private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
 
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
-            IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator, IUserRepository userRepository, 
+            IUnityOfWork unitOfWork,
+IMembershipRequestRepository @object, IPlayerValidator playerValidator, IUserRepository userRepository, 
             ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
-            this.membershipRequestRepository = membershipRequestRepository;
             this.unityOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.userRepository = userRepository;
@@ -156,124 +154,6 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
 
             return teamName;
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
-
-            return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
-
-            return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
-        }
-
-        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId)
-        {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
-
-            playerValidator.PlayerExists(player);
-
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
-
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(request.IdTeam)
-                ?? throw new ValidationException($"A equipa com Id '{request.IdTeam}' não existe.");
-
-            player.IdTeam = team.Id;
-            team.Members.Add(player);
-
-            player.MembershipRequests.Remove(request);
-            team.MembershipRequests?.Remove(request);
-
-            await unityOfWork.SaveChangesAsync();
-
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
-
-            return new MemberShipRequestDto
-            {
-                RequestId = request.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
-            };
-        }
-
-        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId)
-        {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
-
-            playerValidator.PlayerExists(player);
-
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
-
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
-
-            player.MembershipRequests.Remove(request);
-
-            await unityOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = request.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
-            };
-        }
-
-        //faz validation de se o player ja tem equipa
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
-
-            var existingRequest = await membershipRequestRepository
-                .GetMembershipRequestByPlayerAndTeam(playerId, teamId);
-
-            playerValidator.SendMembershipRequestValidator(player, team, existingRequest);
-
-            var newRequest = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = playerId,
-                IdTeam = teamId,
-                Player = player,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
-            };
-
-            await membershipRequestRepository.AddMembershipRequest(newRequest);
-            await unityOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = newRequest.Id,
-                PlayerId = newRequest.IdPlayer,
-                PlayerName = newRequest.Player.Name,
-                TeamId = newRequest.IdTeam,
-                TeamName = newRequest.Team.Name,
-                RequestDate = newRequest.InviteDate,
-                IsPlayerSender = newRequest.IsPlayerSender
-            };
         }
 
         public async Task<List<InfoTeamsDto>> GetListTeams()

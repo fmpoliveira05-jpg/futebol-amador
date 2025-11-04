@@ -16,12 +16,9 @@ namespace Application.Services
     {
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
-        private readonly IPlayerRepository UserRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
-        private readonly IMembershipRequestRepository MembershipRequestRepository;
-        private readonly IPlayerValidator PlayerValidator;
 
         public TeamService(
             ITeamRepository teamRepository,
@@ -37,8 +34,6 @@ namespace Application.Services
             UnityOfWork = unityOfWork;
             TeamValidator = teamValidator;
             RankRepository = rankRepository;
-            MembershipRequestRepository = membershipRequestRepository;
-            PlayerValidator = playerValidator;
         }
 
         #region CRUD Team
@@ -157,156 +152,6 @@ namespace Application.Services
             playerToDemote.IsAdmin = false;
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
             await UnityOfWork.SaveChangesAsync();
-        }
-
-        #endregion
-
-        #region MemberShipRequest
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, string playerIdToInvite, string adminUserId)
-        {
-            var team = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-            var playerToInvite = await PlayerRepository.GetPlayerByIdAsync(playerIdToInvite);
-            var existing = await MembershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
-
-            TeamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
-            PlayerValidator.PlayerExists(playerToInvite);
-
-            var invite = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = playerIdToInvite,
-                IdTeam = teamId,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = false
-            };
-
-            await MembershipRequestRepository.AddMembershipRequest(invite);
-            await UnityOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = invite.Id,
-                PlayerId = invite.IdPlayer,
-                PlayerName = invite.Player.Name,
-                TeamId = invite.IdTeam,
-                TeamName = invite.Team.Name,
-                RequestDate = invite.InviteDate,
-                IsPlayerSender = invite.IsPlayerSender
-            };
-        }
-
-        public async Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId)
-        {
-            var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
-            var playerAcceptingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, playerAcceptingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerAccepting = await playerAcceptingTask;
-
-            if (existingTeam.MembershipRequests == null) { 
-                existingTeam.MembershipRequests = new List<MembershipRequest>();
-            }
-
-            var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-            if (requestToRemove == null)
-            {
-                throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
-            }
-
-            TeamValidator.ApproveMembershipRequestValidation(existingTeam, playerAccepting, requestId);
-
-            var playerAccepted = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer);
-
-            existingTeam.MembershipRequests.Remove(requestToRemove);
-            //Apaga os pedidos de adesão que o jogador enviou e deixa os que o mesmo recebeu
-            if (playerAccepted?.MembershipRequests != null)
-            {
-                foreach (MembershipRequest request in playerAccepted.MembershipRequests)
-                {
-                    if (request.IsPlayerSender)
-                    {
-                        playerAccepted.MembershipRequests.Remove(request);
-                        break;
-                    }
-                }
-            }
-
-            playerAccepted.IdTeam = teamId;
-            existingTeam.Members.Add(playerAccepted);
-
-            await UnityOfWork.SaveChangesAsync();
-        }
-
-        public async Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId)
-        {
-            var existingTeamTask = TeamRepository.GetTeamForMembershipRequestAsync(teamId);
-            var playerRejectingTask = PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            await Task.WhenAll(existingTeamTask, playerRejectingTask);
-
-            var existingTeam = await existingTeamTask;
-            var playerRejecting = await playerRejectingTask;
-
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequest>();
-
-            var requestToRemove = existingTeam?.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-            if (requestToRemove == null)
-                throw new ValidationException($"A equipa com Id '{teamId}' não possui um pedido de adesão com Id '{requestId}'.");
-
-            TeamValidator.RejectMembershipRequestValidation(existingTeam, playerRejecting, requestId);
-
-            var playerRejected = await PlayerRepository.GetPlayerByIdAsync(requestToRemove.IdPlayer);
-
-            existingTeam.MembershipRequests.Remove(requestToRemove);
-
-            if (playerRejected?.MembershipRequests != null)
-            {
-                var playerRequest = playerRejected.MembershipRequests.FirstOrDefault(r => r.Id == requestId);
-                if (playerRequest != null)
-                    playerRejected.MembershipRequests.Remove(playerRequest);
-            }
-
-            await UnityOfWork.SaveChangesAsync();
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string adminUserId)
-        {
-            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            var adminConsulting = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            if (!existingTeam.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequest)Activator.CreateInstance(typeof(MembershipRequest), nonPublic: true)!;
-                existingTeam.MembershipRequests.Add(fakeRequest);
-            }
-
-            TeamValidator.GetMembershipRequestsValidation(existingTeam, adminConsulting);
-
-            return await TeamRepository.GetMembershipRequestsDtoAsync(teamId);
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters)
-        {
-            var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            
-            var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
-
-            if (existingTeam.MembershipRequests == null)
-                existingTeam.MembershipRequests = new List<MembershipRequest>();
-
-            if (!existingTeam.MembershipRequests.Any())
-            {
-                var fakeRequest = (MembershipRequest)Activator.CreateInstance(typeof(MembershipRequest), nonPublic: true)!;
-                existingTeam.MembershipRequests.Add(fakeRequest);
-            }
-
-            TeamValidator.GetMembershipRequestsValidation(existingTeam, admin);
-
-            return await TeamRepository.GetMembershipRequestsDtoAsyncWithFilters(teamId, filters);
         }
 
         #endregion

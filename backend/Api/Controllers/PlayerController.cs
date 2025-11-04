@@ -132,6 +132,7 @@ namespace Api.Controllers
             return Ok(list);
         }
 
+        /*
         [HttpGet("{playerId:guid}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
@@ -202,6 +203,7 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
             }
         }
+        */
 
         #endregion
 

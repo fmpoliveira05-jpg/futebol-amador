@@ -6,6 +6,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
+using System.Numerics;
 
 namespace Application.Validators
 {
@@ -402,12 +403,10 @@ namespace Application.Validators
 
         private static bool PlayerExistsInTeam(Team? team, Player? Player)
         {
-            if (!team.Members.Contains(Player))
-            {
+            if (team == null || Player == null)
                 return false;
-                
-            }
-            return true;
+
+            return team.Members.Any(m => m.Id == Player.Id);
         }
 
         private static bool TeamIsFull(Team? team)

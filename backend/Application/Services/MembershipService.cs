@@ -1,176 +1,209 @@
-﻿using Application.DTOs.MemberShip;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
 
 namespace Application.Services
-//pedidos e convites
 {
-    public class MembershipService
+    public class MembershipService : IMembershipRequestService
     {
-        private readonly IPlayerRepository playerRepository;
-        private readonly ITeamRepository teamRepository;
-        private readonly IMembershipRequestRepository membershipRequestRepository;
-        private readonly IUnityOfWork unityOfWork;
+        private readonly ITeamRepository _teamRepository;
+        private readonly IPlayerRepository _playerRepository;
+        private readonly IMembershipRequestRepository _membershipRequestRepository;
+        private readonly IUnityOfWork _unityOfWork;
+        private readonly ITeamValidator _teamValidator;
+        private readonly IPlayerValidator _playerValidator;
 
         public MembershipService(
-            IPlayerRepository playerRepository,
             ITeamRepository teamRepository,
+            IPlayerRepository playerRepository,
             IMembershipRequestRepository membershipRequestRepository,
-            IUnityOfWork unityOfWork)
+            IUnityOfWork unityOfWork,
+            ITeamValidator teamValidator,
+            IPlayerValidator playerValidator)
         {
-            this.playerRepository = playerRepository ?? throw new ArgumentNullException(nameof(playerRepository));
-            this.teamRepository = teamRepository ?? throw new ArgumentNullException(nameof(teamRepository));
-            this.membershipRequestRepository = membershipRequestRepository ?? throw new ArgumentNullException(nameof(membershipRequestRepository));
-            this.unityOfWork = unityOfWork ?? throw new ArgumentNullException(nameof(unityOfWork));
+            _teamRepository = teamRepository;
+            _playerRepository = playerRepository;
+            _membershipRequestRepository = membershipRequestRepository;
+            _unityOfWork = unityOfWork;
+            _teamValidator = teamValidator;
+            _playerValidator = playerValidator;
         }
 
-        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsReceivedByPlayerFromTeams(string idPlayer)
+        #region Pedidos de adesão da Team
+
+        public Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId)
         {
-            if (idPlayer == string.Empty)
-                throw new BusinessRuleException("O id do jogador não pode estar vazio");
-
-            var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
-            if (player == null)
-                throw new ArgumentException("O jogador não foi encontrado");
-
-            var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
-
-            var invitesFromTeams = list
-                .Where(m => m.IsPlayerSender == false)
-                .Select(m => new MemberShipRequestDto
-                {
-                    RequestId = m.Id,
-                    PlayerId = m.IdPlayer,
-                    PlayerName = m.Player?.Name,
-                    TeamId = m.IdTeam,
-                    TeamName = m.Team?.Name,
-                    RequestDate = m.InviteDate,
-                    IsPlayerSender = m.IsPlayerSender
-                });
-
-            return invitesFromTeams;
-        }
-
-        public async Task<IEnumerable<MemberShipRequestDto>> GetRequestsSentByPlayer(string idPlayer)
-        {
-            if (idPlayer == string.Empty)
-                throw new BusinessRuleException("O id do jogador não pode estar vazio");
-
-            var player = await playerRepository.GetPlayerByIdAsync(idPlayer);
-            if (player == null)
-                throw new ArgumentException("O jogador não foi encontrado");
-
-            var list = await membershipRequestRepository.GetMembershipRequestsByPlayer(idPlayer);
-
-            var sentByPlayer = list
-                .Where(m => m.IsPlayerSender == true)
-                .Select(m => new MemberShipRequestDto
-                {
-                    RequestId = m.Id,
-                    PlayerId = m.IdPlayer,
-                    PlayerName = m.Player?.Name,
-                    TeamId = m.IdTeam,
-                    TeamName = m.Team?.Name,
-                    RequestDate = m.InviteDate,
-                    IsPlayerSender = m.IsPlayerSender
-                });
-
-            return sentByPlayer;
-        }
-
-        public async Task SendMembershipRequest(MemberShipRequestDto dto)
-        {
-            if (dto == null)
-                throw new BusinessRuleException("DTO inválido");
-
-            if (dto.PlayerId == string.Empty)
-                throw new BusinessRuleException("O id do jogador não pode estar vazio");
-
-            if (dto.TeamId == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode estar vazio");
-
-            bool senderFlag = dto.IsPlayerSender;
-
-            var player = await playerRepository.GetPlayerByIdAsync(dto.PlayerId);
-            if (player == null)
-                throw new ArgumentException("O jogador não foi encontrado");
-
-            var team = await teamRepository.GetTeamByIdAsync(dto.TeamId);
-            if (team == null)
-                throw new ArgumentException("A equipa não foi encontrada");
-
-            var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(dto.PlayerId, dto.TeamId);
-            if (existing != null)
+            return _teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
             {
-                throw new BusinessRuleException("Já existe um pedido de adesão entre este jogador e esta equipa");
-            }
+                var team = await teamTask;
+                var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
+                var playerToInvite = await _playerRepository.GetPlayerByIdAsync(playerIdToInvite);
+                var existing = await _membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            var membershipRequest = new MembershipRequest(player, team, senderFlag)
-            {
-            };
+                _teamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
+                _playerValidator.PlayerExists(playerToInvite);
 
-            await membershipRequestRepository.AddMembershipRequest(membershipRequest);
+                var invite = new MembershipRequest
+                {
+                    Id = Guid.NewGuid(),
+                    IdPlayer = playerIdToInvite,
+                    IdTeam = teamId,
+                    InviteDate = DateTime.UtcNow,
+                    IsPlayerSender = false
+                };
 
-            player.MembershipRequests.Add(membershipRequest);
+                await _membershipRequestRepository.AddMembershipRequest(invite);
+                await _unityOfWork.SaveChangesAsync();
 
-            await unityOfWork.SaveChangesAsync();
+                return new MemberShipRequestDto
+                {
+                    RequestId = invite.Id,
+                    PlayerId = invite.IdPlayer,
+                    PlayerName = playerToInvite.Name,
+                    TeamId = invite.IdTeam,
+                    TeamName = team.Name,
+                    RequestDate = invite.InviteDate,
+                    IsPlayerSender = invite.IsPlayerSender
+                };
+            }).Unwrap();
         }
 
-        public async Task<Player> AcceptMembershipRequest(Guid idTeam, Guid idMembershipRequest)
+        public async Task AcceptMembershipRequest(Guid teamId, Guid requestId, string adminUserId)
         {
-            if (idTeam == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode estar vazio");
-
-            if (idMembershipRequest == Guid.Empty)
-                throw new BusinessRuleException("O id do pedido não pode estar vazio");
-
-            var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
+            var request = await _membershipRequestRepository.GetMembershipRequestById(requestId);
             if (request == null)
-                throw new ArgumentException("O pedido de adesão não existe");
+                throw new ValidationException($"O pedido de adesão com Id '{requestId}' não existe.");
 
-            if (request.IdTeam != idTeam)
-                throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");
-
-            var player = request.Player;
-            if (player == null)
-                throw new ArgumentException("O jogador do pedido não foi encontrado");
-
-            var team = request.Team;
+            var team = await _teamRepository.GetTeamForMembershipRequestAsync(teamId);
             if (team == null)
-                throw new ArgumentException("A equipa do pedido não foi encontrada");
+                throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-            player.Team = team;
-            player.IdTeam = team.Id;
+            var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
 
-            await membershipRequestRepository.DeleteMembershipRequest(request);
+            _teamValidator.ApproveMembershipRequestValidation(team, admin, requestId);
 
-            teamRepository.UpdateTeam(team);
+            var playerAccepted = await _playerRepository.GetPlayerByIdAsync(request.IdPlayer);
+            if (playerAccepted == null)
+                throw new ValidationException($"O jogador com Id '{request.IdPlayer}' não existe.");
 
-            await unityOfWork.SaveChangesAsync();
+            _membershipRequestRepository.RemoveMembershipRequest(request);
 
-            return player;
+            playerAccepted.IdTeam = teamId;
+            team.Members.Add(playerAccepted);
+
+            await _unityOfWork.SaveChangesAsync();
         }
 
-        public async Task RefuseMembershipRequest(Guid idTeam, Guid idMembershipRequest)
+        public Task RejectMembershipRequest(Guid teamId, Guid requestId, string adminUserId)
         {
-            if (idTeam == Guid.Empty)
-                throw new BusinessRuleException("O id da equipa não pode estar vazio");
+            return _membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
+            {
+                var request = await requestTask;
+                if (request == null)
+                    throw new ValidationException($"O pedido de adesão com Id '{requestId}' não existe.");
 
-            if (idMembershipRequest == Guid.Empty)
-                throw new BusinessRuleException("O id do pedido não pode estar vazio");
+                var team = await _teamRepository.GetTeamForMembershipRequestAsync(teamId);
+                var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
 
-            var request = await membershipRequestRepository.GetMembershipRequestById(idMembershipRequest);
-            if (request == null)
-                throw new ArgumentException("O pedido de adesão não existe");
+                if (team == null)
+                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-            if (request.IdTeam != idTeam)
-                throw new BusinessRuleException("O pedido de adesão não pertence a esta equipa");
+                _teamValidator.RejectMembershipRequestValidation(team, admin, requestId);
 
-            await membershipRequestRepository.DeleteMembershipRequest(request);
-
-            await unityOfWork.SaveChangesAsync();
+                _membershipRequestRepository.RemoveMembershipRequest(request);
+                await _unityOfWork.SaveChangesAsync();
+            }).Unwrap();
         }
+
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId)
+        {
+            return _teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
+            {
+                var team = await teamTask;
+                var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
+
+                if (team == null)
+                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
+
+                _teamValidator.GetMembershipRequestsValidation(team, admin);
+
+                var list = await _membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
+                return list ?? new List<MemberShipRequestDto>();
+            }).Unwrap();
+        }
+
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters)
+        {
+            return _teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
+            {
+                var team = await teamTask;
+                var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
+
+                if (team == null)
+                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
+
+                _teamValidator.GetMembershipRequestsValidation(team, admin);
+
+                var list = await _membershipRequestRepository.GetMembershipRequestsByTeamWithFilters(teamId, filters);
+                return list ?? new List<MemberShipRequestDto>();
+            }).Unwrap();
+        }
+
+        #endregion
+
+        #region Pedidos de adesão do Player
+
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId)
+        {
+            return _membershipRequestRepository.GetMembershipRequestsByPlayer(playerId);
+        }
+
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId, FilterMembershipRequestsPlayer filters)
+        {
+            return _membershipRequestRepository.GetMembershipRequestsByPlayerWithFilters(playerId, filters);
+        }
+
+        public Task<MemberShipRequestDto> PlayerSendMembershipRequest(string playerId, Guid teamId)
+        {
+            return _playerRepository.GetPlayerByIdAsync(playerId).ContinueWith(async playerTask =>
+            {
+                var player = await playerTask;
+                var team = await _teamRepository.GetTeamForMembershipRequestAsync(teamId);
+                var existing = await _membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerId, teamId);
+
+                _playerValidator.SendMembershipRequestValidator(player, team, existing);
+
+                var newRequest = new MembershipRequest
+                {
+                    Id = Guid.NewGuid(),
+                    IdPlayer = playerId,
+                    IdTeam = teamId,
+                    Player = player,
+                    Team = team,
+                    InviteDate = DateTime.UtcNow,
+                    IsPlayerSender = true
+                };
+
+                await _membershipRequestRepository.AddMembershipRequest(newRequest);
+                await _unityOfWork.SaveChangesAsync();
+
+                return new MemberShipRequestDto
+                {
+                    RequestId = newRequest.Id,
+                    PlayerId = newRequest.IdPlayer,
+                    PlayerName = player.Name,
+                    TeamId = newRequest.IdTeam,
+                    TeamName = team.Name,
+                    RequestDate = newRequest.InviteDate,
+                    IsPlayerSender = newRequest.IsPlayerSender
+                };
+            }).Unwrap();
+        }
+
+        #endregion
     }
 }

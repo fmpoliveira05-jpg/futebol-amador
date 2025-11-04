@@ -1,19 +1,27 @@
-﻿using Domain.Entities;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
 {
     public interface IMembershipRequestRepository
     {
-        Task AddMembershipRequest(MembershipRequest membershipRequest);
+        Task AddMembershipRequest(MembershipRequest request);
 
-        Task DeleteMembershipRequest(MembershipRequest membershipRequest);
+        void RemoveMembershipRequest(MembershipRequest request);
 
         Task<MembershipRequest?> GetMembershipRequestById(Guid id);
 
-        Task<IEnumerable<MembershipRequest>> GetMembershipRequestsByPlayer(string idPlayer);
+        Task<MembershipRequest?> GetMembershipRequestByPlayerAndTeam(string playerId, Guid teamId);
 
-        Task<IEnumerable<MembershipRequest>> GetMembershipRequestsByTeam(Guid idTeam);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId);
 
-        Task<MembershipRequest?> GetMembershipRequestByPlayerAndTeam(string idPlayer, Guid idTeam);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId);
+
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
+
+        Task<bool> ExistsRequestBetweenPlayerAndTeam(string playerId, Guid teamId);
     }
 }
