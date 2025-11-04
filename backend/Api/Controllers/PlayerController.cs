@@ -3,7 +3,6 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,12 +15,14 @@ namespace Api.Controllers
     [Authorize]
     public class PlayerController : ControllerBase
     {
+        #region Inicializar
         private readonly IPlayerService playerService;
 
         public PlayerController(IPlayerService playerService)
         {
             this.playerService = playerService;
         }
+        #endregion
 
         #region CRUD Player
         [HttpPost]
@@ -204,7 +205,6 @@ namespace Api.Controllers
         }
 
         #endregion
-
 
         #region Teams Operations
 

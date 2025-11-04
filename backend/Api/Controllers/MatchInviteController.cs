@@ -1,9 +1,9 @@
-﻿using Domain.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces.Services;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.MatchInvites;
-using Application.DTOs.Filters;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -12,6 +12,7 @@ namespace Api.Controllers
     [ApiController]
     public class MatchInviteController : ControllerBase
     {
+        #region Initialization
         private readonly IMatchInviteService matchInviteService;
 
         public MatchInviteController(IMatchInviteService matchInviteService)
@@ -19,136 +20,76 @@ namespace Api.Controllers
             this.matchInviteService = matchInviteService;
         }
 
+        #endregion
+
+        #region EndPoints
         [HttpPost("match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            try
-            {
-                var sendInvite = await matchInviteService.SendMatchInvite(idTeam, dto);
+            var sendInvite = await matchInviteService.SendMatchInvite(GetCurrentUserId(), idTeam, dto);
 
-                return Ok(sendInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(sendInvite);
         }
 
         [HttpPost("AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-            try
-            {
-                var match = await matchInviteService.AcceptMatchInvite(idTeam, idMatchInvite);
-
-                return Ok(match);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            var match = await matchInviteService.AcceptMatchInvite(GetCurrentUserId(), idTeam, idMatchInvite);
+            
+            return Ok(match);
         }
 
         [HttpDelete("RefuseMatchInvite")]
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-            try
-            {
-                await matchInviteService.RefuseMatchInvites(idTeam, idMatchInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
 
+            await matchInviteService.RefuseMatchInvites(GetCurrentUserId(), idTeam, idMatchInvite);
             return Ok();
         }
 
         [HttpPut("Negociate")]
         public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            try
-            {
-                var matchInvite = await matchInviteService.NegociateMatchInvite(idTeam, dto);
+            var matchInvite = await matchInviteService.NegociateMatchInvite(GetCurrentUserId(), idTeam, dto);
 
-                return Ok(matchInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(matchInvite);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam, [FromQuery] FilterMatchInvitesDto filter)
         {
-            try
-            {
-                IEnumerable<InfoMatchInviteDto> matchesInvite;
+            IEnumerable<InfoMatchInviteDto> matchesInvite;
 
-                bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
-                                 filter.MinDate.HasValue ||
-                                 filter.MaxDate.HasValue;
+            bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
+                                filter.MinDate.HasValue ||
+                                filter.MaxDate.HasValue;
 
-                if (hasFilter)
-                {
-                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
-                }
-                else
-                {
-                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
-                }
+            if (hasFilter)
+            {
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(GetCurrentUserId(), idTeam, filter);
+            }
+            else
+            {
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(GetCurrentUserId(), idTeam);
+            }
 
-                return Ok(matchesInvite);
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(matchesInvite);
         }
+        #endregion
+
+        #region Private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
+
+        #endregion
     }
 }

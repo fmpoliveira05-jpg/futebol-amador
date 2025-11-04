@@ -6,11 +6,11 @@ namespace Application.Interfaces.Services
 {
     public interface IMatchInviteService
     {
-        public Task<InfoMatchInviteDto> SendMatchInvite(Guid idSender, SendMatchInviteDto dto);
-        public Task<MatchDto> AcceptMatchInvite(Guid idTeam, Guid idMatchInvite);
-        public Task RefuseMatchInvites(Guid idTeam, Guid idMatchInvite);
-        public Task<InfoMatchInviteDto> NegociateMatchInvite(Guid idSender, SendMatchInviteDto dto);
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(Guid idTeam);
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter);
+        public Task<InfoMatchInviteDto> SendMatchInvite(string userId, Guid idSender, SendMatchInviteDto dto);
+        public Task<MatchDto> AcceptMatchInvite(string userId, Guid idTeam, Guid idMatchInvite);
+        public Task RefuseMatchInvites(string userId, Guid idTeam, Guid idMatchInvite);
+        public Task<InfoMatchInviteDto> NegociateMatchInvite(string userId, Guid idSender, SendMatchInviteDto dto);
+        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(string userId, Guid idTeam);
+        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(string userId,Guid idTeam, FilterMatchInvitesDto filter);
     }
 }

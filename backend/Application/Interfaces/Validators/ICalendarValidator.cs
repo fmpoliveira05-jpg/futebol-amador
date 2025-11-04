@@ -7,6 +7,8 @@ namespace Application.Interfaces.Validators
 {
     public interface ICalendarValidator
     {
+        public void ExistsMatch(Matches match);
+        public void ExistsTeamStatistics(TeamStatistics team);
         public void ValidateTeamCalendar(Guid idTeam);
         public void ValidateFilterCalendar(Guid idTeam, FilterCalendarDto filter);
         public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto);
@@ -14,12 +16,12 @@ namespace Application.Interfaces.Validators
             TeamStatistics opponetTeam, Guid idOpponnent);
         public void ValidateAcceptPostPoneMatchDto(Guid idTeam, AcceptRefusePostPoneDto dto);
         public void ValidatorAcceptPostPoneMatch(PostPoneMatch postPoneMatch, Matches match, TeamStatistics team, Guid idTeam,
-            TeamStatistics opponetTeam, Guid idOpponnent);
+            TeamStatistics opponetTeam, Guid idOpponnent, Matches matchFind);
         public void ValidateRejectPostPoneMatchDTO(Guid idTeam, AcceptRefusePostPoneDto dto);
         public void ValidatorRejectPostPoneMatch(PostPoneMatch postPoneMatch, Matches match, TeamStatistics team, Guid idTeam,
             TeamStatistics opponetTeam, Guid idOpponnent);
+        public void ValidateVariabelCancelMatch(Guid idTeam, Guid idMatch, string description);
         public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent);
-        public void ValidatorGetListPostPoneMatchTeam(List<InfoPostPoneMatch> listPostPone);
         public void validateResultMatch(Guid idTeam, ResultMatchDto result);
         public void ValidateFinishMatch(Matches match, TeamStatistics team, Guid idTeam,
             TeamStatistics opponent, Guid idOponnent, ResultMatchDto result);

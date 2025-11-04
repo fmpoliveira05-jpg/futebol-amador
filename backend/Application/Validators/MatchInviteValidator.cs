@@ -86,7 +86,6 @@ namespace Application.Validators
             const string msgError = "O jogo não pode ser aceite a essa hora, por causa que já tem um jogo a pelo menos 12 horas desse";
             ValidateTwentyHoursMatch(twentyhoursMatch, msgError);
 
-            //Não devia de ser o reciever???????
             const string errorMsg = "Não dá para aceitar o convite porque ele não foi enviado, pelo emissor";
             const string msgNullSender = "O recetor do convite não foi encontrado ou não existe";
             ValidateSender(sender, matchInvite, msgNullSender, errorMsg);

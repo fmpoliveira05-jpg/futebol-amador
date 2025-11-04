@@ -5,7 +5,6 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,6 +12,7 @@ namespace Application.Services
 {
     public class PlayerService : IPlayerService
     {
+        #region Initializer
         private readonly IPlayerRepository playerRepository;
         private readonly ITeamRepository teamRepository;
         private readonly IUnityOfWork unityOfWork;
@@ -20,12 +20,12 @@ namespace Application.Services
         private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
-
+        private readonly IAuthorizationValidator authorizationValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator, IUserRepository userRepository, 
-            ITeamService teamService)
+            IPlayerValidator playerValidator, IUserRepository userRepository,
+            IAuthorizationValidator authorizationValidator, ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
@@ -33,10 +33,13 @@ namespace Application.Services
             this.unityOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.userRepository = userRepository;
+            this.authorizationValidator = authorizationValidator;
             this.teamService = teamService;
-
         }
 
+        #endregion
+
+        #region CRUD Player
         public async Task<string> CreatePlayerAsync(string userId, string email, CreatePlayerDto playerDto)
         {
             var player = new Player
@@ -113,6 +116,9 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
+        #endregion
+
+        #region Actions Player in Team
         //Falta tirar o player da lista de players do team
         public async Task<string> LeaveTeam(string playerId)
         {
@@ -157,11 +163,15 @@ namespace Application.Services
 
             return teamName;
         }
+        #endregion
+
+        #region Membership Requests
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
         }
@@ -170,6 +180,7 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.PlayerExists(player);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
         }
@@ -180,6 +191,7 @@ namespace Application.Services
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
 
             playerValidator.PlayerExists(player);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
                 ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
@@ -216,6 +228,7 @@ namespace Application.Services
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
 
             playerValidator.PlayerExists(player);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
                 ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
@@ -243,6 +256,10 @@ namespace Application.Services
         public async Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            playerValidator.PlayerExists(player);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
+
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
             var existingRequest = await membershipRequestRepository
@@ -276,6 +293,9 @@ namespace Application.Services
             };
         }
 
+        #endregion
+
+        #region Lists
         public async Task<List<InfoTeamsDto>> GetListTeams()
         {
             return await teamRepository.GetListTeamsPlayer();
@@ -286,6 +306,7 @@ namespace Application.Services
             playerValidator.ValidateFiltersListTeams(filter);
             return await teamRepository.GetListTeamsPlayersWithFilters(filter);
         }
+        #endregion
 
         #region Private Methods
         private static bool hasChangePlayer(UpdatePlayerDto dto, Player player)

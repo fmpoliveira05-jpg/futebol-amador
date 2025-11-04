@@ -10,35 +10,34 @@ namespace Application.Services
 {
     public class MatchInviteService: IMatchInviteService
     {
+        #region Initialization
+        private readonly IAuthorizationService AuthorizationService;
         private readonly ITeamRepository TeamRepository;
-        
         private readonly IMatchInviteRepository MatchInviteRepository;
-        
         private readonly IMatchRepository MatchRepository;
-        
-        private readonly ITeamStatisticsRepository TeamStatisticsRepository;
-
         private readonly IPitchRepository PitchRepository;
-
         private readonly IUnityOfWork UnityOfWork;
-
         private readonly IMatchInviteValidator MatchInviteValidator;
 
-        public MatchInviteService(ITeamRepository teamRepository, IMatchInviteRepository matchInviteRepository, 
-            IMatchRepository matchRepository, ITeamStatisticsRepository teamStatisticsRepository,
-            IPitchRepository pitchRepository, IMatchInviteValidator matchInviteValidator,
-            IUnityOfWork unityOfWork, ITeamPostPoneGameRepository @object) {
+        public MatchInviteService(IAuthorizationService AuthorizationService, ITeamRepository teamRepository, 
+            IMatchInviteRepository matchInviteRepository, IMatchRepository matchRepository, 
+            IPitchRepository pitchRepository, IMatchInviteValidator matchInviteValidator, 
+            IUnityOfWork unityOfWork) {
+            this.AuthorizationService = AuthorizationService;
             this.TeamRepository = teamRepository; 
             this.MatchInviteRepository = matchInviteRepository;
             this.MatchRepository = matchRepository;
-            this.TeamStatisticsRepository = teamStatisticsRepository;
             this.PitchRepository = pitchRepository;
             this.MatchInviteValidator = matchInviteValidator;
             this.UnityOfWork = unityOfWork;
         }
+        #endregion
 
-        public async Task<InfoMatchInviteDto> SendMatchInvite(Guid idSender, SendMatchInviteDto dto)
+        #region Methods MatchInvite
+        public async Task<InfoMatchInviteDto> SendMatchInvite(string userId, Guid idSender, SendMatchInviteDto dto)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idSender);
+
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
             var idReceiver = dto.IdReceiver;
@@ -81,8 +80,10 @@ namespace Application.Services
             return sendMatchInviteDto;
         }
 
-        public async Task<MatchDto> AcceptMatchInvite(Guid idTeam, Guid idMatchInvite)
+        public async Task<MatchDto> AcceptMatchInvite(string userId, Guid idTeam, Guid idMatchInvite)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+
             MatchInviteValidator.ValidateAcceptRefuseMatchInvite(idTeam, idMatchInvite);
 
             DateTime gameDate;
@@ -94,14 +95,14 @@ namespace Application.Services
 
             MatchInviteValidator.ValidateMatchInvite(matchInvite);
 
-            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender); ;
+            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
             var pitch = await PitchRepository.GetPitchById(matchInvite.IdPitch);
             var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(receiver.Id, matchInvite.GameDate);
 
             MatchInviteValidator.ValidateAcceptMatchInvite(sender, validateMatch, matchInvite, pitch);
             
             gameDate = matchInvite.GameDate;
-            List<TeamStatistics> teamStatistics = await ListTeamsStatistics(sender, receiver);
+            List<TeamStatistics> teamStatistics = ListTeamsStatistics(sender, receiver);
 
             var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.Chat);
             
@@ -110,8 +111,7 @@ namespace Application.Services
             receiver.Calendar.Matches.Add(match);
             sender.Calendar.Matches.Add(match);
             await MatchRepository.AddMatch(match);
-
-
+ 
             var matchDTO = new MatchDto
             {
                 IdMatch = match.Id,
@@ -126,8 +126,10 @@ namespace Application.Services
             return matchDTO;
         }
 
-        public async Task RefuseMatchInvites(Guid idTeam, Guid idMatchInvite)
+        public async Task RefuseMatchInvites(string userId, Guid idTeam, Guid idMatchInvite)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
+
             MatchInviteValidator.ValidateAcceptRefuseMatchInvite(idTeam, idMatchInvite);
 
             MatchInvite? matchInvite = null;
@@ -147,8 +149,10 @@ namespace Application.Services
         }
 
 
-        public async Task<InfoMatchInviteDto> NegociateMatchInvite(Guid idSender, SendMatchInviteDto dto)
+        public async Task<InfoMatchInviteDto> NegociateMatchInvite(string userId, Guid idSender, SendMatchInviteDto dto)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idSender);
+
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
             var gameDate = dto.GameDate;
@@ -157,6 +161,7 @@ namespace Application.Services
             bool hasChanged = false;
             var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idSender, idReceiver);
             var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
+
             var senderTeam = matchInvite?.Sender;
             var receiverTeam = matchInvite?.Receiver;
             var pitch = matchInvite?.Pitch;
@@ -166,7 +171,7 @@ namespace Application.Services
             hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); 
 
             MatchInviteValidator.ValidateHasChangeNegociateMatchInvite(hasChanged);
-          
+
             var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
@@ -183,8 +188,9 @@ namespace Application.Services
             return sendMatchInviteDto;
         }
 
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(Guid idTeam)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(string userId, Guid idTeam)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
             MatchInviteValidator.ValidateTeamCalendar(idTeam);
 
             var listMatchInvites = await MatchInviteRepository.GetAllMatchInviteReceiverById(idTeam);
@@ -192,16 +198,18 @@ namespace Application.Services
             return listMatchInvites;
         }
 
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
+        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(string userId, Guid idTeam, FilterMatchInvitesDto filter)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(userId, idTeam);
             MatchInviteValidator.ValidateFilterMatchInvite(idTeam, filter);
 
             var listMatchInvite = await MatchInviteRepository.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
             return listMatchInvite;
         }
+        #endregion
 
         #region Private Methods
-        private static async Task<List<TeamStatistics>> ListTeamsStatistics(Team sender, Team receiver)
+        private static List<TeamStatistics> ListTeamsStatistics(Team sender, Team receiver)
         {
             var list = new List<TeamStatistics>();
 

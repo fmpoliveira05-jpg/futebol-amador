@@ -2,6 +2,7 @@
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Validators;
+using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -10,6 +11,21 @@ namespace Application.Validators
 {
     public class CalendarValidator: ICalendarValidator
     {
+        public void ExistsMatch(Matches match)
+        {
+            if (match == null)
+            {
+                throw new ArgumentException("A partida não foi encontrada");
+            }
+        }
+
+        public void ExistsTeamStatistics(TeamStatistics team)
+        {
+            if (team == null)
+            {
+                throw new ArgumentException("A equipa não foi encontrada");
+            }
+        }
         public void ValidateTeamCalendar(Guid idTeam)
         {
             if (idTeam == Guid.Empty)
@@ -95,7 +111,7 @@ namespace Application.Validators
         }
 
         public void ValidatorAcceptPostPoneMatch(PostPoneMatch postPoneMatch, Matches match, TeamStatistics team, Guid idTeam,
-            TeamStatistics opponetTeam, Guid idOpponnent)
+            TeamStatistics opponetTeam, Guid idOpponnent, Matches matcheFind)
         {
             ValidateStatusPostPoneMatch(match);
 
@@ -104,6 +120,11 @@ namespace Application.Validators
             ValidateTeam(idOpponnent, opponetTeam);
 
             ValidatePostPoneMatch(postPoneMatch, idTeam);
+
+            if (matcheFind != null)
+            {
+                throw new ValidationException("A equipa já tem um jogo marcado 12 horas, antes desse adiamento");
+            }
         }
 
         public void ValidateRejectPostPoneMatchDTO(Guid idTeam, AcceptRefusePostPoneDto dto)
@@ -128,13 +149,29 @@ namespace Application.Validators
             ValidatePostPoneMatch(postPoneMatch, idTeam);
         }
 
-
-        public void ValidatorGetListPostPoneMatchTeam(List<InfoPostPoneMatch> listPostPone)
+        public void ValidateVariabelCancelMatch(Guid idTeam, Guid idMatch, string description)
         {
-            if (listPostPone.Count == 0)
+            if (idTeam == Guid.Empty)
             {
-                throw new EmptyCollectionException("A lista de adiamentos da equipa está vazia");
+                throw new ArgumentException("O id da equipa não pode estar vazio");
             }
+
+            if (idMatch == Guid.Empty)
+            {
+                throw new ArgumentException("O id da partida está vazio");
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                throw new ArgumentException("A descrição tem de estar preenchida");
+            }
+
+            var lengthDescription = description.Length;
+            if (lengthDescription < ModelConstants.CancelledMatchConst.MinDescriptionLength || lengthDescription > ModelConstants.CancelledMatchConst.MaxDescriptionLength)
+            {
+                throw new ArgumentException("A descrição não tem o tamanho correto");
+            }
+
         }
 
         public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent)
