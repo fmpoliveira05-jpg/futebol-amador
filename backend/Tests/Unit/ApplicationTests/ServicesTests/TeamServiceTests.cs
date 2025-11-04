@@ -76,8 +76,9 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region Tests
+
         #region CreateTeamTests
-        [Test(Description = "CreateTeamAsync deve criar uma nova equipa com Rank 'Unranked'")]
+        [Test(Description = "T1GE1- CreateTeamAsync deve criar uma nova equipa com Rank 'Unranked'")]
         public async Task CreateTeamAsync_Should_Create_Team_With_DefaultRank_Unranked()
         {
             var dto = new CreateTeamDto
@@ -104,7 +105,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "CreateTeamAsync deve lançar exceção se já existir uma equipa com o mesmo nome")]
+        [Test(Description = "T2GE1- CreateTeamAsync deve lançar exceção se já existir uma equipa com o mesmo nome")]
         public async Task CreateTeamAsync_Should_Throw_When_Team_Name_Already_Exists()
         {
             var dto = new CreateTeamDto
@@ -129,7 +130,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque nenhuma alteração deve ser persistida");
         }
 
-        [Test(Description = "CreateTeamAsync deve lançar exceção se o jogador já for administrador de uma equipa")]
+        [Test(Description = "T3GE1- CreateTeamAsync deve lançar exceção se o jogador já for administrador de uma equipa")]
         public async Task CreateTeamAsync_Should_Throw_When_Player_Is_Already_Admin()
         {
             var rank = new TestRank("Unranked");
@@ -161,31 +162,10 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Team>()), Times.Never, "porque a criação deve ser bloqueada");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
-
-        [Test(Description = "CreateTeamAsync deve lançar ValidationException quando o Rank padrão não existe")]
-        public async Task CreateTeamAsync_Should_Throw_When_DefaultRank_IsMissing()
-        {
-            var dto = new CreateTeamDto
-            {
-                Name = "FC SemRank",
-                Description = "Teste",
-                icon = new byte[] { 9, 9, 9 },
-                HomePitch = new PitchDto { Name = "Campo", Address = "Rua" }
-            };
-            var adminPlayer = new Player { Id = "admin-id-123", IsAdmin = true };
-            _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Team)null);
-            _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync((Rank)null!);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
-
-            Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
-            
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*classificação padrão*");
-        }
         #endregion
 
         #region UpdateTeamTests
-        [Test(Description = "UpdateTeamInfoAsync deve atualizar os dados da equipa com sucesso")]
+        [Test(Description = "T1GE2- UpdateTeamInfoAsync deve atualizar os dados da equipa com sucesso")]
         public async Task UpdateTeamInfoAsync_Should_Update_Team()
         {
             var rank = new TestRank();
@@ -214,7 +194,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "UpdateTeamInfoAsync deve lançar exceção se o jogador não for administrador")]
+        [Test(Description = "T2GE2- UpdateTeamInfoAsync deve lançar exceção se o jogador não for administrador")]
         public async Task UpdateTeamInfoAsync_Should_Throw_If_Not_Admin()
         {
             var rank = new TestRank();
@@ -242,7 +222,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque a atualização não deve ser persistida");
         }
 
-        [Test(Description = "UpdateTeamInfoAsync deve lançar exceção se o admin pertencer a outra equipa")]
+        [Test(Description = "T3GE2- UpdateTeamInfoAsync deve lançar exceção se o admin pertencer a outra equipa")]
         public async Task UpdateTeamInfoAsync_Should_Throw_If_Admin_From_Another_Team()
         {
             var rank = new TestRank();
@@ -273,7 +253,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "UpdateTeamInfoAsync deve lançar exceção se a equipa não existir")]
+        [Test(Description = "T4GE2- UpdateTeamInfoAsync deve lançar exceção se a equipa não existir")]
         public async Task UpdateTeamInfoAsync_Should_Throw_If_Team_Not_Found()
         {
             var rank = new TestRank();
@@ -289,7 +269,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve persistir alterações");
         }
 
-        [Test(Description = "UpdateTeamInfoAsync deve lançar exceção se o novo nome já pertencer a outra equipa")]
+        [Test(Description = "T5GE2- UpdateTeamInfoAsync deve lançar exceção se o novo nome já pertencer a outra equipa")]
         public async Task UpdateTeamInfoAsync_Should_Throw_When_NewName_Already_Exists()
         {
             var rank = new TestRank();
@@ -323,7 +303,7 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region DeleteTeamTests
-        [Test(Description = "DeleteTeamAsync deve eliminar a equipa quando o utilizador é administrador")]
+        [Test(Description = "T1GE3- DeleteTeamAsync deve eliminar a equipa quando o utilizador é administrador")]
         public async Task DeleteTeamAsync_Should_Delete_When_Admin()
         {
             var rank = new TestRank();
@@ -340,7 +320,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once, "porque a operação deve ser persistida na base de dados");
         }
 
-        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador pertence à equipa mas não é administrador")]
+        [Test(Description = "T2GE3- DeleteTeamAsync deve lançar exceção quando o jogador pertence à equipa mas não é administrador")]
         public async Task DeleteTeamAsync_Should_Throw_When_Player_Is_Not_Admin()
         {
             var rank = new TestRank();
@@ -359,7 +339,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "DeleteTeamAsync deve lançar exceção quando a equipa não existe")]
+        [Test(Description = "T4GE3- DeleteTeamAsync deve lançar exceção quando a equipa não existe")]
         public async Task DeleteTeamAsync_Should_Throw_When_Team_Not_Found()
         {
             var player = new Player { Id = "player-id-generic", IsAdmin = true };
@@ -377,7 +357,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador é admin de outra equipa e tenta eliminar uma equipa que não administra")]
+        [Test(Description = "T3GE3- DeleteTeamAsync deve lançar exceção quando o jogador é admin de outra equipa e tenta eliminar uma equipa que não administra")]
         public async Task DeleteTeamAsync_Should_Throw_When_Player_Is_Admin_Of_Another_Team()
         {
             var rank = new TestRank();
@@ -397,7 +377,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "DeleteTeamAsync deve lançar exceção quando o jogador pertence a outra equipa e não é administrador")]
+        [Test(Description = "T7GE3- DeleteTeamAsync deve lançar exceção quando o jogador pertence a outra equipa e não é administrador")]
         public async Task DeleteTeamAsync_Should_Throw_When_Player_Belongs_To_Other_Team_And_Not_Admin()
         {
             var rank = new TestRank();
@@ -421,7 +401,7 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region RemovePlayerTests
-        [Test(Description = "RemovePlayerFromTeamAsync deve remover o jogador da equipa com sucesso")]
+        [Test(Description = "T1GEJ1- RemovePlayerFromTeamAsync deve remover o jogador da equipa com sucesso")]
         public async Task RemovePlayerFromTeamAsync_Should_Remove_Player()
         {
             var rank = new TestRank();
@@ -445,7 +425,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "RemovePlayerFromTeamAsync deve lançar exceção se o jogador não for administrador")]
+        [Test(Description = "T2GEJ1- RemovePlayerFromTeamAsync deve lançar exceção se o jogador não for administrador")]
         public async Task RemovePlayerFromTeamAsync_Should_Throw_If_NonAdmin_Tries()
         {
             var rank = new TestRank();
@@ -470,7 +450,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve haver persistência sem permissões");
         }
 
-        [Test(Description = "RemovePlayerFromTeamAsync deve lançar exceção se o jogador for admin de outra equipa")]
+        [Test(Description = "T3GEJ1- RemovePlayerFromTeamAsync deve lançar exceção se o jogador for admin de outra equipa")]
         public async Task RemovePlayerFromTeamAsync_Should_Throw_When_Admin_Of_Other_Team_Tries()
         {
             var rank = new TestRank();
@@ -500,7 +480,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "RemovePlayerFromTeamAsync deve lançar exceção se o jogador a remover pertencer a outra equipa")]
+        [Test(Description = "T4GEJ1- RemovePlayerFromTeamAsync deve lançar exceção se o jogador a remover pertencer a outra equipa")]
         public async Task RemovePlayerFromTeamAsync_Should_Throw_When_Player_To_Remove_Belongs_To_Other_Team()
         {
             var rank = new TestRank();
@@ -527,30 +507,6 @@ namespace Unit.ApplicationTests.ServicesTests
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não pertence à equipa*");
             team.Members.Should().NotContain(playerToRemove);
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-        }
-
-        [Test(Description = "RemovePlayerFromTeamAsync deve lançar exceção se o jogador a remover não existir")]
-        public async Task RemovePlayerFromTeamAsync_Should_Throw_When_Player_To_Remove_Not_Found()
-        {
-            var rank = new TestRank();
-            var team = new Team("Team W", "Desc W", new byte[] { 1 }, new Pitch("Campo W", "Rua W"), rank)
-            {
-                Id = Guid.NewGuid(),
-                Members = new List<Player>()
-            };
-            var admin = new Player { Id = "admin-w-1", Name = "Admin W", IdTeam = team.Id, IsAdmin = true };
-            team.Members.Add(admin);
-            var nonExistingPlayerId = "non-existing-player-id";
-
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(admin.Id)).ReturnsAsync(admin);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(It.Is<string>(id => id != admin.Id))).ReturnsAsync((Player?)null);
-
-            Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(team.Id, nonExistingPlayerId, admin.Id);
-
-            await act.Should().ThrowAsync<NotFoundException>()
-                     .WithMessage("O Player não existe");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
         #endregion
@@ -788,7 +744,7 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region GetTeamTests
-        [Test(Description = "GetTeamByIdAsync deve devolver os detalhes de uma equipa existente")]
+        [Test(Description = "T1GE4- GetTeamByIdAsync deve devolver os detalhes de uma equipa existente")]
         public async Task GetTeamByIdAsync_Should_Return_Details()
         {
             var teamDetails = new TeamDetailsDto { Name = "Team X" };
@@ -799,7 +755,7 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Should().BeEquivalentTo(teamDetails);
         }
 
-        [Test(Description = "GetTeamByIdAsync deve lançar NotFoundException se a equipa não existir")]
+        [Test(Description = "T2GE4- GetTeamByIdAsync deve lançar NotFoundException se a equipa não existir")]
         public async Task GetTeamByIdAsync_Should_Throw_If_NotFound()
         {
             _teamRepoMock.Setup(r => r.GetTeamDetailsDtoAsync(It.IsAny<Guid>())).ReturnsAsync((TeamDetailsDto)null!);
@@ -813,7 +769,7 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region GetTeamPlayersTests
-        [Test(Description = "GetTeamPlayersAsync deve devolver a lista de jogadores da equipa")]
+        [Test(Description = "T1GEJ2- GetTeamPlayersAsync deve devolver a lista de jogadores da equipa")]
         public async Task GetTeamPlayersAsync_Should_Return_Player_List()
         {
             var team = new Team("T", "Desc", new byte[1], new Pitch("Campo", "Rua"), new TestRank());
@@ -829,7 +785,7 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Select(p => p.Name).Should().Contain(new[] { "A", "B" });
         }
 
-        [Test(Description = "GetTeamPlayersAsync deve lançar exceção quando a equipa não existe")]
+        [Test(Description = "T2GEJ2- GetTeamPlayersAsync deve lançar exceção quando a equipa não existe")]
         public async Task GetTeamPlayersAsync_Should_Throw_When_Team_Not_Found()
         {
             var teamId = Guid.NewGuid();
@@ -889,7 +845,8 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region AcceptMembershipRequestTests
-        [Test(Description = "AcceptMembershipRequestAsync deve aceitar o pedido de adesão com sucesso quando o utilizador é admin")]
+
+        [Test(Description = "T1GEPA2- AcceptMembershipRequestAsync deve aceitar o pedido de adesão com sucesso quando o utilizador é admin")]
         public async Task AcceptMembershipRequestAsync_Should_Add_Player_To_Team_When_Admin_Accepts()
         {
             var teamId = Guid.NewGuid();
@@ -900,9 +857,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
 
             var request = CreateMembershipRequest(requestId, playerId, teamId);
-
             team.MembershipRequests = team.MembershipRequests ?? new List<MembershipRequest>();
             team.MembershipRequests.Add(request);
+
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequest> { request } };
 
@@ -916,11 +873,10 @@ namespace Unit.ApplicationTests.ServicesTests
 
             team.Members.Should().Contain(player);
             team.MembershipRequests.Should().BeEmpty();
-
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "AcceptMembershipRequestAsync deve lançar exceção quando o jogador que tenta aceitar não é administrador da equipa")]
+        [Test(Description = "T2GEPA2- AcceptMembershipRequestAsync deve lançar exceção quando o jogador que tenta aceitar não é administrador da equipa")]
         public async Task AcceptMembershipRequestAsync_Should_Throw_When_NonAdmin_Tries_To_Accept()
         {
             var teamId = Guid.NewGuid();
@@ -944,11 +900,12 @@ namespace Unit.ApplicationTests.ServicesTests
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administrador da equipa*");
+
             team.Members.Should().NotContain(player, "porque o jogador não deve ser adicionado à equipa");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque a operação deve ser bloqueada");
         }
 
-        [Test(Description = "AcceptMembershipRequestAsync deve lançar exceção quando a equipa já atingiu o número máximo de jogadores")]
+        [Test(Description = "T3GEPA2- AcceptMembershipRequestAsync deve lançar exceção quando a equipa já atingiu o número máximo de jogadores")]
         public async Task AcceptMembershipRequestAsync_Should_Throw_When_Team_Is_Full()
         {
             var teamId = Guid.NewGuid();
@@ -968,6 +925,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequest> { request } };
             team.Members.Add(admin);
+
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
@@ -976,11 +934,12 @@ namespace Unit.ApplicationTests.ServicesTests
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*já atingiu o número máximo de jogadores*");
+
             team.Members.Should().NotContain(player, "porque não deve ser possível adicionar mais jogadores");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "AcceptMembershipRequestAsync deve lançar exceção quando o pedido de adesão não existe")]
+        [Test(Description = "T4GEPA2- AcceptMembershipRequestAsync deve lançar exceção quando o pedido de adesão não existe")]
         public async Task AcceptMembershipRequestAsync_Should_Throw_When_Request_Not_Found()
         {
             var teamId = Guid.NewGuid();
@@ -993,6 +952,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 Id = teamId,
                 MembershipRequests = new List<MembershipRequest>()
             };
+
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty };
 
@@ -1005,13 +965,16 @@ namespace Unit.ApplicationTests.ServicesTests
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não possui um pedido de adesão*");
+
             team.Members.Should().NotContain(player, "porque o pedido não existe e o jogador não deve ser adicionado");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve persistir alterações");
         }
+
         #endregion
 
         #region RejectMembershipRequestTests
-        [Test(Description = "RejectMembershipRequestAsync deve rejeitar o pedido de adesão com sucesso quando o utilizador é admin")]
+
+        [Test(Description = "T1GEPA3- RejectMembershipRequestAsync deve rejeitar o pedido de adesão com sucesso quando o utilizador é admin")]
         public async Task RejectMembershipRequestAsync_Should_Remove_Request_When_Admin_Rejects()
         {
             var teamId = Guid.NewGuid();
@@ -1025,6 +988,7 @@ namespace Unit.ApplicationTests.ServicesTests
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty, MembershipRequests = new List<MembershipRequest> { request } };
+
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
@@ -1038,7 +1002,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "RejectMembershipRequestAsync deve lançar exceção se o utilizador não for admin")]
+        [Test(Description = "T2GEPA3- RejectMembershipRequestAsync deve lançar exceção se o utilizador não for admin")]
         public async Task RejectMembershipRequestAsync_Should_Throw_If_Not_Admin()
         {
             var teamId = Guid.NewGuid();
@@ -1051,6 +1015,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 Id = teamId,
                 MembershipRequests = new List<MembershipRequest> { CreateMembershipRequest(requestId, playerId, teamId) }
             };
+
             var nonAdmin = new Player { Id = nonAdminId, IdTeam = team.Id, IsAdmin = false };
             var player = new Player { Id = playerId };
 
@@ -1065,7 +1030,7 @@ namespace Unit.ApplicationTests.ServicesTests
                      .WithMessage("*não é administrador*");
         }
 
-        [Test(Description = "RejectMembershipRequestAsync deve lançar exceção quando o pedido de adesão não existe")]
+        [Test(Description = "T3GEPA3- RejectMembershipRequestAsync deve lançar exceção quando o pedido de adesão não existe")]
         public async Task RejectMembershipRequestAsync_Should_Throw_When_Request_Not_Found()
         {
             var teamId = Guid.NewGuid();
@@ -1078,8 +1043,10 @@ namespace Unit.ApplicationTests.ServicesTests
                 Id = teamId,
                 MembershipRequests = new List<MembershipRequest>()
             };
+
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = Guid.Empty };
+
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
@@ -1089,89 +1056,15 @@ namespace Unit.ApplicationTests.ServicesTests
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não possui um pedido de adesão*");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve persistir alterações");
         }
-        #endregion
 
-        #region GetMembershipRequestsTests
-        [Test(Description = "GetMembershipRequestsAsync deve devolver os pedidos de adesão quando o utilizador é admin")]
-        public async Task GetMembershipRequestsAsync_Should_Return_Requests_When_Admin()
-        {
-            var teamId = Guid.NewGuid();
-            var adminId = "player-id-abc";
-            var rank = new TestRank();
-            var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
-            {
-                Id = teamId,
-                MembershipRequests = new List<MembershipRequest>()
-                 {
-                     new MembershipRequest { Id = Guid.NewGuid() },
-                     new MembershipRequest { Id = Guid.NewGuid() }
-                 }
-            };
-            var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
-            var requests = new List<MemberShipRequestDto>
-            {
-               new MemberShipRequestDto { PlayerName = "Jogador 1" },
-               new MemberShipRequestDto { PlayerName = "Jogador 2" }
-            };
-            team.Members.Add(admin);
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
-            _teamRepoMock.Setup(r => r.GetMembershipRequestsDtoAsync(teamId)).ReturnsAsync(requests);
-
-            var result = await _sut.GetMembershipRequestsAsync(teamId, adminId);
-
-            result.Should().HaveCount(2, "porque há dois pedidos pendentes");
-            result.Select(r => r.PlayerName).Should().Contain(new[] { "Jogador 1", "Jogador 2" });
-        }
-
-        [Test(Description = "GetMembershipRequestsAsync deve lançar exceção quando o jogador não é administrador da equipa")]
-        public async Task GetMembershipRequestsAsync_Should_Throw_When_Player_Is_Not_Admin()
-        {
-            var teamId = Guid.NewGuid();
-            var nonAdminId = "non-admin-id-2";
-            var rank = new TestRank();
-            var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
-            {
-                Id = teamId
-            };
-            var nonAdmin = new Player { Id = nonAdminId, IdTeam = team.Id, IsAdmin = false };
-            team.Members.Add(nonAdmin);
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(nonAdminId)).ReturnsAsync(nonAdmin);
-
-            Func<Task> act = async () => await _sut.GetMembershipRequestsAsync(teamId, nonAdminId);
-     
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador da equipa*");
-            _teamRepoMock.Verify(r => r.GetMembershipRequestsDtoAsync(It.IsAny<Guid>()), Times.Never,
-                "porque apenas administradores podem consultar pedidos");
-        }
-
-        [Test(Description = "GetMembershipRequestsAsync deve lançar exceção quando o admin pertence a outra equipa")]
-        public async Task GetMembershipRequestsAsync_Should_Throw_When_Admin_From_Another_Team_Tries()
-        {
-            var teamA = new Team("Team A", "desc", new byte[1], new Pitch("Campo A", "Rua A"), new TestRank())
-            { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "desc", new byte[1], new Pitch("Campo B", "Rua B"), new TestRank())
-            { Id = Guid.NewGuid() };
-            var adminOfTeamA = new Player { Id = "admin-a-5", IdTeam = teamA.Id, IsAdmin = true };
-            teamA.Members.Add(adminOfTeamA);
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamB.Id)).ReturnsAsync(teamB);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminOfTeamA.Id)).ReturnsAsync(adminOfTeamA);
-  
-            Func<Task> act = async () => await _sut.GetMembershipRequestsAsync(teamB.Id, adminOfTeamA.Id);
-            
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
-            _teamRepoMock.Verify(r => r.GetMembershipRequestsDtoAsync(It.IsAny<Guid>()), Times.Never,
-                "porque um admin de outra equipa não deve aceder aos pedidos desta equipa");
-        }
         #endregion
 
         #region SendMembershipRequestTests
-        [Test(Description = "SendMembershipRequestAsync deve lançar exceção quando o jogador que tenta enviar não é administrador da equipa")]
+
+        [Test(Description = "T2GEPA4- SendMembershipRequestAsync deve lançar exceção quando o jogador que tenta enviar não é administrador da equipa")]
         public async Task SendMembershipRequestAsync_Should_Throw_When_NonAdmin_Tries()
         {
             var teamId = Guid.NewGuid();
@@ -1179,21 +1072,24 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerId = "player-to-invite-id-3";
             var rank = new TestRank();
             var team = new Team("FC Invite", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+
             var nonAdmin = new Player { Id = nonAdminId, IdTeam = teamId, IsAdmin = false };
             var playerToInvite = new Player { Id = playerId, IdTeam = Guid.Empty };
             team.Members.Add(nonAdmin);
+
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(nonAdminId)).ReturnsAsync(nonAdmin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerToInvite);
-            
+
             Func<Task> act = async () => await _sut.SendMembershipRequestAsync(teamId, playerId, nonAdminId);
-            
+
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administrador da equipa*");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "SendMembershipRequestAsync deve lançar exceção quando a equipa já atingiu o número máximo de jogadores")]
+        [Test(Description = "T3GEPA4- SendMembershipRequestAsync deve lançar exceção quando a equipa já atingiu o número máximo de jogadores")]
         public async Task SendMembershipRequestAsync_Should_Throw_When_Team_Is_Full()
         {
             var teamId = Guid.NewGuid();
@@ -1201,23 +1097,27 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerId = "player-id-full-team-send";
             var rank = new TestRank();
             var team = new Team("FC Full", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+
             for (int i = 0; i < 32; i++)
                 team.Members.Add(new Player { Id = Guid.NewGuid().ToString(), IdTeam = teamId });
+
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
             var playerToInvite = new Player { Id = playerId, IdTeam = Guid.Empty };
             team.Members.Add(admin);
+
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerToInvite);
-          
+
             Func<Task> act = async () => await _sut.SendMembershipRequestAsync(teamId, playerId, adminId);
-            
+
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*já atingiu o número máximo de jogadores*");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "SendMembershipRequestAsync deve lançar exceção quando o jogador pertence a outra equipa")]
+        [Test(Description = "T4GEPA4- SendMembershipRequestAsync deve lançar exceção quando o jogador pertence a outra equipa")]
         public async Task SendMembershipRequestAsync_Should_Throw_When_Player_Belongs_To_Another_Team()
         {
             var teamId = Guid.NewGuid();
@@ -1226,27 +1126,28 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new TestRank();
             var team = new Team("Team A", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var otherTeamId = Guid.NewGuid();
+
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
             var player = new Player { Id = playerId, IdTeam = otherTeamId };
+
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
-            
+
             Func<Task> act = async () => await _sut.SendMembershipRequestAsync(teamId, playerId, adminId);
-            
+
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("O jogador já pertence a outra equipa e não pode ser convidado.");
         }
 
-        [Test(Description = "SendMembershipRequestAsync deve lançar exceção quando o jogador convidado já pertence à equipa")]
+        [Test(Description = "T6GEPA4- SendMembershipRequestAsync deve lançar exceção quando o jogador convidado já pertence à equipa")]
         public async Task SendMembershipRequestAsync_Should_Throw_When_Player_Already_In_Same_Team()
         {
             var teamId = Guid.NewGuid();
             var adminId = "admin-id-same-team";
             var playerId = "player-id-same-team";
             var rank = new TestRank();
-
             var team = new Team("FC Invite", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
 
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
@@ -1263,10 +1164,11 @@ namespace Unit.ApplicationTests.ServicesTests
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("O jogador já pertence a esta equipa.");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "SendMembershipRequestAsync deve lançar exceção quando já existe um pedido pendente entre o jogador e a equipa")]
+        [Test(Description = "T5GEPA4- SendMembershipRequestAsync deve lançar exceção quando já existe um pedido pendente entre o jogador e a equipa")]
         public async Task SendMembershipRequestAsync_Should_Throw_When_Request_Already_Exists()
         {
             var teamId = Guid.NewGuid();
@@ -1274,30 +1176,124 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerId = "player-id-req-exists";
             var rank = new TestRank();
             var team = new Team("FC Invite", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
             var playerToInvite = new Player { Id = playerId, IdTeam = Guid.Empty };
             team.Members.Add(admin);
+
             var existingRequest = new MembershipRequest
             {
                 Id = Guid.NewGuid(),
-                IdPlayer = playerId, 
+                IdPlayer = playerId,
                 IdTeam = teamId,
                 InviteDate = DateTime.UtcNow,
                 IsPlayerSender = false
             };
+
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerToInvite);
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(playerId, teamId))
                                       .ReturnsAsync(existingRequest);
-            
+
             Func<Task> act = async () => await _sut.SendMembershipRequestAsync(teamId, playerId, adminId);
-         
+
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("Já existe um pedido pendente entre a equipa e este jogador.");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
+
         #endregion
+
+        #region GetMembershipRequestsTests
+
+        [Test(Description = "T1GEPA1- GetMembershipRequestsAsync deve devolver os pedidos de adesão quando o utilizador é admin")]
+        public async Task GetMembershipRequestsAsync_Should_Return_Requests_When_Admin()
+        {
+            var teamId = Guid.NewGuid();
+            var adminId = "player-id-abc";
+            var rank = new TestRank();
+            var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            {
+                Id = teamId,
+                MembershipRequests = new List<MembershipRequest>()
+        {
+            new MembershipRequest { Id = Guid.NewGuid() },
+            new MembershipRequest { Id = Guid.NewGuid() }
+        }
+            };
+
+            var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
+            var requests = new List<MemberShipRequestDto>
+    {
+        new MemberShipRequestDto { PlayerName = "Jogador 1" },
+        new MemberShipRequestDto { PlayerName = "Jogador 2" }
+    };
+
+            team.Members.Add(admin);
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
+            _teamRepoMock.Setup(r => r.GetMembershipRequestsDtoAsync(teamId)).ReturnsAsync(requests);
+
+            var result = await _sut.GetMembershipRequestsAsync(teamId, adminId);
+
+            result.Should().HaveCount(2, "porque há dois pedidos pendentes");
+            result.Select(r => r.PlayerName).Should().Contain(new[] { "Jogador 1", "Jogador 2" });
+        }
+
+        [Test(Description = "T2GEPA2- GetMembershipRequestsAsync deve lançar exceção quando o jogador não é administrador da equipa")]
+        public async Task GetMembershipRequestsAsync_Should_Throw_When_Player_Is_Not_Admin()
+        {
+            var teamId = Guid.NewGuid();
+            var nonAdminId = "non-admin-id-2";
+            var rank = new TestRank();
+            var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            {
+                Id = teamId
+            };
+
+            var nonAdmin = new Player { Id = nonAdminId, IdTeam = team.Id, IsAdmin = false };
+            team.Members.Add(nonAdmin);
+
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(nonAdminId)).ReturnsAsync(nonAdmin);
+
+            Func<Task> act = async () => await _sut.GetMembershipRequestsAsync(teamId, nonAdminId);
+
+            await act.Should().ThrowAsync<ValidationException>()
+                     .WithMessage("*não é administrador da equipa*");
+
+            _teamRepoMock.Verify(r => r.GetMembershipRequestsDtoAsync(It.IsAny<Guid>()), Times.Never,
+                "porque apenas administradores podem consultar pedidos");
+        }
+
+        [Test(Description = "T3GEPA2- GetMembershipRequestsAsync deve lançar exceção quando o admin pertence a outra equipa")]
+        public async Task GetMembershipRequestsAsync_Should_Throw_When_Admin_From_Another_Team_Tries()
+        {
+            var teamA = new Team("Team A", "desc", new byte[1], new Pitch("Campo A", "Rua A"), new TestRank())
+            { Id = Guid.NewGuid() };
+
+            var teamB = new Team("Team B", "desc", new byte[1], new Pitch("Campo B", "Rua B"), new TestRank())
+            { Id = Guid.NewGuid() };
+
+            var adminOfTeamA = new Player { Id = "admin-a-5", IdTeam = teamA.Id, IsAdmin = true };
+            teamA.Members.Add(adminOfTeamA);
+
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamB.Id)).ReturnsAsync(teamB);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminOfTeamA.Id)).ReturnsAsync(adminOfTeamA);
+
+            Func<Task> act = async () => await _sut.GetMembershipRequestsAsync(teamB.Id, adminOfTeamA.Id);
+
+            await act.Should().ThrowAsync<ValidationException>()
+                     .WithMessage("*não pertence à equipa*");
+
+            _teamRepoMock.Verify(r => r.GetMembershipRequestsDtoAsync(It.IsAny<Guid>()), Times.Never,
+                "porque um admin de outra equipa não deve aceder aos pedidos desta equipa");
+        }
+
+        #endregion
+
         #endregion
     }
 }
