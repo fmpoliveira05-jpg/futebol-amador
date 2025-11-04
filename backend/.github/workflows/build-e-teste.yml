@@ -93,7 +93,7 @@ jobs:
 
       # 6. Corre os testes (como o teu 'unit-test-job:')
       - name: Test (dotnet test)
-        run: dotnet test Tests/Tests.csproj --no-build --logger "junit;LogFileName=test-results.xml"
+        run: dotnet test Tests/Tests.csproj --configuration Release --no-build --logger "junit;LogFileName=test-results.xml"
 
       # 7. (BÓNUS) Publica os resultados dos testes na UI do GitHub
       - name: Publicar Resultados dos Testes
@@ -102,4 +102,5 @@ jobs:
         with:
           name: Resultados dos Testes de Unidade
           path: "Tests/test-results.xml"
-          reporter: dotnet-junit
+          # ⬇️ CORREÇÃO 2: Alterado de 'dotnet-junit' para 'java-junit'
+          reporter: java-junit
