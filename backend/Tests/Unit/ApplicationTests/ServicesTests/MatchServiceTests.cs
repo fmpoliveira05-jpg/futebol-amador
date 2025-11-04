@@ -5,6 +5,7 @@ using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Domain.Entities;
@@ -26,7 +27,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<ICalendarValidator> _validatorMock;
-        private Mock<IPlayerRepository> _playerRepoMock;
+        private Mock<IAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
 
@@ -39,7 +40,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<ICalendarValidator>();
-            _playerRepoMock = new Mock<IPlayerRepository>();
+            _authorizarionService = new Mock<IAuthorizationService>();
 
             _sut = new MatchService(
                 _matchRepoMock.Object,
@@ -47,7 +48,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
                 _validatorMock.Object,
-                _playerRepoMock.Object
+                _authorizarionService.Object
             );
         }
         #endregion

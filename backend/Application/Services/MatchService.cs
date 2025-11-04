@@ -18,12 +18,11 @@ namespace Application.Services
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
-        private readonly IPlayerRepository PlayerRepository;
         private readonly IAuthorizationService AuthorizationService;
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            ICalendarValidator MatchValidator, IPlayerRepository playerRepository,
+            ICalendarValidator MatchValidator,
             IAuthorizationService AuthorizationService)
         {
             this.MatchRepository = matchRepository;
@@ -31,7 +30,6 @@ namespace Application.Services
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
-            this.PlayerRepository = playerRepository;
             this.AuthorizationService = AuthorizationService;
         }
         #endregion
