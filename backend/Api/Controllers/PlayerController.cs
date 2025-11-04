@@ -2,6 +2,7 @@
 using Application.Interfaces.Services;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -34,11 +35,21 @@ namespace Api.Controllers
             }
 
             var newPlayerId = await playerService.CreatePlayerAsync(userId,email,playerDto);
-
+            /*
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
                     playerDto);
+            */
+            return CreatedAtAction(
+            "",
+            null,
+            null);
+            /* Demora um bocado
+            return Ok(playerDto);
+            */
+            //Cria o player rapido
+            //  return NoContent();
         }
 
         [HttpDelete("{playerId:required}")]
