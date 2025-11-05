@@ -1,8 +1,5 @@
 ﻿using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
-using Microsoft.Extensions.DependencyInjection; // <-- Adicione este using
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace Api.BackGroundServices
 {
