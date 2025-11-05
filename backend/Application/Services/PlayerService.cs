@@ -3,10 +3,8 @@ using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using System.Numerics;
 
 namespace Application.Services
 {
@@ -54,6 +52,7 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
+
 
             await unityOfWork.SaveChangesAsync();
 
