@@ -21,6 +21,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private MembershipService _sut;
         private TeamValidator _teamValidator;
         private PlayerValidator _playerValidator;
+        private PlayerAuthorizationValidator authorizationValidator;
         #endregion
 
         #region SetUp
@@ -33,6 +34,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _teamValidator = new TeamValidator();
             _playerValidator = new PlayerValidator();
+            authorizationValidator = new PlayerAuthorizationValidator();
 
             _sut = new MembershipService(
                 _teamRepoMock.Object,
@@ -40,7 +42,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 _membershipRequestRepoMock.Object,
                 _unitOfWorkMock.Object,
                 _teamValidator,
-                _playerValidator
+                _playerValidator,
+                authorizationValidator
             );
         }
         #endregion
@@ -96,7 +99,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
             // ACT
-            await _sut.AcceptMembershipRequest(teamId, requestId, adminId);
+            await _sut.AcceptMembershipRequestTeam(teamId, requestId);
 
             //ASSERT
             team.Members.Should().Contain(player);
@@ -125,7 +128,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
             // ACT
-            Func<Task> act = async () => await _sut.AcceptMembershipRequest(teamId, requestId, nonAdminId);
+            Func<Task> act = async () => await _sut.AcceptMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -156,7 +159,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
             // ACT
-            Func<Task> act = async () => await _sut.AcceptMembershipRequest(teamId, requestId, adminId);
+            Func<Task> act = async () => await _sut.AcceptMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -175,7 +178,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestById(requestId)).ReturnsAsync((MembershipRequest?)null);
 
             // ACT
-            Func<Task> act = async () => await _sut.AcceptMembershipRequest(teamId, requestId, adminId);
+            Func<Task> act = async () => await _sut.AcceptMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -206,7 +209,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
 
             // ACT
-            await _sut.RejectMembershipRequest(teamId, requestId, adminId);
+            await _sut.RejectMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             _membershipRequestRepoMock.Verify(r => r.RemoveMembershipRequest(request), Times.Once);
@@ -231,7 +234,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
             // ACT
-            Func<Task> act = async () => await _sut.RejectMembershipRequest(teamId, requestId, playerId);
+            Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -249,7 +252,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestById(requestId)).ReturnsAsync((MembershipRequest?)null);
 
             // ACT
-            Func<Task> act = async () => await _sut.RejectMembershipRequest(teamId, requestId, adminId);
+            Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -285,7 +288,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByTeam(teamId)).ReturnsAsync(requests);
 
             // ACT
-            var result = await _sut.GetMembershipRequestsByTeam(teamId, adminId);
+            var result = await _sut.GetMembershipRequestsByTeam(teamId);
 
             // ASSERT
             result.Should().HaveCount(2);
@@ -312,7 +315,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByTeam(teamId)).ReturnsAsync(requests);
 
             // ACT
-            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, playerId);
+            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -339,7 +342,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByTeam(teamId)).ReturnsAsync(requests);
 
             // ACT
-            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, playerId);
+            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -377,7 +380,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>()));
 
             // ACT
-            var result = await _sut.SendMembershipRequest(teamId, playerIdToInvite, adminId);
+            var result = await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             result.Should().BeEquivalentTo(requestDto, options => options.Excluding(r => r.RequestDate).Excluding(r => r.RequestId));
@@ -403,7 +406,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequest(teamId, playerIdToInvite, nonAdminId);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -432,7 +435,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequest(teamId, playerIdToInvite, adminId);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -455,7 +458,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequest(teamId, playerIdToInvite, adminId);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -480,7 +483,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequest(teamId, playerIdToInvite, adminId);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -503,7 +506,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequest(teamId, playerIdToInvite, adminId);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()

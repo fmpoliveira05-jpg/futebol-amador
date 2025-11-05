@@ -86,7 +86,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.PostPoneMatch(userId, team.Id, dto);
+            var result = await _sut.PostPoneMatch(team.Id, dto);
 
             // ASSERT
             result.Should().NotBeNull();
@@ -107,7 +107,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Setup(v => v.ValidatePostPoneMatchDto(teamId, dto))
                 .Throws(new ValidationException("A equipa não é administradora."));
 
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, teamId, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*administradora*");
@@ -125,7 +125,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Setup(v => v.ValidatePostPoneMatchDto(outsiderTeamId, dto))
                 .Throws(new ValidationException("A equipa não pertence à partida."));
 
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, outsiderTeamId, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(outsiderTeamId, dto);
 
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não pertence*");
@@ -157,7 +157,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -189,7 +189,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -209,7 +209,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ArgumentException("Partida não encontrada."));
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, teamId, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -241,7 +241,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(userId, team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -272,7 +272,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            await _sut.CancelMatch(userId, team.Id, match.Id, "Cancelado por motivos técnicos");
+            await _sut.CancelMatch(team.Id, match.Id, "Cancelado por motivos técnicos");
 
             // ASSERT
             match.MatchStatus.Should().Be(MatchStatus.CANCELED);
@@ -301,7 +301,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A partida não pode ser cancelada pois já foi concluída."));
 
             // ACT
-            Func<Task> act = async () => await _sut.CancelMatch(userId, team.Id, match.Id, "Motivo");
+            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -316,7 +316,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var matchId = Guid.NewGuid();
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(matchId)).ReturnsAsync((Matches?)null);
 
-            Func<Task> act = async () => await _sut.CancelMatch(userId, teamId, matchId, "Qualquer motivo");
+            Func<Task> act = async () => await _sut.CancelMatch(teamId, matchId, "Qualquer motivo");
 
             await act.Should().ThrowAsync<ArgumentException>()
                      .WithMessage("*não existe*");
@@ -343,7 +343,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não é administradora da partida."));
 
             // ACT
-            Func<Task> act = async () => await _sut.CancelMatch(userId, team.Id, match.Id, "Motivo");
+            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -373,7 +373,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não pertence à partida."));
 
             // ACT
-            Func<Task> act = async () => await _sut.CancelMatch(userId, outsider.Id, match.Id, "Tentativa indevida");
+            Func<Task> act = async () => await _sut.CancelMatch(outsider.Id, match.Id, "Tentativa indevida");
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -423,7 +423,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchRepoMock.Setup(r => r.GetAllMatchesTeam(teamId)).ReturnsAsync(matches);
 
             // ACT
-            var result = await _sut.GetCalendar(userId, teamId);
+            var result = await _sut.GetCalendar(teamId);
 
             // ASSERT
             result.Should().HaveCount(2);
@@ -468,7 +468,7 @@ namespace Unit.ApplicationTests.ServicesTests
                           .ReturnsAsync(filteredMatches);
 
             // ACT
-            var result = await _sut.GetCalendarWithFilters(userId, teamId, filter);
+            var result = await _sut.GetCalendarWithFilters(teamId, filter);
 
             // ASSERT
             result.Should().HaveCount(1, "porque há uma partida que cumpre os filtros");
@@ -491,7 +491,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
 
             // ACT
-            Func<Task> act = async () => await _sut.GetCalendarWithFilters(userId, idTeam, filter);
+            Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
 
             // ASSERT
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("A data minima tem de ser inferior ou igual à data maxima");
@@ -511,7 +511,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
 
             // ACT
-            Func<Task> act = async () => await _sut.GetCalendarWithFilters(userId, idTeam, filter);
+            Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
 
             // ASSERT
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar nulo");

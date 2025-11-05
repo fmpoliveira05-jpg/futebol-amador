@@ -19,6 +19,11 @@ namespace Application.Services
         private readonly IPlayerValidator playerValidator;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
         private readonly IMembershipValidator membershipValidator;
+        private ITeamRepository object1;
+        private IPlayerRepository object2;
+        private IMembershipRequestRepository object3;
+        private IUnityOfWork object4;
+        private PlayerAuthorizationValidator authorizationValidator1;
 
         public MembershipService(
             ITeamRepository teamRepository,
@@ -39,6 +44,17 @@ namespace Application.Services
             this.authorizationValidator = authorizationValidator;
             this.membershipValidator = membershipValidator;
 
+        }
+
+        public MembershipService(ITeamRepository object1, IPlayerRepository object2, IMembershipRequestRepository object3, IUnityOfWork object4, TeamValidator teamValidator, PlayerValidator playerValidator, PlayerAuthorizationValidator authorizationValidator1)
+        {
+            this.object1 = object1;
+            this.object2 = object2;
+            this.object3 = object3;
+            this.object4 = object4;
+            this.teamValidator = teamValidator;
+            this.playerValidator = playerValidator;
+            this.authorizationValidator1 = authorizationValidator1;
         }
 
         #region Pedidos de adesão da Team
