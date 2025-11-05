@@ -6,17 +6,17 @@ namespace Application.Services
 {
     public class LeaderboardService : ILeaderboardService
     {
-        private readonly ITeamRepository _teamRepository;
+        private readonly ITeamRepository teamRepository;
 
         public LeaderboardService(ITeamRepository teamRepository)
         {
-            _teamRepository = teamRepository;
+            this.teamRepository = teamRepository;
         }
 
         public async Task<List<TeamLeaderboardDto>> GetLeaderboardAsync()
         {
             const int top = 100;
-            var teams = await _teamRepository.GetTopTeamsAsync(top);
+            var teams = await teamRepository.GetTopTeamsAsync(top);
 
             return teams
                 .Select((t, index) => new TeamLeaderboardDto

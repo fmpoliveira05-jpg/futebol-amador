@@ -24,7 +24,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchInviteValidator> _validatorMock;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
-        private Mock<IAuthorizationService> _authorizationService;
+        private Mock<IPlayerAuthorizationService> _authorizationService;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -41,7 +41,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchInviteValidator>();
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
-            _authorizationService = new Mock<IAuthorizationService>();
+            _authorizationService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
