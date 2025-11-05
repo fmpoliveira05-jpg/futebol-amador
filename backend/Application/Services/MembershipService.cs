@@ -114,8 +114,6 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             team.Members.Add(playerAccepted);
 
-            await notificationHub
-
             await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
 
             await unityOfWork.SaveChangesAsync();
