@@ -12,16 +12,6 @@ namespace Api.Hubs.Notification
             this.hubContext = hubContext;
         }
 
-        public Task JoinNotificationHub(Guid teamId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task LeaveNotificationHub()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task SendUserAsync(string userId, string title, string body, object? data = null) =>
             await hubContext.Clients.User(userId).SendAsync("ReceiveNotification", new { title, body, data });
 
