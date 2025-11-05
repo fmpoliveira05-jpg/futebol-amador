@@ -1,26 +1,26 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
-using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {
     public interface IMembershipRequestService
     {
-        Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId);
+        Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite);
 
-        Task AcceptMembershipRequest(Guid teamId, Guid requestId, string adminUserId);
+        Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId);
 
-        Task RejectMembershipRequest(Guid teamId, Guid requestId, string adminUserId);
+        Task RejectMembershipRequestTeam(Guid teamId, Guid requestId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayer(string playerId);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
+        Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId);
+        Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId);
+        Task<MemberShipRequestDto> SendMembershipRequestAsyncPlayer(string playerId, Guid teamId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId, FilterMembershipRequestsPlayer filters);
-
-        Task<MemberShipRequestDto> PlayerSendMembershipRequest(string playerId, Guid teamId);
 
     }
 }

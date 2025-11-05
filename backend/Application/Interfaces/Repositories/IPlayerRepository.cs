@@ -1,6 +1,4 @@
-﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
+﻿using Application.DTOs.Player;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories

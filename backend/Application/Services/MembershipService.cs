@@ -39,15 +39,15 @@ namespace Application.Services
 
         #region Pedidos de adesão da Team
 
-        public async Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId)
+        public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
-            var admin = await playerRepository.GetPlayerByIdAsync(adminUserId);
             var playerToInvite = await playerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(playerToInvite);
+
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            teamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
-            playerValidator.PlayerExists(playerToInvite);
+            teamValidator.SendMembershipRequestValidation(existing, team);
 
             var invite = new MembershipRequest
             {
@@ -73,7 +73,7 @@ namespace Application.Services
             };
         }
 
-        public async Task AcceptMembershipRequest(Guid teamId, Guid requestId, string adminUserId)
+        public async Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId)
         {
             var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
             if (request == null)
@@ -83,9 +83,8 @@ namespace Application.Services
             if (team == null)
                 throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-            var admin = await playerRepository.GetPlayerByIdAsync(adminUserId);
 
-            teamValidator.ApproveMembershipRequestValidation(team, admin, requestId);
+            teamValidator.ApproveMembershipRequestValidation(team, requestId);
 
             var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
             if (playerAccepted == null)
@@ -99,7 +98,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public Task RejectMembershipRequest(Guid teamId, Guid requestId, string adminUserId)
+        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId)
         {
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
             {
@@ -108,46 +107,43 @@ namespace Application.Services
                     throw new ValidationException($"O pedido de adesão com Id '{requestId}' não existe.");
 
                 var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
-                var admin = await playerRepository.GetPlayerByIdAsync(adminUserId);
 
                 if (team == null)
                     throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-                teamValidator.RejectMembershipRequestValidation(team, admin, requestId);
+                teamValidator.RejectMembershipRequestValidation(team, requestId);
 
                 membershipRequestRepository.RemoveMembershipRequest(request);
                 await unityOfWork.SaveChangesAsync();
             }).Unwrap();
         }
 
-        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId)
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId)
         {
             return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
             {
                 var team = await teamTask;
-                var admin = await playerRepository.GetPlayerByIdAsync(adminUserId);
 
                 if (team == null)
                     throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-                teamValidator.GetMembershipRequestsValidation(team, admin);
+                teamValidator.GetMembershipRequestsValidation(team);
 
                 var list = await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
                 return list ?? new List<MemberShipRequestDto>();
             }).Unwrap();
         }
 
-        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters)
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
         {
             return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
             {
                 var team = await teamTask;
-                var admin = await playerRepository.GetPlayerByIdAsync(adminUserId);
 
                 if (team == null)
                     throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
 
-                teamValidator.GetMembershipRequestsValidation(team, admin);
+                teamValidator.GetMembershipRequestsValidation(team);
 
                 var list = await membershipRequestRepository.GetMembershipRequestsByTeamWithFilters(teamId, filters);
                 return list ?? new List<MemberShipRequestDto>();
@@ -158,7 +154,7 @@ namespace Application.Services
 
         #region Pedidos de adesão do Player
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayer(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
@@ -166,7 +162,7 @@ namespace Application.Services
             return await membershipRequestRepository.GetMembershipRequestsByPlayer(playerId);
         }
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
@@ -174,7 +170,7 @@ namespace Application.Services
             return await membershipRequestRepository.GetMembershipRequestsByPlayerWithFilters(playerId, filters);
         }
 
-        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId)
+        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
@@ -210,7 +206,7 @@ namespace Application.Services
             };
         }
 
-        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId)
+        public async Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
@@ -239,11 +235,9 @@ namespace Application.Services
             };
         }
 
-        //faz validation de se o player ja tem equipa
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId)
+        public async Task<MemberShipRequestDto> SendMembershipRequestAsyncPlayer(string playerId, Guid teamId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
@@ -280,6 +274,6 @@ namespace Application.Services
             };
         }
 
-            #endregion
+        #endregion
     }
 } 

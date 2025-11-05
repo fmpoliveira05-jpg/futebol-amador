@@ -18,9 +18,12 @@ namespace Api.Controllers
     {
         #region Initialization
         private readonly ITeamService TeamService;
-        public TeamController(ITeamService teamService)
+        private readonly IMembershipRequestService MemberShipRequestService;
+        private readonly IPlayerAuthorizationService PlayerAuthorizationService;
+        public TeamController(ITeamService teamService, IMembershipRequestService MemberShipRequestService)
         {
             this.TeamService = teamService;
+            this.MemberShipRequestService = MemberShipRequestService;
         }
 
         #endregion
@@ -188,54 +191,35 @@ namespace Api.Controllers
             }
         }
 
-        /*
+
         [HttpGet("{teamId}/membership-request")]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
-            if (teamId == Guid.Empty)
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+
+            IEnumerable<MemberShipRequestDto> membershipRequests;
+            var hasFilter = filters.MinDate.HasValue ||
+                filters.MaxDate.HasValue ||
+                !string.IsNullOrEmpty(filters.SenderName);
+
+            if (hasFilter)
             {
-                return BadRequest("O id da equipa é obrigatorio");
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeamWithFilters(teamId, filters);
+            }
+            else
+            {
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeam(teamId);
             }
 
-            var adminUserId = GetCurrentUserId();
-
-            try
-            {
-                IEnumerable<MemberShipRequestDto> membershipRequests;
-                var hasFilter = filters.MinDate.HasValue ||
-                    filters.MaxDate.HasValue ||
-                    !string.IsNullOrEmpty(filters.SenderName);
-
-                if (hasFilter)
-                {
-                    membershipRequests = await TeamService.GetMembershipRequestsAsyncWithFilters(teamId, adminUserId, filters);
-                }
-                else
-                {
-                    membershipRequests = await TeamService.GetMembershipRequestsAsync(teamId, adminUserId);
-                }
-
-                return Ok(membershipRequests);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(membershipRequests);
         }
-        */
+
 
 
         [HttpPost("{teamId}/membership-request/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return Ok();
         }
@@ -243,35 +227,21 @@ namespace Api.Controllers
         [HttpDelete("{teamId}/membership-request/{requestId}/reject")]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             return Ok();
         }
 
-        /*
         [HttpPost("{teamId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
-            try
-            {
-                var adminId = GetCurrentUserId();
-                var dto = await TeamService.SendMembershipRequestAsync(teamId, playerId, adminId);
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId);
 
-                return Ok(dto);
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(dto);
+           
         }
-        */
+
         #endregion
 
         #endregion

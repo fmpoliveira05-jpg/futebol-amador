@@ -1,9 +1,7 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
-using Application.DTOs.Match;
 
 namespace Application.Interfaces.Services
 {

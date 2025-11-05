@@ -18,11 +18,12 @@ namespace Api.Controllers
         #region Inicializar
         private readonly IPlayerService playerService;
         private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
-
-        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator)
+        private readonly IMembershipRequestService membershipRequestService;
+        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService)
         {
             this.playerService = playerService;
             this.playerAuthorizationValidator = playerAuthorizationValidator;
+            this.membershipRequestService = membershipRequestService;
         }
         #endregion
 
@@ -142,7 +143,7 @@ namespace Api.Controllers
             return Ok(list);
         }
 
-        /*
+
         [HttpGet("{playerId:guid}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
@@ -155,11 +156,11 @@ namespace Api.Controllers
             IEnumerable<MemberShipRequestDto> requests;
             if (hasFilter)
             {
-                requests = await playerService.GetMembershipRequestsAsyncWithFilters(playerId, filters);
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayerWithFilters(playerId, filters);
             }
             else
             {
-                requests = await playerService.GetMembershipRequestsAsync(playerId);
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayer(playerId);
             }
 
             return Ok(requests);
@@ -170,7 +171,7 @@ namespace Api.Controllers
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            var dto = await playerService.AcceptMembershipRequestAsync(playerId, requestId);
+            var dto = await membershipRequestService.AcceptMembershipRequestAsyncPlayer(playerId, requestId);
             return Ok(dto);
         }
 
@@ -179,7 +180,7 @@ namespace Api.Controllers
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            var dto = await playerService.RejectMembershipRequestAsync(playerId, requestId);
+            var dto = await membershipRequestService.RejectMembershipRequestAsyncPlayer(playerId, requestId);
             return Ok(dto);
         }
 
@@ -188,10 +189,9 @@ namespace Api.Controllers
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            var dto = await playerService.SendMembershipRequestAsync(playerId, teamId);
+            var dto = await membershipRequestService.SendMembershipRequestAsyncPlayer(playerId, teamId);
             return Ok(dto);
         }
-        */
 
         #endregion
 

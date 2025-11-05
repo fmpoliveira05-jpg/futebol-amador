@@ -1,14 +1,11 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
-using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -259,6 +256,11 @@ namespace Application.Services
             TeamValidator.ValidateFiltersGetPlayersWithout(filter);
 
             return await TeamRepository.GetListPlayersWithoutTeamtWithFilters(filter);
+        }
+
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam()
+        {
+            return await TeamRepository.GetListPlayersWithoutTeam();
         }
 
         #endregion

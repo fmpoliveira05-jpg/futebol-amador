@@ -139,7 +139,7 @@ namespace Application.Validators
 
         }
 
-        public void GetMembershipRequestsValidation(Team? team, Player? adminPlayer)
+        public void GetMembershipRequestsValidation(Team? team)
         {
             if (!TeamExists(team))
             {
@@ -153,7 +153,7 @@ namespace Application.Validators
         }
 
         //não validar se o playerApproved pertence à equipa, porque a validação deve ser feita quando ele tenta aceitar o pedido!
-        public void ApproveMembershipRequestValidation(Team? team, Player? playerToInvite, Guid requestToDelete)
+        public void ApproveMembershipRequestValidation(Team? team, Guid requestToDelete)
         {
             if (!TeamExists(team))
             {
@@ -168,7 +168,7 @@ namespace Application.Validators
             ValidateTeamFull(team);
         }
 
-        public void RejectMembershipRequestValidation(Team? team, Player? admin, Guid requestToDelete)
+        public void RejectMembershipRequestValidation(Team? team, Guid requestToDelete)
         {
             if (!TeamExists(team))
             {
@@ -181,7 +181,7 @@ namespace Application.Validators
             }
         }
 
-        public void SendMembershipRequestValidation(MembershipRequest? mr, Team? team, Player? admin, Player? playerToInvite)
+        public void SendMembershipRequestValidation(MembershipRequest? mr, Team? team)
         {
             if (mr != null)
             {

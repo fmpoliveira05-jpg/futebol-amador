@@ -12,7 +12,7 @@ namespace Application.Services
     {
         #region Initialization
         private readonly IMatchInviteRepository MatchInviteRepository;
-        private readonly IAuthorizationService AuthorizationService;
+        private readonly IPlayerAuthorizationService AuthorizationService;
         private readonly ITeamRepository TeamRepository;
         private readonly IMatchRepository MatchRepository;
         private readonly ITeamStatisticsRepository _teamStatisticsRepository;
@@ -30,7 +30,7 @@ namespace Application.Services
             IMatchInviteValidator matchInviteValidator,
             IUnityOfWork unityOfWork,
             ITeamPostPoneGameRepository teamPostPoneRepository,
-            IAuthorizationService authorizationService)
+            IPlayerAuthorizationService authorizationService)
         {
             MatchInviteRepository = matchInviteRepository;
             TeamRepository = teamRepository;
