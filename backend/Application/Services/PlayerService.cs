@@ -21,8 +21,6 @@ namespace Application.Services
         private readonly ITeamService teamService;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
 
-        private readonly INotificationService notification;
-
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository,

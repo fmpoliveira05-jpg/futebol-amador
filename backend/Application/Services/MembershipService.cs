@@ -2,10 +2,12 @@
 using Application.DTOs.MemberShip;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
+using FirebaseAdmin.Messaging;
 
 namespace Application.Services
 {
@@ -24,6 +26,8 @@ namespace Application.Services
         private IMembershipRequestRepository object3;
         private IUnityOfWork object4;
         private PlayerAuthorizationValidator authorizationValidator1;
+
+        private readonly INotificationService notificationService;
 
         public MembershipService(
             ITeamRepository teamRepository,
@@ -78,6 +82,8 @@ namespace Application.Services
                 IsPlayerSender = false
             };
 
+            await notificationService.SendUserAsync(playerIdToInvite, "New Team Invitation!", $"You've been invited to join the team {team.Name}!");
+
             await membershipRequestRepository.AddMembershipRequest(invite);
             await unityOfWork.SaveChangesAsync();
 
@@ -108,6 +114,8 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             team.Members.Add(playerAccepted);
 
+            await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
+
             await unityOfWork.SaveChangesAsync();
         }
 
@@ -122,6 +130,9 @@ namespace Application.Services
                 membershipValidator.ValidateRejectRequestByTeam(team, request);
 
                 membershipRequestRepository.RemoveMembershipRequest(request);
+
+                await notificationService.SendUserAsync(request.IdPlayer, "Membership request rejected.", $"Your request to join the team {team.Name} has been rejected.");
+
                 await unityOfWork.SaveChangesAsync();
             }).Unwrap();
         }
@@ -187,6 +198,15 @@ namespace Application.Services
             player.IdTeam = team.Id;
             team.Members.Add(player);
 
+            var teamAdmins = request.Team.Members
+                            .Where(p => p.IsAdmin == true)
+                            .ToList();
+
+            foreach (var admin in teamAdmins)
+            {
+                await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!.");
+            }
+
             player.MembershipRequests.Remove(request);
             team.MembershipRequests?.Remove(request);
 
@@ -221,6 +241,15 @@ namespace Application.Services
             var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
 
             player.MembershipRequests.Remove(request);
+
+            var teamAdmins = request.Team.Members
+                            .Where(p => p.IsAdmin == true)
+                            .ToList();
+
+            foreach (var admin in teamAdmins)
+            {
+                await notificationService.SendUserAsync(admin.Id, "Membership Invite Rejected", $"{player.Name} rejected your membership invite.");
+            }
 
             await unityOfWork.SaveChangesAsync();
 
@@ -259,6 +288,15 @@ namespace Application.Services
                 InviteDate = DateTime.UtcNow,
                 IsPlayerSender = true
             };
+
+            var teamAdmins = team.Members
+                            .Where(p => p.IsAdmin == true)
+                            .ToList();
+
+            foreach (var admin in teamAdmins)
+            {
+                await notificationService.SendUserAsync(admin.Id, "New Membership Request", $"Your team received a new membership request from {player.Name}.");
+            }
 
             await membershipRequestRepository.AddMembershipRequest(newRequest);
             await unityOfWork.SaveChangesAsync();

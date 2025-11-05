@@ -22,7 +22,6 @@ namespace Application.Services
         private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
         
-
         private readonly INotificationService notificationService;
 
         public TeamService(
