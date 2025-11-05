@@ -40,7 +40,7 @@ namespace Application.Services
         {
             var player = new Player
             {
-                Id = userId,
+                //Id = userId,
                 Name = playerDto.Name,
                 DateOfBirth = playerDto.DateOfBirth,
                 Address = playerDto.Address,
@@ -52,7 +52,6 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-
 
             await unityOfWork.SaveChangesAsync();
 

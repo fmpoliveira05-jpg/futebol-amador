@@ -30,6 +30,7 @@ namespace Application
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMatchMakerService, MatchMakerService>();
             services.AddScoped<ISuperAdminService, SuperAdminService>();
+            services.AddScoped<IMembershipRequestService, MembershipService>();
             services.AddScoped<IChatRoomService, FirebaseChatService>();
             services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
 
@@ -70,7 +71,7 @@ namespace Application
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
             services.AddScoped<IEmailValidator, EmailValidator>();
             services.AddScoped<IPlayerAuthorizationValidator, PlayerAuthorizationValidator>();
-
+            services.AddScoped<IMembershipValidator, MembershipValidator>();
             return services;
         }
 
