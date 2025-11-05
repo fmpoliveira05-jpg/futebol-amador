@@ -25,7 +25,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IRankRepository> _rankRepoMock;
         private ITeamValidator _validatorReal;
-        private IAuthorizationValidator _authorizationValidator;
+        private IPlayerAuthorizationValidator _authorizationValidator;
         private TeamService _sut;
         private readonly Mock<IMembershipRequestRepository> _membershipRequestRepoMock = new();
         private readonly Mock<IPlayerValidator> _playerValidatorMock = new();
@@ -40,7 +40,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _rankRepoMock = new Mock<IRankRepository>();
             _validatorReal = new TeamValidator();
-            _authorizationValidator = new AuthorizationValidator();
+            _authorizationValidator = new PlayerAuthorizationValidator();
 
             _sut = new TeamService(
             _teamRepoMock.Object,

@@ -14,19 +14,25 @@ namespace Api.Controllers
     {
         #region Initialization
         private readonly IMatchInviteService matchInviteService;
+        private readonly IPlayerAuthorizationService AuthorizationService;
 
-        public MatchInviteController(IMatchInviteService matchInviteService)
+        public MatchInviteController(IMatchInviteService matchInviteService, IPlayerAuthorizationService authorizationService)
         {
             this.matchInviteService = matchInviteService;
+            this.AuthorizationService = authorizationService;
         }
 
         #endregion
 
         #region EndPoints
+
+        #region MatchInvites
         [HttpPost("match-invites")]
         public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            var sendInvite = await matchInviteService.SendMatchInvite(GetCurrentUserId(), idTeam, dto);
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+
+            var sendInvite = await matchInviteService.SendMatchInvite(idTeam, dto);
 
             return Ok(sendInvite);
         }
@@ -34,7 +40,9 @@ namespace Api.Controllers
         [HttpPost("AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-            var match = await matchInviteService.AcceptMatchInvite(GetCurrentUserId(), idTeam, idMatchInvite);
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+
+            var match = await matchInviteService.AcceptMatchInvite(idTeam, idMatchInvite);
             
             return Ok(match);
         }
@@ -42,15 +50,16 @@ namespace Api.Controllers
         [HttpDelete("RefuseMatchInvite")]
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-
-            await matchInviteService.RefuseMatchInvites(GetCurrentUserId(), idTeam, idMatchInvite);
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            await matchInviteService.RefuseMatchInvites(idTeam, idMatchInvite);
             return Ok();
         }
 
         [HttpPut("Negociate")]
         public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            var matchInvite = await matchInviteService.NegociateMatchInvite(GetCurrentUserId(), idTeam, dto);
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            var matchInvite = await matchInviteService.NegociateMatchInvite(idTeam, dto);
 
             return Ok(matchInvite);
         }
@@ -66,15 +75,17 @@ namespace Api.Controllers
 
             if (hasFilter)
             {
-                matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(GetCurrentUserId(), idTeam, filter);
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
             }
             else
             {
-                matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(GetCurrentUserId(), idTeam);
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
             }
 
             return Ok(matchesInvite);
         }
+        #endregion
+
         #endregion
 
         #region Private Methods

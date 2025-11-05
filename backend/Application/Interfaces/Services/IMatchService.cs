@@ -6,13 +6,13 @@ namespace Application.Interfaces.Services
 {
     public interface IMatchService
     {
-        public Task<List<InfoMatchCalendar>> GetCalendar(string userId, Guid idTeam);
-        public Task<List<InfoMatchCalendar>> GetCalendarWithFilters(string userId, Guid idTeam, FilterCalendarDto filter);
-        public Task<InfoPostPoneMatch> PostPoneMatch(string userId, Guid idTeam, PostPoneMatchDto dto);
-        public Task<MatchDto> AcceptPostPoneMatch(string userId, Guid idTeam, AcceptRefusePostPoneDto dto);
-        public Task RejectPostPoneMatch(string userId, Guid idTeam, AcceptRefusePostPoneDto dto);
-        public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(string userId, Guid idTeam);
-        public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(string userId, Guid idTeam, FilterPostPoneMatchDto filter);
-        public Task CancelMatch(string userId, Guid idTeam, Guid idMatch, string description);
+        public Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam);
+        public Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendarDto filter);
+        public Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto);
+        public Task<MatchDto> AcceptPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto);
+        public Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto);
+        public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam);
+        public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter);
+        public Task CancelMatch(Guid idTeam, Guid idMatch, string description);
     }
 }

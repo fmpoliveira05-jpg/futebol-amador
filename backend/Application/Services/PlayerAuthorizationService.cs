@@ -5,16 +5,16 @@ using Domain.Entities;
 
 namespace Application.Services
 {
-    public class AuthorizationService: IAuthorizationService
+    public class PlayerAuthorizationService: IPlayerAuthorizationService
     {
         #region Initializer
         private readonly IPlayerRepository PlayerRepository;
         private readonly ISuperAdminRepository SuperAdminRepository;
-        private readonly IAuthorizationValidator AuthorizationValidator;
+        private readonly IPlayerAuthorizationValidator AuthorizationValidator;
 
-        public AuthorizationService(IPlayerRepository playerRepository, 
+        public PlayerAuthorizationService(IPlayerRepository playerRepository, 
             ISuperAdminRepository SuperAdminRepository,
-            IAuthorizationValidator authorizationValidator)
+            IPlayerAuthorizationValidator authorizationValidator)
         {
             this.PlayerRepository = playerRepository;
             this.SuperAdminRepository = SuperAdminRepository;

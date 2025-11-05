@@ -26,6 +26,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<IPlayerValidator> validatorMock;
         private Mock<ITeamRepository> teamRepoMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
+        private Mock<IPlayerAuthorizationValidator> authorizationValidatorMock;
 
         private PlayerService service;
 
@@ -42,6 +43,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock = new Mock<IPlayerValidator>();
             teamRepoMock = new Mock<ITeamRepository>();
             membershipReqRepoMock = new Mock<IMembershipRequestRepository>();
+            authorizationValidatorMock = new Mock<IPlayerAuthorizationValidator>();
 
             service = new PlayerService(
                 playerRepoMock.Object,
@@ -50,6 +52,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 membershipReqRepoMock.Object,
                 validatorMock.Object,
                 userRepoMock.Object,
+                authorizationValidatorMock.Object,
                 teamServiceMock.Object
             );
         }

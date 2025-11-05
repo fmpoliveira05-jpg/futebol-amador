@@ -1,11 +1,9 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
-using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
@@ -24,7 +22,6 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IPitchRepository> _pitchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchInviteValidator> _validatorMock;
-        private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -40,17 +37,14 @@ namespace Unit.ApplicationTests.ServicesTests
             _pitchRepoMock = new Mock<IPitchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchInviteValidator>();
-            _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
 
             _sut = new MatchInviteService(
                 _teamRepoMock.Object,
                 _matchInviteRepoMock.Object,
                 _matchRepoMock.Object,
-                _teamStatsRepoMock.Object,
                 _pitchRepoMock.Object,
                 _validatorMock.Object,
-                _unitOfWorkMock.Object,
-                _teamPostPoneRepoMock.Object
+                _unitOfWorkMock.Object
             );
 
             // rank mínimo válido para testes

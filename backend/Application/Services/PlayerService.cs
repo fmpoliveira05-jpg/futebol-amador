@@ -20,12 +20,12 @@ namespace Application.Services
         private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
-        private readonly IAuthorizationValidator authorizationValidator;
+        private readonly IPlayerAuthorizationValidator authorizationValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository,
-            IAuthorizationValidator authorizationValidator, ITeamService teamService)
+            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
@@ -170,7 +170,6 @@ namespace Application.Services
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
@@ -179,7 +178,6 @@ namespace Application.Services
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
@@ -190,7 +188,6 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
 
-            playerValidator.PlayerExists(player);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
@@ -227,7 +224,6 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
                 ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
 
-            playerValidator.PlayerExists(player);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
@@ -257,7 +253,6 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            playerValidator.PlayerExists(player);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
