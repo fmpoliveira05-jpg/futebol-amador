@@ -12,20 +12,25 @@ using System.Security.Claims;
 namespace Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class TeamController : ControllerBase
     {
+        #region Initialization
         private readonly ITeamService TeamService;
-
         public TeamController(ITeamService teamService)
         {
-            TeamService = teamService;
+            this.TeamService = teamService;
         }
+
+        #endregion
+
+        #region EndPoints
 
         #region CRUD Team
         [HttpPost]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
-        {
+        {            
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var newTeamId = await TeamService.CreateTeamAsync(teamDto, userId);
 
@@ -33,6 +38,7 @@ namespace Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeamById(Guid id)
         {
             var team = await TeamService.GetTeamByIdAsync(id);
@@ -58,8 +64,8 @@ namespace Api.Controllers
         #endregion
 
         #region Search Teams 
-        //Depois adaptar para o teamId, o player é Aut
-        [HttpGet("{teamId}/search")] // Responde a GET /api/team
+
+        [HttpGet("{teamId}/search")]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -74,7 +80,6 @@ namespace Api.Controllers
                            filter.MinNumberPlayers.HasValue ||
                            filter.MaxNumberPlayers.HasValue;
 
-            //Falta mandar o userId para o service
             IEnumerable<InfoTeamsDto> list;
             if (isFilter)
             {
@@ -269,8 +274,9 @@ namespace Api.Controllers
         */
         #endregion
 
+        #endregion
+
         #region private Methods
-        [Authorize]
         private string GetCurrentUserId()
         {
             //validar null

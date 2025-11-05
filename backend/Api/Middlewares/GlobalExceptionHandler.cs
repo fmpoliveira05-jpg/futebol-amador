@@ -28,20 +28,6 @@ namespace Api.Middlewares
 
             switch (exception)
             {
-                case BusinessRuleException ex:
-                {
-                    problemDetails.Title = "Problema no não cumprimento de regra de negocio";
-                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
-                    problemDetails.Detail = ex.Message;
-                    break;
-                }
-                case MatchInviteException ex:
-                {
-                    problemDetails.Title = "Problema no convite de partida";
-                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
-                    problemDetails.Detail = ex.Message;
-                    break;
-                }
                 case ValidationException ex:
                 {
                     problemDetails.Title = "Erro de Validação";
@@ -55,7 +41,7 @@ namespace Api.Middlewares
                     problemDetails.Status = (int)HttpStatusCode.NotFound;
                     problemDetails.Detail = ex.Message;
                     break;
-                }     
+                }
                 case InvalidOperationException ex:
                 {
                     problemDetails.Title = "Operação Inválida";
@@ -70,6 +56,27 @@ namespace Api.Middlewares
                     problemDetails.Detail = ex.Message;
                     break;
                 }
+                case BusinessRuleException ex:
+                {
+                    problemDetails.Title = "Problema no não cumprimento de regra de negocio";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case MatchInviteException ex:
+                {
+                    problemDetails.Title = "Problema no convite de partida";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case UnauthorizedAccessException ex:
+                {
+                    problemDetails.Title = "Acesso Não Autorizado";
+                    problemDetails.Status = (int)HttpStatusCode.Unauthorized;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }            
                 case Exception ex:
                 {
                     problemDetails.Title = "Erro Geral";

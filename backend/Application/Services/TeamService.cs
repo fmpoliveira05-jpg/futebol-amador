@@ -21,6 +21,10 @@ namespace Application.Services
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
         private readonly IAuthorizationValidator AuthorizationValidator;
+        private readonly IMembershipRequestRepository MembershipRequestRepository;
+        private readonly IPlayerValidator PlayerValidator;
+        private readonly IPlayerAuthorizationValidator AuthorizationValidator;
+        
         public TeamService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
@@ -29,7 +33,7 @@ namespace Application.Services
             IRankRepository rankRepository,
             IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator,
-            IAuthorizationValidator authorizationValidator)
+            IPlayerAuthorizationValidator authorizationValidator)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;

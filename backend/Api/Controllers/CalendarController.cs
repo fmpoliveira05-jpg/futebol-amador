@@ -16,13 +16,15 @@ namespace Api.Controllers
     {
         #region Inicializer
         private readonly IMatchService matchController;
+        private readonly IPlayerAuthorizationService authorizationService;
         private readonly IStartMatchHubClientService startMatchHubClientService;
         private readonly IFinishMatchHubClientService finishMatchHubClientService;
         
-        public CalendarController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService,
-            IFinishMatchHubClientService finishMatchHubClientService)
+        public CalendarController(IMatchService matchController, IPlayerAuthorizationService authorizationService,
+            IStartMatchHubClientService startMatchHubClientService, IFinishMatchHubClientService finishMatchHubClientService)
         {
             this.matchController = matchController;
+            this.authorizationService = authorizationService;
             this.startMatchHubClientService = startMatchHubClientService;
             this.finishMatchHubClientService = finishMatchHubClientService;
         }
@@ -32,6 +34,7 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<IActionResult> CalendarTeam(Guid idTeam, [FromQuery] FilterCalendarDto filters)
         {
+            await authorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), idTeam);
             IEnumerable<InfoMatchCalendar> matches;
             var hasFilter = filters.IsRealized != null ||
                                 filters.IsRanqued != null ||
@@ -40,14 +43,15 @@ namespace Api.Controllers
                                 filters.MaxDate.HasValue ||
                                 !string.IsNullOrEmpty(filters.NameOpponent);
 
-            var userId = GetCurrentUserId();
+            
+
             if (hasFilter)
             {
-                matches = await matchController.GetCalendarWithFilters(userId, idTeam, filters);
+                matches = await matchController.GetCalendarWithFilters(idTeam, filters);
             }
             else 
             {
-                matches = await matchController.GetCalendar(userId, idTeam);
+                matches = await matchController.GetCalendar(idTeam);
             }
                     
             return Ok(matches);  
@@ -59,7 +63,8 @@ namespace Api.Controllers
         [HttpPut("PostponeMatch")]
         public async Task<IActionResult> PostponeMatch(Guid idTeam, [FromBody] PostPoneMatchDto dto)
         {
-            var matchPostPone = await matchController.PostPoneMatch(GetCurrentUserId(), idTeam, dto);
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            var matchPostPone = await matchController.PostPoneMatch(idTeam, dto);
 
             return Ok(matchPostPone);  
         }
@@ -70,7 +75,8 @@ namespace Api.Controllers
         [HttpDelete("CancelMatch/{idMatch}")]
         public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
-            await matchController.CancelMatch(GetCurrentUserId(), idTeam, idMatch, description);
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            await matchController.CancelMatch(idTeam, idMatch, description);
 
             return Ok();
         }

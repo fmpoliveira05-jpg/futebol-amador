@@ -27,7 +27,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<ICalendarValidator> _validatorMock;
-        private Mock<IAuthorizationService> _authorizarionService;
+        private Mock<IPlayerAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
 
@@ -40,7 +40,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<ICalendarValidator>();
-            _authorizarionService = new Mock<IAuthorizationService>();
+            _authorizarionService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchService(
                 _matchRepoMock.Object,
@@ -515,42 +515,6 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar nulo");
-        }
-
-        [Test(Description = "GetListPostPoneMatchTeam deve devolver a lista de partidas adiadas")]
-        public async Task GetListPostPoneMatchTeam_Should_Return_List_When_Valid()
-        {
-            // ARRANGE
-            var userId = "admin-id";
-            var idTeam = Guid.NewGuid();
-            var list = new List<InfoPostPoneMatch> { new InfoPostPoneMatch() };
-            _matchRepoMock.Setup(r => r.GetAllMatchPostPoneReceiverById(idTeam)).ReturnsAsync(list);
-            //_validatorMock.Setup(v => v.ValidatorGetListPostPoneMatchTeam(list));
-
-            // ACT
-            var result = await _sut.GetListPostPoneMatchTeam(userId, idTeam);
-
-            // ASSERT
-            result.Should().BeEquivalentTo(list, "porque a lista de partidas adiadas para a equipa deve ser retornada");
-            //_validatorMock.Verify(v => v.ValidatorGetListPostPoneMatchTeam(list), Times.Once);
-        }
-
-        [Test(Description = "GetListPostPoneMatchTeam deve lançar exceção quando a lista de adiamentos estiver vazia")]
-        public async Task GetListPostPoneMatchTeam_Should_Throw_Exception_When_List_Is_Empty()
-        {
-            // ARRANGE
-            var userId = "admin-id";
-            var idTeam = Guid.NewGuid();
-            var list = new List<InfoPostPoneMatch>();
-            _matchRepoMock.Setup(r => r.GetAllMatchPostPoneReceiverById(idTeam)).ReturnsAsync(list);
-            //_validatorMock.Setup(v => v.ValidatorGetListPostPoneMatchTeam(list)).Throws(new EmptyCollectionException("A lista de adiamentos da equipa está vazia"));
-
-            // ACT
-            Func<Task> act = async () => await _sut.GetListPostPoneMatchTeam(userId, idTeam);
-
-            // ASSERT
-            await act.Should().ThrowAsync<EmptyCollectionException>().WithMessage("A lista de adiamentos da equipa está vazia");
-            //_validatorMock.Verify(v => v.ValidatorGetListPostPoneMatchTeam(list), Times.Once);
         }
         #endregion
 

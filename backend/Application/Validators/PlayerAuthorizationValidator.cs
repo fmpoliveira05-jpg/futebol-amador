@@ -3,8 +3,9 @@ using Domain.Entities;
 
 namespace Application.Validators
 {
-    public class AuthorizationValidator: IAuthorizationValidator
+    public class PlayerAuthorizationValidator: IPlayerAuthorizationValidator
     {
+        #region Validation User Id
         public void ValidateUserId(string userId)
         {
             if (!string.IsNullOrEmpty(userId))
@@ -12,6 +13,15 @@ namespace Application.Validators
                 throw new InvalidOperationException("O id do utilizador está inválido.");
             }
         }
+
+        public void ValidateUserIdIsSameUrl(string userId, string userIdUrl)
+        {
+            if (userId != userIdUrl)
+            {
+                throw new UnauthorizedAccessException("O utilizador que está a tentar entrar não é o mesmo da url.");
+            }
+        }
+        #endregion
 
         #region Validator Players
         public void ValidatePlayerAutorizationIsAdmin(Player player, Guid idTeam)

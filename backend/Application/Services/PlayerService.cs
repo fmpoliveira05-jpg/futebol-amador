@@ -1,12 +1,10 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace Application.Services
 {
@@ -19,11 +17,12 @@ namespace Application.Services
         private readonly IPlayerValidator playerValidator;
         private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
-        private readonly IAuthorizationValidator authorizationValidator;
+        private readonly IPlayerAuthorizationValidator authorizationValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
-            IUnityOfWork unitOfWork, IMembershipRequestRepository @object, IPlayerValidator playerValidator, IUserRepository userRepository, 
-            ITeamService teamService)
+            IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
+            IPlayerValidator playerValidator, IUserRepository userRepository,
+            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
@@ -162,8 +161,7 @@ namespace Application.Services
         }
         #endregion
 
-        #region Membership Requests
-
+        #region Lists
         public async Task<List<InfoTeamsDto>> GetListTeams()
         {
             return await teamRepository.GetListTeamsPlayer();
