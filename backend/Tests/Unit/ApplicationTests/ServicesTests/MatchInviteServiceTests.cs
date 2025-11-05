@@ -24,7 +24,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchInviteValidator> _validatorMock;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
-        private Mock<IAuthorizationService> _authorizationService;
+        private Mock<IPlayerAuthorizationService> _authorizationService;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -41,7 +41,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchInviteValidator>();
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
-            _authorizationService = new Mock<IAuthorizationService>();
+            _authorizationService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
@@ -92,7 +92,7 @@ namespace Unit.ApplicationTests.ServicesTests
                           .ReturnsAsync((Matches)null);
 
             // ACT
-            var result = await _sut.SendMatchInvite(userId, idSender, dto);
+            var result = await _sut.SendMatchInvite(idSender, dto);
 
             // ASSERT
             result.Should().NotBeNull();
@@ -120,7 +120,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador não é administrador da equipa."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMatchInvite(userId, idSender, dto);
+            Func<Task> act = async () => await _sut.SendMatchInvite(idSender, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -146,7 +146,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador não pertence à equipa."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMatchInvite(userId, idSender, dto);
+            Func<Task> act = async () => await _sut.SendMatchInvite(idSender, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -177,7 +177,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa de destino não existe."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMatchInvite(userId, idSender, dto);
+            Func<Task> act = async () => await _sut.SendMatchInvite(idSender, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -222,7 +222,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.AcceptMatchInvite(userId, receiverTeam.Id, matchInvite.Id);
+            var result = await _sut.AcceptMatchInvite(receiverTeam.Id, matchInvite.Id);
 
             // ASSERT
             result.Should().NotBeNull();
@@ -248,7 +248,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não é administradora ou não tem permissão para aceitar o convite."));
 
             // ACT
-            Func<Task> act = async () => await _sut.AcceptMatchInvite(userId, idTeam, idMatchInvite);
+            Func<Task> act = async () => await _sut.AcceptMatchInvite(idTeam, idMatchInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -278,7 +278,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não recebeu este convite."));
 
             // ACT
-            Func<Task> act = async () => await _sut.AcceptMatchInvite(userId, outsiderTeam.Id, invite.Id);
+            Func<Task> act = async () => await _sut.AcceptMatchInvite(outsiderTeam.Id, invite.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -316,7 +316,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            Func<Task> act = async () => await _sut.RefuseMatchInvites(userId, receiverTeam.Id, matchInvite.Id);
+            Func<Task> act = async () => await _sut.RefuseMatchInvites(receiverTeam.Id, matchInvite.Id);
 
             // ASSERT
             await act.Should().NotThrowAsync();
@@ -337,7 +337,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não tem permissão para rejeitar o convite."));
 
             // ACT
-            Func<Task> act = async () => await _sut.RefuseMatchInvites(userId, idTeam, idMatchInvite);
+            Func<Task> act = async () => await _sut.RefuseMatchInvites(idTeam, idMatchInvite);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -368,7 +368,7 @@ namespace Unit.ApplicationTests.ServicesTests
                          .ReturnsAsync(outsiderTeam);
 
             // ACT
-            Func<Task> act = async () => await _sut.RefuseMatchInvites(userId, outsiderTeam.Id, invite.Id);
+            Func<Task> act = async () => await _sut.RefuseMatchInvites(outsiderTeam.Id, invite.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -409,7 +409,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.NegociateMatchInvite(userId, senderTeam.Id, dto);
+            var result = await _sut.NegociateMatchInvite(senderTeam.Id, dto);
 
             // ASSERT
             result.Should().NotBeNull();
@@ -436,7 +436,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não é administradora para negociar convites."));
 
             // ACT
-            Func<Task> act = async () => await _sut.NegociateMatchInvite(userId, idSender, dto);
+            Func<Task> act = async () => await _sut.NegociateMatchInvite(idSender, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -466,7 +466,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa não pertence ao convite a negociar."));
 
             // ACT
-            Func<Task> act = async () => await _sut.NegociateMatchInvite(userId, outsiderTeam.Id, dto);
+            Func<Task> act = async () => await _sut.NegociateMatchInvite(outsiderTeam.Id, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
