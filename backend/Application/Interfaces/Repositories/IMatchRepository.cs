@@ -19,5 +19,6 @@ namespace Application.Interfaces.Repositories
         public Task<List<InfoMatchCalendar>> GetAllMatchesTeamWithFilters(Guid idTeam, FilterCalendarDto filter);
         public Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverById(Guid idReceiver);
         Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverByIdWithFilters(Guid idReceiver, FilterPostPoneMatchDto filter);
+        Task<List<InfoMatchCalendar>> GetMatchesByDateAsync(DateTime date);
     }
 }
