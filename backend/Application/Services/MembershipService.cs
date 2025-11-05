@@ -18,6 +18,8 @@ namespace Application.Services
         private readonly ITeamValidator teamValidator;
         private readonly IPlayerValidator playerValidator;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
+        private readonly IMembershipValidator membershipValidator;
+
         public MembershipService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
@@ -25,15 +27,17 @@ namespace Application.Services
             IUnityOfWork unityOfWork,
             ITeamValidator teamValidator,
             IPlayerValidator playerValidator,
-            IPlayerAuthorizationValidator authorizationValidator)
+            IPlayerAuthorizationValidator authorizationValidator,
+            IMembershipValidator membershipValidator)
         {
-            teamRepository = teamRepository;
-            playerRepository = playerRepository;
-            membershipRequestRepository = membershipRequestRepository;
-            unityOfWork = unityOfWork;
-            teamValidator = teamValidator;
-            playerValidator = playerValidator;
+            this.teamRepository = teamRepository;
+            this.playerRepository = playerRepository;
+            this.membershipRequestRepository = membershipRequestRepository;
+            this.unityOfWork = unityOfWork;
+            this.teamValidator = teamValidator;
+            this.playerValidator = playerValidator;
             this.authorizationValidator = authorizationValidator;
+            this.membershipValidator = membershipValidator;
 
         }
 
@@ -47,7 +51,7 @@ namespace Application.Services
 
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            teamValidator.SendMembershipRequestValidation(existing, team);
+            membershipValidator.ValidateSendRequestByTeam(team, playerToInvite, existing);
 
             var invite = new MembershipRequest
             {
@@ -76,19 +80,12 @@ namespace Application.Services
         public async Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId)
         {
             var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
-            if (request == null)
-                throw new ValidationException($"O pedido de adesão com Id '{requestId}' não existe.");
 
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
-            if (team == null)
-                throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
-
-
-            teamValidator.ApproveMembershipRequestValidation(team, requestId);
 
             var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            if (playerAccepted == null)
-                throw new ValidationException($"O jogador com Id '{request.IdPlayer}' não existe.");
+
+            membershipValidator.ValidateAcceptRequestByTeam(team, request);
 
             membershipRequestRepository.RemoveMembershipRequest(request);
 
@@ -103,15 +100,10 @@ namespace Application.Services
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
             {
                 var request = await requestTask;
-                if (request == null)
-                    throw new ValidationException($"O pedido de adesão com Id '{requestId}' não existe.");
 
                 var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
-                if (team == null)
-                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
-
-                teamValidator.RejectMembershipRequestValidation(team, requestId);
+                membershipValidator.ValidateRejectRequestByTeam(team, request);
 
                 membershipRequestRepository.RemoveMembershipRequest(request);
                 await unityOfWork.SaveChangesAsync();
@@ -124,10 +116,7 @@ namespace Application.Services
             {
                 var team = await teamTask;
 
-                if (team == null)
-                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
-
-                teamValidator.GetMembershipRequestsValidation(team);
+                membershipValidator.ValidateGetRequestsByTeam(team);
 
                 var list = await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
                 return list ?? new List<MemberShipRequestDto>();
@@ -140,10 +129,7 @@ namespace Application.Services
             {
                 var team = await teamTask;
 
-                if (team == null)
-                    throw new ValidationException($"A equipa com Id '{teamId}' não existe.");
-
-                teamValidator.GetMembershipRequestsValidation(team);
+                membershipValidator.ValidateGetRequestsByTeam(team);
 
                 var list = await membershipRequestRepository.GetMembershipRequestsByTeamWithFilters(teamId, filters);
                 return list ?? new List<MemberShipRequestDto>();
@@ -172,16 +158,15 @@ namespace Application.Services
 
         public async Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
+            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
+            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId);
 
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(request.IdTeam)
-                ?? throw new ValidationException($"A equipa com Id '{request.IdTeam}' não existe.");
+            var team = await teamRepository.GetTeamForMembershipRequestAsync(request.IdTeam);
+
+            membershipValidator.ValidateAcceptRequestByPlayer(player, request, team);
 
             player.IdTeam = team.Id;
             team.Members.Add(player);
@@ -208,13 +193,13 @@ namespace Application.Services
 
         public async Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
+            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
+            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId);
+
+            membershipValidator.ValidateRejectRequestByPlayer(request, player);
 
             var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
             var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
