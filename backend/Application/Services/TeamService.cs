@@ -20,7 +20,6 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
-        private readonly IAuthorizationValidator AuthorizationValidator;
         private readonly IMembershipRequestRepository MembershipRequestRepository;
         private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
@@ -253,18 +252,6 @@ namespace Application.Services
             TeamValidator.ValidateTeamSearch(team);
 
             return await TeamRepository.GetListTeamsByTeamsWithFilters(idTeam, filters);
-        }
-        #endregion
-
-        #region List Player To MemberShipRequest
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam()
-        {
-            var playersWithoutTeam = await PlayerRepository.GetPlayersWithoutTeamAsync();
-
-            if (playersWithoutTeam == null || !playersWithoutTeam.Any())
-                throw new NotFoundException("Não existem jogadores sem equipa no momento.");
-
-            return playersWithoutTeam;
         }
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter)

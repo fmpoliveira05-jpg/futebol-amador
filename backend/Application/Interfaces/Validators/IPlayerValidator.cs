@@ -12,7 +12,7 @@ namespace Application.Interfaces.Validators
 
         void DeletePlayerValidator(Player? player);
 
-        void GetPlayerByIdValidator(Player player);
+        void GetPlayerByIdValidator(Player? player);
 
         void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto,Player player, User[] existingPlayers);
 
