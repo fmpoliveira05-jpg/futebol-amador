@@ -37,7 +37,8 @@ namespace Application.Services
             ITeamValidator teamValidator,
             IPlayerValidator playerValidator,
             IPlayerAuthorizationValidator authorizationValidator,
-            IMembershipValidator membershipValidator)
+            IMembershipValidator membershipValidator,
+            INotificationService notificationService)
         {
             this.teamRepository = teamRepository;
             this.playerRepository = playerRepository;
@@ -47,7 +48,7 @@ namespace Application.Services
             this.playerValidator = playerValidator;
             this.authorizationValidator = authorizationValidator;
             this.membershipValidator = membershipValidator;
-
+            this.notificationService = notificationService;
         }
 
         public MembershipService(ITeamRepository object1, IPlayerRepository object2, IMembershipRequestRepository object3, IUnityOfWork object4, TeamValidator teamValidator, PlayerValidator playerValidator, PlayerAuthorizationValidator authorizationValidator1)

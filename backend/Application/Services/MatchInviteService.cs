@@ -35,7 +35,8 @@ namespace Application.Services
             IMatchInviteValidator matchInviteValidator,
             IUnityOfWork unityOfWork,
             ITeamPostPoneGameRepository teamPostPoneRepository,
-            IPlayerAuthorizationService authorizationService)
+            IPlayerAuthorizationService authorizationService,
+            INotificationService notificationService)
         {
             MatchInviteRepository = matchInviteRepository;
             TeamRepository = teamRepository;
@@ -46,6 +47,7 @@ namespace Application.Services
             UnityOfWork = unityOfWork;
             _teamPostPoneRepository = teamPostPoneRepository;
             AuthorizationService = authorizationService;
+            this.notificationService = notificationService;
         }
         #endregion
 

@@ -21,7 +21,6 @@ namespace Application.Services
         private readonly IMembershipRequestRepository MembershipRequestRepository;
         private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
-        
         private readonly INotificationService notificationService;
 
         public TeamService(
@@ -32,7 +31,8 @@ namespace Application.Services
             IRankRepository rankRepository,
             IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator,
-            IPlayerAuthorizationValidator authorizationValidator)
+            IPlayerAuthorizationValidator authorizationValidator,
+            INotificationService notificationService)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
@@ -40,6 +40,7 @@ namespace Application.Services
             TeamValidator = teamValidator;
             RankRepository = rankRepository;
             AuthorizationValidator = authorizationValidator;
+            this.notificationService = notificationService;
         }
         #endregion
 
