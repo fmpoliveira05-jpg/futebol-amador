@@ -878,6 +878,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
         #endregion
 
+        /*
         #region Tests GetMembershipRequestsAsync
 
         [Test(Description = "Caminho feliz: Get player membership requests should work")]
@@ -1292,6 +1293,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(player.IdTeam, Is.EqualTo(teamId1));
         }
         #endregion
+        */
 
         #endregion
     }

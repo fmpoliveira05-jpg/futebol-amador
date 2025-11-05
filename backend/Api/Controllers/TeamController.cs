@@ -188,6 +188,7 @@ namespace Api.Controllers
             }
         }
 
+        /*
         [HttpGet("{teamId}/membership-request")]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
@@ -229,6 +230,7 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
             }
         }
+        */
 
 
         [HttpPost("{teamId}/membership-request/accept")]
@@ -245,6 +247,7 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /*
         [HttpPost("{teamId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
@@ -268,6 +271,7 @@ namespace Api.Controllers
                 return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
             }
         }
+        */
         #endregion
 
         #endregion

@@ -23,10 +23,6 @@ namespace Application.Interfaces.Repositories
 
         Task AddAsync(Player player);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(string playerId);
-
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
-
         Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }
 }

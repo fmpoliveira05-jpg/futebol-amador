@@ -17,7 +17,6 @@ namespace Application.Services
         private readonly ITeamRepository teamRepository;
         private readonly IUnityOfWork unityOfWork;
         private readonly IPlayerValidator playerValidator;
-        private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUserRepository userRepository;
         private readonly ITeamService teamService;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
@@ -29,7 +28,6 @@ namespace Application.Services
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
-            this.membershipRequestRepository = membershipRequestRepository;
             this.unityOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.userRepository = userRepository;

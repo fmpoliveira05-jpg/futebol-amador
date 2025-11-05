@@ -142,6 +142,7 @@ namespace Api.Controllers
             return Ok(list);
         }
 
+        /*
         [HttpGet("{playerId:guid}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
@@ -190,6 +191,7 @@ namespace Api.Controllers
             var dto = await playerService.SendMembershipRequestAsync(playerId, teamId);
             return Ok(dto);
         }
+        */
 
         #endregion
 
