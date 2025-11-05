@@ -5,6 +5,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using System.Numerics;
 
 namespace Application.Services
 {
@@ -60,12 +61,8 @@ namespace Application.Services
 
         public async Task DeletePlayerAsync(string playerId)
         {
+            //playerValidator.GetPlayerByIdValidator(playerId);
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
-
-            if (playerToDelete == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }    
 
             playerRepository.DeletePlayer(playerToDelete);
 
@@ -76,11 +73,6 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.GetPlayerByIdValidator(player);
-
-            if (player == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
 
             PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {

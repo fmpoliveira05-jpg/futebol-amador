@@ -163,7 +163,7 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
+            return await membershipRequestRepository.GetMembershipRequestsByPlayer(playerId);
         }
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
@@ -171,7 +171,7 @@ namespace Application.Services
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
+            return await membershipRequestRepository.GetMembershipRequestsByPlayerWithFilters(playerId, filters);
         }
 
         public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId)
