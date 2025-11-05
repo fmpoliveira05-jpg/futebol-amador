@@ -4,6 +4,7 @@ using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 
@@ -21,6 +22,9 @@ namespace Application.Services
         private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
         
+
+        private readonly INotificationService notificationService;
+
         public TeamService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
@@ -150,6 +154,8 @@ namespace Application.Services
             
             TeamValidator.PromoteMemberToAdminValidation(existingTeam, playerToPromote, playerPromoting);
 
+            await notificationService.SendUserAsync(playerIdToPromoteId, "Team Promotion", $"You have been promoted to admin of the team {existingTeam.Name}.");
+
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
@@ -167,6 +173,8 @@ namespace Application.Services
 
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             TeamValidator.DemoteAdminToMemberValidation(existingTeam, playerToDemote, playerDemoting);
+
+            await notificationService.SendUserAsync(adminIdToDemote, "Team Demotion", $"You have been demoted to player of the team {existingTeam.Name}.");
 
             playerToDemote.IsAdmin = false;
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
@@ -215,6 +223,8 @@ namespace Application.Services
 
 
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
+
+            await notificationService.SendUserAsync(playerIdToRemove, "Team Ban", $"You have been removed from the team {existingTeam.Name}.");
 
             existingTeam.Members.Remove(playerToRemove);
             playerToRemove.IdTeam = null;

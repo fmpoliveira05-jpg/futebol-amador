@@ -9,12 +9,12 @@ using Microsoft.AspNetCore.SignalR;
 namespace Api.Hubs
 {
     [Authorize]
-    public class RankMatchMakerHub: Hub<IRankMatchMakerHub>
+    public class RankMatchMakerHub : Hub<IRankMatchMakerHub>
     {
         private readonly IManagerRankMatchMakerService service;
         private readonly IGeralHubValidator geralValidator;
-        
-        public RankMatchMakerHub(IManagerRankMatchMakerService service, 
+
+        public RankMatchMakerHub(IManagerRankMatchMakerService service,
             IGeralHubValidator geralValidator)
         {
             this.service = service;
@@ -56,15 +56,16 @@ namespace Api.Hubs
             }
 
             await Groups.AddToGroupAsync(connectionId, groupName);
-            
-            if (result.ConnectionId != connectionId) 
+
+            if (result.ConnectionId != connectionId)
             {
                 //Notificar os dois teams, ver no startMatch
                 await CleanHub(groupName, result.ConnectionId, connectionId);
             }
         }
 
-        public async Task LeaveRankMatchMaker() {
+        public async Task LeaveRankMatchMaker()
+        {
             try
             {
                 bool success = await HandleLeaveHub();

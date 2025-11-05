@@ -3,8 +3,12 @@ using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using FirebaseAdmin.Messaging;
+using System.Numerics;
+using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace Application.Services
 {
@@ -20,6 +24,7 @@ namespace Application.Services
         private readonly IMatchInviteValidator MatchInviteValidator;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ITeamPostPoneGameRepository _teamPostPoneRepository;
+        private readonly INotificationService notificationService;
 
         public MatchInviteService(
             IMatchInviteRepository matchInviteRepository,
@@ -84,6 +89,15 @@ namespace Application.Services
                 NamePitch = pitchName
             };
 
+            var teamAdmins = receiver.Members
+                            .Where(p => p.IsAdmin == true)
+                            .ToList();
+
+            foreach (var admin in teamAdmins)
+            {
+                await notificationService.SendUserAsync(receiver.Id.ToString(), "New Match Invite", $"{sender.Name} wants to play a match against your team!");
+            }
+
             await UnityOfWork.SaveChangesAsync();
 
             return sendMatchInviteDto;
@@ -127,6 +141,9 @@ namespace Application.Services
                 NameOpponent = sender.Name,
                 NamePitch = pitch.Name
             };
+
+            await notificationService.SendTeamAsync(receiver.Id.ToString(), "Match Scheduled!", $"Your match against {sender.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
+            await notificationService.SendTeamAsync(sender.Id.ToString(), "Match Scheduled!", $"Your match against {receiver.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
 
             await UnityOfWork.SaveChangesAsync();
 

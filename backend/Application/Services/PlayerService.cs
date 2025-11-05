@@ -3,6 +3,7 @@ using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using System.Numerics;
@@ -20,7 +21,9 @@ namespace Application.Services
         private readonly ITeamService teamService;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
+        private readonly INotificationService notification;
+
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository,
             IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService)
@@ -53,9 +56,9 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-            
+
             await unityOfWork.SaveChangesAsync();
-            
+
             return player.Id;
         }
 

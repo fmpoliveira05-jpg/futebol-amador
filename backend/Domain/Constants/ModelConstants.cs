@@ -103,6 +103,11 @@
             public const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
         }
 
+        public static class NotificationHubConst
+        {
+            public const string PrefixGroupName = "notificationGroup-";
+            public const string ContentTeamId = "HubTeamId";
+        }
 
         public static class GeralTimeInHubConst
         {
