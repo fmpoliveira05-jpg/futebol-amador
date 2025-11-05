@@ -1,13 +1,6 @@
 using Api.Extensions;
 using Api.Middlewares;
 using Application;
-using Application.Interfaces.Services;
-using Application.Services;
-using Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 using Google.Cloud.Firestore;
 using Infrastructure;
 

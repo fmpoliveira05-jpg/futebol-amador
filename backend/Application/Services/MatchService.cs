@@ -12,7 +12,7 @@ using Domain.Enums;
  */
 namespace Application.Services
 {
-    public class MatchService: IMatchService
+    public class MatchService : IMatchService
     {
         private readonly IMatchRepository MatchRepository;
         private readonly ITeamPostPoneGameRepository TeamPostPoneGameRepository;
@@ -20,8 +20,8 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
 
-        public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
-            ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
+        public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository,
+            ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork,
             ICalendarValidator MatchValidator, IPlayerRepository @object)
         {
             this.MatchRepository = matchRepository;
@@ -46,7 +46,7 @@ namespace Application.Services
         public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
             MatchValidator.ValidatePostPoneMatchDto(idTeam, dto);
-            
+
             var idMatch = dto.IdMatch;
             var newDate = dto.PostPoneDate;
             var idOpponnent = dto.IdOpponent;
@@ -123,7 +123,7 @@ namespace Application.Services
         public async Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
         {
             MatchValidator.ValidateRejectPostPoneMatchDTO(idTeam, dto);
-            
+
             var idMatch = dto.IdMatch;
             var idOpponnent = dto.IdOpponent;
 
@@ -165,12 +165,12 @@ namespace Application.Services
             }
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
-            
+
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
             await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
-            
+
             match.MatchStatus = MatchStatus.CANCELED;
-            
+
             await UnityOfWork.SaveChangesAsync();
         }
 

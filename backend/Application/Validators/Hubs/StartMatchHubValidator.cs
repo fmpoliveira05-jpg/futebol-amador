@@ -4,7 +4,7 @@ using System.Collections.Concurrent;
 
 namespace Application.Validators.Hubs
 {
-    public class StartMatchHubValidator: IStartMatchHubValidator
+    public class StartMatchHubValidator : IStartMatchHubValidator
     {
         public void ValidateVariableJoinMatch(Guid matchId, string userId, string connectionId)
         {

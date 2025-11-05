@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
         public async Task<Team?> GetTeamByNameAsync(String name)
         {
             return await DbContext.Team
-                .FirstOrDefaultAsync(t => t.Name == name); 
+                .FirstOrDefaultAsync(t => t.Name == name);
         }
 
         public async Task AddAsync(Team team)
@@ -78,7 +78,7 @@ namespace Infrastructure.Repositories
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
-        
+
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
             return await DbContext.Team
@@ -113,9 +113,9 @@ namespace Infrastructure.Repositories
                         .Select(mr => new MemberShipRequestDto
                         {
                             RequestId = mr.Id,
-                            PlayerName = mr.Player.Name, 
+                            PlayerName = mr.Player.Name,
                             PlayerId = mr.IdPlayer,
-                            TeamName = mr.Team.Name,     
+                            TeamName = mr.Team.Name,
                             RequestDate = mr.InviteDate,
                             IsPlayerSender = mr.IsPlayerSender
                         })
@@ -279,8 +279,8 @@ namespace Infrastructure.Repositories
         {
             return await DbContext.Team
                 .Include(t => t.Members)
-                .Include (t => t.Rank)
-                .Include (t => t.Pitch)
+                .Include(t => t.Rank)
+                .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -419,7 +419,7 @@ namespace Infrastructure.Repositories
 
             return list;
         }
-        
+
         public Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId)
         {
             return DbContext.Team
@@ -474,7 +474,7 @@ namespace Infrastructure.Repositories
             var query = DbContext.Team
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
-                            .Where(t => t.Id != idTeam 
+                            .Where(t => t.Id != idTeam
                                 && t.Members.Count < ModelConstants.TeamConst.MaxMembers);
 
             if (!string.IsNullOrEmpty(filters.NameTeam))
@@ -493,7 +493,7 @@ namespace Infrastructure.Repositories
             {
                 var fragment = filters.City.ToLower();
                 query = query.Where(t =>
-                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%") 
+                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%")
                     &&
                     !EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%,%")
                 );
@@ -570,9 +570,9 @@ namespace Infrastructure.Repositories
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam()
         {
-            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow); 
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = await DbContext.Player.Where(p => !p.IsAdmin 
+            var query = await DbContext.Player.Where(p => !p.IsAdmin
                                                     && p.IdTeam == null)
                 .Select(p => new PlayerWithoutTeamInfoDto
                 {

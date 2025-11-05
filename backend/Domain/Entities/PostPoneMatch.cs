@@ -24,7 +24,8 @@ namespace Domain.Entities
         public DateTime PostPoneDate { get; set; }
 
         public PostPoneMatch() { }
-        public PostPoneMatch(Team team, Matches match, DateTime postPoneDate) {
+        public PostPoneMatch(Team team, Matches match, DateTime postPoneDate)
+        {
             this.Team = team;
             this.IdTeamPostPone = team.Id;
             this.Match = match;

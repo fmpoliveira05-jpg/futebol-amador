@@ -18,7 +18,7 @@ namespace Application.DTOs.Team
 
         [Required]
         public DateTime FoundationDate { get; set; }
-        
+
         [Required]
         [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints)]
         public int TotalPoints { get; set; }

@@ -9,7 +9,7 @@ namespace Application.DTOs.Match
         public Guid IdMatch { get; set; }
 
         [Required]
-        public DateTime GameDate { get; set; } 
+        public DateTime GameDate { get; set; }
 
         [Required]
         [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]

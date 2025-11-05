@@ -1,15 +1,7 @@
-﻿using Application.DTOs.PlayerDTOs;
-using Application.DTOs.SuperAdmin;
+﻿using Application.DTOs.SuperAdmin;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Validators
 {

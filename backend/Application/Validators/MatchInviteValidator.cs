@@ -6,7 +6,7 @@ using Domain.Exceptions;
 
 namespace Application.Validators
 {
-    public class MatchInviteValidator: IMatchInviteValidator
+    public class MatchInviteValidator : IMatchInviteValidator
     {
         public void ValidateSenderMatchInvite(SendMatchInviteDto dto, Guid idSender)
         {
@@ -115,7 +115,7 @@ namespace Application.Validators
             ValidateSender(sender, matchInvite, errorMsgNullSender, errorMsg);
         }
 
-        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Team senderTeam, 
+        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Team senderTeam,
             Team receiverTeam, Matches findMatchWith12hour)
         {
             const string msgNullPitch = "O campo da partida não pode estar a nulo";

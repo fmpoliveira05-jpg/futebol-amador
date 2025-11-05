@@ -1,9 +1,5 @@
-﻿
-
-using Application.DTOs.PlayerDTOs;
-using Application.DTOs.SuperAdmin;
+﻿using Application.DTOs.SuperAdmin;
 using Application.Interfaces.Services;
-using Application.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers

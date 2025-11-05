@@ -1,5 +1,4 @@
 ﻿using Application.DTOs.RankMatchMaker;
-using Domain.Entities;
 
 namespace Application.Interfaces.Services.Hub
 {

@@ -9,7 +9,7 @@ namespace Application.Services
         /**
          Metodo que procura uma partida para uma equipa que acabou de começar a procura por
          */
-        public Guid? LogicMatchMakerJoinHub(InfoTeamRankMatchMakerDto finder, 
+        public Guid? LogicMatchMakerJoinHub(InfoTeamRankMatchMakerDto finder,
             IEnumerable<InfoTeamRankMatchMakerDto> teamsInSearch, DateTime gameDate)
         {
             IEnumerable<InfoTeamRankMatchMakerDto> orderTeams;
@@ -20,7 +20,7 @@ namespace Application.Services
             {
                 orderTeams = teamsInSearch.Where(t => t.Rank.Name == rank)
                                           .OrderByDescending(t => t.timeEntry);
-            } 
+            }
             else
             {
                 var otherRank = finder.NextOrPreviousRank;
@@ -51,7 +51,7 @@ namespace Application.Services
             var diffPoints = criteria.differencPoints;
             var diffAge = criteria.diffAverageAge;
             var agrupListTeams = GetDicitonaryTeamGroupByMatchDate(teamsInSearch);
-            
+
             //Utilizar sliding window
             foreach (var dateGame in agrupListTeams)
             {
@@ -72,7 +72,7 @@ namespace Application.Services
                     var team = entry.Team;
                     var teamId = team.IdTeam;
                     //Ver se a team já está numa match
-                    
+
                     if (matched.Contains(teamId))
                     {
                         continue;
@@ -105,8 +105,8 @@ namespace Application.Services
                             matched.Add(teamId);
                             matched.Add(teamRight.IdTeam);
                             findTeam = true;
-                        } 
-                        else 
+                        }
+                        else
                         {
                             pointerRight++;
                         }
@@ -119,7 +119,7 @@ namespace Application.Services
             return result;
         }
 
-        private static Dictionary<DateTime, List<EntryRankMatchMakerHub>> GetDicitonaryTeamGroupByMatchDate(IEnumerable<EntryRankMatchMakerHub> teamsInSearch) 
+        private static Dictionary<DateTime, List<EntryRankMatchMakerHub>> GetDicitonaryTeamGroupByMatchDate(IEnumerable<EntryRankMatchMakerHub> teamsInSearch)
         {
             var dicionary = teamsInSearch
                 .GroupBy(t => t.Team.GameDate)

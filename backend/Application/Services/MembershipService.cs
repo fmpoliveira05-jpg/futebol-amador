@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.MemberShip;
 using Application.Interfaces.Repositories;
-using Application.Interfaces.Services;
 using Domain.Entities;
 using Domain.Exceptions;
 

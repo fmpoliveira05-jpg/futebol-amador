@@ -9,7 +9,7 @@ namespace Api.Hubs
 {
     //Descomentar isto quando houver aut para so pessoas autenticadas acederem
     //[Authorize]
-    public class StartMatchHub: Hub<IStartMatchHub>
+    public class StartMatchHub : Hub<IStartMatchHub>
     {
         private readonly IManagerStartMatchService startMatchManager;
         private readonly IGeralHubValidator geralValidator;
@@ -25,7 +25,7 @@ namespace Api.Hubs
             var userId = Context.User.Identity.Name;
             var groupName = GetGroupName(idMatch);
             JoinStartMatchResult result;
-            
+
             try
             {
                 result = await startMatchManager.JoinHubAsync(idMatch, userId, idTeam, connectionId);

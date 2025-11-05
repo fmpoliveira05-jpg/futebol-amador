@@ -1,17 +1,17 @@
-﻿using Application.DTOs.Match;
-using Application.DTOs.PostPoneGame;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.Pitch;
+using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Application.DTOs.Filters;
 
 namespace Infrastructure.Repositories
 {
-    public class MatchRepository: IMatchRepository
+    public class MatchRepository : IMatchRepository
     {
         private readonly AmateurFootballContext context;
 
@@ -39,11 +39,11 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 
-        public async Task<Matches?> GetScheduledMatchById(Guid idMatch) 
+        public async Task<Matches?> GetScheduledMatchById(Guid idMatch)
         {
             return await context.Match
                     .Include(m => m.Teams)
-                    .FirstOrDefaultAsync(match => match.Id == idMatch 
+                    .FirstOrDefaultAsync(match => match.Id == idMatch
                                         && match.MatchStatus == MatchStatus.SCHEDULED);
         }
 
@@ -51,7 +51,7 @@ namespace Infrastructure.Repositories
         {
             return await context.Match
                                 .Include(m => m.Teams)
-                                .FirstOrDefaultAsync(match => match.Id == idMatch 
+                                .FirstOrDefaultAsync(match => match.Id == idMatch
                                                     && match.MatchStatus == MatchStatus.IN_PROGRESS);
         }
 
@@ -84,7 +84,7 @@ namespace Infrastructure.Repositories
                     && (m.MatchStatus == MatchStatus.SCHEDULED || m.MatchStatus == MatchStatus.POST_PONED))
                 .FirstOrDefaultAsync();
 
-            return query; 
+            return query;
         }
 
         /***
@@ -94,41 +94,41 @@ namespace Infrastructure.Repositories
         public async Task<List<InfoMatchCalendar>> GetAllMatchesTeam(Guid idTeam)
         {
             var query = await (from m in context.Match
-                         join pitch in context.Pitch on m.idPitch equals pitch.Id
-                         
-                         where (m.MatchStatus == MatchStatus.SCHEDULED 
-                            || m.MatchStatus == MatchStatus.DONE)
-                            && m.Teams.Any(tm => tm.IdTeam == idTeam) 
-                            && m.Teams.Any(tm => tm.IdTeam != idTeam)
+                               join pitch in context.Pitch on m.idPitch equals pitch.Id
 
-                         let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == idTeam)
-                         let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != idTeam)
+                               where (m.MatchStatus == MatchStatus.SCHEDULED
+                                  || m.MatchStatus == MatchStatus.DONE)
+                                  && m.Teams.Any(tm => tm.IdTeam == idTeam)
+                                  && m.Teams.Any(tm => tm.IdTeam != idTeam)
 
-                         select new InfoMatchCalendar
-                         {
-                             IdMatch = m.Id,
-                             MatchStatus = m.MatchStatus,
-                             GameDate = m.MatchDate,
-                             MatchResult = myTeam.MatchResult,
-                             Result = m.MatchStatus == MatchStatus.DONE
-                                ? (myTeam.NumGoals + " - " + opponentTeam.NumGoals) 
-                                : "x-x",
-                             Team = new TeamDto
-                             {
-                                 IdTeam = idTeam,
-                                 Name = myTeam.Team.Name
-                             },
-                             Opponent = new TeamDto
-                             {
-                                 IdTeam = opponentTeam.IdTeam,
-                                 Name = opponentTeam.Team.Name
-                             },
-                             pitchGame = new PitchDto 
-                             {
-                                 Name = pitch.Name,
-                                 Address = pitch.Address
-                             }
-                         })
+                               let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == idTeam)
+                               let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != idTeam)
+
+                               select new InfoMatchCalendar
+                               {
+                                   IdMatch = m.Id,
+                                   MatchStatus = m.MatchStatus,
+                                   GameDate = m.MatchDate,
+                                   MatchResult = myTeam.MatchResult,
+                                   Result = m.MatchStatus == MatchStatus.DONE
+                                      ? (myTeam.NumGoals + " - " + opponentTeam.NumGoals)
+                                      : "x-x",
+                                   Team = new TeamDto
+                                   {
+                                       IdTeam = idTeam,
+                                       Name = myTeam.Team.Name
+                                   },
+                                   Opponent = new TeamDto
+                                   {
+                                       IdTeam = opponentTeam.IdTeam,
+                                       Name = opponentTeam.Team.Name
+                                   },
+                                   pitchGame = new PitchDto
+                                   {
+                                       Name = pitch.Name,
+                                       Address = pitch.Address
+                                   }
+                               })
                          .ToListAsync();
 
             return query;
@@ -146,12 +146,12 @@ namespace Infrastructure.Repositories
                 {
                     query = query.Where(m => m.MatchStatus == MatchStatus.DONE);
                 }
-                else 
+                else
                 {
                     query = query.Where(m => m.MatchStatus == MatchStatus.SCHEDULED);
                 }
             }
-            else 
+            else
             {
                 query = query.Where(m => m.MatchStatus == MatchStatus.SCHEDULED ||
                                          m.MatchStatus == MatchStatus.DONE);
@@ -159,20 +159,20 @@ namespace Infrastructure.Repositories
 
             if (filter.IsRanqued.HasValue)
             {
-                if(filter.IsRanqued.Value)
+                if (filter.IsRanqued.Value)
                 {
                     query = query.Where(m => m.IsCompetive == true);
                 }
-                else 
+                else
                 {
                     query = query.Where(m => m.IsCompetive == false);
                 }
             }
 
-           
+
             if (filter.IsHome.HasValue)
             {
-                if (filter.IsHome.Value) 
+                if (filter.IsHome.Value)
                 {
                     query = query.Where(m => m.idPitch == m.Teams
                                         .FirstOrDefault(tm => tm.IdTeam == idTeam).Team.IdPitch);
@@ -218,7 +218,7 @@ namespace Infrastructure.Repositories
                     MatchResult = x.MyTeam.MatchResult,
                     Result = x.Match.MatchStatus == MatchStatus.DONE
                            ? (x.MyTeam.NumGoals + " - " + x.OpponentTeam.NumGoals)
-                           : "x-x", 
+                           : "x-x",
                     Team = new TeamDto
                     {
                         IdTeam = idTeam,
@@ -336,7 +336,7 @@ namespace Infrastructure.Repositories
                     nameTeam = x.MyTeam.Name,
                     IdOpponent = x.OpponentTeam.Id,
                     nameOpponent = x.OpponentTeam.Name,
-                }) 
+                })
                 .ToListAsync();
 
             return list;

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Exceptions
 {
-    public class BusinessRuleException: Exception
+    public class BusinessRuleException : Exception
     {
         public BusinessRuleException()
         {

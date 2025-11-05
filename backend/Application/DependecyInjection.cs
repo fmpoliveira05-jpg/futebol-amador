@@ -36,7 +36,7 @@ namespace Application
             services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
             services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
             services.AddScoped<IChatRoomService, FirebaseChatService>();
-            
+
             return services;
         }
 
@@ -53,7 +53,7 @@ namespace Application
         {
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
-            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>(); 
+            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>();
 
             return services;
         }

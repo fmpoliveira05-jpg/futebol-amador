@@ -11,7 +11,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
         #region Variables
         private MatchMakerService service;
         private readonly DateTime gameDate = DateTime.Now.AddDays(7).Date.AddHours(10);
-        private readonly DateTime gameDateAfternoon = DateTime.Now.AddDays(7).Date.AddHours(16); 
+        private readonly DateTime gameDateAfternoon = DateTime.Now.AddDays(7).Date.AddHours(16);
         private readonly string city = "Lisbon";
         private readonly string rankGold = "Gold";
         private readonly string rankSilver = "Silver";
@@ -115,15 +115,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             // --- Equipas da Data 1 (Manhã) ---
             // Par 1 (Tight): T1 (500) e T2 (520)
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, date1));
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 26, 520, date1)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 26, 520, date1));
             // Par 2 (Tight): T3 (580) e T4 (590)
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 30, 580, date1));
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 31, 590, date1)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 31, 590, date1));
             // Par 3 (Porto): T5 (550) e T6 (560)
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 22, 550, date1)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 23, 560, date1)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 22, 550, date1));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 23, 560, date1));
             // Par 4 (Loose): T7 (700) e T8 (750)
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 700, date1)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 700, date1));
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 35, 750, date1)); // (Age diff 10, Pts diff 50)
             // Equipa Solitária (Falha Ponto Window)
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankPlatinum, "Lisbon", 40, 900, date1));
@@ -133,18 +133,18 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 800, date1));
             teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 50, 810, date1)); // (Age diff 25)
             // Equipa Solitária (Sem ninguém perto)
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 1500, date1)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 2000, date1)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 2500, date1)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 3000, date1)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 1500, date1));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 2000, date1));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 2500, date1));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Coimbra", 25, 3000, date1));
 
             // --- Equipas da Data 2 (Tarde) ---
             // Par 1 (Tight): T17 (500) e T18 (520)
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, date2)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 26, 520, date2)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, date2));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 26, 520, date2));
             // Solitárias
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 25, 500, date2)); 
-            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Faro", 30, 800, date2)); 
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankGold, "Porto", 25, 500, date2));
+            teams.Add(CreateTestEntry(Guid.NewGuid(), rankSilver, "Faro", 30, 800, date2));
 
             return teams;
         }
@@ -231,7 +231,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var criteria = new CriteriaMatchMaker
             {
                 differencPoints = 50,
-                diffAverageAge = 5   
+                diffAverageAge = 5
             };
             var teamsInSearch = GetTwentyMockEntries(gameDate, gameDateAfternoon);
 
@@ -264,9 +264,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var criteria = new CriteriaMatchMaker { differencPoints = 100, diffAverageAge = 10 };
             var teamsInSearch = new List<EntryRankMatchMakerHub>
             {
-                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, gameDate), 
+                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, gameDate),
                 CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 26, 510, gameDate),
-                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 27, 520, gameDate) 
+                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 27, 520, gameDate)
             };
 
             var result = service.LogicMatchMaker(teamsInSearch, criteria);
@@ -281,7 +281,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
             var teamsInSearch = new List<EntryRankMatchMakerHub>
             {
                 CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, gameDate),
-                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, gameDateAfternoon) 
+                CreateTestEntry(Guid.NewGuid(), rankGold, "Lisbon", 25, 500, gameDateAfternoon)
             };
 
             var result = service.LogicMatchMaker(teamsInSearch, criteria);

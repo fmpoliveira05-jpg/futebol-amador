@@ -11,10 +11,10 @@ using System.Collections.Concurrent;
 
 namespace Application.Services.Hub
 {
-    public class ManagerFinishMatchService: IManagerFinishMatchService
+    public class ManagerFinishMatchService : IManagerFinishMatchService
     {
         #region Initialization
-        private readonly IMatchRepository matchRepository; 
+        private readonly IMatchRepository matchRepository;
         private readonly IUnityOfWork unityOfWork;
         private readonly IFinishMatchValidator validator;
         private readonly IGeralHubValidator geralValidator;
@@ -32,14 +32,14 @@ namespace Application.Services.Hub
 
         #region public Methods
         public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
-        {  
+        {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
-            
+
             EntryHubFinishMatch entry;
             var match = await matchRepository.GetMatchWithListPlayerById(matchId);
             validator.ValidateMatchJoinMatch(match);
 
-            var teamMatchAdmin = match.Teams.FirstOrDefault(ts => 
+            var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
                 ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
             );
 
@@ -64,7 +64,7 @@ namespace Application.Services.Hub
                 result.IsFirstAdmin = true;
                 result.MatchFinish = false;
             }
-            else 
+            else
             {
                 result.IsFirstAdmin = false;
                 result.MatchFinish = true;
@@ -93,7 +93,7 @@ namespace Application.Services.Hub
         public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
-   
+
             var match = await matchRepository.GetMatchWithListPlayerById(matchId);
             validator.ValidateMatchJoinMatch(match);
 
@@ -160,7 +160,7 @@ namespace Application.Services.Hub
             return await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId);
         }
         #endregion
-        
+
         #region private Methods
         private static string GetHubCacheKey(Guid matchId)
         {
@@ -191,7 +191,7 @@ namespace Application.Services.Hub
             Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
         {
             var opponententry = hub?.FirstOrDefault(kvp => kvp.Key != team.IdTeam).Value;
-            
+
             if (opponententry == null)
             {
                 result.IsCoincides = false;
@@ -257,22 +257,23 @@ namespace Application.Services.Hub
             var team = teamStatistic.Team;
             var rank = team.Rank;
 
-            switch(teamStatistic.MatchResult) {
+            switch (teamStatistic.MatchResult)
+            {
                 case MatchResult.WIN:
-                {
-                    team.CurrentPoints += rank.WinPoints;
-                    break;
-                }
-                case MatchResult.DRAW: 
-                {
-                    team.CurrentPoints += rank.DrawPoints;  
-                    break;
-                }
+                    {
+                        team.CurrentPoints += rank.WinPoints;
+                        break;
+                    }
+                case MatchResult.DRAW:
+                    {
+                        team.CurrentPoints += rank.DrawPoints;
+                        break;
+                    }
                 case MatchResult.LOSE:
-                {
-                    team.CurrentPoints += rank.LosePoints;
-                    break;
-                }
+                    {
+                        team.CurrentPoints += rank.LosePoints;
+                        break;
+                    }
             }
 
             ValidatePromotionOrDepromotionTeam(team);
@@ -283,7 +284,8 @@ namespace Application.Services.Hub
             var nextRank = team.Rank.NextRank;
             var previousRank = team.Rank.PreviousRank;
 
-            if (team.CurrentPoints >= team.Rank.PointsToPromotion) {
+            if (team.CurrentPoints >= team.Rank.PointsToPromotion)
+            {
                 team.Rank = nextRank;
             }
             else if (team.CurrentPoints < previousRank.PointsToPromotion)

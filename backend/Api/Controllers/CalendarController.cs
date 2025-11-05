@@ -19,7 +19,7 @@ namespace Api.Controllers
         private readonly IMatchService matchController;
         private readonly IStartMatchHubClientService startMatchHubClientService;
         private readonly IFinishMatchHubClientService finishMatchHubClientService;
-        
+
         public CalendarController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService,
             IFinishMatchHubClientService finishMatchHubClientService)
         {
@@ -46,11 +46,11 @@ namespace Api.Controllers
                 {
                     matches = await matchController.GetCalendarWithFilters(idTeam, filters);
                 }
-                else 
+                else
                 {
                     matches = await matchController.GetCalendar(idTeam);
                 }
-                    
+
                 return Ok(matches);
             }
             catch (BusinessRuleException ex)
@@ -104,7 +104,7 @@ namespace Api.Controllers
                 return BadRequest("O id da equipa não pode estar vazio");
             }
 
-            if(idMatch == Guid.Empty)
+            if (idMatch == Guid.Empty)
             {
                 return BadRequest("O id da partida está vazio");
             }
@@ -195,14 +195,14 @@ namespace Api.Controllers
                 return BadRequest("Não foi mandado o resultado da equipa");
             }
 
-            if(idTeam != result.IdTeam)
+            if (idTeam != result.IdTeam)
             {
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
             await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.EditResultMatchAsync(result);
-  
+
             return Ok("Resultado alterado com sucesso");
         }
 

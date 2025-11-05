@@ -33,7 +33,7 @@ namespace Application.DTOs.RankMatchMaker
 
         [Required]
         public DateTime GameDate { get; set; }
-        
+
         /**
          True --> pode subir ou descer
          False --> vai jogar apenas com teams do mesmo rank

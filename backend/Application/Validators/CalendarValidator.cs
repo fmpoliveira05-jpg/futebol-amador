@@ -8,7 +8,7 @@ using Domain.Exceptions;
 
 namespace Application.Validators
 {
-    public class CalendarValidator: ICalendarValidator
+    public class CalendarValidator : ICalendarValidator
     {
         public void ValidateTeamCalendar(Guid idTeam)
         {
@@ -34,7 +34,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto) 
+        public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto)
         {
             if (dto.IdMatch == Guid.Empty)
             {
@@ -56,7 +56,7 @@ namespace Application.Validators
                 throw new ArgumentException("O id do opponent está vazio");
             }
         }
-        public void ValidatorPostPoneMatch(Matches match, DateTime newDate, TeamStatistics team, Guid idTeam, 
+        public void ValidatorPostPoneMatch(Matches match, DateTime newDate, TeamStatistics team, Guid idTeam,
             TeamStatistics opponetTeam, Guid idOpponnent)
         {
             if (match == null)
@@ -137,7 +137,8 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent) {
+        public void ValidateCancelMatch(Matches match, TeamStatistics team, Guid idTeam, TeamStatistics opponent, Guid idOpponent)
+        {
             if (match == null)
             {
                 throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
@@ -232,7 +233,7 @@ namespace Application.Validators
 
             if (filter.MinDateGame.HasValue && filter.MaxDateGame.HasValue)
             {
-                if (filter.MinDateGame.Value > filter.MaxDateGame.Value) 
+                if (filter.MinDateGame.Value > filter.MaxDateGame.Value)
                 {
                     throw new InvalidOperationException("A data minima de jogo não pode superior há data máxima");
                 }
@@ -308,7 +309,8 @@ namespace Application.Validators
             }
         }
 
-        private static void ValidateNumGoals(int numGoals) {
+        private static void ValidateNumGoals(int numGoals)
+        {
             if (numGoals < 0)
             {
                 throw new InvalidOperationException("O número de golos de uma equipa não pode ser menor que 0");

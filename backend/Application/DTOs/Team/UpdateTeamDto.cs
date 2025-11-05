@@ -14,7 +14,7 @@ namespace Application.DTOs.Team
         public byte[]? icon { get; set; }
 
         [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
-        public string? PitchName{ get; set; }
+        public string? PitchName { get; set; }
 
         [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string? PitchLocation { get; set; }

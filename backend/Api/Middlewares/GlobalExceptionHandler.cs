@@ -1,4 +1,4 @@
-﻿using Domain.Exceptions; 
+﻿using Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

@@ -21,7 +21,7 @@ namespace Domain.Entities
         public DateTime MatchDate { get; set; }
 
         public DateTime? TimeStart { get; set; } = null;
-        
+
         [Required]
         public bool IsCompetive { get; set; } //Se o match é a valer para o rank ou é so amigável
 
@@ -60,7 +60,8 @@ namespace Domain.Entities
             {
                 this.Chat = chat;
                 this.IdChat = Chat.Id;
-            } else
+            }
+            else
             {
                 this.Chat = new Chat();
                 this.IdChat = this.Chat.Id;

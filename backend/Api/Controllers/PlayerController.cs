@@ -3,11 +3,10 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Domain.Exceptions;
 
 namespace Api.Controllers
 {
@@ -38,7 +37,7 @@ namespace Api.Controllers
                 return Unauthorized();
             }
 
-            var newPlayerId = await playerService.CreatePlayerAsync(userId,email,playerDto);
+            var newPlayerId = await playerService.CreatePlayerAsync(userId, email, playerDto);
 
             return CreatedAtAction(
                     nameof(GetPlayer),
@@ -48,7 +47,7 @@ namespace Api.Controllers
         }
 
         [HttpDelete("{playerId:required}")]
-        public async Task<IActionResult> DeletePlayer(string playerId) 
+        public async Task<IActionResult> DeletePlayer(string playerId)
         {
             await playerService.DeletePlayerAsync(playerId);
 
@@ -91,7 +90,7 @@ namespace Api.Controllers
             {
                 return Unauthorized();
             }
-            
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);

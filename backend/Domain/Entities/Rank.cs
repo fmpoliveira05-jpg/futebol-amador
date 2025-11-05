@@ -13,7 +13,7 @@ namespace Domain.Entities
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        [StringLength(ModelConstants.RankConts.MaxNameLength, MinimumLength = ModelConstants.RankConts.MinNameLength)] 
+        [StringLength(ModelConstants.RankConts.MaxNameLength, MinimumLength = ModelConstants.RankConts.MinNameLength)]
         public string Name { get; set; }
 
         [Required]

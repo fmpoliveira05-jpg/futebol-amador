@@ -30,7 +30,8 @@ namespace Domain.Entities
 
         public CancelledMatch() { }
 
-        public CancelledMatch(Team team, Matches match, string description) { 
+        public CancelledMatch(Team team, Matches match, string description)
+        {
             this.Team = team;
             this.IdTeam = team.Id;
             this.Match = match;

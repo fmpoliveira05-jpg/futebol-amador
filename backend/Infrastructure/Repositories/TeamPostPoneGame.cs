@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class TeamPostPoneGame: ITeamPostPoneGameRepository
+    public class TeamPostPoneGame : ITeamPostPoneGameRepository
     {
         private readonly AmateurFootballContext context;
 

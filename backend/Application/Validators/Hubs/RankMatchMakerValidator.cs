@@ -41,7 +41,7 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("Não pode marcar um jogo para este domingo uma vez que já tem um jogo marcado a pelo menos 12 horas do jogo a marcar");
             }
 
-            if(differenteHoursNowAndGame <= 12)
+            if (differenteHoursNowAndGame <= 12)
             {
                 throw new InvalidOperationException("Não pode marcar um jogo para este domingo, porque está a menos de 12 horas da hora do jogo");
             }
@@ -57,7 +57,7 @@ namespace Application.Validators.Hubs
 
         public void ValidateJoinRankMatchMaker(Team team, float averageAge, string city, bool? findUser, ConcurrentDictionary<Guid, EntryRankMatchMakerHub>? hub)
         {
-            if(!findUser.HasValue || !findUser.Value)
+            if (!findUser.HasValue || !findUser.Value)
             {
                 throw new NotFindException("O administrador que quer procurar uma partida ranqueada não existe");
             }

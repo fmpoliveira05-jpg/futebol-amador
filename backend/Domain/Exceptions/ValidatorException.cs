@@ -1,6 +1,6 @@
 ﻿namespace Domain.Exceptions
 {
-    public class ValidatorException: Exception
+    public class ValidatorException : Exception
     {
         public ValidatorException()
         {

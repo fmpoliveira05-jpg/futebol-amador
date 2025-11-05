@@ -6,7 +6,7 @@ namespace Application.DTOs.Membership
     {
         [Required]
         public Guid IdPlayer { get; set; }
-        
+
         [Required]
         public Guid IdTeam { get; set; }
 

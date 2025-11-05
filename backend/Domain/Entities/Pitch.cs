@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Domain.Constants;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 /***
  * Entidade que representa um campo de jogo no sistema.
  */
-namespace Domain.Entities {
+namespace Domain.Entities
+{
     public class Pitch
     {
         [Key]

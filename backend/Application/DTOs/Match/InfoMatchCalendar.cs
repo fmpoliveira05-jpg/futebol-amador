@@ -15,7 +15,7 @@ namespace Application.DTOs.Match
 
         [Required]
         public DateTime GameDate { get; set; }
-        
+
         public string? Result { get; set; }
 
         [Required]

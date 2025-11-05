@@ -1,9 +1,9 @@
-﻿using Infrastructure.Data;
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
+using Infrastructure.Data;
 
 namespace Infrastructure.Repositories
 {
-    public class UnityOfWork: IUnityOfWork
+    public class UnityOfWork : IUnityOfWork
     {
         private readonly AmateurFootballContext context;
 

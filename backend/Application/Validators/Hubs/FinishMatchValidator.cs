@@ -35,12 +35,12 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("O número de golos das equipas não pode ser negativo");
             }
 
-            if (finishMatch.IdTeam == Guid.Empty) 
+            if (finishMatch.IdTeam == Guid.Empty)
             {
                 throw new ArgumentException("O id da sua equipa é obrigatório");
             }
 
-            if (finishMatch.IdOpponent == Guid.Empty) 
+            if (finishMatch.IdOpponent == Guid.Empty)
             {
                 throw new ArgumentException("O id da equipa adversária é obrigatório");
             }
@@ -77,7 +77,8 @@ namespace Application.Validators.Hubs
                 throw new InvalidOperationException("Já existe um admin desta equipa a iniciar a partida");
             }
 
-            if (hub.Count >= 2) {
+            if (hub.Count >= 2)
+            {
                 throw new InvalidOperationException("Apenas do 2 admins (um de cada equipa) pode aceder a esta funcionalidade");
             }
         }

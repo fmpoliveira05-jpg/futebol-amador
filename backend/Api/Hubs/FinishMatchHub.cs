@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
 {
-    public class FinishMatchHub: Hub<IFinishMatchHub>
+    public class FinishMatchHub : Hub<IFinishMatchHub>
     {
         private readonly IManagerFinishMatchService managerFinishMatchService;
         private readonly IHubFinshMatchValidator validator;
@@ -31,7 +31,7 @@ namespace Api.Hubs
             var groupName = GetGroupName(idMatch);
 
             try
-            {                
+            {
                 result = await managerFinishMatchService.JoinHubAsync(idMatch, finishMatch, userId, connectionId);
             }
             catch (ArgumentException ex)
@@ -47,7 +47,7 @@ namespace Api.Hubs
 
             Context.Items[ModelConstants.FinishMatchHubConst.ContentMatchId] = idMatch;
             Context.Items[ModelConstants.FinishMatchHubConst.ContentTeamId] = result.IdTeam;
-            
+
             if (result.IsCoincides.HasValue)
             {
                 await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
@@ -61,7 +61,7 @@ namespace Api.Hubs
             var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
             JoinFinishMatch result;
-            
+
             try
             {
                 result = await managerFinishMatchService.UpdateResult(idMatch, finishMatch, userId, connectionId);
@@ -84,7 +84,7 @@ namespace Api.Hubs
                 throw new HubException(ex.Message);
             }
 
-            await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);    
+            await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
         }
 
         public async Task LeaveFinishMatch()

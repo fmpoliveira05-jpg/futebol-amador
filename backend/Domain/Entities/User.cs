@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Domain.Constants;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Entities
 {
@@ -22,7 +22,7 @@ namespace Domain.Entities
 
         [Required]
         [StringLength(ModelConstants.UserConst.MaxEmailLength, MinimumLength = ModelConstants.UserConst.MinEmailLength)]
-        [EmailAddress(ErrorMessage = "Invalid email format")] 
+        [EmailAddress(ErrorMessage = "Invalid email format")]
         public string Email { get; set; }
 
         [Required]
@@ -36,7 +36,7 @@ namespace Domain.Entities
         protected User() { }
 
         // Construtor público para inicializar todas as propriedades obrigatórias
-        public User(string Id,string name, DateOnly dateOfBirth, string address, string email, string phone)
+        public User(string Id, string name, DateOnly dateOfBirth, string address, string email, string phone)
         {
             this.Id = Id;
             this.Name = name;

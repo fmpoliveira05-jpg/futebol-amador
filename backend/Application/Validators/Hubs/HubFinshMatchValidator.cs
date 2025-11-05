@@ -2,7 +2,7 @@
 
 namespace Application.Validators.Hubs
 {
-    public class HubFinshMatchValidator: IHubFinshMatchValidator
+    public class HubFinshMatchValidator : IHubFinshMatchValidator
     {
         public void ValidateIsCoincide(bool? isCoincide)
         {

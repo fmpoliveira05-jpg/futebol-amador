@@ -2,7 +2,6 @@
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Authentication;
 
 namespace Api.Extensions
 {

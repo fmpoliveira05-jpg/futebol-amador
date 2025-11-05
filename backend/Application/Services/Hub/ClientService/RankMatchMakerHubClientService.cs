@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
 {
-    public class RankMatchMakerHubClientService: IRankMatchMakerHubClientService
+    public class RankMatchMakerHubClientService : IRankMatchMakerHubClientService
     {
         private HubConnection connection = null!;
 

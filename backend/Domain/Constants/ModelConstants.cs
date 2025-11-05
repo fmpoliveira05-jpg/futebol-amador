@@ -73,18 +73,18 @@
             public const int MaxMessageLength = 250;
         }
 
-        public static class CancelledMatchConst 
+        public static class CancelledMatchConst
         {
             public const int MinDescriptionLength = 1;
             public const int MaxDescriptionLength = 50;
         }
 
-        public static class StartMatchHubConst 
+        public static class StartMatchHubConst
         {
             public const string PrefixGroupName = "StartMatchhub-";
             public const string PrefixHubCache = "StartMatchhub-";
         }
-       
+
         public static class FinishMatchHubConst
         {
             public const string ContentMatchId = "HubMatchId";
@@ -93,12 +93,14 @@
             public const string PrefixGroupName = "hubFinishMatch-";
         }
 
-        public static class RankMatchMakerHubConst {
+        public static class RankMatchMakerHubConst
+        {
             public const string ContentTeamId = "HubTeamId";
             public const string PrefixGroupName = "RankMatchhub-";
         }
 
-        public static class ManagerRankMatchMakerServiceConst {
+        public static class ManagerRankMatchMakerServiceConst
+        {
             public const string PrefixHubCache = "matchRankMaker-";
             public const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
         }
@@ -117,7 +119,7 @@
             public const int maxDifferencePoint = 20;
         }
 
-        public static class HoursValidToCompetitiveMatch 
+        public static class HoursValidToCompetitiveMatch
         {
             public static readonly TimeOnly MORNING = new TimeOnly(10, 0, 0);
             public static readonly TimeOnly AFTERNOON = new TimeOnly(16, 0, 0);

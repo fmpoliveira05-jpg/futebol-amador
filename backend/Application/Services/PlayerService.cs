@@ -5,7 +5,6 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,9 +21,9 @@ namespace Application.Services
         private readonly ITeamService teamService;
 
 
-        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository, 
+        public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator, IUserRepository userRepository, 
+            IPlayerValidator playerValidator, IUserRepository userRepository,
             ITeamService teamService)
         {
             this.playerRepository = playerRepository;
@@ -53,9 +52,9 @@ namespace Application.Services
             };
 
             await playerRepository.AddAsync(player);
-            
+
             await unityOfWork.SaveChangesAsync();
-            
+
             return player.Id;
         }
 
@@ -66,7 +65,7 @@ namespace Application.Services
             if (playerToDelete == null)
             {
                 throw new Exception($"Player with ID {playerId} not found.");
-            }    
+            }
 
             playerRepository.DeletePlayer(playerToDelete);
 

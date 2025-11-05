@@ -1,9 +1,9 @@
-﻿using Domain.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces.Services;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.MatchInvites;
-using Application.DTOs.Filters;
+using Application.Interfaces.Services;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {

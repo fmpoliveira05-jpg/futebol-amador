@@ -9,7 +9,7 @@ namespace Application.DTOs.PlayerDTOs
         [Required]
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string Name { get; set; } = null!;
-        
+
         [Required]
         public DateOnly DateOfBirth { get; set; }
 
@@ -23,7 +23,7 @@ namespace Application.DTOs.PlayerDTOs
 
         [Required]
         [MinLength(ModelConstants.UserConst.SizePhoneNumber), MaxLength(ModelConstants.UserConst.SizePhoneNumber)]
-        public string Phone {  get; set; } = null!;
+        public string Phone { get; set; } = null!;
 
         [Required]
         public Position Position { get; set; }

@@ -1,6 +1,6 @@
 ﻿namespace Domain.Exceptions
 {
-    public class EmptyCollectionException: Exception
+    public class EmptyCollectionException : Exception
     {
         public EmptyCollectionException()
         {

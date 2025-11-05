@@ -1,10 +1,8 @@
 ﻿using Application.DTOs.Chat;
-using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
-using Google.Api;
 using Google.Cloud.Firestore;
 
 namespace Application.Services
@@ -23,7 +21,7 @@ namespace Application.Services
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            PlayerValidator = new PlayerValidator(); 
+            PlayerValidator = new PlayerValidator();
         }
 
         public async Task<string> CreateMatchRoomAsync(CreateChatRoomRequestDto request, string createdByUserId)
@@ -31,10 +29,8 @@ namespace Application.Services
             // Criar uma lista de membros única (HashSet evita duplicados)
             var memberIds = new HashSet<string> { createdByUserId };
 
-            // 2. Ir à sua base de dados principal buscar os membros das equipas
             foreach (var teamId in request.TeamIds)
             {
-                //Adiciona os admins das equipas como membros da sala
                 //adicionar verificação se a equipa existe e se os membros existem
                 List<string> userIds = await TeamRepository.GetAdminsIdsByTeamIdAsync(teamId);
                 foreach (var id in userIds)
@@ -48,7 +44,7 @@ namespace Application.Services
             {
                 { "name", request.RoomName },
                 { "createdBy", createdByUserId },
-                { "members", memberIds.ToList() }, 
+                { "members", memberIds.ToList() },
                 { "createdAt", Timestamp.GetCurrentTimestamp() }
             };
 
@@ -113,7 +109,7 @@ namespace Application.Services
 
                     var chatRoomDto = new ChatRoomDto
                     {
-                        RoomId = documentSnapshot.Id, 
+                        RoomId = documentSnapshot.Id,
                         RoomName = roomName,
                         MemberIds = participantIds
                     };

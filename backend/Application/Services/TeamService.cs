@@ -206,7 +206,8 @@ namespace Application.Services
             var existingTeam = await existingTeamTask;
             var playerAccepting = await playerAcceptingTask;
 
-            if (existingTeam.MembershipRequests == null) { 
+            if (existingTeam.MembershipRequests == null)
+            {
                 existingTeam.MembershipRequests = new List<MembershipRequest>();
             }
 
@@ -292,7 +293,7 @@ namespace Application.Services
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(Guid teamId, string adminUserId, FilterMembershipRequestsTeam filters)
         {
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
-            
+
             var admin = await PlayerRepository.GetPlayerByIdAsync(adminUserId);
 
             if (existingTeam.MembershipRequests == null)

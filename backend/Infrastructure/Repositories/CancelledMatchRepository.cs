@@ -4,7 +4,7 @@ using Infrastructure.Data;
 
 namespace Infrastructure.Repositories
 {
-    public class CancelledMatchRepository: ICancelledMatchRepository
+    public class CancelledMatchRepository : ICancelledMatchRepository
     {
         private readonly AmateurFootballContext context;
 

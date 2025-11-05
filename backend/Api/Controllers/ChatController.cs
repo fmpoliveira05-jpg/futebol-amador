@@ -1,8 +1,8 @@
-﻿using Application.Interfaces.Services; 
+﻿using Application.DTOs.Chat; // Ou onde quer que o seu DTO esteja
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using Application.DTOs.Chat; // Ou onde quer que o seu DTO esteja
 namespace Api.Controllers;
 
 [ApiController]

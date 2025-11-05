@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
 {
-    public class FinishMatchHubClientService: IFinishMatchHubClientService
+    public class FinishMatchHubClientService : IFinishMatchHubClientService
     {
         private HubConnection connection = null!;
 
@@ -63,7 +63,7 @@ namespace Application.Services.Hub.ClientService
          */
         public async Task EditResultMatchAsync(ResultMatchDto result)
         {
-            await ConnectAsync(); 
+            await ConnectAsync();
             await connection.InvokeAsync("EditResult", result);
         }
 
@@ -72,7 +72,7 @@ namespace Application.Services.Hub.ClientService
          */
         public async Task LeaveFinishMatchAsync()
         {
-            await ConnectAsync(); 
+            await ConnectAsync();
             await connection.InvokeAsync("LeaveFinishMatch");
         }
     }

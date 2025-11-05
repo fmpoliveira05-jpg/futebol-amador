@@ -16,7 +16,7 @@ namespace Domain.Entities
         [Required]
         [ForeignKey("Sender")]
         public Guid IdSender { get; set; } //FK
-        
+
         public Team Receiver { get; set; }
 
         [Required]

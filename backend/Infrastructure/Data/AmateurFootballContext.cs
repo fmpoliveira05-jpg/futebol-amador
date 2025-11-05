@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
@@ -18,7 +18,7 @@ namespace Infrastructure.Data
         public DbSet<CancelledMatch> CancelledMatch { get; set; } = null!;
         public DbSet<TeamStatistics> TeamStatistics { get; set; } = null!;
         public DbSet<Message> Message { get; set; } = null!;
-        public DbSet<Chat> Chat { get; set; } = null!;     
+        public DbSet<Chat> Chat { get; set; } = null!;
         public DbSet<MatchInvite> MatchInvite { get; set; } = null!;
         public DbSet<MembershipRequest> MembershipRequests { get; set; } = null!;
         public AmateurFootballContext(DbContextOptions<AmateurFootballContext> options)
@@ -36,7 +36,7 @@ namespace Infrastructure.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            
+
             // 🔹 PostPoneMatch → Team
             modelBuilder.Entity<PostPoneMatch>()
                 .HasOne(p => p.Team)

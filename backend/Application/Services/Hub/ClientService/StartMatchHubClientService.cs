@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
 {
-    public class StartMatchHubClientService: IStartMatchHubClientService
+    public class StartMatchHubClientService : IStartMatchHubClientService
     {
         private HubConnection connection = null!;
 

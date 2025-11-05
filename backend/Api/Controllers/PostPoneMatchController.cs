@@ -3,7 +3,6 @@ using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -11,7 +10,7 @@ namespace Api.Controllers
     [Authorize]
     [Route("api/Team/{idTeam:guid}/[controller]")]
     [ApiController]
-    public class PostPoneMatchController: ControllerBase
+    public class PostPoneMatchController : ControllerBase
     {
         private readonly IMatchService matchController;
 

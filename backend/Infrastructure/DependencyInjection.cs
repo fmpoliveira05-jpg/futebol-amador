@@ -17,7 +17,7 @@ namespace Infrastructure
             return services;
         }
 
-        private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration) 
+        private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AmateurFootballContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -25,7 +25,7 @@ namespace Infrastructure
             return services;
         }
 
-        private static IServiceCollection AddRepositorys(this IServiceCollection services) 
+        private static IServiceCollection AddRepositorys(this IServiceCollection services)
         {
             services.AddScoped<ITeamRepository, TeamRepository>();
             services.AddScoped<IMatchInviteRepository, MatchInviteRepository>();
@@ -42,6 +42,6 @@ namespace Infrastructure
             services.AddScoped<IUserRepository, UserRepository>();
 
             return services;
-        } 
+        }
     }
 }

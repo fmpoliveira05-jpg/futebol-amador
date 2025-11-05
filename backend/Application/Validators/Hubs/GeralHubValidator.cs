@@ -2,7 +2,7 @@
 
 namespace Application.Validators.Hubs
 {
-    public class GeralHubValidator: IGeralHubValidator
+    public class GeralHubValidator : IGeralHubValidator
     {
         public void ValidateIdMatchLeaveMatch(Guid idMatch, Guid idTeam)
         {

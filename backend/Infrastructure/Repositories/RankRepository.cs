@@ -1,9 +1,6 @@
 ﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
-using System;
-using System.Collections.Generic;
-using Domain.Constants;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
@@ -22,13 +19,14 @@ namespace Infrastructure.Repositories
             await DbContext.Rank.AddAsync(rank);
         }
 
-        public async Task AddRankInOtherRankPlaceAsync(Rank rank, Rank nextRank) { 
+        public async Task AddRankInOtherRankPlaceAsync(Rank rank, Rank nextRank)
+        {
             rank.IdNextRank = nextRank.Id;
             rank.IdPreviousRank = nextRank.IdPreviousRank;
             nextRank.IdPreviousRank = nextRank.Id;
             await DbContext.Rank.AddAsync(rank);
             DbContext.Rank.Update(nextRank);
-            
+
         }
 
         public void DeleteRank(Rank rank)
@@ -41,7 +39,7 @@ namespace Infrastructure.Repositories
             return await DbContext.Rank.ToListAsync();
         }
 
-        public async Task<Rank> GetDefaultRankAsync() 
+        public async Task<Rank> GetDefaultRankAsync()
         {
             return await DbContext.Rank.FirstOrDefaultAsync(r => r.IdPreviousRank == null);
         }

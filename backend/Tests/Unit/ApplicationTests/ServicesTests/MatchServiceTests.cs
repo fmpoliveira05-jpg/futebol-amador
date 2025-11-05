@@ -1,5 +1,4 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;

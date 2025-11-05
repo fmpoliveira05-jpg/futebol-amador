@@ -42,7 +42,7 @@ namespace Infrastructure.Repositories
         {
             return await context.MatchInvite
                 .Include(mi => mi.Sender)
-                .Include (mi => mi.Receiver)
+                .Include(mi => mi.Receiver)
                 .Include(mi => mi.Pitch)
                 .FirstOrDefaultAsync(mi => mi.IdSender == idSender && mi.IdReceiver == idReceiver);
         }
@@ -78,7 +78,7 @@ namespace Infrastructure.Repositories
                 .Include(mi => mi.Pitch)
                 .Include(mi => mi.Receiver)
                 .Where(mi => mi.IdReceiver == idReceiver);
-                
+
             if (!string.IsNullOrEmpty(senderName))
             {
                 query = query.Include(mi => mi.Sender)
@@ -88,9 +88,9 @@ namespace Infrastructure.Repositories
             if (minDate != null)
             {
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) >= minDate);
-            } 
+            }
 
-            if (minDate == null) 
+            if (minDate == null)
             {
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) <= maxDate);
             }

@@ -3,11 +3,11 @@ using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static Domain.Constants.ModelConstants;
-using Domain.Enums;
 
 namespace Application.Validators
 {
@@ -200,14 +200,16 @@ namespace Application.Validators
             }
             return valid;
         }
-        public void PlayerHasChatRoomsValidation(Player player) {
+        public void PlayerHasChatRoomsValidation(Player player)
+        {
             PlayerExists(player);
-            
-            
+
+
         }
 
         // acabar! falta ver como buscar as chatrooms do firebase e ver se faz sentido guardar no db do backend tambem
-        private void PlayerHasChatRooms(Player player) { 
+        private void PlayerHasChatRooms(Player player)
+        {
             //if(player.)
         }
 

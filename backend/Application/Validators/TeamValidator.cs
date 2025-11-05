@@ -1,6 +1,5 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Team;
-using Application.Interfaces.Repositories;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
@@ -13,7 +12,7 @@ namespace Application.Validators
     {
         private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
 
-        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank,Team? team, Player? playerCreating)
+        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank, Team? team, Player? playerCreating)
         {
             if (rank == null)
             {
@@ -27,7 +26,8 @@ namespace Application.Validators
             }
 
 
-            if (playerCreating.IdTeam != null) {
+            if (playerCreating.IdTeam != null)
+            {
                 throw new ValidationException($"O jogador com o Id '{playerCreating.Id}' ja possui uma equipa.");
             }
 
@@ -154,7 +154,7 @@ namespace Application.Validators
                 throw new NotFoundException("A equipa não existe.");
             }
             PlayerValidator.PlayerExists(adminPlayer);
-            
+
             ValidatePlayerBelongToTeamAndIsAdmin(team, adminPlayer);
 
             if (team.MembershipRequests == null || !team.MembershipRequests.Any())
@@ -250,7 +250,8 @@ namespace Application.Validators
             }
         }
 
-        public void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting) {
+        public void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting)
+        {
             ValidatePlayerAndTeamExists(team, memberToPromote);
 
             PlayerValidator.PlayerExists(memberPromoting);
@@ -262,7 +263,7 @@ namespace Application.Validators
 
             ValidatePlayerBelongToTeamAndIsAdmin(team, memberPromoting);
 
-            if (!PlayerExistsInTeam(team,memberToPromote))
+            if (!PlayerExistsInTeam(team, memberToPromote))
             {
                 throw new ValidationException($"O Player? de id '{memberToPromote.Id}' não pertence a equipa '{team.Name}'.");
             }
@@ -340,7 +341,7 @@ namespace Application.Validators
         {
             if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
             {
-                if(filter.MinAge > filter.MaxAge)
+                if (filter.MinAge > filter.MaxAge)
                 {
                     throw new InvalidOperationException("A idade mínima do jogador deve ser inferior ou igual há idade máxima");
                 }
@@ -405,7 +406,7 @@ namespace Application.Validators
             if (!team.Members.Contains(Player))
             {
                 return false;
-                
+
             }
             return true;
         }

@@ -161,7 +161,7 @@ namespace Api.Controllers
                             filter.Position.HasValue;
 
 
-            try 
+            try
             {
                 if (hasFilter)
                 {
@@ -270,8 +270,8 @@ namespace Api.Controllers
         private string GetCurrentUserId()
         {
             //validar null
-        return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
+            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
         }
         #endregion
     }

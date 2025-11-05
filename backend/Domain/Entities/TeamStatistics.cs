@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using Domain.Constants;
+﻿using Domain.Constants;
 using Domain.Enums;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 /***
  * Entidade que representa as estatísticas de uma equipa durante uma Partida
@@ -18,7 +18,7 @@ namespace Domain.Entities
         [Required]
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
-        
+
         [Required]
         [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoals { get; set; } = 0;
