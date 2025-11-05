@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories
             this.context = context;
         }
 
-        public async Task<List<User?>> GetAllUsersAsync()
+        public async Task<List<User>> GetAllUsersAsync()
         {
             return await context.User.ToListAsync();
         }

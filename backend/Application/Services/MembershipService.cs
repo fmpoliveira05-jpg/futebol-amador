@@ -35,41 +35,38 @@ namespace Application.Services
 
         #region Pedidos de adesão da Team
 
-        public Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId)
+        public async Task<MemberShipRequestDto> SendMembershipRequest(Guid teamId, string playerIdToInvite, string adminUserId)
         {
-            return _teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
+            var team = await _teamRepository.GetTeamForMemberManagementAsync(teamId);
+            var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
+            var playerToInvite = await _playerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            var existing = await _membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
+
+            _teamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
+            _playerValidator.PlayerExists(playerToInvite);
+
+            var invite = new MembershipRequest
             {
-                var team = await teamTask;
-                var admin = await _playerRepository.GetPlayerByIdAsync(adminUserId);
-                var playerToInvite = await _playerRepository.GetPlayerByIdAsync(playerIdToInvite);
-                var existing = await _membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
+                Id = Guid.NewGuid(),
+                IdPlayer = playerIdToInvite,
+                IdTeam = teamId,
+                InviteDate = DateTime.UtcNow,
+                IsPlayerSender = false
+            };
 
-                _teamValidator.SendMembershipRequestValidation(existing, team, admin, playerToInvite);
-                _playerValidator.PlayerExists(playerToInvite);
+            await _membershipRequestRepository.AddMembershipRequest(invite);
+            await _unityOfWork.SaveChangesAsync();
 
-                var invite = new MembershipRequest
-                {
-                    Id = Guid.NewGuid(),
-                    IdPlayer = playerIdToInvite,
-                    IdTeam = teamId,
-                    InviteDate = DateTime.UtcNow,
-                    IsPlayerSender = false
-                };
-
-                await _membershipRequestRepository.AddMembershipRequest(invite);
-                await _unityOfWork.SaveChangesAsync();
-
-                return new MemberShipRequestDto
-                {
-                    RequestId = invite.Id,
-                    PlayerId = invite.IdPlayer,
-                    PlayerName = playerToInvite.Name,
-                    TeamId = invite.IdTeam,
-                    TeamName = team.Name,
-                    RequestDate = invite.InviteDate,
-                    IsPlayerSender = invite.IsPlayerSender
-                };
-            }).Unwrap();
+            return new MemberShipRequestDto
+            {
+                RequestId = invite.Id,
+                PlayerId = invite.IdPlayer,
+                PlayerName = playerToInvite.Name,
+                TeamId = invite.IdTeam,
+                TeamName = team.Name,
+                RequestDate = invite.InviteDate,
+                IsPlayerSender = invite.IsPlayerSender
+            };
         }
 
         public async Task AcceptMembershipRequest(Guid teamId, Guid requestId, string adminUserId)

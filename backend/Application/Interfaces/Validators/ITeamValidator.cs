@@ -15,9 +15,9 @@ namespace Application.Interfaces.Validators
         void RemovePlayerFromTeamValidation(Team? team, Player? playerRemoving, Player? playerRemoved);
         void GetTeamMembersValidation(Team? team);
         void GetMembershipRequestsValidation(Team? team, Player? adminPlayer);
-        void ApproveMembershipRequestValidation(Team? team, Guid requestToDelete);
-        void RejectMembershipRequestValidation(Team? team, Guid requestToDelete);
-        void SendMembershipRequestValidation(MembershipRequest? mr, Team? team);
+        void ApproveMembershipRequestValidation(Team? team, Player? admin, Guid requestToDelete);
+        void RejectMembershipRequestValidation(Team? team, Player? admin, Guid requestToDelete);
+        void SendMembershipRequestValidation(MembershipRequest? mr, Team? team, Player? admin, Player? playerToInvite);
         void DemoteAdminToMemberValidation(Team? team, Player? adminToDemote, Player? adminDemoting);
         void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting);
         void GetTeamScheduleValidation(Team? team);

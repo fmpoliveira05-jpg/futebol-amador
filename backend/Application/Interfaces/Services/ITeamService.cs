@@ -3,6 +3,7 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.DTOs.Match;
 
 namespace Application.Interfaces.Services
 {
@@ -26,10 +27,6 @@ namespace Application.Interfaces.Services
         Task PromotePlayerToAdminAsync(Guid teamId, string playerIdToPromoteId, string playerPromotingId);
 
         Task DemoteAdminToPlayerAsync(Guid teamId, string adminIdToDemote, string currentAdminId);
-
-        Task<MemberShipRequestDto> SendMembershipRequestAsync(Guid teamId, string playerIdToInvite, string adminUserId);
-        
-        Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
 
         Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam);
 

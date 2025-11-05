@@ -11,25 +11,36 @@ namespace Application.Services
     public class MatchInviteService: IMatchInviteService
     {
         #region Initialization
+        private readonly IMatchInviteRepository MatchInviteRepository;
         private readonly IAuthorizationService AuthorizationService;
         private readonly ITeamRepository TeamRepository;
-        private readonly IMatchInviteRepository MatchInviteRepository;
         private readonly IMatchRepository MatchRepository;
+        private readonly ITeamStatisticsRepository _teamStatisticsRepository;
         private readonly IPitchRepository PitchRepository;
-        private readonly IUnityOfWork UnityOfWork;
         private readonly IMatchInviteValidator MatchInviteValidator;
+        private readonly IUnityOfWork UnityOfWork;
+        private readonly ITeamPostPoneGameRepository _teamPostPoneRepository;
 
-        public MatchInviteService(IAuthorizationService AuthorizationService, ITeamRepository teamRepository, 
-            IMatchInviteRepository matchInviteRepository, IMatchRepository matchRepository, 
-            IPitchRepository pitchRepository, IMatchInviteValidator matchInviteValidator, 
-            IUnityOfWork unityOfWork) {
-            this.AuthorizationService = AuthorizationService;
-            this.TeamRepository = teamRepository; 
-            this.MatchInviteRepository = matchInviteRepository;
-            this.MatchRepository = matchRepository;
-            this.PitchRepository = pitchRepository;
-            this.MatchInviteValidator = matchInviteValidator;
-            this.UnityOfWork = unityOfWork;
+        public MatchInviteService(
+            IMatchInviteRepository matchInviteRepository,
+            ITeamRepository teamRepository,
+            IMatchRepository matchRepository,
+            ITeamStatisticsRepository teamStatisticsRepository,
+            IPitchRepository pitchRepository,
+            IMatchInviteValidator matchInviteValidator,
+            IUnityOfWork unityOfWork,
+            ITeamPostPoneGameRepository teamPostPoneRepository,
+            IAuthorizationService authorizationService)
+        {
+            MatchInviteRepository = matchInviteRepository;
+            TeamRepository = teamRepository;
+            MatchRepository = matchRepository;
+            _teamStatisticsRepository = teamStatisticsRepository;
+            PitchRepository = pitchRepository;
+            MatchInviteValidator = matchInviteValidator;
+            UnityOfWork = unityOfWork;
+            _teamPostPoneRepository = teamPostPoneRepository;
+            AuthorizationService = authorizationService;
         }
         #endregion
 

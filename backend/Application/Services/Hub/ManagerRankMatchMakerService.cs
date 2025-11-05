@@ -35,7 +35,7 @@ namespace Application.Services.Hub
             this.cache = cache;
         }
 
-        public async Task<EntryRankMatchMakerHub?> JoinRankMatchMaker(string idPlayer, 
+        public async Task<EntryRankMatchMakerHub> JoinRankMatchMaker(string idPlayer, 
             Guid idTeam, TimeOnly hoursGame, string connectionId)
         {
             validator.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId);

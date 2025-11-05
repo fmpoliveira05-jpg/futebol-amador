@@ -6,6 +6,7 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
 
@@ -19,6 +20,7 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
+        private readonly IAuthorizationValidator AuthorizationValidator;
         public TeamService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
@@ -34,6 +36,7 @@ namespace Application.Services
             UnityOfWork = unityOfWork;
             TeamValidator = teamValidator;
             RankRepository = rankRepository;
+            AuthorizationValidator = authorizationValidator;
         }
         #endregion
 
