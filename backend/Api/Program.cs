@@ -2,16 +2,9 @@ using Api.Extensions;
 using Api.Hubs.Notification;
 using Api.Middlewares;
 using Application;
-using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
-using Application.Services;
-using Google.Api;
 using Google.Cloud.Firestore;
 using Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
