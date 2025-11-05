@@ -51,7 +51,7 @@ namespace Application.Services
             this.notificationService = notificationService;
         }
 
-        public MembershipService(ITeamRepository object1, IPlayerRepository object2, IMembershipRequestRepository object3, IUnityOfWork object4, TeamValidator teamValidator, PlayerValidator playerValidator, PlayerAuthorizationValidator authorizationValidator1)
+        public MembershipService(ITeamRepository object1, IPlayerRepository object2, IMembershipRequestRepository object3, IUnityOfWork object4, TeamValidator teamValidator, IPlayerValidator playerValidator, PlayerAuthorizationValidator authorizationValidator1)
         {
             this.object1 = object1;
             this.object2 = object2;

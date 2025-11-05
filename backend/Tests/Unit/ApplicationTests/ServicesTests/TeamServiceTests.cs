@@ -50,7 +50,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _rankRepoMock.Object,
             _membershipRequestRepoMock.Object,
             _playerValidatorMock.Object,
-            _authorizationValidator
+            _authorizationValidator,
+            null
             );
         }
         #endregion

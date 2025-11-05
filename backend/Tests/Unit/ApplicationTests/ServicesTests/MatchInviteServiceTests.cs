@@ -42,6 +42,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock = new Mock<IMatchInviteValidator>();
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _authorizationService = new Mock<IPlayerAuthorizationService>();
+            
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
@@ -52,7 +53,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 _validatorMock.Object,
                 _unitOfWorkMock.Object,
                 _teamPostPoneRepoMock.Object,
-                _authorizationService.Object
+                _authorizationService.Object,
+                null
             );
 
             // rank mínimo válido para testes
