@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AmateurFootballContext))]
-    [Migration("20251028180126_ExtendPasswordLength")]
-    partial class ExtendPasswordLength
+    [Migration("20251106142228_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,8 +44,8 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<Guid>("IdMatch")
                         .HasColumnType("uniqueidentifier");
@@ -148,14 +148,16 @@ namespace Infrastructure.Migrations
                     b.ToTable("Match");
                 });
 
-            modelBuilder.Entity("Domain.Entities.MembershipRequests", b =>
+            modelBuilder.Entity("Domain.Entities.MembershipRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdPlayer")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdPlayer")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("IdTeam")
                         .HasColumnType("uniqueidentifier");
@@ -184,15 +186,17 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("ChatId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("IdUser")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("IdUser")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("MessageText")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
 
-                    b.Property<DateTime>("timeStamp")
+                    b.Property<DateTime>("TimeStamp")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
@@ -291,41 +295,11 @@ namespace Infrastructure.Migrations
                     b.ToTable("Rank");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TeamStatistics", b =>
+            modelBuilder.Entity("Domain.Entities.Team", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdTeam")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("MatchResult")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("MatchesId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("NumGoals")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdTeam");
-
-                    b.HasIndex("MatchesId");
-
-                    b.ToTable("TeamStatistics");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Teams", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<float>("AverageAge")
-                        .HasColumnType("real");
 
                     b.Property<int>("CurrentPoints")
                         .HasColumnType("int");
@@ -365,11 +339,38 @@ namespace Infrastructure.Migrations
                     b.ToTable("Team");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Users", b =>
+            modelBuilder.Entity("Domain.Entities.TeamStatistics", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("IdTeam")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MatchResult")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("MatchesId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("NumGoals")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdTeam");
+
+                    b.HasIndex("MatchesId");
+
+                    b.ToTable("TeamStatistics");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -384,15 +385,10 @@ namespace Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
@@ -404,14 +400,14 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
 
                     b.UseTptMappingStrategy();
                 });
 
             modelBuilder.Entity("Domain.Entities.Player", b =>
                 {
-                    b.HasBaseType("Domain.Entities.Users");
+                    b.HasBaseType("Domain.Entities.User");
 
                     b.Property<int>("Height")
                         .HasColumnType("int");
@@ -428,17 +424,14 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Position")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("TeamId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasIndex("TeamId");
+                    b.HasIndex("IdTeam");
 
                     b.ToTable("Player");
                 });
 
             modelBuilder.Entity("Domain.Entities.SuperAdmin", b =>
                 {
-                    b.HasBaseType("Domain.Entities.Users");
+                    b.HasBaseType("Domain.Entities.User");
 
                     b.ToTable("SuperAdmin");
                 });
@@ -451,7 +444,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Team")
+                    b.HasOne("Domain.Entities.Team", "Team")
                         .WithMany()
                         .HasForeignKey("IdTeam")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -476,13 +469,13 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Receiver")
+                    b.HasOne("Domain.Entities.Team", "Receiver")
                         .WithMany("ReceivedInvites")
                         .HasForeignKey("IdReceiver")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Sender")
+                    b.HasOne("Domain.Entities.Team", "Sender")
                         .WithMany("SentInvites")
                         .HasForeignKey("IdSender")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -520,7 +513,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Pitch");
                 });
 
-            modelBuilder.Entity("Domain.Entities.MembershipRequests", b =>
+            modelBuilder.Entity("Domain.Entities.MembershipRequest", b =>
                 {
                     b.HasOne("Domain.Entities.Player", "Player")
                         .WithMany("MembershipRequests")
@@ -528,7 +521,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Team")
+                    b.HasOne("Domain.Entities.Team", "Team")
                         .WithMany("MembershipRequests")
                         .HasForeignKey("IdTeam")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -545,7 +538,7 @@ namespace Infrastructure.Migrations
                         .WithMany("Messages")
                         .HasForeignKey("ChatId");
 
-                    b.HasOne("Domain.Entities.Users", "Actor")
+                    b.HasOne("Domain.Entities.User", "Actor")
                         .WithMany()
                         .HasForeignKey("IdUser")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -562,7 +555,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Team")
+                    b.HasOne("Domain.Entities.Team", "Team")
                         .WithMany()
                         .HasForeignKey("IdTeamPostPone")
                         .OnDelete(DeleteBehavior.NoAction)
@@ -590,26 +583,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("PreviousRank");
                 });
 
-            modelBuilder.Entity("Domain.Entities.TeamStatistics", b =>
-                {
-                    b.HasOne("Domain.Entities.Teams", "Team")
-                        .WithMany()
-                        .HasForeignKey("IdTeam")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Matches", "Match")
-                        .WithMany("Teams")
-                        .HasForeignKey("MatchesId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Match");
-
-                    b.Navigation("Team");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Teams", b =>
+            modelBuilder.Entity("Domain.Entities.Team", b =>
                 {
                     b.HasOne("Domain.Entities.Calendar", "Calendar")
                         .WithMany()
@@ -636,24 +610,43 @@ namespace Infrastructure.Migrations
                     b.Navigation("Rank");
                 });
 
+            modelBuilder.Entity("Domain.Entities.TeamStatistics", b =>
+                {
+                    b.HasOne("Domain.Entities.Team", "Team")
+                        .WithMany()
+                        .HasForeignKey("IdTeam")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Matches", "Match")
+                        .WithMany("Teams")
+                        .HasForeignKey("MatchesId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Match");
+
+                    b.Navigation("Team");
+                });
+
             modelBuilder.Entity("Domain.Entities.Player", b =>
                 {
-                    b.HasOne("Domain.Entities.Users", null)
+                    b.HasOne("Domain.Entities.User", null)
                         .WithOne()
                         .HasForeignKey("Domain.Entities.Player", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Teams", "Team")
+                    b.HasOne("Domain.Entities.Team", "Team")
                         .WithMany("Members")
-                        .HasForeignKey("TeamId");
+                        .HasForeignKey("IdTeam");
 
                     b.Navigation("Team");
                 });
 
             modelBuilder.Entity("Domain.Entities.SuperAdmin", b =>
                 {
-                    b.HasOne("Domain.Entities.Users", null)
+                    b.HasOne("Domain.Entities.User", null)
                         .WithOne()
                         .HasForeignKey("Domain.Entities.SuperAdmin", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -675,7 +668,7 @@ namespace Infrastructure.Migrations
                     b.Navigation("Teams");
                 });
 
-            modelBuilder.Entity("Domain.Entities.Teams", b =>
+            modelBuilder.Entity("Domain.Entities.Team", b =>
                 {
                     b.Navigation("Members");
 

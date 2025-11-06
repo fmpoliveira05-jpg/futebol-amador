@@ -1,9 +1,9 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Pitch;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Application.Validators;
@@ -29,6 +29,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private TeamService _sut;
         private readonly Mock<IMembershipRequestRepository> _membershipRequestRepoMock = new();
         private readonly Mock<IPlayerValidator> _playerValidatorMock = new();
+        private readonly Mock<INotificationService> _notificationServiceMock = new();
         #endregion
 
         #region SetUp
@@ -50,7 +51,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _rankRepoMock.Object,
             _membershipRequestRepoMock.Object,
             _playerValidatorMock.Object,
-            _authorizationValidator
+            _authorizationValidator,
+            _notificationServiceMock.Object
             );
         }
         #endregion
