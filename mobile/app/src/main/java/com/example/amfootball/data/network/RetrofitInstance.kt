@@ -8,7 +8,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object RetrofitInstance {
 
     // MUDE ISTO para o URL base da sua API .NET
-    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev" // link com ngrok
+    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev " // link com ngrok
     //Cria o cliente aqui
     private val okHttpClient = OkHttpClient.Builder()
         .addInterceptor(AuthInterceptor())
