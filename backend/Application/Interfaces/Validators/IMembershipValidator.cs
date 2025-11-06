@@ -8,11 +8,11 @@ namespace Application.Interfaces.Validators
 
         void ValidateSendRequestByTeam(Team team, Player invitedPlayer, MembershipRequest? existingRequest);
 
-        void ValidateAcceptRequestByTeam(Team team, MembershipRequest request);
+        void ValidateAcceptRequestByTeam(Team team, MembershipRequest request, Player playerAccepting);
 
-        void ValidateRejectRequestByTeam(Team team, MembershipRequest request);
+        void ValidateRejectRequestByTeam(Team team, MembershipRequest request, Player player);
 
-        void ValidateGetRequestsByTeam(Team team);
+        void ValidateGetRequestsByTeam(Team team, Player player);
 
         void ValidateAcceptRequestByPlayer(Player player, MembershipRequest request, Team team);
 

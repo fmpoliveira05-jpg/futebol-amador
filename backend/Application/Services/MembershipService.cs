@@ -68,7 +68,6 @@ namespace Application.Services
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToInvite = await playerRepository.GetPlayerByIdAsync(playerIdToInvite);
-            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(playerToInvite);
 
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
@@ -100,15 +99,17 @@ namespace Application.Services
             };
         }
 
-        public async Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId)
+        public async Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
         {
             var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
 
             var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
+            var playerAccepting = await playerRepository.GetPlayerByIdAsync(adminId);
+
             var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
 
-            membershipValidator.ValidateAcceptRequestByTeam(team, request);
+            membershipValidator.ValidateAcceptRequestByTeam(team, request, playerAccepting);
 
             membershipRequestRepository.RemoveMembershipRequest(request);
 
@@ -120,7 +121,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId)
+        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, Player player)
         {
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
             {
@@ -128,7 +129,7 @@ namespace Application.Services
 
                 var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
-                membershipValidator.ValidateRejectRequestByTeam(team, request);
+                membershipValidator.ValidateRejectRequestByTeam(team, request, player);
 
                 membershipRequestRepository.RemoveMembershipRequest(request);
 
@@ -138,19 +139,20 @@ namespace Application.Services
             }).Unwrap();
         }
 
-        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId)
+        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, Player player)
         {
             return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
             {
                 var team = await teamTask;
 
-                membershipValidator.ValidateGetRequestsByTeam(team);
+                membershipValidator.ValidateGetRequestsByTeam(team, player);
 
                 var list = await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
                 return list ?? new List<MemberShipRequestDto>();
             }).Unwrap();
         }
 
+        /*
         public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
         {
             return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
@@ -163,6 +165,7 @@ namespace Application.Services
                 return list ?? new List<MemberShipRequestDto>();
             }).Unwrap();
         }
+        */
 
         #endregion
 

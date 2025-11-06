@@ -42,10 +42,12 @@ namespace Application.Validators
                 throw new ValidationException("O jogador a convidar não existe.");
             }
 
+            /*
             if (invitedPlayer.IdTeam != null)
             {
                 throw new ValidationException("O jogador já pertence a uma equipa.");
             }
+            */
 
             if (existingRequest != null)
             {
@@ -53,7 +55,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateAcceptRequestByTeam(Team team, MembershipRequest request)
+        public void ValidateAcceptRequestByTeam(Team team, MembershipRequest request, Player playerAccepting)
         {
             if (team == null)
             {
@@ -63,6 +65,11 @@ namespace Application.Validators
             if (request == null)
             {
                 throw new ValidationException("O pedido de adesão não existe.");
+            }
+
+            if (!playerAccepting.IsAdmin)
+            {
+                throw new ValidationException("O jogador que tenta aceitar o pedido não é administrador da equipa.");
             }
 
             if (team.Members.Any(m => m.Id == request.IdPlayer))
@@ -71,11 +78,16 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateRejectRequestByTeam(Team team, MembershipRequest request)
+        public void ValidateRejectRequestByTeam(Team team, MembershipRequest request, Player player)
         {
             if (team == null)
             {
                 throw new ValidationException("A equipa não existe.");
+            }
+
+            if (!player.IsAdmin)
+            {
+                throw new ValidationException("O jogador não é administrador da equipa.");
             }
 
             if (request == null)
@@ -84,11 +96,21 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateGetRequestsByTeam(Team team)
+        public void ValidateGetRequestsByTeam(Team team, Player player)
         {
             if (team == null)
             {
                 throw new ValidationException("A equipa não existe.");
+            }
+
+            if (player.Team != team)
+            {
+                throw new ValidationException("O jogador não pertence à equipa.");
+            }
+            
+            if (!player.IsAdmin)
+            {
+                throw new ValidationException("O jogador não é administrador da equipa.");
             }
         }
 
