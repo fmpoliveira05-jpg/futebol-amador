@@ -8,7 +8,7 @@ namespace Application.Validators
         #region Validation User Id
         public void ValidateUserId(string userId)
         {
-            if (!string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId))
             {
                 throw new InvalidOperationException("O id do utilizador está inválido.");
             }

@@ -23,7 +23,7 @@ namespace Application.Validators
             PlayerValidator.PlayerExists(playerCreating);
             if (TeamExists(team))
             {
-                throw new ValidationException($"Já existe uma equipa com o nome'{team.Name}'");
+                throw new NotFoundException($"Já existe uma equipa com o nome'{team.Name}'");
             }
 
 
@@ -157,7 +157,7 @@ namespace Application.Validators
         {
             if (!TeamExists(team))
             {
-                throw new ValidationException($"A equipa não existe.");
+                throw new NotFoundException($"A equipa não existe.");
             }
 
             if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))

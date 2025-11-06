@@ -45,6 +45,7 @@ namespace Api.Controllers
         public async Task<IActionResult> GetTeamById(Guid id)
         {
             var team = await TeamService.GetTeamByIdAsync(id);
+
             return Ok(team);
         }
 
