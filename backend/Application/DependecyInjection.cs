@@ -33,6 +33,7 @@ namespace Application
             services.AddScoped<IMembershipRequestService, MembershipService>();
             services.AddScoped<IChatRoomService, FirebaseChatService>();
             services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
+            services.AddScoped<IAuthService, FireBaseAuthService>();
 
             services.AddManagerHubService();
             services.AddHubServiceClients();
@@ -69,7 +70,7 @@ namespace Application
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
             services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
-            services.AddScoped<IEmailValidator, EmailValidator>();
+            services.AddScoped<IUserDataValidator, UserDataValidator>();
             services.AddScoped<IPlayerAuthorizationValidator, PlayerAuthorizationValidator>();
             services.AddScoped<IMembershipValidator, MembershipValidator>();
             return services;

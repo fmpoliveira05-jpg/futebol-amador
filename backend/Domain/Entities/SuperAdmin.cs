@@ -1,10 +1,13 @@
 ﻿/***
  * Entidade que representa um super administrador no sistema.
  */
+using System.ComponentModel.DataAnnotations;
+
 namespace Domain.Entities
 {
     public class SuperAdmin : User
     {
+        
         public SuperAdmin() { }
 
         public SuperAdmin(string userId,string name, DateOnly dateOfBirth, string address, string email, 
