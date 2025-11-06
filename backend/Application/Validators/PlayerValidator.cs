@@ -13,15 +13,15 @@ namespace Application.Validators
 {
     public class PlayerValidator : IPlayerValidator
     {
-        IEmailValidator emailValidator;
+        IUserDataValidator UserDatalValidator;
 
         public PlayerValidator()
         {
 
         }
-        public PlayerValidator(IEmailValidator emailValidator)
+        public PlayerValidator(IUserDataValidator emailValidator)
         {
-            this.emailValidator = emailValidator;
+            this.UserDatalValidator = emailValidator;
         }
 
         public void PlayerExists(Player? player)
@@ -32,23 +32,19 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User[] players)
+        public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User? phoneUser, User? emailUser)
         {
-            if (players[0] != null)
+            if (emailUser != null)
             {
-                throw new ValidationException($"The email '{players[0].Email}' is already in use.");
+                throw new ValidationException($"The email '{emailUser.Email}' is already in use.");
             }
 
-            if (players[1] != null)
+            if (phoneUser  != null)
             {
-                throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
+                throw new ValidationException($"The phone number '{phoneUser.Phone}' is already in use.");
             }
 
-            if (!emailValidator.IsValid(CreatePlayerDto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
-
+            
             ValidateHeigth(CreatePlayerDto.Height);
 
             ValidateAge(CreatePlayerDto.DateOfBirth);
@@ -91,10 +87,7 @@ namespace Application.Validators
                 }
             }
 
-            if (!emailValidator.IsValid(UpdatePlayerDto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
+            UserDatalValidator.EmailValidation(UpdatePlayerDto.Email);
 
             ValidateHeigth(UpdatePlayerDto.Height);
 

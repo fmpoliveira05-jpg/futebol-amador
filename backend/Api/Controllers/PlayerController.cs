@@ -1,6 +1,8 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs;
+using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.SuperAdmin;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
@@ -13,24 +15,48 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class PlayerController : ControllerBase
     {
         #region Inicializar
         private readonly IPlayerService playerService;
         private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
         private readonly IMembershipRequestService membershipRequestService;
-        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService)
+        private readonly IAuthService authService;
+        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService, IAuthService authService)
         {
             this.playerService = playerService;
             this.playerAuthorizationValidator = playerAuthorizationValidator;
             this.membershipRequestService = membershipRequestService;
+            this.authService = authService;
         }
         #endregion
 
         #region EndPoints
 
         #region CRUD Player
+        /*
+        [HttpPost]
+        [Route("testeCreateFBUser")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TesteCreateFBUser([FromBody] ProfileSetupDto newProfile)
+        { 
+            var nwUserID= await authService.RegisterUser(newProfile.Email, newProfile.Password, newProfile.phoneNumber);
+            return Ok(nwUserID);
+        }
+        
+
+        [HttpDelete]
+        [Route("DELETEUSER")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TesteDeleteFBUser([FromBody] string userId)
+        {
+            authService.DeleteUser(userId);
+            return NoContent();
+        }
+        */
+
+
+
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]

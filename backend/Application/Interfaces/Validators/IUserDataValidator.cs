@@ -11,8 +11,12 @@ using System.Text;
 
 namespace Application.Interfaces.Validators
 {
-    public interface IEmailValidator
+    public interface IUserDataValidator
     {
-        bool IsValid(string email);
+        void EmailValidation(string email);
+
+        void PhoneNumberValidation(string phoneNumber);
+
+        void CreateUserValidation(string newUserId);
     }
 }

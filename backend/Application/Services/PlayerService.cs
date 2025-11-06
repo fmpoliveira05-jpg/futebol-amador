@@ -12,17 +12,23 @@ namespace Application.Services
     {
         #region Initializer
         private readonly IPlayerRepository playerRepository;
-        private readonly ITeamRepository teamRepository;
-        private readonly IUnityOfWork unityOfWork;
-        private readonly IPlayerValidator playerValidator;
         private readonly IUserRepository userRepository;
+        private readonly ITeamRepository teamRepository;
+        
+        private readonly IUnityOfWork unityOfWork;
+        
         private readonly ITeamService teamService;
+        private readonly IAuthService AuthService;
+        
         private readonly IPlayerAuthorizationValidator authorizationValidator;
+        private readonly IUserDataValidator UserDataValidator;
+        private readonly IPlayerValidator playerValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository,
-            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService)
+            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService, 
+            IUserDataValidator userDataValidator,IAuthService authService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
@@ -31,20 +37,35 @@ namespace Application.Services
             this.userRepository = userRepository;
             this.authorizationValidator = authorizationValidator;
             this.teamService = teamService;
+            UserDataValidator = userDataValidator;
+            this.AuthService = authService;
+
         }
 
         #endregion
 
         #region CRUD Player
-        public async Task<string> CreatePlayerAsync(string userId, string email, CreatePlayerDto playerDto)
+        public async Task<string> CreatePlayerAsync(CreatePlayerDto playerDto)
         {
+            UserDataValidator.PhoneNumberValidation(playerDto.Phone);
+            UserDataValidator.EmailValidation(playerDto.Email);
+
+            var userSamePhoneNumber  = await playerRepository.GetPlayerByPhoneNumberAsync(playerDto.Phone);
+            var userSameEmail = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
+
+            playerValidator.CreatePlayerValidator(playerDto, userSamePhoneNumber, userSameEmail);
+
+            var userId = await AuthService.RegisterUser(playerDto.Email, playerDto.Password, playerDto.Phone);
+
+            UserDataValidator.CreateUserValidation(userId);
+
             var player = new Player
             {
-                //Id = userId,
+                Id = userId,
                 Name = playerDto.Name,
                 DateOfBirth = playerDto.DateOfBirth,
                 Address = playerDto.Address,
-                Email = email,
+                Email = playerDto.Email,
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,

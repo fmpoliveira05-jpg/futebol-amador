@@ -7,6 +7,8 @@ namespace Application.Interfaces.Repositories
     {
         Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList);
 
+        Task<Player?> GetPlayerByPhoneNumberAsync(string phoneNumber);
+
         Task<List<Player>?> GetAllTPlayersAsync();
 
         Task<Player?> GetPlayerByIdAsync(string id);
