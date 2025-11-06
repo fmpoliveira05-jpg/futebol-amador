@@ -1,17 +1,25 @@
-﻿using Application.DTOs.Team;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Team;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
+using System.Numerics;
 
 namespace Application.Validators
 {
     public class TeamValidator : ITeamValidator
     {
-        private IPlayerValidator PlayerValidator = new PlayerValidator();
-        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Teams? team, Player? playerCreating)
+        private readonly IPlayerValidator PlayerValidator = new PlayerValidator();
+
+        public void CreateTeamValidation(CreateTeamDto? createTeamDto, Rank rank,Team? team, Player? playerCreating)
         {
+            if (rank == null)
+            {
+                throw new ValidationException("Não foi possível atribuir a classificação padrão à equipa.");
+            }
+
             PlayerValidator.PlayerExists(playerCreating);
             if (TeamExists(team))
             {
@@ -38,14 +46,14 @@ namespace Application.Validators
             - O novo nome da equipa (se for alterado) não deve ser igual ao nome de outra equipa existente.
          
          */
-        public void UpdateTeamValidation(Teams? existingTeamNewName, Teams? updatingTeam, Player? playerEditing)
+        public void UpdateTeamValidation(Team? existingTeamNewName, Team? updatingTeam)
         {
-            ValidatePlayerAndTeamExists(updatingTeam, playerEditing);
+            if (!TeamExists(existingTeamNewName))
+            {
+                throw new NotFoundException("A equipa não existe.");
+            }
 
-
-            ValidatePlayerBelongToTeamAndIsAdmin(updatingTeam, playerEditing);
-
-            if (TeamExists(existingTeamNewName) && existingTeamNewName.Name != updatingTeam.Name)
+            if (existingTeamNewName.Name != updatingTeam.Name)
             {
                 throw new ValidationException($"Já existe uma equipa com o nome '{existingTeamNewName.Name}'.");
             }
@@ -60,11 +68,12 @@ namespace Application.Validators
             - O jogador que está a tentar eliminar a equipa deve ser um administrador da equipa.
             - A equipa não deve ter partidas agendadas ou em progresso.
          */
-        public void DeleteTeamValidation(Teams? team, Player? playerDeleting)
+        public void DeleteTeamValidation(Team? team)
         {
-            ValidatePlayerAndTeamExists(team, playerDeleting);
-
-            ValidatePlayerBelongToTeamAndIsAdmin(team, playerDeleting);
+            if(!TeamExists(team))
+            {
+                throw new NotFoundException("A equipa não existe.");
+            }
 
             if (team.Calendar.Matches.Any(m => m.MatchStatus == MatchStatus.SCHEDULED || m.MatchStatus == MatchStatus.IN_PROGRESS))
             {
@@ -80,7 +89,7 @@ namespace Application.Validators
             }
         }
 
-        public void GetAllTeamsValidation(IEnumerable<Teams?> Teams)
+        public void GetAllTeamsValidation(IEnumerable<Team?> Teams)
         {
             if (Teams == null || !Teams.Any())
             {
@@ -99,19 +108,18 @@ namespace Application.Validators
             - O jogador que está a remover não pode ser o mesmo que está a ser removido.
             - O jogador que está a remover deve ser administrador por mais tempo do que o jogador que está a ser removido.
          */
-        public void RemovePlayerFromTeamValidation(Teams? team, Player? playerRemoving, Player? playerRemoved)
+        public void RemovePlayerFromTeamValidation(Team? team, Player? playerRemoving, Player? playerRemoved)
         {
-            ValidatePlayerAndTeamExists(team, playerRemoving);
-            PlayerValidator.PlayerExists(playerRemoved);
-            ValidatePlayerBelongToTeamAndIsAdmin(team, playerRemoving);
-            if (!PlayerExistsInTeam(team, playerRemoved))
+            if (!TeamExists(team))
             {
-                throw new ValidationException($"O jogador com o Id '{playerRemoved.Id}' não pertence à equipa com Id '{team.Id}'.");
+                throw new NotFoundException("A equipa não existe.");
             }
+
             if (playerRemoving.Id == playerRemoved.Id)
             {
                 throw new ValidationException("Um administrador não pode expulsar-se a si próprio.");
             }
+
             if (playerRemoved.IsAdmin)
             {
                 if (!AdminOlderThanSecondAdmin(playerRemoving, playerRemoved))
@@ -122,7 +130,7 @@ namespace Application.Validators
         }
 
         // Não validar se o team tem membros, porque adicionamos verificação no Player e quando o ultimo membro sair a equipa é eliminada!
-        public void GetTeamMembersValidation(Teams? team)
+        public void GetTeamMembersValidation(Team? team)
         {
             if (!TeamExists(team))
             {
@@ -131,16 +139,13 @@ namespace Application.Validators
 
         }
 
-        public void GetMembershipRequestsValidation(Teams? team, Player? adminPlayer)
+        public void GetMembershipRequestsValidation(Team? team)
         {
             if (!TeamExists(team))
             {
                 throw new NotFoundException("A equipa não existe.");
             }
-            PlayerValidator.PlayerExists(adminPlayer);
             
-            ValidatePlayerBelongToTeamAndIsAdmin(team, adminPlayer);
-
             if (team.MembershipRequests == null || !team.MembershipRequests.Any())
             {
                 throw new NotFoundException("Não existem pedidos de adesão para esta equipa.");
@@ -148,33 +153,41 @@ namespace Application.Validators
         }
 
         //não validar se o playerApproved pertence à equipa, porque a validação deve ser feita quando ele tenta aceitar o pedido!
-        public void ApproveMembershipRequestValidation(Teams? team, Player? playerApproving, Guid requestToDelete)
+        public void ApproveMembershipRequestValidation(Team? team, Guid requestToDelete)
         {
-            ValidatePlayerAndTeamExists(team, playerApproving);
-            ValidatePlayerBelongToTeamAndIsAdmin(team, playerApproving);
+            if (!TeamExists(team))
+            {
+                throw new ValidationException($"A equipa não existe.");
+            }
+
             if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
             {
                 throw new ValidationException($"A equipa com Id '{team.Id}' não possui um pedido de adesão com Id '{requestToDelete}'.");
             }
+
             ValidateTeamFull(team);
-
         }
 
-        public void RejectMembershipRequestValidation(Teams? team, Player? playerRejecting, Guid requestToDelete)
+        public void RejectMembershipRequestValidation(Team? team, Guid requestToDelete)
         {
-            ValidatePlayerAndTeamExists(team, playerRejecting);
-            ValidatePlayerBelongToTeamAndIsAdmin(team, playerRejecting);
+            if (!TeamExists(team))
+            {
+                throw new NotFoundException("A equipa não existe.");
+            }
+
             if (!team.MembershipRequests.Any(mr => mr.Id == requestToDelete))
             {
                 throw new ValidationException($"A equipa com Id '{team.Id}' não possui um pedido de adesão com Id '{requestToDelete}'.");
             }
         }
 
-        public void SendMembershipRequestValidation(Teams? team, Player? playerSending, Player? playerReceiving)
+        public void SendMembershipRequestValidation(MembershipRequest? mr, Team? team)
         {
-            ValidatePlayerAndTeamExists(team, playerSending);
-            PlayerValidator.PlayerExists(playerReceiving);
-            ValidatePlayerBelongToTeamAndIsAdmin(team, playerSending);
+            if (mr != null)
+            {
+                throw new ValidationException("Já existe um pedido pendente entre a equipa e este jogador.");
+            }
+
             if (TeamIsFull(team))
             {
                 throw new ValidationException($"A equipa com o Id '{team.Id}' já atingiu o número máximo de jogadores.");
@@ -194,19 +207,17 @@ namespace Application.Validators
             - O jogador que está a rebaixar deve ser um administrador da equipa.
             - O jogador que está a rebaixar deve ter sido administrador por mais tempo do que o jogador que está a ser demitido.
          */
-        public void DemoteAdminToMemberValidation(Teams? team, Player? adminToDemote, Player? adminDemoting)
+        public void DemoteAdminToMemberValidation(Team? team, Player? adminToDemote, Player? adminDemoting)
         {
-            ValidatePlayerAndTeamExists(team, adminToDemote);
-
-            PlayerValidator.PlayerExists(adminDemoting);
+            if (!TeamExists(team))
+            {
+                throw new NotFoundException("A equipa não existe.");
+            }
 
             if (adminToDemote.Id == adminDemoting.Id)
             {
                 throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
             }
-
-            ValidatePlayerBelongToTeamAndIsAdmin(team, adminToDemote);
-            ValidatePlayerBelongToTeamAndIsAdmin(team, adminDemoting);
 
             if (!AdminOlderThanSecondAdmin(adminToDemote, adminDemoting))
             {
@@ -214,59 +225,114 @@ namespace Application.Validators
             }
         }
 
-        public void PromoteMemberToAdminValidation(Teams? team, Player? memberToPromote, Player? memberPromoting) {
-            ValidatePlayerAndTeamExists(team, memberToPromote);
-
-            PlayerValidator.PlayerExists(memberPromoting);
+        public void PromoteMemberToAdminValidation(Team? team, Player? memberToPromote, Player? memberPromoting) {
+            if (!TeamExists(team))
+            {
+                throw new NotFoundException("A equipa não existe.");
+            }
 
             if (memberToPromote.Id == memberPromoting.Id)
             {
                 throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
             }
 
-            ValidatePlayerBelongToTeamAndIsAdmin(team, memberPromoting);
-
-            if (!PlayerExistsInTeam(team,memberToPromote))
+            if (memberToPromote.IsAdmin)
             {
-                throw new ValidationException($"O Player? de id '{memberToPromote.Id}' não pertence a equipa '{team.Name}'.");
+                throw new ValidationException($"O jogador '{memberToPromote.Name}' já é administrador da equipa '{team.Name}'.");
+            }
+
+            var adminCount = team.Members.Count(m => m.IsAdmin);
+            if (adminCount >= 3)
+            {
+                throw new ValidationException($"A equipa '{team.Name}' já tem o número máximo de administradores.");
             }
         }
 
-        public void GetTeamScheduleValidation(Teams? team)
+        public void GetTeamScheduleValidation(Team? team)
         {
             if (!TeamExists(team))
             {
                 throw new NotFoundException("A equipa não existe.");
             }
+
             if (team.Calendar.Matches == null || !team.Calendar.Matches.Any())
             {
                 throw new NotFoundException("A equipa não possui partidas agendadas.");
             }
         }
 
-        private void ValidatePlayerAndTeamExists(Teams? team, Player? Player)
+        public void ValidateVariableSearchTeam(Guid idTeam)
         {
-            if (!TeamExists(team))
+            if (idTeam == Guid.Empty)
             {
-                throw new NotFoundException("A equipa não existe.");
-            }
-
-            PlayerValidator.PlayerExists(Player);
-        }
-
-        private void ValidatePlayerBelongToTeamAndIsAdmin(Teams? team, Player? Player)
-        {
-            if (!PlayerExistsInTeam(team, Player))
-            {
-                throw new ValidationException($"O jogador com o Id '{Player?.Id}' não pertence à equipa com Id '{team.Id}'.");
-            }
-            if (!Player.IsAdmin)
-            {
-                throw new ValidationException($"O jogador com o Id '{Player?.Id}' não é administrador da equipa.");
+                throw new ArgumentException("O id da equipa está vazio");
             }
         }
 
-        private void ValidateTeamFull(Teams? team)
+        public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter)
+        {
+            ValidateVariableSearchTeam(idTeam);
+
+            if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
+            {
+                if (filter.MinNumberPoints > filter.MaxNumberPoints)
+                {
+                    throw new InvalidOperationException("O numero minimo de pontos de uma equipa, não deve ser superior ao numero maximo");
+                }
+            }
+
+            if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
+            {
+                if (filter.MinAge.Value > filter.MaxAge.Value)
+                {
+                    throw new InvalidOperationException("O numero minimo de idade minima tem de ser inferior à idade media maxima");
+                }
+            }
+
+            if (filter.MinNumberPlayers.HasValue && filter.MaxNumberPlayers.HasValue)
+            {
+                if (filter.MinNumberPlayers.Value > filter.MaxNumberPlayers.Value)
+                {
+                    throw new InvalidOperationException("O número minimo de membros deve ser superior ao numero maximo de membros");
+                }
+            }
+        }
+
+        public void ValidateTeamSearch(Team team)
+        {
+            if (team == null)
+            {
+                throw new ArgumentException("A equipa não existe");
+            }
+        }
+
+        public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto filter)
+        {
+            if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
+            {
+                if(filter.MinAge > filter.MaxAge)
+                {
+                    throw new InvalidOperationException("A idade mínima do jogador deve ser inferior ou igual há idade máxima");
+                }
+            }
+
+            if (filter.MinHeight.HasValue && filter.MaxHeight.HasValue)
+            {
+                if (filter.MinHeight > filter.MaxHeight)
+                {
+                    throw new InvalidOperationException("A altura mínima do jogador deve ser inferior ou igual há altura máxima");
+                }
+            }
+
+            if (filter.Position.HasValue && !Enum.IsDefined(typeof(Position), filter.Position))
+            {
+                throw new InvalidOperationException("A posição que introduziu não existe. Por favor introduza uma posição valida!");
+            }
+        }
+
+        #region Private Methods
+
+        private static void ValidateTeamFull(Team? team)
         {
             if (TeamIsFull(team))
             {
@@ -274,53 +340,61 @@ namespace Application.Validators
             }
         }
 
-        private bool TeamExists(Teams? team)
+        private static bool TeamExists(Team? team)
         {
+            bool exists = true;
+
             if (team == null)
             {
+                exists = false;
+            }
+
+            return exists;
+        }
+
+        private static bool PlayerExistsInTeam(Team? team, Player? Player)
+        {
+            if (team == null || Player == null)
                 return false;
-            }
-            return true;
+
+            return team.Members.Any(m => m.Id == Player.Id);
         }
 
-        private bool PlayerExistsInTeam(Teams? team, Player? Player)
+        private static bool TeamIsFull(Team? team)
         {
-            if (!team.Members.Contains(Player))
+            bool isFull = false;
+            
+            if (team.Members.Count >= ModelConstants.TeamConst.MaxMembers)
             {
-                return false;
-                
+                isFull = true;
             }
-            return true;
+
+            return isFull;
         }
 
-        private bool TeamIsFull(Teams? team)
+        private static bool AdminOlderThanSecondAdmin(Player? adminToDemote, Player? adminDemoting)
         {
-            if (team.Members.Count >= ModelConstants.TeamConst.MaxPlayers)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        private bool AdminOlderThanSecondAdmin(Player? adminToDemote, Player? adminDemoting)
-        {
+            bool isOlder = true;
+            
             if (adminToDemote.IsAdminLastChangedAt >= adminDemoting.IsAdminLastChangedAt)
             {
-                return false;
-                //throw new ValidationException($"O Player? de id '{adminDemoting.Id}' não pode demitir o administrador com id '{adminToDemote.Id}' porque este é administrador há mais tempo.");
+                isOlder = false;
             }
-            return true;
+
+            return isOlder;
         }
 
-        private bool CreateTeamDtoIsValid(CreateTeamDto createTeamDto)
+        private static bool CreateTeamDtoIsValid(CreateTeamDto createTeamDto)
         {
+            bool invalid = true;
+
             if (string.IsNullOrWhiteSpace(createTeamDto.Name) || createTeamDto.HomePitch == null)
             {
-                return false;
+                invalid = false;
             }
-            return true;
+
+            return invalid;
         }
-
-
+        #endregion
     }
 }

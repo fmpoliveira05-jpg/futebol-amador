@@ -1,0 +1,97 @@
+﻿using Application.DTOs.SuperAdmin;
+using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
+using Application.Interfaces.Validators;
+using Domain.Entities;
+
+namespace Application.Services
+{
+    public class SuperAdminService : ISuperAdminService
+    {
+        private readonly ISuperAdminRepository superAdminRepository;
+        private readonly IUserRepository userRepository;
+        private readonly IUnityOfWork unityOfWork;
+        private readonly ISuperAdminValidator superAdminValidator;
+
+        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUserRepository userRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator)
+        {
+            this.superAdminRepository = superAdminRepository;
+            this.userRepository = userRepository;
+            this.unityOfWork = unityOfWork;
+            this.superAdminValidator = superAdminValidator;
+        }
+
+        public async Task<string> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
+        {
+            var existingSadmin = new User[]{
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
+            };
+
+            superAdminValidator.CreateSuperAdminValidator(dto, existingSadmin);
+
+            var superAdmin = new SuperAdmin
+            {
+                Name = dto.Name,
+                DateOfBirth = dto.DateOfBirth,
+                Email = dto.Email,
+                Phone = dto.Phone,
+                Address = dto.Address,
+            };
+
+            await superAdminRepository.AddAsync(superAdmin);
+
+            await unityOfWork.SaveChangesAsync();
+
+            return superAdmin.Id;
+        }
+
+        public async Task DeleteSuperAdminAsync(string superAdminId)
+        {
+            var superAdminToDelete = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
+
+            superAdminValidator.DeleteSuperAdminValidator(superAdminToDelete);
+
+            superAdminRepository.DeleteSuperAdmin(superAdminToDelete);
+
+            await unityOfWork.SaveChangesAsync();
+        }
+
+        public async Task<SuperAdminDetailsDTO> GetSuperAdminByIdAsync(string superAdminId)
+        {
+            var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
+
+            superAdminValidator.GetSuperAdminByIdValidator(superAdmin);
+
+            SuperAdminDetailsDTO superAdminDetails = new SuperAdminDetailsDTO
+            {
+                Name = superAdmin.Name,
+                DateOfBirth = superAdmin.DateOfBirth,
+                Address = superAdmin.Address,
+            };
+
+            return superAdminDetails;
+        }
+
+        public async Task UpdateSuperAdminAsync(string superAdminId, UpdateSuperAdminDTO dto)
+        {
+            var superAdmin = await superAdminRepository.GetSuperAdminByIdAsync(superAdminId);
+            var existingSadmin = new User[]{
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
+            };
+
+            superAdminValidator.UpdateSuperAdminValidator(dto, superAdmin, existingSadmin);
+
+            superAdmin.Name = dto.Name;
+            superAdmin.DateOfBirth = dto.DateOfBirth;
+            superAdmin.Address = dto.Address;
+            superAdmin.Phone = dto.Phone;
+            superAdmin.Email = dto.Email;
+
+            superAdminRepository.UpdateSuperAdmin(superAdmin);
+
+            await unityOfWork.SaveChangesAsync();
+        }
+    }
+}

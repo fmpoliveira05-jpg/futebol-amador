@@ -12,31 +12,33 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        [MaxLength(50)]
-        public Users Actor { get; set; }
+        public User Actor { get; set; }
 
+        [Required]
         [ForeignKey("Actor")]
         [MaxLength(ModelConstants.UserConst.MaxIdLength)]
         public string IdUser { get; set; } //FK
 
-        [MaxLength(250)]
+        [Required]
+        [StringLength(ModelConstants.MessageConst.MaxMessageLength, MinimumLength = ModelConstants.MessageConst.MinMessageLength)]
         public string MessageText { get; set; }
 
-        public DateTime timeStamp { get; set; }
+        [Required]
+        public DateTime TimeStamp { get; set; }
 
         protected Message() { }
 
-        public Message(Users actor, string messageText)
+        public Message(User actor, string messageText)
         {
             this.Actor = actor;
             this.IdUser = actor.Id;
             this.MessageText = messageText;
-            this.timeStamp = DateTime.Now;
+            this.TimeStamp = DateTime.Now;
         }
 
         public override string ToString()
         {
-            return $"[{timeStamp}] {Actor.Name}: {MessageText}";
+            return $"[{TimeStamp}] {Actor.Name}: {MessageText}";
         }
     }
 }

@@ -1,238 +1,106 @@
-﻿using Domain.Exceptions;
-using Microsoft.AspNetCore.Mvc;
-using Application.Interfaces.Services;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.MatchInvites;
-using Application.DTOs.Filters;
+using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
-    [Route("api/{idTeam:guid}/[controller]")]
+    [Authorize]
+    [Route("api/[controller]/{idTeam:guid}")]
     [ApiController]
     public class MatchInviteController : ControllerBase
     {
+        #region Initialization
         private readonly IMatchInviteService matchInviteService;
+        private readonly IPlayerAuthorizationService AuthorizationService;
 
-        public MatchInviteController(IMatchInviteService matchInviteService)
+        public MatchInviteController(IMatchInviteService matchInviteService, IPlayerAuthorizationService authorizationService)
         {
             this.matchInviteService = matchInviteService;
+            this.AuthorizationService = authorizationService;
         }
 
-        /***
-         *  Vai faltar AUTs
-         */
+        #endregion
 
+        #region EndPoints
+
+        #region MatchInvites
         [HttpPost("match-invites")]
-        public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+        public async Task<IActionResult> SendMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa está vazio");
-            }
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
 
-            if (dto.IdSender == Guid.Empty)
-            {
-                return BadRequest("O id do emissor do convite não pode ser nulo");
-            }
+            var sendInvite = await matchInviteService.SendMatchInvite(idTeam, dto);
 
-            if (dto.IdSender != idTeam)
-            {
-                return BadRequest("O id da equipa do DTO não bate com a do url");
-            }
-
-            if (dto.IdSender == dto.IdReceiver)
-            {
-                throw new BusinessRuleException("O recetor do convite deve ser diferente do emissor!");
-            }
-
-            try
-            {
-                var sendInvite = await matchInviteService.SendMatchInvite(dto);
-
-                return Ok(sendInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
-        }
-
-        private List<string> ValidateMatchInviteIds(Guid idTeam, Guid idMatchInvite)
-        {
-            var error = new List<string>();
-            if (idTeam == Guid.Empty)
-            {
-                error.Add("O id da equipa não pode estar vazio");
-            }
-
-            if (idMatchInvite == Guid.Empty)
-            {
-                error.Add("O id da partida não pode estar vazio");
-            }
-
-            return error;
+            return Ok(sendInvite);
         }
 
         [HttpPost("AcceptMatchInvite")]
         public async Task<IActionResult> AcceptMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-            List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
-            if (validator.Count() > 0)
-            {
-                return BadRequest(validator);
-            }
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
 
-            //Chamar service
-            try
-            {
-                var match = await matchInviteService.AcceptMatchInvite(idTeam, idMatchInvite);
-
-                return Ok(match);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            var match = await matchInviteService.AcceptMatchInvite(idTeam, idMatchInvite);
+            
+            return Ok(match);
         }
 
-        //DELETE
-        // api/.../RefuseMatchInvite/id_invite
         [HttpDelete("RefuseMatchInvite")]
         public async Task<IActionResult> RefuseMatchInvite(Guid idTeam, [FromBody] Guid idMatchInvite)
         {
-            List<string> validator = ValidateMatchInviteIds(idTeam, idMatchInvite);
-            if (validator.Count() > 0)
-            {
-                return BadRequest(validator);
-            }
-
-            try
-            {
-                await matchInviteService.RefuseMatchInvites(idTeam, idMatchInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
-
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            await matchInviteService.RefuseMatchInvites(idTeam, idMatchInvite);
             return Ok();
         }
 
         [HttpPut("Negociate")]
-        public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDTO dto)
+        public async Task<IActionResult> NegociateMatchInvite(Guid idTeam, [FromBody] SendMatchInviteDto dto)
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa não pode ser nulo");
-            }
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            var matchInvite = await matchInviteService.NegociateMatchInvite(idTeam, dto);
 
-            if (dto.IdSender == Guid.Empty)
-            {
-                return BadRequest("O id de quem enviou o convite não pode ser nulo");
-            }
-
-            if (dto.IdReceiver == Guid.Empty)
-            {
-                return BadRequest("O id do recetor do convite não pode ser nulo!");
-            }
-
-            if (dto.namePitch == null || dto.namePitch == "")
-            {
-                return BadRequest("O id do campo não pode ser nulo");
-            }
-
-            if (idTeam != dto.IdReceiver)
-            {
-                return BadRequest("O id da equipa não bate com o id da equipa que mandou o convite");
-            }
-
-            try
-            {
-                var matchInvite = await matchInviteService.NegociateMatchInvite(dto);
-
-                return Ok(matchInvite);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(matchInvite);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam, [FromQuery] FilterMatchInvitesDto filter)
         {
-            if (idTeam == Guid.Empty)
+            IEnumerable<InfoMatchInviteDto> matchesInvite;
+
+            bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
+                                filter.MinDate.HasValue ||
+                                filter.MaxDate.HasValue;
+
+            if (hasFilter)
             {
-                return BadRequest("O id da equipa não pode ser nulo");
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
+            }
+            else
+            {
+                matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
             }
 
-            try
-            {
-                IEnumerable<InfoMatchInviteDTO> matchesInvite;
+            return Ok(matchesInvite);
+        }
+        #endregion
 
-                bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||
-                                 filter.MinDate.HasValue ||
-                                 filter.MaxDate.HasValue;
+        #endregion
 
-                if (hasFilter)
-                {
-                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
-                }
-                else
-                {
-                    matchesInvite = await matchInviteService.GetAllMatchInvitesTeam(idTeam);
-                }
+        #region Private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-                return Ok(matchesInvite);
-            }
-            catch (NullReferenceException ex)
+            if (userId == null)
             {
-                return NotFound(new { message = ex.Message });
+                throw new UnauthorizedAccessException("User ID not found in claims.");
             }
-            catch (InvalidOperationException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+
+            return userId;
         }
 
+        #endregion
     }
 }

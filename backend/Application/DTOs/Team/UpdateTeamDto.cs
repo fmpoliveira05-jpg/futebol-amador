@@ -1,24 +1,22 @@
 ﻿using Domain.Constants;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.DTOs.Team
 {
     public class UpdateTeamDto
     {
+        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? Name { get; set; }
+
+        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string? Description { get; set; }
 
         public byte[]? icon { get; set; }
 
-        [MaxLength(ModelConstants.PitchConst.MaxNameLength)]
+        [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string? PitchName{ get; set; }
 
-        [MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string? PitchLocation { get; set; }
     }
 }

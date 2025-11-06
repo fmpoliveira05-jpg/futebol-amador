@@ -13,24 +13,29 @@ namespace Domain.Entities
         [Key]
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        public Teams Team { get; set; } //FK
+        public Team Team { get; set; } //FK
 
+        [Required]
         [ForeignKey("Team")]
         public Guid IdTeam { get; set; } //FK
-
+        
+        [Required]
         [Range(0, ModelConstants.GeneralConst.MaxGoals, ErrorMessage = "O número de golos deve estar entre 0 e 100")]
         public int NumGoals { get; set; } = 0;
 
+        [Required]
         [ForeignKey("Match")]
         public Guid MatchesId { get; set; }
 
         public Matches Match { get; set; }
+
+        [Required]
         public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;
 
         // EF
-        protected TeamStatistics() { }
+        public TeamStatistics() { }
 
-        public TeamStatistics(Teams team)
+        public TeamStatistics(Team team)
         {
             this.Team = team;
         }

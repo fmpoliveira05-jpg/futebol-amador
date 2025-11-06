@@ -1,24 +1,30 @@
-﻿using Domain.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Domain.Constants;
+using Domain.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.PlayerDTOs
 {
-    public class PlayerDetailsDTO
+    public class PlayerDetailsDto
     {
-        public string Name { get; set; }
-
+        [Required]
         public string PlayerId { get; set; }
-        //Lembrar de retirar e por no playerDataComplete
+
+        [Required]
+        [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
+        public string Name { get; set; } = null!;
+
+        [Required]
         public DateOnly DateOfBirth { get; set; }
 
-        public string Address { get; set; }
+        [Required]
+        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        public string Address { get; set; } = null!;
 
+        [Required]
         public Position Position { get; set; }
 
+        [Required]
+        [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight)]
         public int Height { get; set; }
 
         public Guid? IdTeam { get; set; }

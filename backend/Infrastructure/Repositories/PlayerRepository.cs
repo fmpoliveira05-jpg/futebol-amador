@@ -1,4 +1,7 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
+using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +52,29 @@ namespace Infrastructure.Repositories
         public void UpdatePlayer(Player updatedPlayer)
         {
             context.Player.Update(updatedPlayer);
+        }
+
+        public async Task<Player?> GetPlayerByIdWithRequestsAsync(string playerId)
+        {
+            return await context.Player
+                .Include(p => p.MembershipRequests)
+                    .ThenInclude(r => r.Team)
+                .FirstOrDefaultAsync(p => p.Id == playerId);
+        }
+
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync()
+        {
+            return await context.Player
+                .Where(p => p.IdTeam == null || p.IdTeam == Guid.Empty)
+                .Select(p => new PlayerWithoutTeamInfoDto
+                {
+                    PlayerId = p.Id,
+                    Name = p.Name,
+                    Age = DateTime.Now.Year - p.DateOfBirth.Year -
+                          ((DateTime.Now.DayOfYear < p.DateOfBirth.DayOfYear) ? 1 : 0),
+                    Position = p.Position
+                })
+                .ToListAsync();
         }
     }
 }

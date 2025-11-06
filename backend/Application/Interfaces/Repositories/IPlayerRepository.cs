@@ -1,9 +1,5 @@
-﻿using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Application.DTOs.Player;
+using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
 {
@@ -21,6 +17,10 @@ namespace Application.Interfaces.Repositories
 
         void UpdatePlayer(Player updatedPlayer);
 
+        Task<Player?> GetPlayerByIdWithRequestsAsync(string userId);
+
         Task AddAsync(Player player);
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }
 }

@@ -1,8 +1,9 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
 using Application.Hubs;
 using Application.Interfaces.Hub;
-using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
+using Domain.Constants;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
@@ -12,6 +13,7 @@ namespace Api.Hubs
         private readonly IManagerFinishMatchService managerFinishMatchService;
         private readonly IHubFinshMatchValidator validator;
         private readonly IGeralHubValidator geralValidator;
+
         public FinishMatchHub(IManagerFinishMatchService managerFinishMatchService,
             IHubFinshMatchValidator validator, IGeralHubValidator geralValidator)
         {
@@ -43,16 +45,13 @@ namespace Api.Hubs
 
             await Groups.AddToGroupAsync(connectionId, groupName);
 
-            Context.Items["HubMatchId"] = idMatch;
-            Context.Items["HubTeamId"] = result.IdTeam;
+            Context.Items[ModelConstants.FinishMatchHubConst.ContentMatchId] = idMatch;
+            Context.Items[ModelConstants.FinishMatchHubConst.ContentTeamId] = result.IdTeam;
             
             if (result.IsCoincides.HasValue)
             {
                 await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
             }
-
-            //Meter aqui um else para mandar um aviso a dizer que os resultados não coincidem
-            return;
         }
 
         public async Task EditResult(ResultMatchDto finishMatch)
@@ -85,9 +84,7 @@ namespace Api.Hubs
                 throw new HubException(ex.Message);
             }
 
-            await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
-            
-            return;
+            await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);    
         }
 
         public async Task LeaveFinishMatch()
@@ -105,8 +102,6 @@ namespace Api.Hubs
             {
                 throw new HubException(ex.Message);
             }
-
-            return;
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -115,12 +110,12 @@ namespace Api.Hubs
             Guid? teamId = null;
 
             //Limpeza do Context
-            if (Context.Items.TryGetValue("LobbyMatchId", out var m) && m is Guid g)
+            if (Context.Items.TryGetValue(ModelConstants.FinishMatchHubConst.ContentMatchId, out var m) && m is Guid g)
             {
                 matchId = g;
             }
 
-            if (Context.Items.TryGetValue("LobbyTeamId", out var t) && t is Guid tg)
+            if (Context.Items.TryGetValue(ModelConstants.FinishMatchHubConst.ContentTeamId, out var t) && t is Guid tg)
             {
                 teamId = tg;
             }
@@ -129,19 +124,14 @@ namespace Api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        private string GetGroupName(Guid idMatch)
-        {
-            return $"hubFinishMatch-{idMatch}";
-        }
-
         /*
          * Contém a lógica de limpeza que é partilhada
          * Retorna 'true' se limpou algo, 'false' se não encontrou nada
         */
         private async Task<bool> HandleLeaveHub()
         {
-            if (Context.Items.TryGetValue("HubMatchId", out var matchIdObj) &&
-                Context.Items.TryGetValue("HubTeamId", out var teamIdObj))
+            if (Context.Items.TryGetValue(ModelConstants.FinishMatchHubConst.ContentMatchId, out var matchIdObj) &&
+                Context.Items.TryGetValue(ModelConstants.FinishMatchHubConst.ContentTeamId, out var teamIdObj))
             {
                 var matchId = (Guid)matchIdObj;
                 var teamId = (Guid)teamIdObj;
@@ -156,14 +146,19 @@ namespace Api.Hubs
                     await Groups.RemoveFromGroupAsync(connectionId, groupName);
 
                     // limpar context items
-                    Context.Items.Remove("HubMatchId");
-                    Context.Items.Remove("HubTeamId");
+                    Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentMatchId);
+                    Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentTeamId);
                 }
 
                 return removed;
             }
 
             return false;
+        }
+
+        private static string GetGroupName(Guid idMatch)
+        {
+            return ModelConstants.FinishMatchHubConst.PrefixGroupName + idMatch;
         }
 
         private async Task CleanHub(string groupName, string? fisrtAdminConnectionId, string SecondAdminConnectionId)
@@ -175,8 +170,8 @@ namespace Api.Hubs
 
             await Groups.RemoveFromGroupAsync(SecondAdminConnectionId, groupName);
 
-            Context.Items.Remove("HubMatchId");
-            Context.Items.Remove("HubTeamId");
+            Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentMatchId);
+            Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentTeamId);
         }
     }
 }

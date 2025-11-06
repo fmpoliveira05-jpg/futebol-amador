@@ -1,7 +1,7 @@
-﻿using Application.DTOs.Team;
-using Application.DTOs.MemberShip;
-using Application.DTOs.Match;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 
 namespace Application.Interfaces.Services
 {
@@ -11,17 +11,13 @@ namespace Application.Interfaces.Services
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 
-        Task<List<TeamSummaryDto>> SearchTeamsAsync(string playerId, TeamSearchFiltersDto filters);
-
         Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId);
 
         Task DeleteTeamAsync(Guid teamId, string currentUserId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(Guid teamId, string adminUserId);
+        Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId);
 
-        Task AcceptMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
-
-        Task RejectMembershipRequestAsync(Guid teamId, Guid requestId, string adminUserId);
+        Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
 
         Task RemovePlayerFromTeamAsync(Guid teamId, string playerIdToRemove, string playerRemovingId);
 
@@ -30,8 +26,12 @@ namespace Application.Interfaces.Services
 
         Task DemoteAdminToPlayerAsync(Guid teamId, string adminIdToDemote, string currentAdminId);
 
-        Task<List<PlayerDetailsDTO>> GetTeamPlayersAsync(Guid teamId);
+        Task<List<InfoTeamsDto>> SearchTeamsAsync(Guid idTeam);
 
-        Task<List<MatchDto>> GetTeamScheduleAsync(Guid teamId);
+        Task<List<InfoTeamsDto>> SearchTeamsWithFiltersAsync(Guid idTeam, FilterListTeamDto filters);
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam();
+
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter);
     }
 }

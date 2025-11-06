@@ -1,6 +1,9 @@
-﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Services;
+using Application.Interfaces.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -13,26 +16,38 @@ namespace Api.Controllers
     [Authorize]
     public class PlayerController : ControllerBase
     {
+        #region Inicializar
         private readonly IPlayerService playerService;
-
-        public PlayerController(IPlayerService playerService)
+        private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
+        private readonly IMembershipRequestService membershipRequestService;
+        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService)
         {
             this.playerService = playerService;
+            this.playerAuthorizationValidator = playerAuthorizationValidator;
+            this.membershipRequestService = membershipRequestService;
         }
+        #endregion
 
+        #region EndPoints
+
+        #region CRUD Player
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]
-        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDTO playerDto)
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            //var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
+            /**
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
             {
                 return Unauthorized();
             }
+             */
+            var userId = "";
+            var email = playerDto.Email;
 
             var newPlayerId = await playerService.CreatePlayerAsync(userId,email,playerDto);
             /*
@@ -55,6 +70,7 @@ namespace Api.Controllers
         [HttpDelete("{playerId:required}")]
         public async Task<IActionResult> DeletePlayer(string playerId) 
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             await playerService.DeletePlayerAsync(playerId);
 
             return NoContent();
@@ -75,7 +91,6 @@ namespace Api.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
@@ -87,14 +102,19 @@ namespace Api.Controllers
         }
 
         [HttpPut("{playerId:required}")]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDTO dto)
+        public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
 
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
+            }
+
+            if (playerId != userId)
+            {
+                return Forbid();
             }
             
             if (!ModelState.IsValid)
@@ -107,12 +127,115 @@ namespace Api.Controllers
             return Ok("Player information updated succesfully.");
         }
 
+        #endregion
+
+        #region MemberShipRequest
+
+        [HttpGet("listTeamsToMemberShipRequest")]
+        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        {
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await playerService.GetTeamListWithFilters(filter);
+            }
+            else
+            {
+                list = await playerService.GetListTeams();
+            }
+
+            return Ok(list);
+        }
+
+
+        [HttpGet("{playerId:guid}/membership-requests")]
+        public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
+        {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var hasFilter = filters.MinDate.HasValue ||
+                            filters.MaxDate.HasValue ||
+                            !string.IsNullOrEmpty(filters.SenderName);
+
+            IEnumerable<MemberShipRequestDto> requests;
+            if (hasFilter)
+            {
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayerWithFilters(playerId, filters);
+            }
+            else
+            {
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayer(playerId);
+            }
+
+            return Ok(requests);
+        }
+
+        [HttpPost("{playerId:guid}/membership-requests/accept")]
+        public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
+        {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.AcceptMembershipRequestAsyncPlayer(playerId, requestId);
+            return Ok(dto);
+        }
+
+        [HttpDelete("{playerId:guid}/membership-requests/reject/{requestId:guid}")]
+        public async Task<IActionResult> RejectMembershipRequest(string playerId, Guid requestId)
+        {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.RejectMembershipRequestAsyncPlayer(playerId, requestId);
+            return Ok(dto);
+        }
+
+        [HttpPost("{playerId:guid}/membership-requests/send")]
+        public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
+        {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.SendMembershipRequestAsyncPlayer(playerId, teamId);
+            return Ok(dto);
+        }
+
+        #endregion
+
+        #region Teams Operations
+
         [HttpPut("{playerId:required}/leave-team")]
         public async Task<IActionResult> LeaveTeam(string playerId)
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
             string teamName = await playerService.LeaveTeam(playerId);
 
             return Ok("Player succesfully left the team" + teamName + ".");
         }
+        #endregion
+
+        #endregion
+
+        #region Private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
+        #endregion
     }
 }

@@ -16,7 +16,9 @@ namespace Application.Interfaces.Repositories
         public Task<Matches?> GetMatchWithListPlayerById(Guid idMatch);
         public Task<Matches?> GetMatchProxim12HoursMatchs(Guid idReceiver, DateTime gameDate);
         public Task<List<InfoMatchCalendar>> GetAllMatchesTeam(Guid idTeam);
-        public Task<List<InfoMatchCalendar>> GetAllMatchesTeamWithFilters(Guid idTeam, FilterCalendar filter);
+        public Task<List<InfoMatchCalendar>> GetAllMatchesTeamWithFilters(Guid idTeam, FilterCalendarDto filter);
         public Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverById(Guid idReceiver);
+        Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverByIdWithFilters(Guid idReceiver, FilterPostPoneMatchDto filter);
+        Task<List<InfoMatchCalendar>> GetMatchesByDateAsync(DateTime date);
     }
 }

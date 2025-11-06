@@ -1,48 +1,47 @@
-﻿using Api.Controllers; // Assume que este é o teu namespace
+using Application.DTOs.Filters;
+using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
+using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using System.Security.Claims;
 
 namespace Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
-    // [Authorize] para autenticação, validar se bloqueia todos os metodos
     public class TeamController : ControllerBase
     {
+        #region Initialization
         private readonly ITeamService TeamService;
-
-        public TeamController(ITeamService teamService)
+        private readonly IMembershipRequestService MemberShipRequestService;
+        private readonly IPlayerAuthorizationService PlayerAuthorizationService;
+        public TeamController(ITeamService teamService, IMembershipRequestService MemberShipRequestService)
         {
-            TeamService = teamService;
+            this.TeamService = teamService;
+            this.MemberShipRequestService = MemberShipRequestService;
         }
 
-        private string? GetCurrentUserId()
-        {
-            /*
-            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
-            {
-                throw new ValidationException("Token de utilizador inválido ou em falta.");
-            }
-            return userId;
-             */
-            return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        }
+        #endregion
 
+        #region EndPoints
+
+        #region CRUD Team
         [HttpPost]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
-        {
-            var creatorUserId = GetCurrentUserId();
-            var newTeamId = await TeamService.CreateTeamAsync(teamDto, creatorUserId);
+        {            
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var newTeamId = await TeamService.CreateTeamAsync(teamDto, userId);
 
             return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeamById(Guid id)
         {
             var team = await TeamService.GetTeamByIdAsync(id);
@@ -52,8 +51,8 @@ namespace Api.Controllers
         [HttpPut("{teamId}")]
         public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] UpdateTeamDto dto)
         {
-            var currentUserId = GetCurrentUserId();
-            await TeamService.UpdateTeamInfoAsync(teamId, dto, currentUserId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
             return Ok("Equipa atualizada com sucesso.");
         }
 
@@ -61,78 +60,205 @@ namespace Api.Controllers
         [HttpDelete("{teamId}")]
         public async Task<IActionResult> DeleteTeam(Guid teamId)
         {
-            var currentUserId = GetCurrentUserId();
-            await TeamService.DeleteTeamAsync(teamId, currentUserId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await TeamService.DeleteTeamAsync(teamId, userId);
             return NoContent();
         }
+        #endregion
+
+        #region Search Teams 
+
+        [HttpGet("{teamId}/search")]
+        public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
+                           !string.IsNullOrEmpty(filter.NameRank) ||
+                           !string.IsNullOrEmpty(filter.City) ||
+                           filter.MinNumberPoints.HasValue ||
+                           filter.MaxNumberPoints.HasValue ||
+                           filter.MinAge.HasValue ||
+                           filter.MaxAge.HasValue ||
+                           filter.MinNumberPlayers.HasValue ||
+                           filter.MaxNumberPlayers.HasValue;
+
+            IEnumerable<InfoTeamsDto> list;
+            if (isFilter)
+            {
+                list = await TeamService.SearchTeamsWithFiltersAsync(teamId, filter);
+            }
+            else
+            {
+                list = await TeamService.SearchTeamsAsync(teamId);
+            }
+
+            return Ok(list);
+        }
+        #endregion
+
+        #region Team Members Management
 
         [HttpGet("{teamId}/members")]
-        public async Task<IActionResult> GetTeamPlayers(Guid teamId)
+        public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
         {
-                var players = await TeamService.GetTeamPlayersAsync(teamId);
-                return Ok(players);
+            IEnumerable<PlayerDetailsDto> players;
+            var hasFilters = filters.IsAdmin.HasValue ||
+                             !string.IsNullOrEmpty(filters.Name) ||
+                             filters.MinAge.HasValue ||
+                             filters.MaxAge.HasValue ||
+                             filters.Position.HasValue;
+
+            if (hasFilters)
+            {
+                players = await TeamService.GetTeamPlayersAsyncWithFilters(teamId, filters);
+            }
+            else
+            {
+                players = await TeamService.GetTeamPlayersAsync(teamId);
+            }
+
+            return Ok(players);
         }
 
         [HttpDelete("{teamId}/members/{playerIdToRemove}")]
         public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, string playerIdToRemove)
         {
-                var playerRemovingId = GetCurrentUserId();
-                await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
-                return NoContent();
+            var playerRemovingId = GetCurrentUserId();
+            await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
+            return NoContent();
         }
 
-        [HttpPost("{teamId}/members/{playerIdToPromote}/promote")]
+        #region Manage Admins
+
+        [HttpPut("{teamId}/members/promote/{playerIdToPromote}")]
         public async Task<IActionResult> PromotePlayerToAdmin(Guid teamId, string playerIdToPromote)
         {
-                var playerPromotingId = GetCurrentUserId();
-                await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, playerPromotingId);
-                return Ok("Jogador promovido a admin.");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, userId);
+            return Ok("Jogador promovido a admin.");
         }
 
-        [HttpPost("{teamId}/members/{adminIdToDemote}/demote")]
+        [HttpPut("{teamId}/members/demote/{adminIdToDemote}")]
         public async Task<IActionResult> DemoteAdminToPlayer(Guid teamId, string adminIdToDemote)
         {
-            var adminDemotingId = GetCurrentUserId();
-            await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, adminDemotingId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, userId);
             return Ok("Admin rebaixado a jogador.");
         }
 
-        [HttpGet("{teamId}/members/requests")]
-        public async Task<IActionResult> GetMembershipRequests(Guid teamId)
+        #endregion
+
+        #endregion
+
+        #region Membership Requests Management
+
+        //Falta também validar se a team existe mas isso a principio a Aut faz
+        //Falta fazer validação de autentificação e autorização aqui ou se for no service, no proprio service
+        [HttpGet("{teamId}/playersWithoutTeam")]
+        [Authorize]
+        public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterPlayersWithoutTeamDto filter)
         {
-            var adminUserId = GetCurrentUserId();
-            var requests = await TeamService.GetMembershipRequestsAsync(teamId, adminUserId);
-            return Ok(requests);
+            IEnumerable<PlayerWithoutTeamInfoDto> players;
+            var hasFilter = !string.IsNullOrEmpty(filter.PlayerName) ||
+                            !string.IsNullOrEmpty(filter.City) ||
+                            filter.MinAge.HasValue ||
+                            filter.MaxAge.HasValue ||
+                            filter.MinHeight.HasValue ||
+                            filter.MaxHeight.HasValue ||
+                            filter.Position.HasValue;
+
+
+            try 
+            {
+                if (hasFilter)
+                {
+                    players = await TeamService.GetPlayersWithoutTeamWithFilters(filter);
+                }
+                else
+                {
+                    players = await TeamService.GetPlayersWithoutTeam();
+                }
+                return Ok(players);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+            }
         }
 
 
-        [HttpPost("{teamId}/members/requests/{requestId}/accept")]
-        public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, Guid requestId)
+        [HttpGet("{teamId}/membership-request")]
+        public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
 
-            var adminUserId = GetCurrentUserId();
-            await TeamService.AcceptMembershipRequestAsync(teamId, requestId, adminUserId);
-            return Ok("Pedido de adesão aceite.");
+            IEnumerable<MemberShipRequestDto> membershipRequests;
+            var hasFilter = filters.MinDate.HasValue ||
+                filters.MaxDate.HasValue ||
+                !string.IsNullOrEmpty(filters.SenderName);
+
+            if (hasFilter)
+            {
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeamWithFilters(teamId, filters);
+            }
+            else
+            {
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeam(teamId);
+            }
+
+            return Ok(membershipRequests);
         }
 
-        [HttpPost("{teamId}/members/requests/{requestId}/reject")]
+
+
+        [HttpPost("{teamId}/membership-request/accept")]
+        public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
+        {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok();
+        }
+
+        [HttpDelete("{teamId}/membership-request/{requestId}/reject")]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
-            var adminUserId = GetCurrentUserId();
-            await TeamService.RejectMembershipRequestAsync(teamId, requestId, adminUserId);
-            return Ok("Pedido de adesão rejeitado.");
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            return Ok();
         }
 
-
-        [HttpGet("{teamId}/search")] // Responde a GET /api/team
-        public async Task<IActionResult> SearchTeams([FromQuery] TeamSearchFiltersDto filters)
+        [HttpPost("{teamId}/membership-requests/send")]
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId);
 
-            // var teams = await _teamService.SearchTeamsAsync(filters);
-            // return Ok(teams);
-            return Ok("Endpoint 'SearchTeams' ainda não implementado no serviço.");
-            
+            return Ok(dto);
+           
         }
 
+        #endregion
+
+        #endregion
+
+        #region private Methods
+        private string GetCurrentUserId()
+        {
+            //validar null
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
+        #endregion
     }
 }

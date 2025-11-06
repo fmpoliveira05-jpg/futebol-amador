@@ -1,43 +1,37 @@
 ﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
+using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
-        public Task AddAsync(Player player)
+        private readonly AmateurFootballContext context;
+
+        public UserRepository(AmateurFootballContext context)
         {
-            throw new NotImplementedException();
+            this.context = context;
         }
 
-        public void DeletePlayer(Player playerToRemove)
+        public async Task<List<User>> GetAllUsersAsync()
         {
-            throw new NotImplementedException();
+            return await context.User.ToListAsync();
         }
 
-        public Task<List<Player>?> GetAllTPlayersAsync()
+        public async Task<User?> GetUserByIdAsync(string userId)
         {
-            throw new NotImplementedException();
+            return await context.User.FirstOrDefaultAsync(p => p.Id == userId);
         }
 
-        public Task<Player?> GetPlayerByEmailAsync(string email)
+        public async Task<User?> GetUserByEmailAsync(string email)
         {
-            throw new NotImplementedException();
+            return await context.User.FirstOrDefaultAsync(p => p.Email == email);
         }
 
-        public Task<Player?> GetPlayerByIdAsync(Guid id)
+        public async Task<User?> GetUserByPhoneAsync(string phone)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<Player>> GetPlayersListByIdListAsync(List<Guid> playerIdList)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Teams?> GetUserByIdAsync(Guid userId)
-        {
-            throw new NotImplementedException();
+            return await context.User.FirstOrDefaultAsync(p => p.Phone == phone);
         }
 
         public void UpdatePlayer(Player updatedPlayer)

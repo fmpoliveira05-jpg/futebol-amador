@@ -2,9 +2,9 @@
 {
     public enum Position
     {
-        FORWARD,
-        MIDFIELDER,
-        DEFENDER,
-        GOALKEEPER
+        FORWARD = 0,
+        MIDFIELDER = 1,
+        DEFENDER = 2,
+        GOALKEEPER = 3
     }
 }

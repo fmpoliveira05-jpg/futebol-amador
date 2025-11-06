@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.MatchInvites
 {
-    public class SendMatchInviteDTO
+    public class SendMatchInviteDto
     {
         [Required(ErrorMessage = "O Id da equipa que enviou é obrigatório!")]
         public Guid IdSender { get; set; }
@@ -14,7 +15,7 @@ namespace Application.DTOs.MatchInvites
         public DateTime GameDate { get; set; }
 
         [Required(ErrorMessage = "É obrigatório especificar o id do Campo")]
-        [MaxLength(50)]
-        public string namePitch { get; set; }
+        [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
+        public string namePitch { get; set; } = null!;
     }
 }

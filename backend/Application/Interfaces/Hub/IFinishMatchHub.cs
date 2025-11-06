@@ -1,4 +1,4 @@
-﻿using Application.DTOs;
+﻿using Application.DTOs.Match;
 
 namespace Application.Interfaces.Hub
 {

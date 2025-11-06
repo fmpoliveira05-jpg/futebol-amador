@@ -1,27 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.PlayerDTOs;
+using Domain.Constants;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Team
 {
     public class TeamDetailsDto
     {
+        [Required]
         public Guid Id { get; set; }
-        public string Name { get; set; } 
-        public string? Description { get; set; } 
-        public DateTime FoundationDate { get; set; } 
+
+        [Required]
+        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
+        public string Name { get; set; } = null!;
+
+        [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
+        public string? Description { get; set; }
+
+        [Required]
+        public DateTime FoundationDate { get; set; }
+        
+        [Required]
+        [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints)]
         public int TotalPoints { get; set; }
 
-        //Alterar para o enum dos nomes dos ranks
-        public string? RankName { get; set; }
+        [Required]
+        [MinLength(ModelConstants.RankConts.MinNameLength), MaxLength(ModelConstants.RankConts.MaxNameLength)]
+        public string RankName { get; set; } = null!;
 
-        public string PitchDto { get; set; }
+        [Required]
+        public string PitchDto { get; set; } = null!;
 
-        public List<PlayerDetailsDTO> Players { get; set; }
+        [Required]
+        public List<PlayerDetailsDto> Players { get; set; } = null!;
     }
-
-
 }
