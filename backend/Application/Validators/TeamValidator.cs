@@ -48,12 +48,12 @@ namespace Application.Validators
          */
         public void UpdateTeamValidation(Team? existingTeamNewName, Team? updatingTeam)
         {
-            if (!TeamExists(existingTeamNewName))
+            if (updatingTeam == null)
             {
                 throw new NotFoundException("A equipa não existe.");
             }
 
-            if (existingTeamNewName.Name != updatingTeam.Name)
+            if (existingTeamNewName != null && existingTeamNewName.Id != updatingTeam.Id)
             {
                 throw new ValidationException($"Já existe uma equipa com o nome '{existingTeamNewName.Name}'.");
             }
@@ -214,6 +214,11 @@ namespace Application.Validators
                 throw new NotFoundException("A equipa não existe.");
             }
 
+            if (adminToDemote.Team != adminDemoting.Team)
+            {
+                throw new ValidationException("O jogador alvo pertence a outra equipa!");
+            }
+
             if (adminToDemote.Id == adminDemoting.Id)
             {
                 throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
@@ -236,15 +241,25 @@ namespace Application.Validators
                 throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
             }
 
-            if (memberToPromote.IsAdmin)
+            if (memberToPromote.Team != memberPromoting.Team)
             {
-                throw new ValidationException($"O jogador '{memberToPromote.Name}' já é administrador da equipa '{team.Name}'.");
+                throw new ValidationException("O jogador alvo da promoção não pertence à equipa!");
             }
 
             var adminCount = team.Members.Count(m => m.IsAdmin);
             if (adminCount >= 3)
             {
                 throw new ValidationException($"A equipa '{team.Name}' já tem o número máximo de administradores.");
+            }
+
+            if (memberToPromote.Team == null)
+            {
+                throw new ValidationException("O jogador alvo da promoção não pertence a nenhuma equipa!");
+            }
+
+            if (memberToPromote.IsAdmin)
+            {
+                throw new ValidationException("O jogador alvo já é administrador da equipa.");
             }
         }
 

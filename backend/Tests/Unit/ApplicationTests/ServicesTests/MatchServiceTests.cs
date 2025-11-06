@@ -8,6 +8,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Services;
+using Application.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -26,7 +27,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
-        private Mock<ICalendarValidator> _validatorMock;
+        private CalendarValidator _validator;
         private Mock<IPlayerAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
@@ -39,7 +40,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
-            _validatorMock = new Mock<ICalendarValidator>();
+            _validator = new CalendarValidator();
             _authorizarionService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchService(
@@ -47,7 +48,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _teamPostPoneRepoMock.Object,
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _validatorMock.Object,
+                _validator,
                 _authorizarionService.Object
             );
         }
@@ -80,8 +81,6 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdOpponent = opponent.Id
             };
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
-            _validatorMock.Setup(v => v.ValidatePostPoneMatchDto(team.Id, dto));
-            _validatorMock.Setup(v => v.ValidatorPostPoneMatch(match, dto.PostPoneDate, teamStats, team.Id, opponentStats, opponent.Id));
             _teamPostPoneRepoMock.Setup(r => r.AddTeamPostPoneMatch(It.IsAny<PostPoneMatch>()));
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -103,10 +102,6 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
 
-            _validatorMock
-                .Setup(v => v.ValidatePostPoneMatchDto(teamId, dto))
-                .Throws(new ValidationException("A equipa não é administradora."));
-
             Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             await act.Should().ThrowAsync<ValidationException>()
@@ -120,10 +115,6 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var outsiderTeamId = Guid.NewGuid();
             var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
-
-            _validatorMock
-                .Setup(v => v.ValidatePostPoneMatchDto(outsiderTeamId, dto))
-                .Throws(new ValidationException("A equipa não pertence à partida."));
 
             Func<Task> act = async () => await _sut.PostPoneMatch(outsiderTeamId, dto);
 
@@ -204,9 +195,6 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
             _matchRepoMock.Setup(r => r.GetMatchById(dto.IdMatch)).ReturnsAsync((Matches?)null);
-            _validatorMock
-                .Setup(v => v.ValidatorPostPoneMatch(null, dto.PostPoneDate, null, teamId, null, dto.IdOpponent))
-                .Throws(new ArgumentException("Partida não encontrada."));
 
             // ACT
             Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
@@ -259,7 +247,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
-            var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
+            var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
@@ -268,7 +256,6 @@ namespace Unit.ApplicationTests.ServicesTests
             match.Teams.Add(teamStats);
             match.Teams.Add(opponentStats);
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
-            _validatorMock.Setup(v => v.ValidateCancelMatch(match, teamStats, team.Id, opponentStats, opponentStats.IdTeam));
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
@@ -288,7 +275,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var opponent = new Team("Team B", "desc", new byte[] { 1 }, pitch, rank);
-            var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
+            var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.DONE
             };
@@ -296,16 +283,13 @@ namespace Unit.ApplicationTests.ServicesTests
             match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponent.Id });
             var dto = new PostPoneMatchDto { IdMatch = match.Id, PostPoneDate = DateTime.UtcNow.AddDays(2) };
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidateCancelMatch(match, It.IsAny<TeamStatistics>(), team.Id, It.IsAny<TeamStatistics>(), opponent.Id))
-                .Throws(new ValidationException("A partida não pode ser cancelada pois já foi concluída."));
 
             // ACT
             Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pode ser cancelada*");
+            await act.Should().ThrowAsync<ArgumentException>()
+                     .WithMessage("O estado da partida tem de ser SCHEDULED.");
         }
 
         [Test(Description = "T3GP6 - Tentar cancelar partida que não existe.")]
@@ -319,36 +303,43 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.CancelMatch(teamId, matchId, "Qualquer motivo");
 
             await act.Should().ThrowAsync<ArgumentException>()
-                     .WithMessage("*não existe*");
+                     .WithMessage("A partida não foi encontrada");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "T4GP6 - Player não admin tenta cancelar partida.")]
-        public async Task CancelMatch_Should_Throw_When_TeamIsNotAdmin()
+        [Test(Description = "T4GP6 - Jogador não administrador tenta cancelar partida.")]
+        public async Task CancelMatch_Should_Throw_When_PlayerIsNotAdmin()
         {
-            var userId = "admin-id";
+            // ARRANGE
+            var userId = "player-nonadmin-id";
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
-            var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
+            var player = new Player
+            {
+                Id = userId,
+                IdTeam = team.Id,
+                IsAdmin = false,
+                Team = team
+            };
+            team.Members.Add(player);
+            var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
             match.Teams.Add(new TeamStatistics(team) { IdTeam = team.Id });
             match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponent.Id });
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidateCancelMatch(match, It.IsAny<TeamStatistics>(), team.Id, It.IsAny<TeamStatistics>(), opponent.Id))
-                .Throws(new ValidationException("A equipa não é administradora da partida."));
 
             // ACT
-            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Motivo");
+            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Tentativa sem permissão", player);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administradora*");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque o jogador não é administrador e não deve conseguir cancelar a partida");
         }
 
         [Test(Description = "T5GP6 - Player não pertencente à equipa tenta cancelar partida.")]
@@ -361,16 +352,13 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
             var outsider = new Team("Outsider", "desc", new byte[] { 3 }, pitch, rank);
-            var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
+            var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
             match.Teams.Add(new TeamStatistics(teamA) { IdTeam = teamA.Id });
             match.Teams.Add(new TeamStatistics(teamB) { IdTeam = teamB.Id });
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
-            _validatorMock
-                .Setup(v => v.ValidateCancelMatch(match, null, outsider.Id, It.IsAny<TeamStatistics>(), It.IsAny<Guid>()))
-                .Throws(new ValidationException("A equipa não pertence à partida."));
 
             // ACT
             Func<Task> act = async () => await _sut.CancelMatch(outsider.Id, match.Id, "Tentativa indevida");
@@ -463,7 +451,6 @@ namespace Unit.ApplicationTests.ServicesTests
                     pitchGame = pitch
                 }
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(teamId, filter));
             _matchRepoMock.Setup(r => r.GetAllMatchesTeamWithFilters(teamId, filter))
                           .ReturnsAsync(filteredMatches);
 
@@ -473,7 +460,6 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             result.Should().HaveCount(1, "porque há uma partida que cumpre os filtros");
             result.Should().BeEquivalentTo(filteredMatches, "porque o serviço apenas retorna o resultado do repositório");
-            _validatorMock.Verify(v => v.ValidateFilterCalendar(teamId, filter), Times.Once, "porque o filtro deve ser validado antes da procura");
             _matchRepoMock.Verify(r => r.GetAllMatchesTeamWithFilters(teamId, filter), Times.Once, "porque deve chamar o repositório uma única vez com os filtros aplicados");
         }
 
@@ -488,7 +474,6 @@ namespace Unit.ApplicationTests.ServicesTests
                 MinDate = new DateOnly(2025, 12, 15),
                 MaxDate = new DateOnly(2025, 12, 14)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
@@ -508,13 +493,12 @@ namespace Unit.ApplicationTests.ServicesTests
                 MinDate = new DateOnly(2025, 12, 1),
                 MaxDate = new DateOnly(2025, 12, 31)
             };
-            _validatorMock.Setup(v => v.ValidateFilterCalendar(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>())).Throws(new InvalidOperationException("O id da equipa não pode estar nulo"));
 
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar nulo");
+            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar vazio");
         }
         #endregion
 

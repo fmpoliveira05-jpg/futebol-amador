@@ -181,6 +181,11 @@ namespace Application.Validators
                 throw new ArgumentException("A match a cancelar não existe ou já não pode ser cancelada.");
             }
 
+            if (match.MatchStatus != MatchStatus.SCHEDULED)
+            {
+                throw new ArgumentException("O estado da partida tem de ser SCHEDULED.");
+            }
+
             var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;
             const int numDays = 2;
 
