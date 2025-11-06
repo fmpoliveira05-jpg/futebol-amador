@@ -79,13 +79,15 @@ namespace Api.Controllers
                     new { playerId = newPlayerId },
                     playerDto);
             */
+
+            /* Demora um bocado
             return CreatedAtAction(
             "",
             null,
             null);
-            /* Demora um bocado
+             */
             return Ok(playerDto);
-            */
+
             //Cria o player rapido
             //  return NoContent();
         }

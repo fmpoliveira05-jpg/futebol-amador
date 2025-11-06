@@ -27,6 +27,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<ITeamRepository> teamRepoMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
         private Mock<IPlayerAuthorizationValidator> authorizationValidatorMock;
+        private Mock<IUserDataValidator> userDataValidator;
+        private Mock<IAuthService> authService;
 
         private PlayerService service;
 
@@ -44,6 +46,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             teamRepoMock = new Mock<ITeamRepository>();
             membershipReqRepoMock = new Mock<IMembershipRequestRepository>();
             authorizationValidatorMock = new Mock<IPlayerAuthorizationValidator>();
+            userDataValidator = new Mock<IUserDataValidator>();
+            authService = new Mock<IAuthService>();
 
             service = new PlayerService(
                 playerRepoMock.Object,
@@ -53,7 +57,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 validatorMock.Object,
                 userRepoMock.Object,
                 authorizationValidatorMock.Object,
-                teamServiceMock.Object
+                teamServiceMock.Object,
+                userDataValidator.Object,
+                authService.Object
             );
         }
         #endregion
@@ -217,7 +223,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             uowMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
 
-            var resultId = await service.CreatePlayerAsync(authId, dto.Email, dto);
+            var resultId = await service.CreatePlayerAsync(dto);
 
             Assert.That(resultId, Is.EqualTo(authId));
 
