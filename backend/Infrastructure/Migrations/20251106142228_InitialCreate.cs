@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigrationAfterBigBug : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -136,7 +136,6 @@ namespace Infrastructure.Migrations
                     Icon = table.Column<byte[]>(type: "varbinary(max)", nullable: true),
                     IdPitch = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DataFoundation = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    AverageAge = table.Column<float>(type: "real", nullable: false),
                     CurrentPoints = table.Column<int>(type: "int", nullable: false),
                     IdRank = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdCalendar = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
@@ -170,7 +169,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdUser = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     MessageText = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
-                    timeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TimeStamp = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ChatId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
@@ -213,7 +212,7 @@ namespace Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdTeam = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdMatch = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     TimeCancellation = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -276,7 +275,6 @@ namespace Infrastructure.Migrations
                     Id = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
                     Position = table.Column<int>(type: "int", nullable: false),
                     Height = table.Column<int>(type: "int", nullable: false),
-                    TeamId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IdTeam = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsAdmin = table.Column<bool>(type: "bit", nullable: false),
                     IsAdminLastChangedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -285,8 +283,8 @@ namespace Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Player", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Player_Team_TeamId",
-                        column: x => x.TeamId,
+                        name: "FK_Player_Team_IdTeam",
+                        column: x => x.IdTeam,
                         principalTable: "Team",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -440,9 +438,9 @@ namespace Infrastructure.Migrations
                 column: "IdUser");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Player_TeamId",
+                name: "IX_Player_IdTeam",
                 table: "Player",
-                column: "TeamId");
+                column: "IdTeam");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PostPoneMatch_IdMatch",

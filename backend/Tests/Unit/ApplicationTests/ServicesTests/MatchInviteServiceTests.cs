@@ -2,6 +2,7 @@
 using Application.DTOs.MatchInvites;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Domain.Entities;
@@ -25,6 +26,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IMatchInviteValidator> _validatorMock;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<IPlayerAuthorizationService> _authorizationService;
+        private Mock<INotificationService> _notificationService;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -42,7 +44,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock = new Mock<IMatchInviteValidator>();
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _authorizationService = new Mock<IPlayerAuthorizationService>();
-            
+            _notificationService = new Mock<INotificationService>();
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
@@ -54,7 +56,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _unitOfWorkMock.Object,
                 _teamPostPoneRepoMock.Object,
                 _authorizationService.Object,
-                null
+                _notificationService.Object
             );
 
             // rank mínimo válido para testes
