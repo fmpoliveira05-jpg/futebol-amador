@@ -233,6 +233,7 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /*
         [HttpPost("{teamId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
@@ -242,6 +243,7 @@ namespace Api.Controllers
             return Ok(dto);
            
         }
+        */
 
         #endregion
 

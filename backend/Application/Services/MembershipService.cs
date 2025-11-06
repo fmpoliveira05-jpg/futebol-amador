@@ -64,14 +64,14 @@ namespace Application.Services
 
         #region Pedidos de adesão da Team
 
-        public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite)
+        public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, Player player)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToInvite = await playerRepository.GetPlayerByIdAsync(playerIdToInvite);
 
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
-            membershipValidator.ValidateSendRequestByTeam(team, playerToInvite, existing);
+            membershipValidator.ValidateSendRequestByTeam(team, playerToInvite, existing, player);
 
             var invite = new MembershipRequest
             {
@@ -107,9 +107,9 @@ namespace Application.Services
 
             var playerAccepting = await playerRepository.GetPlayerByIdAsync(adminId);
 
-            var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-
             membershipValidator.ValidateAcceptRequestByTeam(team, request, playerAccepting);
+
+            var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
 
             membershipRequestRepository.RemoveMembershipRequest(request);
 

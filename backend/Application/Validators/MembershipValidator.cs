@@ -30,16 +30,36 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateSendRequestByTeam(Team team, Player invitedPlayer, MembershipRequest? existingRequest)
+        public void ValidateSendRequestByTeam(Team team, Player invitedPlayer, MembershipRequest? existingRequest, Player player)
         {
             if (team == null)
             {
                 throw new ValidationException("A equipa não existe.");
             }
 
+            if (team.Members.Count == Domain.Constants.ModelConstants.TeamConst.MaxMembers)
+            {
+                throw new ValidationException("A equipa já está cheia.");
+            }
+
             if (invitedPlayer == null)
             {
                 throw new ValidationException("O jogador a convidar não existe.");
+            }
+
+            if (invitedPlayer.Team != player.Team && invitedPlayer.Team != null)
+            {
+                throw new ValidationException("O jogador convidado já pertence a outra equipa.");
+            }
+
+            if (invitedPlayer.Team == player.Team)
+            {
+                throw new ValidationException("O jogador convidado já pertence à equipa.");
+            }
+
+            if (!player.IsAdmin)
+            {
+                throw new ValidationException("O jogador não é administrador da equipa.");
             }
 
             /*
@@ -60,6 +80,11 @@ namespace Application.Validators
             if (team == null)
             {
                 throw new ValidationException("A equipa não existe.");
+            }
+
+            if (team.Members.Count == Domain.Constants.ModelConstants.TeamConst.MaxMembers)
+            {
+                throw new ValidationException("A equipa já está cheia.");
             }
 
             if (request == null)

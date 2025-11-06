@@ -6,7 +6,7 @@ namespace Application.Interfaces.Validators
     {
         void ValidateSendRequestByPlayer(Player player, Team team, MembershipRequest? existingRequest);
 
-        void ValidateSendRequestByTeam(Team team, Player invitedPlayer, MembershipRequest? existingRequest);
+        void ValidateSendRequestByTeam(Team team, Player invitedPlayer, MembershipRequest? existingRequest, Player player);
 
         void ValidateAcceptRequestByTeam(Team team, MembershipRequest request, Player playerAccepting);
 

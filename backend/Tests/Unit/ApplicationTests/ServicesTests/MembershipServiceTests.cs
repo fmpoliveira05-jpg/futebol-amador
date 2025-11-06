@@ -244,7 +244,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*máximo de jogadores*");
+                     .WithMessage("A equipa já está cheia.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -355,7 +355,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = "player-id-abc";
             var rank = new TestRank();
             var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
+            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team};
             team.Members.Add(admin);
             var request1 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p1", IdTeam = teamId };
             var request2 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p2", IdTeam = teamId };
@@ -445,9 +445,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = "admin-id";
             var rank = new TestRank();
             var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
+            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team };
             team.Members.Add(admin);
-            var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.Empty };
+            var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.Empty, Team = null };
             var existingRequest = (MembershipRequest)null;
             var requestDto = new MemberShipRequestDto
             {
@@ -463,7 +463,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>()));
 
             // ACT
-            var result = await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            var result = await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
 
             // ASSERT
             result.Should().BeEquivalentTo(requestDto, options => options.Excluding(r => r.RequestDate).Excluding(r => r.RequestId));
@@ -480,7 +480,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var nonAdminId = "non-admin-id";
             var rank = new TestRank();
             var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var nonAdmin = new Player { Id = nonAdminId, IdTeam = teamId, IsAdmin = false };
+            var nonAdmin = new Player { Id = nonAdminId, IdTeam = teamId, IsAdmin = false, Team = team };
             team.Members.Add(nonAdmin);
             var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.Empty };
 
@@ -489,11 +489,11 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, nonAdmin);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("O jogador com o Id '" + nonAdminId + "' não é administrador da equipa.");
+                     .WithMessage("O jogador não é administrador da equipa.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -518,11 +518,11 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*já atingiu o número máximo de jogadores*");
+                     .WithMessage("A equipa já está cheia.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -534,19 +534,45 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerIdToInvite = "player-id-to-invite";
             var adminId = "admin-id";
             var rank = new TestRank();
-            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.NewGuid() };
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(new Player { Id = adminId, IsAdmin = true });
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
+            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var teamB = new Team("FC Unity 2", "desc", new byte[1], new Pitch("Campo 2", "Rua 2"), rank)
+            {
+                Id = teamId,
+                Members = new List<Player>()
+            };
+            var admin = new Player
+            {
+                Id = adminId,
+                IdTeam = teamId,
+                IsAdmin = true,
+                Team = team
+            };
+            team.Members.Add(admin);
+            var playerToInvite = new Player
+            {
+                Id = playerIdToInvite,
+                IdTeam = Guid.NewGuid(),
+                Team = teamB
+            };
+            teamB.Members.Add(playerToInvite);
+            _teamRepoMock
+                .Setup(r => r.GetTeamForMemberManagementAsync(teamId))
+                .ReturnsAsync(team);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(adminId))
+                .ReturnsAsync(admin);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(playerIdToInvite))
+                .ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("O jogador já pertence a outra equipa e não pode ser convidado.");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+                     .WithMessage("O jogador convidado já pertence a outra equipa.");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque não deve persistir alterações ao tentar convidar um jogador que já pertence a outra equipa");
         }
 
         [Test(Description = "T5GEPA4- Tentar enviar um pedido de adesão sendo administrador da equipa a um jogador sem clube que já foi convidado pela mesma equipa")]
@@ -556,22 +582,55 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamId = Guid.NewGuid();
             var playerIdToInvite = "player-id-to-invite";
             var adminId = "admin-id";
+
             var rank = new TestRank();
-            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.Empty };
-            var existingRequest = new MembershipRequest { IdPlayer = playerIdToInvite, IdTeam = teamId };
-            _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId)).ReturnsAsync(existingRequest);
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(new Player { Id = adminId, IsAdmin = true });
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
+            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            {
+                Id = teamId,
+                Members = new List<Player>()
+            };
+            var admin = new Player
+            {
+                Id = adminId,
+                IdTeam = teamId,
+                IsAdmin = true,
+                Team = team
+            };
+            team.Members.Add(admin);
+            var playerToInvite = new Player
+            {
+                Id = playerIdToInvite,
+                IdTeam = null,
+                Team = null
+            };
+            var existingRequest = new MembershipRequest
+            {
+                IdPlayer = playerIdToInvite,
+                IdTeam = teamId
+            };
+
+            _membershipRequestRepoMock
+                .Setup(r => r.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId))
+                .ReturnsAsync(existingRequest);
+            _teamRepoMock
+                .Setup(r => r.GetTeamForMemberManagementAsync(teamId))
+                .ReturnsAsync(team);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(adminId))
+                .ReturnsAsync(admin);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(playerIdToInvite))
+                .ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("Já existe um pedido pendente entre a equipa e este jogador.");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+                     .WithMessage("Já existe um pedido de adesão entre esta equipa e este jogador.");
+
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque não deve persistir alterações quando já existe um pedido de adesão pendente");
         }
 
         [Test(Description = "T6GEPA4- Tentar enviar um pedido de adesão sendo administrador da equipa, mas o jogador convidado já pertence à equipa")]
@@ -582,19 +641,44 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerIdToInvite = "player-id-to-invite";
             var adminId = "admin-id";
             var rank = new TestRank();
-            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = teamId };
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(new Player { Id = adminId, IsAdmin = true });
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
+            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            {
+                Id = teamId,
+                Members = new List<Player>()
+            };
+            var admin = new Player
+            {
+                Id = adminId,
+                IdTeam = teamId,
+                IsAdmin = true,
+                Team = team
+            };
+            team.Members.Add(admin);
+            var playerToInvite = new Player
+            {
+                Id = playerIdToInvite,
+                IdTeam = teamId,
+                Team = team
+            };
+            team.Members.Add(playerToInvite);
+            _teamRepoMock
+                .Setup(r => r.GetTeamForMemberManagementAsync(teamId))
+                .ReturnsAsync(team);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(adminId))
+                .ReturnsAsync(admin);
+            _playerRepoMock
+                .Setup(r => r.GetPlayerByIdAsync(playerIdToInvite))
+                .ReturnsAsync(playerToInvite);
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("O jogador já pertence a esta equipa.");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+                     .WithMessage("O jogador convidado já pertence à equipa.");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque não deve persistir alterações ao tentar convidar alguém que já é membro da equipa");
         }
 
         #endregion
