@@ -245,6 +245,7 @@ namespace Api.Controllers
 
             return Ok("Player succesfully left the team" + teamName + ".");
         }
+
         #endregion
 
         #endregion
@@ -261,6 +262,7 @@ namespace Api.Controllers
 
             return userId;
         }
+
         #endregion
     }
 }

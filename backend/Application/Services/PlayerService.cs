@@ -75,7 +75,6 @@ namespace Application.Services
 
             await playerRepository.AddAsync(player);
 
-
             await unityOfWork.SaveChangesAsync();
 
             return player.Id;
