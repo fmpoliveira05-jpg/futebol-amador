@@ -17,8 +17,7 @@ class AuthViewModel : ViewModel() {
 
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
-            // --- PARTE 1: FIREBASE SDK ---
-            // 1. Tentar fazer login no Firebase
+            // fazer login no Firebase
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
 
             val firebaseUser = authResult.user
@@ -26,7 +25,7 @@ class AuthViewModel : ViewModel() {
                 throw Exception("Utilizador Firebase não encontrado após login.")
             }
 
-            // 2. Obter o token JWT desse utilizador
+            // token JWT do utilizador
             val idTokenResult = firebaseUser.getIdToken(true).await()
             val token = idTokenResult.token
 
@@ -36,10 +35,10 @@ class AuthViewModel : ViewModel() {
 
             Log.d("TOKEN_TEST", "Bearer $token")
 
-            // --- GUARDAR O TOKEN LOCALMENTE ---
+            // guarda o token localmente
             sessionManager.saveAuthToken(token)
 
-            // --- BUSCAR DADOS DO PERFIL NO BACKEND ---
+            // busca os dados na api backend (descomentar quando a rota estiver pronta)
 
              //val profile = apiService.getMyProfile("Bearer $token")
             // sessionManager.saveUserProfile(profile)
@@ -47,7 +46,7 @@ class AuthViewModel : ViewModel() {
             return true // Login bem-sucedido
 
         } catch (e: Exception) {
-            // Lidar com erros (ex: auth/wrong-password, auth/user-not-found)
+            // Tratamento de erros
             println("Erro no login: ${e.message}")
             return false // Login falhou
         }
@@ -69,7 +68,7 @@ class AuthViewModel : ViewModel() {
     suspend fun registerUser(profile: CreateProfileDto, password: String) {
         var createdFirebaseUser: FirebaseUser? = null
         try {
-            // 1. Tentar criar o utilizador no Firebase
+            // Tenta criar o utilizador no Firebase
             val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
 
             createdFirebaseUser = authResult.user
@@ -78,8 +77,8 @@ class AuthViewModel : ViewModel() {
                 throw Exception("Utilizador Firebase não foi criado.")
             }
 
-            // 2. Obter o token JWT desse utilizador
-            // forceRefresh = true garante que obtemos um token fresco
+            // Obtem o token JWT do utilizador
+            //pos forceRefresh = true garante que obtemos um token fresco
             val idTokenResult = createdFirebaseUser.getIdToken(true).await()
             val token = idTokenResult.token
 
