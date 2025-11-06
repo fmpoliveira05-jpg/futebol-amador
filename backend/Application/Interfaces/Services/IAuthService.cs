@@ -1,10 +1,11 @@
-﻿using System.Globalization;
+﻿using Application.DTOs;
+using System.Globalization;
 
 namespace Application.Interfaces.Services
 {
     public interface IAuthService
     {
-        Task<string> LoginAsync(string email, string password);
+        Task<FirebaseLoginResponseDto> LoginAsync(string email, string password);
 
         Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 

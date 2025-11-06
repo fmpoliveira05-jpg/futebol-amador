@@ -18,5 +18,7 @@ namespace Application.Interfaces.Validators
         void PhoneNumberValidation(string phoneNumber);
 
         void CreateUserValidation(string newUserId);
+
+        void DeleteUserValidation(string userIdToDelete);
     }
 }

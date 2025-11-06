@@ -4,6 +4,7 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -81,11 +82,15 @@ namespace Application.Services
 
         public async Task DeletePlayerAsync(string playerId)
         {
-            //playerValidator.GetPlayerByIdValidator(playerId);
+            UserDataValidator.DeleteUserValidation(playerId);
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            playerValidator.DeletePlayerValidator(playerToDelete);
 
             playerRepository.DeletePlayer(playerToDelete);
 
+            AuthService.DeleteUser(playerId);
+            //Caso não remover o player automaticamente da team remover manualmente
             await unityOfWork.SaveChangesAsync();
         }
 

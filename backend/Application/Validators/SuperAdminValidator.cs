@@ -42,10 +42,7 @@ namespace Application.Validators
                 throw new ValidationException($"The phone number '{sadmins[1].Phone}' is already in use.");
             }
 
-            if (!emailValidator.EmailValidation(dto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
+            emailValidator.EmailValidation(dto.Email);
 
             if (dto.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
                 || dto.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))
@@ -90,10 +87,7 @@ namespace Application.Validators
                 }
             }
 
-            if (!emailValidator.EmailValidation(dto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
+            emailValidator.EmailValidation(dto.Email);
 
             if (dto.DateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-18)
                 || dto.DateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-70))

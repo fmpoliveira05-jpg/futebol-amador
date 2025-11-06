@@ -1,9 +1,12 @@
-﻿using Application.Interfaces.Repositories;
+﻿using Application.DTOs;
+using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
-using Google.Cloud.Firestore;
+using Domain.Exceptions;
 using FirebaseAdmin.Auth;
+using Google.Cloud.Firestore;
+using System.Net.Http.Json;
 
 namespace Application.Services
 {
@@ -34,9 +37,38 @@ namespace Application.Services
             FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
 
-        public Task<string> LoginAsync(string email, string password)
+        public async Task<FirebaseLoginResponseDto> LoginAsync(string email, string password)
         {
-            throw new NotImplementedException();
+            string firebaseApiKey = "REMOVIDO";
+
+            var firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseApiKey}";
+
+            var requestBody = new
+            {
+                email = email,
+                password = password,
+                returnSecureToken = true
+            };
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.PostAsJsonAsync(firebaseAuthUrl, requestBody);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var firebaseResponse = await response.Content.ReadFromJsonAsync<FirebaseLoginResponseDto>();
+                    if (firebaseResponse == null)
+                    {
+                        throw new AuthenticationException("Failed to parse Firebase response.");
+                    }
+                    return firebaseResponse;
+                }
+                else
+                {
+                    var errorResponse = await response.Content.ReadAsStringAsync();
+                    throw new AuthenticationException(errorResponse);
+                }
+            }
         }
 
         public Task LogoutAsync()

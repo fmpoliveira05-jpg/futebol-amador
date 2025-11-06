@@ -35,5 +35,13 @@ namespace Application.Validators
                 throw new Exception("O user não foi criado com sucesso");
             }
         }
+
+        public void DeleteUserValidation(string userIdToDelete)
+        {
+            if (userIdToDelete == null)
+            {
+                throw new ValidationException("O a deletar user não Existe");
+            }
+        }
     }
 }

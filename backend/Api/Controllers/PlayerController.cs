@@ -53,29 +53,26 @@ namespace Api.Controllers
             authService.DeleteUser(userId);
             return NoContent();
         }
+        
+
+        [HttpPost]
+        [Route("LOGIN")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TesteLoginFBUser([FromBody] LoginDto loginDto)
+        {
+            var loginResponse = await authService.LoginAsync(loginDto.Email,loginDto.Password);
+            return Ok(loginResponse);
+        }
+
         */
-
-
 
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
-            //var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            //var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-            /**
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
-            {
-                return Unauthorized();
-            }
-             */
-            var userId = "";
-            var email = playerDto.Email;
-
-            var newPlayerId = await playerService.CreatePlayerAsync(userId,email,playerDto);
+            var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
             /*
             return CreatedAtAction(
                     nameof(GetPlayer),
