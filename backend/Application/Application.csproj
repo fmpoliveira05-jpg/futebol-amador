@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -9,10 +9,13 @@
   <ItemGroup>
     <Compile Remove="DTOs\NovaPasta1\**" />
     <Compile Remove="Interfaces\Entities\**" />
+    <Compile Remove="Properties\PublishProfiles\**" />
     <EmbeddedResource Remove="DTOs\NovaPasta1\**" />
     <EmbeddedResource Remove="Interfaces\Entities\**" />
+    <EmbeddedResource Remove="Properties\PublishProfiles\**" />
     <None Remove="DTOs\NovaPasta1\**" />
     <None Remove="Interfaces\Entities\**" />
+    <None Remove="Properties\PublishProfiles\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +37,10 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.10" />
     <PackageReference Include="NUnit" Version="4.2.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.35.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>
