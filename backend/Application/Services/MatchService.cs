@@ -188,7 +188,7 @@ namespace Application.Services
         #endregion
 
         #region CancelMatch
-        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description, Player player)
+        public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
         {
             var match = await MatchRepository.GetMatchToCancelById(idMatch);
             MatchValidator.ExistsMatch(match);
