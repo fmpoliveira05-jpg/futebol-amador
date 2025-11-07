@@ -1,4 +1,4 @@
-name: CI/CD - .NET 9 + SonarQube
+name: CI/CD - .NET 8 + SonarQube + DockerHub
 
 on:
   push:
@@ -7,17 +7,17 @@ on:
     branches: [ developer, master ]
 
 env:
-  DOTNET_VERSION: '9.0.x'
+  DOTNET_VERSION: '8.0.x'
   SOLUTION_FILE: 'FutebolAmador.sln'
-  TEST_RESULTS_DIR: 'TestResults'
   SONAR_PROJECT_KEY: 'LDS-Backend'
+  TEST_PROJECT: 'Tests/Tests.csproj'
+  TEST_RESULTS_DIR: 'TestResults'
+  DOCKER_IMAGE_NAME: 'willkie/backend-lds'
 
 jobs:
-  # ======================================================
-  # 1️⃣ BUILD
-  # ======================================================
+
   build:
-    name: 🔨 Build Solution
+    name: Build Solution
     runs-on: windows-latest
 
     steps:
@@ -25,8 +25,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -35,11 +34,8 @@ jobs:
           dotnet restore ${{ env.SOLUTION_FILE }}
           dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
 
-  # ======================================================
-  # 2️⃣ TESTES UNITÁRIOS (em todas as branches)
-  # ======================================================
   unit-tests:
-    name: 🧪 Unit Tests
+    name: Unit Tests
     runs-on: windows-latest
     needs: build
 
@@ -49,9 +45,15 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Restore & Build
+        run: |
+          dotnet restore ${{ env.SOLUTION_FILE }}
+          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+
       - name: Run Unit Tests
         run: |
-          dotnet test Tests/Unit --no-build --configuration Release `
+          dotnet test ${{ env.TEST_PROJECT }} --configuration Release `
+            --filter "FullyQualifiedName~Unit" `
             --logger "trx;LogFileName=unit-tests.trx" `
             --results-directory "${{ env.TEST_RESULTS_DIR }}"
 
@@ -62,11 +64,8 @@ jobs:
           name: Unit-Test-Results
           path: ${{ env.TEST_RESULTS_DIR }}
 
-  # ======================================================
-  # 3️⃣ TESTES DE INTEGRAÇÃO + SONARQUBE (só na master)
-  # ======================================================
   integration-tests-and-sonar:
-    name: 🔍 Integration Tests + SonarQube
+    name: Integration Tests + SonarQube
     runs-on: windows-latest
     needs: build
     if: github.ref == 'refs/heads/master'
@@ -85,47 +84,57 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Cache NuGet
-        uses: actions/cache@v4
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-dotnet-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: ${{ runner.os }}-dotnet-
-
       - name: Install SonarQube Scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Start SonarQube + Build + Test
+      - name: Run Integration Tests + Sonar
         shell: pwsh
         run: |
-          # 1️⃣ INICIAR ANÁLISE SONAR
           dotnet-sonarscanner begin `
             /k:"${{ env.SONAR_PROJECT_KEY }}" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
-            /d:sonar.cs.junit.reportsPaths="**/*.trx" `
+            /d:sonar.cs.vstest.reportsPaths="**/*.trx" `
             /d:sonar.verbose=true
 
-          # 2️⃣ BUILD OBRIGATÓRIO PARA O SONAR
           dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-incremental
 
-          # 3️⃣ EXECUTAR TESTES DE INTEGRAÇÃO COM COBERTURA
-          dotnet test Tests/Integration --configuration Release `
+          dotnet test ${{ env.TEST_PROJECT }} --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
+            --filter "FullyQualifiedName~Integration" `
             --results-directory "${{ env.TEST_RESULTS_DIR }}" `
             --logger "trx;LogFileName=integration-tests.trx"
 
-          # Mostrar o que foi gerado
-          Write-Host "=== Conteúdo da pasta TestResults ==="
-          Get-ChildItem -Path "${{ env.TEST_RESULTS_DIR }}" -Recurse | Format-Table -AutoSize
+          # Encontrar e mover ficheiro de cobertura para a raiz
+          $coverage = Get-ChildItem -Recurse -Filter "coverage.opencover.xml" | Select-Object -First 1
+          if ($coverage) {
+            Copy-Item $coverage.FullName -Destination "$PWD/coverage.opencover.xml" -Force
+            Write-Host "✅ Cobertura copiada de $($coverage.FullName)"
+          } else {
+            Write-Host "⚠️ Nenhum ficheiro de cobertura encontrado!"
+            Get-ChildItem -Recurse | Where-Object { $_.Name -like "*coverage*" } | ForEach-Object { Write-Host "Encontrado: $($_.FullName)" }
+          }
 
-          # 4️⃣ FINALIZAR ANÁLISE SONAR
           dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-      - name: Upload Integration Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
+
+  dockerhub-deploy:
+    name: Push Docker Image
+    runs-on: ubuntu-latest
+    needs: integration-tests-and-sonar
+    if: success() && github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
         with:
-          name: Integration-Test-Results
-          path: ${{ env.TEST_RESULTS_DIR }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build e Push da Imagem
+        run: |
+          docker build -t ${{ env.DOCKER_IMAGE_NAME }}:latest -f .\Api\Dockerfile .
+          docker push ${{ env.DOCKER_IMAGE_NAME }}:latest
