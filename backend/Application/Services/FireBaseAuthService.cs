@@ -6,6 +6,7 @@ using Application.Validators;
 using Domain.Exceptions;
 using FirebaseAdmin.Auth;
 using Google.Cloud.Firestore;
+using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
 namespace Application.Services
@@ -20,15 +21,19 @@ namespace Application.Services
 
         private readonly IPlayerValidator PlayerValidator;
 
+        private readonly IConfiguration Configuration;
+        private readonly string FirebaseApiKey;
 
-
-        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository)
+        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository, IConfiguration configuration)
         {
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             PlayerValidator = playerValidator;
             SuperAdminRepository = superAdminRepository;
+            Configuration = configuration;
+            FirebaseApiKey = configuration["Firebase:ApiKey"]
+            ?? throw new ArgumentNullException("Firebase:ApiKey não encontrada no secrets.json");
         }
 
         public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
@@ -69,9 +74,8 @@ namespace Application.Services
 
         public async Task<LoginResponseDto> LoginAsync(string email, string password)
         {
-            string firebaseApiKey = "REMOVIDO";
 
-            var firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={firebaseApiKey}";
+            var firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FirebaseApiKey}";
 
             var requestBody = new
             {
