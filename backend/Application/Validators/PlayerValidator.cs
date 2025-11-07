@@ -49,8 +49,6 @@ namespace Application.Validators
 
             ValidateAge(CreatePlayerDto.DateOfBirth);
 
-            ValidatePhone(CreatePlayerDto.Phone);
-
             ValidatePosition(CreatePlayerDto.Position);
 
             ValidateAddress(CreatePlayerDto.Address);
@@ -93,8 +91,6 @@ namespace Application.Validators
 
             ValidateAge(UpdatePlayerDto.DateOfBirth);
 
-            ValidatePhone(UpdatePlayerDto.Phone);
-
             ValidatePosition(UpdatePlayerDto.Position);
 
             ValidateAddress(UpdatePlayerDto.Address);
@@ -112,7 +108,6 @@ namespace Application.Validators
 
         public void LeaveTeamValidator(Player player)
         {
-            //same as the delete one
             if (player.Team == null)
             {
                 throw new ValidationException("Player does not belong to any team.");
@@ -199,7 +194,6 @@ namespace Application.Validators
             
         }
 
-        // acabar! falta ver como buscar as chatrooms do firebase e ver se faz sentido guardar no db do backend tambem
         private void PlayerHasChatRooms(Player player) { 
             //if(player.)
         }
@@ -226,29 +220,6 @@ namespace Application.Validators
                 || dateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MaxAge))
             {
                 throw new ValidationException("Invalid Date of birth");
-            }
-        }
-
-        private static void ValidatePhone(string phone)
-        {
-            if (phone.Length != 9)
-            {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
-
-            if (!phone.All(char.IsDigit))
-            {
-                throw new ValidationException("Phone number must only contain digits (0-9).");
-            }
-
-            if (phone.StartsWith("0"))
-            {
-                throw new ValidationException("Phone number cannot start with '0'.");
-            }
-
-            if (!int.TryParse(phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
             }
         }
 

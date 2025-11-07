@@ -24,7 +24,6 @@ namespace Application.DTOs.PlayerDTOs
         public string Password { get; set; } = null!;
 
         [Required]
-        [MinLength(ModelConstants.UserConst.SizePhoneNumber), MaxLength(ModelConstants.UserConst.SizePhoneNumber)]
         public string Phone {  get; set; } = null!;
 
         [Required]

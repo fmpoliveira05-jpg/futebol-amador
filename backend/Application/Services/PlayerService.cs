@@ -89,7 +89,7 @@ namespace Application.Services
 
             playerRepository.DeletePlayer(playerToDelete);
 
-            AuthService.DeleteUser(playerId);
+            AuthService.DeleteUserAsync(playerId);
             //Caso não remover o player automaticamente da team remover manualmente
             await unityOfWork.SaveChangesAsync();
         }

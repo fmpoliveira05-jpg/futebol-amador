@@ -13,7 +13,7 @@ namespace Application.Interfaces.Services
 
         Task LogoutAsync(string userId);
 
-        void DeleteUser(string userId);
+        void DeleteUserAsync(string userId);
 
         Task<string> RegisterUser(string email, string password, string phoneNumber);
     }

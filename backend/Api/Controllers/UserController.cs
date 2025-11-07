@@ -42,15 +42,17 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /*
         [HttpDelete]
         [Route("delete")]
         [Authorize]
         public IActionResult DeleteUser()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            authService.DeleteUser(userId);
+            authService.DeleteUserAsync(userId);
             return NoContent();
         }
+        */
 
         [HttpGet]
         [Route("ChangePassword")]

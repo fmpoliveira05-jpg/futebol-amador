@@ -62,7 +62,7 @@ namespace Application.Services
             }
         }
 
-        public async void DeleteUser(string userId)
+        public async void DeleteUserAsync(string userId)
         {
             await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
