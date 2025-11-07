@@ -64,4 +64,6 @@ jobs:
 
           dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage;Format=opencover" --logger "junit;LogFileName=test-results.xml"
 
+          Write-Host "Procurando pelo ficheiro de cobertura..."
+          Get-ChildItem -Path . -Recurse -Filter "coverage.opencover.xml" | ForEach-Object { Write-Host "FICHEIRO ENCONTRADO: $($_.FullName)" }
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
