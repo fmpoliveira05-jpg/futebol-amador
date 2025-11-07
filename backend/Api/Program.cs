@@ -7,6 +7,8 @@ using Application.Interfaces.Services.Hub;
 using Application.Services;
 using Google.Cloud.Firestore;
 using Infrastructure;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,10 @@ builder.Services.AddSwaggerDocumentacion();
 //adiciona o Tratador de exceções global
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["sub"] = ClaimTypes.NameIdentifier;
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["user_id"] = ClaimTypes.NameIdentifier;
 
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
 if (string.IsNullOrEmpty(firebaseProjectId))
