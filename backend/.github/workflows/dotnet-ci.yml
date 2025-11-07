@@ -1,19 +1,25 @@
-name: CI - Build, Test & Analyze (.NET 9)
+name: CI/CD - .NET 9 + SonarQube
 
 on:
   push:
-    branches: [ master, main, developer ]
+    branches: [ master, developer ]
   pull_request:
+    branches: [ developer, master ]
 
 env:
   DOTNET_VERSION: '9.0.x'
   SOLUTION_FILE: 'FutebolAmador.sln'
+  TEST_RESULTS_DIR: 'TestResults'
+  SONAR_PROJECT_KEY: 'LDS-Backend'
 
 jobs:
-  # ------------------ BUILD ------------------
+  # ======================================================
+  # 1️⃣ BUILD
+  # ======================================================
   build:
-    name: Build
+    name: 🔨 Build Solution
     runs-on: windows-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -29,12 +35,14 @@ jobs:
           dotnet restore ${{ env.SOLUTION_FILE }}
           dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
 
-  # ------------------ UNIT TESTS ------------------
+  # ======================================================
+  # 2️⃣ TESTES UNITÁRIOS (em todas as branches)
+  # ======================================================
   unit-tests:
-    name: Unit Tests
+    name: 🧪 Unit Tests
     runs-on: windows-latest
     needs: build
-    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -45,14 +53,24 @@ jobs:
         run: |
           dotnet test Tests/Unit --no-build --configuration Release `
             --logger "trx;LogFileName=unit-tests.trx" `
-            --results-directory "TestResults"
+            --results-directory "${{ env.TEST_RESULTS_DIR }}"
 
-  # ------------------ INTEGRATION TESTS + SONAR ------------------
+      - name: Upload Unit Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Unit-Test-Results
+          path: ${{ env.TEST_RESULTS_DIR }}
+
+  # ======================================================
+  # 3️⃣ TESTES DE INTEGRAÇÃO + SONARQUBE (só na master)
+  # ======================================================
   integration-tests-and-sonar:
-    name: Integration Tests + SonarQube
+    name: 🔍 Integration Tests + SonarQube
     runs-on: windows-latest
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,18 +95,37 @@ jobs:
       - name: Install SonarQube Scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Run Integration Tests & Sonar
+      - name: Start SonarQube + Build + Test
         shell: pwsh
         run: |
-          dotnet-sonarscanner begin /k:"LDS-Backend" `
+          # 1️⃣ INICIAR ANÁLISE SONAR
+          dotnet-sonarscanner begin `
+            /k:"${{ env.SONAR_PROJECT_KEY }}" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
+            /d:sonar.cs.junit.reportsPaths="**/*.trx" `
+            /d:sonar.verbose=true
 
+          # 2️⃣ BUILD OBRIGATÓRIO PARA O SONAR
+          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-incremental
+
+          # 3️⃣ EXECUTAR TESTES DE INTEGRAÇÃO COM COBERTURA
           dotnet test Tests/Integration --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
-            --results-directory "TestResults"
+            --results-directory "${{ env.TEST_RESULTS_DIR }}" `
+            --logger "trx;LogFileName=integration-tests.trx"
 
-          Get-ChildItem -Recurse TestResults | Format-Table -AutoSize
+          # Mostrar o que foi gerado
+          Write-Host "=== Conteúdo da pasta TestResults ==="
+          Get-ChildItem -Path "${{ env.TEST_RESULTS_DIR }}" -Recurse | Format-Table -AutoSize
 
+          # 4️⃣ FINALIZAR ANÁLISE SONAR
           dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+
+      - name: Upload Integration Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Integration-Test-Results
+          path: ${{ env.TEST_RESULTS_DIR }}
