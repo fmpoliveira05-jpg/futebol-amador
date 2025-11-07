@@ -231,24 +231,14 @@ namespace Application.Validators
 
         private static void ValidatePhone(string phone)
         {
-            if (phone.Length != 9)
+            if (phone.Length != UserConst.SizePhoneNumber)
             {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
-
-            if (!phone.All(char.IsDigit))
-            {
-                throw new ValidationException("Phone number must only contain digits (0-9).");
+                throw new ValidationException($"Phone number must have {UserConst.SizePhoneNumber} digits.");
             }
 
             if (phone.StartsWith("0"))
             {
                 throw new ValidationException("Phone number cannot start with '0'.");
-            }
-
-            if (!int.TryParse(phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
             }
         }
 
