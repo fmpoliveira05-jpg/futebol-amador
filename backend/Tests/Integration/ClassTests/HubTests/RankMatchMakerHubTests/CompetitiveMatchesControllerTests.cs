@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
-namespace Tests.Integration.ClassTests.RankMatchMakerHubTests
+namespace Tests.Integration.ClassTests.HubTests.RankMatchMakerHubTests
 {
     [TestFixture]
     public class CompetitiveMatchesControllerTests

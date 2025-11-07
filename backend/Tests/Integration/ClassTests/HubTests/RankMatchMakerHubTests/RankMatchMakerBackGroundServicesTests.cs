@@ -9,7 +9,7 @@ using Moq;
 using NUnit.Framework;
 using Tests.Integration.Helpers;
 
-namespace Tests.Integration.ClassTests.RankMatchMakerHubTests
+namespace Tests.Integration.ClassTests.HubTests.RankMatchMakerHubTests
 {
     public class RankMatchMakerBackGroundServicesTests
     {
@@ -43,7 +43,7 @@ namespace Tests.Integration.ClassTests.RankMatchMakerHubTests
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.AddSingleton<IManagerRankMatchMakerService>(mockManager.Object);
+                    services.AddSingleton(mockManager.Object);
                     services.AddSingleton(typeof(IHubContext<RankMatchMakerHub, IRankMatchMakerHub>), mockHubContext.Object);
                     services.AddSingleton<IHostedService, OneShotRankMatchMakerHostedService>();
                 });
