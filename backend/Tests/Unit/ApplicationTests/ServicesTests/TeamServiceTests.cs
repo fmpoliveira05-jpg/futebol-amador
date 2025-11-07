@@ -1,9 +1,9 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Pitch;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Application.Validators;
@@ -24,11 +24,12 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IPlayerRepository> _playerRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IRankRepository> _rankRepoMock;
-        private ITeamValidator _validatorReal;
-        private IPlayerAuthorizationValidator _authorizationValidator;
+        private Mock<IMembershipRequestRepository> _membershipRequestRepoMock;
+        private Mock<IPlayerValidator> _playerValidatorMock;
+        private Mock<IPlayerAuthorizationValidator> _authorizationValidatorMock;
+        private Mock<INotificationService> _notificationServiceMock;
+        private TeamValidator _teamValidator;
         private TeamService _sut;
-        private readonly Mock<IMembershipRequestRepository> _membershipRequestRepoMock = new();
-        private readonly Mock<IPlayerValidator> _playerValidatorMock = new();
         #endregion
 
         #region SetUp
@@ -39,19 +40,22 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock = new Mock<IPlayerRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _rankRepoMock = new Mock<IRankRepository>();
-            _validatorReal = new TeamValidator();
-            _authorizationValidator = new PlayerAuthorizationValidator();
+            _membershipRequestRepoMock = new Mock<IMembershipRequestRepository>();
+            var playerValidator = new PlayerValidator();
+            var authorizationValidator = new PlayerAuthorizationValidator();
+            _notificationServiceMock = new Mock<INotificationService>();
+            _teamValidator = new TeamValidator();
 
             _sut = new TeamService(
-            _teamRepoMock.Object,
-            _playerRepoMock.Object,
-            _unitOfWorkMock.Object,
-            _validatorReal,
-            _rankRepoMock.Object,
-            _membershipRequestRepoMock.Object,
-            _playerValidatorMock.Object,
-            _authorizationValidator,
-            null
+                _teamRepoMock.Object,
+                _playerRepoMock.Object,
+                _unitOfWorkMock.Object,
+                _teamValidator,
+                _rankRepoMock.Object,
+                _membershipRequestRepoMock.Object,
+                playerValidator,
+                authorizationValidator,
+                _notificationServiceMock.Object
             );
         }
         #endregion
@@ -132,8 +136,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*já existe*", "porque o nome da equipa não pode ser duplicado");
+            await act.Should().ThrowAsync<NotFoundException>()
+                     .WithMessage("*Já existe uma equipa com o nome*");
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Team>()), Times.Never, "porque não deve tentar adicionar uma equipa duplicada");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque nenhuma alteração deve ser persistida");
         }
@@ -165,8 +169,8 @@ namespace Unit.ApplicationTests.ServicesTests
             // ACT
             Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*ja possui uma equipa*", "porque um jogador admin não pode criar uma nova equipa");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas jogadores sem equipa podem aceder a este recurso!");
 
             // ASSERT
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Team>()), Times.Never, "porque a criação deve ser bloqueada");
@@ -233,8 +237,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.UpdateTeamInfoAsync(team.Id, dto, nonAdmin.Id);
             
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*", "porque apenas administradores podem atualizar os dados da equipa");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque a atualização não deve ser persistida");
         }
 
@@ -267,8 +271,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.UpdateTeamInfoAsync(teamB.Id, dto, adminOfTeamA.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*", "porque o admin pertence a outra equipa e não deve ter acesso");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -363,8 +367,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(team.Id, player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                 .WithMessage("*não é administrador*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -384,8 +388,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, playerAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                 .WithMessage("*não pertence*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -403,8 +407,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(Guid.NewGuid(), player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<NotFoundException>()
-                 .WithMessage("*não existe*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                 .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -428,24 +432,34 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once, "porque a operação deve ser persistida na base de dados");
         }
 
-        [Test(Description = "T6GE3- DeleteTeamAsync deve permitir a exclusão da equipa se um administrador de outra equipa realizar a ação")]
-        public async Task DeleteTeamAsync_Should_Delete_When_Another_Admin_Deletes_Team()
+        [Test(Description = "T6GE3- DeleteTeamAsync deve lançar exceção quando um jogador sem equipa tenta eliminar uma equipa")]
+        public async Task DeleteTeamAsync_Should_Throw_When_Player_Without_Team_Tries_To_Delete_Team()
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("TeamToDelete", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
-            var admin = new Player { Id = "admin-id-123", IsAdmin = true };
-            team.Members.Add(admin);
+            var team = new Team("TeamToDelete", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            {
+                Id = Guid.NewGuid()
+            };
+            var playerWithoutTeam = new Player
+            {
+                Id = "player-no-team-123",
+                IdTeam = null,
+                IsAdmin = true
+            };
             _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(team.Id)).ReturnsAsync(team);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(admin.Id)).ReturnsAsync(admin);
-            _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).Returns(Task.FromResult(1));
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerWithoutTeam.Id)).ReturnsAsync(playerWithoutTeam);
 
             // ACT
-            await _sut.DeleteTeamAsync(team.Id, admin.Id);
+            Func<Task> act = async () => await _sut.DeleteTeamAsync(team.Id, playerWithoutTeam.Id);
 
             // ASSERT
-            _teamRepoMock.Verify(r => r.DeleteTeam(team), Times.Once, "porque o repositório deve eliminar a equipe");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once, "porque a operação deve ser persistida na base de dados");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
+            _teamRepoMock.Verify(r => r.DeleteTeam(It.IsAny<Team>()), Times.Never,
+                "porque o jogador sem equipa não deve conseguir eliminar a equipa");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque nenhuma alteração deve ser persistida");
         }
 
         [Test(Description = "T7GE3- DeleteTeamAsync deve lançar exceção quando o jogador pertence a outra equipa e não é administrador")]
@@ -468,8 +482,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                 .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
         #endregion
@@ -524,8 +538,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, playerRemoving.Id);
             
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*", "porque apenas administradores podem remover jogadores da equipa");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             team.Members.Should().Contain(playerToRemove, "porque o jogador não deve ser removido");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve haver persistência sem permissões");
         }
@@ -557,8 +571,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(teamB.Id, playerToRemove.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             teamB.Members.Should().Contain(playerToRemove);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -590,22 +604,22 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, admin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             team.Members.Should().NotContain(playerToRemove);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
         #endregion
 
         #region PromotePlayerTests
-        [Test(Description = "T1GAE1 - Adicionar um administrador de equipe com sucesso")]
+        [Test(Description = "T1GAE1 - Adicionar um administrador de equipa com sucesso")]
         public async Task PromotePlayerToAdminAsync_Should_Work_When_Admin_Promotes_Member()
         {
             // ARRANGE
             var rank = new TestRank();
             var team = new Team("FC Unity", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
-            var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true };
-            var member = new Player { Id = "player-id-123", IdTeam = team.Id, IsAdmin = false };
+            var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true, Team = team};
+            var member = new Player { Id = "player-id-123", IdTeam = team.Id, IsAdmin = false, Team = team};
             team.Members.Add(admin);
             team.Members.Add(member);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
@@ -620,14 +634,14 @@ namespace Unit.ApplicationTests.ServicesTests
             member.IsAdmin.Should().BeTrue("porque o jogador foi promovido por um administrador");
         }
 
-        [Test(Description = "T2GAE1 - Tentar adicionar à equipe um administrador já adicionado")]
+        [Test(Description = "T2GAE1 - Tentar adicionar à equipa um administrador já adicionado")]
         public async Task PromotePlayerToAdminAsync_Should_Throw_If_NonAdmin_Tries()
         {
             // ARRANGE
             var rank = new TestRank();
             var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
-            var memberPromoting = new Player { Id = "non-admin-id-123", IdTeam = team.Id, IsAdmin = false };
-            var memberToPromote = new Player { Id = "user-id-123", IdTeam = team.Id, IsAdmin = false };
+            var memberPromoting = new Player { Id = "non-admin-id-123", IdTeam = team.Id, IsAdmin = true, Team = team };
+            var memberToPromote = new Player { Id = "user-id-123", IdTeam = team.Id, IsAdmin = true, Team = team};
             team.Members.Add(memberPromoting);
             team.Members.Add(memberToPromote);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
@@ -639,7 +653,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*");
+                     .WithMessage("O jogador alvo já é administrador da equipa.");
         }
 
         [Test(Description = "T3GAE1 - O Jogador que tenta promover outro jogador não é admin da equipe, mas pertence à equipe")]
@@ -648,8 +662,8 @@ namespace Unit.ApplicationTests.ServicesTests
             // ARRANGE
             var rank = new TestRank();
             var team = new Team("Team A", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
-            var adminPromoter = new Player { Id = "admin-promoter-1", IdTeam = team.Id, IsAdmin = true };
-            var playerAlreadyAdmin = new Player { Id = "already-admin-1", IdTeam = team.Id, IsAdmin = true };
+            var adminPromoter = new Player { Id = "admin-promoter-1", IdTeam = team.Id, IsAdmin = false, Team = team};
+            var playerAlreadyAdmin = new Player { Id = "already-admin-1", IdTeam = team.Id, IsAdmin = false };
             team.Members.Add(adminPromoter);
             team.Members.Add(playerAlreadyAdmin);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
@@ -660,8 +674,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.PromotePlayerToAdminAsync(team.Id, playerAlreadyAdmin.Id, adminPromoter.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*já é administrador da equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -684,22 +698,33 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.PromotePlayerToAdminAsync(teamB.Id, playerToPromote.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "T5GAE1 - O Jogador alvo da promoção pertence a outra equipe")]
-        public async Task PromotePlayerToAdminAsync_Should_Throw_When_Player_Belongs_To_Other_Team()
+        [Test(Description = "T5GAE1 - O Jogador alvo da promoção não pertence a nenhuma equipa")]
+        public async Task PromotePlayerToAdminAsync_Should_Throw_When_Player_Has_No_Team()
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
-            var admin = new Player { Id = "admin-a-2", IdTeam = teamA.Id, IsAdmin = true };
-            var playerToPromote = new Player { Id = "player-b-2", IdTeam = teamB.Id, IsAdmin = false };
+            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank)
+            {
+                Id = Guid.NewGuid()
+            };
+            var admin = new Player
+            {
+                Id = "admin-a-2",
+                IdTeam = teamA.Id,
+                IsAdmin = true
+            };
+            var playerToPromote = new Player
+            {
+                Id = "player-no-team",
+                IdTeam = null,
+                IsAdmin = false
+            };
             teamA.Members.Add(admin);
-            teamB.Members.Add(playerToPromote);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamA.Id)).ReturnsAsync(teamA);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(admin.Id)).ReturnsAsync(admin);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerToPromote.Id)).ReturnsAsync(playerToPromote);
@@ -709,8 +734,9 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence a equipa*");
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+                     .WithMessage("O jogador alvo da promoção não pertence a nenhuma equipa!");
+            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
+                "porque o jogador não pertence a nenhuma equipa e não deve ser promovido");
         }
 
         [Test(Description = "T6GAE1 - Tentar promover um jogador, sendo administrador da equipe, mas a equipe já tem 3 administradores")]
@@ -744,7 +770,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "T7GAE1 - O Jogador alvo da promoção pertence a outra equipe")]
+        [Test(Description = "T7GAE1 - O Jogador alvo da promoção pertence a outra equipa")]
         public async Task PromotePlayerToAdminAsync_Should_Throw_When_Player_Belongs_To_Another_Team()
         {
             // ARRANGE
@@ -752,7 +778,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
             var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
             var admin = new Player { Id = "admin-a-2", IdTeam = teamA.Id, IsAdmin = true };
-            var playerToPromote = new Player { Id = "player-b-2", IdTeam = teamB.Id, IsAdmin = false };
+            var playerToPromote = new Player { Id = "player-b-2", IdTeam = teamB.Id, IsAdmin = false, Team = teamB};
             teamA.Members.Add(admin);
             teamB.Members.Add(playerToPromote);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamA.Id)).ReturnsAsync(teamA);
@@ -764,7 +790,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence a equipa*");
+                     .WithMessage("O jogador alvo da promoção não pertence à equipa!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
         #endregion
@@ -810,8 +836,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(team.Id, admin.Id, nonAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
         }
 
         [Test(Description = "T3GAE2 - Tentar remover um administrador da equipa com um jogador de equipe de uma equipe diferente")]
@@ -833,8 +859,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(teamB.Id, adminToDemote.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -858,29 +884,42 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "T5GAE2 - Um jogador sem clube tenta remover um administrador de uma equipe já existente")]
-        public async Task DemoteAdminToPlayerAsync_Should_Throw_When_Target_Player_From_Other_Team()
+        [Test(Description = "T5GAE2 - Um jogador sem clube tenta remover um administrador de uma equipa já existente")]
+        public async Task DemoteAdminToPlayerAsync_Should_Throw_When_Player_Without_Team_Tries_To_Demote_Admin()
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
-            var adminTeamA = new Player { Id = "admin-a-4", IdTeam = teamA.Id, IsAdmin = true };
-            var adminTeamB = new Player { Id = "admin-b-4", IdTeam = teamB.Id, IsAdmin = true };
-            teamA.Members.Add(adminTeamA);
-            teamB.Members.Add(adminTeamB);
-            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamA.Id)).ReturnsAsync(teamA);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminTeamA.Id)).ReturnsAsync(adminTeamA);
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminTeamB.Id)).ReturnsAsync(adminTeamB);
+            var team = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank)
+            {
+                Id = Guid.NewGuid()
+            };
+            var playerWithoutTeam = new Player
+            {
+                Id = "player-no-team-1",
+                IdTeam = null,
+                IsAdmin = true
+            };
+            var adminTeam = new Player
+            {
+                Id = "admin-a-4",
+                IdTeam = team.Id,
+                IsAdmin = true,
+                Team = team
+            };
+
+            team.Members.Add(adminTeam);
+            _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerWithoutTeam.Id)).ReturnsAsync(playerWithoutTeam);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminTeam.Id)).ReturnsAsync(adminTeam);
 
             // ACT
-            Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(teamA.Id, adminTeamB.Id, adminTeamA.Id);
+            Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(team.Id, adminTeam.Id, playerWithoutTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
-                "porque o jogador alvo pertence a outra equipa e não deve ser rebaixado");
+                "porque o jogador sem clube não deve conseguir rebaixar um administrador de equipa");
         }
 
         [Test(Description = "T6GAE2 - O Jogador alvo pertence a outra equipa")]
@@ -890,8 +929,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new TestRank();
             var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
             var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
-            var adminTeamA = new Player { Id = "admin-a-5", IdTeam = teamA.Id, IsAdmin = true };
-            var playerFromOtherTeam = new Player { Id = "player-b-5", IdTeam = teamB.Id, IsAdmin = false };
+            var adminTeamA = new Player { Id = "admin-a-5", IdTeam = teamA.Id, IsAdmin = true, Team = teamA };
+            var playerFromOtherTeam = new Player { Id = "player-b-5", IdTeam = teamB.Id, IsAdmin = false, Team = teamB };
             teamA.Members.Add(adminTeamA);
             teamB.Members.Add(playerFromOtherTeam);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamA.Id)).ReturnsAsync(teamA);
@@ -903,7 +942,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence à equipa*");
+                     .WithMessage("O jogador alvo pertence a outra equipa!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
                 "porque o jogador alvo pertence a outra equipa e não pode ser rebaixado");
         }

@@ -5,34 +5,34 @@
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class IncreasePasswordLength : Migration
+    public partial class phoneFix : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Password",
+                name: "Phone",
                 table: "User",
-                type: "nvarchar(100)",
-                maxLength: 100,
+                type: "nvarchar(13)",
+                maxLength: 13,
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(16)",
-                oldMaxLength: 16);
+                oldType: "nvarchar(9)",
+                oldMaxLength: 9);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Password",
+                name: "Phone",
                 table: "User",
-                type: "nvarchar(16)",
-                maxLength: 16,
+                type: "nvarchar(9)",
+                maxLength: 9,
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(100)",
-                oldMaxLength: 100);
+                oldType: "nvarchar(13)",
+                oldMaxLength: 13);
         }
     }
 }

@@ -2,7 +2,9 @@ using Api.Extensions;
 using Api.Hubs.Notification;
 using Api.Middlewares;
 using Application;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
+using Application.Services;
 using Google.Cloud.Firestore;
 using Infrastructure;
 
@@ -14,6 +16,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
+builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
 //notification service for the application layer
 builder.Services.AddScoped<INotificationService, NotificationService>();
@@ -55,3 +58,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+//Classe para os testes de integração
+public partial class Program { }

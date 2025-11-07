@@ -25,6 +25,11 @@ namespace Application.Validators
                 throw new ArgumentException("O id do recetor está vazio");
             }
 
+            if(dto.IdSender == dto.IdReceiver)
+            {
+                throw new ArgumentException("O seu adversário não pode ser voce");
+            }
+
             ValidateHoursGame(dto.GameDate);
         }
 
@@ -70,6 +75,11 @@ namespace Application.Validators
             if (sender.Pitch.Name != namePitch && receiver.Pitch.Name != namePitch)
             {
                 throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
+            }
+
+            if(receiver.Id == sender.Id)
+            {
+                throw new InvalidOperationException("Não pode mandar um convite de partida a si mesmo");
             }
         }
 

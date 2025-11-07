@@ -32,6 +32,12 @@ namespace Application.Services
         public async Task UserAuthorizationIsMemberTeamById(string userId, Guid idTeam)
         {
             var user = await GetPlayerById(userId);
+            AuthorizationValidator.ValidatePlayerAutorizationIsMember(user, idTeam);
+        }
+
+        public async Task UserAuthorizationIsMemberTeamNotAdminById(string userId, Guid idTeam)
+        {
+            var user = await GetPlayerById(userId);
             AuthorizationValidator.ValidatePlayerAutorizationIsNotAdmin(user, idTeam);
         }
 

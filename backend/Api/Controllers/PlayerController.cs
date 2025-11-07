@@ -183,7 +183,7 @@ namespace Api.Controllers
         }
 
 
-        [HttpGet("{playerId:guid}/membership-requests")]
+        [HttpGet("{playerId}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -205,7 +205,7 @@ namespace Api.Controllers
             return Ok(requests);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/accept")]
+        [HttpPost("{playerId:required}/membership-requests/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -214,7 +214,7 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
-        [HttpDelete("{playerId:guid}/membership-requests/reject/{requestId:guid}")]
+        [HttpDelete("{playerId:required}/membership-requests/reject/{requestId:guid}")]
         public async Task<IActionResult> RejectMembershipRequest(string playerId, Guid requestId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -223,7 +223,7 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/send")]
+        [HttpPost("{playerId:required}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -245,6 +245,7 @@ namespace Api.Controllers
 
             return Ok("Player succesfully left the team" + teamName + ".");
         }
+
         #endregion
 
         #endregion
@@ -261,6 +262,7 @@ namespace Api.Controllers
 
             return userId;
         }
+
         #endregion
     }
 }

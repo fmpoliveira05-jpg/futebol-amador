@@ -2,6 +2,7 @@
 using Application.DTOs.MatchInvites;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Services;
 using Domain.Entities;
@@ -25,6 +26,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IMatchInviteValidator> _validatorMock;
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<IPlayerAuthorizationService> _authorizationService;
+        private Mock<INotificationService> _notificationServiceMock;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -42,7 +44,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock = new Mock<IMatchInviteValidator>();
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _authorizationService = new Mock<IPlayerAuthorizationService>();
-            
+            _notificationServiceMock = new Mock<INotificationService>();
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
@@ -54,7 +56,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _unitOfWorkMock.Object,
                 _teamPostPoneRepoMock.Object,
                 _authorizationService.Object,
-                null
+                _notificationServiceMock.Object
             );
 
             // rank mínimo válido para testes
@@ -200,6 +202,10 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+
+            senderTeam.Calendar.Matches = new List<Matches>();
+            receiverTeam.Calendar.Matches = new List<Matches>();
+
             var matchInvite = new MatchInvite(senderTeam, receiverTeam, DateTime.UtcNow.AddDays(1), pitch);
 
             receiverTeam.ReceivedInvites.Add(matchInvite);
@@ -209,8 +215,10 @@ namespace Unit.ApplicationTests.ServicesTests
 
             _teamRepoMock.Setup(r => r.GetByIdWithReceivedInvitesAndCalendar(receiverTeam.Id))
                          .ReturnsAsync(receiverTeam);
-            _teamRepoMock.Setup(r => r.GetTeamByIdAsync(senderTeam.Id))
+
+            _teamRepoMock.Setup(r => r.GetByIdWithReceivedInvitesAndCalendar(senderTeam.Id))
                          .ReturnsAsync(senderTeam);
+
             _pitchRepoMock.Setup(r => r.GetPitchById(matchInvite.IdPitch))
                           .ReturnsAsync(pitch);
             _matchRepoMock.Setup(r => r.GetMatchProxim12HoursMatchs(receiverTeam.Id, It.IsAny<DateTime>()))

@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
+using Domain.Entities;
 
 namespace Application.Interfaces.Services
 {

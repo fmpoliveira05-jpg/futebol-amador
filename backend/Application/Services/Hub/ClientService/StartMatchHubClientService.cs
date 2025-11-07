@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.Hub.ClienteService;
+using Domain.Constants;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace Application.Services.Hub.ClientService
@@ -19,7 +20,7 @@ namespace Application.Services.Hub.ClientService
             }
 
             connection = new HubConnectionBuilder()
-                .WithUrl($"http://localhost:5218/StartMatch")
+                .WithUrl($"{ModelConstants.RouteHubConst.StartRoute}/StartMatch")
                 .WithAutomaticReconnect()
                 .Build();
 

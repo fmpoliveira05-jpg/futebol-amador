@@ -17,7 +17,6 @@ namespace Application.Services.BackGroundServices
 
         private readonly ILogger<RankMatchMakerBackGroundService> logger;
 
-
         /** Intervalo de tempo entre cada verificação de matchmaking */
         private readonly TimeSpan interval = TimeSpan.FromSeconds(5);
 
@@ -62,7 +61,6 @@ namespace Application.Services.BackGroundServices
                         differencPoints = diffPoints,
                         diffAverageAge = diffAverageAge
                     };
-
 
                     //Forma que preciso de utilizar para chamar um service
                     using (var scope = scopeFactory.CreateScope())

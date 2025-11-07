@@ -8,7 +8,7 @@ namespace Application.Validators
         #region Validation User Id
         public void ValidateUserId(string userId)
         {
-            if (!string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId))
             {
                 throw new InvalidOperationException("O id do utilizador está inválido.");
             }
@@ -45,7 +45,7 @@ namespace Application.Validators
 
             if (player.IsAdmin)
             {
-                throw new InvalidOperationException("Apenas utiliazdores da equipa têm acesso a este recurso.");
+                throw new InvalidOperationException("Apenas utilizadores da equipa têm acesso a este recurso.");
             }
 
             ValidateUserHaveTeamAndIsMember(player, idTeam);

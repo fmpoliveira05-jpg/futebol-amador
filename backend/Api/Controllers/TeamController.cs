@@ -45,6 +45,7 @@ namespace Api.Controllers
         public async Task<IActionResult> GetTeamById(Guid id)
         {
             var team = await TeamService.GetTeamByIdAsync(id);
+
             return Ok(team);
         }
 
@@ -191,7 +192,7 @@ namespace Api.Controllers
             }
         }
 
-
+        /*
         [HttpGet("{teamId}/membership-request")]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
@@ -213,8 +214,7 @@ namespace Api.Controllers
 
             return Ok(membershipRequests);
         }
-
-
+        */
 
         [HttpPost("{teamId}/membership-request/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
@@ -232,6 +232,7 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /*
         [HttpPost("{teamId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
@@ -241,6 +242,7 @@ namespace Api.Controllers
             return Ok(dto);
            
         }
+        */
 
         #endregion
 

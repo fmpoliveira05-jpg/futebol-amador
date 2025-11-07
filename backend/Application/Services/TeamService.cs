@@ -106,7 +106,6 @@ namespace Application.Services
         public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId)
         {
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
-            AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
 
             var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
 
@@ -118,6 +117,8 @@ namespace Application.Services
             }
 
             TeamValidator.UpdateTeamValidation(teamWithSameName, teamToUpdate);
+
+            AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
 
             teamToUpdate.Name = dto.Name ?? teamToUpdate.Name;
             teamToUpdate.Description = dto.Description ?? teamToUpdate.Description;
@@ -148,7 +149,6 @@ namespace Application.Services
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerPromoting, teamId);
 
             var playerToPromote = await PlayerRepository.GetPlayerByIdAsync(playerIdToPromoteId);
-            AuthorizationValidator.ValidatePlayerAutorizationIsMember(playerPromoting, teamId);
 
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             
@@ -166,7 +166,6 @@ namespace Application.Services
         {
 
             var playerToDemote = await PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
-            AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerToDemote, teamId);
 
             var playerDemoting = await PlayerRepository.GetPlayerByIdAsync(adminDemotingId);
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerDemoting, teamId);
