@@ -35,7 +35,7 @@
             public const int MinNameLength = 3;
             public const int MinEmailLength = 4;
             public const int MaxEmailLength = 256;
-            public const int SizePhoneNumber = 9;
+            public const int SizePhoneNumber = 13;
             public const int MinAge = 18;
             public const int MaxAge = 70;
             //APAGAR

@@ -26,7 +26,7 @@ namespace Domain.Entities
         public string Email { get; set; }
 
         [Required]
-        [StringLength(ModelConstants.UserConst.SizePhoneNumber, ErrorMessage = "Phone number must have 9 digits")]
+        [StringLength(ModelConstants.UserConst.SizePhoneNumber, ErrorMessage = "Phone number must have 13 digits")]
         public string Phone { get; set; }
 
         [Required]
