@@ -4,14 +4,16 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Moq;
 using System.Reflection;
 
 namespace Tests.Integration
 {
-    public class ApiTestAppFactory: WebApplicationFactory<Program>
+    public class ApiTestAppFactory : WebApplicationFactory<Program>
     {
         public string TestUserId { get; private set; } = "fake-user-id-" + Guid.NewGuid();
 
@@ -21,7 +23,7 @@ namespace Tests.Integration
             {
                 var descriptorsToRemove = services
                     .Where(d =>
-                        d.ServiceType == typeof(DbContextOptions<AmateurFootballContext>) ||
+                        d.ServiceType == typeof(IDbContextOptionsConfiguration<AmateurFootballContext>) ||
                         d.ServiceType == typeof(AmateurFootballContext) ||
                         (d.ImplementationType != null && d.ImplementationType == typeof(AmateurFootballContext)) ||
                         (d.ImplementationFactory != null && d.ImplementationFactory.GetMethodInfo().ReturnType == typeof(AmateurFootballContext))
@@ -43,7 +45,7 @@ namespace Tests.Integration
                     services.Remove(h);
                 }
 
-                services.AddDbContext<AmateurFootballContext>(options => 
+                services.AddDbContext<AmateurFootballContext>(options =>
                 {
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
@@ -69,10 +71,10 @@ namespace Tests.Integration
             });
         }
 
-        public void SeedDatabase(Action<AmateurFootballContext> seeder) 
+        public void SeedDatabase(Action<AmateurFootballContext> seeder)
         {
             using var scope = Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AmateurFootballContext>(); 
+            var context = scope.ServiceProvider.GetRequiredService<AmateurFootballContext>();
             context.Database.EnsureCreated();
             seeder(context);
             context.SaveChanges();
