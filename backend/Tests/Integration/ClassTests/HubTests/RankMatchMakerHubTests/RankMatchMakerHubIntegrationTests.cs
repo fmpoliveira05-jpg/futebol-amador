@@ -6,7 +6,7 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration.ClassTests.RankMatchMakerHubTests
+namespace Tests.Integration.ClassTests.HubTests.RankMatchMakerHubTests
 {
     public class RankMatchMakerHubIntegrationTests
     {
