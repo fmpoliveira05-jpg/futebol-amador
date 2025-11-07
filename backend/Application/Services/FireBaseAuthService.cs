@@ -16,28 +16,58 @@ namespace Application.Services
 
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
+        private readonly ISuperAdminRepository SuperAdminRepository;
+
         private readonly IPlayerValidator PlayerValidator;
 
 
-        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository)
+
+        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository)
         {
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            PlayerValidator = new PlayerValidator();
+            PlayerValidator = playerValidator;
+            SuperAdminRepository = superAdminRepository;
         }
 
-        public Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
+                if (string.IsNullOrEmpty(user?.Email))
+                {
+                    throw new AuthenticationException("Usuário não encontrado ou sem email.");
+                }
+
+
+                await this.LoginAsync(user.Email, currentPassword);
+
+                var args = new UserRecordArgs
+                {
+                    Uid = userId, 
+                    Password = newPassword
+                };
+
+                await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
+            }
+            catch (AuthenticationException ex)
+            {
+                throw new AuthenticationException("A senha atual está incorreta.", ex);
+            }
+            catch (FirebaseAuthException ex)
+            {
+                throw new Exception($"Falha ao processar a mudança de senha: {ex.Message}", ex);
+            }
         }
 
-        public void DeleteUser(string userId)
+        public async void DeleteUserAsync(string userId)
         {
-            FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
+            await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
 
-        public async Task<FirebaseLoginResponseDto> LoginAsync(string email, string password)
+        public async Task<LoginResponseDto> LoginAsync(string email, string password)
         {
             string firebaseApiKey = "REMOVIDO";
 
@@ -61,7 +91,45 @@ namespace Application.Services
                     {
                         throw new AuthenticationException("Failed to parse Firebase response.");
                     }
-                    return firebaseResponse;
+
+                    var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(firebaseResponse.LocalId);
+                    if (superAdminUser != null)
+                    {
+                        return new LoginResponseDto
+                        {
+                            Address = superAdminUser.Address,
+                            Email = firebaseResponse.Email,
+                            DateOfBirth = superAdminUser.DateOfBirth,
+                            Name = superAdminUser.Name,
+                            Phone = superAdminUser.Phone,
+                            CreationDate = superAdminUser.CreationDate,
+                            FirebaseLoginResponseDto = firebaseResponse
+
+
+                        };
+                    }
+                    var playerUser = await PlayerRepository.GetPlayerByIdAsync(firebaseResponse.LocalId);
+                    if (playerUser != null)
+                    { 
+                        return new LoginResponseDto
+                        {
+                            Email = firebaseResponse.Email,
+                            DateOfBirth = playerUser.DateOfBirth,
+                            Name = playerUser.Name,
+                            Address = playerUser.Address,
+                            IsAdmin = playerUser.IsAdmin,
+                            Height = playerUser.Height,
+                            IdTeam = playerUser.IdTeam,
+                            Phone = playerUser.Phone,
+                            Position = playerUser.Position,
+                            CreationDate = playerUser.CreationDate,
+                            IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
+                            FirebaseLoginResponseDto = firebaseResponse
+                        };
+                    }
+
+                    throw new AuthenticationException("Usuário não encontrado na base de dados.");
+
                 }
                 else
                 {
@@ -71,9 +139,9 @@ namespace Application.Services
             }
         }
 
-        public Task LogoutAsync()
+        public async Task LogoutAsync(string userId)
         {
-            throw new NotImplementedException();
+            await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(userId);
         }
 
         public async Task<string> RegisterUser(string email, string password, string phoneNumber)
@@ -91,6 +159,27 @@ namespace Application.Services
             UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(userArgs);
             
             return userRecord.Uid;  
+        }
+
+        public async Task UpdateEmailAsync(string userId, string newEmail)
+        {
+            try
+            {
+                var args = new UserRecordArgs
+                {
+                    Uid = userId,
+                    Email = newEmail
+                };
+                await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
+            }
+            catch (FirebaseAuthException ex)
+            {
+                if (ex.AuthErrorCode == AuthErrorCode.EmailAlreadyExists)
+                {
+                    throw new Exception("Este email já está em uso por outra conta.");
+                }
+                throw;
+            }
         }
     }
 }

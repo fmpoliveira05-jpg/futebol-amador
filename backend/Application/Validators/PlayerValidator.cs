@@ -15,13 +15,14 @@ namespace Application.Validators
     {
         IUserDataValidator UserDatalValidator;
 
-        public PlayerValidator()
-        {
 
-        }
         public PlayerValidator(IUserDataValidator emailValidator)
         {
             this.UserDatalValidator = emailValidator;
+        }
+        public PlayerValidator()
+        {
+
         }
 
         public void PlayerExists(Player? player)
@@ -49,8 +50,6 @@ namespace Application.Validators
 
             ValidateAge(CreatePlayerDto.DateOfBirth);
 
-            ValidatePhone(CreatePlayerDto.Phone);
-
             ValidatePosition(CreatePlayerDto.Position);
 
             ValidateAddress(CreatePlayerDto.Address);
@@ -61,7 +60,7 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void GetPlayerByIdValidator(Player player)
+        public void GetPlayerByIdValidator(Player? player)
         {
             PlayerExists(player);
         }
@@ -93,11 +92,7 @@ namespace Application.Validators
 
             ValidateAge(UpdatePlayerDto.DateOfBirth);
 
-            ValidatePhone(UpdatePlayerDto.Phone);
-
             ValidatePosition(UpdatePlayerDto.Position);
-
-            ValidateAddress(UpdatePlayerDto.Address);
 
             ValidateAddress(UpdatePlayerDto.Address);
         }
@@ -112,7 +107,6 @@ namespace Application.Validators
 
         public void LeaveTeamValidator(Player player)
         {
-            //same as the delete one
             if (player.Team == null)
             {
                 throw new ValidationException("Player does not belong to any team.");
@@ -199,7 +193,6 @@ namespace Application.Validators
             
         }
 
-        // acabar! falta ver como buscar as chatrooms do firebase e ver se faz sentido guardar no db do backend tambem
         private void PlayerHasChatRooms(Player player) { 
             //if(player.)
         }
@@ -226,19 +219,6 @@ namespace Application.Validators
                 || dateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MaxAge))
             {
                 throw new ValidationException("Invalid Date of birth");
-            }
-        }
-
-        private static void ValidatePhone(string phone)
-        {
-            if (phone.Length != UserConst.SizePhoneNumber)
-            {
-                throw new ValidationException($"Phone number must have {UserConst.SizePhoneNumber} digits.");
-            }
-
-            if (phone.StartsWith("0"))
-            {
-                throw new ValidationException("Phone number cannot start with '0'.");
             }
         }
 

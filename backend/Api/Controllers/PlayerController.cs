@@ -54,7 +54,7 @@ namespace Api.Controllers
             return NoContent();
         }
         
-
+        */
         [HttpPost]
         [Route("LOGIN")]
         [AllowAnonymous]
@@ -64,7 +64,7 @@ namespace Api.Controllers
             return Ok(loginResponse);
         }
 
-        */
+        
 
         [HttpPost]
         [Route("create-profile")]
@@ -73,23 +73,12 @@ namespace Api.Controllers
         {
 
             var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
-            /*
+            var createPlayerResult = await authService.LoginAsync(playerDto.Email, playerDto.Password);
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    playerDto);
-            */
-
-            /* Demora um bocado
-            return CreatedAtAction(
-            "",
-            null,
-            null);
-             */
-            return Ok(playerDto);
-
-            //Cria o player rapido
-            //  return NoContent();
+                    createPlayerResult
+                    );
         }
 
         [HttpDelete("{playerId:required}")]
