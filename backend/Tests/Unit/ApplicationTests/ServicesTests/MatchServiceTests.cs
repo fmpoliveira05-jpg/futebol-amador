@@ -334,7 +334,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchRepoMock.Setup(r => r.GetMatchToCancelById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Tentativa sem permissão", player);
+            Func<Task> act = async () => await _sut.CancelMatch(team.Id, match.Id, "Tentativa sem permissão");
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()

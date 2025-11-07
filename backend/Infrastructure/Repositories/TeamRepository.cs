@@ -88,7 +88,7 @@ namespace Infrastructure.Repositories
                     Id = t.Id,
                     Name = t.Name,
                     Description = t.Description,
-                    FoundationDate = t.DataFoundation,
+                    FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
                     PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",

@@ -76,7 +76,14 @@ namespace Api.Middlewares
                     problemDetails.Status = (int)HttpStatusCode.Unauthorized;
                     problemDetails.Detail = ex.Message;
                     break;
-                }            
+                }
+                case AuthenticationException ex:
+                {
+                    problemDetails.Title = "Erro na autenticação";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
                 case Exception ex:
                 {
                     problemDetails.Title = "Erro Geral";

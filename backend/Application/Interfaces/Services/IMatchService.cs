@@ -14,6 +14,6 @@ namespace Application.Interfaces.Services
         public Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto);
         public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam);
         public Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter);
-        public Task CancelMatch(Guid idTeam, Guid idMatch, string description, Player player);
+        public Task CancelMatch(Guid idTeam, Guid idMatch, string description);
     }
 }

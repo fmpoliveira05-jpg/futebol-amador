@@ -17,6 +17,10 @@ namespace Infrastructure.Repositories
             this.context = context;
         }
 
+        public async Task<Player?> GetPlayerByPhoneNumberAsync(string phoneNumber) {
+            return await context.Player.FirstOrDefaultAsync(p => p.Phone == phoneNumber);
+        }
+
         public async Task AddAsync(Player player)
         {
             await context.Player.AddAsync(player);

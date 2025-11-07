@@ -21,6 +21,8 @@ namespace Application.DTOs.PlayerDTOs
         [MinLength(ModelConstants.UserConst.MinEmailLength), MaxLength(ModelConstants.UserConst.MaxEmailLength)]
         public string Email { get; set; } = null!;
 
+        public string Password { get; set; } = null!;
+
         [Required]
         [MinLength(ModelConstants.UserConst.SizePhoneNumber), MaxLength(ModelConstants.UserConst.SizePhoneNumber)]
         public string Phone {  get; set; } = null!;
