@@ -15,13 +15,14 @@ namespace Application.Validators
     {
         IUserDataValidator UserDatalValidator;
 
-        public PlayerValidator()
-        {
 
-        }
         public PlayerValidator(IUserDataValidator emailValidator)
         {
             this.UserDatalValidator = emailValidator;
+        }
+        public PlayerValidator()
+        {
+
         }
 
         public void PlayerExists(Player? player)
@@ -59,7 +60,7 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void GetPlayerByIdValidator(Player player)
+        public void GetPlayerByIdValidator(Player? player)
         {
             PlayerExists(player);
         }
