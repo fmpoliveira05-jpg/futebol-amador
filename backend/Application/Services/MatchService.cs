@@ -206,8 +206,6 @@ namespace Application.Services
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
 
-            MatchValidator.ExistsTeamStatistics(opponent);
-
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
 
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
