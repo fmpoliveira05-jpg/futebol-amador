@@ -90,7 +90,7 @@ namespace Application.Validators
 
         private void ValidateUserHaveTeamAndIsMember(Player player, Guid idTeam)
         {
-            if (player.IdTeam == null)
+            if (player.IdTeam != null)
             {
                 throw new InvalidOperationException("Apenas jogadores com equipa podem aceder a este recurso!");
             }
