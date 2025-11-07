@@ -105,7 +105,7 @@ namespace Application.Services
             };
 
             playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
-
+            //teste
             bool hasChange = hasChangePlayer(dto, player);
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
