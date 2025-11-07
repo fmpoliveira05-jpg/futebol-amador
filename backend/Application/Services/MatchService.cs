@@ -60,7 +60,6 @@ namespace Application.Services
         #region PostPoneMatch
         public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
-            //AuthorizationValidator.ValidatePlayerAutorizationIsAdmin();
             var idMatch = dto.IdMatch;
             var match = await MatchRepository.GetMatchById(idMatch);
             if (match == null)
