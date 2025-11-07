@@ -19,9 +19,8 @@ namespace Application.Interfaces.Repositories
 
         void UpdatePlayer(Player updatedPlayer);
 
-        Task<Player?> GetPlayerByIdWithRequestsAsync(string userId);
-
         Task AddAsync(Player player);
+        Task<MembershipRequest?> GetPlayerByIdWithRequestsAsync(string playerId);
 
         Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }

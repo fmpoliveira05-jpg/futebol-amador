@@ -5,9 +5,8 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Application.Validators;
+using Domain.Constants;
 using Domain.Entities;
-using Domain.Exceptions;
-using FirebaseAdmin.Messaging;
 
 namespace Application.Services
 {
@@ -17,15 +16,9 @@ namespace Application.Services
         private readonly IPlayerRepository playerRepository;
         private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUnityOfWork unityOfWork;
-        private readonly ITeamValidator teamValidator;
         private readonly IPlayerValidator playerValidator;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
         private readonly IMembershipValidator membershipValidator;
-        private ITeamRepository object1;
-        private IPlayerRepository object2;
-        private IMembershipRequestRepository object3;
-        private IUnityOfWork object4;
-        private PlayerAuthorizationValidator authorizationValidator1;
 
         private readonly INotificationService notificationService;
 
@@ -44,22 +37,10 @@ namespace Application.Services
             this.playerRepository = playerRepository;
             this.membershipRequestRepository = membershipRequestRepository;
             this.unityOfWork = unityOfWork;
-            this.teamValidator = teamValidator;
             this.playerValidator = playerValidator;
             this.authorizationValidator = authorizationValidator;
             this.membershipValidator = membershipValidator;
             this.notificationService = notificationService;
-        }
-
-        public MembershipService(ITeamRepository object1, IPlayerRepository object2, IMembershipRequestRepository object3, IUnityOfWork object4, TeamValidator teamValidator, IPlayerValidator playerValidator, PlayerAuthorizationValidator authorizationValidator1)
-        {
-            this.object1 = object1;
-            this.object2 = object2;
-            this.object3 = object3;
-            this.object4 = object4;
-            this.teamValidator = teamValidator;
-            this.playerValidator = playerValidator;
-            this.authorizationValidator1 = authorizationValidator1;
         }
 
         #region Pedidos de adesão da Team
@@ -116,6 +97,10 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             team.Members.Add(playerAccepted);
 
+            //Remove todos os pedidos de adesão pendentes do jogador
+            await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(playerAccepted.Id);
+            await RemoveAllMatchInviteTeam(team);
+
             await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
 
             await unityOfWork.SaveChangesAsync();
@@ -152,21 +137,6 @@ namespace Application.Services
             }).Unwrap();
         }
 
-        /*
-        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
-        {
-            return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
-            {
-                var team = await teamTask;
-
-                membershipValidator.ValidateGetRequestsByTeam(team);
-
-                var list = await membershipRequestRepository.GetMembershipRequestsByTeamWithFilters(teamId, filters);
-                return list ?? new List<MemberShipRequestDto>();
-            }).Unwrap();
-        }
-        */
-
         #endregion
 
         #region Pedidos de adesão do Player
@@ -189,20 +159,19 @@ namespace Application.Services
 
         public async Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
+            var membershipRequest = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
+            var player = membershipRequest.Player;
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId);
+            var team = await teamRepository.GetTeamForMembershipRequestAsync(membershipRequest.IdTeam);
 
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(request.IdTeam);
-
-            membershipValidator.ValidateAcceptRequestByPlayer(player, request, team);
+            membershipValidator.ValidateAcceptRequestByPlayer(player, membershipRequest, team);
 
             player.IdTeam = team.Id;
             team.Members.Add(player);
 
-            var teamAdmins = request.Team.Members
+            var teamAdmins = team.Members
                             .Where(p => p.IsAdmin == true)
                             .ToList();
 
@@ -211,42 +180,44 @@ namespace Application.Services
                 await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!.");
             }
 
-            player.MembershipRequests.Remove(request);
-            team.MembershipRequests?.Remove(request);
+            player.MembershipRequests?.Remove(membershipRequest);
+            team.MembershipRequests?.Remove(membershipRequest);
 
+            await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(player.Id);
+
+            await RemoveAllMatchInviteTeam(team);
             await unityOfWork.SaveChangesAsync();
 
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
+            var fullPlayer = await playerRepository.GetPlayerByIdAsync(membershipRequest.IdPlayer);
+            var fullTeam = await teamRepository.GetTeamByIdAsync(membershipRequest.IdTeam);
 
             return new MemberShipRequestDto
             {
-                RequestId = request.Id,
+                RequestId = membershipRequest.Id,
                 PlayerId = fullPlayer.Id,
                 PlayerName = fullPlayer.Name,
                 TeamId = fullTeam.Id,
                 TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
+                RequestDate = membershipRequest.InviteDate,
+                IsPlayerSender = membershipRequest.IsPlayerSender
             };
         }
 
         public async Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
+            var membershipRequest = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
+            var player = membershipRequest.Player;
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId);
+            membershipValidator.ValidateRejectRequestByPlayer(membershipRequest, player);
 
-            membershipValidator.ValidateRejectRequestByPlayer(request, player);
+            var fullPlayer = await playerRepository.GetPlayerByIdAsync(membershipRequest.IdPlayer);
+            var fullTeam = await teamRepository.GetTeamByIdAsync(membershipRequest.IdTeam);
 
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
+            player.MembershipRequests?.Remove(membershipRequest);
 
-            player.MembershipRequests.Remove(request);
-
-            var teamAdmins = request.Team.Members
+            var teamAdmins = membershipRequest.Team.Members
                             .Where(p => p.IsAdmin == true)
                             .ToList();
 
@@ -259,13 +230,13 @@ namespace Application.Services
 
             return new MemberShipRequestDto
             {
-                RequestId = request.Id,
+                RequestId = membershipRequest.Id,
                 PlayerId = fullPlayer.Id,
                 PlayerName = fullPlayer.Name,
                 TeamId = fullTeam.Id,
                 TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
+                RequestDate = membershipRequest.InviteDate,
+                IsPlayerSender = membershipRequest.IsPlayerSender
             };
         }
 
@@ -318,5 +289,16 @@ namespace Application.Services
         }
 
         #endregion
+
+        #region Private Methods
+        private async Task RemoveAllMatchInviteTeam(Team team)
+        {
+            if (team.Members.Count >= ModelConstants.TeamConst.MaxMembers)
+            {
+                await membershipRequestRepository.RemoveAllMemberShipRequestsOfTeam(team.Id);
+            }
+        }
+        #endregion
     }
+
 } 
