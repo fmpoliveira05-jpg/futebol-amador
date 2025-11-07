@@ -1,73 +1,94 @@
-name: Build, Test e Analyze (.NET 8)
+name: CI - Build, Test & Analyze (.NET 9)
 
 on:
   push:
-    branches: [ master, developer ]
-  pull_request: {}
+    branches: [ master, main, developer ]
+  pull_request:
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  SOLUTION_FILE: 'FutebolAmador.sln'
 
 jobs:
-  build-test-analyze:
-    name: Build, Test e Analyze
+  # ------------------ BUILD ------------------
+  build:
+    name: Build
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  
+          fetch-depth: 0
 
-      - name: Set up JDK 17
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore & Build
+        run: |
+          dotnet restore ${{ env.SOLUTION_FILE }}
+          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+
+  # ------------------ UNIT TESTS ------------------
+  unit-tests:
+    name: Unit Tests
+    runs-on: windows-latest
+    needs: build
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Run Unit Tests
+        run: |
+          dotnet test Tests/Unit --no-build --configuration Release `
+            --logger "trx;LogFileName=unit-tests.trx" `
+            --results-directory "TestResults"
+
+  # ------------------ INTEGRATION TESTS + SONAR ------------------
+  integration-tests-and-sonar:
+    name: Integration Tests + SonarQube
+    runs-on: windows-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java & .NET
         uses: actions/setup-java@v4
         with:
           java-version: 17
-          distribution: 'zulu'
-
-      - name: Setup .NET 9.0
-        uses: actions/setup-dotnet@v4
+          distribution: zulu
+      - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Cache dos pacotes NuGet
+      - name: Cache NuGet
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
           key: ${{ runner.os }}-dotnet-${{ hashFiles('**/packages.lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-dotnet-
+          restore-keys: ${{ runner.os }}-dotnet-
 
-      - name: Cache SonarQube scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v4
-        with:
-          path: ${{ runner.temp }}\scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
+      - name: Install SonarQube Scanner
+        run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Install SonarQube scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
+      - name: Run Integration Tests & Sonar
+        shell: pwsh
         run: |
-          New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
-
-      - name: Build, Test and Analyze
-        shell: powershell
-        run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"LDS-Backend" `
-            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+          dotnet-sonarscanner begin /k:"LDS-Backend" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
-            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
-            /d:sonar.cs.junit.reportsPaths="**/test-results.xml"
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
+            /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml"
 
-          dotnet restore FutebolAmador.sln
-
-          dotnet build FutebolAmador.sln --configuration Release --no-restore
-
-          dotnet test FutebolAmador.sln --configuration Release `
+          dotnet test Tests/Integration --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
-            --results-directory "TestResults" `
-            --logger "trx;LogFileName=test-results.trx"
+            --results-directory "TestResults"
 
-          Write-Host "=== Conteúdo da pasta TestResults ==="
-          Get-ChildItem -Path TestResults -Recurse | Format-Table -AutoSize
+          Get-ChildItem -Recurse TestResults | Format-Table -AutoSize
 
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
