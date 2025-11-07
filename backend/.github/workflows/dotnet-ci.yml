@@ -52,28 +52,27 @@ jobs:
       - name: Build, Test and Analyze
         shell: powershell
         run: |
-          # 1. INICIAR O SONAR (Repare que removi a linha do junit.reportsPaths)
+          # 1. INICIAR O SONAR
+          # (Usa caminhos explícitos para os relatórios)
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"LDS-Backend" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
-            /d:sonar.cs.opencover.reportsPaths="TestResults/coverage.opencover.xml"
+            /d:sonar.cs.opencover.reportsPaths="TestResults/coverage.opencover.xml" `
+            /d:sonar.cs.junit.reportsPaths="TestResults/test-results.xml"
 
-          # 2. RESTAURAR E COMPILAR
+          # 2. RESTAURAR PACOTES
           dotnet restore FutebolAmador.sln
+
+          # 3. COMPILAR O PROJETO EM MODO RELEASE
           dotnet build FutebolAmador.sln --configuration Release --no-restore
 
-          # 3. EXECUTAR OS TESTES (Repare que removi o --logger "junit...")
-          #    Isto foca-se APENAS em gerar a cobertura.
+          # 4. EXECUTAR OS TESTES
+          # (Adicionado --configuration Release para corresponder ao build)
+          # (Adicionados diretórios de saída explícitos)
           dotnet test Tests/Tests.csproj --no-build --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
+            --logger "junit;LogFileName=test-results.xml;ResultsDirectory=TestResults" `
             --results-directory "TestResults"
-
-          # 4. DEBUG: Vamos verificar se o ficheiro foi criado
-          Write-Host "--- DEBUG: Procurando o ficheiro de cobertura ---"
-          Get-ChildItem -Path TestResults -Filter "*.xml" | ForEach-Object {
-              Write-Host "FICHEIRO ENCONTRADO: $($_.Name) ($($_.Length) bytes)"
-          }
-          Write-Host "--- FIM DO DEBUG ---"
 
           # 5. FINALIZAR O SONAR
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
