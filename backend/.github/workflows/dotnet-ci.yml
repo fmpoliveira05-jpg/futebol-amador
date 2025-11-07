@@ -57,13 +57,26 @@ jobs:
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
             /d:sonar.cs.opencover.reportsPaths="**\coverage.opencover.xml" `
             /d:sonar.cs.junit.reportsPaths="**\test-results.xml"
-
+  
           dotnet restore FutebolAmador.sln
-
+  
           dotnet build FutebolAmador.sln --configuration Release --no-restore
-
+  
+          # Comando de teste com o formato correto
           dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage;Format=opencover" --logger "junit;LogFileName=test-results.xml"
-
-          Write-Host "Procurando pelo ficheiro de cobertura..."
-          Get-ChildItem -Path . -Recurse -Filter "coverage.opencover.xml" | ForEach-Object { Write-Host "FICHEIRO ENCONTRADO: $($_.FullName)" }
+  
+          # --- SCRIPT DE DEBUG MELHORADO ---
+          Write-Host "--- INÍCIO DO DEBUG DE COBERTURA ---"
+          Write-Host "Procurando por diretórios 'TestResults'..."
+          Get-ChildItem -Path . -Recurse -Directory -Filter "TestResults" | ForEach-Object {
+              Write-Host "Diretório TestResults ENCONTRADO: $($_.FullName)"
+              Write-Host "Listando ficheiros .xml neste diretório:"
+              # Lista todos os ficheiros .xml e os seus tamanhos
+              Get-ChildItem -Path $_.FullName -Recurse -Filter "*.xml" | ForEach-Object {
+                  Write-Host "  -> FicheIRO XML: $($_.Name) ($($_.Length) bytes)"
+              }
+          }
+          Write-Host "--- FIM DO DEBUG DE COBERTURA ---"
+          # --- FIM DO SCRIPT DE DEBUG ---
+  
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
