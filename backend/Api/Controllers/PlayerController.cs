@@ -21,7 +21,7 @@ namespace Api.Controllers
         {
             this.playerService = playerService;
         }
-
+        //teste2
         #region CRUD Player
         [HttpPost]
         [Route("create-profile")]
