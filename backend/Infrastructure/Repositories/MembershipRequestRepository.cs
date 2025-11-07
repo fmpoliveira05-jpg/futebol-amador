@@ -9,26 +9,26 @@ namespace Infrastructure.Repositories
 {
     public class MembershipRequestRepository : IMembershipRequestRepository
     {
-        private readonly AmateurFootballContext _context;
+        private readonly AmateurFootballContext context;
 
         public MembershipRequestRepository(AmateurFootballContext context)
         {
-            _context = context;
+            this.context = context;
         }
 
         public async Task AddMembershipRequest(MembershipRequest request)
         {
-            await _context.MembershipRequests.AddAsync(request);
+            await context.MembershipRequests.AddAsync(request);
         }
 
         public void RemoveMembershipRequest(MembershipRequest request)
         {
-            _context.MembershipRequests.Remove(request);
+            context.MembershipRequests.Remove(request);
         }
 
         public async Task<MembershipRequest?> GetMembershipRequestById(Guid id)
         {
-            return await _context.MembershipRequests
+            return await context.MembershipRequests
                 .Include(mr => mr.Player)
                 .Include(mr => mr.Team)
                 .FirstOrDefaultAsync(mr => mr.Id == id);
@@ -36,7 +36,7 @@ namespace Infrastructure.Repositories
 
         public async Task<MembershipRequest?> GetMembershipRequestByPlayerAndTeam(string playerId, Guid teamId)
         {
-            return await _context.MembershipRequests
+            return await context.MembershipRequests
                 .Include(mr => mr.Player)
                 .Include(mr => mr.Team)
                 .FirstOrDefaultAsync(mr => mr.IdPlayer == playerId && mr.IdTeam == teamId);
@@ -44,7 +44,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId)
         {
-            return await _context.MembershipRequests
+            return await context.MembershipRequests
                 .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true)
                 .Select(mr => new MemberShipRequestDto
                 {
@@ -61,7 +61,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
         {
-            var query = _context.MembershipRequests
+            var query = context.MembershipRequests
                 .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true);
 
             if (filters.MinDate.HasValue)
@@ -92,7 +92,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayer(string playerId)
         {
-            return await _context.MembershipRequests
+            return await context.MembershipRequests
                 .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false)
                 .Select(mr => new MemberShipRequestDto
                 {
@@ -109,7 +109,7 @@ namespace Infrastructure.Repositories
 
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
-            var query = _context.MembershipRequests
+            var query = context.MembershipRequests
                 .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false);
 
             if (filters.MinDate.HasValue)
@@ -140,8 +140,26 @@ namespace Infrastructure.Repositories
 
         public async Task<bool> ExistsRequestBetweenPlayerAndTeam(string playerId, Guid teamId)
         {
-            return await _context.MembershipRequests
+            return await context.MembershipRequests
                 .AnyAsync(mr => mr.IdPlayer == playerId && mr.IdTeam == teamId);
+        }
+
+        public async Task RemoveAllMemberShipRequestsOfPlayer(string playerId)
+        {
+            var requests = await context.MembershipRequests
+                .Where(mr => mr.IdPlayer == playerId)
+                .ToListAsync();
+
+            context.MembershipRequests.RemoveRange(requests);
+        }
+
+        public async Task RemoveAllMemberShipRequestsOfTeam(Guid idTeam)
+        {
+            var requests = await context.MembershipRequests
+                .Where(mr => mr.IdTeam == idTeam)
+                .ToListAsync();
+
+            context.MembershipRequests.RemoveRange(requests);
         }
     }
 }

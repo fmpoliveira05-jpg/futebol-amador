@@ -23,5 +23,7 @@ namespace Application.Interfaces.Repositories
         Task<List<MemberShipRequestDto>> GetMembershipRequestsByPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
 
         Task<bool> ExistsRequestBetweenPlayerAndTeam(string playerId, Guid teamId);
+        Task RemoveAllMemberShipRequestsOfPlayer(string playerId);
+        Task RemoveAllMemberShipRequestsOfTeam(Guid idTeam);
     }
 }

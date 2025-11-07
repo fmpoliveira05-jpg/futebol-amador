@@ -60,12 +60,11 @@ namespace Application.Validators
             ValidateUserHaveTeamAndIsMember(player, idTeam);
         }
 
-
         public void ValidatePlayerAutorizationWithoutTeam(Player player)
         {
             UserExists(player);
 
-            if (player.IdTeam != null)
+            if (player.IdTeam != null || player.Team != null)
             {
                 throw new InvalidOperationException("Apenas jogadores sem equipa podem aceder a este recurso!");
             }

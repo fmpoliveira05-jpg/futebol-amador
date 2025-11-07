@@ -58,12 +58,12 @@ namespace Infrastructure.Repositories
             context.Player.Update(updatedPlayer);
         }
 
-        public async Task<Player?> GetPlayerByIdWithRequestsAsync(string playerId)
+        public async Task<MembershipRequest?> GetPlayerByIdWithRequestsAsync(string playerId)
         {
-            return await context.Player
-                .Include(p => p.MembershipRequests)
-                    .ThenInclude(r => r.Team)
-                .FirstOrDefaultAsync(p => p.Id == playerId);
+            return await context.MembershipRequests
+                .Include(m => m.Player)
+                .ThenInclude(m => m.Team)
+                .FirstOrDefaultAsync(p => p.IdPlayer == playerId);
         }
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync()

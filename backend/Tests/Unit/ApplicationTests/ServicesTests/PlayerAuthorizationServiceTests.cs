@@ -4,19 +4,20 @@ using Application.Services;
 using Domain.Entities;
 using Moq;
 using NUnit.Framework;
-using System;
-using System.Threading.Tasks;
 
 namespace Tests.Unit.ApplicationTests.ServicesTests
 {
     public class PlayerAuthorizationServiceTests
     {
+        #region Initializer
         private Mock<IPlayerRepository> playerRepoMock;
         private Mock<ISuperAdminRepository> superAdminRepoMock;
         private Mock<IPlayerAuthorizationValidator> validatorMock;
 
         private PlayerAuthorizationService service;
+        #endregion
 
+        #region SetUp
         [SetUp]
         public void Setup()
         {
@@ -30,7 +31,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 validatorMock.Object
             );
         }
+        #endregion
 
+        #region Support Methods
         private Player BuildPlayer(string id, Guid? teamId = null, bool isAdmin = false)
         {
             return new Player
@@ -40,11 +43,11 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 IsAdmin = isAdmin
             };
         }
+        #endregion
 
-        // -------------------------------
-        // UserAuthorizationIsAdminTeamById
-        // -------------------------------
+        #region Tests
 
+        #region Tests UserAuthorizationIsAdminTeamById
         [Test]
         public async Task UserAuthorizationIsAdminTeamById_Success()
         {
@@ -70,24 +73,28 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             );
         }
 
-        // -------------------------------
-        // UserAuthorizationIsMemberTeamById
-        // -------------------------------
+        #endregion
 
+        #region Tests UserAuthorizationIsMemberTeamById
+     
         [Test]
         public async Task UserAuthorizationIsMemberTeamById_Success()
         {
+            // ARRANGE
             var player = BuildPlayer("user2", Guid.NewGuid(), false);
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id))
                 .ReturnsAsync(player);
 
+            // ACT
             await service.UserAuthorizationIsMemberTeamById(player.Id, player.IdTeam.Value);
 
+            // ASSERT
             validatorMock.Verify(v => v.ValidateUserId(player.Id), Times.Once);
-            validatorMock.Verify(v => v.ValidatePlayerAutorizationIsNotAdmin(player, player.IdTeam.Value), Times.Once);
-        }
 
+            // corrigido: o método do serviço chama ValidatePlayerAutorizationIsMember(...)
+            validatorMock.Verify(v => v.ValidatePlayerAutorizationIsMember(player, player.IdTeam.Value), Times.Once);
+        }
         [Test]
         public void UserAuthorizationIsMemberTeamById_ValidatorThrows_Propagates()
         {
@@ -98,10 +105,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 service.UserAuthorizationIsMemberTeamById("bad-id", Guid.NewGuid())
             );
         }
+        #endregion
 
-        // -------------------------------
-        // UserAuthorizationIsPlayerWithoutTeamById
-        // -------------------------------
+        #region Tests UserAuthorizationIsPlayerWithoutTeamById
 
         [Test]
         public async Task UserAuthorizationIsPlayerWithoutTeamById_Success()
@@ -127,5 +133,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
                 service.UserAuthorizationIsPlayerWithoutTeamById(null)
             );
         }
+
+        #endregion
+
+        #endregion
     }
 }

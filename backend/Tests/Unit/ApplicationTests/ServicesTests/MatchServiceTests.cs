@@ -15,7 +15,6 @@ using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
-using System.Runtime.ConstrainedExecution;
 
 namespace Unit.ApplicationTests.ServicesTests
 {
@@ -27,7 +26,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
-        private CalendarValidator _validator;
+        private Mock<ICalendarValidator> _validatorMock;
         private Mock<IPlayerAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
@@ -40,7 +39,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
-            _validator = new CalendarValidator();
+            _validatorMock = new Mock<ICalendarValidator>();
             _authorizarionService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchService(
@@ -48,7 +47,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _teamPostPoneRepoMock.Object,
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _validator,
+                _validatorMock.Object,
                 _authorizarionService.Object
             );
         }
@@ -101,7 +100,7 @@ namespace Unit.ApplicationTests.ServicesTests
             // ARRANGE
             var teamId = Guid.NewGuid();
             var idMatch = Guid.NewGuid();
-            var idOpponent = Guid.NewGuid(); 
+            var idOpponent = Guid.NewGuid();
             var dto = new PostPoneMatchDto
             {
                 IdMatch = idMatch,
@@ -109,14 +108,27 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdOpponent = idOpponent
             };
 
-            var dummyMatch = new Matches();
+            // cria um match com ambas as equipas (evita NullReference por falta de opponent)
+            var dummyMatch = new Matches(DateTime.UtcNow.AddDays(2), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
+            {
+                MatchStatus = MatchStatus.SCHEDULED
+            };
 
-            var team = new Team("Team A", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var team = new Team("Team A", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!)) { Id = teamId };
+            var opponent = new Team("Team B", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!)) { Id = idOpponent };
+
             dummyMatch.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
+            dummyMatch.Teams.Add(new TeamStatistics(opponent) { IdTeam = idOpponent });
 
             _matchRepoMock.Setup(r => r.GetMatchById(idMatch))
-                          .ReturnsAsync(dummyMatch); 
+                          .ReturnsAsync(dummyMatch);
 
+            // configura o validador para lançar ValidationException que indica que o jogador não é admin
+            _validatorMock
+                .Setup(v => v.ValidatePostPoneMatchDto(teamId, dto))
+                .Throws(new ValidationException("O jogador não é administradora da equipa."));
+
+            // ACT
             Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             // ASSERT
@@ -522,11 +534,16 @@ namespace Unit.ApplicationTests.ServicesTests
                 MaxDate = new DateOnly(2025, 12, 14)
             };
 
+            _validatorMock
+                .Setup(v => v.ValidateFilterCalendar(idTeam, filter))
+                .Throws(new InvalidOperationException("A data minima tem de ser inferior ou igual à data maxima"));
+
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("A data minima tem de ser inferior ou igual à data maxima");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("A data minima tem de ser inferior ou igual à data maxima");
         }
 
         [Test(Description = "GetCalendarWithFilters deve lançar exceção quando o id da equipa for nulo")]
@@ -541,11 +558,16 @@ namespace Unit.ApplicationTests.ServicesTests
                 MaxDate = new DateOnly(2025, 12, 31)
             };
 
+            _validatorMock
+                .Setup(v => v.ValidateFilterCalendar(idTeam, filter))
+                .Throws(new InvalidOperationException("O id da equipa não pode estar vazio"));
+
             // ACT
             Func<Task> act = async () => await _sut.GetCalendarWithFilters(idTeam, filter);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>().WithMessage("O id da equipa não pode estar vazio");
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("O id da equipa não pode estar vazio");
         }
         #endregion
 
