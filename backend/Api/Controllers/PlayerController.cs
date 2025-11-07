@@ -1,10 +1,13 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs;
+using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.SuperAdmin;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Domain.Exceptions;
+using Application.Interfaces.Validators;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -15,40 +18,42 @@ namespace Api.Controllers
     [Authorize]
     public class PlayerController : ControllerBase
     {
+        #region Inicializar
         private readonly IPlayerService playerService;
-
-        public PlayerController(IPlayerService playerService)
+        private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
+        private readonly IMembershipRequestService membershipRequestService;
+        private readonly IAuthService authService;
+        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService, IAuthService authService)
         {
             this.playerService = playerService;
+            this.playerAuthorizationValidator = playerAuthorizationValidator;
+            this.membershipRequestService = membershipRequestService;
+            this.authService = authService;
         }
-        //teste2
+        #endregion
+
+        #region EndPoints
+
         #region CRUD Player
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(email))
-            {
-                return Unauthorized();
-            }
-
-            var newPlayerId = await playerService.CreatePlayerAsync(userId, email, playerDto);
-
+            var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
+            var createPlayerResult = await authService.LoginAsync(playerDto.Email, playerDto.Password);
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    playerDto
+                    createPlayerResult
                     );
         }
 
         [HttpDelete("{playerId:required}")]
-        public async Task<IActionResult> DeletePlayer(string playerId)
+        public async Task<IActionResult> DeletePlayer(string playerId) 
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             await playerService.DeletePlayerAsync(playerId);
 
             return NoContent();
@@ -69,7 +74,6 @@ namespace Api.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
@@ -81,16 +85,21 @@ namespace Api.Controllers
         }
 
         [HttpPut("{playerId:required}")]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDto dto)
+        public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
 
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
 
+            if (playerId != userId)
+            {
+                return Forbid();
+            }
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -131,89 +140,87 @@ namespace Api.Controllers
             return Ok(list);
         }
 
-        [HttpGet("{playerId:guid}/membership-requests")]
+
+        [HttpGet("{playerId}/membership-requests")]
         public async Task<IActionResult> GetMembershipRequests(string playerId, [FromQuery] FilterMembershipRequestsPlayer filters)
         {
-            try
-            {
-                var hasFilter = filters.MinDate.HasValue ||
-                                filters.MaxDate.HasValue ||
-                                !string.IsNullOrEmpty(filters.SenderName);
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-                IEnumerable<MemberShipRequestDto> requests;
-                if (hasFilter)
-                {
-                    requests = await playerService.GetMembershipRequestsAsyncWithFilters(playerId, filters);
-                }
-                else
-                {
-                    requests = await playerService.GetMembershipRequestsAsync(playerId);
-                }
+            var hasFilter = filters.MinDate.HasValue ||
+                            filters.MaxDate.HasValue ||
+                            !string.IsNullOrEmpty(filters.SenderName);
 
-                return Ok(requests);
-            }
-            catch (NotFoundException ex)
+            IEnumerable<MemberShipRequestDto> requests;
+            if (hasFilter)
             {
-                return NotFound(new { message = ex.Message });
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayerWithFilters(playerId, filters);
             }
-            catch (ValidationException ex)
+            else
             {
-                return BadRequest(new { message = ex.Message });
+                requests = await membershipRequestService.GetMembershipRequestsAsyncPlayer(playerId);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
-            }
+
+            return Ok(requests);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/accept")]
+        [HttpPost("{playerId:required}/membership-requests/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
         {
-            var dto = await playerService.AcceptMembershipRequestAsync(playerId, requestId);
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.AcceptMembershipRequestAsyncPlayer(playerId, requestId);
             return Ok(dto);
         }
 
-        [HttpDelete("{playerId:guid}/membership-requests/reject/{requestId:guid}")]
+        [HttpDelete("{playerId:required}/membership-requests/reject/{requestId:guid}")]
         public async Task<IActionResult> RejectMembershipRequest(string playerId, Guid requestId)
         {
-            var dto = await playerService.RejectMembershipRequestAsync(playerId, requestId);
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.RejectMembershipRequestAsyncPlayer(playerId, requestId);
             return Ok(dto);
         }
 
-        [HttpPost("{playerId:guid}/membership-requests/send")]
+        [HttpPost("{playerId:required}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
         {
-            try
-            {
-                var dto = await playerService.SendMembershipRequestAsync(playerId, teamId);
-                return Ok(dto);
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Erro inesperado no servidor.", details = ex.Message });
-            }
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
+            var dto = await membershipRequestService.SendMembershipRequestAsyncPlayer(playerId, teamId);
+            return Ok(dto);
         }
 
         #endregion
-
 
         #region Teams Operations
 
         [HttpPut("{playerId:required}/leave-team")]
         public async Task<IActionResult> LeaveTeam(string playerId)
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
             string teamName = await playerService.LeaveTeam(playerId);
 
             return Ok("Player succesfully left the team" + teamName + ".");
         }
+
+        #endregion
+
+        #endregion
+
+        #region Private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
+
         #endregion
     }
 }

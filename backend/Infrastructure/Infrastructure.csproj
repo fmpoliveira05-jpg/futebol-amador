@@ -7,14 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20251031003831_InitialMigrationAfterBigBug.cs" />
-    <Compile Remove="Migrations\20251031003831_InitialMigrationAfterBigBug.Designer.cs" />
-    <Compile Remove="Migrations\20251031005129_InitialMigrationAfterBigBug.cs" />
-    <Compile Remove="Migrations\20251031005129_InitialMigrationAfterBigBug.Designer.cs" />
-    <Compile Remove="Migrations\AmateurFootballContextModelSnapshot.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
@@ -23,7 +15,6 @@
     <Folder Include="Cache\" />
     <Folder Include="Jobs\" />
     <Folder Include="Configuration\" />
-    <Folder Include="Migrations\" />
     <Folder Include="Notification\" />
   </ItemGroup>
 
@@ -37,6 +28,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
   </ItemGroup>
 
 </Project>

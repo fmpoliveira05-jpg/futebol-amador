@@ -29,13 +29,14 @@ namespace Application
             services.AddScoped<IMatchService, MatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IMatchMakerService, MatchMakerService>();
+            services.AddScoped<ISuperAdminService, SuperAdminService>();
+            services.AddScoped<IMembershipRequestService, MembershipService>();
+            services.AddScoped<IChatRoomService, FirebaseChatService>();
+            services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
+            services.AddScoped<IAuthService, FireBaseAuthService>();
 
             services.AddManagerHubService();
             services.AddHubServiceClients();
-            services.AddScoped<ISuperAdminService, SuperAdminService>();
-            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
-            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
-            services.AddScoped<IChatRoomService, FirebaseChatService>();
 
             return services;
         }
@@ -53,7 +54,7 @@ namespace Application
         {
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
-            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>();
+            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>(); 
 
             return services;
         }
@@ -69,8 +70,9 @@ namespace Application
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
             services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
-            services.AddScoped<IEmailValidator, EmailValidator>();
-
+            services.AddScoped<IUserDataValidator, UserDataValidator>();
+            services.AddScoped<IPlayerAuthorizationValidator, PlayerAuthorizationValidator>();
+            services.AddScoped<IMembershipValidator, MembershipValidator>();
             return services;
         }
 

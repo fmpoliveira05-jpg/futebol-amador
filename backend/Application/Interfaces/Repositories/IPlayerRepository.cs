@@ -1,6 +1,4 @@
-﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
-using Application.DTOs.Player;
+﻿using Application.DTOs.Player;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
@@ -8,6 +6,8 @@ namespace Application.Interfaces.Repositories
     public interface IPlayerRepository
     {
         Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList);
+
+        Task<Player?> GetPlayerByPhoneNumberAsync(string phoneNumber);
 
         Task<List<Player>?> GetAllTPlayersAsync();
 
@@ -19,13 +19,8 @@ namespace Application.Interfaces.Repositories
 
         void UpdatePlayer(Player updatedPlayer);
 
-        Task<Player?> GetPlayerByIdWithRequestsAsync(string userId);
-
         Task AddAsync(Player player);
-
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(string playerId);
-
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
+        Task<MembershipRequest?> GetPlayerByIdWithRequestsAsync(string playerId);
 
         Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
     }

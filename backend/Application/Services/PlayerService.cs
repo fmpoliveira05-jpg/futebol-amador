@@ -1,50 +1,72 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace Application.Services
 {
     public class PlayerService : IPlayerService
     {
+        #region Initializer
         private readonly IPlayerRepository playerRepository;
-        private readonly ITeamRepository teamRepository;
-        private readonly IUnityOfWork unityOfWork;
-        private readonly IPlayerValidator playerValidator;
-        private readonly IMembershipRequestRepository membershipRequestRepository;
         private readonly IUserRepository userRepository;
+        private readonly ITeamRepository teamRepository;
+        
+        private readonly IUnityOfWork unityOfWork;
+        
         private readonly ITeamService teamService;
-
+        private readonly IAuthService AuthService;
+        
+        private readonly IPlayerAuthorizationValidator authorizationValidator;
+        private readonly IUserDataValidator UserDataValidator;
+        private readonly IPlayerValidator playerValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository,
-            ITeamService teamService)
+            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService, 
+            IUserDataValidator userDataValidator,IAuthService authService)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
-            this.membershipRequestRepository = membershipRequestRepository;
             this.unityOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.userRepository = userRepository;
+            this.authorizationValidator = authorizationValidator;
             this.teamService = teamService;
+            UserDataValidator = userDataValidator;
+            this.AuthService = authService;
 
         }
 
-        public async Task<string> CreatePlayerAsync(string userId, string email, CreatePlayerDto playerDto)
+        #endregion
+
+        #region CRUD Player
+        public async Task<string> CreatePlayerAsync(CreatePlayerDto playerDto)
         {
+            UserDataValidator.PhoneNumberValidation(playerDto.Phone);
+            UserDataValidator.EmailValidation(playerDto.Email);
+
+            var userSamePhoneNumber  = await playerRepository.GetPlayerByPhoneNumberAsync(playerDto.Phone);
+            var userSameEmail = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
+
+            playerValidator.CreatePlayerValidator(playerDto, userSamePhoneNumber, userSameEmail);
+
+            var userId = await AuthService.RegisterUser(playerDto.Email, playerDto.Password, playerDto.Phone);
+
+            UserDataValidator.CreateUserValidation(userId);
+
             var player = new Player
             {
                 Id = userId,
                 Name = playerDto.Name,
                 DateOfBirth = playerDto.DateOfBirth,
                 Address = playerDto.Address,
-                Email = email,
+                Email = playerDto.Email,
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,
@@ -60,15 +82,15 @@ namespace Application.Services
 
         public async Task DeletePlayerAsync(string playerId)
         {
+            UserDataValidator.DeleteUserValidation(playerId);
             var playerToDelete = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            if (playerToDelete == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
+            playerValidator.DeletePlayerValidator(playerToDelete);
 
             playerRepository.DeletePlayer(playerToDelete);
 
+            AuthService.DeleteUserAsync(playerId);
+            //Caso não remover o player automaticamente da team remover manualmente
             await unityOfWork.SaveChangesAsync();
         }
 
@@ -76,11 +98,6 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.GetPlayerByIdValidator(player);
-
-            if (player == null)
-            {
-                throw new Exception($"Player with ID {playerId} not found.");
-            }
 
             PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {
@@ -105,13 +122,16 @@ namespace Application.Services
             };
 
             playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
-            //teste
-            bool hasChange = hasChangePlayer(dto, player);
+
+            bool hasChange =  await hasChangePlayer(dto, player);
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
             await unityOfWork.SaveChangesAsync();
         }
 
+        #endregion
+
+        #region Actions Player in Team
         //Falta tirar o player da lista de players do team
         public async Task<string> LeaveTeam(string playerId)
         {
@@ -156,125 +176,9 @@ namespace Application.Services
 
             return teamName;
         }
+        #endregion
 
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
-
-            return await playerRepository.GetMembershipRequestsDtoAsync(playerId);
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            playerValidator.PlayerExists(player);
-
-            return await playerRepository.GetMembershipRequestsDtoAsyncWithFilters(playerId, filters);
-        }
-
-        public async Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId)
-        {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
-
-            playerValidator.PlayerExists(player);
-
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
-
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(request.IdTeam)
-                ?? throw new ValidationException($"A equipa com Id '{request.IdTeam}' não existe.");
-
-            player.IdTeam = team.Id;
-            team.Members.Add(player);
-
-            player.MembershipRequests.Remove(request);
-            team.MembershipRequests?.Remove(request);
-
-            await unityOfWork.SaveChangesAsync();
-
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
-
-            return new MemberShipRequestDto
-            {
-                RequestId = request.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
-            };
-        }
-
-        public async Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId)
-        {
-            var player = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId)
-                ?? throw new ValidationException($"O jogador com Id '{playerId}' não existe.");
-
-            playerValidator.PlayerExists(player);
-
-            var request = player.MembershipRequests?.FirstOrDefault(r => r.Id == requestId)
-                ?? throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{requestId}'.");
-
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
-
-            player.MembershipRequests.Remove(request);
-
-            await unityOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = request.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
-                RequestDate = request.InviteDate,
-                IsPlayerSender = request.IsPlayerSender
-            };
-        }
-
-        //faz validation de se o player ja tem equipa
-        public async Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId)
-        {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-            var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
-
-            var existingRequest = await membershipRequestRepository
-                .GetMembershipRequestByPlayerAndTeam(playerId, teamId);
-
-            playerValidator.SendMembershipRequestValidator(player, team, existingRequest);
-
-            var newRequest = new MembershipRequest
-            {
-                Id = Guid.NewGuid(),
-                IdPlayer = playerId,
-                IdTeam = teamId,
-                Player = player,
-                Team = team,
-                InviteDate = DateTime.UtcNow,
-                IsPlayerSender = true
-            };
-
-            await membershipRequestRepository.AddMembershipRequest(newRequest);
-            await unityOfWork.SaveChangesAsync();
-
-            return new MemberShipRequestDto
-            {
-                RequestId = newRequest.Id,
-                PlayerId = newRequest.IdPlayer,
-                PlayerName = newRequest.Player.Name,
-                TeamId = newRequest.IdTeam,
-                TeamName = newRequest.Team.Name,
-                RequestDate = newRequest.InviteDate,
-                IsPlayerSender = newRequest.IsPlayerSender
-            };
-        }
-
+        #region Lists
         public async Task<List<InfoTeamsDto>> GetListTeams()
         {
             return await teamRepository.GetListTeamsPlayer();
@@ -285,9 +189,10 @@ namespace Application.Services
             playerValidator.ValidateFiltersListTeams(filter);
             return await teamRepository.GetListTeamsPlayersWithFilters(filter);
         }
+        #endregion
 
         #region Private Methods
-        private static bool hasChangePlayer(UpdatePlayerDto dto, Player player)
+        private async Task<bool> hasChangePlayer(UpdatePlayerDto dto, Player player)
         {
             bool hasChange = false;
 
@@ -312,6 +217,7 @@ namespace Application.Services
             if (dto.Email != player.Email)
             {
                 player.Email = dto.Email;
+                 await AuthService.UpdateEmailAsync(player.Id, dto.Email);
                 hasChange = true;
             }
 

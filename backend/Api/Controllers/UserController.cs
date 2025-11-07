@@ -1,5 +1,5 @@
-﻿using Application.Interfaces.Services;
-using Domain.Exceptions;
+﻿using Application.DTOs;
+using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -8,56 +8,61 @@ namespace Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController : ControllerBase
+    public class UserController : Controller
     {
-        private readonly IUserService userService;
+        #region Inicializar 
+        private readonly IAuthService authService;
+        
+        public UserController(IAuthService authService) { 
+            this.authService = authService;
 
-        public UserController(IUserService userService)
+        }
+        #endregion
+
+        [HttpPost]
+        [Route("login")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginDto loginData)
         {
-            this.userService = userService;
+            return Ok(await authService.LoginAsync(loginData.Email, loginData.Password));
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginDto dto)
-        {
-            try
-            {
-                var token = await userService.LoginAsync(dto.Email, dto.Password);
-                return Ok(new { Token = token });
-            }
-            catch (ValidationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
+        [HttpGet]
+        [Route("logout")]
         [Authorize]
-        [HttpPost("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+        public async Task<IActionResult> logout()
         {
-            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-            await userService.ChangePasswordAsync(userId, dto.CurrentPassword, dto.NewPassword);
-            return Ok("Password alterada com sucesso.");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            await authService.LogoutAsync(userId);
+            return Ok();
         }
 
+        /*
+        [HttpDelete]
+        [Route("delete")]
         [Authorize]
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        public IActionResult DeleteUser()
         {
-            await userService.LogoutAsync();
-            return Ok("Logout efetuado.");
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            authService.DeleteUserAsync(userId);
+            return NoContent();
         }
-    }
+        */
 
-    public class LoginDto
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
+        [HttpGet]
+        [Route("ChangePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromQuery] string currentPassword, [FromQuery] string newPassword)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await authService.ChangePasswordAsync(userId, currentPassword, newPassword);
+            return NoContent();
+        }
 
-    public class ChangePasswordDto
-    {
-        public string CurrentPassword { get; set; }
-        public string NewPassword { get; set; }
     }
 }

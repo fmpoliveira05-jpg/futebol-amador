@@ -8,11 +8,11 @@ namespace Application.Interfaces.Validators
     {
         void PlayerExists(Player? player);
 
-        void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User[] players);
+        void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User? phoneUser, User? emailUser);
 
         void DeletePlayerValidator(Player? player);
 
-        void GetPlayerByIdValidator(Player player);
+        void GetPlayerByIdValidator(Player? player);
 
         void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto, Player player, User[] existingPlayers);
 

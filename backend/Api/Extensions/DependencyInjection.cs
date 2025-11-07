@@ -1,4 +1,5 @@
-﻿using Application.Services.BackGroundServices;
+﻿using Api.BackGroundServices;
+using Application.Services.BackGroundServices;
 
 namespace Api.Extensions
 {
@@ -7,6 +8,7 @@ namespace Api.Extensions
         public static IServiceCollection AddApiBackGroundService(this IServiceCollection services)
         {
             services.AddHostedService<RankMatchMakerBackGroundService>();
+            services.AddHostedService<NotificationBackGroundService>();
 
             return services;
         }

@@ -3,68 +3,58 @@ using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub.ClienteService;
-using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-/*
- Criar urls para o FinishMatch
- */
 namespace Api.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]/{idTeam:guid}")]
     [ApiController]
     public class CalendarController : ControllerBase
     {
+        #region Inicializer
         private readonly IMatchService matchController;
+        private readonly IPlayerAuthorizationService authorizationService;
         private readonly IStartMatchHubClientService startMatchHubClientService;
         private readonly IFinishMatchHubClientService finishMatchHubClientService;
-
-        public CalendarController(IMatchService matchController, IStartMatchHubClientService startMatchHubClientService,
-            IFinishMatchHubClientService finishMatchHubClientService)
+        
+        public CalendarController(IMatchService matchController, IPlayerAuthorizationService authorizationService,
+            IStartMatchHubClientService startMatchHubClientService, IFinishMatchHubClientService finishMatchHubClientService)
         {
             this.matchController = matchController;
+            this.authorizationService = authorizationService;
             this.startMatchHubClientService = startMatchHubClientService;
             this.finishMatchHubClientService = finishMatchHubClientService;
         }
+        #endregion
 
         #region Calendar
         [HttpGet]
         public async Task<IActionResult> CalendarTeam(Guid idTeam, [FromQuery] FilterCalendarDto filters)
         {
-            try
-            {
-                IEnumerable<InfoMatchCalendar> matches;
-                var hasFilter = filters.IsRealized != null ||
-                                 filters.IsRanqued != null ||
-                                 filters.IsHome != null ||
-                                 filters.MinDate.HasValue ||
-                                 filters.MaxDate.HasValue ||
-                                 !string.IsNullOrEmpty(filters.NameOpponent);
+            await authorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), idTeam);
+            IEnumerable<InfoMatchCalendar> matches;
+            var hasFilter = filters.IsRealized != null ||
+                                filters.IsRanqued != null ||
+                                filters.IsHome != null ||
+                                filters.MinDate.HasValue ||
+                                filters.MaxDate.HasValue ||
+                                !string.IsNullOrEmpty(filters.NameOpponent);
 
-                if (hasFilter)
-                {
-                    matches = await matchController.GetCalendarWithFilters(idTeam, filters);
-                }
-                else
-                {
-                    matches = await matchController.GetCalendar(idTeam);
-                }
+            
 
-                return Ok(matches);
-            }
-            catch (BusinessRuleException ex)
+            if (hasFilter)
             {
-                return BadRequest(new { message = ex.Message });
+                matches = await matchController.GetCalendarWithFilters(idTeam, filters);
             }
-            catch (NullReferenceException ex)
+            else 
             {
-                return NotFound(new { message = ex.Message });
+                matches = await matchController.GetCalendar(idTeam);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+                    
+            return Ok(matches);  
         }
 
         #endregion
@@ -73,24 +63,10 @@ namespace Api.Controllers
         [HttpPut("PostponeMatch")]
         public async Task<IActionResult> PostponeMatch(Guid idTeam, [FromBody] PostPoneMatchDto dto)
         {
-            try
-            {
-                var matchPostPone = await matchController.PostPoneMatch(idTeam, dto);
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            var matchPostPone = await matchController.PostPoneMatch(idTeam, dto);
 
-                return Ok(matchPostPone);
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (NullReferenceException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(matchPostPone);  
         }
 
         #endregion
@@ -99,35 +75,10 @@ namespace Api.Controllers
         [HttpDelete("CancelMatch/{idMatch}")]
         public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa não pode estar vazio");
-            }
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            await matchController.CancelMatch(idTeam, idMatch, description);
 
-            if (idMatch == Guid.Empty)
-            {
-                return BadRequest("O id da partida está vazio");
-            }
-
-            if (description == "")
-            {
-                return BadRequest("O cancelamento precisa de uma descrição");
-            }
-
-            try
-            {
-                await matchController.CancelMatch(idTeam, idMatch, description);
-
-                return Ok();
-            }
-            catch (EmptyCollectionException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok();
         }
 
         #endregion
@@ -195,14 +146,14 @@ namespace Api.Controllers
                 return BadRequest("Não foi mandado o resultado da equipa");
             }
 
-            if (idTeam != result.IdTeam)
+            if(idTeam != result.IdTeam)
             {
                 return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
             }
 
             await finishMatchHubClientService.InitializeAsync();
             await finishMatchHubClientService.EditResultMatchAsync(result);
-
+  
             return Ok("Resultado alterado com sucesso");
         }
 
@@ -213,6 +164,20 @@ namespace Api.Controllers
             await finishMatchHubClientService.LeaveFinishMatchAsync();
 
             return Ok("Saiu do Hub com sucesso!");
+        }
+        #endregion
+
+        #region private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
         }
         #endregion
     }

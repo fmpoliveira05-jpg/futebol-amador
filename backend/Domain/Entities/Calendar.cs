@@ -15,11 +15,12 @@ namespace Domain.Entities
         //EF
         public Calendar()
         {
+            this.Matches = new List<Matches>();
         }
 
         public Calendar(ICollection<Matches> matches)
         {
-            Matches = matches;
+            this.Matches = matches;
         }
 
         public override string ToString()

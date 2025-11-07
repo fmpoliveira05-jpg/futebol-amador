@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories
         public async Task<Team?> GetTeamByNameAsync(String name)
         {
             return await DbContext.Team
-                .FirstOrDefaultAsync(t => t.Name == name);
+                .FirstOrDefaultAsync(t => t.Name == name); 
         }
 
         public async Task AddAsync(Team team)
@@ -78,7 +78,7 @@ namespace Infrastructure.Repositories
                .Include(t => t.ReceivedInvites)
                .FirstOrDefaultAsync(t => t.Id == id);
         }
-
+        
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
             return await DbContext.Team
@@ -88,7 +88,7 @@ namespace Infrastructure.Repositories
                     Id = t.Id,
                     Name = t.Name,
                     Description = t.Description,
-                    FoundationDate = t.DataFoundation,
+                    FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
                     PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",
@@ -103,59 +103,6 @@ namespace Infrastructure.Repositories
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
-        }
-
-        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsync(Guid teamId)
-        {
-
-            return await DbContext.MembershipRequests
-                        .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true)
-                        .Select(mr => new MemberShipRequestDto
-                        {
-                            RequestId = mr.Id,
-                            PlayerName = mr.Player.Name,
-                            PlayerId = mr.IdPlayer,
-                            TeamName = mr.Team.Name,
-                            RequestDate = mr.InviteDate,
-                            IsPlayerSender = mr.IsPlayerSender
-                        })
-                        .ToListAsync();
-        }
-
-        public async Task<List<MemberShipRequestDto>?> GetMembershipRequestsDtoAsyncWithFilters(Guid teamId, FilterMembershipRequestsTeam filters)
-        {
-            var query = DbContext.MembershipRequests
-                .Where(mr => mr.IdTeam == teamId && mr.IsPlayerSender == true);
-
-            if (filters.MinDate.HasValue)
-            {
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);
-            }
-
-            if (filters.MaxDate.HasValue)
-            {
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) <= filters.MaxDate.Value);
-            }
-
-            if (!string.IsNullOrWhiteSpace(filters.SenderName))
-            {
-                var upperName = filters.SenderName.ToUpper();
-                query = query.Where(mr => mr.Player.Name.ToUpper().Contains(upperName));
-            }
-
-            var list = await query
-                .Select(mr => new MemberShipRequestDto
-                {
-                    RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    RequestDate = mr.InviteDate,
-                    IsPlayerSender = mr.IsPlayerSender
-                })
-                .ToListAsync();
-
-            return list;
         }
 
         public async Task<Team?> GetTeamForMembershipRequestAsync(Guid id)
@@ -279,8 +226,8 @@ namespace Infrastructure.Repositories
         {
             return await DbContext.Team
                 .Include(t => t.Members)
-                .Include(t => t.Rank)
-                .Include(t => t.Pitch)
+                .Include (t => t.Rank)
+                .Include (t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -419,7 +366,7 @@ namespace Infrastructure.Repositories
 
             return list;
         }
-
+        
         public Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId)
         {
             return DbContext.Team
@@ -474,7 +421,7 @@ namespace Infrastructure.Repositories
             var query = DbContext.Team
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
-                            .Where(t => t.Id != idTeam
+                            .Where(t => t.Id != idTeam 
                                 && t.Members.Count < ModelConstants.TeamConst.MaxMembers);
 
             if (!string.IsNullOrEmpty(filters.NameTeam))
@@ -493,7 +440,7 @@ namespace Infrastructure.Repositories
             {
                 var fragment = filters.City.ToLower();
                 query = query.Where(t =>
-                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%")
+                    EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%") 
                     &&
                     !EF.Functions.Like(t.Pitch.Address.ToLower(), "%, %" + fragment + "%,%")
                 );
@@ -570,9 +517,9 @@ namespace Infrastructure.Repositories
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam()
         {
-            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow); 
 
-            var query = await DbContext.Player.Where(p => !p.IsAdmin
+            var query = await DbContext.Player.Where(p => !p.IsAdmin 
                                                     && p.IdTeam == null)
                 .Select(p => new PlayerWithoutTeamInfoDto
                 {

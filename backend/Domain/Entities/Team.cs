@@ -57,16 +57,16 @@ namespace Domain.Entities
 
         public Team(string name, string? description, byte[]? icon, Pitch pitch, Rank DefaultRank)
         {
-            Name = name;
-            Description = description;
-            Icon = icon;
-            Pitch = pitch;
-            IdPitch = pitch.Id;
-            DataFoundation = DateTime.Now;
+            this.Name = name;
+            this.Description = description;
+            this.Icon = icon;
+            this.Pitch = pitch;
+            this.IdPitch = pitch.Id;
+            this.DataFoundation = DateTime.Now;
             this.Rank = DefaultRank;
-            CurrentPoints = 0;
-            Calendar = new Calendar();
-            IdCalendar = Calendar.Id;
+            this.CurrentPoints = 0;
+            this.Calendar = new Calendar();
+            this.IdCalendar = Calendar.Id;
         }
         //
         public override string ToString()

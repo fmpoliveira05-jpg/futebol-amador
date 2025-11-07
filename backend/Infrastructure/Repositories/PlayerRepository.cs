@@ -17,6 +17,10 @@ namespace Infrastructure.Repositories
             this.context = context;
         }
 
+        public async Task<Player?> GetPlayerByPhoneNumberAsync(string phoneNumber) {
+            return await context.Player.FirstOrDefaultAsync(p => p.Phone == phoneNumber);
+        }
+
         public async Task AddAsync(Player player)
         {
             await context.Player.AddAsync(player);
@@ -54,58 +58,12 @@ namespace Infrastructure.Repositories
             context.Player.Update(updatedPlayer);
         }
 
-        public async Task<Player?> GetPlayerByIdWithRequestsAsync(string playerId)
-        {
-            return await context.Player
-                .Include(p => p.MembershipRequests)
-                    .ThenInclude(r => r.Team)
-                .FirstOrDefaultAsync(p => p.Id == playerId);
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsync(string playerId)
+        public async Task<MembershipRequest?> GetPlayerByIdWithRequestsAsync(string playerId)
         {
             return await context.MembershipRequests
-                .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false)
-                .Select(mr => new MemberShipRequestDto
-                {
-                    RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    RequestDate = mr.InviteDate,
-                    IsPlayerSender = mr.IsPlayerSender
-                })
-                .ToListAsync();
-        }
-
-        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsDtoAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
-        {
-            var query = context.MembershipRequests
-                .Where(mr => mr.IdPlayer == playerId && mr.IsPlayerSender == false);
-
-            if (filters.MinDate.HasValue)
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) >= filters.MinDate.Value);
-
-            if (filters.MaxDate.HasValue)
-                query = query.Where(mr => DateOnly.FromDateTime(mr.InviteDate) <= filters.MaxDate.Value);
-
-            if (!string.IsNullOrWhiteSpace(filters.SenderName))
-            {
-                var upperName = filters.SenderName.ToUpper();
-                query = query.Where(mr => mr.Team.Name.ToUpper().Contains(upperName));
-            }
-
-            return await query
-                .Select(mr => new MemberShipRequestDto
-                {
-                    RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    RequestDate = mr.InviteDate,
-                    IsPlayerSender = mr.IsPlayerSender
-                })
-                .ToListAsync();
+                .Include(m => m.Player)
+                .ThenInclude(m => m.Team)
+                .FirstOrDefaultAsync(p => p.IdPlayer == playerId);
         }
 
         public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync()

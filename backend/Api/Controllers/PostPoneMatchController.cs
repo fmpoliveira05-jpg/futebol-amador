@@ -1,9 +1,9 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
-using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -12,110 +12,80 @@ namespace Api.Controllers
     [ApiController]
     public class PostPoneMatchController : ControllerBase
     {
+        #region Initialization
         private readonly IMatchService matchController;
-
-        public PostPoneMatchController(IMatchService matchController)
+        private readonly IPlayerAuthorizationService authorizationService;
+       
+        public PostPoneMatchController(IMatchService matchController, IPlayerAuthorizationService authorizationService)
         {
             this.matchController = matchController;
+            this.authorizationService = authorizationService;
         }
+        #endregion
 
+        #region EndPoints
+        
         #region PostPoneMatch
         [HttpGet]
         public async Task<IActionResult> GetListPostPoneMatchTeam(Guid idTeam, [FromQuery] FilterPostPoneMatchDto filter)
         {
-            try
-            {
-                IEnumerable<InfoPostPoneMatch> listPostPone;
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            IEnumerable<InfoPostPoneMatch> listPostPone;
 
-                var isFilter = !string.IsNullOrEmpty(filter.NameOpponent) ||
-                                filter.IsHome.HasValue ||
-                                filter.MinDateGame.HasValue ||
-                                filter.MaxDateGame.HasValue ||
-                                filter.MinDatePostPoneGame.HasValue ||
-                                filter.MaxDatePostPoneGame.HasValue;
-                if (isFilter)
-                {
-                    listPostPone = await matchController.GetListPostPoneMatchTeamWithFilters(idTeam, filter);
-                }
-                else
-                {
-                    listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
-                }
+            var isFilter = !string.IsNullOrEmpty(filter.NameOpponent) ||
+                            filter.IsHome.HasValue ||
+                            filter.MinDateGame.HasValue ||
+                            filter.MaxDateGame.HasValue ||
+                            filter.MinDatePostPoneGame.HasValue ||
+                            filter.MaxDatePostPoneGame.HasValue;
 
-                return Ok(listPostPone);
-            }
-            catch (EmptyCollectionException ex)
+            var userId = GetCurrentUserId();
+            if (isFilter)
             {
-                return NotFound(new { message = ex.Message });
+                listPostPone = await matchController.GetListPostPoneMatchTeamWithFilters(idTeam, filter);
             }
-            catch (Exception ex)
+            else
             {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
+                listPostPone = await matchController.GetListPostPoneMatchTeam(idTeam);
             }
+
+            return Ok(listPostPone);
         }
 
         [HttpPost("AcceptPostponeMatch")]
         public async Task<IActionResult> AcceptPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDto dto)
         {
-            try
-            {
-                var match = await matchController.AcceptPostPoneMatch(idTeam, dto);
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            var match = await matchController.AcceptPostPoneMatch(idTeam, dto);
 
-                return Ok(match);
-            }
-            catch (MatchException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (NotFindException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok(match);
         }
 
         [HttpDelete("RejectPostponeMatch")]
         public async Task<IActionResult> RejectPostponeMatch(Guid idTeam, [FromBody] AcceptRefusePostPoneDto dto)
         {
-            try
-            {
-                await matchController.RejectPostPoneMatch(idTeam, dto);
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            await matchController.RejectPostPoneMatch(idTeam, dto);
 
-                return Ok();
-            }
-            catch (MatchException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (BusinessRuleException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (NotFindException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+            return Ok();
         }
 
+        #endregion
+
+        #endregion
+
+        #region private Methods
+        private string GetCurrentUserId()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userId == null)
+            {
+                throw new UnauthorizedAccessException("User ID not found in claims.");
+            }
+
+            return userId;
+        }
         #endregion
     }
 }

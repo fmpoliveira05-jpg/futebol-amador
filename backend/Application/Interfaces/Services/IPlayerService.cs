@@ -7,24 +7,13 @@ namespace Application.Interfaces.Services
 {
     public interface IPlayerService
     {
-        Task<string> CreatePlayerAsync(string userId, string email, CreatePlayerDto playerDTO);
+        Task<string> CreatePlayerAsync(CreatePlayerDto playerDTO);
 
-        Task<PlayerDetailsDto> GetPlayerByIdAsync(string teamId);
+        Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId);
 
         Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
 
         Task DeletePlayerAsync(string playerId);
-
-
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsync(string playerId);
-
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncWithFilters(string playerId, FilterMembershipRequestsPlayer filters);
-
-        Task<MemberShipRequestDto> AcceptMembershipRequestAsync(string playerId, Guid requestId);
-
-        Task<MemberShipRequestDto> RejectMembershipRequestAsync(string playerId, Guid requestId);
-
-        Task<MemberShipRequestDto> SendMembershipRequestAsync(string playerId, Guid teamId);
 
         Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter);
 

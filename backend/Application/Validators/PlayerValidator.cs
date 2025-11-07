@@ -3,25 +3,26 @@ using Application.DTOs.PlayerDTOs;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
-using Domain.Enums;
 using Domain.Exceptions;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static Domain.Constants.ModelConstants;
+using Domain.Enums;
 
 namespace Application.Validators
 {
     public class PlayerValidator : IPlayerValidator
     {
-        IEmailValidator emailValidator;
+        IUserDataValidator UserDatalValidator;
 
+
+        public PlayerValidator(IUserDataValidator emailValidator)
+        {
+            this.UserDatalValidator = emailValidator;
+        }
         public PlayerValidator()
         {
 
-        }
-        public PlayerValidator(IEmailValidator emailValidator)
-        {
-            this.emailValidator = emailValidator;
         }
 
         public void PlayerExists(Player? player)
@@ -32,28 +33,22 @@ namespace Application.Validators
             }
         }
 
-        public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User[] players)
+        public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User? phoneUser, User? emailUser)
         {
-            if (players[0] != null)
+            if (emailUser != null)
             {
-                throw new ValidationException($"The email '{players[0].Email}' is already in use.");
+                throw new ValidationException($"The email '{emailUser.Email}' is already in use.");
             }
 
-            if (players[1] != null)
+            if (phoneUser  != null)
             {
-                throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
+                throw new ValidationException($"The phone number '{phoneUser.Phone}' is already in use.");
             }
 
-            if (!emailValidator.IsValid(CreatePlayerDto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
-
+            
             ValidateHeigth(CreatePlayerDto.Height);
 
             ValidateAge(CreatePlayerDto.DateOfBirth);
-
-            ValidatePhone(CreatePlayerDto.Phone);
 
             ValidatePosition(CreatePlayerDto.Position);
 
@@ -65,7 +60,7 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
-        public void GetPlayerByIdValidator(Player player)
+        public void GetPlayerByIdValidator(Player? player)
         {
             PlayerExists(player);
         }
@@ -91,20 +86,13 @@ namespace Application.Validators
                 }
             }
 
-            if (!emailValidator.IsValid(UpdatePlayerDto.Email))
-            {
-                throw new ValidationException($"Email format is invalid.");
-            }
+            UserDatalValidator.EmailValidation(UpdatePlayerDto.Email);
 
             ValidateHeigth(UpdatePlayerDto.Height);
 
             ValidateAge(UpdatePlayerDto.DateOfBirth);
 
-            ValidatePhone(UpdatePlayerDto.Phone);
-
             ValidatePosition(UpdatePlayerDto.Position);
-
-            ValidateAddress(UpdatePlayerDto.Address);
 
             ValidateAddress(UpdatePlayerDto.Address);
         }
@@ -119,7 +107,6 @@ namespace Application.Validators
 
         public void LeaveTeamValidator(Player player)
         {
-            //same as the delete one
             if (player.Team == null)
             {
                 throw new ValidationException("Player does not belong to any team.");
@@ -200,16 +187,13 @@ namespace Application.Validators
             }
             return valid;
         }
-        public void PlayerHasChatRoomsValidation(Player player)
-        {
+        public void PlayerHasChatRoomsValidation(Player player) {
             PlayerExists(player);
-
-
+            
+            
         }
 
-        // acabar! falta ver como buscar as chatrooms do firebase e ver se faz sentido guardar no db do backend tambem
-        private void PlayerHasChatRooms(Player player)
-        {
+        private void PlayerHasChatRooms(Player player) { 
             //if(player.)
         }
 
@@ -235,29 +219,6 @@ namespace Application.Validators
                 || dateOfBirth < DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MaxAge))
             {
                 throw new ValidationException("Invalid Date of birth");
-            }
-        }
-
-        private static void ValidatePhone(string phone)
-        {
-            if (phone.Length != 9)
-            {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
-
-            if (!phone.All(char.IsDigit))
-            {
-                throw new ValidationException("Phone number must only contain digits (0-9).");
-            }
-
-            if (phone.StartsWith("0"))
-            {
-                throw new ValidationException("Phone number cannot start with '0'.");
-            }
-
-            if (!int.TryParse(phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
             }
         }
 

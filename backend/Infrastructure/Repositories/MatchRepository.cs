@@ -6,6 +6,7 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
+using Google.Api;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -341,5 +342,40 @@ namespace Infrastructure.Repositories
 
             return list;
         }
+
+        public async Task<List<InfoMatchCalendar>> GetMatchesByDateAsync(DateTime date)
+        {
+            return await context.Match
+                .Where(m => m.MatchDate.Date == date.Date)
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                .Include(m => m.Pitch)
+                .Select(m => new InfoMatchCalendar
+                {
+                    IdMatch = m.Id,
+                    MatchStatus = m.MatchStatus,
+                    GameDate = m.MatchDate,
+
+                    Team = new TeamDto
+                    {
+                        IdTeam = m.Teams.First().Team.Id,
+                        Name = m.Teams.First().Team.Name,
+                    },
+
+                    Opponent = new TeamDto
+                    {
+                        IdTeam = m.Teams.Skip(1).First().Team.Id,
+                        Name = m.Teams.Skip(1).First().Team.Name,
+                    },
+
+                    pitchGame = new PitchDto
+                    {
+                        Name = m.Pitch.Name,
+                        Address = m.Pitch.Address
+                    }
+                })
+                .ToListAsync();
+        }
+
     }
 }

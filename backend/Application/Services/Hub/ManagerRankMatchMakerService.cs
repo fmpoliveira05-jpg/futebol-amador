@@ -14,7 +14,7 @@ using System.Text.RegularExpressions;
 //Criar configuração do cache para apagar o gajo em 30 minutos
 namespace Application.Services.Hub
 {
-    public class ManagerRankMatchMakerService : IManagerRankMatchMakerService
+    public class ManagerRankMatchMakerService: IManagerRankMatchMakerService
     {
         private readonly IMatchMakerService serviceMatchMaker;
         private readonly ITeamRepository teamRepository;
@@ -24,7 +24,7 @@ namespace Application.Services.Hub
         private readonly IMemoryCache cache;
 
         public ManagerRankMatchMakerService(IMatchMakerService serviceMatchMaker, ITeamRepository teamRepository,
-            IMatchRepository matchRepository, IUnityOfWork unityOfWork, IRankMatchMakerValidator validator,
+            IMatchRepository matchRepository, IUnityOfWork unityOfWork, IRankMatchMakerValidator validator, 
             IMemoryCache cache)
         {
             this.serviceMatchMaker = serviceMatchMaker;
@@ -35,11 +35,11 @@ namespace Application.Services.Hub
             this.cache = cache;
         }
 
-        public async Task<EntryRankMatchMakerHub?> JoinRankMatchMaker(string idPlayer,
+        public async Task<EntryRankMatchMakerHub> JoinRankMatchMaker(string idPlayer, 
             Guid idTeam, TimeOnly hoursGame, string connectionId)
         {
             validator.ValidateVariableJoinRankMatchMaker(idPlayer, idTeam, hoursGame, connectionId);
-
+            
             Team? team;
             string hubCacheKey = "";
             bool? findUser = false;
@@ -74,7 +74,7 @@ namespace Application.Services.Hub
             {
                 haveChangeDifferenceRank = true;
             }
-
+            
             validator.ValidateJoinRankMatchMaker(team, averageAge, city, findUser, hub);
 
             InfoTeam = new InfoTeamRankMatchMakerDto
@@ -99,9 +99,9 @@ namespace Application.Services.Hub
                 ConnectionId = connectionId,
                 Team = InfoTeam
             };
-
+            
             var teamsInCache = GetAllTeamsInCache();
-
+            
             //Não retornar um id mas sim a team (para corrigir o erro, se calhar)
             var teamMatchId = serviceMatchMaker.LogicMatchMakerJoinHub(InfoTeam, teamsInCache, gameDate);
 
@@ -197,7 +197,7 @@ namespace Application.Services.Hub
                 await CreateMatch(team1.IdTeam, team2.IdTeam, team2.GameDate);
             }
         }
-
+        
         /*
          Retorna todas as teams em cache em que atualmente estão sozinhas em hub
          há procura de match
@@ -283,8 +283,8 @@ namespace Application.Services.Hub
             var pattern = new Regex(@",\s(?<city>.+)$", RegexOptions.Compiled);
             var validateAddress = pattern.Match(addressTeam);
 
-            city = validateAddress.Groups["city"].Value;
-
+            city = validateAddress.Groups["city"].Value;       
+            
             return city;
         }
 

@@ -29,30 +29,77 @@ namespace Api.Middlewares
             switch (exception)
             {
                 case ValidationException ex:
+                {
                     problemDetails.Title = "Erro de Validação";
                     problemDetails.Status = (int)HttpStatusCode.BadRequest;
                     problemDetails.Detail = ex.Message;
                     break;
-
+                }
                 case NotFoundException ex:
+                {
                     problemDetails.Title = "Recurso Não Encontrado";
                     problemDetails.Status = (int)HttpStatusCode.NotFound;
                     problemDetails.Detail = ex.Message;
                     break;
-
+                }
+                case InvalidOperationException ex:
+                {
+                    problemDetails.Title = "Operação Inválida";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case ArgumentException ex:
+                {
+                    problemDetails.Title = "Argumento Inválido";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case BusinessRuleException ex:
+                {
+                    problemDetails.Title = "Problema no não cumprimento de regra de negocio";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
                 case MatchInviteException ex:
+                {
                     problemDetails.Title = "Problema no convite de partida";
                     problemDetails.Status = (int)HttpStatusCode.BadRequest;
                     problemDetails.Detail = ex.Message;
                     break;
-
+                }
+                case UnauthorizedAccessException ex:
+                {
+                    problemDetails.Title = "Acesso Não Autorizado";
+                    problemDetails.Status = (int)HttpStatusCode.Unauthorized;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case AuthenticationException ex:
+                {
+                    problemDetails.Title = "Erro na autenticação";
+                    problemDetails.Status = (int)HttpStatusCode.BadRequest;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
+                case Exception ex:
+                {
+                    problemDetails.Title = "Erro Geral";
+                    problemDetails.Status = (int)HttpStatusCode.InternalServerError;
+                    problemDetails.Detail = ex.Message;
+                    break;
+                }
                 default:
+                {
                     Logger.LogError(exception, "Erro não tratado: {Message}", exception.Message);
 
                     problemDetails.Title = "Erro Interno do Servidor";
                     problemDetails.Status = (int)HttpStatusCode.InternalServerError;
                     problemDetails.Detail = "Ocorreu um erro inesperado. Tente novamente mais tarde.";
                     break;
+                }
             }
 
             httpContext.Response.StatusCode = problemDetails.Status.Value;
