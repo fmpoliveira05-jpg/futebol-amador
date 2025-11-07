@@ -49,7 +49,7 @@ jobs:
           New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
 
-      - name: Build, Test and Analyze
+- name: Build, Test and Analyze
         shell: powershell
         run: |
           # 1. INICIAR O SONAR
