@@ -98,29 +98,74 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T2GP5 - Player não admin tenta adiar partida.")]
         public async Task PostPoneMatch_Should_Throw_When_TeamIsNotAdmin()
         {
-            var userId = "admin-id";
+            // ARRANGE
             var teamId = Guid.NewGuid();
-            var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
+            var idMatch = Guid.NewGuid();
+            var idOpponent = Guid.NewGuid(); 
+            var dto = new PostPoneMatchDto
+            {
+                IdMatch = idMatch,
+                PostPoneDate = DateTime.UtcNow.AddDays(1),
+                IdOpponent = idOpponent
+            };
+
+            var dummyMatch = new Matches();
+
+            var team = new Team("Team A", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            dummyMatch.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
+
+            _matchRepoMock.Setup(r => r.GetMatchById(idMatch))
+                          .ReturnsAsync(dummyMatch); 
 
             Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
+            // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*administradora*");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        [Test(Description = "T3GP5 - Player não pertencente à equipa tenta adiar partida.")]
+        [Test(Description = "Validação: Lança exceção se a equipa não pertencer à partida")]
         public async Task PostPoneMatch_Should_Throw_When_TeamDoesNotBelongToMatch()
         {
-            var userId = "admin-id";
-            var outsiderTeamId = Guid.NewGuid();
-            var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
+            // ARRANGE
+            var outsiderTeamId = Guid.NewGuid(); 
+            var idMatch = Guid.NewGuid();
+            var idOpponent = Guid.NewGuid();
+            var dto = new PostPoneMatchDto
+            {
+                IdMatch = idMatch,
+                PostPoneDate = DateTime.UtcNow.AddDays(1), 
+                IdOpponent = idOpponent
+            };
 
+            var pitch = new Pitch("Campo", "Rua");
+            var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
+            var teamA = new Team("Team A", "desc", null, pitch, rank);
+            var teamB = new Team("Team B", "desc", null, pitch, rank) { Id = idOpponent }; 
+
+            var match = new Matches(DateTime.UtcNow.AddDays(10), false, pitch.Id, new List<TeamStatistics>(), new Chat())
+            {
+                MatchStatus = MatchStatus.SCHEDULED 
+            };
+
+            match.Teams.Add(new TeamStatistics(teamA) { IdTeam = Guid.NewGuid() }); 
+            match.Teams.Add(new TeamStatistics(teamB) { IdTeam = idOpponent });
+
+            _matchRepoMock.Setup(r => r.GetMatchById(idMatch))
+                          .ReturnsAsync(match);
+
+            // ACT
             Func<Task> act = async () => await _sut.PostPoneMatch(outsiderTeamId, dto);
 
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence*");
+            // ASSERT
+            await act.Should().ThrowAsync<BusinessRuleException>()
+                     .WithMessage("A partida não possui equipas válidas."); 
+
+            // VERIFY
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
+            _matchRepoMock.Verify(r => r.GetMatchById(idMatch), Times.Once);
         }
 
         [Test(Description = "T4GP5 - Tenta adiar partida com estado CANCELLED, DONE ou IN_PROGRESS.")]
