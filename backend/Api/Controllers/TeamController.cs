@@ -70,6 +70,7 @@ namespace Api.Controllers
         #region Search Teams 
 
         [HttpGet("{teamId}/search")]
+        [AllowAnonymous]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -101,6 +102,7 @@ namespace Api.Controllers
         #region Team Members Management
 
         [HttpGet("{teamId}/members")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
         {
             IEnumerable<PlayerDetailsDto> players;

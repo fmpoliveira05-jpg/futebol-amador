@@ -28,7 +28,7 @@ namespace Api.Controllers
         #region CRUD Super Admin
         [HttpPost]
         [AllowAnonymous]
-        public async Task<IActionResult> CreateSueprAdmin([FromBody] CreateSuperAdminDTO createSuperAdminDTO)
+        public async Task<IActionResult> CreateSuperAdmin([FromBody] CreateSuperAdminDTO createSuperAdminDTO)
         {
             if (!ModelState.IsValid)
             {

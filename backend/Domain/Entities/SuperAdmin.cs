@@ -7,7 +7,6 @@ namespace Domain.Entities
 {
     public class SuperAdmin : User
     {
-        
         public SuperAdmin() { }
 
         public SuperAdmin(string userId,string name, DateOnly dateOfBirth, string address, string email, 
