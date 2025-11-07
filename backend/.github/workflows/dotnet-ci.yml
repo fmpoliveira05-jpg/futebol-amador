@@ -52,29 +52,22 @@ jobs:
       - name: Build, Test and Analyze
         shell: powershell
         run: |
-          # 1. INICIAR O SONAR (usar glob para os relatórios de coverage e junit)
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"LDS-Backend" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
             /d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" `
             /d:sonar.cs.junit.reportsPaths="**/test-results.xml"
 
-          # 2. RESTAURAR PACOTES
           dotnet restore FutebolAmador.sln
 
-          # 3. BUILD em Release
           dotnet build FutebolAmador.sln --configuration Release --no-restore
 
-          # 4. EXECUTAR TODOS OS TESTES DA SOLUTION e gerar coverage
-          #    - executa por solution para correr todos os projectos de teste
           dotnet test FutebolAmador.sln --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
             --results-directory "TestResults" `
             --logger "trx;LogFileName=test-results.trx"
 
-          # 4.1 Listar o que foi gerado para debug (muito importante para ver onde está o coverage)
           Write-Host "=== Conteúdo da pasta TestResults ==="
           Get-ChildItem -Path TestResults -Recurse | Format-Table -AutoSize
 
-          # 5. FINALIZAR O SONAR (envia os relatórios)
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
