@@ -134,6 +134,11 @@
             public const int FirstPosition = 1;
             public const int LastPosition = 100;
         }
+
+        public static class RouteHubConst
+        {
+            public const string StartRoute = "http://localhost:5218";
+        }
     }
 }
 
