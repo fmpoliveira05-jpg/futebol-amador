@@ -16,15 +16,19 @@ namespace Application.Services
 
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
+        private readonly ISuperAdminRepository SuperAdminRepository;
+
         private readonly IPlayerValidator PlayerValidator;
 
 
-        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository)
+
+        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository)
         {
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            PlayerValidator = new PlayerValidator();
+            PlayerValidator = playerValidator;
+            SuperAdminRepository = superAdminRepository;
         }
 
         public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
@@ -63,7 +67,7 @@ namespace Application.Services
             await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
 
-        public async Task<FirebaseLoginResponseDto> LoginAsync(string email, string password)
+        public async Task<LoginResponseDto> LoginAsync(string email, string password)
         {
             string firebaseApiKey = "REMOVIDO";
 
@@ -87,7 +91,45 @@ namespace Application.Services
                     {
                         throw new AuthenticationException("Failed to parse Firebase response.");
                     }
-                    return firebaseResponse;
+
+                    var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(firebaseResponse.LocalId);
+                    if (superAdminUser != null)
+                    {
+                        return new LoginResponseDto
+                        {
+                            Address = superAdminUser.Address,
+                            Email = firebaseResponse.Email,
+                            DateOfBirth = superAdminUser.DateOfBirth,
+                            Name = superAdminUser.Name,
+                            Phone = superAdminUser.Phone,
+                            CreationDate = superAdminUser.CreationDate,
+                            FirebaseLoginResponseDto = firebaseResponse
+
+
+                        };
+                    }
+                    var playerUser = await PlayerRepository.GetPlayerByIdAsync(firebaseResponse.LocalId);
+                    if (playerUser != null)
+                    { 
+                        return new LoginResponseDto
+                        {
+                            Email = firebaseResponse.Email,
+                            DateOfBirth = playerUser.DateOfBirth,
+                            Name = playerUser.Name,
+                            Address = playerUser.Address,
+                            IsAdmin = playerUser.IsAdmin,
+                            Height = playerUser.Height,
+                            IdTeam = playerUser.IdTeam,
+                            Phone = playerUser.Phone,
+                            Position = playerUser.Position,
+                            CreationDate = playerUser.CreationDate,
+                            IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
+                            FirebaseLoginResponseDto = firebaseResponse
+                        };
+                    }
+
+                    throw new AuthenticationException("Usuário não encontrado na base de dados.");
+
                 }
                 else
                 {

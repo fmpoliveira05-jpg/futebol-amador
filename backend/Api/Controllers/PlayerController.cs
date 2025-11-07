@@ -54,7 +54,7 @@ namespace Api.Controllers
             return NoContent();
         }
         
-
+        */
         [HttpPost]
         [Route("LOGIN")]
         [AllowAnonymous]
@@ -64,7 +64,7 @@ namespace Api.Controllers
             return Ok(loginResponse);
         }
 
-        */
+        
 
         [HttpPost]
         [Route("create-profile")]

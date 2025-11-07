@@ -5,7 +5,7 @@ namespace Application.Interfaces.Services
 {
     public interface IAuthService
     {
-        Task<FirebaseLoginResponseDto> LoginAsync(string email, string password);
+        Task<LoginResponseDto> LoginAsync(string email, string password);
 
         Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 
