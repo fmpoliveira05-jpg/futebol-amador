@@ -35,38 +35,6 @@ namespace Api.Controllers
         #region EndPoints
 
         #region CRUD Player
-        /*
-        [HttpPost]
-        [Route("testeCreateFBUser")]
-        [AllowAnonymous]
-        public async Task<IActionResult> TesteCreateFBUser([FromBody] ProfileSetupDto newProfile)
-        { 
-            var nwUserID= await authService.RegisterUser(newProfile.Email, newProfile.Password, newProfile.phoneNumber);
-            return Ok(nwUserID);
-        }
-        
-
-        [HttpDelete]
-        [Route("DELETEUSER")]
-        [AllowAnonymous]
-        public async Task<IActionResult> TesteDeleteFBUser([FromBody] string userId)
-        {
-            authService.DeleteUser(userId);
-            return NoContent();
-        }
-        
-        */
-        [HttpPost]
-        [Route("LOGIN")]
-        [AllowAnonymous]
-        public async Task<IActionResult> TesteLoginFBUser([FromBody] LoginDto loginDto)
-        {
-            var loginResponse = await authService.LoginAsync(loginDto.Email,loginDto.Password);
-            return Ok(loginResponse);
-        }
-
-        
-
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]

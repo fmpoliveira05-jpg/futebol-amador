@@ -15,10 +15,15 @@ namespace Api.Controllers
         #region Initialization
         private readonly ISuperAdminService superAdminService;
         private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
-        public SuperAdminController(ISuperAdminService superAdminService, IPlayerAuthorizationValidator playerAuthorizationValidator)
+        private readonly IAuthService authService;
+
+
+        public SuperAdminController(ISuperAdminService superAdminService, IPlayerAuthorizationValidator playerAuthorizationValidator, IAuthService authService)
         {
             this.superAdminService = superAdminService;
             this.playerAuthorizationValidator = playerAuthorizationValidator;
+            this.authService = authService;
+
         }
 
         #endregion
@@ -36,11 +41,11 @@ namespace Api.Controllers
             }
 
             var newSadminId = await superAdminService.CreateSuperAdminAsync(createSuperAdminDTO);
-
+            var createUserResult = await authService.LoginAsync(createSuperAdminDTO.Email, createSuperAdminDTO.Password);
             return CreatedAtAction(
                 nameof(GetSuperAdmin),
                 new { sadminId = newSadminId },
-                createSuperAdminDTO
+                createUserResult
                 );
         }
 

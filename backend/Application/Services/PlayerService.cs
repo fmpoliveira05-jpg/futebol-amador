@@ -123,7 +123,7 @@ namespace Application.Services
 
             playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
 
-            bool hasChange = hasChangePlayer(dto, player);
+            bool hasChange =  await hasChangePlayer(dto, player);
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
             await unityOfWork.SaveChangesAsync();
@@ -192,7 +192,7 @@ namespace Application.Services
         #endregion
 
         #region Private Methods
-        private static bool hasChangePlayer(UpdatePlayerDto dto, Player player)
+        private async Task<bool> hasChangePlayer(UpdatePlayerDto dto, Player player)
         {
             bool hasChange = false;
 
@@ -217,6 +217,7 @@ namespace Application.Services
             if (dto.Email != player.Email)
             {
                 player.Email = dto.Email;
+                 await AuthService.UpdateEmailAsync(player.Id, dto.Email);
                 hasChange = true;
             }
 

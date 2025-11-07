@@ -11,14 +11,19 @@ namespace Application.Services
         private readonly ISuperAdminRepository superAdminRepository;
         private readonly IUserRepository userRepository;
         private readonly IUnityOfWork unityOfWork;
+
+        private readonly IAuthService authService;
+
         private readonly ISuperAdminValidator superAdminValidator;
 
-        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUserRepository userRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator)
+        public SuperAdminService(ISuperAdminRepository superAdminRepository, IUserRepository userRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator, IAuthService authService)
         {
             this.superAdminRepository = superAdminRepository;
             this.userRepository = userRepository;
             this.unityOfWork = unityOfWork;
             this.superAdminValidator = superAdminValidator;
+            this.authService = authService;
+
         }
 
         public async Task<string> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
@@ -30,8 +35,17 @@ namespace Application.Services
 
             superAdminValidator.CreateSuperAdminValidator(dto, existingSadmin);
 
+            var newUserId = await authService.RegisterUser(dto.Email, dto.Password, dto.Phone);
+
+            if (string.IsNullOrEmpty(newUserId))
+            {
+                throw new Exception("Error creating user in authentication service.");
+            }
+
+
             var superAdmin = new SuperAdmin
             {
+                Id = newUserId,
                 Name = dto.Name,
                 DateOfBirth = dto.DateOfBirth,
                 Email = dto.Email,
@@ -53,6 +67,8 @@ namespace Application.Services
             superAdminValidator.DeleteSuperAdminValidator(superAdminToDelete);
 
             superAdminRepository.DeleteSuperAdmin(superAdminToDelete);
+
+            authService.DeleteUserAsync(superAdminId);
 
             await unityOfWork.SaveChangesAsync();
         }
@@ -88,9 +104,12 @@ namespace Application.Services
             superAdmin.Address = dto.Address;
             superAdmin.Phone = dto.Phone;
             superAdmin.Email = dto.Email;
+            await authService.UpdateEmailAsync(superAdminId, dto.Email);
+
+
 
             superAdminRepository.UpdateSuperAdmin(superAdmin);
-
+            
             await unityOfWork.SaveChangesAsync();
         }
     }

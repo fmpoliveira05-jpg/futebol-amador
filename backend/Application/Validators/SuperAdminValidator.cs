@@ -50,11 +50,6 @@ namespace Application.Validators
                 throw new ValidationException("Invalid Date of birth");
             }
 
-            if (dto.Phone.Length != 9)
-            {
-                throw new ValidationException("Phone number must have 9 digits.");
-            }
-
             if (!int.TryParse(dto.Phone, out _))
             {
                 throw new ValidationException("Phone number must only have numbers.");
