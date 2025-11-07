@@ -699,37 +699,39 @@ namespace Unit.ApplicationTests.ServicesTests
             Assert.That(result[0].TeamName, Is.EqualTo("Botafogo"));
         }
 
-        [Test(Description = "Validação: Try consulting membership requests while player has team")]
-        public async Task GetMembershipRequests_ShouldThrow_WhilePlayerHasTeam()
+        [Test(Description = "Validação: GetMembershipRequests_ShouldThrow_WhilePlayerHasTeam")]
+        public void GetMembershipRequests_ShouldThrow_WhilePlayerHasTeam()
         {
-            var player = BuildValidPlayer(null, BuildValidTeam(), false, null);
+            // ARRANGE
+            var playerId = "player-with-team";
 
-            var mockRequests = BuildMockMembershipRequestList(player);
+            var playerWithTeam = new Player
+            {
+                Id = playerId,
+                Team = new Team(), 
+                IdTeam = Guid.NewGuid() 
+            };
 
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            _playerValidatorMock
-                .Setup(v => v.PlayerExists(player))
-                .Throws(new BusinessRuleException("Player already has a team."));
-            _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByPlayer(player.Id)).ReturnsAsync(mockRequests);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerWithTeam);
 
-            Assert.ThrowsAsync<BusinessRuleException>(async () =>
-                await _sut.GetMembershipRequestsAsyncPlayer(player.Id)
-            );
+            // ACT & ASSERT
+            Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _sut.GetMembershipRequestsAsyncPlayer(playerId));
         }
 
-        [Test(Description = "Validação: GetMembershipRequests_ShouldThrow_TryingToAcessAnotherPlayerRequests")]
-        public async Task GetMembershipRequests_ShouldThrow_TryingToAcessAnotherPlayerRequests()
+        [Test(Description = "Validação: Lança exceção se o jogador pedido não existir")]
+        public void GetMembershipRequests_ShouldThrow_When_PlayerNotFound()
         {
-            var otherPlayer = BuildValidPlayer();
+            // ARRANGE
+            var playerId = "jogador-que-nao-existe";
 
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(otherPlayer.Id)).ReturnsAsync(otherPlayer);
-            _playerValidatorMock
-                .Setup(v => v.PlayerExists(otherPlayer))
-                .Throws(new BusinessRuleException("Player already has a team."));
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
+                           .ReturnsAsync((Player)null);
+            Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _sut.GetMembershipRequestsAsyncPlayer(playerId));
 
-            Assert.ThrowsAsync<BusinessRuleException>(async () =>
-                await _sut.GetMembershipRequestsAsyncPlayer(otherPlayer.Id)
-            );
+            // VERIFY
+            _membershipRequestRepoMock.Verify(r => r.GetMembershipRequestsByPlayer(It.IsAny<string>()), Times.Never);
         }
 
         #endregion
@@ -765,25 +767,28 @@ namespace Unit.ApplicationTests.ServicesTests
         }
 
         [Test(Description = "Validação: SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam")]
-        public void SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam()
+        public async Task SendMembershipRequestAsync_ShouldThrow_WhilePlayerHasTeam()
         {
-            var player = BuildValidPlayer(null, BuildValidTeam());
-            var team = BuildValidTeam();
-            var request = (MembershipRequest)null;
+            // ARRANGE
+            var playerId = "player-with-team";
+            var teamIdToJoin = Guid.NewGuid();
 
-            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
-            _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(team.Id)).ReturnsAsync(team);
-            _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(player.Id, team.Id)).ReturnsAsync(request);
+            var playerWithTeam = new Player
+            {
+                Id = playerId,
+                Team = new Team(), 
+                IdTeam = Guid.NewGuid()
+            };
 
-            _playerValidatorMock
-                .Setup(v => v.SendMembershipRequestValidator(player, team, request))
-                .Throws(new BusinessRuleException("Player is already on a team and can't send membership requests."));
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerWithTeam);
 
-            Assert.ThrowsAsync<BusinessRuleException>(async () =>
-                await _sut.SendMembershipRequestAsyncPlayer(player.Id, team.Id)
-            );
+            // ACT
+            Func<Task> act = async () => await _sut.SendMembershipRequestAsyncPlayer(playerId, teamIdToJoin);
+
+            // ASSERT
+            await act.Should().ThrowAsync<InvalidOperationException>()
+                     .WithMessage("Apenas jogadores sem equipa podem aceder a este recurso!");
         }
-
 
         [Test(Description = "Validação: SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull")]
         public void SendMembershipRequestAsync_ShouldThrow_WhileTeamIsFull()
