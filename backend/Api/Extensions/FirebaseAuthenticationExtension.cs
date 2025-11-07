@@ -36,20 +36,51 @@ namespace Api.Extensions
                 throw new ArgumentNullException("Firebase:ProjectId", "O ProjectId do Firebase não pode ser nulo na configuração.");
             }
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = $"https://securetoken.google.com/{firebaseProjectId}";
+                    var projectId = firebaseProjectId;
+                    options.Authority = $"https://securetoken.google.com/{projectId}";
+                    options.Audience = projectId;
+
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = $"https://securetoken.google.com/{firebaseProjectId}",
+                        ValidIssuer = $"https://securetoken.google.com/{projectId}",
                         ValidateAudience = true,
-                        ValidAudience = firebaseProjectId,
-                        ValidateLifetime = true
-
+                        ValidAudience = projectId,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.FromMinutes(5),
+                        RequireSignedTokens = true,
+                        RequireExpirationTime = true
                     };
-                });
+
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine("JWT Auth Failed: " + context.Exception.Message);
+                            return Task.CompletedTask;
+                        },
+                        OnChallenge = context =>
+                        {
+                            Console.WriteLine("JWT Challenge: " + context.ErrorDescription);
+                            return Task.CompletedTask;
+                        },
+                        OnMessageReceived = context =>
+                        {
+                            Console.WriteLine("JWT Received");
+                            return Task.CompletedTask;
+                        },
+                        OnTokenValidated = context =>
+                        {
+                            Console.WriteLine("JWT Validated for user: " +
+                                context.Principal?.FindFirst("user_id")?.Value);
+                            return Task.CompletedTask;
+                        }
+                    };
+                    });
 
             return services;
         }
