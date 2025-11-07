@@ -25,6 +25,11 @@ namespace Application.Validators
                 throw new ArgumentException("O id do recetor está vazio");
             }
 
+            if(dto.IdSender == dto.IdReceiver)
+            {
+                throw new ArgumentException("O seu adversário não pode ser voce");
+            }
+
             ValidateHoursGame(dto.GameDate);
         }
 
