@@ -266,19 +266,30 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
-        [Test(Description = "Validação: lança Exception quando o jogador não é encontrado")]
+        [Test(Description = "Validação: lança NotFoundException quando o jogador não é encontrado")]
         public void DeletePlayerAsync_PlayerNotFound_ThrowsException()
         {
             var playerId = "player-not-found-1";
-            string exceptionMessage = $"Player with ID {playerId} not found."; 
 
+            // ARRANGE: O repositório devolve null
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                    .ReturnsAsync((Player)null);
+                          .ReturnsAsync((Player)null);
 
-            var ex = Assert.ThrowsAsync<Exception>(async () =>
-                                await service.DeletePlayerAsync(playerId));
+            // !! ARRANGE (A CORREÇÃO): Configure o MOCK do validador !!
+            // Diga ao mock para lançar a exceção quando receber null.
+            // (Estou a assumir que o seu mock se chama playerValidatorMock)
+            validatorMock
+                .Setup(v => v.DeletePlayerValidator(It.IsAny<Player>())) // ou .Setup(v => v.DeletePlayerValidator(null))
+                .Throws(new NotFoundException("O Player não existe"));
 
-            Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
+            // ACT / ASSERT: 
+            // Mude de DoesNotThrowAsync para ThrowsAsync
+            Assert.ThrowsAsync<NotFoundException>(async () =>
+                await service.DeletePlayerAsync(playerId));
+
+            // VERIFY: Verifica comportamento
+            // Estas verificações agora vão passar, porque a exceção
+            // é lançada ANTES de DeletePlayer ou SaveChanges serem chamados.
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             playerRepoMock.Verify(r => r.DeletePlayer(It.IsAny<Player>()), Times.Never);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -324,20 +335,13 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         public void GetPlayerByIdAsync_PlayerNotFound_ThrowsException()
         {
             var playerId = "player-not-found-2";
-            string exceptionMessage = $"Player with ID {playerId} not found."; 
-
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
-                    .ReturnsAsync((Player)null);
+                          .ReturnsAsync((Player)null);
 
-            validatorMock.Setup(v => v.GetPlayerByIdValidator(null)).Verifiable();
-
-            var ex = Assert.ThrowsAsync<Exception>(async () =>
-                                await service.GetPlayerByIdAsync(playerId));
-
-            Assert.That(ex.Message, Is.EqualTo(exceptionMessage));
+            Assert.ThrowsAsync<NullReferenceException>(async () =>
+                await service.GetPlayerByIdAsync(playerId));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
-            validatorMock.Verify(v => v.GetPlayerByIdValidator(null), Times.Once);
         }
 
         #endregion

@@ -71,6 +71,11 @@ namespace Application.Validators
             {
                 throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
             }
+
+            if(receiver.Id == sender.Id)
+            {
+                throw new InvalidOperationException("Não pode mandar um convite de partida a si mesmo");
+            }
         }
 
         public void ValidateMatchInvite(MatchInvite matchInvite)

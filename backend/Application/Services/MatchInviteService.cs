@@ -118,7 +118,7 @@ namespace Application.Services
 
             MatchInviteValidator.ValidateMatchInvite(matchInvite);
 
-            var sender = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+            var sender = await TeamRepository.GetByIdWithReceivedInvitesAndCalendar(matchInvite.IdSender);
             var pitch = await PitchRepository.GetPitchById(matchInvite.IdPitch);
             var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(receiver.Id, matchInvite.GameDate);
 
