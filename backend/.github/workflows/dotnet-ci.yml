@@ -55,21 +55,18 @@ jobs:
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"LDS-Backend" `
             /d:sonar.token="${{ secrets.SONAR_TOKEN }}" `
             /d:sonar.host.url="${{ secrets.SONAR_HOST_URL }}" `
-            # Caminho explícito para o relatório de cobertura
             /d:sonar.cs.opencover.reportsPaths="TestResults/coverage.opencover.xml" `
-            # Caminho explícito para o relatório de testes
             /d:sonar.cs.junit.reportsPaths="TestResults/test-results.xml"
 
           dotnet restore FutebolAmador.sln
 
           dotnet build FutebolAmador.sln --configuration Release --no-restore
 
-          # Comando de teste com diretórios de saída explícitos
-          dotnet test Tests/Tests.csproj --no-build `
+          # --- COMANDO CORRIGIDO ---
+          # Adicionado --configuration Release para corresponder ao build
+          dotnet test Tests/Tests.csproj --no-build --configuration Release `
             --collect:"XPlat Code Coverage;Format=opencover" `
             --logger "junit;LogFileName=test-results.xml;ResultsDirectory=TestResults" `
             --results-directory "TestResults"
-
-          # (Pode manter o script de debug da 'Solução A' aqui para verificar)
 
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
