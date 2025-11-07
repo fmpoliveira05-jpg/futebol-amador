@@ -50,21 +50,16 @@ namespace Application.Validators
             }
         }
 
-        public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto) 
+        public void ValidatePostPoneMatchDto(Guid idTeam, PostPoneMatchDto dto)
         {
             if (dto.IdMatch == Guid.Empty)
             {
                 throw new ArgumentException("O id da partida a adiar está vazio");
             }
 
-            if (dto.IdTeam == Guid.Empty)
+            if (idTeam == Guid.Empty)
             {
                 throw new ArgumentException("O id da equipa está vazio");
-            }
-
-            if (idTeam != dto.IdTeam)
-            {
-                throw new InvalidOperationException("O id da equipa não é o mesmo do url");
             }
 
             if (dto.IdOpponent == Guid.Empty)

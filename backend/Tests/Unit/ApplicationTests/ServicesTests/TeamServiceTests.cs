@@ -136,8 +136,8 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*já existe*", "porque o nome da equipa não pode ser duplicado");
+            await act.Should().ThrowAsync<NotFoundException>()
+                     .WithMessage("*Já existe uma equipa com o nome*");
             _teamRepoMock.Verify(r => r.AddAsync(It.IsAny<Team>()), Times.Never, "porque não deve tentar adicionar uma equipa duplicada");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque nenhuma alteração deve ser persistida");
         }

@@ -4,6 +4,7 @@ using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -19,6 +20,13 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
         private readonly IPlayerAuthorizationService AuthorizationService;
+        private readonly IPlayerAuthorizationValidator AuthorizationValidator;
+        private IMatchRepository object1;
+        private ITeamPostPoneGameRepository object2;
+        private ICancelledMatchRepository object3;
+        private IUnityOfWork object4;
+        private CalendarValidator validator;
+        private IPlayerAuthorizationService object5;
 
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
@@ -52,22 +60,23 @@ namespace Application.Services
         #region PostPoneMatch
         public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
+            //AuthorizationValidator.ValidatePlayerAutorizationIsAdmin();
+            var idMatch = dto.IdMatch;
+            var match = await MatchRepository.GetMatchById(idMatch);
+            if (match == null)
+            {
+                throw new BusinessRuleException("A partida não foi encontrada.");
+            }
+
             MatchValidator.ValidatePostPoneMatchDto(idTeam, dto);
 
-            var idMatch = dto.IdMatch;
             var newDate = dto.PostPoneDate;
             var idOpponnent = dto.IdOpponent;
             PostPoneMatch postPoneDate;
             Team team;
 
-            var match = await MatchRepository.GetMatchById(idMatch);
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
-
-            if (match == null)
-            {
-                throw new BusinessRuleException("A partida não foi encontrada.");
-            }
 
             if (teamStatistic == null || opponentStatistics == null)
             {
