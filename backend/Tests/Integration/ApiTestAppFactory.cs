@@ -1,9 +1,13 @@
-﻿using Infrastructure.Data;
+﻿using Application.Interfaces.Validators.Hub;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Moq;
+using System.Reflection;
 
 namespace Tests.Integration
 {
@@ -15,12 +19,28 @@ namespace Tests.Integration
         {
             builder.ConfigureServices(services =>
             {
-                var dbContextDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(DbContextOptions<AmateurFootballContext>)); 
+                var descriptorsToRemove = services
+                    .Where(d =>
+                        d.ServiceType == typeof(DbContextOptions<AmateurFootballContext>) ||
+                        d.ServiceType == typeof(AmateurFootballContext) ||
+                        (d.ImplementationType != null && d.ImplementationType == typeof(AmateurFootballContext)) ||
+                        (d.ImplementationFactory != null && d.ImplementationFactory.GetMethodInfo().ReturnType == typeof(AmateurFootballContext))
+                    )
+                    .ToList();
 
-                if (dbContextDescriptor != null)
+                foreach (var d in descriptorsToRemove)
                 {
-                    services.Remove(dbContextDescriptor);
+                    services.Remove(d);
+                }
+
+                var hostedServices = services
+                    .Where(d => d.ServiceType == typeof(IHostedService) ||
+                                (d.ImplementationType != null && typeof(IHostedService).IsAssignableFrom(d.ImplementationType)))
+                    .ToList();
+
+                foreach (var h in hostedServices)
+                {
+                    services.Remove(h);
                 }
 
                 services.AddDbContext<AmateurFootballContext>(options => 
@@ -28,8 +48,10 @@ namespace Tests.Integration
                     options.UseInMemoryDatabase("InMemoryDbForTesting");
                 });
 
+                services.AddMemoryCache();
+
                 var authDescriptor = services.SingleOrDefault(
-                    d => d.ServiceType == typeof(IAuthenticationService));
+                    d => d.ServiceType == typeof(Microsoft.AspNetCore.Authentication.IAuthenticationService));
 
                 if (authDescriptor != null)
                 {
@@ -38,6 +60,12 @@ namespace Tests.Integration
 
                 services.AddAuthentication("Test")
                     .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("Test", options => { });
+
+                var mockHubFinshValidator = new Mock<IHubFinshMatchValidator>();
+                var mockGeralValidator = new Mock<IGeralHubValidator>();
+
+                services.AddSingleton<IHubFinshMatchValidator>(mockHubFinshValidator.Object);
+                services.AddSingleton<IGeralHubValidator>(mockGeralValidator.Object);
             });
         }
 

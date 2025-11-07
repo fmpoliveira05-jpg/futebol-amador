@@ -1,11 +1,11 @@
-﻿using Application.Interfaces.Services.Hub.ClienteService;
+﻿using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
+using Application.Interfaces.Services.Hub.ClienteService;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
-using System.Net;
-using System.Net.Http.Headers;
-using Microsoft.Extensions.DependencyInjection;
-using System.Text;
 
 namespace Tests.Integration.ClassTests.StartMatchHub
 {
@@ -58,8 +58,8 @@ namespace Tests.Integration.ClassTests.StartMatchHub
             // Act
             var response = await client.PostAsync(url, content);
 
-            // Assert
-            //Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            // Assert (usando Assert.That)
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             mockStartClient.Verify(m => m.InitializeAsync(), Times.Once);
             mockStartClient.Verify(m => m.JoinStartMatchAsync(idMatch, idTeam), Times.Once);
         }
@@ -87,7 +87,7 @@ namespace Tests.Integration.ClassTests.StartMatchHub
 
             var response = await client.PostAsync(url, content);
 
-           // Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
             mockStartClient.Verify(m => m.JoinStartMatchAsync(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
         }
 
@@ -114,10 +114,9 @@ namespace Tests.Integration.ClassTests.StartMatchHub
 
             var response = await client.PostAsync(url, null);
 
-            //Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             mockStartClient.Verify(m => m.InitializeAsync(), Times.Once);
             mockStartClient.Verify(m => m.LeaveStartMatchAsync(), Times.Once);
         }
-
     }
 }
