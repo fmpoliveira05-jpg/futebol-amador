@@ -62,6 +62,6 @@ jobs:
 
           dotnet build FutebolAmador.sln --configuration Release --no-restore
 
-          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage" --logger "junit;LogFileName=test-results.xml"
+          dotnet test Tests/Tests.csproj --no-build --collect:"XPlat Code Coverage;Format=opencover" --logger "junit;LogFileName=test-results.xml"
 
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
