@@ -72,6 +72,7 @@ namespace Api.Controllers
         #endregion
 
         #region CancelMatch
+        /*
         [HttpDelete("CancelMatch/{idMatch}")]
         public async Task<IActionResult> CancelMatch(Guid idTeam, Guid idMatch, [FromBody] string description)
         {
@@ -80,6 +81,7 @@ namespace Api.Controllers
 
             return Ok();
         }
+        */
 
         #endregion
 

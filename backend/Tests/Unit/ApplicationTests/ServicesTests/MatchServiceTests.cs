@@ -238,6 +238,7 @@ namespace Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region CancelMatchTests
+        /*
         [Test(Description = "T1GP6 - Player Admin cancela partida com estado SCHEDULED.")]
         public async Task CancelMatch_Should_CancelScheduledMatch_When_AdminTeam()
         {
@@ -368,6 +369,7 @@ namespace Unit.ApplicationTests.ServicesTests
                      .WithMessage("*não pertence*");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
+        */
         #endregion
 
         #region CalendarTests
