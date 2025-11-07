@@ -2,8 +2,8 @@
 using Application.Interfaces.Services.Hub;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.SignalR.Client;
-using Moq;
 using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using NUnit.Framework;
 
 namespace Tests.Integration.ClassTests.StartMatchHub
@@ -12,8 +12,7 @@ namespace Tests.Integration.ClassTests.StartMatchHub
     {
         private ApiTestAppFactory _factory = null!;
         private WebApplicationFactory<Program> _appFactory = null!;
-        // Ajusta isto se o teu MapHubs usar outro path
-        private const string HubPath = "/startMatchHub";
+        private const string HubPath = "/StartMatch";
 
         [SetUp]
         public void Setup()
@@ -60,6 +59,7 @@ namespace Tests.Integration.ClassTests.StartMatchHub
             {
                 builder.ConfigureServices(services =>
                 {
+                    // substitui o serviço real pelo mock
                     services.AddSingleton(mockManager.Object);
                 });
             });
@@ -69,6 +69,7 @@ namespace Tests.Integration.ClassTests.StartMatchHub
             var firstConnection = new HubConnectionBuilder()
                 .WithUrl(new Uri(baseAddress, HubPath), options =>
                 {
+                    // necessário para usar o TestServer internamente
                     options.HttpMessageHandlerFactory = _ => clientFactory.Server.CreateHandler();
                 })
                 .Build();
@@ -102,13 +103,15 @@ namespace Tests.Integration.ClassTests.StartMatchHub
             await firstConnection.InvokeAsync("JoinStartMatch", matchId, firstTeamId);
             await secondConnection.InvokeAsync("JoinStartMatch", matchId, secondTeamId);
 
-            // Wait for message
+            // Wait for message (timeout safety)
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            var completed = await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
+            await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
 
-            //Assert.IsTrue(tcs.Task.IsCompleted, "Did not receive ReceiveStartMatch within timeout.");
-            //Assert.IsNotNull(receivedMessage);
+            // Asserts (usando Assert.That)
+            Assert.That(tcs.Task.IsCompleted, Is.True, "Não foi recebido ReceiveStartMatch dentro do timeout.");
+            Assert.That(receivedMessage, Is.Not.Null.And.Not.Empty);
 
+            // cleanup
             await firstConnection.StopAsync();
             await secondConnection.StopAsync();
             await firstConnection.DisposeAsync();
@@ -117,6 +120,5 @@ namespace Tests.Integration.ClassTests.StartMatchHub
             mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), firstTeamId, It.IsAny<string>()), Times.Once);
             mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), secondTeamId, It.IsAny<string>()), Times.Once);
         }
-
     }
 }
