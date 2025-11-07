@@ -1,4 +1,4 @@
-name: CI/CD - .NET 9 + SonarQube + DockerHub
+name: CI/CD - .NET 8 + SonarQube + DockerHub
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ developer, master ]
 
 env:
-  DOTNET_VERSION: '9.0.x'
+  DOTNET_VERSION: '8.0.x'
   SOLUTION_FILE: 'FutebolAmador.sln'
   SONAR_PROJECT_KEY: 'LDS-Backend'
   TEST_PROJECT: 'Tests/Tests.csproj' # 👈 muda este nome se o .csproj tiver outro nome
