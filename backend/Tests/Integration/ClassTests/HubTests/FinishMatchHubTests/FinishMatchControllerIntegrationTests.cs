@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration.ClassTests.FinishMatchHubTests
+namespace Tests.Integration.ClassTests.HubTests.FinishMatchHubTests
 {
     public class FinishMatchControllerIntegrationTests
     {

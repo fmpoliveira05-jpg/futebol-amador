@@ -7,7 +7,7 @@ using Moq;
 using NUnit.Framework;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Tests.Integration.ClassTests.FinishMatchHubTests
+namespace Tests.Integration.ClassTests.HubTests.FinishMatchHubTests
 {
     public class FinishMatchIntegrationTests
     {

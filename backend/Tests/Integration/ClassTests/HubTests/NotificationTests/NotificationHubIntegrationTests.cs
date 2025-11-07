@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using NUnit.Framework;
 
-namespace Tests.Integration.ClassTests.NotificationTests
+namespace Tests.Integration.ClassTests.HubTests.NotificationTests
 {
     public class NotificationHubIntegrationTests
     {
