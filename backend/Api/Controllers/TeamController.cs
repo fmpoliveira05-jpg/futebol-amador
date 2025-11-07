@@ -216,8 +216,6 @@ namespace Api.Controllers
         }
         */
 
-
-
         [HttpPost("{teamId}/membership-request/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
         {
