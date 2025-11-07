@@ -50,9 +50,14 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Restore & Build
+        run: |
+          dotnet restore ${{ env.SOLUTION_FILE }}
+          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+
       - name: Run Unit Tests
         run: |
-          dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release `
+          dotnet test ${{ env.TEST_PROJECT }} --configuration Release `
             --filter "FullyQualifiedName~Unit" `
             --logger "trx;LogFileName=unit-tests.trx" `
             --results-directory "${{ env.TEST_RESULTS_DIR }}"
@@ -63,6 +68,7 @@ jobs:
         with:
           name: Unit-Test-Results
           path: ${{ env.TEST_RESULTS_DIR }}
+
 
   # ======================================================
   # 3️⃣ INTEGRATION TESTS + SONAR (só na master)
