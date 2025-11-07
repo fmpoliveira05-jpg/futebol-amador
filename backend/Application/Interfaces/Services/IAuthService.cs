@@ -9,7 +9,9 @@ namespace Application.Interfaces.Services
 
         Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 
-        Task LogoutAsync();
+        Task UpdateEmailAsync(string userId, string newEmail);
+
+        Task LogoutAsync(string userId);
 
         void DeleteUser(string userId);
 

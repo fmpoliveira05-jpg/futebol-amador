@@ -27,14 +27,40 @@ namespace Application.Services
             PlayerValidator = new PlayerValidator();
         }
 
-        public Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var user = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
+                if (string.IsNullOrEmpty(user?.Email))
+                {
+                    throw new AuthenticationException("Usuário não encontrado ou sem email.");
+                }
+
+
+                await this.LoginAsync(user.Email, currentPassword);
+
+                var args = new UserRecordArgs
+                {
+                    Uid = userId, 
+                    Password = newPassword
+                };
+
+                await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
+            }
+            catch (AuthenticationException ex)
+            {
+                throw new AuthenticationException("A senha atual está incorreta.", ex);
+            }
+            catch (FirebaseAuthException ex)
+            {
+                throw new Exception($"Falha ao processar a mudança de senha: {ex.Message}", ex);
+            }
         }
 
-        public void DeleteUser(string userId)
+        public async void DeleteUser(string userId)
         {
-            FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
+            await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
 
         public async Task<FirebaseLoginResponseDto> LoginAsync(string email, string password)
@@ -71,9 +97,9 @@ namespace Application.Services
             }
         }
 
-        public Task LogoutAsync()
+        public async Task LogoutAsync(string userId)
         {
-            throw new NotImplementedException();
+            await FirebaseAuth.DefaultInstance.RevokeRefreshTokensAsync(userId);
         }
 
         public async Task<string> RegisterUser(string email, string password, string phoneNumber)
@@ -91,6 +117,27 @@ namespace Application.Services
             UserRecord userRecord = await FirebaseAuth.DefaultInstance.CreateUserAsync(userArgs);
             
             return userRecord.Uid;  
+        }
+
+        public async Task UpdateEmailAsync(string userId, string newEmail)
+        {
+            try
+            {
+                var args = new UserRecordArgs
+                {
+                    Uid = userId,
+                    Email = newEmail
+                };
+                await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
+            }
+            catch (FirebaseAuthException ex)
+            {
+                if (ex.AuthErrorCode == AuthErrorCode.EmailAlreadyExists)
+                {
+                    throw new Exception("Este email já está em uso por outra conta.");
+                }
+                throw;
+            }
         }
     }
 }
