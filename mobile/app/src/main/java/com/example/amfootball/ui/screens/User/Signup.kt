@@ -97,7 +97,7 @@ fun SignUpScreen(navController: NavHostController) {
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp)
-                .verticalScroll(rememberScrollState()), // Adiciona scroll
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -142,7 +142,6 @@ fun SignUpScreen(navController: NavHostController) {
                 label = "exemple@example.com",
                 keyboardType = KeyboardType.Email
             )
-
 
             Spacer(Modifier.height(8.dp))
             Text(text = "Position:")

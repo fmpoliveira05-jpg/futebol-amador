@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_page_send_match_Invite">Enviar Pedido de Partida</string>
+
+    <string name="game_date">Dia do Jogo:</string>
+    <string name="description_game_date">Dia que quer convidar o adversário para jogar</string>
+
+    <string name="game_hours">Hora de Jogo:</string>
+    <string name="description_game_hours">Hora que quer convidar o adversário para jogar</string>
+
+    <string name="playing_home">Joga em casa?:</string>
+    <string name="checked_playing_home">Jogo em sua casa</string>
+    <string name="unchecked_playing_home">Jogo na casa do adversário</string>
+
+</resources>

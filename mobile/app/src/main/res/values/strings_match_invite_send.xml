@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_page_send_match_Invite">Send Match Invite</string>
+
+    <string name="game_date">Game Date:</string>
+    <string name="description_game_date">Day he wants to invite the opponent to play</string>
+
+    <string name="game_hours">Game Hours:</string>
+    <string name="description_game_hours">Time to invite the opponent to play</string>
+
+    <string name="playing_home">Playing at home?</string>
+    <string name="checked_playing_home">Home game</string>
+    <string name="unchecked_playing_home">Away game</string>
+</resources>

@@ -28,6 +28,7 @@ import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.MatchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
 import com.example.amfootball.ui.screens.Team.CalendarScreen
+import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
 import com.example.amfootball.ui.screens.Team.ListMembersScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlin.collections.arrayListOf
@@ -44,9 +45,12 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
         itens = drawerItemList,
         titleNavBar = "NavBar Team",
         scaffoldContent = { innerNav ->
-            ScaffoldContentTeamNavBar(navController = innerNav)
+            ScaffoldContentTeamNavBar(
+                navController = innerNav,
+                globalNavController = globalNavController
+            )
         },
-        internalNavController = internalNavController, // Passa o interno
+        internalNavController = internalNavController,
         globalNavController = globalNavController,
         topBarActions = {
             HomePageTeamTopBarActions(
@@ -60,13 +64,15 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldContentTeamNavBar(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = RouteNavBarHomePage.HOME_PAGE) {
-        composable(RoutesNavBarTeam.CALENDAR) {
-            CalendarScreen()
+fun ScaffoldContentTeamNavBar(navController: NavHostController,
+                              globalNavController: NavHostController
+) {
+    NavHost(navController = navController, startDestination = RoutesNavBarTeam.HOME_PAGE_TEAM) {
+        composable(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+            HomePageTeamScreen(globalNavController = globalNavController)
         }
-        composable(RouteNavBarHomePage.HOME_PAGE) {
-            HomePageScreen()
+        composable(RoutesNavBarTeam.CALENDAR) {
+            CalendarScreen(globalNavController = globalNavController)
         }
         composable(RoutesNavBarTeam.LIST_MEMBERS) {
             ListMembersScreen()

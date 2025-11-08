@@ -14,10 +14,12 @@ import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.User.LoginScreen
 import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
-import com.example.amfootball.navigation.Objects.AutRoutes
+import com.example.amfootball.navigation.Objects.Pages.AutRoutes
+import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
+import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
 import com.example.amfootball.ui.screens.User.ProfileScreen
 
 @Composable
@@ -74,12 +76,13 @@ private fun NavGraphBuilder.NavBars(
 }
 
 private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
-    //Provavelmente para futuro vai ser importante o NavHostController
     composable(RotasUser.USER_PROFILE) {
         ProfileScreen(globalNavController)
     }
 
     AutPages(globalNavController = globalNavController)
+
+    MatchInivitePages(globalNavController = globalNavController)
 }
 
 /**
@@ -93,5 +96,14 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
 
     composable(AutRoutes.SIGN_IN) {
         SignUpScreen(globalNavController)
+    }
+}
+
+/**
+ * Páginas de MatchInvite
+ * */
+private fun NavGraphBuilder.MatchInivitePages(globalNavController: NavHostController){
+    composable(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
+        SendMatchInviteScreen(navHostController = globalNavController)
     }
 }

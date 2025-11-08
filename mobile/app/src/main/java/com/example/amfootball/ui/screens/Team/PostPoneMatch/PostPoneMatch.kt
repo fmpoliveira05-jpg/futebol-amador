@@ -1,15 +1,15 @@
-package com.example.amfootball.ui.screens.Team
+package com.example.amfootball.ui.screens.Team.PostPoneMatch
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun CreateTeamScreen() {
+fun PostPoneMatchScreen() {
 
 }
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewCreateTeamScreen() {
-    CreateTeamScreen()
+fun PreviewPostPoneMatch(){
+    PostPoneMatchScreen()
 }

@@ -1,4 +1,4 @@
-package com.example.amfootball.navigation.Objects
+package com.example.amfootball.navigation.Objects.Pages
 
 object AutRoutes {
     const val LOGIN = "Login"

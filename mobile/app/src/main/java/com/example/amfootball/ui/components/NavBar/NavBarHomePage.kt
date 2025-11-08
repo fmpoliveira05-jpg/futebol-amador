@@ -39,7 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.amfootball.navigation.Objects.AutRoutes
+import com.example.amfootball.navigation.Objects.Pages.AutRoutes
 import com.example.amfootball.navigation.Objects.GeralRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.R
@@ -62,7 +62,10 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
         itens = drawerItemList,
         titleNavBar = "NavBar HomePage",
         scaffoldContent = { innerNav ->
-            ScaffoldContentNavBarHomePage(navController = innerNav)
+            ScaffoldContentNavBarHomePage(
+                navController = innerNav,
+                globalNavController = globalNavController
+            )
         },
         internalNavController = internalNavController,
         globalNavController = globalNavController,
@@ -81,10 +84,11 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
+fun ScaffoldContentNavBarHomePage(navController: NavHostController,
+                                  globalNavController: NavHostController) {
     NavHost(navController = navController, startDestination = RouteNavBarHomePage.HOME_PAGE) {
         composable(RouteNavBarHomePage.HOME_PAGE) {
-            HomePageScreen()
+            HomePageScreen(globalNavController = globalNavController)
         }
         composable(RouteNavBarHomePage.EQUIPAS) {
             ListTeamScreen()
@@ -92,10 +96,10 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
         composable(RouteNavBarHomePage.LEADBOARD) {
             LeaderboardScreen()
         }
-        composable(GeralRoutes.SETTINGS) {
+        composable(route = GeralRoutes.SETTINGS) {
             SettingsScreen()
         }
-        composable(GeralRoutes.PREFERENCE) {
+        composable(route = GeralRoutes.PREFERENCE) {
             PreferenceScreen()
         }
     }
