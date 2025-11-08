@@ -6,15 +6,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
-fun ListTeamScreen(){
-    Column {
-        Text(text = "Lista de equipas")
+fun ListPlayersScreen() {
+    Column() {
+        Text(text = "Lista de jogadores")
     }
 }
 
 
 @Preview(showBackground = true)
 @Composable
-fun PreviewListTeamScreen() {
-    ListTeamScreen()
+fun ListPlayersPreview() {
+    ListPlayersScreen()
 }

@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="content_description_navbar">Abrir itens da nav bar</string>
+
     <string name="navbar_home_page_team">Pagina Inicial Equipa</string>
     <string name="description_navbar_homepage_team">Pagina inicial da equipa</string>
+
     <string name="navbar_calendar">Calendario</string>
     <string name="description_navbar_calendar">Calendario de jogos da equipa</string>
+
+    <string name="navbar_members_list">Lista de membros</string>
+    <string name="description_navbar_members_list">Lista de membros da equipa incluindo jogadores e administradores</string>
+
+    <string name="navbar_players_without_team_list">Jogadores sem equipa</string>
+    <string name="description_navbar_players_without_team_list">Lista de jogadores sem equipa que a equipa pode convida-los para o mesmo</string>
+
+    <string name="navbar_memberships_list">Pedidos de adesão</string>
+    <string name="description_navbar_memberships_list">Lista de pedidos de adesão da equipa que podem ser aceitos ou recusados</string>
+
+    <string name="navbar_teams_to_matchinvite_list">Equipas para partida</string>
+    <string name="description_navbar_teams_to_matchinvite_list">Lista de equipas que a equipa pode convidar para partidas casuais</string>
+
+    <string name="navbar_matchinvite_list">Pedidos de partida</string>
+    <string name="description_navbar_matchinvite_list">Lista de pedidos de partida recebidos pela equipa</string>
 </resources>

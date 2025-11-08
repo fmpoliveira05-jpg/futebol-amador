@@ -19,7 +19,6 @@ import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
-import com.example.amfootball.ui.screens.Team.ListPlayersScreen
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.Settings.SettingsScreen
 import com.example.amfootball.ui.screens.Settings.PreferenceScreen
@@ -89,9 +88,6 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController) {
         }
         composable(RouteNavBarHomePage.EQUIPAS) {
             ListTeamScreen()
-        }
-        composable(RouteNavBarHomePage.PLAYERS) {
-            ListPlayersScreen()
         }
         composable(RouteNavBarHomePage.LEADBOARD) {
             LeaderboardScreen()
