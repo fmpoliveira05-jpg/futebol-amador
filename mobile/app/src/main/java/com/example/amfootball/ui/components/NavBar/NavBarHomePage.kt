@@ -19,10 +19,10 @@ import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
-import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.Team.ListPlayersScreen
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.SettingsScreen
-import com.example.amfootball.ui.screens.PreferenceScreen
+import com.example.amfootball.ui.screens.Settings.SettingsScreen
+import com.example.amfootball.ui.screens.Settings.PreferenceScreen
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Text

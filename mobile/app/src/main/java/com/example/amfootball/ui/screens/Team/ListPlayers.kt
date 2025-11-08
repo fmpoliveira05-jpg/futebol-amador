@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.Lists
+package com.example.amfootball.ui.screens.Team
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
