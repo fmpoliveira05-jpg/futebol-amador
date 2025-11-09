@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_field_name_team">Nome da Equipa</string>
+    <string name="label_field_description_team">Descrição</string>
+    <string name="label_field_name_pitch_team">Nome do campo</string>
+    <string name="label_field_address_pitch_team">Morada do campo</string>
+    <string name="button_create_team">Criar Equipa</string>
+    <string name="button_description_create_team">Button to submit the submitted data and create the team</string>
+</resources>

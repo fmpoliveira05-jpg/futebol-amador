@@ -135,7 +135,7 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
     ) {
         Icon(Icons.Default.Send, contentDescription = "Enviar Convite")
         Spacer(Modifier.width(8.dp))
-        Text(text = "Enviar Convite")
+        Text(text = stringResource(R.string.button_send_match_invite))
     }
 }
 

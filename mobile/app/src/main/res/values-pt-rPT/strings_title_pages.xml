@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_page_create_team">Criar equipa</string>
+    <string name="title_page_profile_team">Perfil da equipa</string>
+
+    <string name="title_page_send_match_Invite">Enviar Pedido de Partida</string>
+</resources>

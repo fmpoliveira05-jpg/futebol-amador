@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_field_name_team">Name Team</string>
+    <string name="label_field_description_team">Description</string>
+    <string name="label_field_name_pitch_team">Name Pitch</string>
+    <string name="label_field_address_pitch_team">Address Pitch</string>
+    <string name="button_create_team">Create Team</string>
+    <string name="button_description_create_team">Botão para submeter os dados submetidos e criar a equipa</string>
+</resources>

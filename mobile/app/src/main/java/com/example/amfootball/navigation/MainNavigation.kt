@@ -15,11 +15,13 @@ import com.example.amfootball.ui.screens.User.LoginScreen
 import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import com.example.amfootball.navigation.Objects.Pages.AutRoutes
+import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
+import com.example.amfootball.ui.screens.User.CreateTeamScreen
 import com.example.amfootball.ui.screens.User.ProfileScreen
 
 @Composable
@@ -53,6 +55,7 @@ fun MainNavigation() {
     }
 }
 
+//Função que declara todas as rotas da app
 private fun NavGraphBuilder.NavBars(
     globalNavController: NavHostController,
     isLoggedIn: Boolean,
@@ -75,12 +78,15 @@ private fun NavGraphBuilder.NavBars(
     }
 }
 
+/**
+ * Função que declara todas as páginas da app
+ * */
 private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
-    composable(RotasUser.USER_PROFILE) {
-        ProfileScreen(globalNavController)
-    }
-
     AutPages(globalNavController = globalNavController)
+
+    UserPages(globalNavController = globalNavController)
+
+    CrudTeamPages(globalNavController = globalNavController)
 
     MatchInivitePages(globalNavController = globalNavController)
 }
@@ -96,6 +102,24 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
 
     composable(AutRoutes.SIGN_IN) {
         SignUpScreen(globalNavController)
+    }
+}
+
+/**
+ * Paginas do Utilizador
+ * */
+private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
+    composable(RotasUser.USER_PROFILE) {
+        ProfileScreen(globalNavController)
+    }
+}
+
+/**
+ * Páginas do CRUD da Equipa
+ * */
+private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController){
+    composable(route = CrudTeamRoutes.CREATE_TEAM) {
+        CreateTeamScreen(navHostController = globalNavController)
     }
 }
 
