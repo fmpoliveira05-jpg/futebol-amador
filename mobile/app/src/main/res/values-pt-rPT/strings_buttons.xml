@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="button_send_match_invite">Enviar Pedido de adesão</string>
+    <string name="button_send_match_invite">Enviar Convite de Partida</string>
+    <string name="button_description_send_match_invite">Botão que permite apos preencher o formulário para enviar convite de partida</string>
+
+    <string name="button_create_team">Criar Equipa</string>
+    <string name="button_description_create_team">Botão que permite após preencher o formulário criar uma equipa</string>
 </resources>

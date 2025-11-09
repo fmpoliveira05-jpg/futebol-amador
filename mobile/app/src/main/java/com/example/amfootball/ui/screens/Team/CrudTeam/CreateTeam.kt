@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GroupAdd
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -32,6 +33,7 @@ import com.example.amfootball.data.constants.PitchConstants
 import com.example.amfootball.data.constants.TeamConstants
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.components.BackTopBar
+import com.example.amfootball.ui.components.Buttons.SubmitFormButton
 import com.example.amfootball.ui.components.InputFields.CreateTextFieldOutline
 import com.example.amfootball.ui.components.InputFields.ImagePicker
 
@@ -141,33 +143,35 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
     )
 
     val isFormValid = remember(name, description, pitchName, pitchAddress) {
-        val isValidName = name.isNotBlank() && name.length >= TeamConstants.MinNameLength && name.length <= TeamConstants.MaxNameLength
-        val isValidDescription = description.isBlank() || (description.isNotBlank() && description.length <= TeamConstants.MaxDescriptionLength)
-        val isValidPitchName = pitchName.isNotBlank() && pitchName.length >= PitchConstants.MinNameLength && pitchName.length <= PitchConstants.MaxNameLength
-        val isValidPitchAddress = pitchAddress.isNotBlank() && pitchAddress.length >= AddressContants.MinAddressLength && pitchAddress.length <= AddressContants.MaxAddressLength
-
-        isValidName && isValidDescription && isValidPitchName && isValidPitchAddress
+        ValidateFormValid(name, description, pitchName, pitchAddress)
     }
 
-    Button(
-            onClick = {
-                hasAttemptedSubmit = true
+    SubmitFormButton(
+        onClick = {
+            hasAttemptedSubmit = true
 
-                if (isFormValid) {
-                    navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
-                        popUpTo(0)
-                    }
+            if (isFormValid) {
+                navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+                    popUpTo(0)
                 }
-            },
+            }
+        },
+        imageButton = Icons.Default.GroupAdd,
+        text = stringResource(id = R.string.button_create_team),
+        contentDescription = stringResource(id = R.string.button_description_create_team)
+    )
+}
 
-    modifier = Modifier
-        .fillMaxWidth()
-        .height(56.dp)
-    ) {
-        Icon(imageVector = Icons.Default.GroupAdd, contentDescription = "Enviar Convite")
-        Spacer(Modifier.width(8.dp))
-        Text(text = stringResource(id = R.string.button_create_team))
-    }
+private fun ValidateFormValid(name: String,
+                              description: String,
+                              pitchName: String,
+                              pitchAddress: String): Boolean {
+    val isValidName = name.isNotBlank() && name.length >= TeamConstants.MinNameLength && name.length <= TeamConstants.MaxNameLength
+    val isValidDescription = description.isBlank() || (description.isNotBlank() && description.length <= TeamConstants.MaxDescriptionLength)
+    val isValidPitchName = pitchName.isNotBlank() && pitchName.length >= PitchConstants.MinNameLength && pitchName.length <= PitchConstants.MaxNameLength
+    val isValidPitchAddress = pitchAddress.isNotBlank() && pitchAddress.length >= AddressContants.MinAddressLength && pitchAddress.length <= AddressContants.MaxAddressLength
+
+    return isValidName && isValidDescription && isValidPitchName && isValidPitchAddress
 }
 
 @Preview(name = "Criar Equipa - En",

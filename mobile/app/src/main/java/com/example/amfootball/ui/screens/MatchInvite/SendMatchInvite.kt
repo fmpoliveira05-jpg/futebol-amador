@@ -2,24 +2,11 @@ package com.example.amfootball.ui.screens.MatchInvite
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
+import com.example.amfootball.ui.components.Buttons.SubmitFormButton
 import com.example.amfootball.ui.components.InputFields.CreateTextFieldOutline
 import com.example.amfootball.ui.components.InputFields.DatePickerDocked
 import com.example.amfootball.ui.components.InputFields.FieldTimePicker
@@ -80,13 +68,8 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
     var gameTime by remember { mutableStateOf("") }
     var isHomeGame by remember { mutableStateOf(true) }
 
-    val isFormValid = remember(gameDate, gameTime) {
-        val isDateValid = gameDate.isNotEmpty()
-        val isTimeValid = gameTime.isNotEmpty()
-        val isTimeLongEnough = gameTime.length == 5
+    //Estado de controlo de clicar no botão
 
-        isDateValid && isTimeValid && isTimeLongEnough
-    }
     CreateTextFieldOutline(
         label = "Opponente",
         value = "Equipa xxxx",
@@ -121,23 +104,33 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
         textUnChecked = stringResource(id = R.string.unchecked_playing_home),
     )
 
-    Button(
+    val isFormValid = remember(gameDate, gameTime) {
+        IsFormValid(gameDate, gameTime)
+    }
+
+    SubmitFormButton(
         onClick = {
-            navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
-                popUpTo(0)
-                println("Convite enviado!")
+            if (isFormValid) {
+                navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+                    popUpTo(0)
+                    println("Convite enviado!")
+                }
             }
         },
-        enabled = isFormValid,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(56.dp)
-    ) {
-        Icon(Icons.Default.Send, contentDescription = "Enviar Convite")
-        Spacer(Modifier.width(8.dp))
-        Text(text = stringResource(R.string.button_send_match_invite))
-    }
+        imageButton = Icons.Default.Send,
+        text = stringResource(R.string.button_send_match_invite),
+        contentDescription = stringResource(id = R.string.button_description_send_match_invite)
+    )
 }
+
+private fun IsFormValid(gameDate: String, gameTime: String): Boolean {
+    val isDateValid = gameDate.isNotEmpty()
+    val isTimeValid = gameTime.isNotEmpty()
+    val isTimeLongEnough = gameTime.length == 5
+
+    return isDateValid && isTimeValid && isTimeLongEnough
+}
+
 
 @Preview(name = "Send Match Invite - EN", locale = "en", showBackground = true)
 @Preview(name = "Enviar Pedido de partida - PT", locale = "pt", showBackground = true)

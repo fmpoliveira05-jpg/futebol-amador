@@ -45,6 +45,7 @@ fun LabeledInputField(
     } else {
         VisualTransformation.None
     }
+
     //adicionar o alerta para quando o email ou a password forem invalidos
     var finalKeyboardType = keyboardType
     if (isPassword) {

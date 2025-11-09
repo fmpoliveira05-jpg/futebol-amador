@@ -32,7 +32,7 @@ fun ImagePicker(
     contentDescriptionWithoutImage: String? = null,
 ) {
 
-    // 2. Cria o launcher para o Photo Picker
+    //Cria o launcher para o Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
