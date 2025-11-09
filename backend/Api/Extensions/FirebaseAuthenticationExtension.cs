@@ -28,14 +28,12 @@ namespace Api.Extensions
                 });
             }
 
-
             var firebaseProjectId = configuration["Firebase:ProjectId"];
             if (string.IsNullOrEmpty(firebaseProjectId))
             {
                 throw new ArgumentNullException("Firebase:ProjectId", "O ProjectId do Firebase não pode ser nulo na configuração.");
             }
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {

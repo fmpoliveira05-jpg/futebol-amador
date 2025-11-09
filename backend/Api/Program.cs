@@ -35,10 +35,22 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["sub"] = ClaimTypes.NameIdent
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["user_id"] = ClaimTypes.NameIdentifier;
 
 var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
+var credentialPath = builder.Configuration["Firebase:CredentialPath"];
+
 if (string.IsNullOrEmpty(firebaseProjectId))
 {
-    throw new ArgumentNullException(nameof(firebaseProjectId), "Firebase:ProjectId não pode ser nulo no appsettings.json");
+    throw new ArgumentNullException(nameof(firebaseProjectId), "Firebase:ProjectId não pode ser nulo.");
 }
+if (string.IsNullOrEmpty(credentialPath))
+{
+    throw new ArgumentNullException(nameof(credentialPath), "Firebase:CredentialPath não foi encontrado. Verifique se o seu 'secrets.json' está correto.");
+}
+if (!File.Exists(credentialPath))
+{
+    throw new FileNotFoundException($"O ficheiro de credenciais não foi encontrado no caminho especificado: {credentialPath}. Verifique o caminho no 'secrets.json'.");
+}
+
+Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
 
 //Autenticação com Firebase
 builder.Services.AddFirebaseAuthentication(builder.Configuration);
