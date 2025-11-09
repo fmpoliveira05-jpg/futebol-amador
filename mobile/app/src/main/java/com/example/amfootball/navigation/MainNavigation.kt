@@ -21,7 +21,7 @@ import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
-import com.example.amfootball.ui.screens.User.CreateTeamScreen
+import com.example.amfootball.ui.screens.Team.CrudTeam.CreateTeamScreen
 import com.example.amfootball.ui.screens.User.ProfileScreen
 
 @Composable
