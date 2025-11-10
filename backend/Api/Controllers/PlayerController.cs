@@ -84,20 +84,15 @@ namespace Api.Controllers
             return Ok(playerDetails);
         }
 
-        [HttpPut("{playerId:required}")]
-        public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDto dto)
         {
-            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+            //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
-            }
-
-            if (playerId != userId)
-            {
-                return Forbid();
             }
             
             if (!ModelState.IsValid)

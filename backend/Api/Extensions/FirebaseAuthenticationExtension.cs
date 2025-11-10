@@ -51,7 +51,7 @@ namespace Api.Extensions
                         ValidAudience = projectId,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.FromMinutes(5),
-                        RequireSignedTokens = true,
+                        RequireSignedTokens = false,
                         RequireExpirationTime = true
                     };
 
