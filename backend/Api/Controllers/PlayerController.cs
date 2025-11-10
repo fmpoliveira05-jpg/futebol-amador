@@ -85,9 +85,11 @@ namespace Api.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDto dto)
         {
             //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+            /*
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
@@ -99,8 +101,9 @@ namespace Api.Controllers
             {
                 return BadRequest(ModelState);
             }
+            */
 
-            await playerService.UpdatePlayerAsync(userId, dto);
+            await playerService.UpdatePlayerAsync(dto.playerId, dto);
 
             return Ok("Player information updated succesfully.");
         }
