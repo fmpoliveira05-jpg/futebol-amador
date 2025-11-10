@@ -10,19 +10,32 @@ namespace Tests.Integration
 {
     public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        public TestAuthHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder)
+        public const string TestUserId = "test-user-id-12345";
+
+        public TestAuthHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options, 
+            ILoggerFactory logger, 
+            UrlEncoder encoder)
             : base(options, logger, encoder)
         {
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            var factory = (ApiTestAppFactory)Context.RequestServices.GetService(typeof(WebApplicationFactory<Program>));
-            var testUserId = factory?.TestUserId ?? "default-fake-id";
+            if (!Request.Headers.ContainsKey("Authorization"))
+            {
+                return Task.FromResult(AuthenticateResult.NoResult());
+            }
+
+            string authorizationHeader = Request.Headers["Authorization"];
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Test"))
+            {
+                return Task.FromResult(AuthenticateResult.NoResult());
+            }
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, testUserId),
+                new Claim(ClaimTypes.NameIdentifier, TestUserId),
                 new Claim(ClaimTypes.Name, "TestUser")
             };
             var identity = new ClaimsIdentity(claims, "Test");
