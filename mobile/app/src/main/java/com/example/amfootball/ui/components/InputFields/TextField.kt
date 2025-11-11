@@ -59,8 +59,8 @@ fun LabelTextField(
 }
 
 @Composable
-private fun Label(label: String,
-                  isRequired: Boolean) {
+fun Label(label: String,
+          isRequired: Boolean) {
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
 
     Text(

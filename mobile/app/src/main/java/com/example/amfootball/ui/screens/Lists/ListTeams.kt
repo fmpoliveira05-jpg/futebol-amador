@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -30,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,8 +57,12 @@ import com.example.amfootball.ui.components.InputFields.LabelTextField
 import com.example.amfootball.ui.components.Lists.FilterHeader
 import com.example.amfootball.ui.components.Lists.InfoRow
 import com.example.amfootball.R
+import com.example.amfootball.data.dtos.Rank.RankNameDto
 import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
+import com.example.amfootball.ui.components.InputFields.LabelSelectBox
+import com.example.amfootball.ui.components.InputFields.SelectBox
+import kotlin.String
 
 /**
  * TODO: Meter botão de filtragem (ver se filtra localmente ou no servidor)
@@ -71,6 +78,7 @@ import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
 fun ListTeamScreen(navHostController: NavHostController){
     var filters by remember { mutableStateOf(FiltersListTeamDto()) }
     var filtersExpanded by remember { mutableStateOf(false) }
+    val listRanks = RankNameDto.generateExampleRanks()
 
     val allTeams = remember { ItemTeamInfoDto.generateExampleTeams() }
     val filteredList = remember(allTeams, filters) {
@@ -88,7 +96,8 @@ fun ListTeamScreen(navHostController: NavHostController){
                     filters = filters,
                     onFiltersChange = { newFilters ->
                         filters = newFilters
-                    }
+                    },
+                    listRanks = listRanks
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -111,7 +120,8 @@ private fun FilterSection(
     onToggleExpand: () -> Unit,
     filters: FiltersListTeamDto,
     onFiltersChange: (FiltersListTeamDto) -> Unit,
-    modifier: Modifier = Modifier
+    listRanks: List<RankNameDto>,
+    modifier: Modifier = Modifier,
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column {
@@ -126,7 +136,8 @@ private fun FilterSection(
                 FiltersListTeamContent(
                     filters = filters,
                     onFiltersChange = onFiltersChange,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    listRanks = listRanks,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 )
             }
         }
@@ -140,6 +151,7 @@ private fun FilterSection(
 private fun FiltersListTeamContent(
     filters: FiltersListTeamDto,
     onFiltersChange: (FiltersListTeamDto) -> Unit,
+    listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -162,7 +174,19 @@ private fun FiltersListTeamContent(
         Spacer(Modifier.height(8.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            // TODO: Adicionar Rank SelectBox
+            // TODO: Modificar a selectBox do rank para que os ranks sejam carregados da BD
+            LabelSelectBox(
+                label = "Rank",
+                list = listRanks,
+                selectedValue = filters.rank ?: "",
+                itemToString = { rankDto ->
+                    rankDto.Name
+                },
+                onSelectItem = { rankDto ->
+                    onFiltersChange(filters.copy(rank = rankDto.Name))
+                },
+                modifier = Modifier.weight(1f)
+            )
 
             Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(8.dp))
@@ -274,7 +298,7 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
     ListItem(
         headlineContent = { //Conteudo Principal
             Text(
-                text=team.Name,
+                text= team.Name,
                 style = MaterialTheme.typography.titleLarge,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis)
@@ -407,6 +431,9 @@ private fun filterTeamList(
     return teams.filter { team ->
         val nameFilterPassed = filters.name.isNullOrEmpty() ||
                 team.Name.contains(filters.name, ignoreCase = true)
+
+        val rankFilterPassed = filters.rank.isNullOrEmpty() ||
+                team.Name.contains(filters.rank, ignoreCase = true)
 
         val cityFilterPassed = filters.city.isNullOrEmpty() ||
                 team.City.contains(filters.city, ignoreCase = true)
