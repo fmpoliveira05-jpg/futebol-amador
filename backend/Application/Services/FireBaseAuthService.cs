@@ -4,8 +4,10 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Validators;
 using Domain.Exceptions;
+using FirebaseAdmin;
 using FirebaseAdmin.Auth;
 using Google.Cloud.Firestore;
+using Google.Cloud.Firestore.V1;
 using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
@@ -76,7 +78,7 @@ namespace Application.Services
         {
 
             var firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FirebaseApiKey}";
-
+            
             var requestBody = new
             {
                 email = email,

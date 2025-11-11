@@ -77,7 +77,9 @@ namespace Api.Extensions
                             return Task.CompletedTask;
                         }
                     };
-                    });
+                })
+                ;
+        
 
             return services;
         }
