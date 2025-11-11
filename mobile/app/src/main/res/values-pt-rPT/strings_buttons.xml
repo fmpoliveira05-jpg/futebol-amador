@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="filter_button">Filtrar</string>
+    <string name="filter_button_description">Botão que permite filtrar por um conjunto especifico de itens da lista</string>
+
+
     <string name="button_send_match_invite">Enviar Convite de Partida</string>
     <string name="button_description_send_match_invite">Botão que permite apos preencher o formulário para enviar convite de partida</string>
 

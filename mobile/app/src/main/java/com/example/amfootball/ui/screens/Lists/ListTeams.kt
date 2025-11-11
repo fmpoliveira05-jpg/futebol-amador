@@ -17,14 +17,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -32,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -60,16 +56,16 @@ import com.example.amfootball.R
 import com.example.amfootball.data.dtos.Rank.RankNameDto
 import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
+import com.example.amfootball.ui.components.Buttons.FilterApplyButton
 import com.example.amfootball.ui.components.InputFields.LabelSelectBox
-import com.example.amfootball.ui.components.InputFields.SelectBox
 import kotlin.String
 
 /**
+ * TODO: Quando carregar da API os dados ter em atenção e quando for um tipo de players carregar as teams de uma forma e outro tipo de player de outra
  * TODO: Meter botão de filtragem (ver se filtra localmente ou no servidor)
  * TODO: Meter para quando consultar a team aparecer no profile os dados reais da Team
  * TODO: Meter os botões de send MatchInvite caso seja uma Team a aceder há lista
  * TODO: Meter os botões de send MemberShipRequest caso seja um player sem equipa a consultar a lista
- * Falta apenas meter botoes acima a funcionar, levando a pagina correspondente com os valores que devem ir
  * */
 /**
  * Ver como faço para daqui reutilizar a lista, os filtros ver depois
@@ -244,19 +240,17 @@ private fun FiltersListTeamContent(
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
-
-            IconButton(
-                onClick = {
-                    //TODO: Meter para filtar localmente ou com a BD
-                },
-            ) {
-                Icon(
-                    imageVector = Icons.Default.FilterAlt,
-                    contentDescription = "Botão para filtar na lista",
-                )
-            }
             Spacer(Modifier.weight(1f))
         }
+
+        Spacer(Modifier.height(16.dp))
+
+        FilterApplyButton(
+            onClick = {
+                // TODO: Fazer o pedido ao endpoint com os 'filters'
+            },
+            modifier = Modifier.fillMaxWidth() // Para ocupar a largura toda
+        )
     }
 }
 
@@ -448,8 +442,8 @@ private fun filterTeamList(
         val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.NumberMembers <= maxNumberMembers)
 
         // Devolve o resultado do teste para esta equipa
-        nameFilterPassed && cityFilterPassed && minPointFilterPassed && maxPointFilterPassed &&
-                minAgeFilterPassed && maxAgeFilterPassed &&
+        nameFilterPassed && rankFilterPassed && cityFilterPassed && minPointFilterPassed
+                && maxPointFilterPassed && minAgeFilterPassed && maxAgeFilterPassed &&
                 minNumberMembersFilterPassed && maxNumberMembersFilterPassed
     }
 }
