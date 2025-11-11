@@ -89,8 +89,8 @@ namespace Api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
-            //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
-            var userId= User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(userId, playerId);
 
             if (string.IsNullOrEmpty(userId))
             {
