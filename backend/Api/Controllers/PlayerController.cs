@@ -101,7 +101,7 @@ namespace Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            */
+            
 
             await playerService.UpdatePlayerAsync(dto.playerId, dto);
 
