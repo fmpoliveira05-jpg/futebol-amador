@@ -19,11 +19,11 @@ namespace Api.Extensions
                 options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
                     Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey,
+                    Type = SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
                     In = ParameterLocation.Header,
-                    Description = "Autenticação JWT (Bearer). Insira 'Bearer' [espaço] e depois o seu token.\r\n\r\nExemplo: 'Bearer eyJhbGciOi...'"
+                    Description = "Autenticação JWT (Bearer). Insira apenas o seu token de acesso."
                 });
 
                 // 2. Tornar o esquema de segurança obrigatório para os endpoints

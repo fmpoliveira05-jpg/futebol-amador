@@ -106,7 +106,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, Player player)
+        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
         {
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
             {
@@ -114,7 +114,11 @@ namespace Application.Services
 
                 var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
 
-                membershipValidator.ValidateRejectRequestByTeam(team, request, player);
+                var playerAccepting = await playerRepository.GetPlayerByIdAsync(adminId);
+
+                membershipValidator.ValidateRejectRequestByTeam(team, request, playerAccepting);
+
+                var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
 
                 membershipRequestRepository.RemoveMembershipRequest(request);
 

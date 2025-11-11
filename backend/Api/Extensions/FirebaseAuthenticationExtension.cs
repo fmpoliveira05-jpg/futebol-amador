@@ -1,13 +1,16 @@
 ﻿using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Protocols;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
+using System.Text.Json;
 
 namespace Api.Extensions
 {
     public static class FirebaseAuthenticationExtensions
     {
-        public static IServiceCollection AddFirebaseAuthentication(
+        public async static Task<IServiceCollection> AddFirebaseAuthentication(
             this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -28,58 +31,95 @@ namespace Api.Extensions
                 });
             }
 
+            var firebaseProjectId = "frontend-amfootball";
+            var issuer = $"https://securetoken.google.com/{firebaseProjectId}";
+            var jwksUri = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
 
-            var firebaseProjectId = configuration["Firebase:ProjectId"];
-            if (string.IsNullOrEmpty(firebaseProjectId))
+            // Faz download direto das chaves da Google
+            var http = new HttpClient();
+            var jwksJson = await http.GetStringAsync(jwksUri);
+            var jwks = JsonDocument.Parse(jwksJson);
+            var keys = new List<SecurityKey>();
+
+            foreach (var keyElem in jwks.RootElement.GetProperty("keys").EnumerateArray())
             {
-                throw new ArgumentNullException("Firebase:ProjectId", "O ProjectId do Firebase não pode ser nulo na configuração.");
+                var e = keyElem.GetProperty("e").GetString();
+                var n = keyElem.GetProperty("n").GetString();
+                var kid = keyElem.GetProperty("kid").GetString();
+
+                var rsa = new System.Security.Cryptography.RSAParameters
+                {
+                    Exponent = Base64UrlEncoder.DecodeBytes(e),
+                    Modulus = Base64UrlEncoder.DecodeBytes(n)
+                };
+
+                keys.Add(new RsaSecurityKey(rsa) { KeyId = kid });
             }
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+            Console.WriteLine($"[Startup] JWKS keys loaded directly: {keys.Count}");
+
+            // Configura autenticação JWT
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    var projectId = firebaseProjectId;
-                    options.Authority = $"https://securetoken.google.com/{projectId}";
-                    options.Audience = projectId;
+                    options.RequireHttpsMetadata = true;
 
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuer = true,
-                        ValidIssuer = $"https://securetoken.google.com/{projectId}",
+                        ValidIssuer = issuer,
                         ValidateAudience = true,
-                        ValidAudience = projectId,
+                        ValidAudience = firebaseProjectId,
                         ValidateLifetime = true,
-                        ClockSkew = TimeSpan.FromMinutes(5),
-                        RequireSignedTokens = false,
-                        RequireExpirationTime = true
+                        RequireSignedTokens = true,
+                        IssuerSigningKeys = keys
+                    };
+
+                    // Resolver dinâmico (caso o Firebase rode as chaves)
+                    options.TokenValidationParameters.IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+                    {
+                        var match = keys.FirstOrDefault(k => k.KeyId == kid);
+                        if (match != null) return new[] { match };
+
+                        Console.WriteLine($"[Resolver] Kid {kid} não encontrado localmente. Atualizando JWKS...");
+                        var newJwksJson = http.GetStringAsync(jwksUri).GetAwaiter().GetResult();
+                        var newJwks = JsonDocument.Parse(newJwksJson);
+                        var updatedKeys = new List<SecurityKey>();
+
+                        foreach (var keyElem in newJwks.RootElement.GetProperty("keys").EnumerateArray())
+                        {
+                            var e = keyElem.GetProperty("e").GetString();
+                            var n = keyElem.GetProperty("n").GetString();
+                            var newKid = keyElem.GetProperty("kid").GetString();
+
+                            var rsa = new System.Security.Cryptography.RSAParameters
+                            {
+                                Exponent = Base64UrlEncoder.DecodeBytes(e),
+                                Modulus = Base64UrlEncoder.DecodeBytes(n)
+                            };
+
+                            updatedKeys.Add(new RsaSecurityKey(rsa) { KeyId = newKid });
+                        }
+
+                        Console.WriteLine($"[Resolver] JWKS atualizado. {updatedKeys.Count} chaves disponíveis.");
+                        return updatedKeys;
                     };
 
                     options.Events = new JwtBearerEvents
                     {
-                        OnAuthenticationFailed = context =>
+                        OnAuthenticationFailed = ctx =>
                         {
-                            Console.WriteLine("JWT Auth Failed: " + context.Exception.Message);
+                            Console.WriteLine($"[Auth Failed] {ctx.Exception.Message}");
                             return Task.CompletedTask;
                         },
-                        OnChallenge = context =>
+                        OnTokenValidated = ctx =>
                         {
-                            Console.WriteLine("JWT Challenge: " + context.ErrorDescription);
-                            return Task.CompletedTask;
-                        },
-                        OnMessageReceived = context =>
-                        {
-                            Console.WriteLine("JWT Received");
-                            return Task.CompletedTask;
-                        },
-                        OnTokenValidated = context =>
-                        {
-                            Console.WriteLine("JWT Validated for user: " +
-                                context.Principal?.FindFirst("user_id")?.Value);
+                            Console.WriteLine($"[Token OK] UID: {ctx.Principal?.FindFirst("user_id")?.Value}");
                             return Task.CompletedTask;
                         }
                     };
-                    });
+                });
+
 
             return services;
         }

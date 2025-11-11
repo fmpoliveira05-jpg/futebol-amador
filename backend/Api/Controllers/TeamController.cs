@@ -20,10 +20,11 @@ namespace Api.Controllers
         private readonly ITeamService TeamService;
         private readonly IMembershipRequestService MemberShipRequestService;
         private readonly IPlayerAuthorizationService PlayerAuthorizationService;
-        public TeamController(ITeamService teamService, IMembershipRequestService MemberShipRequestService)
+        public TeamController(ITeamService TeamService, IMembershipRequestService MemberShipRequestService, IPlayerAuthorizationService PlayerAuthorizationService)
         {
-            this.TeamService = teamService;
+            this.TeamService = TeamService;
             this.MemberShipRequestService = MemberShipRequestService;
+            this.PlayerAuthorizationService = PlayerAuthorizationService;
         }
 
         #endregion
@@ -221,16 +222,18 @@ namespace Api.Controllers
         [HttpPost("{teamId}/membership-request/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
         {
-            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetCurrentUserId();
+            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
+            await MemberShipRequestService.AcceptMembershipRequestTeam(teamId, requestId, userId);
             return Ok();
         }
 
         [HttpDelete("{teamId}/membership-request/{requestId}/reject")]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
-            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = GetCurrentUserId();
+            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
+            await MemberShipRequestService.RejectMembershipRequestTeam(teamId, requestId, userId);
             return Ok();
         }
 

@@ -6,6 +6,7 @@ using Application.DTOs.SuperAdmin;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -84,13 +85,12 @@ namespace Api.Controllers
             return Ok(playerDetails);
         }
 
-        [HttpPut]
+        [HttpPut("{playerId:required}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser([FromBody] UpdatePlayerDto dto)
+        public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
             //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
-            /*
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId= User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
             if (string.IsNullOrEmpty(userId))
             {
