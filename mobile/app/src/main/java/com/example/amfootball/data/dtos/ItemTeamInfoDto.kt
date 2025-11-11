@@ -10,7 +10,7 @@ data class ItemTeamInfoDto(
     val Points: Int,
     val AverageAge: Int,
     val NumberMembers: Int
-    //Depois meter o Icon
+    //Depois meter o Icon e restantes dados da Team
 ) {
     companion object {
         fun generateExampleTeams(): List<ItemTeamInfoDto> {

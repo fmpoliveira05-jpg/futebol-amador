@@ -167,6 +167,7 @@ private fun RowScope.HomePageTopBarActions(
     globalNavController: NavHostController
 ) {
     if (isLoggedIn) {
+        //TODO: Aparecer botão de criar equipa se ele não for admin nem jogador de equipa
         IconButton(onClick = onLogout) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.Logout,

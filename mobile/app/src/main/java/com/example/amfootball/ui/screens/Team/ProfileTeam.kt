@@ -18,7 +18,10 @@ import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 
 @Composable
-fun ProfileTeamScreen(navHostController: NavHostController) {
+fun ProfileTeamScreen(
+    navHostController: NavHostController,
+    idTeam: String
+) {
     Scaffold(
         topBar = {
             BackTopBar(
@@ -95,5 +98,9 @@ private fun FieldProfileTeam() {
 )
 @Composable
 fun ProfileTeamScreenPreview() {
-    ProfileTeamScreen(navHostController = rememberNavController())
+//Depois meter Id valido, de exemplo ou da BD
+    ProfileTeamScreen(
+        idTeam = "2",
+        navHostController = rememberNavController()
+    )
 }

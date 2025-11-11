@@ -2,6 +2,7 @@ package com.example.amfootball.ui.screens.Lists
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,8 +17,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -26,15 +29,20 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -46,11 +54,15 @@ import com.example.amfootball.ui.components.InputFields.LabelTextField
 import com.example.amfootball.ui.components.Lists.FilterHeader
 import com.example.amfootball.ui.components.Lists.InfoRow
 import com.example.amfootball.R
+import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
+import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
 
 /**
+ * TODO: Meter botão de filtragem (ver se filtra localmente ou no servidor)
  * TODO: Meter para quando consultar a team aparecer no profile os dados reais da Team
  * TODO: Meter os botões de send MatchInvite caso seja uma Team a aceder há lista
  * TODO: Meter os botões de send MemberShipRequest caso seja um player sem equipa a consultar a lista
+ * Falta apenas meter botoes acima a funcionar, levando a pagina correspondente com os valores que devem ir
  * */
 /**
  * Ver como faço para daqui reutilizar a lista, os filtros ver depois
@@ -208,6 +220,17 @@ private fun FiltersListTeamContent(
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
+
+            IconButton(
+                onClick = {
+                    //TODO: Meter para filtar localmente ou com a BD
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.FilterAlt,
+                    contentDescription = "Botão para filtar na lista",
+                )
+            }
             Spacer(Modifier.weight(1f))
         }
     }
@@ -246,31 +269,41 @@ private fun NumberFilterField(
 
 @Composable
 private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController) {
+    val typeUser by remember { mutableStateOf(false) }
+
     ListItem(
         headlineContent = { //Conteudo Principal
-            Text(team.Name, style = MaterialTheme.typography.titleLarge)
+            Text(
+                text=team.Name,
+                style = MaterialTheme.typography.titleLarge,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis)
         },
         overlineContent = { //Aparece em cima do titulo
-            Row {
-                Text(
-                    text = "Rank: ${team.Rank}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = "(${team.Points} Pts)",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            Text(
+                text = buildAnnotatedString {
+                    pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+                    append("Rank: ${team.Rank}")
+                    pop()
+
+                    append("  ")
+
+                    pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
+                    append("(${team.Points} Pts)")
+                    pop()
+                },
+                style = MaterialTheme.typography.bodyMedium, // Estilo base para todo o texto
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         },
         supportingContent = { //Aparece em baixo (Descrição e cidade)
             Column {
                 Spacer(Modifier.height(8.dp))
                 InfoRow(
                     icon = Icons.Default.LocationOn,
-                    text = team.City
+                    text = team.City,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(4.dp))
@@ -288,20 +321,70 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
                 modifier = Modifier.size(40.dp)
             )
         },
-        trailingContent = {  // Tudo que aparece há direita (Botão Ver Detalher + Send MatchInvite no caso da team ou no caso do player send MemberShipRequest)
-            IconButton(
-                //Depois preciso de adaptar para também mandar os dados da equipa
-                onClick = {
-                    navHostController.navigate(CrudTeamRoutes.PROFILE_TEAM) {
-                        launchSingleTop = true
+        trailingContent = { // Tudo que aparece há direita (Botão Ver Detalher + Send MatchInvite no caso da team ou no caso do player send MemberShipRequest)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                if(typeUser) {
+                    TextButton(
+                        onClick = {
+                            navHostController.navigate(route = MembershipRequestRoutes.SEND_MEMBERSHIP_REQUEST) {
+                                launchSingleTop = true
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send Membership Request",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Send Membership",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1
+                        )
+                    }
+                } else {
+                    TextButton(
+                        onClick = {
+                            navHostController.navigate(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
+                                launchSingleTop = true
+                            }
+                        },
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Send,
+                            contentDescription = "Send Match Invite",
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Match Invite",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1
+                        )
                     }
                 }
-            ) {
-                Icon(
-                    imageVector  = Icons.Default.ChevronRight,
-                    contentDescription = stringResource(id = R.string.list_teams_view_team),
-                    tint = MaterialTheme.colorScheme.outline
-                )
+
+                IconButton(
+                    onClick = {
+                        val idTeam = team.Id
+                        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
+                            launchSingleTop = true
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = stringResource(id = R.string.list_teams_view_team),
+                        tint = MaterialTheme.colorScheme.outline
+                    )
+                }
             }
         },
     )

@@ -54,27 +54,13 @@ private fun ContentSendMemberShipRequest(modifier: Modifier = Modifier,
 
 @Composable
 private fun FieldsSendMemberShipRequest() {
-    /*
-    * label: String,
-                           value: String,
-                           isSingleLine: Boolean = true,
-                           onValueChange: (String) -> Unit = {},
-                           isReadOnly: Boolean = false,
-                           isRequired: Boolean = false,
-                           isError: Boolean = false,
-                           errorMessage: String = stringResource(id = R.string.mandatory_field)
-)
-    * */
     val receiver by remember { mutableStateOf("Recetor") }
-
 
     TextFieldOutline(
         label = "Recetor",
         value = receiver,
         isReadOnly = true
     )
-
-
 }
 
 @Preview(

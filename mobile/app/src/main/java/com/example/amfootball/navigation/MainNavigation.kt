@@ -14,6 +14,8 @@ import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.User.LoginScreen
 import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.example.amfootball.navigation.Objects.Pages.AutRoutes
 import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
@@ -123,8 +125,26 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
         CreateTeamScreen(navHostController = globalNavController)
     }
 
-    composable(route = CrudTeamRoutes.PROFILE_TEAM) {
-        ProfileTeamScreen(navHostController = globalNavController)
+    composable(
+        route = CrudTeamRoutes.PROFILE_TEAM_URL,
+        arguments = listOf(
+            navArgument(CrudTeamRoutes.ARG_TEAM_ID) {
+                type = NavType.StringType
+            }
+        )
+    ) { navBackStackEntry -> //Tem os argumentos
+
+        val idTeam = navBackStackEntry.arguments?.getString(CrudTeamRoutes.ARG_TEAM_ID)
+
+        if (idTeam != null) {
+            ProfileTeamScreen(
+                navHostController = globalNavController,
+                idTeam = idTeam
+            )
+        } else {
+            //Posso depois aqui fazer algo personalizado
+            print("Error")
+        }
     }
 }
 
