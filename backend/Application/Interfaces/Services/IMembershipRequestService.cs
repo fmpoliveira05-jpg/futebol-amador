@@ -10,7 +10,7 @@ namespace Application.Interfaces.Services
 
         Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId, string adminId);
 
-        Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, Player player);
+        Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string userId);
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, Player player);
 

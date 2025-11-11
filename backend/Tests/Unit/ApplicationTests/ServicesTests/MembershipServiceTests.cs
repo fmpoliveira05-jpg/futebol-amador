@@ -321,7 +321,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
 
             // ACT
-            await _sut.RejectMembershipRequestTeam(teamId, requestId, admin);
+            await _sut.RejectMembershipRequestTeam(teamId, requestId, admin.Id);
 
             // ASSERT
             _membershipRequestRepoMock.Verify(r => r.RemoveMembershipRequest(request), Times.Once);
@@ -355,7 +355,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador não é administrador.")); 
 
             // ACT
-            Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId, playerNaoAdmin);
+            Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId, playerNaoAdmin.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
