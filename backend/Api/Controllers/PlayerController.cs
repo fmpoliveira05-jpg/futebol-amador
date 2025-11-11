@@ -90,10 +90,8 @@ namespace Api.Controllers
         public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
             //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
-            var idToken= User.FindFirst(ClaimTypes.Authentication)?.Value;
-            FirebaseToken decodedToken = await FirebaseAuth.DefaultInstance
-            .VerifyIdTokenAsync(idToken);
-            string userId = decodedToken.Uid;
+            var userId= User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();

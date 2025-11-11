@@ -53,9 +53,18 @@ if (!File.Exists(credentialPath))
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
 
 //Autenticação com Firebase
-builder.Services.AddFirebaseAuthentication(builder.Configuration);
+await builder.Services.AddFirebaseAuthentication(builder.Configuration);
 
 builder.Services.AddSingleton(provider => FirestoreDb.Create(firebaseProjectId));
+
+builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, HttpClient) =>
+{ 
+    var configuration = sp.GetRequiredService<IConfiguration>();
+    HttpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]);
+}
+
+);
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

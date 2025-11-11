@@ -13,7 +13,7 @@ using System.Net.Http.Json;
 
 namespace Application.Services
 {
-    internal class FireBaseAuthService : IAuthService
+    public class FireBaseAuthService : IAuthService
     {
         private readonly FirestoreDb DbContext;
 
@@ -25,8 +25,11 @@ namespace Application.Services
 
         private readonly IConfiguration Configuration;
         private readonly string FirebaseApiKey;
+        private readonly HttpClient HttpClient;
 
-        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository, IConfiguration configuration)
+        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,
+                                   IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository,
+                                   IConfiguration configuration, HttpClient httpClient)
         {
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
@@ -36,6 +39,7 @@ namespace Application.Services
             Configuration = configuration;
             FirebaseApiKey = configuration["Firebase:ApiKey"]
             ?? throw new ArgumentNullException("Firebase:ApiKey não encontrada no secrets.json");
+            HttpClient = httpClient;
         }
 
         public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
@@ -86,63 +90,62 @@ namespace Application.Services
                 returnSecureToken = true
             };
 
-            using (var httpClient = new HttpClient())
+            var response = await HttpClient.PostAsJsonAsync("", requestBody);
+     
+
+            if (response.IsSuccessStatusCode)
             {
-                var response = await httpClient.PostAsJsonAsync(firebaseAuthUrl, requestBody);
-
-                if (response.IsSuccessStatusCode)
+                var firebaseResponse = await response.Content.ReadFromJsonAsync<FirebaseLoginResponseDto>();
+                if (firebaseResponse == null)
                 {
-                    var firebaseResponse = await response.Content.ReadFromJsonAsync<FirebaseLoginResponseDto>();
-                    if (firebaseResponse == null)
-                    {
-                        throw new AuthenticationException("Failed to parse Firebase response.");
-                    }
-
-                    var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(firebaseResponse.LocalId);
-                    if (superAdminUser != null)
-                    {
-                        return new LoginResponseDto
-                        {
-                            Address = superAdminUser.Address,
-                            Email = firebaseResponse.Email,
-                            DateOfBirth = superAdminUser.DateOfBirth,
-                            Name = superAdminUser.Name,
-                            Phone = superAdminUser.Phone,
-                            CreationDate = superAdminUser.CreationDate,
-                            FirebaseLoginResponseDto = firebaseResponse
-
-
-                        };
-                    }
-                    var playerUser = await PlayerRepository.GetPlayerByIdAsync(firebaseResponse.LocalId);
-                    if (playerUser != null)
-                    { 
-                        return new LoginResponseDto
-                        {
-                            Email = firebaseResponse.Email,
-                            DateOfBirth = playerUser.DateOfBirth,
-                            Name = playerUser.Name,
-                            Address = playerUser.Address,
-                            IsAdmin = playerUser.IsAdmin,
-                            Height = playerUser.Height,
-                            IdTeam = playerUser.IdTeam,
-                            Phone = playerUser.Phone,
-                            Position = playerUser.Position,
-                            CreationDate = playerUser.CreationDate,
-                            IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
-                            FirebaseLoginResponseDto = firebaseResponse
-                        };
-                    }
-
-                    throw new AuthenticationException("Usuário não encontrado na base de dados.");
-
+                    throw new AuthenticationException("Failed to parse Firebase response.");
                 }
-                else
+
+                var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(firebaseResponse.LocalId);
+                if (superAdminUser != null)
                 {
-                    var errorResponse = await response.Content.ReadAsStringAsync();
-                    throw new AuthenticationException(errorResponse);
+                    return new LoginResponseDto
+                    {
+                        Address = superAdminUser.Address,
+                        Email = firebaseResponse.Email,
+                        DateOfBirth = superAdminUser.DateOfBirth,
+                        Name = superAdminUser.Name,
+                        Phone = superAdminUser.Phone,
+                        CreationDate = superAdminUser.CreationDate,
+                        FirebaseLoginResponseDto = firebaseResponse
+
+
+                    };
                 }
+                var playerUser = await PlayerRepository.GetPlayerByIdAsync(firebaseResponse.LocalId);
+                if (playerUser != null)
+                { 
+                    return new LoginResponseDto
+                    {
+                        Email = firebaseResponse.Email,
+                        DateOfBirth = playerUser.DateOfBirth,
+                        Name = playerUser.Name,
+                        Address = playerUser.Address,
+                        IsAdmin = playerUser.IsAdmin,
+                        Height = playerUser.Height,
+                        IdTeam = playerUser.IdTeam,
+                        Phone = playerUser.Phone,
+                        Position = playerUser.Position,
+                        CreationDate = playerUser.CreationDate,
+                        IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
+                        FirebaseLoginResponseDto = firebaseResponse
+                    };
+                }
+
+                throw new AuthenticationException("Usuário não encontrado na base de dados.");
+
             }
+            else
+            {
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                throw new AuthenticationException(errorResponse);
+            }
+            
         }
 
         public async Task LogoutAsync(string userId)
