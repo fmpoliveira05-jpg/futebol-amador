@@ -22,6 +22,7 @@ import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
 import com.example.amfootball.ui.screens.Team.CrudTeam.CreateTeamScreen
+import com.example.amfootball.ui.screens.Team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.User.ProfileScreen
 
 @Composable
@@ -120,6 +121,10 @@ private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
 private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController){
     composable(route = CrudTeamRoutes.CREATE_TEAM) {
         CreateTeamScreen(navHostController = globalNavController)
+    }
+
+    composable(route = CrudTeamRoutes.PROFILE_TEAM) {
+        ProfileTeamScreen(navHostController = globalNavController)
     }
 }
 

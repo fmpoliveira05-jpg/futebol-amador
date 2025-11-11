@@ -23,7 +23,7 @@ fun HomePageScreen(globalNavController: NavHostController) {
         //NavigatonDrawerNavBarHomePage()
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         //Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
-
+        Text(text = "Bem-vindo utilizador")
         Button(
             onClick = {
                 globalNavController.navigate(route = CrudTeamRoutes.CREATE_TEAM)

@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
@@ -22,7 +21,6 @@ import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
-import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.MatchInvite.ListMatchInviteScreen
@@ -84,7 +82,7 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController,
             ListPlayersScreen()
         }
         composable(RoutesNavBarTeam.SEARCH_TEAMS_TO_MATCH_INVITE) {
-            ListTeamScreen()
+            ListTeamScreen(navHostController = globalNavController)
         }
         composable(RoutesNavBarTeam.LIST_MATCHINVITE) {
             ListMatchInviteScreen()

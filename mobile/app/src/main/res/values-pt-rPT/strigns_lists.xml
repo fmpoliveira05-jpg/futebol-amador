@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="list_teams_description_logo_team">Logo da Equipa</string>
+    <string name="list_teams_members">Membros</string>
+    <string name="list_teams_view_team">Ver Equipa</string>
+</resources>

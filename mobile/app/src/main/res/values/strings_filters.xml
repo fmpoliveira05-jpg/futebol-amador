@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_filter_header">Filters</string>
+    <string name="hide_filter">Hide Filters</string>
+    <string name="open_filters">Open Filters</string>
+
+    <string name="filter_name_team">Name Team</string>
+    <string name="filter_city">City</string>
+    <string name="filter_min_points_Team">Min. Points</string>
+    <string name="filter_max_points_Team">Max. Points</string>
+    <string name="filter_min_average_age_team">Min. Average Age</string>
+    <string name="filter_max_average_age_team">Max. Average Age</string>
+    <string name="filter_min_members_team">Min. Members</string>
+    <string name="filter_max_members_team">Max. Members</string>
+</resources>

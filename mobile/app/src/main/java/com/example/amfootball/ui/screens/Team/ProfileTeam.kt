@@ -15,7 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.ui.components.BackTopBar
-import com.example.amfootball.ui.components.InputFields.CreateTextFieldOutline
+import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 
 @Composable
 fun ProfileTeamScreen(navHostController: NavHostController) {
@@ -53,14 +53,14 @@ private fun ContentProfileTeam(modifier: Modifier = Modifier) {
  * */
 @Composable
 private fun FieldProfileTeam() {
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_team),
         value = "Equipa xxxx",
         isSingleLine = true,
         isReadOnly = true,
     )
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_description_team),
         value = "Descrição equipa",
         isSingleLine = true,
@@ -68,14 +68,14 @@ private fun FieldProfileTeam() {
     )
 
     Text(text = "Campo da equipa")
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
         value = "Campo xxxxx",
         isSingleLine = true,
         isReadOnly = true,
     )
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_address_pitch_team),
         value = "Rua xxxx",
         isSingleLine = true,

@@ -23,7 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.components.Buttons.SubmitFormButton
-import com.example.amfootball.ui.components.InputFields.CreateTextFieldOutline
+import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 import com.example.amfootball.ui.components.InputFields.DatePickerDocked
 import com.example.amfootball.ui.components.InputFields.FieldTimePicker
 import com.example.amfootball.ui.components.InputFields.Switcher
@@ -70,7 +70,7 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
 
     //Estado de controlo de clicar no botão
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = "Opponente",
         value = "Equipa xxxx",
         isReadOnly = true,

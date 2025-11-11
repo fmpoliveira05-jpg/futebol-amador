@@ -102,6 +102,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

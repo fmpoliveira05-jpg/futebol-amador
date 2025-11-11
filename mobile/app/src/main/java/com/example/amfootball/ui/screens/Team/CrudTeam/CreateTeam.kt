@@ -34,7 +34,7 @@ import com.example.amfootball.data.constants.TeamConstants
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.Buttons.SubmitFormButton
-import com.example.amfootball.ui.components.InputFields.CreateTextFieldOutline
+import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 import com.example.amfootball.ui.components.InputFields.ImagePicker
 
 @Composable
@@ -93,7 +93,7 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
         modifier = Modifier.padding(bottom = 24.dp)
     )
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_team),
         value = name,
         onValueChange = {newName ->
@@ -105,7 +105,7 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
         isError = isNameBlank
     )
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_description_team),
         value = description,
         onValueChange = {newDescription ->
@@ -118,7 +118,7 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
 
 
     Text(text = "Campo da equipa")
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
         value = pitchName,
         onValueChange = {newPitchName ->
@@ -130,7 +130,7 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
         isError = isPitchNameBlank
     )
 
-    CreateTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_address_pitch_team),
         value = pitchAddress,
         onValueChange = { newPitchAddress ->

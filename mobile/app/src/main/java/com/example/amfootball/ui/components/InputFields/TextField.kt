@@ -2,7 +2,9 @@ package com.example.amfootball.ui.components.InputFields
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -17,19 +19,74 @@ import com.example.amfootball.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateTextFieldOutline(label: String, 
-                           value: String, 
-                           isSingleLine: Boolean = true,
-                           onValueChange: (String) -> Unit = {},
-                           isReadOnly: Boolean = false,
-                           isRequired: Boolean = false,
-                           isError: Boolean = false,
-                           errorMessage: String = stringResource(id = R.string.mandatory_field)
+fun LabelTextField(
+    label: String,
+    value: String?,
+    modifier: Modifier = Modifier,
+    isSingleLine: Boolean = true,
+    onValueChange: (String) -> Unit = {},
+    isReadOnly: Boolean = false,
+    isRequired: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String = stringResource(id = R.string.mandatory_field),
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Label(label = label, isRequired = isRequired)
+
+        OutlinedTextField(
+            value = value ?: "",
+            onValueChange = onValueChange,
+            singleLine = isSingleLine,
+            readOnly = isReadOnly,
+            isError = isError,
+            label = null,
+            placeholder = { Text(text = label) },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = keyboardOptions,
+            supportingText = {
+                if (isError) {
+                    Text(
+                        text = errorMessage,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun Label(label: String,
+                  isRequired: Boolean) {
+    val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
+
+    Text(
+        text = labelText,
+        style = MaterialTheme.typography.bodyMedium,
+        modifier = Modifier
+            .padding(top = 16.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TextFieldOutline(label: String,
+                     value: String,
+                     isSingleLine: Boolean = true,
+                     onValueChange: (String) -> Unit = {},
+                     isReadOnly: Boolean = false,
+                     isRequired: Boolean = false,
+                     isError: Boolean = false,
+                     errorMessage: String = stringResource(id = R.string.mandatory_field)
 ) {
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
 
     Column {
         Spacer(Modifier.height(4.dp))
+
         OutlinedTextField(
             label = { Text(text = labelText) },
             value = value,
