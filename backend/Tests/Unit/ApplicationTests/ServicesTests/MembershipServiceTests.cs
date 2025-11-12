@@ -51,11 +51,11 @@ namespace Unit.ApplicationTests.ServicesTests
                 _playerRepoMock.Object,
                 _membershipRequestRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _teamValidator,             
+                _teamValidator,
                 _playerValidatorMock.Object,
-                _authorizationValidator,   
-                _membershipValidatorMock.Object, 
-                _notificationServiceMock.Object 
+                _authorizationValidator,
+                _membershipValidatorMock.Object,
+                _notificationServiceMock.Object
             );
         }
         #endregion
@@ -237,7 +237,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var teamFull = new Team
             {
                 Id = teamId,
-                Members = new List<Player>() 
+                Members = new List<Player>()
             };
 
             for (int i = 0; i < ModelConstants.TeamConst.MaxMembers; i++)
@@ -251,7 +251,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestById(requestId))
                 .ReturnsAsync(request);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId))
-                .ReturnsAsync(teamFull); 
+                .ReturnsAsync(teamFull);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId))
                 .ReturnsAsync(playerAdmin);
 
@@ -272,7 +272,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var teamId = Guid.NewGuid();
-            var requestId = Guid.NewGuid(); 
+            var requestId = Guid.NewGuid();
             var adminId = "admin-player";
 
             var team = new Team { Id = teamId };
@@ -284,7 +284,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(playerAdmin);
 
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestById(requestId))
-                .ReturnsAsync((MembershipRequest)null); 
+                .ReturnsAsync((MembershipRequest)null);
 
             _membershipValidatorMock
                 .Setup(v => v.ValidateAcceptRequestByTeam(team, (MembershipRequest)null, playerAdmin))
@@ -339,7 +339,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerNaoAdmin = new Player
             {
                 Id = playerId,
-                IsAdmin = false 
+                IsAdmin = false
             };
 
             var team = new Team { Id = teamId };
@@ -349,19 +349,24 @@ namespace Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(request);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId))
                 .ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
+                .ReturnsAsync(playerNaoAdmin);
 
             _membershipValidatorMock
                 .Setup(v => v.ValidateRejectRequestByTeam(team, request, playerNaoAdmin))
-                .Throws(new ValidationException("O jogador não é administrador.")); 
+                .Throws(new ValidationException("O jogador não é administrador."));
 
             // ACT
             Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId, playerNaoAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*"); 
+            var exception = await act.Should().ThrowAsync<Exception>();
+
+            exception.Which.Should().BeOfType<ValidationException>()
+                    .Which.Message.Should().Be("O jogador não é administrador.");
 
             // VERIFY
+            _membershipValidatorMock.Verify(v => v.ValidateRejectRequestByTeam(team, request, playerNaoAdmin), Times.Once);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -377,7 +382,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = "player-id-abc";
             var rank = new TestRank();
             var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
-            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team};
+            var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team };
             team.Members.Add(admin);
             var request1 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p1", IdTeam = teamId };
             var request2 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p2", IdTeam = teamId };
@@ -412,7 +417,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Id = playerId,
                 IsAdmin = false,
-                IdTeam = teamId 
+                IdTeam = teamId
             };
 
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId))
@@ -443,7 +448,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Id = playerId,
                 IsAdmin = true,
-                IdTeam = Guid.NewGuid() 
+                IdTeam = Guid.NewGuid()
             };
 
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId))
@@ -458,7 +463,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não pertence*"); 
+                     .WithMessage("*não pertence*");
 
             _membershipRequestRepoMock.Verify(r => r.GetMembershipRequestsByTeam(It.IsAny<Guid>()), Times.Never);
         }
@@ -515,7 +520,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerIdToInvite)).ReturnsAsync(playerToInvite);
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId))
-                .ReturnsAsync((MembershipRequest)null); 
+                .ReturnsAsync((MembershipRequest)null);
 
 
             _membershipValidatorMock
@@ -540,7 +545,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerIdToInvite = "player-to-invite";
             var adminPlayer = new Player { Id = "admin", IsAdmin = true };
             var teamFull = new Team { Id = teamId, Members = new List<Player>() };
-           
+
             for (int i = 0; i < ModelConstants.TeamConst.MaxMembers; i++)
             {
                 teamFull.Members.Add(new Player());
@@ -578,7 +583,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerWithTeam = new Player
             {
                 Id = playerIdToInvite,
-                IdTeam = Guid.NewGuid() 
+                IdTeam = Guid.NewGuid()
             };
 
             var team = new Team { Id = teamId };
@@ -651,7 +656,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerInThisTeam = new Player
             {
                 Id = playerIdToInvite,
-                IdTeam = teamId 
+                IdTeam = teamId
             };
 
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
@@ -708,8 +713,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerWithTeam = new Player
             {
                 Id = playerId,
-                Team = new Team(), 
-                IdTeam = Guid.NewGuid() 
+                Team = new Team(),
+                IdTeam = Guid.NewGuid()
             };
 
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(playerWithTeam);
@@ -776,7 +781,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerWithTeam = new Player
             {
                 Id = playerId,
-                Team = new Team(), 
+                Team = new Team(),
                 IdTeam = Guid.NewGuid()
             };
 
@@ -965,8 +970,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdPlayer = playerId,
                 IdTeam = teamId,
                 InviteDate = DateTime.UtcNow,
-                Player = player, 
-                Team = team     
+                Player = player,
+                Team = team
             };
 
             player.MembershipRequests.Add(membershipRequest);
@@ -1027,7 +1032,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 InviteDate = DateTime.UtcNow,
                 IsPlayerSender = false,
                 Team = team,
-                Player = player 
+                Player = player
             };
 
             player.MembershipRequests.Add(membershipRequest);
@@ -1143,7 +1148,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdPlayer = playerId,
                 IdTeam = teamId,
                 Team = team,
-                Player = player 
+                Player = player
             };
 
             team.MembershipRequests.Add(membershipRequest);
@@ -1206,7 +1211,7 @@ namespace Unit.ApplicationTests.ServicesTests
             player.MembershipRequests.Add(otherRequest);
 
             _playerRepoMock.Setup(r => r.GetPlayerByIdWithRequestsAsync(playerId))
-                .ReturnsAsync(acceptedRequest); 
+                .ReturnsAsync(acceptedRequest);
 
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId1)).ReturnsAsync(team1);
             _teamRepoMock.Setup(r => r.GetTeamByIdAsync(teamId1)).ReturnsAsync(team1);
@@ -1224,7 +1229,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock
                 .Setup(r => r.RemoveAllMemberShipRequestsOfPlayer(playerId))
                 .Returns(Task.CompletedTask)
-                .Callback(() => {
+                .Callback(() =>
+                {
                     player.MembershipRequests.Clear();
                 });
 
