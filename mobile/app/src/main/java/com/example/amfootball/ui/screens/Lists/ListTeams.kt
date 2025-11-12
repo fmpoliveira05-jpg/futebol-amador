@@ -28,7 +28,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,20 +43,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.Filters.FiltersListTeamDto
 import com.example.amfootball.data.dtos.ItemTeamInfoDto
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.ui.components.InputFields.LabelTextField
 import com.example.amfootball.ui.components.Lists.FilterHeader
 import com.example.amfootball.ui.components.Lists.InfoRow
 import com.example.amfootball.R
+import com.example.amfootball.data.Actions.FilterTeamActions
 import com.example.amfootball.data.dtos.Rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
-import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
-import com.example.amfootball.ui.components.Buttons.FilterApplyButton
+import com.example.amfootball.ui.components.Buttons.LineClearFilterButtons
+import com.example.amfootball.ui.components.Buttons.TextButtonModel
 import com.example.amfootball.ui.components.InputFields.LabelSelectBox
+import com.example.amfootball.ui.viewModel.Lists.ListTeamViewModel
 import kotlin.String
 
 /**
@@ -71,15 +71,40 @@ import kotlin.String
  * Ver como faço para daqui reutilizar a lista, os filtros ver depois
  * */
 @Composable
-fun ListTeamScreen(navHostController: NavHostController){
-    var filters by remember { mutableStateOf(FiltersListTeamDto()) }
+fun ListTeamScreen(
+    navHostController: NavHostController,
+    viewModel: ListTeamViewModel = viewModel()
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
-    val listRanks = RankNameDto.generateExampleRanks()
+    val listRanks = viewModel.listRank.value
+    val listTeam = viewModel.listTeams.value
 
-    val allTeams = remember { ItemTeamInfoDto.generateExampleTeams() }
-    val filteredList = remember(allTeams, filters) {
-        filterTeamList(allTeams, filters)
-    }
+    val filterStates = FiltersListTeamDto(
+        name = viewModel.name.value,
+        city = viewModel.city.value,
+        rank = viewModel.rank.value,
+        minPoint = viewModel.minPoint.value,
+        maxPoint = viewModel.maxPoint.value,
+        minAge = viewModel.minAge.value,
+        maxAge = viewModel.maxAge.value,
+        minNumberMembers = viewModel.minNumberMembers.value,
+        maxNumberMembers = viewModel.maxNumberMembers.value
+    )
+
+    val filtersActions = FilterTeamActions(
+        onNameChange = viewModel::onNameChange,
+        onCityChange = viewModel::onCityChange,
+        onRankChange = viewModel::onRankChange,
+        onMinPointChange = viewModel::onMinPointChange,
+        onMaxPointChange = viewModel::onMaxPointChange,
+        onMinAgeChange = viewModel::onMinAgeChange,
+        onMaxAgeChange = viewModel::onMaxAgeChange,
+        onMinNumberMembersChange = viewModel::onMinNumberMembersChange,
+        onMaxNumberMembersChange = viewModel::onMaxNumberMembersChange,
+        onApplyFilters = viewModel::applyFilters,
+        onClearFilters = viewModel::clearFilters
+    )
+
 
     Surface {
         LazyColumn(
@@ -89,17 +114,28 @@ fun ListTeamScreen(navHostController: NavHostController){
                 FilterSection(
                     isExpanded = filtersExpanded,
                     onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    filters = filters,
-                    onFiltersChange = { newFilters ->
-                        filters = newFilters
-                    },
+                    state = filterStates,
+                    actions = filtersActions,
                     listRanks = listRanks
                 )
                 Spacer(Modifier.height(16.dp))
             }
 
-            items(filteredList) { team ->
-                ListTeam(team = team, navHostController = navHostController)
+            items(listTeam) { team ->
+                ListTeam(
+                    team = team,
+                    onClickSendMembership = { viewModel.sendMemberShipRequest(
+                        idTeam = team.Id,
+                        navHostController = navHostController
+                    ) },
+                    onClickSendMatchInvite = { viewModel.sendMatchInvite(
+                        idTeam = team.Id,
+                        navHostController = navHostController) },
+                    showMoreDetails = { viewModel.ShowMore(
+                        idTeam = team.Id,
+                        navHostController = navHostController
+                    ) }
+                )
                 Spacer(Modifier.height(12.dp))
             }
         }
@@ -114,8 +150,8 @@ fun ListTeamScreen(navHostController: NavHostController){
 private fun FilterSection(
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
-    filters: FiltersListTeamDto,
-    onFiltersChange: (FiltersListTeamDto) -> Unit,
+    state: FiltersListTeamDto,
+    actions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier,
 ) {
@@ -130,8 +166,8 @@ private fun FilterSection(
             //Filtros todos
             AnimatedVisibility(visible = isExpanded) {
                 FiltersListTeamContent(
-                    filters = filters,
-                    onFiltersChange = onFiltersChange,
+                    state = state,
+                    actions = actions,
                     listRanks = listRanks,
                     modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 )
@@ -145,8 +181,8 @@ private fun FilterSection(
  * */
 @Composable
 private fun FiltersListTeamContent(
-    filters: FiltersListTeamDto,
-    onFiltersChange: (FiltersListTeamDto) -> Unit,
+    state: FiltersListTeamDto,
+    actions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier
 ) {
@@ -154,15 +190,15 @@ private fun FiltersListTeamContent(
         Row(modifier = Modifier.fillMaxWidth()) {
             LabelTextField(
                 label = stringResource(id = R.string.filter_name_team),
-                value = filters.name,
-                onValueChange = { onFiltersChange(filters.copy(name = it)) },
+                value = state.name,
+                onValueChange = { actions.onNameChange(it) },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
             LabelTextField(
                 label = stringResource(id = R.string.filter_city),
-                value = filters.city,
-                onValueChange = { onFiltersChange(filters.copy(city = it)) },
+                value = state.city,
+                onValueChange = { actions.onCityChange(it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -170,26 +206,26 @@ private fun FiltersListTeamContent(
         Spacer(Modifier.height(8.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            // TODO: Modificar a selectBox do rank para que os ranks sejam carregados da BD
             LabelSelectBox(
                 label = "Rank",
                 list = listRanks,
-                selectedValue = filters.rank ?: "",
+                selectedValue = state.rank ?: "",
                 itemToString = { rankDto ->
                     rankDto.Name
                 },
                 onSelectItem = { rankDto ->
-                    onFiltersChange(filters.copy(rank = rankDto.Name))
+                    actions.onRankChange(rankDto.Name)
                 },
                 modifier = Modifier.weight(1f)
             )
 
             Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(8.dp))
+
             NumberFilterField(
                 label = stringResource(id = R.string.filter_min_points_Team),
-                value = filters.minPoint,
-                onValueChange = { onFiltersChange(filters.copy(minPoint = it)) },
+                value = state.minPoint,
+                onValueChange = { actions.onMinPointChange(it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -199,15 +235,15 @@ private fun FiltersListTeamContent(
         Row(modifier = Modifier.fillMaxWidth()) {
             NumberFilterField(
                 label = stringResource(id = R.string.filter_max_points_Team),
-                value = filters.maxPoint,
-                onValueChange = { onFiltersChange(filters.copy(maxPoint = it)) },
+                value = state.maxPoint,
+                onValueChange = { actions.onMaxPointChange(it) },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
             NumberFilterField(
                 label = stringResource(id = R.string.filter_min_average_age_team),
-                value = filters.minAge,
-                onValueChange = { onFiltersChange(filters.copy(minAge = it)) },
+                value = state.minAge,
+                onValueChange = { actions.onMinAgeChange(it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -217,15 +253,15 @@ private fun FiltersListTeamContent(
         Row(modifier = Modifier.fillMaxWidth()) {
             NumberFilterField(
                 label = stringResource(id = R.string.filter_max_average_age_team),
-                value = filters.maxAge,
-                onValueChange = { onFiltersChange(filters.copy(maxAge = it)) },
+                value = state.maxAge,
+                onValueChange = { actions.onMaxAgeChange(it) },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
             NumberFilterField(
                 label = stringResource(id = R.string.filter_min_members_team),
-                value = filters.minNumberMembers,
-                onValueChange = { onFiltersChange(filters.copy(minNumberMembers = it)) },
+                value = state.minNumberMembers,
+                onValueChange = { actions.onMinNumberMembersChange(it) },
                 modifier = Modifier.weight(1f)
             )
         }
@@ -235,8 +271,8 @@ private fun FiltersListTeamContent(
         Row(modifier = Modifier.fillMaxWidth()) {
             NumberFilterField(
                 label = stringResource(id = R.string.filter_max_members_team),
-                value = filters.maxNumberMembers,
-                onValueChange = { onFiltersChange(filters.copy(maxNumberMembers = it)) },
+                value = state.maxNumberMembers,
+                onValueChange = { actions.onMaxNumberMembersChange(it) },
                 modifier = Modifier.weight(1f)
             )
             Spacer(Modifier.width(8.dp))
@@ -245,11 +281,10 @@ private fun FiltersListTeamContent(
 
         Spacer(Modifier.height(16.dp))
 
-        FilterApplyButton(
-            onClick = {
-                // TODO: Fazer o pedido ao endpoint com os 'filters'
-            },
-            modifier = Modifier.fillMaxWidth() // Para ocupar a largura toda
+        LineClearFilterButtons(
+            onApplyFiltersClick = actions.onApplyFilters,
+            onClearFilters = actions.onClearFilters,
+            modifier = Modifier.weight(1f)
         )
     }
 }
@@ -285,10 +320,14 @@ private fun NumberFilterField(
     )
 }
 
+//Passar metodos
 @Composable
-private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController) {
-    val typeUser by remember { mutableStateOf(false) }
-
+private fun ListTeam(
+    team: ItemTeamInfoDto,
+    onClickSendMembership: () -> Unit,
+    onClickSendMatchInvite: () -> Unit,
+    showMoreDetails: () -> Unit
+) {
     ListItem(
         headlineContent = { //Conteudo Principal
             Text(
@@ -310,26 +349,13 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
                     append("(${team.Points} Pts)")
                     pop()
                 },
-                style = MaterialTheme.typography.bodyMedium, // Estilo base para todo o texto
+                style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
         },
         supportingContent = { //Aparece em baixo (Descrição e cidade)
-            Column {
-                Spacer(Modifier.height(8.dp))
-                InfoRow(
-                    icon = Icons.Default.LocationOn,
-                    text = team.City,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(4.dp))
-                InfoRow(
-                    icon = Icons.Default.Groups,
-                    text = "${team.NumberMembers} ${stringResource(id = R.string.list_teams_members)}"
-                )
-            }
+            SupportingContent(team = team)
         },
         leadingContent = { // imagem
             Icon(
@@ -340,123 +366,97 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
             )
         },
         trailingContent = { // Tudo que aparece há direita (Botão Ver Detalher + Send MatchInvite no caso da team ou no caso do player send MemberShipRequest)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                if(typeUser) {
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(route = MembershipRequestRoutes.SEND_MEMBERSHIP_REQUEST) {
-                                launchSingleTop = true
-                            }
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send Membership Request",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Send Membership",
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1
-                        )
-                    }
-                } else {
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
-                                launchSingleTop = true
-                            }
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send Match Invite",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Match Invite",
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1
-                        )
-                    }
-                }
-
-                IconButton(
-                    onClick = {
-                        val idTeam = team.Id
-                        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
-                            launchSingleTop = true
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = stringResource(id = R.string.list_teams_view_team),
-                        tint = MaterialTheme.colorScheme.outline
-                    )
-                }
-            }
+            TrailingContent(
+                onClickSendMembership = onClickSendMembership,
+                onClickSendMatchInvite = onClickSendMatchInvite,
+                showMoreDetails = showMoreDetails
+            )
         },
     )
 }
 
-/**
- * Criterios de Filtragem
- * */
-private fun filterTeamList(
-    teams: List<ItemTeamInfoDto>,
-    filters: FiltersListTeamDto
-): List<ItemTeamInfoDto> {
-    val minPoints = filters.minPoint
-    val maxPoints = filters.maxPoint
-    val minAge = filters.minAge
-    val maxAge = filters.maxAge
-    val minNumberMembers = filters.minNumberMembers
-    val maxNumberMembers = filters.maxNumberMembers
+@Composable
+private fun SupportingContent(
+    team: ItemTeamInfoDto
+) {
+    Column {
+        Spacer(Modifier.height(8.dp))
+        InfoRow(
+            icon = Icons.Default.LocationOn,
+            text = team.City,
+            modifier = Modifier.fillMaxWidth()
+        )
 
-    return teams.filter { team ->
-        val nameFilterPassed = filters.name.isNullOrEmpty() ||
-                team.Name.contains(filters.name, ignoreCase = true)
+        Spacer(Modifier.height(4.dp))
+        InfoRow(
+            icon = Icons.Default.Groups,
+            text = "${team.NumberMembers} ${stringResource(id = R.string.list_teams_members)}"
+        )
+    }
+}
+@Composable
+private fun TrailingContent(
+    onClickSendMembership: () -> Unit,
+    onClickSendMatchInvite: () -> Unit,
+    showMoreDetails: () -> Unit
+) {
+    val typeUser by remember { mutableStateOf(false) }
 
-        val rankFilterPassed = filters.rank.isNullOrEmpty() ||
-                team.Name.contains(filters.rank, ignoreCase = true)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(start = 8.dp)
+    ) {
+        if(typeUser) {
+            TextButtonModel(
+                onClick = { onClickSendMembership() },
+                imageVector = Icons.Default.Send,
+                contentDescription = "Send Membership Request",
+                text = "Send Membership Request",
+            )
+        } else {
+            TextButtonModel(
+                onClick = { onClickSendMatchInvite() },
+                imageVector = Icons.Default.Send,
+                contentDescription = "Send Match Invite",
+                text = "Match Invite",
+            )
+        }
 
-        val cityFilterPassed = filters.city.isNullOrEmpty() ||
-                team.City.contains(filters.city, ignoreCase = true)
-
-        val minPointFilterPassed = (minPoints == null) || (team.Points >= minPoints)
-        val maxPointFilterPassed = (maxPoints == null) || (team.Points <= maxPoints)
-
-        val minAgeFilterPassed = (minAge == null) || (team.AverageAge >= minAge)
-        val maxAgeFilterPassed = (maxAge == null) || (team.AverageAge <= maxAge)
-
-        val minNumberMembersFilterPassed = (minNumberMembers == null) || (team.NumberMembers >= minNumberMembers)
-        val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.NumberMembers <= maxNumberMembers)
-
-        // Devolve o resultado do teste para esta equipa
-        nameFilterPassed && rankFilterPassed && cityFilterPassed && minPointFilterPassed
-                && maxPointFilterPassed && minAgeFilterPassed && maxAgeFilterPassed &&
-                minNumberMembersFilterPassed && maxNumberMembersFilterPassed
+        IconButton(
+            onClick = { showMoreDetails() }
+        ) {
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = stringResource(id = R.string.list_teams_view_team),
+                tint = MaterialTheme.colorScheme.outline
+            )
+        }
     }
 }
 
 @Preview(
-    name = "Lista de Equipa - PT",
+    name = "Lista de Equipa da equipa - PT",
     locale = "pt-rPT",
     showBackground = true)
 @Preview(
-    name = "List Team Screen - EN",
+    name = "List Team Screen of team- EN",
     locale = "en",
     showBackground = true)
 @Composable
-fun PreviewListTeamScreen() {
+fun PreviewListTeamScreenTeam() {
+    ListTeamScreen(rememberNavController())
+}
+
+@Preview(
+    name = "Lista de Equipa de jogador - PT",
+    locale = "pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "List Team Screen of player- EN",
+    locale = "en",
+    showBackground = true)
+@Composable
+fun PreviewListTeamScreenPlayer() {
     ListTeamScreen(rememberNavController())
 }

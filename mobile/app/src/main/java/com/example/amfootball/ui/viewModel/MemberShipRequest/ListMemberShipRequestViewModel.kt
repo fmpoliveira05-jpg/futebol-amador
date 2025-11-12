@@ -10,13 +10,14 @@ import com.example.amfootball.data.dtos.MembershipRequest.MembershipRequestInfoD
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
+import com.example.amfootball.utils.Patterns
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 class ListMemberShipRequestViewModel: ViewModel() {
-    private val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    private val dateFormatter = DateTimeFormatter.ofPattern(Patterns.Date)
 
     //Estados
     //Filtros aplicados
@@ -95,7 +96,6 @@ class ListMemberShipRequestViewModel: ViewModel() {
             matchesName && matchesMinDate && matchesMaxDate
         }
 
-        // 3. Atualiza a lista que a UI está a ver
         listState.value = filteredList
     }
 
