@@ -191,7 +191,9 @@ class ListTeamViewModel: ViewModel() {
 
     fun sendMatchInvite(idTeam: String,
                         navHostController: NavHostController) {
-        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
+
+        //Mandar o id da equipa como parametro
+        navHostController.navigate(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
             launchSingleTop = true
         }
     }
@@ -210,7 +212,7 @@ class ListTeamViewModel: ViewModel() {
     ) {
 
         //Mandar Id da team
-        navHostController.navigate(CrudTeamRoutes.PROFILE_TEAM) {
+        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
             launchSingleTop = true
         }
     }
