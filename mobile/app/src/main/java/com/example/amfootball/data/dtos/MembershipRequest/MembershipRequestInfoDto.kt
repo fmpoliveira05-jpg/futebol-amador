@@ -5,10 +5,13 @@ import java.time.LocalDateTime
 
 data class MembershipRequestInfoDto(
     val Id: String,
+    val IdReceiver: String,
     val Receiver: String,
+    val IdSender: String,
     val Sender: String,
     val ImageSender: Uri,
-    val DateSend: LocalDateTime
+    val DateSend: LocalDateTime,
+    val IsPlayerSender: Boolean
 ) {
     companion object {
         fun generateMemberShipRequestTeam(): List<MembershipRequestInfoDto> {
@@ -25,11 +28,14 @@ data class MembershipRequestInfoDto(
             for (i in 0 until 20) {
                 list.add(
                     MembershipRequestInfoDto(
-                        Id = "t${i + 1}",
+                        Id = "r${i + 1}",
+                        IdReceiver = "t${i + 1}",
                         Receiver = teamName,
+                        IdSender = "p${i + 1}",
                         Sender = playerNames[i],
                         ImageSender = Uri.EMPTY,
-                        DateSend = LocalDateTime.now().minusHours(i.toLong())
+                        DateSend = LocalDateTime.now().plusDays(i.toLong()),
+                        IsPlayerSender = false,
                     )
                 )
             }
@@ -51,11 +57,14 @@ data class MembershipRequestInfoDto(
             for (i in 0 until 20) {
                 list.add(
                     MembershipRequestInfoDto(
-                        Id = "p${i + 1}",
+                        Id = "r${i + 1}",
+                        IdReceiver = "p${i + 1}",
                         Receiver = playerName,
+                        IdSender = "t${i + 1}",
                         Sender = teamNames[i],
                         ImageSender = Uri.EMPTY,
-                        DateSend = LocalDateTime.now().minusDays(i.toLong())
+                        DateSend = LocalDateTime.now().plusDays(i.toLong()),
+                        IsPlayerSender = true,
                     )
                 )
             }

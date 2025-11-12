@@ -43,6 +43,7 @@ import com.example.amfootball.navigation.Objects.Pages.AutRoutes
 import com.example.amfootball.navigation.Objects.GeralRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.R
+import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
 import com.example.amfootball.ui.theme.AMFootballTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +97,9 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController,
         composable(RouteNavBarHomePage.LEADBOARD) {
             LeaderboardScreen()
         }
+        composable(RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST) {
+            ListMemberShipRequest(navHostController = globalNavController)
+        }
         composable(route = GeralRoutes.SETTINGS) {
             SettingsScreen()
         }
@@ -121,6 +125,11 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
         icon = Icons.Filled.Home,
         route = RoutesNavBarTeam.HOME_PAGE_TEAM,
         isGlobalRoute =  true))
+    drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_memberships_list),
+        description = stringResource(id = R.string.description_navbar_memberships_list),
+        icon = Icons.Filled.List,
+        route = RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST,
+        isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_list_team),
         description = stringResource(id = R.string.item_list_team_description),
         icon = Icons.Filled.List,

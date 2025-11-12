@@ -1,17 +1,23 @@
 package com.example.amfootball.ui.components.Buttons
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
 @Composable
@@ -35,6 +41,53 @@ fun FilterApplyButton(
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge
+        )
+    }
+}
+
+@Composable
+fun ClearFilterButton(onClick: () -> Unit,
+                      text: String = stringResource(id = R.string.clear_button),
+                      contentDescription: String = stringResource(id = R.string.clear_button_description),
+                      modifier: Modifier = Modifier,
+) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+    ) {
+        Icon(
+            imageVector = Icons.Default.Clear,
+            contentDescription = contentDescription
+        )
+
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge
+        )
+    }
+
+}
+
+@Composable
+fun LineClearFilterButtons(
+    onApplyFiltersClick: () -> Unit,
+    onClearFilters: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterApplyButton(
+            onClick = onApplyFiltersClick,
+            modifier = modifier
+        )
+
+        ClearFilterButton(
+            onClick = onClearFilters,
+            modifier = modifier
         )
     }
 }

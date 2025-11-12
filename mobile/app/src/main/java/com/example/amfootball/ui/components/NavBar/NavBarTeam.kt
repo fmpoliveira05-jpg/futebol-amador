@@ -76,7 +76,7 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController,
             ListMembersScreen()
         }
         composable(RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST) {
-            ListMemberShipRequest()
+            ListMemberShipRequest(navHostController = globalNavController)
         }
         composable(RoutesNavBarTeam.SEARCH_PLAYERS_WITHOU_TEAM){
             ListPlayersScreen()

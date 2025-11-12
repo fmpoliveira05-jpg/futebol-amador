@@ -1,4 +1,4 @@
-package com.example.amfootball.data.constants
+package com.example.amfootball.utils.constants
 
 object AddressContants {
     const val MinAddressLength = 5
