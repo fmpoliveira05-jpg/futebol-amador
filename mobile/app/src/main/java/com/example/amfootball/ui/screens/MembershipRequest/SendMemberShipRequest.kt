@@ -28,7 +28,8 @@ fun SendMemberShipRequest(navHostController: NavHostController) {
             BackTopBar(
                 navHostController = navHostController,
                 title = stringResource(id = R.string.title_page_create_team)
-            )},
+            )
+        },
         content = { paddingValues ->
             ContentSendMemberShipRequest(
                 modifier = Modifier

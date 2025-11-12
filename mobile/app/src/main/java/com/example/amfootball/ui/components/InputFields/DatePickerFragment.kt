@@ -79,7 +79,8 @@ fun DatePickerDockedLimitedDate(value: String,
         showDatePicker = showDatePicker,
         datePickerState = datePickerState,
         onDismiss = { showDatePicker = false },
-        onDateSelected = onDateSelected
+        onDateSelected = onDateSelected,
+        modifier = modifier
     )
 }
 
@@ -87,8 +88,9 @@ fun DatePickerDockedLimitedDate(value: String,
 fun DatePickerDocked(value: String,
                      onDateSelected: (millis: Long) -> Unit,
                      label: String,
+                     modifier: Modifier = Modifier,
                      contentDescription: String,
-                     modifier: Modifier = Modifier) {
+) {
     var showDatePicker by remember { mutableStateOf(value = false) }
     val datePickerState = rememberDatePickerState()
 
@@ -100,7 +102,8 @@ fun DatePickerDocked(value: String,
         showDatePicker = showDatePicker,
         datePickerState = datePickerState,
         onDismiss = { showDatePicker = false },
-        onDateSelected = onDateSelected
+        onDateSelected = onDateSelected,
+        modifier = modifier
     )
 }
 
@@ -186,13 +189,13 @@ private fun DatePicker(label: String,
     )
 
     Box(
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         DateOutlineOutlinedTextField(
             value = value,
             label = label,
             contentDescription = contentDescription,
-            onIconClick = onIconClick
+            onIconClick = onIconClick,
         )
 
         if (showDatePicker) {

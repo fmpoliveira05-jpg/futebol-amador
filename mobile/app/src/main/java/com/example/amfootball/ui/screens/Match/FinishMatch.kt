@@ -3,6 +3,7 @@ package com.example.amfootball.ui.screens.Match
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -19,7 +21,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.R
-import com.example.amfootball.ui.components.InputFields.NumberTextFieldOutline
+import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 
 //De alguma for vai ser enviado como parametro deste metodo o adversario e a equipa atual
 //Depois quando tiver isso adaptar este metodo
@@ -56,7 +58,7 @@ private fun TextFieldForm() {
     var numGoalsTeam by remember { mutableStateOf("") }
     var numGoalsAdversary by remember { mutableStateOf("") }
 
-    NumberTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_team),
         value = numGoalsTeam,
         onValueChange = { newText ->
@@ -70,10 +72,11 @@ private fun TextFieldForm() {
                 }
             }
         },
-        isRequired = true
+        isRequired = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
-    NumberTextFieldOutline(
+    TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_opponent_team),
         value = numGoalsAdversary,
         onValueChange = { newText ->
@@ -87,7 +90,8 @@ private fun TextFieldForm() {
                 }
             }
         },
-        isRequired = true
+        isRequired = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 }
 
