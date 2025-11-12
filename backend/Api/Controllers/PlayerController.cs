@@ -47,7 +47,7 @@ namespace Api.Controllers
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    createPlayerResult
+                    createPlayerResult //a 
                     );
         }
 
