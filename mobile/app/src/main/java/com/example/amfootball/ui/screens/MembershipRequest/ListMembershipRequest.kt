@@ -42,7 +42,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.MembershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.ui.components.Buttons.FilterApplyButton
 import com.example.amfootball.ui.components.InputFields.DatePickerDocked
 import com.example.amfootball.ui.components.InputFields.LabelTextField
@@ -88,12 +87,14 @@ fun ListMemberShipRequest(
                 Spacer(Modifier.height(16.dp))
             }
 
+            /**
             items(allMemberShipRequest) { request ->
-                ListMemberShipRequestContent(
-                    request = request,
-                    navHostController = navHostController)
-                Spacer(Modifier.height(12.dp))
+            ListMemberShipRequestContent(
+            request = request,
+            navHostController = navHostController)
+            Spacer(Modifier.height(12.dp))
             }
+             */
         }
     }
 }
@@ -220,7 +221,7 @@ private fun ListMemberShipRequestContent(
             Column {
                 InfoRow(
                     icon = Icons.Default.CalendarMonth,
-                    text = membershipRequest.Date,
+                    text = "",//membershipRequest.Date,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
