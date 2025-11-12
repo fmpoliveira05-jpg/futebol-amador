@@ -210,8 +210,6 @@ class ListTeamViewModel: ViewModel() {
         idTeam: String,
         navHostController: NavHostController,
     ) {
-
-        //Mandar Id da team
         navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
             launchSingleTop = true
         }
