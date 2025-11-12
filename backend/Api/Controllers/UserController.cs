@@ -12,8 +12,9 @@ namespace Api.Controllers
     {
         #region Inicializar 
         private readonly IAuthService authService;
-        
-        public UserController(IAuthService authService) { 
+
+        public UserController(IAuthService authService)
+        {
             this.authService = authService;
 
         }
@@ -64,5 +65,19 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        [HttpGet]
+        [Route("get-profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+            var playerDetails = await authService.GetFullUserData(userId);
+            return Ok(playerDetails);
+
+        }
     }
 }
