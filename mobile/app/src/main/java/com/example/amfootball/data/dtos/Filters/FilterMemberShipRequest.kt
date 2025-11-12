@@ -1,11 +1,9 @@
 package com.example.amfootball.data.dtos.Filters
 
-import java.util.Date
+import java.time.LocalDateTime
 
 data class FilterMemberShipRequest(
-    val senderName: String?,
-
-    val minDate: Date?,
-
-    val maxDate: Date?
+    val senderName: String? = null,
+    val minDate: LocalDateTime? = null,
+    val maxDate: LocalDateTime? = null
 )

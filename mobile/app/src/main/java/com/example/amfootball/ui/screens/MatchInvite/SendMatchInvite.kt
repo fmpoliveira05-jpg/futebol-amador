@@ -24,7 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.components.Buttons.SubmitFormButton
 import com.example.amfootball.ui.components.InputFields.TextFieldOutline
-import com.example.amfootball.ui.components.InputFields.DatePickerDocked
+import com.example.amfootball.ui.components.InputFields.DatePickerDockedLimitedDate
 import com.example.amfootball.ui.components.InputFields.FieldTimePicker
 import com.example.amfootball.ui.components.InputFields.Switcher
 import com.example.amfootball.ui.components.InputFields.convertMillisToDate
@@ -76,7 +76,7 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
         isReadOnly = true,
     )
 
-    DatePickerDocked(
+    DatePickerDockedLimitedDate(
         value = gameDate,
         onDateSelected = { millis ->
             gameDate = convertMillisToDate(millis)

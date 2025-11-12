@@ -43,7 +43,7 @@ import java.util.Locale
  * */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDocked(value: String,
+fun DatePickerDockedLimitedDate(value: String,
                      onDateSelected: (millis: Long) -> Unit,
                      label: String,
                      contentDescription: String,
@@ -71,12 +71,118 @@ fun DatePickerDocked(value: String,
         selectableDates = selectableDates
     )
 
-    //Este Bloco de codigo é executado sempre que o utilizador clica num dia na data picker.
-    //E ele atualizada a data com o onDateSelected e e o showDatePicker para fechado
+    DatePicker(
+        label = label,
+        value = value,
+        onIconClick = { showDatePicker = !showDatePicker },
+        contentDescription = contentDescription,
+        showDatePicker = showDatePicker,
+        datePickerState = datePickerState,
+        onDismiss = { showDatePicker = false },
+        onDateSelected = onDateSelected
+    )
+}
+
+@Composable
+fun DatePickerDocked(value: String,
+                     onDateSelected: (millis: Long) -> Unit,
+                     label: String,
+                     contentDescription: String,
+                     modifier: Modifier = Modifier) {
+    var showDatePicker by remember { mutableStateOf(value = false) }
+    val datePickerState = rememberDatePickerState()
+
+    DatePicker(
+        label = label,
+        value = value,
+        onIconClick = { showDatePicker = !showDatePicker },
+        contentDescription = contentDescription,
+        showDatePicker = showDatePicker,
+        datePickerState = datePickerState,
+        onDismiss = { showDatePicker = false },
+        onDateSelected = onDateSelected
+    )
+}
+
+/**
+ * Modal
+ * */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModal(
+    onDateSelected: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected(datePickerState.selectedDateMillis)
+                onDismiss()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerModalInput(
+    onDateSelected: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onDateSelected(datePickerState.selectedDateMillis)
+                onDismiss()
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = datePickerState)
+    }
+}
+
+fun convertMillisToDate(millis: Long): String {
+    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    return formatter.format(Date(millis))
+}
+
+@Composable
+private fun DatePicker(label: String,
+                       value: String,
+                       onIconClick: () -> Unit,
+                       contentDescription: String,
+                       showDatePicker: Boolean,
+                       datePickerState: DatePickerState,
+                       onDismiss: () -> Unit,
+                       onDateSelected: (millis: Long) -> Unit,
+                       modifier: Modifier = Modifier){
+
     LaunchedEffectDatePicker(
         datePickerState = datePickerState,
         onDateSelected = onDateSelected,
-        onDismiss = { showDatePicker = false }
+        onDismiss = onDismiss
     )
 
     Box(
@@ -86,14 +192,14 @@ fun DatePickerDocked(value: String,
             value = value,
             label = label,
             contentDescription = contentDescription,
-            onIconClick = { showDatePicker = !showDatePicker }
+            onIconClick = onIconClick
         )
 
         if (showDatePicker) {
-           PopUpDatePicker(
-               datePickerState = datePickerState,
-               onDismiss = { showDatePicker = false }
-           )
+            PopUpDatePicker(
+                datePickerState = datePickerState,
+                onDismiss = onDismiss
+            )
         }
     }
 }
@@ -161,70 +267,5 @@ private fun PopUpDatePicker(
                 showModeToggle = true,
             )
         }
-    }
-}
-
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
-}
-
-
-/**
- * Modal
- * */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerModal(
-    onDateSelected: (Long?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
-                onDismiss()
-            }) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerModalInput(
-    onDateSelected: (Long?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
-                onDismiss()
-            }) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
     }
 }
