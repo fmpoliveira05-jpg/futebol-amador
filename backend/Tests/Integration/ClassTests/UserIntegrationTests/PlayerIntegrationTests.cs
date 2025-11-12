@@ -45,75 +45,12 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             _factory?.Dispose();
         }
 
-        #region Helper Methods
-        private void SetupMocks(
-            Mock<IPlayerService> mockPlayerService = null,
-            Mock<IAuthService> mockAuthService = null,
-            Mock<IPlayerAuthorizationValidator> mockAuthValidator = null,
-            Mock<IMembershipRequestService> mockMembershipService = null)
-        {
-            _client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    // Remove todos os serviços que podem instanciar Firebase
-                    RemoveFirebaseDependencies(services);
-
-                    // Remove e substitui os serviços específicos
-                    services.RemoveAll<IPlayerService>();
-                    services.RemoveAll<IAuthService>();
-                    services.RemoveAll<IPlayerAuthorizationValidator>();
-                    services.RemoveAll<IMembershipRequestService>();
-
-                    // Adiciona os mocks fornecidos ou cria mocks padrão
-                    services.AddSingleton(mockPlayerService?.Object ?? new Mock<IPlayerService>().Object);
-                    services.AddSingleton(mockAuthService?.Object ?? CreateDefaultAuthServiceMock().Object);
-                    services.AddSingleton(mockAuthValidator?.Object ?? new Mock<IPlayerAuthorizationValidator>().Object);
-                    services.AddSingleton(mockMembershipService?.Object ?? new Mock<IMembershipRequestService>().Object);
-                });
-            }).CreateClient();
-        }
-
-        private Mock<IAuthService> CreateDefaultAuthServiceMock()
-        {
-            var mockAuthService = new Mock<IAuthService>();
-            // Configurações padrão para evitar chamadas ao Firebase
-            mockAuthService.Setup(x => x.RegisterUser(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(Guid.NewGuid().ToString());
-            mockAuthService.Setup(x => x.LoginAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new LoginResponseDto());
-            mockAuthService.Setup(x => x.DeleteUserAsync(It.IsAny<string>())).Verifiable();
-            mockAuthService.Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
-            return mockAuthService;
-        }
-
-        private void RemoveFirebaseDependencies(IServiceCollection services)
-        {
-            // Remove serviços Firebase explicitamente
-            var firebaseServices = services.Where(s =>
-                s.ServiceType.Namespace != null && (
-                    s.ServiceType.Namespace.Contains("Firebase") ||
-                    s.ServiceType.Namespace.Contains("Google.Cloud") ||
-                    s.ServiceType.Namespace.Contains("Firestore") ||
-                    s.ImplementationType?.Namespace?.Contains("Firebase") == true ||
-                    s.ImplementationType?.Namespace?.Contains("Google.Cloud") == true))
-                .ToList();
-
-            foreach (var service in firebaseServices)
-            {
-                services.Remove(service);
-            }
-        }
-        #endregion
-
         #region Tests
 
         #region GetPlayer Tests
         [Test]
         public async Task GetPlayer_Returns_PlayerDetails_When_PlayerExists()
         {
-            // Arrange
             var playerId = Guid.NewGuid().ToString();
             var expectedPlayerDetails = new PlayerDetailsDto
             {
@@ -138,10 +75,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 });
             }).CreateClient();
 
-            // Act
             var response = await _client.GetAsync($"/api/Player/{playerId}");
-
-            // Assert
+            
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
@@ -163,7 +98,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
         [Test]
         public async Task GetPlayer_Returns_NotFound_When_PlayerDoesNotExist()
         {
-            // Arrange
             var playerId = Guid.NewGuid().ToString();
 
             var mockPlayerService = new Mock<IPlayerService>();
@@ -215,10 +149,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            // Act
             var response = await _client.GetAsync("/api/Player/get-my-profile");
 
-            // Assert
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
@@ -251,8 +183,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 });
             }).CreateClient();
 
-            //_client.DefaultRequestHeaders.Remove("Authorization");
-
             var response = await _client.GetAsync("/api/Player/get-my-profile");
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -265,8 +195,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
         [Test]
         public async Task UpdateUser_Returns_Success_When_ValidRequest()
         {
-            // Arrange
-            var playerId = TestAuthHandler.TestUserId; // Usar o mesmo ID fixo do TestAuthHandler
+            var playerId = TestAuthHandler.TestUserId; 
             var updateDto = new UpdatePlayerDto
             {
                 Name = "Test Name",
@@ -279,11 +208,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             };
 
             var mockPlayerService = new Mock<IPlayerService>();
-            var mockPlayerAuthValidator = new Mock<IPlayerAuthorizationValidator>();
             var mockAuthService = new Mock<IAuthService>();
 
-            mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Verifiable();
             mockPlayerService.Setup(s => s.UpdatePlayerAsync(playerId, It.IsAny<UpdatePlayerDto>()))
                 .Returns(Task.CompletedTask);
 
@@ -291,53 +217,43 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             {
                 builder.ConfigureTestServices(services =>
                 {
-                    // Remove serviços existentes
                     services.RemoveAll<IPlayerService>();
-                    services.RemoveAll<IPlayerAuthorizationValidator>();
                     services.RemoveAll<IAuthService>();
 
-                    // Registra os mocks com os tipos de interface corretos
                     services.AddSingleton<IPlayerService>(mockPlayerService.Object);
-                    services.AddSingleton<IPlayerAuthorizationValidator>(mockPlayerAuthValidator.Object);
                     services.AddSingleton<IAuthService>(mockAuthService.Object);
                 });
             }).CreateClient();
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            // Act
             var response = await _client.PutAsJsonAsync($"/api/Player/{playerId}", updateDto);
 
-            // Assert
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             var content = await response.Content.ReadAsStringAsync();
             Assert.That(content, Contains.Substring("Player information updated succesfully"));
 
-            mockPlayerAuthValidator.Verify(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId), Times.Once);
             mockPlayerService.Verify(s => s.UpdatePlayerAsync(playerId, It.IsAny<UpdatePlayerDto>()), Times.Once);
         }
 
         [Test]
         public async Task UpdateUser_Returns_BadRequest_When_InvalidModel()
         {
-            // Arrange
             var playerId = Guid.NewGuid().ToString();
             var invalidDto = new UpdatePlayerDto
             {
-                Name = "", // Invalid empty name
-                Email = "invalid-email", // Invalid email format
-                Phone = "invalid-phone", // Invalid phone format
-                Height = -5 // Invalid height
+                Name = "",
+                Email = "invalid-email", 
+                Phone = "invalid-phone", 
+                Height = -5 
             };
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            // Act
             var response = await _client.PutAsJsonAsync($"/api/Player/{playerId}", invalidDto);
 
-            // Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
@@ -356,32 +272,13 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 Height = 170
             };
 
-            var mockPlayerAuthValidator = new Mock<IPlayerAuthorizationValidator>();
-
-            mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Throws(new UnauthorizedAccessException("User ID does not match"));
-
-            _client = _factory.WithWebHostBuilder(builder =>
-            {
-                builder.ConfigureServices(services =>
-                {
-                    services.RemoveAll(typeof(IPlayerAuthorizationValidator));
-                    services.AddSingleton(mockPlayerAuthValidator.Object);
-                });
-            }).CreateClient();
+            _client = _factory.CreateClient();
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             var response = await _client.PutAsJsonAsync($"/api/Player/{playerId}", updateDto);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
-
-            //var ex = Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            //    _client.PutAsJsonAsync($"/api/Player/{playerId}", updateDto));
-
-            //Assert.That(ex.Message, Contains.Substring("User ID does not match"));
-
-            mockPlayerAuthValidator.Verify(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId), Times.Once);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
         }
         #endregion
 
@@ -389,7 +286,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
         [Test]
         public async Task LeaveTeam_Returns_Success_When_PlayerLeavesTeam()
         {
-            // Arrange
             var playerId = Guid.NewGuid().ToString();
             var teamName = "Test Team";
 
@@ -415,10 +311,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            // Act
             var response = await _client.PutAsync($"/api/Player/{playerId}/leave-team", null);
 
-            // Assert
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
@@ -433,14 +327,11 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
         [Test]
         public async Task LeaveTeam_Returns_Unauthorized_When_NotAuthenticated()
         {
-            // Arrange
             var playerId = Guid.NewGuid().ToString();
             _client = _factory.CreateClient();
 
-            // Act
             var response = await _client.PutAsync($"/api/Player/{playerId}/leave-team", null);
 
-            // Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
 
