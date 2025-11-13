@@ -18,6 +18,10 @@ class LeadBoardViewModel: ViewModel() {
         listTeam.value.take(inicialSizeList.value)
     }
 
+    val showMoreButton: State<Boolean> = derivedStateOf {
+        inicialSizeList.value < listTeam.value.size
+    }
+
     //Inicializer
     init {
         //TODO: Depois adaptar para ir buscar ao FireBase

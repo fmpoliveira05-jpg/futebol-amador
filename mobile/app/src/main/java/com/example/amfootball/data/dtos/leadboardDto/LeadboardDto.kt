@@ -22,7 +22,7 @@ data class LeadboardDto(
                         LeadboardDto(
                             Position = i,
                             Team = InfoTeamLeadboard(
-                                Id = "t-$i",
+                                id = "t-$i",
                                 name = "Equipa Exemplo $i",
                                 currentPoints = points,
                                 nameRank = rankName

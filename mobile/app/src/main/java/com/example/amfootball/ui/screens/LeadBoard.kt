@@ -1,6 +1,9 @@
 package com.example.amfootball.ui.screens
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Surface
@@ -12,6 +15,7 @@ import com.example.amfootball.ui.viewModel.LeadBoardViewModel
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -24,52 +28,55 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.leadboardDto.LeadboardDto
+import com.example.amfootball.ui.components.Buttons.ShowMoreInfoButton
 
-
-/*
-@Composable
-fun LeaderboardScreen(onBack: () -> Unit, viewModel: MainViewModel) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Leaderboard", modifier = Modifier.padding(8.dp))
-        val board = viewModel.getLeaderboard()
-
-        LazyColumn {
-            items(board) { team ->
-                TeamRow(team)
-                Divider()
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onBack) { Text("Voltar") }
-    }
-}
-
-Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-        Text("Leaderboard", modifier = Modifier.padding(8.dp))
-    }
-* */
 @Composable
 fun LeaderboardScreen(
     navHostController: NavHostController,
     viewModel: LeadBoardViewModel = viewModel()
 ) {
     val list = viewModel.inicialList.value
+    val showButton = viewModel.showMoreButton.value
 
     Surface {
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            //METER UM ITEM PARA AS TEAMS
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "LeadBoard",
+                        style = MaterialTheme.typography.headlineSmall // Estilo de título
+                    )
+                }
+            }
+
             items(list) { team ->
                 LeaderBoardContent(
                     team = team,
-                    showMoreAction = { viewModel.loadMoreTeams() },
-                    showInforTeam = { viewModel.showInfoTeam(
+                    showInfoTeam = { viewModel.showInfoTeam(
                         idTeam = team.Team.id,
-                        navHostController = navHostController
-                    ) }
+                        navHostController = navHostController)
+                    }
                 )
+            }
+
+            if (showButton) {
+                item {
+                    FilledTonalButton(
+                        onClick = { viewModel.loadMoreTeams() },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Ver mais",
+                            style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1
+                        )
+                    }
+                }
             }
         }
     }
@@ -78,10 +85,16 @@ fun LeaderboardScreen(
 @Composable
 private fun LeaderBoardContent(
     team: LeadboardDto,
-    showMoreAction: () -> Unit,
-    showInforTeam: () -> Unit
+    showInfoTeam: () -> Unit
 ) {
     ListItem(
+        overlineContent = {
+            Text(
+                text = "#${team.Position}",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold
+            )
+        },
         headlineContent = {
             Text(text = team.Team.name)
         },
@@ -103,7 +116,7 @@ private fun LeaderBoardContent(
                 overflow = TextOverflow.Ellipsis
             )
         },
-        leadingContent = { // imagem
+        leadingContent = {
             Icon(
                 imageVector = Icons.Default.Star,
                 contentDescription = "Logo Team",
@@ -111,7 +124,11 @@ private fun LeaderBoardContent(
                 modifier = Modifier.size(40.dp)
             )
         },
-
+        trailingContent = {
+            ShowMoreInfoButton(
+                showMoreDetails = { showInfoTeam() }
+            )
+        },
     )
 }
 

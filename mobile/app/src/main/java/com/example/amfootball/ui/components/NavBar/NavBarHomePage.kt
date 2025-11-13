@@ -95,7 +95,7 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController,
             ListTeamScreen(navHostController = globalNavController)
         }
         composable(RouteNavBarHomePage.LEADBOARD) {
-            LeaderboardScreen()
+            LeaderboardScreen(navHostController = globalNavController)
         }
         composable(RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST) {
             ListMemberShipRequest(navHostController = globalNavController)
