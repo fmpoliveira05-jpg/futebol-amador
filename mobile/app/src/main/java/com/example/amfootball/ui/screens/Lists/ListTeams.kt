@@ -55,6 +55,8 @@ import com.example.amfootball.R
 import com.example.amfootball.data.Actions.FilterTeamActions
 import com.example.amfootball.data.dtos.Rank.RankNameDto
 import com.example.amfootball.ui.components.Buttons.LineClearFilterButtons
+import com.example.amfootball.ui.components.Buttons.SendMemberShipRequestButton
+import com.example.amfootball.ui.components.Buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.Buttons.TextButtonModel
 import com.example.amfootball.ui.components.InputFields.LabelSelectBox
 import com.example.amfootball.ui.viewModel.Lists.ListTeamViewModel
@@ -408,11 +410,8 @@ private fun TrailingContent(
         modifier = Modifier.padding(start = 8.dp)
     ) {
         if(typeUser) {
-            TextButtonModel(
-                onClick = { onClickSendMembership() },
-                imageVector = Icons.Default.Send,
-                contentDescription = "Send Membership Request",
-                text = "Send Membership Request",
+            SendMemberShipRequestButton(
+                onClickSendMembership = { onClickSendMembership() }
             )
         } else {
             TextButtonModel(
@@ -423,15 +422,9 @@ private fun TrailingContent(
             )
         }
 
-        IconButton(
-            onClick = { showMoreDetails() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = stringResource(id = R.string.list_teams_view_team),
-                tint = MaterialTheme.colorScheme.outline
-            )
-        }
+        ShowMoreInfoButton(
+            showMoreDetails = { showMoreDetails() }
+        )
     }
 }
 
