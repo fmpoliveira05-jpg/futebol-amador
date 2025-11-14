@@ -35,7 +35,9 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import java.util.Calendar
 import androidx.compose.material3.TimePicker
+import androidx.compose.ui.res.stringResource
 import java.util.Locale
+import com.example.amfootball.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +46,8 @@ fun FieldTimePicker(
     onValueChange: (String) -> Unit,
     label: String,
     contentDescription: String,
-
+    isError: Boolean = false,
+    errorMessage: String? = stringResource(id = R.string.mandatory_field),
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -58,6 +61,15 @@ fun FieldTimePicker(
                 Icon(
                     imageVector = Icons.Default.AccessTime,
                     contentDescription = contentDescription)
+            }
+        },
+        supportingText = {
+            if (isError && errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         },
         modifier = Modifier.fillMaxWidth()

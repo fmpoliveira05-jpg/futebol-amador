@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mandatory_field">Mandatory field</string>
+
+    <string name="error_min_address">The address must be at least %1$d characters long</string>
+    <string name="error_max_address">The address should only be up to %1$d characters</string>
+
+    <string name="error_min_name_team">The name of team must have at least %1$d characters</string>
+    <string name="error_max_name_team">The name of team should only have up to %1$d characters</string>
+
+    <string name="error_max_description">The description should only be up to %1$d characters</string>
+
+    <string name="error_min_pitch_name">The pitch name must be at least %1$d characters long</string>
+    <string name="error_max_pitch_name">The pitch name should only have up to %1$d characters</string>
 </resources>

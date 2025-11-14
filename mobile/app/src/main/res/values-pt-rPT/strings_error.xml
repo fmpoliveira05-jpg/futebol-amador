@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="mandatory_field">Campo obrigatório</string>
+
+    <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>
+    <string name="error_max_address">A morada só deve até %1$d caracteres</string>
+
+    <string name="error_min_name_team">O nome da equipa deve ter pelo menos %1$d caracteres</string>
+    <string name="error_max_name_team">O nome da equipa só deve ter até %1$d caracteres</string>
+
+    <string name="error_max_description">A descrição só deve ter até %1$d caracteres</string>
+
+    <string name="error_min_pitch_name">O nome do campo dever ter pelo menos %1$d caracteres</string>
+    <string name="error_max_pitch_name">O nome do campo só deve ter até %1$d caracteres</string>
 </resources>

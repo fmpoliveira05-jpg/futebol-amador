@@ -5,6 +5,9 @@ plugins {
     id("org.sonarqube")
     id("jacoco")
     id("com.google.gms.google-services")
+
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt.android)
 }
 
 android {
@@ -142,5 +145,10 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-}
 
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-compiler:2.51.1") // Para KSP
+
+    // A biblioteca para usar hiltViewModel() no Compose
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+}

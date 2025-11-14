@@ -3,6 +3,9 @@
     <string name="filter_button">Filtrar</string>
     <string name="filter_button_description">Botão que permite filtrar por um conjunto especifico de itens da lista</string>
 
+    <string name="submit_button">Submeter</string>
+    <string name="submit_button_description">Botão que permite submeter um formulário</string>"
+    
     <string name="clear_button">Limpar</string>
     <string name="clear_button_description">Botão que permite apagar os filtros aplicados</string>
 

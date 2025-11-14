@@ -6,6 +6,9 @@
     <string name="clear_button">Clear</string>
     <string name="clear_button_description">Button that allows you to clear the applied filters</string>
 
+    <string name="submit_button">Submit</string>
+    <string name="submit_button_description">Button that allows you to submit a form</string>
+
     <string name="button_send_match_invite">Send Match Invite</string>
     <string name="button_description_send_match_invite">Button that allows you to submit a match invite after filling out the form.</string>
 

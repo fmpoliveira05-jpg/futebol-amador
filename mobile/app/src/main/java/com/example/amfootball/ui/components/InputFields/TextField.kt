@@ -25,6 +25,7 @@ fun LabelTextField(
     isError: Boolean = false,
     errorMessage: String = stringResource(id = R.string.mandatory_field),
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    maxLenght: Int = Int.MAX_VALUE,
 ) {
     Column(
         modifier = modifier
@@ -40,6 +41,7 @@ fun LabelTextField(
             isError = isError,
             errorMessage = errorMessage,
             keyboardOptions = keyboardOptions,
+            maxLenght = maxLenght
         )
     }
 }
@@ -56,15 +58,20 @@ fun TextFieldOutline(
     isReadOnly: Boolean = false,
     isRequired: Boolean = false,
     isError: Boolean = false,
-    errorMessage: String = stringResource(id = R.string.mandatory_field),
+    errorMessage: String? = stringResource(id = R.string.mandatory_field),
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    maxLenght: Int = Int.MAX_VALUE,
 ) {
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
 
     Column(modifier = modifier) {
         OutlinedTextField(
             value = value ?: "",
-            onValueChange = onValueChange,
+            onValueChange = { newValue ->
+                if (newValue.length <= maxLenght) {
+                    onValueChange(newValue)
+                }
+            },
             singleLine = isSingleLine,
             readOnly = isReadOnly,
             isError = isError,
@@ -73,10 +80,11 @@ fun TextFieldOutline(
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = keyboardOptions,
             supportingText = {
-                if (isError) {
+                if (isError && errorMessage != null) {
                     Text(
                         text = errorMessage,
-                        color = MaterialTheme.colorScheme.error
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
                     )
                 }
             }

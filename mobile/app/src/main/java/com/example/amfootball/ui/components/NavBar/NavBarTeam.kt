@@ -21,10 +21,10 @@ import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
-import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
-import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.MatchInvite.ListMatchInviteScreen
-import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
+import com.example.amfootball.ui.screens.lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.lists.ListTeamScreen
+import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
+import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.Team.CalendarScreen
 import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
 import com.example.amfootball.ui.screens.Team.ListMembersScreen

@@ -19,9 +19,9 @@ import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
-import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.Settings.SettingsScreen
-import com.example.amfootball.ui.screens.Settings.PreferenceScreen
+import com.example.amfootball.ui.screens.lists.ListTeamScreen
+import com.example.amfootball.ui.screens.settings.SettingsScreen
+import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.Text
@@ -43,7 +43,7 @@ import com.example.amfootball.navigation.Objects.Pages.AutRoutes
 import com.example.amfootball.navigation.Objects.GeralRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.R
-import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
+import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.theme.AMFootballTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

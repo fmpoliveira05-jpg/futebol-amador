@@ -22,10 +22,10 @@ import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
-import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
-import com.example.amfootball.ui.screens.Team.CrudTeam.CreateTeamScreen
+import com.example.amfootball.ui.screens.Team.CrudTeam.FormTeamScreen
 import com.example.amfootball.ui.screens.Team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.User.ProfileScreen
+import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 
 @Composable
 fun MainNavigation() {
@@ -122,7 +122,7 @@ private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
  * */
 private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController){
     composable(route = CrudTeamRoutes.CREATE_TEAM) {
-        CreateTeamScreen(navHostController = globalNavController)
+        FormTeamScreen(navHostController = globalNavController)
     }
 
     composable(
@@ -153,6 +153,6 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
  * */
 private fun NavGraphBuilder.MatchInivitePages(globalNavController: NavHostController){
     composable(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
-        SendMatchInviteScreen(navHostController = globalNavController)
+        FormMatchInviteScreen(navHostController = globalNavController)
     }
 }

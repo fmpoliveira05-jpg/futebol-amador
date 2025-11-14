@@ -1,67 +1,51 @@
 package com.example.amfootball.ui.viewModel.MemberShipRequest
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.Filters.FilterMemberShipRequest
-import com.example.amfootball.data.dtos.MembershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.RotasUser
-import com.example.amfootball.utils.Patterns
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 class ListMemberShipRequestViewModel: ViewModel() {
-    private val dateFormatter = DateTimeFormatter.ofPattern(Patterns.Date)
 
-    //Estados
-    //Filtros aplicados
-    private val filterState = mutableStateOf(value = FilterMemberShipRequest())
+    private val filterState = MutableStateFlow(value = FilterMemberShipRequest())
+    val uiFilterState = filterState.asStateFlow()
 
-    private val listState = mutableStateOf(value= emptyList<MembershipRequestInfoDto>())
+    private val listState = MutableStateFlow(value= emptyList<MembershipRequestInfoDto>())
+    private var originalList: List<MembershipRequestInfoDto> = emptyList()
+    val uiListState = listState.asStateFlow()
 
-    //Getters (que a UI vai utilizar para mostrar os dados)
-    val senderName: State<String> = derivedStateOf {
-        filterState.value.senderName ?: ""
+    //Inicializador
+    init {
+        // TODO: Meter aqui para logo que ele for chamado/criado o viewModel carregar os dados da lista
+        val initialValue = MembershipRequestInfoDto.generateMemberShipRequestTeam()
+
+        listState.value = initialValue
+        originalList = initialValue
     }
 
-    val minDateDisplayString: State<String> = derivedStateOf {
-        filterState.value.minDate?.format(dateFormatter) ?: ""
-    }
-
-    val maxDateDisplayString: State<String> = derivedStateOf {
-        filterState.value.maxDate?.format(dateFormatter) ?: ""
-    }
-
-    val listMemberShipRequest: State<List<MembershipRequestInfoDto>> = listState
-
-    //Setters (Vão pegar nos dados introduzidos pelo utilizador e guardar no filtro)
+    //Metodos
     fun onSenderNameChanged(newName: String) {
         filterState.value = filterState.value.copy(
             senderName = newName.ifEmpty { null } //Caso esteja vazio guarda null
         )
     }
 
-    fun onMinDateSelected(millis: Long) {
-        filterState.value = filterState.value.copy(minDate = newDateTime(millis = millis))
+    fun onMinDateSelected(newMinDate: Long) {
+        filterState.value = filterState.value.copy(minDate = newDateTime(millis = newMinDate))
     }
 
-    fun onMaxDateSelected(millis: Long) {
-        filterState.value = filterState.value.copy(maxDate = newDateTime(millis = millis))
+    fun onMaxDateSelected(newMaxDate: Long) {
+        filterState.value = filterState.value.copy(maxDate = newDateTime(millis = newMaxDate))
     }
 
-    //Inicializador
-    init {
-        // TODO: Meter aqui para logo que ele for chamado/criado o viewModel carregar os dados da lista
-        listState.value = MembershipRequestInfoDto.generateMemberShipRequestTeam()
-    }
-
-    //Metodos
     /**
      * Função que permite chamar o endPoint da BD para consutlar a lista com os filtros aplicados
      * */
@@ -99,9 +83,11 @@ class ListMemberShipRequestViewModel: ViewModel() {
         listState.value = filteredList
     }
 
+
+    //TODO: Aqui seria feito um novo pedido há API com os dados atualizados
     fun clearFilters() {
         filterState.value = FilterMemberShipRequest()
-        listState.value = listState.value
+        listState.value = originalList
     }
 
     /**
@@ -171,4 +157,5 @@ class ListMemberShipRequestViewModel: ViewModel() {
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
     }
+
 }

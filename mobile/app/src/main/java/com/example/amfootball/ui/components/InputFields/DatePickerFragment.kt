@@ -1,10 +1,10 @@
 package com.example.amfootball.ui.components.InputFields
 
-import android.database.DatabaseErrorHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -31,12 +31,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import com.example.amfootball.R
 
 /**
  * Docker
@@ -44,10 +46,13 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDockedLimitedDate(value: String,
-                     onDateSelected: (millis: Long) -> Unit,
-                     label: String,
-                     contentDescription: String,
-                     modifier: Modifier = Modifier
+                                onDateSelected: (millis: Long) -> Unit,
+                                label: String,
+                                contentDescription: String,
+                                isSingleLine: Boolean = false,
+                                isError: Boolean = false,
+                                errorMessage: String? = stringResource(id = R.string.mandatory_field),
+                                modifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
 
@@ -80,6 +85,9 @@ fun DatePickerDockedLimitedDate(value: String,
         datePickerState = datePickerState,
         onDismiss = { showDatePicker = false },
         onDateSelected = onDateSelected,
+        isSingleLine = isSingleLine,
+        isError = isError,
+        errorMessage = errorMessage,
         modifier = modifier
     )
 }
@@ -90,6 +98,8 @@ fun DatePickerDocked(value: String,
                      label: String,
                      modifier: Modifier = Modifier,
                      contentDescription: String,
+                     isError: Boolean = false,
+                     errorMessage: String? = null
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
     val datePickerState = rememberDatePickerState()
@@ -103,6 +113,8 @@ fun DatePickerDocked(value: String,
         datePickerState = datePickerState,
         onDismiss = { showDatePicker = false },
         onDateSelected = onDateSelected,
+        isError = isError,
+        errorMessage = errorMessage,
         modifier = modifier
     )
 }
@@ -180,6 +192,9 @@ private fun DatePicker(label: String,
                        datePickerState: DatePickerState,
                        onDismiss: () -> Unit,
                        onDateSelected: (millis: Long) -> Unit,
+                       isSingleLine: Boolean = false,
+                       isError: Boolean = false,
+                       errorMessage: String? = null,
                        modifier: Modifier = Modifier){
 
     LaunchedEffectDatePicker(
@@ -196,6 +211,9 @@ private fun DatePicker(label: String,
             label = label,
             contentDescription = contentDescription,
             onIconClick = onIconClick,
+            isSingleLine = isSingleLine,
+            isError = isError,
+            errorMessage = errorMessage
         )
 
         if (showDatePicker) {
@@ -226,7 +244,11 @@ private fun LaunchedEffectDatePicker(
 private fun DateOutlineOutlinedTextField(value: String,
                                          label: String,
                                          contentDescription: String,
-                                         onIconClick: () -> Unit) {
+                                         onIconClick: () -> Unit,
+                                         isSingleLine: Boolean = false,
+                                         isError: Boolean = false,
+                                         errorMessage: String? = null,
+) {
     OutlinedTextField(
         value = value,
         onValueChange = { },
@@ -242,9 +264,19 @@ private fun DateOutlineOutlinedTextField(value: String,
                 )
             }
         },
+        supportingText = {
+            if (isError && errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        singleLine = isSingleLine,
         modifier = Modifier
             .fillMaxWidth()
-            .height(height = 64.dp)
+            .heightIn(min = 64.dp)
     )
 }
 
