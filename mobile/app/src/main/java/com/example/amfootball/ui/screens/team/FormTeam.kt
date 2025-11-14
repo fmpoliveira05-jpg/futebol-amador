@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.team.CrudTeam
+package com.example.amfootball.ui.screens.team
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -123,7 +123,7 @@ private fun FieldsCreateTeam(
         errorMessage = fieldsErrors.descriptionError?.let { stringResource(id = it, TeamConst.MAX_DESCRIPTION_LENGTH) }
     )
 
-    Text(text = "Campo da equipa")
+    Text(text = stringResource(id = R.string.label_fields_pitch))
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
         value = filedTeam.pitch.name,

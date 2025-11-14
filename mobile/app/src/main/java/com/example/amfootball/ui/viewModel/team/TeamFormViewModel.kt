@@ -35,7 +35,6 @@ class TeamFormViewModel @Inject constructor(
     private val errors = MutableStateFlow(TeamFormErros())
     val uiErrors: StateFlow<TeamFormErros> = errors.asStateFlow()
 
-
     //Setters
     fun onNameChange(name: String) {
         formState.value = formState.value.copy(name = name)
