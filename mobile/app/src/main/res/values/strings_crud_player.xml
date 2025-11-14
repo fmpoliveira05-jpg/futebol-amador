@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_name">Name</string>
+    <string name="date_of_birthday">Date of Birth</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="address">Address</string>
+    <string name="player_position">Position</string>
+    <string name="player_size">Height</string>
+    <string name="player_team">Team</string>
+</resources>

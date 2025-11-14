@@ -18,8 +18,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.R
-import com.example.amfootball.ui.components.Buttons.SubmitFormButton
-import com.example.amfootball.ui.components.InputFields.TextFieldOutline
+import com.example.amfootball.ui.components.buttons.SubmitFormButton
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 
 //TODO: Mandar também o idMatch e depois com base disso fazer um pedido há API para carregar as teams da match

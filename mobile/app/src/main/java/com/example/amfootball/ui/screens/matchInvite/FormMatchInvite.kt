@@ -2,8 +2,6 @@ package com.example.amfootball.ui.screens.matchInvite
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
@@ -25,13 +23,12 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.MatchInviteFormErros
-import com.example.amfootball.ui.components.Buttons.SubmitFormButton
-import com.example.amfootball.ui.components.InputFields.TextFieldOutline
-import com.example.amfootball.ui.components.InputFields.DatePickerDockedLimitedDate
-import com.example.amfootball.ui.components.InputFields.FieldTimePicker
-import com.example.amfootball.ui.components.InputFields.Switcher
-import com.example.amfootball.ui.viewModel.MatchInvite.FormMatchInviteViewModel
-import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.ui.components.buttons.SubmitFormButton
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedLimitedDate
+import com.example.amfootball.ui.components.inputFields.FieldTimePicker
+import com.example.amfootball.ui.components.inputFields.Switcher
+import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 
 @Composable
 fun FormMatchInviteScreen(

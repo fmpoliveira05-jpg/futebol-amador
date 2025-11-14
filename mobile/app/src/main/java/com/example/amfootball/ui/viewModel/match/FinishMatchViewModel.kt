@@ -4,7 +4,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import com.example.amfootball.data.dtos.Match.ResultMatchDto
+import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.utils.FinishMatchConst
 
 class FinishMatchViewModel: ViewModel() {

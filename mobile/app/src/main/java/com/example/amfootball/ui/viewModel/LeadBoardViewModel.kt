@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.leadboardDto.LeadboardDto
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
 
 class LeadBoardViewModel: ViewModel() {
     private val listTeam = mutableStateOf(value = emptyList<LeadboardDto>())

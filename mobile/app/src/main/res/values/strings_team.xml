@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="description_logo_team">Team %1$s logo</string>
+    <string name="label_fields_pitch">Team\'s pitch</string>
+</resources>

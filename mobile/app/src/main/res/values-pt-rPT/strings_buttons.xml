@@ -9,6 +9,12 @@
     <string name="clear_button">Limpar</string>
     <string name="clear_button_description">Botão que permite apagar os filtros aplicados</string>
 
+    <string name="accept_button">Aceitar</string>
+    <string name="accept_button_description">Botão que permite aceitar algo</string>
+
+    <string name="reject_button">Rejeitar</string>
+    <string name="reject_button_description">Botão que permite rejetiar algo</string>
+
     <string name="button_send_match_invite">Enviar Convite de Partida</string>
     <string name="button_description_send_match_invite">Botão que permite apos preencher o formulário para enviar convite de partida</string>
 

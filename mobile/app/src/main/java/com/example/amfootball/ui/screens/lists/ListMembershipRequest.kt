@@ -14,13 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -31,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -42,14 +37,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
-import com.example.amfootball.data.dtos.Filters.FilterMemberShipRequest
+import com.example.amfootball.data.dtos.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.ui.components.Buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.InputFields.DatePickerDocked
-import com.example.amfootball.ui.components.InputFields.LabelTextField
-import com.example.amfootball.ui.components.Lists.FilterHeader
-import com.example.amfootball.ui.components.Lists.InfoRow
-import com.example.amfootball.ui.viewModel.MemberShipRequest.ListMemberShipRequestViewModel
+import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
+import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.ui.components.inputFields.LabelTextField
+import com.example.amfootball.ui.components.lists.FilterHeader
+import com.example.amfootball.ui.components.lists.InfoRow
+import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
+import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
 
@@ -70,6 +66,7 @@ fun ListMemberShipRequest(
         onApplyFiltersClick = viewModel::applyFilters,
         onClearFilters = viewModel::clearFilters
     )
+
     var filtersExpanded by remember { mutableStateOf(false) }
 
     Surface {
@@ -86,9 +83,6 @@ fun ListMemberShipRequest(
                 Spacer(Modifier.height(16.dp))
             }
 
-            /**
-             * TODO: Depois meter para receber o senderId e o boolean
-             * */
             items(list) { request ->
                 ListMemberShipRequestContent(
                     membershipRequest = request,
@@ -233,59 +227,13 @@ private fun ListMemberShipRequestContent(
             )
         },
         trailingContent = {
-            TrailingContent(
-                acceptMemberShipRequest = acceptMemberShipRequest,
-                rejectMemberShipRequest = rejectMemberShipRequest,
+            ItemAcceptRejectAndShowMore(
+                accept = acceptMemberShipRequest,
+                reject = rejectMemberShipRequest,
                 showMore = showMore
             )
         },
     )
-}
-
-/**
- * Todo que fica no lado direito da linha
- * */
-@Composable
-private fun TrailingContent(
-    acceptMemberShipRequest: () -> Unit = {},
-    rejectMemberShipRequest: () -> Unit = {},
-    showMore: () -> Unit = {},
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(start = 8.dp)
-    ) {
-        IconButton(
-            onClick = { acceptMemberShipRequest() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Aceitar",
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        IconButton(
-            onClick = { rejectMemberShipRequest() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Rejeitar",
-                tint = MaterialTheme.colorScheme.error
-            )
-        }
-
-        IconButton(
-            onClick = { showMore() }
-        ) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = stringResource(id = R.string.list_teams_view_team),
-                tint = MaterialTheme.colorScheme.outline
-            )
-        }
-    }
 }
 
 @Preview(

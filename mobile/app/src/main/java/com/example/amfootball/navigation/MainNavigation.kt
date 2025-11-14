@@ -9,22 +9,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
-import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
-import com.example.amfootball.ui.screens.User.LoginScreen
-import com.example.amfootball.ui.screens.User.SignUpScreen
+import com.example.amfootball.navigation.objects.navBar.RouteNavBarHomePage
+import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
+import com.example.amfootball.ui.screens.user.LoginScreen
+import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.amfootball.navigation.Objects.Pages.AutRoutes
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
-import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
-import com.example.amfootball.navigation.Objects.RotasUser
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
-import com.example.amfootball.ui.screens.Team.CrudTeam.FormTeamScreen
-import com.example.amfootball.ui.screens.Team.ProfileTeamScreen
-import com.example.amfootball.ui.screens.User.ProfileScreen
+import com.example.amfootball.navigation.objects.pages.AutRoutes
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.MatchInviteRoutes
+import com.example.amfootball.navigation.objects.RotasUser
+import com.example.amfootball.ui.components.navBar.NavigatonDrawerNavBarHomePage
+import com.example.amfootball.ui.components.navBar.NavigatonDrawerTeam
+import com.example.amfootball.ui.screens.team.CrudTeam.FormTeamScreen
+import com.example.amfootball.ui.screens.team.ProfileTeamScreen
+import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 
 @Composable

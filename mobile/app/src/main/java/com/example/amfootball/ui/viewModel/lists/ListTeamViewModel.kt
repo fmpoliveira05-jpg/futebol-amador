@@ -4,11 +4,11 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.Filters.FiltersListTeamDto
+import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
-import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.MatchInviteRoutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

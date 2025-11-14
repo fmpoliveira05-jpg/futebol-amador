@@ -3,7 +3,6 @@ package com.example.amfootball.data.dtos.matchInivite
 import com.example.amfootball.utils.Patterns
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 
 data class MatchInviteDto(
     val id: String? = null,

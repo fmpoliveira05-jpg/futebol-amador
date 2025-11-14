@@ -28,7 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.leadboardDto.LeadboardDto
-import com.example.amfootball.ui.components.Buttons.ShowMoreInfoButton
+import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 
 @Composable
 fun LeaderboardScreen(

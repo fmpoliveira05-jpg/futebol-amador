@@ -1,9 +1,0 @@
-package com.example.amfootball.data.dtos.Match
-
-data class ResultMatchDto(
-    val idMatch: String,
-    val idTeam: String,
-    val numGoals: Int,
-    val idOpponent: String,
-    val numGoalsOpponent: Int
-)
