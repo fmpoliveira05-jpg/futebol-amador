@@ -4,12 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
-import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
-import com.example.amfootball.navigation.objects.RotasUser
 import com.example.amfootball.utils.extensions.toLocalDateTime
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.example.amfootball.data.dtos.Filters.FilterMemberShipRequest
+import com.example.amfootball.data.dtos.MembershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
+import com.example.amfootball.navigation.Objects.Routes
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class ListMemberShipRequestViewModel: ViewModel() {
 
@@ -105,7 +110,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
             //TODO: Fazer pedido ao endpoint da Team accept da API
         }
 
-        navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM)
+        navHostController.navigate(Routes.TeamRoutes.HOMEPAGE.route)
     }
 
     /**
@@ -136,7 +141,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
         IdSender: String,
         navHostController: NavHostController,
     ) {
-        var route = RotasUser.USER_PROFILE
+        var route = Routes.UserRoutes.PROFILE.route
 
         if (isPlayerSender) {
             route = CrudTeamRoutes.PROFILE_TEAM

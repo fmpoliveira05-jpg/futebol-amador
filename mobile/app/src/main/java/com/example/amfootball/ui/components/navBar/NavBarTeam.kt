@@ -19,15 +19,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
-import com.example.amfootball.navigation.objects.navBar.RouteNavBarHomePage
-import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
-import com.example.amfootball.ui.screens.lists.ListPlayersScreen
-import com.example.amfootball.ui.screens.lists.ListTeamScreen
-import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
-import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
-import com.example.amfootball.ui.screens.team.CalendarScreen
-import com.example.amfootball.ui.screens.team.HomePageTeamScreen
-import com.example.amfootball.ui.screens.team.ListMembersScreen
+import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.Lists.ListTeamScreen
+import com.example.amfootball.ui.screens.MatchInvite.ListMatchInviteScreen
+import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
+import com.example.amfootball.ui.screens.Team.CalendarScreen
+import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.Team.ListMembersScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlin.collections.arrayListOf
 
@@ -65,27 +64,30 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
 fun ScaffoldContentTeamNavBar(navController: NavHostController,
                               globalNavController: NavHostController
 ) {
-    NavHost(navController = navController, startDestination = RoutesNavBarTeam.HOME_PAGE_TEAM) {
-        composable(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+    NavHost(navController = navController, startDestination = Routes.TeamRoutes.HOMEPAGE.route) {
+        composable(Routes.TeamRoutes.HOMEPAGE.route) {
             HomePageTeamScreen(globalNavController = globalNavController)
         }
-        composable(RoutesNavBarTeam.CALENDAR) {
+        composable(Routes.TeamRoutes.CALENDAR.route) {
             CalendarScreen(globalNavController = globalNavController)
         }
-        composable(RoutesNavBarTeam.LIST_MEMBERS) {
+        composable(Routes.TeamRoutes.MEMBERLIST.route) {
             ListMembersScreen()
         }
-        composable(RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST) {
+        composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)
         }
-        composable(RoutesNavBarTeam.SEARCH_PLAYERS_WITHOU_TEAM){
+        /*
+        composable(Routes.TeamRoutes.SEARCH_PLAYERS_WITHOU_TEAM.route){
             ListPlayersScreen()
         }
-        composable(RoutesNavBarTeam.SEARCH_TEAMS_TO_MATCH_INVITE) {
+
+         */
+        composable(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route) {
             ListTeamScreen(navHostController = globalNavController)
         }
-        composable(RoutesNavBarTeam.LIST_MATCHINVITE) {
-            ListMatchInviteScreen(navHostController = globalNavController)
+        composable(Routes.TeamRoutes.LIST_MATCH_INVITES.route) {
+            ListMatchInviteScreen()
         }
     }
 }
@@ -98,42 +100,45 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_home),
         description = stringResource(id = R.string.item_home_description),
         icon = Icons.Filled.Home,
-        route = RouteNavBarHomePage.HOME_PAGE,
+        route = Routes.GeralRoutes.HOMEPAGE.route,
         isGlobalRoute = true))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_home_page_team),
         description = stringResource(id = R.string.description_navbar_homepage_team),
         icon = Icons.Filled.Home,
-        route = RoutesNavBarTeam.HOME_PAGE_TEAM,
+        route = Routes.TeamRoutes.HOMEPAGE.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_calendar),
         description = stringResource(id = R.string.description_navbar_calendar),
         icon = Icons.Filled.DateRange,
-        route = RoutesNavBarTeam.CALENDAR,
+        route = Routes.TeamRoutes.CALENDAR.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id= R.string.navbar_members_list),
         description = stringResource(id = R.string.description_navbar_members_list),
         icon = Icons.Filled.List,
-        route = RoutesNavBarTeam.LIST_MEMBERS,
+        route = Routes.TeamRoutes.MEMBERLIST.route,
         isGlobalRoute = false))
+    /*
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_players_without_team_list),
         description = stringResource(id = R.string.description_navbar_players_without_team_list),
         icon = Icons.Filled.Search,
-        route = RoutesNavBarTeam.SEARCH_PLAYERS_WITHOU_TEAM,
+        route = Routes.TeamRoutes.SEARCH_PLAYERS_WITHOU_TEAM,
         isGlobalRoute = false))
+
+     */
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_memberships_list),
         description = stringResource(id = R.string.description_navbar_memberships_list),
         icon = Icons.Filled.List,
-        route = RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST,
+        route = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_teams_to_matchinvite_list),
         description = stringResource(id = R.string.description_navbar_teams_to_matchinvite_list),
         icon = Icons.Filled.List,
-        route = RoutesNavBarTeam.SEARCH_TEAMS_TO_MATCH_INVITE,
+        route = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_matchinvite_list),
         description = stringResource(id = R.string.description_navbar_matchinvite_list),
         icon = Icons.Filled.List,
-        route = RoutesNavBarTeam.LIST_MATCHINVITE,
+        route = Routes.TeamRoutes.LIST_MATCH_INVITES.route,
         isGlobalRoute = false))
     return drawerItemsList
 }

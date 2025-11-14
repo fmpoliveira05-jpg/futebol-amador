@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -15,8 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.NavigationItem
-import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
-import com.example.amfootball.navigation.objects.navBar.RouteNavBarHomePage
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
@@ -39,12 +35,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.amfootball.navigation.objects.pages.AutRoutes
-import com.example.amfootball.navigation.objects.GeralRoutes
-import com.example.amfootball.navigation.objects.RotasUser
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.R
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.theme.AMFootballTheme
+import okhttp3.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,23 +82,23 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
 @Composable
 fun ScaffoldContentNavBarHomePage(navController: NavHostController,
                                   globalNavController: NavHostController) {
-    NavHost(navController = navController, startDestination = RouteNavBarHomePage.HOME_PAGE) {
-        composable(RouteNavBarHomePage.HOME_PAGE) {
+    NavHost(navController = navController, startDestination = Routes.GeralRoutes.HOMEPAGE.route) {
+        composable(Routes.GeralRoutes.HOMEPAGE.route) {
             HomePageScreen(globalNavController = globalNavController)
         }
-        composable(RouteNavBarHomePage.EQUIPAS) {
+        composable(Routes.PlayerRoutes.TEAM_LIST.route) {
             ListTeamScreen(navHostController = globalNavController)
         }
-        composable(RouteNavBarHomePage.LEADBOARD) {
-            LeaderboardScreen(navHostController = globalNavController)
+        composable(Routes.GeralRoutes.LEADERBOARD.route) {
+            LeaderboardScreen()
         }
-        composable(RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST) {
+        composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)
         }
-        composable(route = GeralRoutes.SETTINGS) {
+        composable(route = Routes.GeralRoutes.SETTINGS.route) {
             SettingsScreen()
         }
-        composable(route = GeralRoutes.PREFERENCE) {
+        composable(route = Routes.GeralRoutes.PREFERENCE.route) {
             PreferenceScreen()
         }
     }
@@ -118,47 +113,47 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
     drawerItemsList.add(NavigationItem(label = stringResource(R.string.item_home),
         description = stringResource(id = R.string.item_home_description),
         icon = Icons.Filled.Home,
-        route = RouteNavBarHomePage.HOME_PAGE,
+        route = Routes.GeralRoutes.HOMEPAGE.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_team),
         description = stringResource(id = R.string.item_team_description),
         icon = Icons.Filled.Home,
-        route = RoutesNavBarTeam.HOME_PAGE_TEAM,
+        route = Routes.TeamRoutes.HOMEPAGE.route,
         isGlobalRoute =  true))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.navbar_memberships_list),
         description = stringResource(id = R.string.description_navbar_memberships_list),
         icon = Icons.Filled.List,
-        route = RoutesNavBarTeam.LIST_MEMBERSHIP_REQUEST,
+        route = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route,
         isGlobalRoute = false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_list_team),
         description = stringResource(id = R.string.item_list_team_description),
         icon = Icons.Filled.List,
-        route = RouteNavBarHomePage.EQUIPAS,
+        route = Routes.PlayerRoutes.TEAM_LIST.route,
         isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_list_players),
         description = stringResource(id = R.string.item_list_players_description),
         icon = Icons.Filled.List,
-        route = RouteNavBarHomePage.PLAYERS,
+        route = Routes.PlayerRoutes.PLAYER_LIST.route,
         isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_leadboard),
         description = stringResource(id = R.string.item_leadboard_description),
         icon = Icons.Filled.List, //Depois sacar
-        route = RouteNavBarHomePage.LEADBOARD,
+        route = Routes.GeralRoutes.LEADERBOARD.route,
         isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_settings),
         description = stringResource(id = R.string.item_settings_description),
-        icon = Icons.Filled.Settings,
-        route = GeralRoutes.SETTINGS,
+        icon = Routes.GeralRoutes.SETTINGS.icon,
+        route = Routes.GeralRoutes.SETTINGS.route,
         isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = stringResource(id = R.string.item_preference),
         description = stringResource(id = R.string.item_preference_description),
-        icon = Icons.Filled.Person, //Depois trocar
-        route = GeralRoutes.PREFERENCE,
+        icon = Routes.GeralRoutes.PREFERENCE.icon, //Depois trocar
+        route = Routes.GeralRoutes.PREFERENCE.route,
         isGlobalRoute =  false))
     drawerItemsList.add(NavigationItem(label = "Perfil",
-        description = "PErfil de utilizador",
-        icon = Icons.Filled.Person, //Depois trocar
-        route = RotasUser.USER_PROFILE,
+        description = stringResource(Routes.UserRoutes.PROFILE.contentDescription),
+        icon = Routes.UserRoutes.PROFILE.icon, //Depois trocar
+        route = Routes.UserRoutes.PROFILE.route,
         isGlobalRoute = true))
     return drawerItemsList
 }
@@ -184,16 +179,16 @@ private fun RowScope.HomePageTopBarActions(
             )
         }
     } else {
-        if (currentRoute == RouteNavBarHomePage.HOME_PAGE) {
+        if (currentRoute == Routes.GeralRoutes.HOMEPAGE.route) {
             Row {
                 LoginButton(onClick = {
-                    globalNavController.navigate(AutRoutes.LOGIN)
+                    globalNavController.navigate(Routes.UserRoutes.LOGIN.route)
                 },
                     modifier = Modifier.padding(end = 4.dp)
                 )
 
                 RegisterButton(onClick = {
-                    globalNavController.navigate(AutRoutes.SIGN_IN)
+                    globalNavController.navigate(Routes.UserRoutes.SIGNUP.route)
                 })
             }
 

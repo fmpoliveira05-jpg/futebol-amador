@@ -2,7 +2,7 @@
 <resources>
     <string name="back_button_title" translatable="false">Login</string>
     <string name="login_title" translatable="false">Login</string>
-    <string name="email_field" translatable="false">Email</string>
+    <string name="email_field">Mail</string>
     <string name="email_label">Enter your email</string>
     <string name="password_field" translatable="false">Password</string>
     <string name="password_label">Enter your password</string>

@@ -21,4 +21,24 @@
 
     <string name="item_preference">Preferences</string>
     <string name="item_preference_description">User preferences</string>
+
+    <string name="signup">Sign Up</string>
+    <string name="signup_description">Sign up page</string>
+
+    <string name="logout">Logout</string>
+    <string name="logout_description">Logout from the application</string>
+
+    <string name="page_options">Page Options</string>
+    <string name="page_options_description">Page options</string>
+
+    <string name="chat">Chat</string>
+    <string name="chat_description">Chats</string>
+
+    <string name="team_homepage">Team Profile</string>
+    <string name="team_homepage_description">Team Homepage</string>
+    <string name="team_profile">Team Profile</string>
+    <string name="team_profile_description">Show team profile</string>
+    <string name="team_settings">Team Settings</string>
+    <string name="team_settings_description">Team settings</string>
+
 </resources>
