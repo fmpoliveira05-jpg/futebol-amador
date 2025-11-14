@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.MatchInviteFormErros
-import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +13,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.amfootball.R
+import com.example.amfootball.navigation.Objects.Routes
 
 class FormMatchInviteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
@@ -76,7 +76,7 @@ class FormMatchInviteViewModel @Inject constructor(
             //TODO: Fazer o pedido ao endPoint de sendMatchInvite
         }
 
-        navHostController.navigate(RoutesNavBarTeam.CALENDAR) {
+        navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
             popUpTo(0)
         }
     }

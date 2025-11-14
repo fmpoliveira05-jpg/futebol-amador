@@ -10,6 +10,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
+import com.example.amfootball.data.User
 import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
 
 @Composable

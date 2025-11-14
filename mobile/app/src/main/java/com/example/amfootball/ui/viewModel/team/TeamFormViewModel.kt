@@ -3,7 +3,6 @@ package com.example.amfootball.ui.viewModel.team
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.data.dtos.team.FormTeamDto
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,11 +10,12 @@ import javax.inject.Inject
 import android.net.Uri
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.errors.TeamFormErros
-import com.example.amfootball.navigation.objects.navBar.RoutesNavBarTeam
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.R
+import com.example.amfootball.navigation.Objects.Routes
+
 /**
  * Este viewModel é utilizado pelo create e update Team
  * */
@@ -84,7 +84,7 @@ class TeamFormViewModel @Inject constructor(
         }
 
         //Se tudo der bem
-        navHostController.navigate(route = RoutesNavBarTeam.HOME_PAGE_TEAM)
+        navHostController.navigate(route = Routes.TeamRoutes.HOMEPAGE.route)
     }
 
     //Metodos privados

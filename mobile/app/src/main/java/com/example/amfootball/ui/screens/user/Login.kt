@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.navigation.objects.navBar.RouteNavBarHomePage
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.inputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
@@ -122,7 +122,7 @@ private fun FieldsLogin(navHostController: NavHostController) {
                 isLoading = false
 
                 if (loginSucesso){
-                    navHostController.navigate(RouteNavBarHomePage.HOME_PAGE) {
+                    navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                         popUpTo(navHostController.graph.startDestinationId){
                             inclusive = true
                         }

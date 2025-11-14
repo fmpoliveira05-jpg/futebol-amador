@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="page_profile_user">Perfil User</string>
-    <string name="profile_user_title_page">Perfil User</string>
+    <string name="page_profile_user">User Profile</string>
+    <string name="profile_user_title_page">User Profile</string>
 </resources>
