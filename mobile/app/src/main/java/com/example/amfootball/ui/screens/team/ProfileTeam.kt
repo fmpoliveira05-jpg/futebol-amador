@@ -19,8 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
 import com.example.amfootball.ui.components.BackTopBar
-import com.example.amfootball.ui.components.inputFields.ProfilesImage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 
 @Composable

@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.team.PostPoneMatch
+package com.example.amfootball.ui.screens.team.postPoneMatch
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api

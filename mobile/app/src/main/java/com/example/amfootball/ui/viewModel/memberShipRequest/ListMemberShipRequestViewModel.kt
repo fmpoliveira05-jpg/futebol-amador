@@ -62,20 +62,20 @@ class ListMemberShipRequestViewModel: ViewModel() {
             val matchesName = if (currentFilters.senderName.isNullOrBlank()) {
                 true
             } else {
-                item.Sender.contains(currentFilters.senderName, ignoreCase = true)
+                item.sender.name.contains(currentFilters.senderName, ignoreCase = true)
             }
 
             val matchesMinDate =
                 if (currentFilters.minDate == null) {
                 true
             } else {
-                !item.DateSend.isBefore(currentFilters.minDate)
+                !item.dateSend.isBefore(currentFilters.minDate)
             }
 
             val matchesMaxDate = if (currentFilters.maxDate == null) {
                 true
             } else {
-                !item.DateSend.isAfter(currentFilters.maxDate)
+                !item.dateSend.isAfter(currentFilters.maxDate)
             }
 
             matchesName && matchesMinDate && matchesMaxDate
@@ -125,7 +125,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
             //TODO:Fazer pedido há API, ao endpoint da team
         }
 
-        val updatedList = listState.value.filterNot { it.Id == idRequest }
+        val updatedList = listState.value.filterNot { it.id == idRequest }
 
         listState.value = updatedList
     }
