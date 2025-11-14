@@ -46,18 +46,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.data.dtos.Filters.FiltersListTeamDto
-import com.example.amfootball.data.dtos.ItemTeamInfoDto
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
-import com.example.amfootball.ui.components.InputFields.LabelTextField
-import com.example.amfootball.ui.components.Lists.FilterHeader
-import com.example.amfootball.ui.components.Lists.InfoRow
+import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
+import com.example.amfootball.ui.components.inputFields.LabelTextField
+import com.example.amfootball.ui.components.lists.FilterHeader
+import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.Rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
+import com.example.amfootball.data.dtos.rank.RankNameDto
+import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.Buttons.FilterApplyButton
-import com.example.amfootball.ui.components.InputFields.LabelSelectBox
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.MembershipRequestRoutes
+import com.example.amfootball.ui.components.buttons.FilterApplyButton
+import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import kotlin.String
 
 /**

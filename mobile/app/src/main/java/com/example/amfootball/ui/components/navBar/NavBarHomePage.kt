@@ -15,7 +15,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
-import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import androidx.compose.material.icons.automirrored.filled.Login
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.R
+import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.theme.AMFootballTheme
 import okhttp3.Route
@@ -90,7 +90,7 @@ fun ScaffoldContentNavBarHomePage(navController: NavHostController,
             ListTeamScreen(navHostController = globalNavController)
         }
         composable(Routes.GeralRoutes.LEADERBOARD.route) {
-            LeaderboardScreen()
+            LeaderboardScreen(navHostController = globalNavController)
         }
         composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)

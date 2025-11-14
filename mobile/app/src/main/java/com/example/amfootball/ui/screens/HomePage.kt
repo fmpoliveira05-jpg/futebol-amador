@@ -12,7 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.User
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
 
 @Composable
 //fun HomePageScreen(currentUser: User?){

@@ -12,25 +12,23 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.ui.screens.User.LoginScreen
-import com.example.amfootball.ui.screens.User.SignUpScreen
+import com.example.amfootball.ui.screens.user.LoginScreen
+import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
-import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
-import com.example.amfootball.ui.screens.Team.CrudTeam.CreateTeamScreen
-import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
-import com.example.amfootball.ui.screens.Team.ProfileTeamScreen
-import com.example.amfootball.ui.screens.User.ProfileScreen
+import com.example.amfootball.ui.screens.team.FormTeamScreen
+import com.example.amfootball.ui.screens.team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.team.ProfileTeamScreen
+import com.example.amfootball.ui.screens.user.ProfileScreen
 
 
 @Composable

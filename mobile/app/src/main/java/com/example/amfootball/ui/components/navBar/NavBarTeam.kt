@@ -20,13 +20,13 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.screens.Lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.MatchInvite.ListMatchInviteScreen
-import com.example.amfootball.ui.screens.MembershipRequest.ListMemberShipRequest
-import com.example.amfootball.ui.screens.Team.CalendarScreen
-import com.example.amfootball.ui.screens.Team.HomePageTeamScreen
-import com.example.amfootball.ui.screens.Team.ListMembersScreen
+import com.example.amfootball.ui.screens.lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
+import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
+import com.example.amfootball.ui.screens.team.CalendarScreen
+import com.example.amfootball.ui.screens.team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlin.collections.arrayListOf
 
@@ -77,17 +77,11 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController,
         composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)
         }
-        /*
-        composable(Routes.TeamRoutes.SEARCH_PLAYERS_WITHOU_TEAM.route){
-            ListPlayersScreen()
-        }
-
-         */
         composable(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route) {
             ListTeamScreen(navHostController = globalNavController)
         }
         composable(Routes.TeamRoutes.LIST_MATCH_INVITES.route) {
-            ListMatchInviteScreen()
+            ListMatchInviteScreen(navHostController = globalNavController)
         }
     }
 }

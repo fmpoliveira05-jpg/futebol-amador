@@ -22,12 +22,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.Buttons.SubmitFormButton
-import com.example.amfootball.ui.components.InputFields.TextFieldOutline
-import com.example.amfootball.ui.components.InputFields.DatePickerDockedLimitedDate
-import com.example.amfootball.ui.components.InputFields.FieldTimePicker
-import com.example.amfootball.ui.components.InputFields.Switcher
-import com.example.amfootball.ui.components.InputFields.convertMillisToDate
+import com.example.amfootball.ui.components.buttons.SubmitFormButton
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedLimitedDate
+import com.example.amfootball.ui.components.inputFields.FieldTimePicker
+import com.example.amfootball.ui.components.inputFields.Switcher
+import com.example.amfootball.ui.components.inputFields.convertMillisToDate
 
 @Composable
 fun SendMatchInviteScreen(navHostController: NavHostController) {

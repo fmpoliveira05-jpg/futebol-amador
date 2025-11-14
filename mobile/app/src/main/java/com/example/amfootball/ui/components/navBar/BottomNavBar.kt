@@ -32,7 +32,7 @@ import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.Buttons.NavigateButton
 import com.example.amfootball.ui.screens.HomePageScreen
-import com.example.amfootball.ui.screens.Settings.SettingsScreen
+import com.example.amfootball.ui.screens.settings.SettingsScreen
 
 @Composable
 fun MainBottomNavBar(

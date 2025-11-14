@@ -7,8 +7,8 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
-import com.example.amfootball.navigation.objects.pages.MatchInviteRoutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -156,7 +156,7 @@ class ListTeamViewModel: ViewModel() {
                         navHostController: NavHostController) {
 
         //Mandar o id da equipa como parametro
-        navHostController.navigate(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
+        navHostController.navigate(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
             launchSingleTop = true
         }
     }
