@@ -22,7 +22,7 @@ import com.example.amfootball.navigation.objects.pages.MatchInviteRoutes
 import com.example.amfootball.navigation.objects.RotasUser
 import com.example.amfootball.ui.components.navBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.navBar.NavigatonDrawerTeam
-import com.example.amfootball.ui.screens.team.CrudTeam.FormTeamScreen
+import com.example.amfootball.ui.screens.team.FormTeamScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen

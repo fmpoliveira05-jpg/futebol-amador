@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.screens.team.CrudTeam
+package com.example.amfootball.ui.screens.team
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
