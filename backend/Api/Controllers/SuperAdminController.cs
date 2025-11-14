@@ -35,11 +35,6 @@ namespace Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreateSuperAdmin([FromBody] CreateSuperAdminDTO createSuperAdminDTO)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var newSadminId = await superAdminService.CreateSuperAdminAsync(createSuperAdminDTO);
             var createUserResult = await authService.LoginAsync(createSuperAdminDTO.Email, createSuperAdminDTO.Password);
             return CreatedAtAction(
@@ -49,7 +44,7 @@ namespace Api.Controllers
                 );
         }
 
-        [HttpDelete("{sadminId:guid}")]
+        [HttpDelete("{sadminId:required}")]
         public async Task<IActionResult> DeleteSuperAdmin(string sadminId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), sadminId);
@@ -58,7 +53,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("{sadminId:guid}")]
+        [HttpGet("{sadminId:required}")]
         public async Task<IActionResult> GetSuperAdmin(string sadminId)
         {
             var superAdminDetails = await superAdminService.GetSuperAdminByIdAsync(sadminId);
@@ -66,7 +61,7 @@ namespace Api.Controllers
             return Ok(superAdminDetails);
         }
 
-        [HttpPut("{sadminId:guid}")]
+        [HttpPut("{sadminId:required}")]
         public async Task<IActionResult> UpdateSuperAdmin(string sadminId, [FromBody] UpdateSuperAdminDTO dto)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), sadminId);
