@@ -9,17 +9,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
-import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.screens.User.LoginScreen
 import com.example.amfootball.ui.screens.User.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.amfootball.navigation.Objects.Pages.AutRoutes
 import com.example.amfootball.navigation.Objects.Pages.CrudTeamRoutes
-import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
-import com.example.amfootball.navigation.Objects.RotasUser
+import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.ui.components.NavBar.BottomNavBar
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerNavBarHomePage
 import com.example.amfootball.ui.components.NavBar.NavigatonDrawerTeam
 import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
@@ -37,25 +34,33 @@ fun MainNavigation() {
 
     val onLogoutClick: () -> Unit = {
         isLoggedIn = false
-        globalNavController.navigate(RouteNavBarHomePage.HOME_PAGE) {
+        globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
             popUpTo(0) // Limpa a stack de navegação
         }
     }
 
-    NavHost(
-        navController = globalNavController,
-        startDestination = RouteNavBarHomePage.HOME_PAGE
-    ) {
-        NavBars(
-            globalNavController = globalNavController,
-            isLoggedIn = isLoggedIn,
-            onLogoutClick = onLogoutClick
-        )
+    BottomNavBar(globalNavController = globalNavController)
+    {
+        NavHost(
+            navController = globalNavController,
+            startDestination = Routes.GeralRoutes.HOMEPAGE.route
+        ) {
+            NavBars(
+                globalNavController = globalNavController,
+                isLoggedIn = isLoggedIn,
+                onLogoutClick = onLogoutClick
+            )
 
-        Pages(
-            globalNavController = globalNavController
-        )
+            Pages(
+                globalNavController = globalNavController
+            )
+
+        }
+
     }
+
+
+
 }
 
 //Função que declara todas as rotas da app
@@ -64,7 +69,7 @@ private fun NavGraphBuilder.NavBars(
     isLoggedIn: Boolean,
     onLogoutClick: () -> Unit
 ) {
-    composable(RouteNavBarHomePage.HOME_PAGE) {
+    composable(Routes.GeralRoutes.HOMEPAGE.route) {
         NavigatonDrawerNavBarHomePage(
             globalNavController = globalNavController,
             isLoggedIn = isLoggedIn,
@@ -72,13 +77,16 @@ private fun NavGraphBuilder.NavBars(
         )
     }
 
-    composable(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+    composable(Routes.TeamRoutes.HOMEPAGE.route) {
         NavigatonDrawerTeam(
             globalNavController = globalNavController,
             isLoggedIn = isLoggedIn,
             onLogout = onLogoutClick
         )
     }
+
+
+
 }
 
 /**
@@ -99,11 +107,11 @@ private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
  * */
 private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
     //Depois meter para os dois verificações para só user não autenticados
-    composable(AutRoutes.LOGIN) {
+    composable(Routes.UserRoutes.LOGIN.route) {
         LoginScreen(globalNavController)
     }
 
-    composable(AutRoutes.SIGN_IN) {
+    composable(Routes.UserRoutes.SIGNUP.route) {
         SignUpScreen(globalNavController)
     }
 }
@@ -112,7 +120,7 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
  * Paginas do Utilizador
  * */
 private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
-    composable(RotasUser.USER_PROFILE) {
+    composable(Routes.UserRoutes.PROFILE.route) {
         ProfileScreen(globalNavController)
     }
 }
@@ -152,7 +160,7 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
  * Páginas de MatchInvite
  * */
 private fun NavGraphBuilder.MatchInivitePages(globalNavController: NavHostController){
-    composable(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
+    composable(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
         SendMatchInviteScreen(navHostController = globalNavController)
     }
 }

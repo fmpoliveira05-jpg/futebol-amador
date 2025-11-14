@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.constants.AddressContants
 import com.example.amfootball.utils.constants.PitchConstants
 import com.example.amfootball.utils.constants.TeamConstants
-import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.Buttons.SubmitFormButton
 import com.example.amfootball.ui.components.InputFields.TextFieldOutline
@@ -144,7 +144,7 @@ private fun FieldsCreateTeam(navHostController: NavHostController) {
             hasAttemptedSubmit = true
 
             if (isFormValid) {
-                navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+                navHostController.navigate(Routes.TeamRoutes.HOMEPAGE.route) {
                     popUpTo(0)
                 }
             }

@@ -54,8 +54,8 @@ import com.example.amfootball.ui.components.Lists.FilterHeader
 import com.example.amfootball.ui.components.Lists.InfoRow
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.Rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Pages.MatchInviteRoutes
 import com.example.amfootball.navigation.Objects.Pages.MembershipRequestRoutes
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.Buttons.FilterApplyButton
 import com.example.amfootball.ui.components.InputFields.LabelSelectBox
 import kotlin.String
@@ -369,7 +369,7 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
                 } else {
                     TextButton(
                         onClick = {
-                            navHostController.navigate(route = MatchInviteRoutes.SEND_MATCH_INVITE) {
+                            navHostController.navigate(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
                                 launchSingleTop = true
                             }
                         },

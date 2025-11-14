@@ -36,12 +36,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.navigation.Objects.NavBar.RouteNavBarHomePage
 import com.example.amfootball.ui.components.Buttons.BackButton
 import com.example.amfootball.ui.components.InputFields.DatePickerModalInput
 import com.example.amfootball.ui.components.InputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlinx.coroutines.launch
@@ -286,7 +286,7 @@ private fun FieldsSignUp(navHostController: NavHostController) {
 
                         // Sucesso!
                         isLoading = false
-                        navHostController.navigate(RouteNavBarHomePage.HOME_PAGE) {
+                        navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                             popUpTo(navHostController.graph.startDestinationId) {
                                 inclusive = true
                             }

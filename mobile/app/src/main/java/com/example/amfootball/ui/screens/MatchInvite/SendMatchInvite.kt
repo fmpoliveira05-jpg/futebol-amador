@@ -21,7 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.navigation.Objects.NavBar.RoutesNavBarTeam
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.Buttons.SubmitFormButton
 import com.example.amfootball.ui.components.InputFields.TextFieldOutline
 import com.example.amfootball.ui.components.InputFields.DatePickerDockedLimitedDate
@@ -111,7 +111,7 @@ private fun FieldsSendMatchInvite(navHostController: NavHostController) {
     SubmitFormButton(
         onClick = {
             if (isFormValid) {
-                navHostController.navigate(RoutesNavBarTeam.HOME_PAGE_TEAM) {
+                navHostController.navigate(Routes.TeamRoutes.HOMEPAGE.route) {
                     popUpTo(0)
                     println("Convite enviado!")
                 }

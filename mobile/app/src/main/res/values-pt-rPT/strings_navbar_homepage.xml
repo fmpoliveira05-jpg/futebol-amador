@@ -21,4 +21,31 @@
 
     <string name="item_preference">Preferencias</string>
     <string name="item_preference_description">Preferencias do utilizador</string>
+
+    <string name="signup">Registre-se</string>
+    <string name="signup_description">Registre-se para utilizar a aplicação</string>
+
+    <string name="logout">Sair</string>
+    <string name="logout_description">Sair da aplicação</string>
+
+    <string name="page_options">Opções da página</string>
+    <string name="page_options_description">Opções da página</string>
+
+    <string name="chat">Chat</string>
+    <string name="chat_description">Conversas</string>
+
+    <string name="team_homepage">Página da Equipa</string>
+    <string name="team_homepage_description">Página inicial da equipa</string>
+    <string name="team_profile">Perfil da Equipa</string>
+    <string name="team_profile_description">Ver perfil da equipa</string>
+
+    <string name="team_settings">Definições da Equipa</string>
+    <string name="team_settings_description">Definições da equipa</string>
+
+
+
+
+
+
+
 </resources>
