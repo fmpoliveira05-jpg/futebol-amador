@@ -34,98 +34,32 @@ import com.example.amfootball.ui.components.Buttons.NavigateButton
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.Settings.SettingsScreen
 
-
 @Composable
-fun AppNavHost(
+fun MainBottomNavBar(
     navController: NavHostController,
-    startDestination: Routes.BottomNavBarRoutes,
-    modifier: Modifier = Modifier
+    onShowBottomSheet: () -> Unit // Callback para mostrar o Bottom Sheet
 ) {
-    NavHost(
-        navController,
-        startDestination = startDestination.route,
-        modifier = modifier
-    ) {
-        Routes.BottomNavBarRoutes.entries.forEach { destination ->
-            composable(destination.route) {
-                when (destination) {
-                    Routes.BottomNavBarRoutes.HOMEPAGE -> HomePageScreen(navController)
-                    Routes.BottomNavBarRoutes.TEAM_LIST -> SettingsScreen() //ALTERAR QUANDO EXISTIR
-                    Routes.BottomNavBarRoutes.CHAT -> SettingsScreen() //TODO: Trocar quando a pagina existir
-                    Routes.BottomNavBarRoutes.USER_PROFILE -> SettingsScreen() //TODO: Trocar quando a pagina existir
-                    else -> {}
-                }
-            }
-        }
-    }
-}
-
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-// [START android_compose_components_navigationbarexample]
-
-@Composable
-fun BottomNavBar(
-    globalNavController: NavHostController,
-    content: @Composable (PaddingValues) -> Unit
-    ) {
-    val navController = globalNavController
-    val modifier: Modifier = Modifier
-
-    var showBottomSheet by remember { mutableStateOf(false) }
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    Scaffold(
-        modifier = modifier,
-        bottomBar = {
-            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                Routes.BottomNavBarRoutes.entries.forEach { destination ->
-                    NavigationBarItem(
-                        // Seleção baseada na rota atual do NavController
-                        selected = currentRoute == destination.route,
-                        onClick = {
-                            if (destination == Routes.BottomNavBarRoutes.PAGE_OPTIONS) {
-                                showBottomSheet = true
-                            } else {
-                                // Para todos os outros itens, navega normalmente
-                                navController.navigate(destination.route) {
-                                    launchSingleTop = true
-                                    restoreState = true
-                                    popUpTo(navController.graph.startDestinationId) {
-                                        saveState = true
-                                    }
-                                }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                destination.icon,
-                                contentDescription = stringResource(destination.contentDescription)
-                            )
-                        },
-                        label = { Text(stringResource(destination.labelResId), maxLines = 1, overflow = TextOverflow.Ellipsis) }
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        content(innerPadding)
-
-        AppNavHost(
-            navController = navController,
-            startDestination = Routes.BottomNavBarRoutes.HOMEPAGE,
-            modifier = Modifier.padding(innerPadding)
-        )
-
-
-        if (showBottomSheet) {
-            AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
-                BottomSheetContent(Modifier, navController,currentRoute)
-            }
+    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+        Routes.BottomNavBarRoutes.entries.forEach { destination ->
+            NavigationBarItem(
+                selected = currentRoute == destination.route,
+                onClick = {
+                    if (destination == Routes.BottomNavBarRoutes.PAGE_OPTIONS) {
+                        onShowBottomSheet()
+                    } else {
+                        navController.navigate(destination.route) {
+                            launchSingleTop = true
+                            restoreState = true
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                        }
+                    }
+                },
+                icon = { Icon(destination.icon, contentDescription = stringResource(destination.contentDescription)) },
+                label = { Text(stringResource(destination.labelResId), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+            )
         }
     }
 }
@@ -136,7 +70,6 @@ fun BottomSheetContent(
     navController: NavHostController,
     currentScreenRoute: String?
 ){
-    //fazer um composable para o conteudo
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -190,5 +123,3 @@ fun CommonContentBottomSheet(navController: NavHostController){
     NavigateButton(Routes.PlayerRoutes.PLAYER_LIST.icon, stringResource(Routes.PlayerRoutes.PLAYER_LIST.contentDescription), onClick = {navController.navigate(Routes.PlayerRoutes.PLAYER_LIST.route)})
 
 }
-
-// [END android_compose_components_navigationbarexample]

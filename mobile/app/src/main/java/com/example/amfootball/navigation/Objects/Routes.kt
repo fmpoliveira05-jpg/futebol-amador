@@ -13,16 +13,15 @@ import androidx.compose.material.icons.filled.Groups3
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Person4
-import androidx.compose.material.icons.filled.PersonAddAlt1
-import androidx.compose.material.icons.filled.PersonRemoveAlt1
 import androidx.compose.material.icons.filled.RoomPreferences
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SportsBaseball
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.amfootball.R
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PersonAdd
 
-interface RouteInfo {
+interface AppRouteInfo {
     val route: String
     val labelResId: Int
     val icon: ImageVector
@@ -36,7 +35,7 @@ object Routes {
         override val labelResId: Int,
         override val icon: ImageVector,
         override val contentDescription: Int
-    ) : RouteInfo {
+    ) : AppRouteInfo {
         SETTINGS("Settings", R.string.item_settings, Icons.Default.Settings, R.string.item_settings_description),
         PREFERENCE("Preference", R.string.item_preference, Icons.Default.AccessibilityNew, R.string.item_preference_description),
         HOMEPAGE("homepage", R.string.item_home, Icons.Default.Home, R.string.item_home_description),
@@ -49,7 +48,7 @@ object Routes {
         override val labelResId: Int,
         override val icon: ImageVector,
         override val contentDescription: Int
-    ) : RouteInfo {
+    ) : AppRouteInfo {
         PLAYER_LIST("playerlist", R.string.item_list_players, Icons.Default.Group, R.string.item_list_players_description),
         TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description)
     }
@@ -60,10 +59,10 @@ object Routes {
         override val labelResId: Int,
         override val icon: ImageVector,
         override val contentDescription: Int
-    ) : RouteInfo {
+    ) : AppRouteInfo {
         PROFILE("profile_user", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page),
         LOGIN("Login", R.string.login_title, Icons.AutoMirrored.Filled.Login, R.string.login_title),
-        SIGNUP("Signup", R.string.signup, Icons.Default.AssignmentInd, R.string.signup_description),
+        SIGNUP("Signup", R.string.signup, Icons.Default.PersonAdd, R.string.signup_description),
         LOGOUT("Logout", R.string.logout, Icons.AutoMirrored.Filled.Logout, R.string.logout_description),
     }
 
@@ -75,7 +74,7 @@ object Routes {
         override val labelResId: Int,
         override val icon: ImageVector,
         override val contentDescription: Int
-    ) : RouteInfo {
+    ) : AppRouteInfo {
         // Criei os recursos de string para cada um. Terá de os adicionar a strings.xml
         HOMEPAGE("HomePageTeam", R.string.team_homepage, Icons.Default.Home, R.string.team_homepage_description),
         TEAM_PROFILE("teamprofile", R.string.team_profile, Icons.Default.Person4, R.string.team_profile_description),
@@ -97,7 +96,7 @@ object Routes {
         override val labelResId: Int,
         override val icon: ImageVector,
         override val contentDescription: Int
-    ) : RouteInfo {
+    ) : AppRouteInfo {
         // A lógica aqui já estava quase correta, só precisa do override
         HOMEPAGE(GeralRoutes.HOMEPAGE.route, GeralRoutes.HOMEPAGE.labelResId, GeralRoutes.HOMEPAGE.icon, GeralRoutes.HOMEPAGE.contentDescription),
         TEAM_LIST(PlayerRoutes.TEAM_LIST.route, PlayerRoutes.TEAM_LIST.labelResId, PlayerRoutes.TEAM_LIST.icon, PlayerRoutes.TEAM_LIST.contentDescription),
