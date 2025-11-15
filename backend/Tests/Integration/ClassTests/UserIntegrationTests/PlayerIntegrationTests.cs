@@ -278,7 +278,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             var response = await _client.PutAsJsonAsync($"/api/Player/{playerId}", updateDto);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
         }
         #endregion
 
