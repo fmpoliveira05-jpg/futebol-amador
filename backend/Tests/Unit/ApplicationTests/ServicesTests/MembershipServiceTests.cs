@@ -339,7 +339,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerNaoAdmin = new Player
             {
                 Id = playerId,
-                IsAdmin = false 
+                IsAdmin = false
             };
 
             var team = new Team { Id = teamId };
@@ -349,19 +349,24 @@ namespace Unit.ApplicationTests.ServicesTests
                 .ReturnsAsync(request);
             _teamRepoMock.Setup(r => r.GetTeamForMembershipRequestAsync(teamId))
                 .ReturnsAsync(team);
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
+                .ReturnsAsync(playerNaoAdmin);
 
             _membershipValidatorMock
                 .Setup(v => v.ValidateRejectRequestByTeam(team, request, playerNaoAdmin))
-                .Throws(new ValidationException("O jogador não é administrador.")); 
+                .Throws(new ValidationException("O jogador não é administrador."));
 
             // ACT
             Func<Task> act = async () => await _sut.RejectMembershipRequestTeam(teamId, requestId, playerNaoAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<ValidationException>()
-                     .WithMessage("*não é administrador*"); 
+            var exception = await act.Should().ThrowAsync<Exception>();
+
+            exception.Which.Should().BeOfType<ValidationException>()
+                    .Which.Message.Should().Be("O jogador não é administrador.");
 
             // VERIFY
+            _membershipValidatorMock.Verify(v => v.ValidateRejectRequestByTeam(team, request, playerNaoAdmin), Times.Once);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
