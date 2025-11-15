@@ -1,22 +1,14 @@
 package com.example.amfootball.ui.screens.matchInvite
 
-import android.app.Application
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -42,6 +34,7 @@ import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
+import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
@@ -123,37 +116,36 @@ private fun FilterListMatchInvite(
     val displayFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
 
     Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelTextField(
-                label = stringResource(id = R.string.filter_sender_name),
-                value = filters.senderName ?: "",
-                onValueChange = { filterActions.onSenderNameChange(it) },
-                modifier = Modifier.weight(1f)
-            )
-        }
+        FilterRow(
+            content = {
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_sender_name),
+                    value = filters.senderName ?: "",
+                    onValueChange = { filterActions.onSenderNameChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-        Spacer(Modifier.height(8.dp))
+        FilterRow(
+            content = {
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_min_date),
+                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                    value = filters.minDate?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMinDateSelected(it) },
+                    modifier = Modifier.weight(1f)
+                )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_min_date),
-                contentDescription = stringResource(id = R.string.description_filter_min_date),
-                value = filters.minDate?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMinDateSelected(it) },
-                modifier = Modifier.weight(1f)
-            )
-
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_max_date),
-                contentDescription = stringResource(id = R.string.description_filter_max_date),
-                value = filters.maxDate?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMaxDateSelected(it)},
-                modifier = Modifier.weight(1f)
-            )
-        }
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_max_date),
+                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                    value = filters.maxDate?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMaxDateSelected(it)},
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
         Spacer(Modifier.height(16.dp))
 

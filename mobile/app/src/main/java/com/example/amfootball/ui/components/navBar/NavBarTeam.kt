@@ -36,7 +36,7 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
     val drawerItemList = prepareNavigationDrawerItems()
     val internalNavController = rememberNavController()
 
-    NavigationDraweri(
+    NavigationDrawer(
         itens = drawerItemList,
         titleNavBar = "NavBar Team",
         scaffoldContent = { innerNav ->

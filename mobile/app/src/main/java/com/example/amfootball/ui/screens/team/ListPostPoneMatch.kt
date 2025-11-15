@@ -1,13 +1,10 @@
 package com.example.amfootball.ui.screens.team
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -34,6 +31,7 @@ import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
+import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
@@ -107,79 +105,78 @@ private fun FilterListPostPoneMatchContent(
     val displayFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
 
     Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelTextField(
-                label = stringResource(id = R.string.filter_name),
-                value = filters.nameOpponent,
-                onValueChange = { filterActions.onOpponentNameChange(it) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
+        FilterRow(
+            content = {
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_name),
+                    value = filters.nameOpponent,
+                    onValueChange = { filterActions.onOpponentNameChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
 
-            val locationOptions: List<Boolean?> = listOf(null, true, false)
-            LabelSelectBox(
-                label = stringResource(id = R.string.filter_local_game),
-                list = locationOptions,
-                selectedValue = filters.isHome,
-                onSelectItem = {filterActions.onIsHomeChange(it) },
-                itemToString = { isHomeValue -> // 'isHomeValue' será null, true, or false
-                    when (isHomeValue) {
-                        true -> {
-                            stringResource(id = R.string.filter_home)
+                val locationOptions: List<Boolean?> = listOf(null, true, false)
+                LabelSelectBox(
+                    label = stringResource(id = R.string.filter_local_game),
+                    list = locationOptions,
+                    selectedValue = filters.isHome,
+                    onSelectItem = {filterActions.onIsHomeChange(it) },
+                    itemToString = { isHomeValue -> // 'isHomeValue' será null, true, or false
+                        when (isHomeValue) {
+                            true -> {
+                                stringResource(id = R.string.filter_home)
+                            }
+                            false -> {
+                                stringResource(id = R.string.filter_away)
+                            }
+                            null -> {
+                                stringResource(id = R.string.filter_both)
+                            }
                         }
-                        false -> {
-                            stringResource(id = R.string.filter_away)
-                        }
-                        null -> {
-                            stringResource(id = R.string.filter_both)
-                        }
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_min_date_game),
-                contentDescription = stringResource(id = R.string.description_filter_min_date),
-                value = filters.minDataGame?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMinDateGameChange(it) },
-                modifier = Modifier.weight(1f)
-            )
+        FilterRow(
+            content = {
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_min_date_game),
+                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                    value = filters.minDataGame?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMinDateGameChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
 
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_max_date_game),
-                contentDescription = stringResource(id = R.string.description_filter_max_date),
-                value = filters.maxDateGame?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMaxDateGameChange(it)},
-                modifier = Modifier.weight(1f)
-            )
-        }
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_max_date_game),
+                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                    value = filters.maxDateGame?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMaxDateGameChange(it)},
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_min_date_post_pone),
-                contentDescription = stringResource(id = R.string.description_filter_min_date),
-                value = filters.minDatePostPone?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMinDatePostPoneChange(it) },
-                modifier = Modifier.weight(1f)
-            )
+        FilterRow(
+            content = {
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_min_date_post_pone),
+                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                    value = filters.minDatePostPone?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMinDatePostPoneChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
 
-            DatePickerDocked(
-                label = stringResource(id = R.string.filter_max_date_post_pone),
-                contentDescription = stringResource(id = R.string.description_filter_max_date),
-                value = filters.maxDatePostPone?.format(displayFormatter) ?: "",
-                onDateSelected = { filterActions.onMaxDatePostPoneChange(it)},
-                modifier = Modifier.weight(1f)
-            )
-        }
+                DatePickerDocked(
+                    label = stringResource(id = R.string.filter_max_date_post_pone),
+                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                    value = filters.maxDatePostPone?.format(displayFormatter) ?: "",
+                    onDateSelected = { filterActions.onMaxDatePostPoneChange(it)},
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
         Spacer(Modifier.height(16.dp))
 

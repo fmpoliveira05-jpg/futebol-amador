@@ -3,11 +3,8 @@ package com.example.amfootball.ui.screens.lists
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -41,6 +38,7 @@ import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestBut
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.lists.AddressRow
+import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
@@ -105,101 +103,95 @@ private fun FiltersListTeamContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelTextField(
-                label = stringResource(id = R.string.filter_name_team),
-                value = filters.name,
-                onValueChange = { onFiltersChange(filters.copy(name = it)) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            LabelTextField(
-                label = stringResource(id = R.string.filter_city),
-                value = filters.city,
-                onValueChange = { onFiltersChange(filters.copy(city = it)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
+        FilterRow(
+            content = {
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_name_team),
+                    value = filters.name,
+                    onValueChange = { onFiltersChange(filters.copy(name = it)) },
+                    modifier = Modifier.weight(1f)
+                )
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_city),
+                    value = filters.city,
+                    onValueChange = { onFiltersChange(filters.copy(city = it)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-        Spacer(Modifier.height(8.dp))
+        val selectedRankDto = listRanks.find { it.name == filters.rank }
+        FilterRow(
+            content = {
+                // TODO: Modificar a selectBox do rank para que os ranks sejam carregados da BD
+                LabelSelectBox(
+                    label = "Rank",
+                    list = listRanks,
+                    selectedValue = selectedRankDto ?: listRanks.first(),
+                    itemToString = { rankDto ->
+                        rankDto.name
+                    },
+                    onSelectItem = { rankDto ->
+                        onFiltersChange(filters.copy(rank = rankDto.name))
+                    },
+                    modifier = Modifier.weight(1f)
+                )
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            val selectedRankDto = listRanks.find { it.name == filters.rank }
+                NumberFilterField(
+                    label = stringResource(id = R.string.filter_min_points_Team),
+                    value = filters.minPoint,
+                    onValueChange = { onFiltersChange(filters.copy(minPoint = it)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
+        
+        FilterRow(
+            content = {
+                NumberFilterField(
+                    label = stringResource(id = R.string.filter_max_points_Team),
+                    value = filters.maxPoint,
+                    onValueChange = { onFiltersChange(filters.copy(maxPoint = it)) },
+                    modifier = Modifier.weight(1f)
+                )
 
-            // TODO: Modificar a selectBox do rank para que os ranks sejam carregados da BD
-            LabelSelectBox(
-                label = "Rank",
-                list = listRanks,
-                selectedValue = selectedRankDto ?: listRanks.first(),
-                itemToString = { rankDto ->
-                    rankDto.name
-                },
-                onSelectItem = { rankDto ->
-                    onFiltersChange(filters.copy(rank = rankDto.name))
-                },
-                modifier = Modifier.weight(1f)
-            )
+                NumberFilterField(
+                    label = stringResource(id = R.string.filter_min_average_age_team),
+                    value = filters.minAge,
+                    onValueChange = { onFiltersChange(filters.copy(minAge = it)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-            Spacer(Modifier.weight(1f))
-            Spacer(Modifier.width(8.dp))
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_min_points_Team),
-                value = filters.minPoint,
-                onValueChange = { onFiltersChange(filters.copy(minPoint = it)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
+        FilterRow(
+           content = {
+               NumberFilterField(
+                   label = stringResource(id = R.string.filter_max_average_age_team),
+                   value = filters.maxAge,
+                   onValueChange = { onFiltersChange(filters.copy(maxAge = it)) },
+                   modifier = Modifier.weight(1f)
+               )
 
-        Spacer(Modifier.height(8.dp))
+               NumberFilterField(
+                   label = stringResource(id = R.string.filter_min_members_team),
+                   value = filters.minNumberMembers,
+                   onValueChange = { onFiltersChange(filters.copy(minNumberMembers = it)) },
+                   modifier = Modifier.weight(1f)
+               )
+           }
+        )
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_max_points_Team),
-                value = filters.maxPoint,
-                onValueChange = { onFiltersChange(filters.copy(maxPoint = it)) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_min_average_age_team),
-                value = filters.minAge,
-                onValueChange = { onFiltersChange(filters.copy(minAge = it)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_max_average_age_team),
-                value = filters.maxAge,
-                onValueChange = { onFiltersChange(filters.copy(maxAge = it)) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_min_members_team),
-                value = filters.minNumberMembers,
-                onValueChange = { onFiltersChange(filters.copy(minNumberMembers = it)) },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Row(modifier = Modifier.fillMaxWidth()) {
-            NumberFilterField(
-                label = stringResource(id = R.string.filter_max_members_team),
-                value = filters.maxNumberMembers,
-                onValueChange = { onFiltersChange(filters.copy(maxNumberMembers = it)) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-            Spacer(Modifier.weight(1f))
-        }
-
-        Spacer(Modifier.height(16.dp))
+        FilterRow(
+            content = {
+                NumberFilterField(
+                    label = stringResource(id = R.string.filter_max_members_team),
+                    value = filters.maxNumberMembers,
+                    onValueChange = { onFiltersChange(filters.copy(maxNumberMembers = it)) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
         FilterApplyButton(
             onClick = {

@@ -53,7 +53,7 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
     val navBackStackEntry by internalNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigationDraweri(
+    NavigationDrawer(
         itens = drawerItemList,
         titleNavBar = "NavBar HomePage",
         scaffoldContent = { innerNav ->

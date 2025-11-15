@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -44,6 +42,7 @@ import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.AgeRow
 import com.example.amfootball.ui.components.lists.FilterHeader
+import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
@@ -122,69 +121,70 @@ private fun FilterListMemberContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelTextField(
-                label = stringResource(id = R.string.filter_name),
-                value = filters.name,
-                onValueChange = { filterActions.onNameChange(it) },
-                modifier = Modifier.weight(1f)
-            )
-            Spacer(Modifier.width(8.dp))
-        }
+        FilterRow (
+            content = {
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_name),
+                    value = filters.name ?: "",
+                    onValueChange = { filterActions.onNameChange(it) }, // ou { filterActions.onNameChange(it) }
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        )
 
-        //Corrigir aqui as cenas de não ter (it)
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelTextField(
-                label = stringResource(id = R.string.filter_min_age),
-                value = filters.minAge?.toString(),
-                onValueChange = { filterActions.onMinAgeChange },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.weight(1f)
-            )
+        FilterRow(
+            content = {
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_min_age),
+                    value = filters.minAge?.toString() ?: "",
+                    onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.weight(1f)
+                )
 
-            Spacer(Modifier.width(8.dp))
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_max_age),
+                    value = filters.maxAge?.toString() ?: "",
+                    onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
+                    maxLenght = UserConst.MAX_AGE,
+                    modifier = Modifier.weight(1f)
+                )
+            },
+        )
 
-            LabelTextField(
-                label = stringResource(id = R.string.filter_max_age),
-                value = filters.maxAge?.toString(),
-                onValueChange = { filterActions.onMaxAgeChange },
-                maxLenght = UserConst.MAX_AGE,
-                modifier = Modifier.weight(1f)
-            )
-        }
+        FilterRow(
+            content = {
+                LabelSelectBox(
+                    label = stringResource(id = R.string.filter_type_member),
+                    list = listTypeMember,
+                    selectedValue = filters.typeMember,
+                    onSelectItem = { filterActions.onTypeMemberChange(it) },
+                    itemToString = { position ->
+                        if (position == null) {
+                            stringResource(id = R.string.filter_selectbox_all)
+                        } else {
+                            stringResource(id = position.stringId)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
 
-        Row(modifier = Modifier.fillMaxWidth()) {
-            LabelSelectBox(
-                label = stringResource(id = R.string.filter_type_member),
-                list = listTypeMember,
-                selectedValue = filters.typeMember,
-                onSelectItem = {filterActions.onTypeMemberChange(it) },
-                itemToString = { position ->
-                    if (position == null) {
-                        stringResource(id = R.string.filter_selectbox_all)
-                    } else {
-                        stringResource(id = position.stringId)
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
-
-            Spacer(Modifier.width(8.dp))
-            LabelSelectBox(
-                label = stringResource(id = R.string.filter_position),
-                list = listPosition,
-                selectedValue = filters.position,
-                onSelectItem = {filterActions.onPositionChange(it) },
-                itemToString = { typeMember ->
-                    if (typeMember == null) {
-                        stringResource(id = R.string.filter_selectbox_all)
-                    } else {
-                        stringResource(id = typeMember.stringId)
-                    }
-                },
-                modifier = Modifier.weight(1f)
-            )
-        }
+                LabelSelectBox(
+                    label = stringResource(id = R.string.filter_position),
+                    list = listPosition,
+                    selectedValue = filters.position,
+                    onSelectItem = { filterActions.onPositionChange(it) },
+                    itemToString = { typeMember ->
+                        if (typeMember == null) {
+                            stringResource(id = R.string.filter_selectbox_all)
+                        } else {
+                            stringResource(id = typeMember.stringId)
+                        }
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            },
+        )
 
         Spacer(Modifier.height(16.dp))
 
