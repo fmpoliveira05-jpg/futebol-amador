@@ -58,6 +58,7 @@ import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.page.MembershipRequestRoutes
 import com.example.amfootball.ui.components.buttons.FilterApplyButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
+import com.example.amfootball.ui.components.lists.PlayerImageList
 import kotlin.String
 
 /**
@@ -170,16 +171,18 @@ private fun FiltersListTeamContent(
         Spacer(Modifier.height(8.dp))
 
         Row(modifier = Modifier.fillMaxWidth()) {
+            val selectedRankDto = listRanks.find { it.name == filters.rank }
+
             // TODO: Modificar a selectBox do rank para que os ranks sejam carregados da BD
             LabelSelectBox(
                 label = "Rank",
                 list = listRanks,
-                selectedValue = filters.rank ?: "",
+                selectedValue = selectedRankDto ?: listRanks.first(),
                 itemToString = { rankDto ->
-                    rankDto.Name
+                    rankDto.name
                 },
                 onSelectItem = { rankDto ->
-                    onFiltersChange(filters.copy(rank = rankDto.Name))
+                    onFiltersChange(filters.copy(rank = rankDto.name))
                 },
                 modifier = Modifier.weight(1f)
             )
@@ -285,28 +288,32 @@ private fun NumberFilterField(
 }
 
 @Composable
-private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController) {
+private fun ListTeam(
+    team: ItemTeamInfoDto,
+    navHostController: NavHostController
+) {
     val typeUser by remember { mutableStateOf(false) }
 
     ListItem(
         headlineContent = { //Conteudo Principal
             Text(
-                text= team.Name,
+                text= team.name,
                 style = MaterialTheme.typography.titleLarge,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis)
+                overflow = TextOverflow.Ellipsis
+            )
         },
         overlineContent = { //Aparece em cima do titulo
             Text(
                 text = buildAnnotatedString {
                     pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append("Rank: ${team.Rank}")
+                    append("Rank: ${team.rank}")
                     pop()
 
                     append("  ")
 
                     pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    append("(${team.Points} Pts)")
+                    append("(${team.points} Pts)")
                     pop()
                 },
                 style = MaterialTheme.typography.bodyMedium, // Estilo base para todo o texto
@@ -319,23 +326,20 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
                 Spacer(Modifier.height(8.dp))
                 InfoRow(
                     icon = Icons.Default.LocationOn,
-                    text = team.City,
+                    text = team.city,
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(Modifier.height(4.dp))
                 InfoRow(
                     icon = Icons.Default.Groups,
-                    text = "${team.NumberMembers} ${stringResource(id = R.string.list_teams_members)}"
+                    text = "${team.numberMembers} ${stringResource(id = R.string.list_teams_members)}"
                 )
             }
         },
         leadingContent = { // imagem
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Logo Team",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
+            PlayerImageList(
+                image = team.logoTeam,
             )
         },
         trailingContent = { // Tudo que aparece há direita (Botão Ver Detalher + Send MatchInvite no caso da team ou no caso do player send MemberShipRequest)
@@ -390,7 +394,7 @@ private fun ListTeam(team: ItemTeamInfoDto, navHostController: NavHostController
 
                 IconButton(
                     onClick = {
-                        val idTeam = team.Id
+                        val idTeam = team.id
                         navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
                             launchSingleTop = true
                         }
@@ -423,22 +427,22 @@ private fun filterTeamList(
 
     return teams.filter { team ->
         val nameFilterPassed = filters.name.isNullOrEmpty() ||
-                team.Name.contains(filters.name, ignoreCase = true)
+                team.name.contains(filters.name, ignoreCase = true)
 
         val rankFilterPassed = filters.rank.isNullOrEmpty() ||
-                team.Name.contains(filters.rank, ignoreCase = true)
+                team.name.contains(filters.rank, ignoreCase = true)
 
         val cityFilterPassed = filters.city.isNullOrEmpty() ||
-                team.City.contains(filters.city, ignoreCase = true)
+                team.city.contains(filters.city, ignoreCase = true)
 
-        val minPointFilterPassed = (minPoints == null) || (team.Points >= minPoints)
-        val maxPointFilterPassed = (maxPoints == null) || (team.Points <= maxPoints)
+        val minPointFilterPassed = (minPoints == null) || (team.points >= minPoints)
+        val maxPointFilterPassed = (maxPoints == null) || (team.points <= maxPoints)
 
-        val minAgeFilterPassed = (minAge == null) || (team.AverageAge >= minAge)
-        val maxAgeFilterPassed = (maxAge == null) || (team.AverageAge <= maxAge)
+        val minAgeFilterPassed = (minAge == null) || (team.averageAge >= minAge)
+        val maxAgeFilterPassed = (maxAge == null) || (team.averageAge <= maxAge)
 
-        val minNumberMembersFilterPassed = (minNumberMembers == null) || (team.NumberMembers >= minNumberMembers)
-        val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.NumberMembers <= maxNumberMembers)
+        val minNumberMembersFilterPassed = (minNumberMembers == null) || (team.numberMembers >= minNumberMembers)
+        val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.numberMembers <= maxNumberMembers)
 
         // Devolve o resultado do teste para esta equipa
         nameFilterPassed && rankFilterPassed && cityFilterPassed && minPointFilterPassed

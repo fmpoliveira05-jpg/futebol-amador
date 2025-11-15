@@ -49,23 +49,27 @@ class ListMatchInviteViewModel: ViewModel() {
         listState.value = originalList
     }
 
-    fun acceptMatchInvite(
-        idOpponent: String
-    ) {
+    fun acceptMatchInvite(idMatchInvite: String) {
         //TODO: Remover da lista e fazer pedido há API para aceitar
     }
 
-    fun rejectMatchInvite(
-        idOpponent: String
+    fun negociateMatchInvite (
+        idMatchInvite: String,
+        navHostController: NavHostController
     ) {
+        //TODO: Chamar pagina de negociar matchInivte (Form)
+    }
+
+    fun rejectMatchInvite (idMatchInvite: String) {
         //TODO: Mandar pedido há API para rejeitar
     }
 
     fun showMoreDetails(
-        idOpponent: String,
+        idMatchInvite: String,
         navHostController: NavHostController
     ) {
-        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idOpponent}") {
+        //TODO: Corrigir deve levar para a pagina da matchInivte
+        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idMatchInvite}") {
             launchSingleTop = true
         }
     }

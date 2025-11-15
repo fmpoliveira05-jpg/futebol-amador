@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="position_forward">Forward</string>
+    <string name="position_midfields">Midfields</string>
+    <string name="position_defender">Defender</string>
+    <string name="position_goalkeeper">Goalkeeper</string>
+
+    <string name="type_member_player">Player</string>
+    <string name="type_member_admin_team">Admin</string>
+</resources>

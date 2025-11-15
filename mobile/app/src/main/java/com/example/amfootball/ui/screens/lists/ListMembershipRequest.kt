@@ -186,10 +186,10 @@ private fun FilterListMemberShipRequestContent(
 
 @Composable
 private fun ListMemberShipRequestContent(
-                     membershipRequest: MembershipRequestInfoDto,
-                     acceptMemberShipRequest: () -> Unit = {},
-                     rejectMemberShipRequest: () -> Unit = {},
-                     showMore: () -> Unit = {},
+    membershipRequest: MembershipRequestInfoDto,
+    acceptMemberShipRequest: () -> Unit = {},
+    rejectMemberShipRequest: () -> Unit = {},
+    showMore: () -> Unit = {},
 ) {
     GenericPlayerListItem(
         item = membershipRequest,

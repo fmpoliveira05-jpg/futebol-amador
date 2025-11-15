@@ -1,11 +1,14 @@
 package com.example.amfootball.data.dtos.player
 
+import android.net.Uri
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.data.enums.TypeMember
 
 data class MemberTeamDto(
     val id: String = "",
     val name: String = "",
-    val isAdmin: Boolean = false,
+    val typeMember: TypeMember = TypeMember.PLAYER,
+    val image: Uri = Uri.EMPTY,
     val age: Int = 0,
     val position: Position = Position.MIDFIELDER,
     val size: Int = 0
@@ -23,16 +26,31 @@ data class MemberTeamDto(
                     else -> Position.FORWARD
                 }
 
-                players.add(
-                    MemberTeamDto(
-                        id = "player_$i",
-                        name = "Jogador $i",
-                        isAdmin = (i == 1),
-                        age = (18..35).random(),
-                        position = playerPosition,
-                        size = (165..195).random()
+                if(i < 28) {
+                    players.add(
+                        MemberTeamDto(
+                            id = "player_$i",
+                            name = "Jogador $i",
+                            typeMember = TypeMember.PLAYER,
+                            image = Uri.EMPTY,
+                            age = (18..35).random(),
+                            position = playerPosition,
+                            size = (165..195).random()
+                        )
                     )
-                )
+                } else {
+                    players.add(
+                        MemberTeamDto(
+                            id = "player_$i",
+                            name = "Jogador $i",
+                            typeMember = TypeMember.ADMIN_TEAM,
+                            image = Uri.EMPTY,
+                            age = (18..35).random(),
+                            position = playerPosition,
+                            size = (165..195).random()
+                        )
+                    )
+                }
             }
             return players
         }

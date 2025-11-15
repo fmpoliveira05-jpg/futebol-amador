@@ -12,6 +12,9 @@
     <string name="accept_button">Accept</string>
     <string name="accept_button_description">Button that allows you to accept something</string>
 
+    <string name="negociate_button">Negociate</string>
+    <string name="negociate_button_description">Button that allows you to trade something</string>
+
     <string name="reject_button">Refuse</string>
     <string name="reject_button_description">Button that allows rejecting something</string>
 

@@ -27,9 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -161,13 +163,23 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     Text(text = "Position:")
     Spacer(Modifier.height(4.dp))
 
+
     ExposedDropdownMenuBox(
         expanded = isPositionMenuExpanded,
         onExpandedChange = { isPositionMenuExpanded = !isPositionMenuExpanded },
         modifier = Modifier.fillMaxWidth()
     ) {
+        val selectedPosition = position?.let { nonNullPosition ->
+            Position.values().getOrNull(nonNullPosition)
+        }
+
+        val displayText = if (selectedPosition != null) {
+            stringResource(id = selectedPosition.stringId)
+        } else {
+            ""
+        }
         TextField(
-            value = Position.values().find { it.ordinal == position }?.displayName ?: "",
+            value = displayText,
             onValueChange = {},
             readOnly = true,
             label = { Text("Selecione a Posição") },
@@ -187,7 +199,7 @@ private fun FieldsSignUp(navHostController: NavHostController) {
             // Itera sobre o seu enum
             Position.values().forEach { pos ->
                 DropdownMenuItem(
-                    text = { Text(pos.displayName) }, // Mostra "Avançado", "Médio", etc.
+                    text = { Text(stringResource(pos.stringId)) },
                     onClick = {
                         position = pos.ordinal // Guarda "FORWARD", "MIDFIELER", etc.
                         isPositionMenuExpanded = false // Fecha o menu

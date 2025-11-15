@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Stadium
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -28,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,12 +43,16 @@ import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
 import com.example.amfootball.data.dtos.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
+import com.example.amfootball.ui.components.buttons.RejectButton
+import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterHeader
 import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
+import com.example.amfootball.ui.components.lists.PlayerImageList
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -85,17 +92,23 @@ fun ListMatchInviteScreen(
                     matchInvite = invite,
                     acceptMatchInvite = {
                         viewModel.acceptMatchInvite(
-                            idOpponent = invite.id
+                            idMatchInvite = invite.id
                         )
                     },
                     rejectMatchInvite = {
                         viewModel.rejectMatchInvite(
-                            idOpponent = invite.id
+                            idMatchInvite = invite.id
+                        )
+                    },
+                    negociateMatchInvite = {
+                        viewModel.negociateMatchInvite(
+                            idMatchInvite = invite.id,
+                            navHostController = navHostController
                         )
                     },
                     showMore = {
                         viewModel.showMoreDetails(
-                            idOpponent = invite.id,
+                            idMatchInvite = invite.id,
                             navHostController = navHostController
                         )
                     }
@@ -191,59 +204,81 @@ private fun FilterListMatchInvite(
 private fun ItemListMatchInivite(
     matchInvite: InfoMatchInviteDto,
     acceptMatchInvite: () -> Unit,
+    negociateMatchInvite: () -> Unit,
     rejectMatchInvite: () -> Unit,
     showMore: () -> Unit
 ) {
-    ListItem(
-        headlineContent = { //Conteudo Principal
-            Text(
-                text= matchInvite.nameOpponent,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        leadingContent = {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Logo Team",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            )
-        },
-        supportingContent = { //Aparece em baixo (Descrição e cidade)
-            Column {
-                Column {
-                    InfoRow(
-                        icon = Icons.Default.Stadium,
-                        text = matchInvite.pitchGame,
-                        modifier = Modifier.fillMaxWidth()
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            ListItem(
+                headlineContent = { //Conteudo Principal
+                    Text(
+                        text = matchInvite.nameOpponent,
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                leadingContent = {
+                    PlayerImageList(
+                        image = matchInvite.logoOpponent,
+                    )
+                },
+                supportingContent = { //Aparece em baixo (Descrição e cidade)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        InfoRow(
+                            icon = Icons.Default.Stadium,
+                            text = matchInvite.pitchGame,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        InfoRow(
+                            icon = Icons.Default.CalendarMonth,
+                            text = matchInvite.gameDate.format(
+                                DateTimeFormatter.ofPattern(
+                                    Patterns.DATE,
+                                )
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                },
+                trailingContent = {
+                    ShowMoreInfoButton(
+                        showMoreDetails = showMore,
+                        contentDescription = stringResource(id = R.string.list_teams_view_team)
                     )
                 }
+            )
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Column {
-                    InfoRow(
-                        icon = Icons.Default.CalendarMonth,
-                        text = matchInvite.gameDate.format(
-                            DateTimeFormatter.ofPattern(
-                                Patterns.DATE,
-                            )
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                AcceptButton(accept = acceptMatchInvite)
+                NegociateMatchIniviteButton(negociateMatchInvite = negociateMatchInvite)
+                RejectButton(reject = rejectMatchInvite)
             }
-        },
-        trailingContent = {
-            ItemAcceptRejectAndShowMore(
-                accept = acceptMatchInvite,
-                reject = rejectMatchInvite,
-                showMore = showMore
-            )
         }
-    )
+    }
+}
+
+@Composable
+fun NegociateMatchIniviteButton(
+    negociateMatchInvite: () -> Unit
+) {
+    IconButton(
+        onClick = negociateMatchInvite
+    ) {
+        Icon(
+            imageVector = Icons.Default.Edit,
+            contentDescription = stringResource(id = R.string.negociate_button_description),
+            tint = MaterialTheme.colorScheme.secondary
+        )
+    }
 }
 
 @Preview(

@@ -1,14 +1,29 @@
 package com.example.amfootball.ui.screens.team
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.Straighten
+import androidx.compose.material.icons.filled.Upgrade
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,22 +31,31 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.data.dtos.filters.FilterMembersTeam
+import com.example.amfootball.data.dtos.player.MemberTeamDto
+import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterHeader
 import com.example.amfootball.ui.components.lists.FilterSection
+import com.example.amfootball.ui.components.lists.GenericPlayerListItem
+import com.example.amfootball.ui.components.lists.InfoRow
+import com.example.amfootball.ui.components.lists.PlayerImageList
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
+import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ListMembersScreen(
@@ -50,6 +74,9 @@ fun ListMembersScreen(
         onClearFilter = viewModel::onClearFilter,
     )
 
+    val listTypeMember by viewModel.uiListTypeMember
+    val listPosition by viewModel.uiListPositions
+
     var filtersExpanded by remember { mutableStateOf(false) }
 
     Surface {
@@ -67,6 +94,8 @@ fun ListMembersScreen(
                         FilterListMemberContent(
                             filters = filters,
                             filterActions = filterAction,
+                            listTypeMember = listTypeMember,
+                            listPosition = listPosition,
                             modifier = paddingModifier
                         )
                     }
@@ -75,12 +104,18 @@ fun ListMembersScreen(
                 Spacer(Modifier.height(16.dp))
             }
 
-            /**
-             * items(filteredList) { team ->
-             *                 ListTeam(team = team, navHostController = navHostController)
-             *                 Spacer(Modifier.height(12.dp))
-             *             }
-             * */
+            items(list) { member ->
+                ListMemberItem(
+                    member = member,
+                    promote = { viewModel.onPromoteMember(idPlayer = member.id) },
+                    despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
+                    remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
+                    showMore = { viewModel.onShowMoreInfo(
+                        idUser = member.id,
+                        navHostController = navHostController)
+                    }
+                )
+            }
         }
     }
 }
@@ -89,12 +124,14 @@ fun ListMembersScreen(
 private fun FilterListMemberContent(
     filters: FilterMembersTeam,
     filterActions: FilterMemberTeamAction,
+    listTypeMember: List<TypeMember?>,
+    listPosition: List<Position?>,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row(modifier = Modifier.fillMaxWidth()) {
             LabelTextField(
-                label = "Nome",
+                label = stringResource(id = R.string.filter_name),
                 value = filters.name,
                 onValueChange = { filterActions.onNameChange(it) },
                 modifier = Modifier.weight(1f)
@@ -105,8 +142,8 @@ private fun FilterListMemberContent(
         //Corrigir aqui as cenas de não ter (it)
         Row(modifier = Modifier.fillMaxWidth()) {
             LabelTextField(
-                label = "Idade Min.",
-                value = filters.minAge.toString(),
+                label = stringResource(id = R.string.filter_min_age),
+                value = filters.minAge?.toString(),
                 onValueChange = { filterActions.onMinAgeChange },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f)
@@ -115,44 +152,45 @@ private fun FilterListMemberContent(
             Spacer(Modifier.width(8.dp))
 
             LabelTextField(
-                label = "Idade Max.",
-                value = filters.maxAge.toString(),
+                label = stringResource(id = R.string.filter_max_age),
+                value = filters.maxAge?.toString(),
                 onValueChange = { filterActions.onMaxAgeChange },
+                maxLenght = UserConst.MAX_AGE,
                 modifier = Modifier.weight(1f)
             )
         }
 
         Row(modifier = Modifier.fillMaxWidth()) {
-            //TODO: Trocar para selectBox
-
-            val typeMemberOptions = listOf(
-                null,
-                TypeMember.PLAYER,
-                TypeMember.ADMIN_TEAM
-            )
             LabelSelectBox(
-                label = "Tipo de membro",
-                list = typeMemberOptions,
-                selectedValue = filters.typeMember?.displayName ?: "Todos",
+                label = stringResource(id = R.string.filter_type_member),
+                list = listTypeMember,
+                selectedValue = filters.typeMember,
                 onSelectItem = {filterActions.onTypeMemberChange(it) },
-                itemToString = { it?.displayName ?: "Todos" },
+                itemToString = { position ->
+                    if (position == null) {
+                        stringResource(id = R.string.filter_selectbox_all)
+                    } else {
+                        stringResource(id = position.stringId)
+                    }
+                },
                 modifier = Modifier.weight(1f)
             )
 
-
-
             Spacer(Modifier.width(8.dp))
-
-            //TODO: Trocar para selectBox(positions)
-            /**
-            LabelTextField(
-            label = "Tipo de membro",
-            value = filters.typeMember.toString(),
-            onValueChange = { filterActions.onIsAdminChange },
-            modifier = Modifier.weight(1f)
+            LabelSelectBox(
+                label = stringResource(id = R.string.filter_position),
+                list = listPosition,
+                selectedValue = filters.position,
+                onSelectItem = {filterActions.onPositionChange(it) },
+                itemToString = { typeMember ->
+                    if (typeMember == null) {
+                        stringResource(id = R.string.filter_selectbox_all)
+                    } else {
+                        stringResource(id = typeMember.stringId)
+                    }
+                },
+                modifier = Modifier.weight(1f)
             )
-             * */
-
         }
 
         Spacer(Modifier.height(16.dp))
@@ -164,10 +202,128 @@ private fun FilterListMemberContent(
         )
 
     }
-
 }
 
-@Preview
+@Composable
+private fun ListMemberItem(
+    member: MemberTeamDto,
+    promote: () -> Unit,
+    despromote: () -> Unit,
+    remove: () -> Unit,
+    showMore: () -> Unit,
+) {
+    GenericPlayerListItem(
+        item = member,
+        title = { it.name },
+        leading = {
+            PlayerImageList(
+                image = member.image,
+            )
+        },
+        supporting = {
+            MemberSupportingInfo(member = member)
+        },
+        trailing = {
+            MemberTrailingButtons(
+                typeMember = member.typeMember,
+                promote = promote,
+                despromote = despromote,
+                remove = remove,
+                showMore = showMore
+            )
+        }
+    )
+}
+
+@Composable
+private fun MemberSupportingInfo(member: MemberTeamDto) {
+    Column {
+        InfoRow(
+            icon = Icons.Default.CalendarToday,
+            text = "${member.age} anos",
+            modifier = Modifier.fillMaxWidth()
+        )
+        InfoRow(
+            icon = Icons.Default.SportsSoccer,
+            text = stringResource(id = member.position.stringId),
+            modifier = Modifier.fillMaxWidth()
+        )
+        InfoRow(
+            icon = Icons.Default.Badge,
+            text = stringResource(id = member.typeMember.stringId),
+            modifier = Modifier.fillMaxWidth()
+        )
+        InfoRow(
+            icon = Icons.Default.Straighten,
+            text = "${member.size} cm",
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun MemberTrailingButtons(
+    typeMember: TypeMember,
+    promote: () -> Unit,
+    despromote: () -> Unit,
+    remove: () -> Unit,
+    showMore: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(start = 8.dp)
+    ) {
+        when (typeMember) {
+            TypeMember.PLAYER -> {
+                IconButton(onClick = promote) {
+                    Icon(
+                        imageVector = Icons.Filled.Upgrade,
+                        contentDescription = stringResource(id = R.string.accept_button_description),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+            TypeMember.ADMIN_TEAM ->  {
+                IconButton(onClick = despromote) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowDownward,
+                        contentDescription = stringResource(id = R.string.reject_button_description),
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
+        IconButton(onClick = remove) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                //contentDescription = stringResource(id = R.string.remove_button_description),
+                contentDescription = "Remove",
+                tint = MaterialTheme.colorScheme.error
+            )
+        }
+        IconButton(onClick = showMore) {
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = stringResource(id = R.string.list_teams_view_team),
+                tint = MaterialTheme.colorScheme.outline
+            )
+        }
+    }
+}
+
+
+@Preview(
+    name = "Lista de Memberos - PT",
+    locale = "pt-rPT",
+    showBackground = true
+)
+@Preview(
+    name = "Members List - EN",
+    locale = "en",
+    showBackground = true
+)
 @Composable
 fun PreviewListMembers() {
     ListMembersScreen(rememberNavController())
