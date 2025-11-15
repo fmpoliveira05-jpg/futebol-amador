@@ -88,55 +88,55 @@ class ListTeamViewModel: ViewModel() {
             val teamName = if (currentFilters.name.isNullOrBlank()) {
                 true
             } else {
-                item.Name.contains(currentFilters.name, ignoreCase = true)
+                item.name.contains(currentFilters.name, ignoreCase = true)
             }
 
             val cityName = if (currentFilters.city.isNullOrBlank()) {
                 true
             } else {
-                item.City.contains(currentFilters.city, ignoreCase = true)
+                item.city.contains(currentFilters.city, ignoreCase = true)
             }
 
             val rankName = if (currentFilters.rank.isNullOrBlank()) {
                 true
             } else {
-                item.Rank.contains(currentFilters.rank, ignoreCase = true)
+                item.rank.contains(currentFilters.rank, ignoreCase = true)
             }
 
             val minPoint = if (currentFilters.minPoint == null) {
                 true
             } else {
-                item.Points >= currentFilters.minPoint
+                item.points >= currentFilters.minPoint
             }
 
             val maxPoint = if (currentFilters.maxPoint == null) {
                 true
             } else {
-                item.Points <= currentFilters.maxPoint
+                item.points <= currentFilters.maxPoint
             }
 
             val minAge = if (currentFilters.minAge == null) {
                 true
             } else {
-                item.AverageAge >= currentFilters.minAge
+                item.averageAge >= currentFilters.minAge
             }
 
             val maxAge = if (currentFilters.maxAge == null) {
                 true
             } else {
-                item.AverageAge <= currentFilters.maxAge
+                item.averageAge <= currentFilters.maxAge
             }
 
             val minNumberMembers = if (currentFilters.minNumberMembers == null) {
                 true
             } else {
-                item.NumberMembers >= currentFilters.minNumberMembers
+                item.numberMembers >= currentFilters.minNumberMembers
             }
 
             val maxNumberMembers = if (currentFilters.maxNumberMembers == null) {
                 true
             } else {
-                item.NumberMembers <= currentFilters.maxNumberMembers
+                item.numberMembers <= currentFilters.maxNumberMembers
             }
 
             teamName && cityName && rankName && minPoint && maxPoint && minAge && maxAge
