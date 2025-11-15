@@ -10,6 +10,5 @@ data class FilterListPlayersActions(
     val onPositionChange: (Position?) -> Unit,
     val onMinSizeChange: (Int?) -> Unit,
     val onMaxSizeChange: (Int?) -> Unit,
-    val onFilterApply: () -> Unit,
-    val onFilterClean: () -> Unit,
+    val buttonActions: ButtonFilterActions
 )

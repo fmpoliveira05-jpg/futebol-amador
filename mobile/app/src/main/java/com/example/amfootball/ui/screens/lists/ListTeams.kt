@@ -1,7 +1,5 @@
-package com.example.amfootball.ui.screens.Lists
+package com.example.amfootball.ui.screens.lists
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,25 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,8 +34,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
 import com.example.amfootball.ui.components.inputFields.LabelTextField
-import com.example.amfootball.ui.components.lists.FilterHeader
-import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
@@ -57,8 +41,14 @@ import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.page.MembershipRequestRoutes
 import com.example.amfootball.ui.components.buttons.FilterApplyButton
+import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
+import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
-import com.example.amfootball.ui.components.lists.PlayerImageList
+import com.example.amfootball.ui.components.lists.AddressRow
+import com.example.amfootball.ui.components.lists.FilterSection
+import com.example.amfootball.ui.components.lists.GenericListItem
+import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.NumMembersTeamRow
 import kotlin.String
 
 /**
@@ -90,52 +80,25 @@ fun ListTeamScreen(navHostController: NavHostController){
                 FilterSection(
                     isExpanded = filtersExpanded,
                     onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    filters = filters,
-                    onFiltersChange = { newFilters ->
-                        filters = newFilters
-                    },
-                    listRanks = listRanks
+                    content = {
+                        FiltersListTeamContent(
+                            filters = filters,
+                            onFiltersChange = { filters = it },
+                            listRanks = listRanks,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        )
+                    }
                 )
+                Spacer(Modifier.height(16.dp))
                 Spacer(Modifier.height(16.dp))
             }
 
             items(filteredList) { team ->
-                ListTeam(team = team, navHostController = navHostController)
-                Spacer(Modifier.height(12.dp))
-            }
-        }
-    }
-}
-
-/**
- * Componente que representa a seção dos filtros (Falta meter o botão de filtrar)
- * */
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-private fun FilterSection(
-    isExpanded: Boolean,
-    onToggleExpand: () -> Unit,
-    filters: FiltersListTeamDto,
-    onFiltersChange: (FiltersListTeamDto) -> Unit,
-    listRanks: List<RankNameDto>,
-    modifier: Modifier = Modifier,
-) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
-        Column {
-            //Cabeçalho
-            FilterHeader(
-                isExpanded = isExpanded,
-                onToggleExpand = onToggleExpand
-            )
-
-            //Filtros todos
-            AnimatedVisibility(visible = isExpanded) {
-                FiltersListTeamContent(
-                    filters = filters,
-                    onFiltersChange = onFiltersChange,
-                    listRanks = listRanks,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                ListTeam(
+                    team = team,
+                    navHostController = navHostController
                 )
+                Spacer(Modifier.height(12.dp))
             }
         }
     }
@@ -267,7 +230,7 @@ private fun NumberFilterField(
     onValueChange: (Int?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var textValue by remember(value) {
+    val textValue by remember(value) {
         mutableStateOf(value?.toString() ?: "")
     }
 
@@ -292,123 +255,83 @@ private fun ListTeam(
     team: ItemTeamInfoDto,
     navHostController: NavHostController
 ) {
+    GenericListItem(
+        item = team,
+        title = { it.name },
+        overline = {
+            ListTeamOverline(team = team)
+        },
+        supporting = {
+            AddressRow(address = team.city)
+            NumMembersTeamRow(numMembers = team.numberMembers)
+        },
+        leading = {
+            ImageList(image = team.logoTeam)
+        },
+        trailing = {
+            ListTeamTrailing(
+                team = team,
+                navHostController = navHostController
+            )
+        }
+    )
+}
+
+@Composable
+private fun ListTeamOverline(team: ItemTeamInfoDto) {
+    Text(
+        text = buildAnnotatedString {
+            pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
+            append("Rank: ${team.rank}")
+            pop()
+
+            append("  ")
+
+            pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
+            append("(${team.points} Pts)")
+            pop()
+        },
+        style = MaterialTheme.typography.bodyMedium,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+}
+
+@Composable
+private fun ListTeamTrailing(
+    team: ItemTeamInfoDto,
+    navHostController: NavHostController
+) {
     val typeUser by remember { mutableStateOf(false) }
 
-    ListItem(
-        headlineContent = { //Conteudo Principal
-            Text(
-                text= team.name,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        overlineContent = { //Aparece em cima do titulo
-            Text(
-                text = buildAnnotatedString {
-                    pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append("Rank: ${team.rank}")
-                    pop()
-
-                    append("  ")
-
-                    pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    append("(${team.points} Pts)")
-                    pop()
-                },
-                style = MaterialTheme.typography.bodyMedium, // Estilo base para todo o texto
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        supportingContent = { //Aparece em baixo (Descrição e cidade)
-            Column {
-                Spacer(Modifier.height(8.dp))
-                InfoRow(
-                    icon = Icons.Default.LocationOn,
-                    text = team.city,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(Modifier.height(4.dp))
-                InfoRow(
-                    icon = Icons.Default.Groups,
-                    text = "${team.numberMembers} ${stringResource(id = R.string.list_teams_members)}"
-                )
-            }
-        },
-        leadingContent = { // imagem
-            PlayerImageList(
-                image = team.logoTeam,
-            )
-        },
-        trailingContent = { // Tudo que aparece há direita (Botão Ver Detalher + Send MatchInvite no caso da team ou no caso do player send MemberShipRequest)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(start = 8.dp)
-            ) {
-                if(typeUser) {
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(route = MembershipRequestRoutes.SEND_MEMBERSHIP_REQUEST) {
-                                launchSingleTop = true
-                            }
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send Membership Request",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Send Membership",
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1
-                        )
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(start = 8.dp)
+    ) {
+        ListSendMemberShipRequestButton(
+            sendMemberShipRequest = {
+                if (typeUser) {
+                    navHostController.navigate(route = MembershipRequestRoutes.SEND_MEMBERSHIP_REQUEST) {
+                        launchSingleTop = true
                     }
                 } else {
-                    TextButton(
-                        onClick = {
-                            navHostController.navigate(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
-                                launchSingleTop = true
-                            }
-                        },
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Send,
-                            contentDescription = "Send Match Invite",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Match Invite",
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1
-                        )
+                    navHostController.navigate(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
+                        launchSingleTop = true
                     }
-                }
-
-                IconButton(
-                    onClick = {
-                        val idTeam = team.id
-                        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
-                            launchSingleTop = true
-                        }
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = stringResource(id = R.string.list_teams_view_team),
-                        tint = MaterialTheme.colorScheme.outline
-                    )
                 }
             }
-        },
-    )
+        )
+
+        ShowMoreInfoButton(
+            showMoreDetails = {
+                val idTeam = team.id
+                navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
+                    launchSingleTop = true
+                }
+            }
+        )
+    }
 }
 
 /**

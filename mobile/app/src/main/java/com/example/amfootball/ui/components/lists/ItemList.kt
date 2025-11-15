@@ -1,14 +1,12 @@
 package com.example.amfootball.ui.components.lists
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -47,30 +45,51 @@ fun ItemAcceptRejectAndShowMore(
 
 
 @Composable
-fun<T> GenericPlayerListItem(
+fun<T> GenericListItem(
     item: T,
     title: (T) -> String,
+    overline: @Composable () -> Unit = {},
     leading: @Composable (T) -> Unit = {},
     supporting: @Composable (T) -> Unit = {},
     trailing: @Composable () -> Unit = {},
+    underneathItems: (@Composable () -> Unit)? = null
 ) {
-    ListItem(
-        headlineContent = { //Conteudo Principal
-            Text(
-                text= title(item),
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            ListItem(
+                headlineContent = { //Conteudo Principal
+                    Text(
+                        text = title(item),
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                overlineContent = {
+                    overline()
+                },
+                supportingContent = {
+                    supporting(item)
+                },
+                leadingContent = {
+                    leading(item)
+                },
+                trailingContent = {
+                    trailing()
+                }
             )
-        },
-        supportingContent = {
-            supporting(item)
-        },
-        leadingContent = {
-            leading(item)
-        },
-        trailingContent = {
-            trailing()
         }
-    )
+
+        if (underneathItems != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                underneathItems()
+            }
+        }
+    }
 }

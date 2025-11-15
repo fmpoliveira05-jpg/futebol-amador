@@ -35,7 +35,7 @@ fun ProfilesImage(
 }
 
 @Composable
-fun PlayerImageList(
+fun ImageList(
     image: Uri
 ) {
     ImageIcon(

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="list_teams_description_logo_team">Logo Team</string>
     <string name="list_teams_members">Members</string>
     <string name="list_teams_view_team">View Team</string>

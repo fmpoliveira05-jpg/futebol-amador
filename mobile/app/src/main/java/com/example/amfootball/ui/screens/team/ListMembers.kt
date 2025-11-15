@@ -14,12 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.Badge
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.SportsSoccer
-import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,19 +36,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.data.dtos.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
+import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
+import com.example.amfootball.ui.components.lists.AgeRow
 import com.example.amfootball.ui.components.lists.FilterHeader
 import com.example.amfootball.ui.components.lists.FilterSection
-import com.example.amfootball.ui.components.lists.GenericPlayerListItem
-import com.example.amfootball.ui.components.lists.InfoRow
-import com.example.amfootball.ui.components.lists.PlayerImageList
+import com.example.amfootball.ui.components.lists.GenericListItem
+import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.PositionRow
+import com.example.amfootball.ui.components.lists.SizeRow
+import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 import com.example.amfootball.utils.UserConst
 
@@ -70,8 +70,10 @@ fun ListMembersScreen(
         onMinAgeChange = viewModel::onMinAgeChange,
         onMaxAgeChange = viewModel::onMaxAgeChange,
         onPositionChange = viewModel::onPositionChange,
-        onApplyFilter = viewModel::onApplyFilter,
-        onClearFilter = viewModel::onClearFilter,
+        buttonActions = ButtonFilterActions(
+            onFilterApply = viewModel::onApplyFilter,
+            onFilterClean = viewModel::onClearFilter
+        )
     )
 
     val listTypeMember by viewModel.uiListTypeMember
@@ -196,11 +198,10 @@ private fun FilterListMemberContent(
         Spacer(Modifier.height(16.dp))
 
         LineClearFilterButtons(
-            onApplyFiltersClick = filterActions.onApplyFilter,
-            onClearFilters = filterActions.onClearFilter,
+            onApplyFiltersClick = filterActions.buttonActions.onFilterApply,
+            onClearFilters = filterActions.buttonActions.onFilterClean,
             modifier = Modifier.weight(1f)
         )
-
     }
 }
 
@@ -212,11 +213,11 @@ private fun ListMemberItem(
     remove: () -> Unit,
     showMore: () -> Unit,
 ) {
-    GenericPlayerListItem(
+    GenericListItem(
         item = member,
         title = { it.name },
         leading = {
-            PlayerImageList(
+            ImageList(
                 image = member.image,
             )
         },
@@ -238,26 +239,10 @@ private fun ListMemberItem(
 @Composable
 private fun MemberSupportingInfo(member: MemberTeamDto) {
     Column {
-        InfoRow(
-            icon = Icons.Default.CalendarToday,
-            text = "${member.age} anos",
-            modifier = Modifier.fillMaxWidth()
-        )
-        InfoRow(
-            icon = Icons.Default.SportsSoccer,
-            text = stringResource(id = member.position.stringId),
-            modifier = Modifier.fillMaxWidth()
-        )
-        InfoRow(
-            icon = Icons.Default.Badge,
-            text = stringResource(id = member.typeMember.stringId),
-            modifier = Modifier.fillMaxWidth()
-        )
-        InfoRow(
-            icon = Icons.Default.Straighten,
-            text = "${member.size} cm",
-            modifier = Modifier.fillMaxWidth()
-        )
+        AgeRow(age = member.age,)
+        PositionRow(position = member.position)
+        TypeMemberRow(typeMember = member.typeMember)
+        SizeRow(size = member.size)
     }
 }
 
@@ -303,13 +288,11 @@ private fun MemberTrailingButtons(
                 tint = MaterialTheme.colorScheme.error
             )
         }
-        IconButton(onClick = showMore) {
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = stringResource(id = R.string.list_teams_view_team),
-                tint = MaterialTheme.colorScheme.outline
-            )
-        }
+
+        ShowMoreInfoButton(
+            showMoreDetails = showMore,
+            contentDescription = stringResource(id = R.string.list_teams_view_team)
+        )
     }
 }
 

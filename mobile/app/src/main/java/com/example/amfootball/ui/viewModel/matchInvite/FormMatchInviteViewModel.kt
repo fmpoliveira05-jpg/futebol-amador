@@ -15,6 +15,7 @@ import javax.inject.Inject
 import com.example.amfootball.R
 import com.example.amfootball.navigation.Objects.Routes
 
+//TODO: Adaptar isto para depois a pagina também servir para PostPoneMatch
 class FormMatchInviteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {

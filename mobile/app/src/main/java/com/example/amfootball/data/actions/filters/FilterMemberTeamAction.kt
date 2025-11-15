@@ -9,6 +9,5 @@ data class FilterMemberTeamAction(
     val onMinAgeChange: (Int?) -> Unit,
     val onMaxAgeChange: (Int?) -> Unit,
     val onPositionChange: (Position?) -> Unit,
-    val onApplyFilter: () -> Unit,
-    val onClearFilter: () -> Unit,
+    val buttonActions: ButtonFilterActions
 )

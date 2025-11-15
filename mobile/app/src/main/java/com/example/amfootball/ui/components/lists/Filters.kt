@@ -37,10 +37,8 @@ fun FilterSection(
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column {
-            // Cabeçalho — pode ser o default ou um header passado
             header()
 
-            // Conteúdo dos filtros — slot para o call-site preencher
             AnimatedVisibility(
                 visible = isExpanded,
                 enter = expandVertically(),

@@ -10,6 +10,5 @@ data class FilterTeamActions(
     val onMaxAgeChange: (Int?) -> Unit,
     val onMinNumberMembersChange: (Int?) -> Unit,
     val onMaxNumberMembersChange: (Int?) -> Unit,
-    val onApplyFilters: () -> Unit,
-    val onClearFilters: () -> Unit
+    val buttonActions: ButtonFilterActions
 )

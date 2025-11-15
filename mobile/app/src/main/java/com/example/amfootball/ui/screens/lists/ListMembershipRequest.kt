@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.lists
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,17 +27,18 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.data.dtos.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
-import com.example.amfootball.ui.components.lists.FilterHeader
-import com.example.amfootball.ui.components.lists.GenericPlayerListItem
+import com.example.amfootball.ui.components.lists.FilterSection
+import com.example.amfootball.ui.components.lists.GenericListItem
+import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
-import com.example.amfootball.ui.components.lists.PlayerImageList
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -58,8 +57,10 @@ fun ListMemberShipRequest(
         onSenderNameChange = viewModel::onSenderNameChanged,
         onMinDateSelected = viewModel::onMinDateSelected,
         onMaxDateSelected = viewModel::onMaxDateSelected,
-        onApplyFiltersClick = viewModel::applyFilters,
-        onClearFilters = viewModel::clearFilters
+        buttonActions = ButtonFilterActions(
+            onFilterApply = viewModel::applyFilters,
+            onFilterClean = viewModel::clearFilters
+        ),
     )
 
     var filtersExpanded by remember { mutableStateOf(false) }
@@ -72,8 +73,13 @@ fun ListMemberShipRequest(
                 FilterSection(
                     isExpanded = filtersExpanded,
                     onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    filters = filters,
-                    filterActions = filterActions
+                    content = {
+                        FilterListMemberShipRequestContent(
+                            filters = filters,
+                            filterActions = filterActions,
+                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                        )
+                    }
                 )
                 Spacer(Modifier.height(16.dp))
             }
@@ -100,34 +106,6 @@ fun ListMemberShipRequest(
                 )
 
                 Spacer(Modifier.height(12.dp))
-            }
-        }
-    }
-}
-
-@Composable
-private fun FilterSection(
-    isExpanded: Boolean,
-    onToggleExpand: () -> Unit,
-    filters: FilterMemberShipRequest,
-    filterActions: FilterMemberShipRequestActions,
-    modifier: Modifier = Modifier,
-) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
-        Column {
-            //Cabeçalho
-            FilterHeader(
-                isExpanded = isExpanded,
-                onToggleExpand = onToggleExpand
-            )
-
-            //Filtros todos
-            AnimatedVisibility(visible = isExpanded) {
-                FilterListMemberShipRequestContent(
-                    filters = filters,
-                    filterActions = filterActions,
-                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                )
             }
         }
     }
@@ -177,8 +155,8 @@ private fun FilterListMemberShipRequestContent(
         Spacer(Modifier.height(16.dp))
 
         LineClearFilterButtons(
-            onApplyFiltersClick = filterActions.onApplyFiltersClick,
-            onClearFilters = filterActions.onClearFilters,
+            onApplyFiltersClick = filterActions.buttonActions.onFilterApply,
+            onClearFilters = filterActions.buttonActions.onFilterClean,
             modifier = Modifier.weight(1f)
         )
     }
@@ -191,11 +169,11 @@ private fun ListMemberShipRequestContent(
     rejectMemberShipRequest: () -> Unit = {},
     showMore: () -> Unit = {},
 ) {
-    GenericPlayerListItem(
+    GenericListItem(
         item = membershipRequest,
         title = { it.sender.name },
         leading = {
-            PlayerImageList(
+            ImageList(
                 image = membershipRequest.sender.image,
             )
         },
