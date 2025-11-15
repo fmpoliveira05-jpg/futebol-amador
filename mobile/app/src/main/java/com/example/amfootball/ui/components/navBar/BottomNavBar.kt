@@ -75,7 +75,7 @@ fun BottomSheetContent(
                 TeamListContentBottomSheet(navController)
             }
 
-            Routes.BottomNavBarRoutes.CHAT.route -> {
+            Routes.BottomNavBarRoutes.CHAT_LIST.route -> {
                 ChatContentBottomSheet(navController)
             }
 

@@ -49,7 +49,9 @@ object Routes {
         override val contentDescription: Int
     ) : AppRouteInfo {
         PLAYER_LIST("playerlist", R.string.item_list_players, Icons.Default.Group, R.string.item_list_players_description),
-        TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description)
+        TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description),
+        CHAT_LIST("chatlist", R.string.item_list_chat, Icons.Default.Groups3, R.string.item_list_chat_description),
+
     }
 
     // AGORA IMPLEMENTA RouteInfo
@@ -100,7 +102,7 @@ object Routes {
         HOMEPAGE(GeralRoutes.HOMEPAGE.route, GeralRoutes.HOMEPAGE.labelResId, GeralRoutes.HOMEPAGE.icon, GeralRoutes.HOMEPAGE.contentDescription),
         TEAM_LIST(PlayerRoutes.TEAM_LIST.route, PlayerRoutes.TEAM_LIST.labelResId, PlayerRoutes.TEAM_LIST.icon, PlayerRoutes.TEAM_LIST.contentDescription),
         PAGE_OPTIONS("pageoptions", R.string.page_options, Icons.Default.ArrowCircleUp, R.string.page_options_description),
-        CHAT("chat", R.string.chat, Icons.AutoMirrored.Filled.Message, R.string.chat_description),
+        CHAT_LIST(PlayerRoutes.CHAT_LIST.route, PlayerRoutes.CHAT_LIST.labelResId, Icons.AutoMirrored.Filled.Message, PlayerRoutes.CHAT_LIST.contentDescription),
         USER_PROFILE(UserRoutes.PROFILE.route, UserRoutes.PROFILE.labelResId, UserRoutes.PROFILE.icon, UserRoutes.PROFILE.contentDescription)
     }
 }

@@ -24,6 +24,7 @@ import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
+import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
@@ -121,6 +122,14 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
 private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
     composable(Routes.UserRoutes.PROFILE.route) {
         ProfileScreen(globalNavController)
+    }
+
+    composable(Routes.PlayerRoutes.CHAT_LIST.route){
+        ChatListScreen()
+    }
+
+    composable(Routes.PlayerRoutes.TEAM_LIST.route){
+        HomePageTeamScreen(globalNavController)
     }
 
 }
