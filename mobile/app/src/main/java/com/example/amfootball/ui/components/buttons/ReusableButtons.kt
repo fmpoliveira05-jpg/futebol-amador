@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.components.buttons
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
@@ -32,7 +33,7 @@ fun SendMemberShipRequestButton(
 ) {
     TextButtonModel(
         onClick = { onClickSendMembership() },
-        imageVector = Icons.Default.Send,
+        imageVector = Icons.AutoMirrored.Filled.Send,
         contentDescription = "Send Membership Request",
         text = "Send Membership Request",
     )
