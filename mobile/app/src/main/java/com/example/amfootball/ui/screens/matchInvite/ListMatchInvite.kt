@@ -18,15 +18,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +45,7 @@ import com.example.amfootball.ui.components.lists.DateRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import com.example.amfootball.utils.Patterns
@@ -71,56 +69,49 @@ fun ListMatchInviteScreen(
     )
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                FilterSection(
-                    isExpanded = filtersExpanded,
-                    onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    content = {
-                        FilterListMatchInvite(
-                            filters = filters,
-                            filterActions = filterActions,
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            items(list) { invite ->
-                ItemListMatchInivite(
-                    matchInvite = invite,
-                    acceptMatchInvite = {
-                        viewModel.acceptMatchInvite(
-                            idMatchInvite = invite.id
-                        )
-                    },
-                    rejectMatchInvite = {
-                        viewModel.rejectMatchInvite(
-                            idMatchInvite = invite.id
-                        )
-                    },
-                    negociateMatchInvite = {
-                        viewModel.negociateMatchInvite(
-                            idMatchInvite = invite.id,
-                            navHostController = navHostController
-                        )
-                    },
-                    showMore = {
-                        viewModel.showMoreDetails(
-                            idMatchInvite = invite.id,
-                            navHostController = navHostController
-                        )
-                    }
-                )
-
-                Spacer(Modifier.height(12.dp))
-            }
+    ListSurface(
+        list = list,
+        filterSection = {
+            FilterSection(
+                isExpanded = filtersExpanded,
+                onToggleExpand = { filtersExpanded = !filtersExpanded },
+                content = {
+                    FilterListMatchInvite(
+                        filters = filters,
+                        filterActions = filterActions,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    )
+                }
+            )
+        },
+        listItems = { invite ->
+            ItemListMatchInivite(
+                matchInvite = invite,
+                acceptMatchInvite = {
+                    viewModel.acceptMatchInvite(
+                        idMatchInvite = invite.id
+                    )
+                },
+                rejectMatchInvite = {
+                    viewModel.rejectMatchInvite(
+                        idMatchInvite = invite.id
+                    )
+                },
+                negociateMatchInvite = {
+                    viewModel.negociateMatchInvite(
+                        idMatchInvite = invite.id,
+                        navHostController = navHostController
+                    )
+                },
+                showMore = {
+                    viewModel.showMoreDetails(
+                        idMatchInvite = invite.id,
+                        navHostController = navHostController
+                    )
+                }
+            )
         }
-    }
+    )
 }
 
 @Composable

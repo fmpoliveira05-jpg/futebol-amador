@@ -3,15 +3,11 @@ package com.example.amfootball.ui.screens.team
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,6 +37,7 @@ import com.example.amfootball.ui.components.lists.DateRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
@@ -68,44 +65,37 @@ fun ListPostPoneMatchScreen(
     )
 
     var filtersExpanded by remember { mutableStateOf(false) }
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                FilterSection(
-                    isExpanded = filtersExpanded,
-                    onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    content = { paddingModifier ->
-                        FilterListPostPoneMatchContent(
-                            filters = filters,
-                            filterActions = filterActions,
-                            modifier = paddingModifier
-                        )
-                    }
-
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            items(list) { postPoneMatch ->
-                ItemListPosPoneMatch(
-                    postPoneMatch = postPoneMatch,
-                    acceptPostPoneMatch = { viewModel.acceptPostPoneMatch(
-                        idPostPoneMatch = postPoneMatch.id,
-                    )},
-                    rejectPostPoneMatch = { viewModel.rejectPostPoneMatch(
-                        idPostPoneMatch = postPoneMatch.id,
-                    )},
-                    showMore = { viewModel.showMoreInfo(
-                        idPostPoneMatch = postPoneMatch.id,
-                        navHostController = navHostController)
-                    }
-                )
-                Spacer(Modifier.height(4.dp))
-            }
+    ListSurface(
+        list = list,
+        filterSection = {
+            FilterSection(
+                isExpanded = filtersExpanded,
+                onToggleExpand = { filtersExpanded = !filtersExpanded },
+                content = { paddingModifier ->
+                    FilterListPostPoneMatchContent(
+                        filters = filters,
+                        filterActions = filterActions,
+                        modifier = paddingModifier
+                    )
+                }
+            )
+        },
+        listItems = { postPoneMatch ->
+            ItemListPosPoneMatch(
+                postPoneMatch = postPoneMatch,
+                acceptPostPoneMatch = { viewModel.acceptPostPoneMatch(
+                    idPostPoneMatch = postPoneMatch.id,
+                )},
+                rejectPostPoneMatch = { viewModel.rejectPostPoneMatch(
+                    idPostPoneMatch = postPoneMatch.id,
+                )},
+                showMore = { viewModel.showMoreInfo(
+                    idPostPoneMatch = postPoneMatch.id,
+                    navHostController = navHostController)
+                }
+            )
         }
-    }
+    )
 }
 
 @Composable

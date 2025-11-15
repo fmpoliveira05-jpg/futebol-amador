@@ -39,6 +39,7 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -65,50 +66,43 @@ fun ListMemberShipRequest(
 
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                FilterSection(
-                    isExpanded = filtersExpanded,
-                    onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    content = {
-                        FilterListMemberShipRequestContent(
-                            filters = filters,
-                            filterActions = filterActions,
-                            modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                        )
-                    }
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            items(list) { request ->
-                ListMemberShipRequestContent(
-                    membershipRequest = request,
-                    acceptMemberShipRequest = { viewModel.AcceptMemberShipRequest(
-                        idReceiver = request.receiver.id,
-                        idRequest = request.id,
-                        isPlayerSender = request.isPlayerSender,
-                        navHostController = navHostController,
-                    ) },
-                    rejectMemberShipRequest = { viewModel.RejectMemberShipRequest(
-                        idReceiver = request.receiver.id,
-                        idRequest = request.id,
-                        isPlayerSender = request.isPlayerSender,
-                    ) },
-                    showMore = { viewModel.ShowMore(
-                        isPlayerSender = request.isPlayerSender,
-                        IdSender = request.sender.id,
-                        navHostController = navHostController,
-                    ) }
-                )
-
-                Spacer(Modifier.height(12.dp))
-            }
+    ListSurface(
+        list = list,
+        filterSection = {
+            FilterSection(
+                isExpanded = filtersExpanded,
+                onToggleExpand = { filtersExpanded = !filtersExpanded },
+                content = {
+                    FilterListMemberShipRequestContent(
+                        filters = filters,
+                        filterActions = filterActions,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    )
+                }
+            )
+        },
+        listItems = { request ->
+            ListMemberShipRequestContent(
+                membershipRequest = request,
+                acceptMemberShipRequest = { viewModel.AcceptMemberShipRequest(
+                    idReceiver = request.receiver.id,
+                    idRequest = request.id,
+                    isPlayerSender = request.isPlayerSender,
+                    navHostController = navHostController,
+                ) },
+                rejectMemberShipRequest = { viewModel.RejectMemberShipRequest(
+                    idReceiver = request.receiver.id,
+                    idRequest = request.id,
+                    isPlayerSender = request.isPlayerSender,
+                ) },
+                showMore = { viewModel.ShowMore(
+                    isPlayerSender = request.isPlayerSender,
+                    IdSender = request.sender.id,
+                    navHostController = navHostController,
+                ) }
+            )
         }
-    }
+    )
 }
 
 @Composable

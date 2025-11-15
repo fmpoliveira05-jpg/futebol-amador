@@ -2,18 +2,13 @@ package com.example.amfootball.ui.screens.lists
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +27,6 @@ import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
 import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
-import com.example.amfootball.data.dtos.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -45,6 +39,7 @@ import com.example.amfootball.ui.components.lists.AgeRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
@@ -74,40 +69,34 @@ fun ListPlayersScreen(
 
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                FilterSection(
-                    isExpanded = filtersExpanded,
-                    onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    content = { paddingModifier ->
-                        FilterListPlayerContent(
-                            filters = filters,
-                            filterActions = filterActions,
-                            listPosition = listPosition,
-                            modifier = paddingModifier
-                        )
-                    }
+    ListSurface(
+        list = list,
+        filterSection = {
+            FilterSection(
+                isExpanded = filtersExpanded,
+                onToggleExpand = { filtersExpanded = !filtersExpanded },
+                content = { paddingModifier ->
+                    FilterListPlayerContent(
+                        filters = filters,
+                        filterActions = filterActions,
+                        listPosition = listPosition,
+                        modifier = paddingModifier
+                    )
+                }
 
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            items(list) { player ->
-                ItemListPlayer(
-                    player = player,
-                    sendMemberShipRequest = { viewModel.sendMembershipRequest(player.id) },
-                    showMore = { viewModel.showMore(
-                        idPlayer = player.id,
-                        navHostController = navHostController)
-                    }
-                )
-                Spacer(Modifier.height(4.dp))
-            }
+            )
+        },
+        listItems = {  player ->
+            ItemListPlayer(
+                player = player,
+                sendMemberShipRequest = { viewModel.sendMembershipRequest(player.id) },
+                showMore = { viewModel.showMore(
+                    idPlayer = player.id,
+                    navHostController = navHostController)
+                }
+            )
         }
-    }
+    )
 }
 
 @Composable

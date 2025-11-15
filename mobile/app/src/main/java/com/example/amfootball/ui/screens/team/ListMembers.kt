@@ -2,15 +2,12 @@ package com.example.amfootball.ui.screens.team
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -19,7 +16,6 @@ import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -51,6 +47,7 @@ import com.example.amfootball.ui.components.lists.FilterHeader
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
@@ -64,7 +61,6 @@ fun ListMembersScreen(
 ) {
     val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
     val list by viewModel.uiList.observeAsState(initial = emptyList())
-
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
         onNameChange = viewModel::onNameChange,
@@ -79,48 +75,42 @@ fun ListMembersScreen(
 
     val listTypeMember by viewModel.uiListTypeMember.observeAsState(initial = emptyList())
     val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
-
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                FilterSection(
-                    isExpanded = filtersExpanded,
-                    onToggleExpand = { filtersExpanded = !filtersExpanded },
-                    header = {
-                        FilterHeader(isExpanded = filtersExpanded, onToggleExpand = { filtersExpanded = !filtersExpanded })
-                    },
-                    content = { paddingModifier ->
-                        FilterListMemberContent(
-                            filters = filters,
-                            filterActions = filterAction,
-                            listTypeMember = listTypeMember,
-                            listPosition = listPosition,
-                            modifier = paddingModifier
-                        )
-                    }
+    ListSurface(
+        list = list,
+        filterSection = {
+            FilterSection(
+                isExpanded = filtersExpanded,
+                onToggleExpand = { filtersExpanded = !filtersExpanded },
+                header = {
+                    FilterHeader(isExpanded = filtersExpanded, onToggleExpand = { filtersExpanded = !filtersExpanded })
+                },
+                content = { paddingModifier ->
+                    FilterListMemberContent(
+                        filters = filters,
+                        filterActions = filterAction,
+                        listTypeMember = listTypeMember,
+                        listPosition = listPosition,
+                        modifier = paddingModifier
+                    )
+                }
 
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-
-            items(list) { member ->
-                ListMemberItem(
-                    member = member,
-                    promote = { viewModel.onPromoteMember(idPlayer = member.id) },
-                    despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
-                    remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
-                    showMore = { viewModel.onShowMoreInfo(
-                        idUser = member.id,
-                        navHostController = navHostController)
-                    }
-                )
-            }
+            )
+        },
+        listItems = { member ->
+            ListMemberItem(
+                member = member,
+                promote = { viewModel.onPromoteMember(idPlayer = member.id) },
+                despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
+                remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
+                showMore = { viewModel.onShowMoreInfo(
+                    idUser = member.id,
+                    navHostController = navHostController)
+                }
+            )
         }
-    }
+    )
 }
 
 @Composable
@@ -240,7 +230,7 @@ private fun ListMemberItem(
 @Composable
 private fun MemberSupportingInfo(member: MemberTeamDto) {
     Column {
-        AgeRow(age = member.age,)
+        AgeRow(age = member.age)
         PositionRow(position = member.position)
         TypeMemberRow(typeMember = member.typeMember)
         SizeRow(size = member.size)
