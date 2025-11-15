@@ -1,12 +1,19 @@
 package com.example.amfootball.ui.components.lists
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,6 +24,33 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
+@OptIn(ExperimentalAnimationApi::class)
+@Composable
+fun FilterSection(
+    isExpanded: Boolean,
+    onToggleExpand: () -> Unit,
+    modifier: Modifier = Modifier,
+    header: @Composable () -> Unit = {
+        FilterHeader(isExpanded = isExpanded, onToggleExpand = onToggleExpand)
+    },
+    content: @Composable (modifier: Modifier) -> Unit = {}
+) {
+    ElevatedCard(modifier = modifier.fillMaxWidth()) {
+        Column {
+            // Cabeçalho — pode ser o default ou um header passado
+            header()
+
+            // Conteúdo dos filtros — slot para o call-site preencher
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = expandVertically(),
+                exit = shrinkVertically(),
+            ) {
+                content(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp))
+            }
+        }
+    }
+}
 @Composable
 fun FilterHeader(isExpanded: Boolean,
                  onToggleExpand: () -> Unit, ) {

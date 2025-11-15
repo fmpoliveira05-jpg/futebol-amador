@@ -18,13 +18,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
-import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.Objects.Routes.PlayerRoutes
+import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.screens.HomePageScreen
-import com.example.amfootball.ui.screens.MatchInvite.SendMatchInviteScreen
+import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
 import com.example.amfootball.ui.screens.team.HomePageTeamScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
@@ -87,31 +88,6 @@ fun MainNavigation() {
     }
 }
 
-/*
-private fun NavGraphBuilder.NavBars(
-    globalNavController: NavHostController,
-    isLoggedIn: Boolean,
-    onLogoutClick: () -> Unit
-) {
-    composable(Routes.GeralRoutes.HOMEPAGE.route) {
-        NavigatonDrawerNavBarHomePage(
-            globalNavController = globalNavController,
-            isLoggedIn = isLoggedIn,
-            onLogout = onLogoutClick
-        )
-    }
-
-    composable(Routes.TeamRoutes.HOMEPAGE.route) {
-        NavigatonDrawerTeam(
-            globalNavController = globalNavController,
-            isLoggedIn = isLoggedIn,
-            onLogout = onLogoutClick
-        )
-    }
-}
-
- */
-
 /**
  * Função que declara todas as páginas da app
  * */
@@ -146,6 +122,7 @@ private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
     composable(Routes.UserRoutes.PROFILE.route) {
         ProfileScreen(globalNavController)
     }
+
 }
 
 /**
@@ -167,7 +144,7 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
 
         val idTeam = navBackStackEntry.arguments?.getString(CrudTeamRoutes.ARG_TEAM_ID)
 
-        if (idTeam != null) {
+        if (!idTeam.isNullOrBlank()) {
             ProfileTeamScreen(
                 navHostController = globalNavController,
                 idTeam = idTeam
@@ -175,6 +152,9 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
         } else {
             //Posso depois aqui fazer algo personalizado
             print("Error")
+            globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+                popUpTo(Routes.GeralRoutes.HOMEPAGE.route) { inclusive = true }
+            }
         }
     }
 }
@@ -184,6 +164,6 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
  * */
 private fun NavGraphBuilder.MatchInivitePages(globalNavController: NavHostController){
     composable(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
-        SendMatchInviteScreen(navHostController = globalNavController)
+        FormMatchInviteScreen(navHostController = globalNavController)
     }
 }

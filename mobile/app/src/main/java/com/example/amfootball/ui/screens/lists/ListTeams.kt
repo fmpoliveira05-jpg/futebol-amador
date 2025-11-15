@@ -54,8 +54,8 @@ import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
-import com.example.amfootball.navigation.objects.pages.MembershipRequestRoutes
+import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.Objects.page.MembershipRequestRoutes
 import com.example.amfootball.ui.components.buttons.FilterApplyButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import kotlin.String
@@ -272,7 +272,6 @@ private fun NumberFilterField(
         label = label,
         value = textValue,
         onValueChange = { newValue ->
-            textValue = newValue
             val newIntValue = newValue.toIntOrNull()
             if (newIntValue != null) {
                 onValueChange(newIntValue)

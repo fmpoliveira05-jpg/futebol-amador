@@ -21,7 +21,6 @@ import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.team.CalendarScreen
@@ -72,7 +71,7 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController,
             CalendarScreen(globalNavController = globalNavController)
         }
         composable(Routes.TeamRoutes.MEMBERLIST.route) {
-            ListMembersScreen()
+            ListMembersScreen(navHostController = globalNavController)
         }
         composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)

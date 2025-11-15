@@ -8,7 +8,7 @@ import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.objects.pages.CrudTeamRoutes
+import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

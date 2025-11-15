@@ -38,11 +38,3 @@ fun InfoRow(
         )
     }
 }
-
-@Composable
-fun<T>BasePlayerItem(
-    item: T,
-    
-) {
-
-}
