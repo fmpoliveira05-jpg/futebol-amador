@@ -1,23 +1,23 @@
 package com.example.amfootball.ui.viewModel.memberShipRequest
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.utils.extensions.toLocalDateTime
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 
 class ListMemberShipRequestViewModel: ViewModel() {
 
-    private val filterState = MutableStateFlow(value = FilterMemberShipRequest())
-    val uiFilterState = filterState.asStateFlow()
+    private val filterState: MutableLiveData<FilterMemberShipRequest> = MutableLiveData(FilterMemberShipRequest())
+    val uiFilterState: LiveData<FilterMemberShipRequest> = filterState
 
-    private val listState = MutableStateFlow(value= emptyList<MembershipRequestInfoDto>())
+    private val listState: MutableLiveData<List<MembershipRequestInfoDto>> = MutableLiveData(emptyList<MembershipRequestInfoDto>())
     private var originalList: List<MembershipRequestInfoDto> = emptyList()
-    val uiListState = listState.asStateFlow()
+    val uiListState: LiveData<List<MembershipRequestInfoDto>> = listState
 
     //Inicializador
     init {
@@ -30,24 +30,24 @@ class ListMemberShipRequestViewModel: ViewModel() {
 
     //Metodos
     fun onSenderNameChanged(newName: String) {
-        filterState.value = filterState.value.copy(
+        filterState.value = filterState.value!!.copy(
             senderName = newName.ifEmpty { null } //Caso esteja vazio guarda null
         )
     }
 
     fun onMinDateSelected(newMinDate: Long) {
-        filterState.value = filterState.value.copy(minDate = newMinDate.toLocalDateTime())
+        filterState.value = filterState.value!!.copy(minDate = newMinDate.toLocalDateTime())
     }
 
     fun onMaxDateSelected(newMaxDate: Long) {
-        filterState.value = filterState.value.copy(maxDate = newMaxDate.toLocalDateTime())
+        filterState.value = filterState.value!!.copy(maxDate = newMaxDate.toLocalDateTime())
     }
 
     /**
      * Função que permite chamar o endPoint da BD para consutlar a lista com os filtros aplicados
      * */
     fun applyFilters() {
-        val currentFilters = filterState.value
+        val currentFilters = filterState.value!!
         // TODO: Quando tiver a API, é aqui que a vai chamar:
 
         println("A aplicar filtros (sem API): $currentFilters")

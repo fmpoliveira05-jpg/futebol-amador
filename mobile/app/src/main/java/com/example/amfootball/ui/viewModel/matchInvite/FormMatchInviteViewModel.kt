@@ -1,13 +1,12 @@
 package com.example.amfootball.ui.viewModel.matchInvite
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.MatchInviteFormErros
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -23,11 +22,11 @@ class FormMatchInviteViewModel @Inject constructor(
     private val idMatchInvite: String? = savedStateHandle.get("idMatchInvite")
     val isNegociate = idMatchInvite != null
 
-    private val formState = MutableStateFlow(MatchInviteDto())
-    val uiFormState: StateFlow<MatchInviteDto> = formState.asStateFlow()
+    private val formState: MutableLiveData<MatchInviteDto> = MutableLiveData(MatchInviteDto())
+    val uiFormState: LiveData<MatchInviteDto> = formState
 
-    private val erros = MutableStateFlow(MatchInviteFormErros())
-    val uiErrorsForm: StateFlow<MatchInviteFormErros> = erros.asStateFlow()
+    private val erros: MutableLiveData<MatchInviteFormErros> = MutableLiveData(MatchInviteFormErros())
+    val uiErrorsForm: LiveData<MatchInviteFormErros> = erros
 
     init {
         if (isNegociate) {
@@ -42,7 +41,7 @@ class FormMatchInviteViewModel @Inject constructor(
     //Metodos
     fun onGameDateChange(millis: Long) {
         val newDate = convertMillisToDate(millis)
-        val current = formState.value
+        val current = formState.value!!
 
         formState.value = current.copy(
             gameDate = newDate
@@ -50,7 +49,7 @@ class FormMatchInviteViewModel @Inject constructor(
     }
 
     fun onTimeGameChange(newTime: String) {
-        val current = formState.value
+        val current = formState.value!!
 
         formState.value = current.copy(
             gameTime = newTime
@@ -58,7 +57,7 @@ class FormMatchInviteViewModel @Inject constructor(
     }
 
     fun onLocalGameChange(isHome: Boolean) {
-        formState.value = formState.value.copy(isHomeGame = isHome)
+        formState.value = formState.value!!.copy(isHomeGame = isHome)
     }
 
     fun onSubmitForm(navHostController: NavHostController) {
@@ -67,8 +66,8 @@ class FormMatchInviteViewModel @Inject constructor(
         }
 
         val combinedDateTime = MatchInviteDto.combineToDateTime(
-            formState.value.gameDate,
-            formState.value.gameTime
+            formState.value!!.gameDate,
+            formState.value!!.gameTime
         )
 
         if (isNegociate) {
@@ -84,8 +83,8 @@ class FormMatchInviteViewModel @Inject constructor(
 
     //Trocar para um validateForm com mais verificações
     private fun IsFormValid(): Boolean {
-        val dateGame = formState.value.gameDate
-        val timeGame = formState.value.gameTime
+        val dateGame = formState.value!!.gameDate
+        val timeGame = formState.value!!.gameTime
 
         var errorDateGame: Int? = null
         var errorTime: Int? = null
@@ -117,5 +116,4 @@ class FormMatchInviteViewModel @Inject constructor(
             .toLocalDate()
             .format(formatter)
     }
-
 }

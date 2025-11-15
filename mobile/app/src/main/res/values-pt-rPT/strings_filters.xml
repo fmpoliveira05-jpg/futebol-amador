@@ -28,5 +28,15 @@
     <string name="filter_max_date">Data Max.</string>
     <string name="description_filter_max_date">Filtro qeu permite procurar por todos os item abaixo dessa data.</string>
 
+    <string name="filter_min_date_game">Data Min. Jogo</string>
+    <string name="filter_max_date_game">Data Max. Jogo</string>
+    <string name="filter_min_date_post_pone">Data Min. Adiamento</string>
+    <string name="filter_max_date_post_pone">Data Max. Adiamento</string>
+
+    <string name="filter_local_game">Local Jogo</string>
+    <string name="filter_home">Casa</string>
+    <string name="filter_away">Fora</string>
+
     <string name="filter_selectbox_all">Todos</string>
+    <string name="filter_both">Ambos</string>
 </resources>

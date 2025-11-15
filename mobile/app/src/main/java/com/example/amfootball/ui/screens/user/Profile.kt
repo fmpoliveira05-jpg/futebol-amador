@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -29,7 +29,7 @@ fun ProfileScreen(
     navController: NavHostController,
     viewModel: ProfilePlayerViewModel = viewModel()
 ) {
-    val profileData by viewModel.uiProfilePlayer.collectAsState()
+    val profileData by viewModel.uiProfilePlayer.observeAsState(initial = PlayerProfileDto.createExample())
 
     Scaffold(
         topBar = {

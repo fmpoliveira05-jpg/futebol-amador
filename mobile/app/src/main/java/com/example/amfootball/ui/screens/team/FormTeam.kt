@@ -8,8 +8,8 @@ import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,6 +26,7 @@ import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.ImagePicker
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
@@ -36,8 +37,8 @@ fun FormTeamScreen(
     navHostController: NavHostController,
     viewModel: TeamFormViewModel = viewModel()
 ) {
-    val uiForm by viewModel.uiFormState.collectAsState()
-    val uiErrors by viewModel.uiErrors.collectAsState()
+    val uiForm by viewModel.uiFormState.observeAsState(initial = FormTeamDto())
+    val uiErrors by viewModel.uiErrors.observeAsState(initial = TeamFormErros())
 
     val fieldTeamAction = FormTeamActions(
         onNameChange = viewModel::onNameChange,
@@ -164,8 +165,21 @@ private fun FieldsCreateTeam(
     showBackground = true)
 @Composable
 fun PreviewFormTeamCreate() {
-    FormTeamScreen(navHostController = rememberNavController())
-}
+    AMFootballTheme {
+        ContentCreateTeam(
+            filedsTeam = FormTeamDto(),
+            fieldTeamAction = FormTeamActions(
+                onNameChange = {},
+                onDescriptionChange = {},
+                onImageChange = {},
+                onNamePitchChange = {},
+                onAddressPitchChange = {},
+            ),
+            fieldsErrors = TeamFormErros(), // Sem erros
+            onSubmitClick = {}, // Botão não faz nada no preview
+            modifier = Modifier.padding(16.dp)
+        )
+    }}
 
 @Preview(name = "Edit Team - En",
     locale = "en",
@@ -175,5 +189,20 @@ fun PreviewFormTeamCreate() {
     showBackground = true)
 @Composable
 fun PreviewFormTeamEdit() {
-    FormTeamScreen(navHostController = rememberNavController())
-}
+    AMFootballTheme {
+        ContentCreateTeam(
+            filedsTeam = FormTeamDto.generateEditExampleTeam(),
+            fieldTeamAction = FormTeamActions(
+                onNameChange = {},
+                onDescriptionChange = {},
+                onImageChange = {},
+                onNamePitchChange = {},
+                onAddressPitchChange = {},
+            ),
+            fieldsErrors = TeamFormErros(
+                nameError = R.string.mandatory_field
+            ),
+            onSubmitClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }}

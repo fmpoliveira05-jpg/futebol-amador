@@ -21,8 +21,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -62,8 +62,9 @@ fun ListMembersScreen(
     navHostController: NavHostController,
     viewModel: ListMembersViewModel = viewModel()
 ) {
-    val filters by viewModel.uiFilter.collectAsState()
-    val list by viewModel.uiList.collectAsState()
+    val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
+    val list by viewModel.uiList.observeAsState(initial = emptyList())
+
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
         onNameChange = viewModel::onNameChange,
@@ -76,8 +77,8 @@ fun ListMembersScreen(
         )
     )
 
-    val listTypeMember by viewModel.uiListTypeMember
-    val listPosition by viewModel.uiListPositions
+    val listTypeMember by viewModel.uiListTypeMember.observeAsState(initial = emptyList())
+    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
 
     var filtersExpanded by remember { mutableStateOf(false) }
 

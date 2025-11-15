@@ -1,63 +1,50 @@
 package com.example.amfootball.ui.viewModel.match
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.utils.FinishMatchConst
 
-class FinishMatchViewModel: ViewModel() {
-    private val result = mutableStateOf<ResultMatchDto?>(null)
-
-    //Getters
-    val idMatch: State<String> = derivedStateOf {
-        result.value?.idMatch.toString()
-    }
-
-    val idTeam: State<String> = derivedStateOf {
-        result.value?.idTeam.toString()
-    }
-
-    val numGoalsTeam: State<Int> = derivedStateOf {
-        result.value?.numGoals ?: 0
-    }
-
-    val idOpponent: State<String> = derivedStateOf {
-        result.value?.idOpponent.toString()
-    }
-
-    val numGoalsOpponent: State<Int> = derivedStateOf {
-        result.value?.numGoalsOpponent ?: 0
-    }
+class FinishMatchViewModel(): ViewModel() {
+    private val resultState: MutableLiveData<ResultMatchDto?> = MutableLiveData<ResultMatchDto?>()
+    val resutl: LiveData<ResultMatchDto?> = resultState
 
     //Setters
     fun onNumGoalsTeamChange(newNumGoalsTeam: Int) {
-
-
-        result.value = result.value?.copy(numGoals = NewNumGoals(newNumGoalsTeam))
+        resultState.value = resultState.value?.copy(numGoals = NewNumGoals(newNumGoalsTeam))
     }
 
     fun onNumGoalsOponnetChange(numGoalsOpponent: Int) {
-        result.value = result.value?.copy(numGoalsOpponent = NewNumGoals(numGoalsOpponent))
+        resultState.value = resultState.value?.copy(numGoalsOpponent = NewNumGoals(numGoalsOpponent))
     }
 
     //Initializar
     init {
-        //TODO: Ver o que fazer aqui
+        //TODO: Ver como vou sacar o que falta e claro carregar o opponente
+        resultState.value = ResultMatchDto(
+            numGoals = 0,
+            numGoalsOpponent = 0,
+            idMatch = "ada",
+            idTeam = "asd",
+            idOpponent = "as",
+        )
     }
 
     //Metodos
+    //Sacar o id do parametro ou então buscar na url
     fun onSubmitForm() {
         //TODO: Meter verificações
 
-        result.value = ResultMatchDto(
-            idMatch = idMatch.value,
+        /*
+        resultState.value = ResultMatchDto(
+            idMatch = resultState.value!!.idMatch,
             idTeam = idTeam.value,
             numGoals = numGoalsTeam.value,
             idOpponent = idOpponent.value,
             numGoalsOpponent = numGoalsOpponent.value
         )
+        * */
 
         //TODO: Enviar para o endPoint da API
         //TODO: Meter um if que caso o hub diga que a partida foi finalizada então volta para o calendario,

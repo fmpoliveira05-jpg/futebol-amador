@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,6 +32,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
 import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
+import com.example.amfootball.data.dtos.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -52,9 +54,9 @@ fun ListPlayersScreen(
     navHostController: NavHostController,
     viewModel: ListPlayerViewModel = viewModel()
 ) {
-    val filters by viewModel.uiFilters.collectAsState()
-    val list by viewModel.uiList.collectAsState()
-    val listPosition by viewModel.uiListPositions
+    val filters by viewModel.uiFilters.observeAsState(initial = FilterListPlayerDto())
+    val list by viewModel.uiList.observeAsState(initial = emptyList())
+    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
 
     val filterActions = FilterListPlayersActions(
         onNameChange = viewModel::onNameChange,

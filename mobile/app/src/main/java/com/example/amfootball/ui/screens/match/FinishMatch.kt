@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,6 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.R
+import com.example.amfootball.data.actions.forms.FormFinishMatchActions
+import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
@@ -28,8 +32,12 @@ fun FinishMatchScreen(
     navHostController: NavHostController,
     viewModel: FinishMatchViewModel = viewModel()
 ) {
-    val numGoalsTeam = viewModel.numGoalsTeam.value
-    val numGoalsOpponent = viewModel.numGoalsOpponent.value
+    val result by viewModel.resutl.observeAsState(initial = null)
+    val formActions = FormFinishMatchActions(
+        onNumGoalsTeamChange = viewModel::onNumGoalsTeamChange,
+        onNumGoalsOpponentChange = viewModel::onNumGoalsOponnetChange,
+        onSubmitForm = viewModel::onSubmitForm
+    )
 
     Scaffold(
         topBar = {
@@ -40,11 +48,8 @@ fun FinishMatchScreen(
         },
         content = { paddingValues ->
             FormFinishMatch(
-                numGoalsTeam = numGoalsTeam,
-                numGoalsOpponent = numGoalsOpponent,
-                onNumGoalsTeamChange = { viewModel.onNumGoalsTeamChange(numGoalsTeam) },
-                onNumGoalsOpponentChange = { viewModel.onNumGoalsOponnetChange(numGoalsOpponent) },
-                onSubmitForm = { viewModel.onSubmitForm() },
+                result = result,
+                formActions = formActions,
                 modifier = Modifier
                 .padding(paddingValues)
                 .padding(16.dp)
@@ -55,53 +60,44 @@ fun FinishMatchScreen(
 
 @Composable
 private fun FormFinishMatch(
-    numGoalsTeam: Int,
-    numGoalsOpponent: Int,
-    onNumGoalsTeamChange: () -> Unit,
-    onNumGoalsOpponentChange: () -> Unit,
-    onSubmitForm: () -> Unit,
+    result: ResultMatchDto?,
+    formActions: FormFinishMatchActions,
     modifier: Modifier = Modifier) {
     Column(modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         TextFieldForm(
-            numGoalsTeam = numGoalsTeam,
-            numGoalsOpponent = numGoalsOpponent,
-            onNumGoalsTeamChange = onNumGoalsTeamChange,
-            onNumGoalsOpponentChange = onNumGoalsOpponentChange,
-            onSubmitForm = onSubmitForm
+            result = result,
+            formActions = formActions,
         )
     }
 }
 
 @Composable
 private fun TextFieldForm(
-    numGoalsTeam: Int,
-    numGoalsOpponent: Int,
-    onNumGoalsTeamChange: () -> Unit,
-    onNumGoalsOpponentChange: () -> Unit,
-    onSubmitForm: () -> Unit
+    result: ResultMatchDto?,
+    formActions: FormFinishMatchActions,
 ) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_team),
-        value = numGoalsTeam.toString(),
-        onValueChange = { onNumGoalsTeamChange() },
+        value = result?.numGoals?.toString() ?: "",
+        onValueChange = { formActions.onNumGoalsTeamChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_opponent_team),
-        value = numGoalsOpponent.toString(),
-        onValueChange = { onNumGoalsOpponentChange() },
+        value = result?.numGoalsOpponent?.toString() ?: "",
+        onValueChange = { formActions.onNumGoalsOpponentChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
     SubmitFormButton(
-        onClick = { onSubmitForm() }
+        onClick = { formActions.onSubmitForm() }
     )
 }
 

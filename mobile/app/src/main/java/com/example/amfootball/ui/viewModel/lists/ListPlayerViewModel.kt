@@ -1,24 +1,22 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
-class ListPlayerViewModel: ViewModel() {
-    private val filterState = MutableStateFlow(FilterListPlayerDto())
-    val uiFilters = filterState.asStateFlow()
+class ListPlayerViewModel(): ViewModel() {
+    private val filterState: MutableLiveData<FilterListPlayerDto> = MutableLiveData(FilterListPlayerDto())
+    val uiFilters: LiveData<FilterListPlayerDto> = filterState
 
-    private val listState = MutableStateFlow(emptyList<InfoPlayerDto>())
-    val uiList = listState.asStateFlow()
+    private val listState: MutableLiveData<List<InfoPlayerDto>> = MutableLiveData(emptyList<InfoPlayerDto>())
+    val uiList: LiveData<List<InfoPlayerDto>> = listState
 
-    private val listPositions = mutableStateOf<List<Position?>>(emptyList())
-    val uiListPositions: State<List<Position?>> = listPositions
+    private val listPositions: MutableLiveData<List<Position?>> = MutableLiveData(emptyList())
+    val uiListPositions: LiveData<List<Position?>> = listPositions
 
     init {
         //TODO: Carregar a lista da API
@@ -34,31 +32,31 @@ class ListPlayerViewModel: ViewModel() {
 
     //Metodos
     fun onNameChange(name: String) {
-        filterState.value = filterState.value.copy(name = name)
+        filterState.value = filterState.value!!.copy(name = name)
     }
 
     fun onCityChange(city: String) {
-        filterState.value = filterState.value.copy(city = city)
+        filterState.value = filterState.value!!.copy(city = city)
     }
 
     fun onMinAgeChange(minAge: Int?) {
-        filterState.value = filterState.value.copy(minAge = minAge)
+        filterState.value = filterState.value!!.copy(minAge = minAge)
     }
 
     fun onMaxAgeChange(maxAge: Int?) {
-        filterState.value = filterState.value.copy(maxAge = maxAge)
+        filterState.value = filterState.value!!.copy(maxAge = maxAge)
     }
 
     fun onPositionChange(position: Position?) {
-        filterState.value = filterState.value.copy(position = position)
+        filterState.value = filterState.value!!.copy(position = position)
     }
 
     fun onMinSizeChange(minSize: Int?) {
-        filterState.value = filterState.value.copy(minSize = minSize)
+        filterState.value = filterState.value!!.copy(minSize = minSize)
     }
 
     fun onMaxSizeChange(maxSize: Int?) {
-        filterState.value = filterState.value.copy(maxSize = maxSize)
+        filterState.value = filterState.value!!.copy(maxSize = maxSize)
     }
 
     fun filterApply() {
