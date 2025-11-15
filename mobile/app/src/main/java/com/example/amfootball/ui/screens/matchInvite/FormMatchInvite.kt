@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,6 +16,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.ui.components.BackTopBar
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
@@ -35,8 +35,8 @@ fun FormMatchInviteScreen(
     viewModel: FormMatchInviteViewModel = viewModel(),
     navHostController: NavHostController
 ) {
-    val fields by viewModel.uiFormState.collectAsState()
-    val errors by viewModel.uiErrorsForm.collectAsState()
+    val fields by viewModel.uiFormState.observeAsState(initial = MatchInviteDto())
+    val errors by viewModel.uiErrorsForm.observeAsState(initial = MatchInviteFormErros())
 
     val actions = FormMatchInviteActions(
         onGameDateChange = viewModel::onGameDateChange,

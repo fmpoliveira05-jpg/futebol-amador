@@ -1,8 +1,8 @@
 package com.example.amfootball.data.dtos.rank
 
 data class RankNameDto(
-    val Id: String,
-    val Name: String,
+    val id: String,
+    val name: String,
 ) {
     companion object {
         fun generateExampleRanks(): List<RankNameDto> {

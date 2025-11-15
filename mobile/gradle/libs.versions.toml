@@ -1,5 +1,5 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.1"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.28"
 hilt = "2.51.1"
@@ -16,6 +16,9 @@ material3 = "1.4.0"
 runtime = "1.9.4"
 firebaseFirestoreKtx = "26.0.2"
 foundationLayout = "1.9.4"
+roomKtx = "2.8.3"
+runtimeLivedata = "1.9.4"
+lifecycleViewmodelKtx = "2.9.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +42,9 @@ androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
 androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

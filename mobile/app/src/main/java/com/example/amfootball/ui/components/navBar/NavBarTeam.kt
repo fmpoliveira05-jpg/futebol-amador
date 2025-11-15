@@ -6,7 +6,6 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,8 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.NavigationItem
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.screens.Lists.ListTeamScreen
-import com.example.amfootball.ui.screens.lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.team.CalendarScreen
@@ -38,7 +36,7 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
     val drawerItemList = prepareNavigationDrawerItems()
     val internalNavController = rememberNavController()
 
-    NavigatonDrawer(
+    NavigationDraweri(
         itens = drawerItemList,
         titleNavBar = "NavBar Team",
         scaffoldContent = { innerNav ->
@@ -57,8 +55,8 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
         }
     )
 }
-//Metodo que define todas as rotas da NavBar
 
+//Metodo que define todas as rotas da NavBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScaffoldContentTeamNavBar(navController: NavHostController,
@@ -72,7 +70,7 @@ fun ScaffoldContentTeamNavBar(navController: NavHostController,
             CalendarScreen(globalNavController = globalNavController)
         }
         composable(Routes.TeamRoutes.MEMBERLIST.route) {
-            ListMembersScreen()
+            ListMembersScreen(navHostController = globalNavController)
         }
         composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
             ListMemberShipRequest(navHostController = globalNavController)

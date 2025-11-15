@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="position_forward">Avançado</string>
+    <string name="position_midfields">Meio campo</string>
+    <string name="position_defender">Defesa</string>
+    <string name="position_goalkeeper">Guarda-Redes</string>
+
+    <string name="type_member_player">Jogador</string>
+    <string name="type_member_admin_team">Administrador</string>
+</resources>

@@ -1,13 +1,13 @@
 package com.example.amfootball.ui.viewModel.team
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 
 class ProfileTeamViewModel: ViewModel() {
-    private val infoTeam = MutableStateFlow(ProfileTeamInfoDto())
-    val uiInfoTeam = infoTeam.asStateFlow()
+    private val infoTeam: MutableLiveData<ProfileTeamInfoDto> = MutableLiveData(ProfileTeamInfoDto())
+    val uiInfoTeam: LiveData<ProfileTeamInfoDto> = infoTeam
 
     init{
         //TODO: Carregar dados reais na API

@@ -4,18 +4,36 @@
     <string name="hide_filter">Hide Filters</string>
     <string name="open_filters">Open Filters</string>
 
-    <string name="filter_sender_name">Sender</string>
-    <string name="filter_min_date">Min. Date</string>
-    <string name="description_filter_min_date">A filter that allows you to search for all items above that date.</string>
-    <string name="filter_max_date">Max. Date</string>
-    <string name="description_filter_max_date">A filter that allows you to search for all items below that date.</string>
-
+    <string name="filter_name">Name</string>
     <string name="filter_name_team">Name Team</string>
+    <string name="filter_sender_name">Sender</string>
     <string name="filter_city">City</string>
+
+    <string name="filter_type_member">Type Member</string>
+    <string name="filter_position">Position</string>
+    <string name="filter_min_age">Min. Age</string>
+    <string name="filter_max_age">Max. Age</string>
+    <string name="filter_min_size">Min. Size</string>
+    <string name="filter_max_size">Max. Size</string>
     <string name="filter_min_points_Team">Min. Points</string>
     <string name="filter_max_points_Team">Max. Points</string>
     <string name="filter_min_average_age_team">Min. Average Age</string>
     <string name="filter_max_average_age_team">Max. Average Age</string>
     <string name="filter_min_members_team">Min. Members</string>
     <string name="filter_max_members_team">Max. Members</string>
+    <string name="filter_min_date">Min. Date</string>
+    <string name="description_filter_min_date">A filter that allows you to search for all items above that date.</string>
+    <string name="filter_max_date">Max. Date</string>
+    <string name="description_filter_max_date">A filter that allows you to search for all items below that date.</string>
+    <string name="filter_min_date_game">Min. Date Game</string>
+    <string name="filter_max_date_game">Max. Date Game</string>
+    <string name="filter_min_date_post_pone">Min. Date Post Pone</string>
+    <string name="filter_max_date_post_pone">Max. Date Post Pone</string>
+
+    <string name="filter_local_game">Local Game</string>
+    <string name="filter_home">Home</string>
+    <string name="filter_away">Away</string>
+
+    <string name="filter_selectbox_all">All</string>
+    <string name="filter_both">Both</string>
 </resources>

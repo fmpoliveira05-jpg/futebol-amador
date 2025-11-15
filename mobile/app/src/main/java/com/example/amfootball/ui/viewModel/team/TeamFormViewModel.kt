@@ -3,11 +3,10 @@ package com.example.amfootball.ui.viewModel.team
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.data.dtos.team.FormTeamDto
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.errors.TeamFormErros
 import com.example.amfootball.utils.GeneralConst
@@ -29,35 +28,35 @@ class TeamFormViewModel @Inject constructor(
     private val idTeam: String? = savedStateHandle.get("idTeam")
     val isEditMode = idTeam != null
 
-    private val formState = MutableStateFlow(FormTeamDto())
-    val uiFormState: StateFlow<FormTeamDto> = formState.asStateFlow()
+    private val formState: MutableLiveData<FormTeamDto> = MutableLiveData(FormTeamDto())
+    val uiFormState: LiveData<FormTeamDto> = formState
 
     //Para mandar erros
-    private val errors = MutableStateFlow(TeamFormErros())
-    val uiErrors: StateFlow<TeamFormErros> = errors.asStateFlow()
+    private val errors: MutableLiveData<TeamFormErros> = MutableLiveData(TeamFormErros())
+    val uiErrors: LiveData<TeamFormErros> = errors
 
     //Setters
     fun onNameChange(name: String) {
-        formState.value = formState.value.copy(name = name)
+        formState.value = formState.value!!.copy(name = name)
     }
 
     fun onDescriptionChange(description: String?) {
-        formState.value = formState.value.copy(description = description)
+        formState.value = formState.value!!.copy(description = description)
     }
 
     fun onImageChange(image: Uri?) {
-        formState.value = formState.value.copy(image = image)
+        formState.value = formState.value!!.copy(image = image)
     }
 
     fun onNamePitchChange(name: String) {
-        formState.value = formState.value.copy(
-            pitch = formState.value.pitch.copy(name = name)
+        formState.value = formState.value!!.copy(
+            pitch = formState.value!!.pitch.copy(name = name)
         )
     }
 
     fun onAddressPitchChange(address: String) {
-        formState.value = formState.value.copy(
-            pitch = formState.value.pitch.copy(address = address)
+        formState.value = formState.value!!.copy(
+            pitch = formState.value!!.pitch.copy(address = address)
         )
     }
 
@@ -90,16 +89,16 @@ class TeamFormViewModel @Inject constructor(
 
     //Metodos privados
     private fun ValidateFormValid(): Boolean {
-        val name = formState.value.name
+        val name = formState.value!!.name
         val nameLength = name.length
 
-        val description = formState.value.description ?: ""
+        val description = formState.value!!.description ?: ""
         val descriptionLength = description.length
 
-        val pitchName = formState.value.pitch.name
+        val pitchName = formState.value!!.pitch.name
         val pitchNameLength = pitchName.length
 
-        val pitchAddress = formState.value.pitch.address
+        val pitchAddress = formState.value!!.pitch.address
         val pitchAddressLength = pitchAddress.length
 
         var nameErr: Int? = null

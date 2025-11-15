@@ -12,11 +12,17 @@
     <string name="accept_button">Aceitar</string>
     <string name="accept_button_description">Botão que permite aceitar algo</string>
 
+    <string name="negociate_button">Negociar</string>
+    <string name="negociate_button_description">Botão que permite negociar algo</string>
+
     <string name="reject_button">Rejeitar</string>
     <string name="reject_button_description">Botão que permite rejetiar algo</string>
 
     <string name="button_send_match_invite">Enviar Convite de Partida</string>
     <string name="button_description_send_match_invite">Botão que permite apos preencher o formulário para enviar convite de partida</string>
+
+    <string name="button_send_membership_request">Enviar Pedido de Adesão</string>
+    <string name="button_send_membership_request_description">Botão que lhe permite mandar um pedido de adesão a uma equipa ou jogador</string>
 
     <string name="button_create_team">Criar Equipa</string>
     <string name="button_description_create_team">Botão que permite após preencher o formulário criar uma equipa</string>

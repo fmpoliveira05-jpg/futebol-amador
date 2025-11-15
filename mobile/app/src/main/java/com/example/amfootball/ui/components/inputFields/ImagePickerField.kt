@@ -21,8 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
@@ -74,32 +78,5 @@ fun ImagePicker(
                 modifier = Modifier.size(48.dp)
             )
         }
-    }
-}
-
-@Composable
-fun ProfilesImage(
-    image: Uri,
-    contentDescription: String? = "",
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        val fallbackPainter = rememberVectorPainter(
-            image = Icons.Default.AccountCircle
-        )
-
-        AsyncImage(
-            model = image,
-            contentDescription = contentDescription,
-            contentScale = ContentScale.Crop,
-            fallback = fallbackPainter,
-            error = fallbackPainter,
-            modifier = Modifier
-                .size(100.dp)
-                .clip(CircleShape),
-        )
     }
 }

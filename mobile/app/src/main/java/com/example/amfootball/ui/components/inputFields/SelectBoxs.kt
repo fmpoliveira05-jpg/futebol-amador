@@ -24,9 +24,9 @@ import com.example.amfootball.R
 @Composable
 fun<T> SelectBox(
     list: List<T>,
-    selectedValue: String,
+    selectedValue: T,
     onSelectItem: (T) -> Unit,
-    itemToString: (T) -> String,
+    itemToString: @Composable (T) -> String,
     isError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -40,8 +40,8 @@ fun<T> SelectBox(
     ) {
 
         TextField(
-            value = selectedValue,
-            onValueChange = { _ -> },
+            value = itemToString(selectedValue),
+            onValueChange = { },
             readOnly = true,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
@@ -76,9 +76,9 @@ fun<T> SelectBox(
 fun <T> LabelSelectBox(
     label: String,
     list: List<T>,
-    selectedValue: String,
+    selectedValue: T,
     onSelectItem: (T) -> Unit,
-    itemToString: (T) -> String,
+    itemToString: @Composable (T) -> String,
     modifier: Modifier = Modifier,
     isRequired: Boolean = false,
     isError: Boolean = false,

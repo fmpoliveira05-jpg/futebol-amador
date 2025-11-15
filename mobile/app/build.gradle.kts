@@ -106,6 +106,9 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.compose.runtime.livedata)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -128,7 +131,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
-    // Navigation
+
     implementation("androidx.navigation:navigation-compose:2.7.0")
     // ViewModel e Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")

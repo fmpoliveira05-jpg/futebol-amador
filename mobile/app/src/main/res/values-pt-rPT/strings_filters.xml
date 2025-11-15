@@ -4,18 +4,39 @@
     <string name="hide_filter">Ocultar Filtros</string>
     <string name="open_filters">Abrir Filtros</string>
 
-    <string name="filter_sender_name">Remetente</string>
-    <string name="filter_min_date">Data Min.</string>
-    <string name="description_filter_min_date">Filtro que permite procurar por todos os item acima dessa data.</string>
-    <string name="filter_max_date">Data Max.</string>
-    <string name="description_filter_max_date">Filtro qeu permite procurar por todos os item abaixo dessa data.</string>
-
+    <string name="filter_name">Nome</string>
     <string name="filter_name_team">Nome da Equipa</string>
+    <string name="filter_sender_name">Remetente</string>
     <string name="filter_city">Cidade</string>
+
+    <string name="filter_type_member">Tipo de Membro</string>
+    <string name="filter_position">Posição</string>
+
+
+    <string name="filter_min_age">Idade Max.</string>
+    <string name="filter_max_age">Idade Min.</string>
+    <string name="filter_min_size">Tamnho Min.</string>
+    <string name="filter_max_size">Tamanho Max.</string>
     <string name="filter_min_points_Team">Min. Pontos</string>
     <string name="filter_max_points_Team">Max. Pontos</string>
     <string name="filter_min_average_age_team">Min. Idade Média</string>
     <string name="filter_max_average_age_team">Max. Idade Média</string>
     <string name="filter_min_members_team">Min. Membros</string>
     <string name="filter_max_members_team">Max. Membros</string>
+    <string name="filter_min_date">Data Min.</string>
+    <string name="description_filter_min_date">Filtro que permite procurar por todos os item acima dessa data.</string>
+    <string name="filter_max_date">Data Max.</string>
+    <string name="description_filter_max_date">Filtro qeu permite procurar por todos os item abaixo dessa data.</string>
+
+    <string name="filter_min_date_game">Data Min. Jogo</string>
+    <string name="filter_max_date_game">Data Max. Jogo</string>
+    <string name="filter_min_date_post_pone">Data Min. Adiamento</string>
+    <string name="filter_max_date_post_pone">Data Max. Adiamento</string>
+
+    <string name="filter_local_game">Local Jogo</string>
+    <string name="filter_home">Casa</string>
+    <string name="filter_away">Fora</string>
+
+    <string name="filter_selectbox_all">Todos</string>
+    <string name="filter_both">Ambos</string>
 </resources>

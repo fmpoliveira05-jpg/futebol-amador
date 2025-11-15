@@ -35,7 +35,7 @@ import com.example.amfootball.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigatonDrawer(itens: List<NavigationItem>,
+fun NavigationDraweri(itens: List<NavigationItem>,
                     titleNavBar: String,
                     scaffoldContent: @Composable (NavHostController) -> Unit,
                     internalNavController: NavHostController,

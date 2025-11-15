@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,8 +20,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
 import com.example.amfootball.ui.components.BackTopBar
-import com.example.amfootball.ui.components.inputFields.ProfilesImage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 
 @Composable
@@ -29,7 +30,7 @@ fun ProfileTeamScreen(
     idTeam: String,
     viewModel: ProfileTeamViewModel = viewModel()
 ) {
-    val profileTeam = viewModel.uiInfoTeam.collectAsState()
+    val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamInfoDto.profileExempleTeam())
 
     Scaffold(
         topBar = {

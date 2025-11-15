@@ -36,10 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.R
-import com.example.amfootball.ui.screens.Lists.ListTeamScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
+import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
-import okhttp3.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +53,7 @@ fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
     val navBackStackEntry by internalNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-    NavigatonDrawer(
+    NavigationDraweri(
         itens = drawerItemList,
         titleNavBar = "NavBar HomePage",
         scaffoldContent = { innerNav ->
