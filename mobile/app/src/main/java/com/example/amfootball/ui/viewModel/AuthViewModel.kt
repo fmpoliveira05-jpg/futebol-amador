@@ -1,7 +1,8 @@
 package com.example.amfootball.ui.viewModel
+
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.tasks.await // Importante
+import kotlinx.coroutines.tasks.await
 import com.example.amfootball.App
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.network.RetrofitInstance

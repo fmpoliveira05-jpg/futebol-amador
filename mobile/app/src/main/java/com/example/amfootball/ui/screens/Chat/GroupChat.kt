@@ -1,4 +1,5 @@
 package com.example.amfootball.ui.screens.Chat
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,45 +20,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.amfootball.data.dtos.chat.GroupMessageDto
 
-// --- Modelo de Dados (Permanece o mesmo) ---
-data class GroupMessage(
-    val id: String,
-    val text: String,
-    val senderName: String,
-    val senderColor: Color,
-    val isSentByMe: Boolean,
-    val timestamp: String
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GroupChatScreen() {
-    // Cores para os jogadores
-    val colorAdm = Color(0xFFE91E63) // Edu (Adm) - Rosa
-    val colorGoleiro = Color(0xFF2196F3) // Goleiro - Azul
-    val colorRiso = Color(0xFFFF9800) // O Engraçado - Laranja
-    val colorMe = Color(0xFF4CAF50)   // Eu - Verde
-
-    // --- DADOS ATUALIZADOS: TEMA FUTEBOL ---
-    val mockMessages = listOf(
-        GroupMessage("1", "Fala galera! Lista de Domingo. Quem vai?", "Luiz (Adm)", colorAdm, false, "09:30"),
-        GroupMessage("2", "1 - Luiz\n2 - ...", "Luiz (Adm)", colorAdm, false, "09:30"),
-        GroupMessage("3", "Tô dentro! 🙋‍♂️", "João", colorGoleiro, false, "09:32"),
-        GroupMessage("4", "Coloca meu nome aí. O goleiro confirmou?", "Marcão", colorRiso, false, "09:35"),
-        GroupMessage("5", "Confirmou sim, ele vem.", "Luiz (Adm)", colorAdm, false, "09:36"),
-        GroupMessage("6", "Deixem somente ver se consigo!", "Eu", colorMe, true, "09:40"),
-        GroupMessage("7", "Tambem irei.Podem contar comigo!", "Luiz (Adm)", colorAdm, false, "09:41"),
-        GroupMessage("8", "Vou levar meu primo, joga muito.", "Marcão", colorRiso, false, "09:45"),
-        GroupMessage("9", "Se jogar igual você tamo ferrado kkkkk", "João", colorGoleiro, false, "09:46"),
-        GroupMessage("10", "Domingo não consigo, podemos remarcar?", "Eu", colorMe, true, "09:50")
-    )
-
     var messageText by remember { mutableStateOf("") }
+    val listMessage = GroupMessageDto.generateExempleChat()
 
     Scaffold(
         topBar = {
-            // --- TÍTULO ATUALIZADO ---
             GroupChatTopBar(
                 groupName = "The Simpsons VS Gorilazz",
                 participants = "Luiz, João, Antonio, Você, +5..."
@@ -76,7 +49,7 @@ fun GroupChatScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     item { Spacer(modifier = Modifier.height(8.dp)) }
-                    items(mockMessages) { message ->
+                    items(listMessage) { message ->
                         GroupMessageBubble(message = message)
                     }
                     item { Spacer(modifier = Modifier.height(8.dp)) }
@@ -92,15 +65,12 @@ fun GroupChatScreen() {
     )
 }
 
-// --- Os componentes visuais (Bubble, TopBar, Input) permanecem iguais ---
-// Cole aqui as funções auxiliares (GroupChatTopBar, GroupMessageBubble, GroupMessageInput)
-// do código anterior se elas não estiverem no mesmo arquivo.
-
-// Vou repetir os componentes aqui para garantir que o código funcione ao copiar e colar:
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupChatTopBar(groupName: String, participants: String, onBackClick: () -> Unit) {
+fun GroupChatTopBar(groupName: String,
+                    participants: String,
+                    onBackClick: () -> Unit
+) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -110,7 +80,7 @@ fun GroupChatTopBar(groupName: String, participants: String, onBackClick: () -> 
                     modifier = Modifier.size(40.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
-                        Text("⚽", fontSize = 20.sp) // Ícone de bola
+                        Text("⚽", fontSize = 20.sp)
                     }
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -140,8 +110,9 @@ fun GroupChatTopBar(groupName: String, participants: String, onBackClick: () -> 
 }
 
 @Composable
-fun GroupMessageBubble(message: GroupMessage) {
+fun GroupMessageBubble(message: GroupMessageDto) {
     val isMe = message.isSentByMe
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isMe) Arrangement.End else Arrangement.Start,

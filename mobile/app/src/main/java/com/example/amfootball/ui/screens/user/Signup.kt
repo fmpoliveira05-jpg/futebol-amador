@@ -15,7 +15,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -41,7 +40,6 @@ import com.example.amfootball.ui.components.inputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.buttons.BackTopBar
 import com.example.amfootball.ui.theme.AMFootballTheme
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat

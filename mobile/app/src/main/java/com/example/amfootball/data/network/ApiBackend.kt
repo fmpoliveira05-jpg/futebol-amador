@@ -1,7 +1,7 @@
 package com.example.amfootball.data.network
 
-import com.example.amfootball.data.dtos.CreateRoomRequest
-import com.example.amfootball.data.dtos.CreateRoomResponse
+import com.example.amfootball.data.dtos.chat.CreateRoomRequest
+import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.CreateProfileDto
 import retrofit2.Response
 import retrofit2.http.Body

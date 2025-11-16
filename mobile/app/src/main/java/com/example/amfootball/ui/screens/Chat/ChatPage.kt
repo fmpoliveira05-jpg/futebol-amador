@@ -39,55 +39,31 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-// --- Modelo de Dados Simples para a Mensagem ---
-
-data class Message(
-    val id: String,
-    val text: String,
-    val isSentByMe: Boolean,
-    val timestamp: String
-)
-
-// --- Composable Principal da Tela de Chat ---
+import com.example.amfootball.data.dtos.chat.MessageDto
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen() {
-    // Lista de mensagens de exemplo (mock)
-    val mockMessages = listOf(
-        Message("1", "Olá! Tudo bem?", isSentByMe = false, "10:00"),
-        Message("2", "Tudo ótimo! E com você?", isSentByMe = true, "10:01"),
-        Message("3", "Estou bem também, obrigado por perguntar.", isSentByMe = false, "10:01"),
-        Message("4", "Você viu o novo layout do app? Achei incrível!", isSentByMe = false, "10:02"),
-        Message("5", "Vi sim! O time de design fez um trabalho excelente.", isSentByMe = true, "10:03"),
-        Message("6", "Com certeza. A navegação está muito mais fluida.", isSentByMe = true, "10:03"),
-        Message("7", "Verdade!", isSentByMe = false, "10:04")
-    )
-
-    // Estado para armazenar o texto digitado
     var messageText by remember { mutableStateOf("") }
-
+    val listChat = MessageDto.generateMessageDtoList()
     Scaffold(
         topBar = {
             ChatTopBar(contactName = "Jane Doe") {
-                // Ação para o botão de voltar (ex: fechar a tela)
             }
         },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Aplica o padding do Scaffold
+                    .padding(paddingValues)
             ) {
-                // --- 1. Lista de Mensagens ---
                 LazyColumn(
                     modifier = Modifier
-                        .weight(1f) // Ocupa todo o espaço disponível
+                        .weight(1f)
                         .padding(horizontal = 16.dp),
-                    reverseLayout = false // Opcional: true se quiser começar do fim
+                    reverseLayout = false
                 ) {
-                    items(mockMessages) { message ->
+                    items(listChat) { message ->
                         MessageBubble(message = message)
                     }
                 }
@@ -97,9 +73,7 @@ fun ChatScreen() {
                     message = messageText,
                     onMessageChange = { messageText = it },
                     onSendClick = {
-                        // Lógica para enviar a mensagem (aqui apenas limpa o campo)
                         if (messageText.isNotBlank()) {
-                            // Adicionar a nova mensagem à lista (em um app real)
                             messageText = ""
                         }
                     }
@@ -109,7 +83,6 @@ fun ChatScreen() {
     )
 }
 
-// --- Componentes da Tela de Chat ---
 
 /**
  * Barra superior com nome, foto (placeholder) e ações.
@@ -172,7 +145,7 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
  * Balão de mensagem individual (distingue enviadas e recebidas).
  */
 @Composable
-fun MessageBubble(message: Message) {
+fun MessageBubble(message: MessageDto) {
     val alignment = if (message.isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
     val bubbleColor = if (message.isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
     val textColor = if (message.isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
@@ -212,7 +185,7 @@ fun MessageInput(
     onSendClick: () -> Unit
 ) {
     Surface(
-        tonalElevation = 2.dp, // Adiciona uma leve sombra/elevação
+        tonalElevation = 2.dp,
     ) {
         Row(
             modifier = Modifier
@@ -247,12 +220,9 @@ fun MessageInput(
     }
 }
 
-// --- Preview para o Android Studio ---
 
 @Preview(showBackground = true)
 @Composable
 fun ChatScreenPreview() {
-    // Você pode envolver com seu tema do app se tiver um
-    // Ex: SeuAppTheme { ... }
     ChatScreen()
 }

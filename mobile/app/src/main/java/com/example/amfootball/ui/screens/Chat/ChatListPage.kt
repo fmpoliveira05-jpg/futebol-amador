@@ -21,35 +21,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// Certifique-se de ter uma imagem de placeholder no seu drawable (R.drawable.avatar_placeholder)
-// ou remova a parte da imagem se não tiver.
+import com.example.amfootball.data.dtos.chat.ItemListChatDto
 
-// --- Modelo de Dados ---
-data class Chat(
-    val id: Int,
-    val name: String,
-    val lastMessage: String,
-    val time: String,
-    val unreadCount: Int = 0,
-    val isOnline: Boolean = false
-)
 
-// --- Dados Fictícios (Mock Data) ---
-val sampleChats = listOf(
-    Chat(1, "FooFigthers VS Gorilazz", "João: É possivel remarcar para domingo as 10?", "10:30", 2, true),
-    Chat(2, "The Simpsons VS Friends", "Antonio: Sexta-feira não poderei.", "09:15", 5),
-    Chat(3, "João Dev", "O PR foi aprovado, pode fazer o merge.", "Ontem", 0, true),
-    Chat(4, "Suporte Técnico", "Seu ticket #4829 foi resolvido.", "Ontem", 0),
-    Chat(5, "Maria Oliveira", "Enviei as fotos do projeto.", "Segunda", 1),
-    Chat(6, "Bruno Academia", "Bora treinar hoje?", "Domingo", 0),
-    Chat(7, "Clube do Livro", "A próxima leitura será 'Duna'.", "Sábado", 12),
-    Chat(8, "Lucas Design", "Vou te mandar o Figma atualizado.", "Sexta", 0, true)
-)
-
-// --- Tela Principal ---
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen() {
+    val listChat = ItemListChatDto.generateListChat()
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -92,7 +71,7 @@ fun ChatListScreen() {
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            items(sampleChats) { chat ->
+            items(listChat) { chat ->
                 ChatItem(chat)
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 80.dp),
@@ -104,9 +83,8 @@ fun ChatListScreen() {
     }
 }
 
-// --- Componente de Item da Lista ---
 @Composable
-fun ChatItem(chat: Chat) {
+fun ChatItem(chat: ItemListChatDto) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,9 +92,7 @@ fun ChatItem(chat: Chat) {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar com indicador de Online
         Box {
-            // Placeholder simples para o Avatar (Use AsyncImage do Coil em app real)
             Surface(
                 modifier = Modifier.size(56.dp),
                 shape = CircleShape,
@@ -132,7 +108,6 @@ fun ChatItem(chat: Chat) {
                 }
             }
 
-            // Bolinha Verde (Online)
             if (chat.isOnline) {
                 Box(
                     modifier = Modifier
@@ -149,7 +124,6 @@ fun ChatItem(chat: Chat) {
 
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Coluna Central (Nome e Mensagem)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = chat.name,
@@ -169,7 +143,6 @@ fun ChatItem(chat: Chat) {
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // Coluna Lateral (Hora e Contador)
         Column(horizontalAlignment = Alignment.End) {
             Text(
                 text = chat.time,
@@ -199,7 +172,6 @@ fun ChatItem(chat: Chat) {
     }
 }
 
-// --- Preview para o Android Studio ---
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ChatListScreenPreview() {

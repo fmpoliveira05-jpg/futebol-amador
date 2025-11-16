@@ -40,7 +40,6 @@ import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
 
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
-//TODO: Está tudo feito para funcionar sem a API, mas depois meter
 @Composable
 fun ListMemberShipRequest(
     navHostController: NavHostController,

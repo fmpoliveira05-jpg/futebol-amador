@@ -9,6 +9,9 @@
     <string name="clear_button">Limpar</string>
     <string name="clear_button_description">Botão que permite apagar os filtros aplicados</string>
 
+    <string name="button_back">Voltar</string>
+    <string name="button_back_description">Botão que permite voltar para a pagina anterior</string>
+
     <string name="accept_button">Aceitar</string>
     <string name="accept_button_description">Botão que permite aceitar algo</string>
 

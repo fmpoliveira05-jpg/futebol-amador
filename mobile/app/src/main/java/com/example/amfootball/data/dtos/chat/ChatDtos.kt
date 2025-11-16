@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos
+package com.example.amfootball.data.dtos.chat
 
 data class CreateRoomRequest(
     val roomName: String,

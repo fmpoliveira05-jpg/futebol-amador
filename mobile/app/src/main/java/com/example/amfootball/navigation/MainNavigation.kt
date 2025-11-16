@@ -15,9 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.ui.screens.user.LoginScreen
 import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.navArgument
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet

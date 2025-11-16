@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FilterSection(

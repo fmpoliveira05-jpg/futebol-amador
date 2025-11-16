@@ -31,7 +31,6 @@ import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.navigation.Objects.page.MembershipRequestRoutes
 import com.example.amfootball.ui.components.buttons.FilterApplyButton
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -197,7 +196,7 @@ private fun FiltersListTeamContent(
             onClick = {
                 // TODO: Fazer o pedido ao endpoint com os 'filters'
             },
-            modifier = Modifier.fillMaxWidth() // Para ocupar a largura toda
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -349,7 +348,6 @@ private fun filterTeamList(
         val minNumberMembersFilterPassed = (minNumberMembers == null) || (team.numberMembers >= minNumberMembers)
         val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.numberMembers <= maxNumberMembers)
 
-        // Devolve o resultado do teste para esta equipa
         nameFilterPassed && rankFilterPassed && cityFilterPassed && minPointFilterPassed
                 && maxPointFilterPassed && minAgeFilterPassed && maxAgeFilterPassed &&
                 minNumberMembersFilterPassed && maxNumberMembersFilterPassed
