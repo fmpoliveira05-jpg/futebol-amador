@@ -6,6 +6,7 @@
 
     <string name="filter_name">Name</string>
     <string name="filter_name_team">Name Team</string>
+    <string name="filter_opponent">Opponent</string>
     <string name="filter_sender_name">Sender</string>
     <string name="filter_city">City</string>
 
@@ -34,6 +35,14 @@
     <string name="filter_home">Home</string>
     <string name="filter_away">Away</string>
 
+    <string name="filter_type_match">Competitive Match</string>
+
+
+    <string name="filter_finish_match">Finish</string>
+
+    <string name="filter_indifferente">Indifferent</string>
+    <string name="filter_yes">Yes</string>
+    <string name="filter_no">No</string>
     <string name="filter_selectbox_all">All</string>
     <string name="filter_both">Both</string>
 </resources>

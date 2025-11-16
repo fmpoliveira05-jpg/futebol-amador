@@ -1,95 +1,117 @@
 package com.example.amfootball.ui.components.lists
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
+import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 
-
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun FilterSection(
-    isExpanded: Boolean,
-    onToggleExpand: () -> Unit,
-    modifier: Modifier = Modifier,
-    header: @Composable () -> Unit = {
-        FilterHeader(isExpanded = isExpanded, onToggleExpand = onToggleExpand)
-    },
-    content: @Composable (modifier: Modifier) -> Unit = {}
+fun FilterIsHomeMatch(
+    selectedValue: Boolean?,
+    onSelectItem: (Boolean?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
-        Column {
-            header()
-
-            AnimatedVisibility(
-                visible = isExpanded,
-                enter = expandVertically(),
-                exit = shrinkVertically(),
-            ) {
-                content(Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp))
+    val locationOptions: List<Boolean?> = listOf(null, true, false)
+    LabelSelectBox(
+        label = stringResource(id = R.string.filter_local_game),
+        list = locationOptions,
+        selectedValue = selectedValue,
+        onSelectItem = onSelectItem,
+        itemToString = { isHomeValue ->
+            when (isHomeValue) {
+                true -> {
+                    stringResource(id = R.string.filter_home)
+                }
+                false -> {
+                    stringResource(id = R.string.filter_away)
+                }
+                null -> {
+                    stringResource(id = R.string.filter_both)
+                }
             }
-        }
-    }
-}
-@Composable
-fun FilterHeader(
-    isExpanded: Boolean,
-    onToggleExpand: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggleExpand() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = stringResource(id = R.string.title_filter_header),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.weight(1f)
-        )
-        Icon(
-            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-            contentDescription = if (isExpanded) {
-                stringResource(id = R.string.hide_filter)
-            }  else {
-                stringResource(id = R.string.open_filters)
-            }
-        )
-    }
+        },
+        modifier = modifier
+    )
 }
 
 @Composable
-fun FilterRow(
-    modifier: Modifier = Modifier.fillMaxWidth(),
-    content: @Composable RowScope.() -> Unit, //Permite-me mandar os filtros que quisser para a row
-    horizontalSpacing: Dp = 8.dp,
+fun FilterIsCompetiveMatch(
+    selectedValue: TypeMatch?,
+    onSelectItem: (TypeMatch?) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        content()
-    }
+
+    val competitiveOptions: List<TypeMatch?> = listOf(
+        null,
+        TypeMatch.COMPETITIVE,
+        TypeMatch.CASUAL,
+    )
+    LabelSelectBox(
+        label = stringResource(id = R.string.filter_type_match),
+        list = competitiveOptions,
+        selectedValue = selectedValue,
+        onSelectItem = onSelectItem,
+        itemToString = { isCompetitiveValue ->
+            when (isCompetitiveValue) {
+                TypeMatch.COMPETITIVE -> {
+                    stringResource(id = TypeMatch.COMPETITIVE.stringId)
+                }
+                TypeMatch.CASUAL -> {
+                    stringResource(id = TypeMatch.CASUAL.stringId)
+                }
+                null -> {
+                    stringResource(id = R.string.filter_both)
+                }
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun FilterIsFinishMatch(
+    selectedValue: Boolean?,
+    onSelectItem: (Boolean?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val finishMatchOptions: List<Boolean?> = listOf(null, true, false)
+    LabelSelectBox(
+        label = stringResource(id = R.string.filter_finish_match),
+        list = finishMatchOptions,
+        selectedValue = selectedValue,
+        onSelectItem = onSelectItem,
+        itemToString = { isFinishMatchValue ->
+            when (isFinishMatchValue) {
+                true -> {
+                    stringResource(id = R.string.filter_yes)
+                }
+                false -> {
+                    stringResource(id = R.string.filter_no)
+                }
+                null -> {
+                    stringResource(id = R.string.filter_indifferente)
+                }
+            }
+        },
+        modifier = modifier
+    )
+}
+
+
+@Composable
+fun FilterMinDateGame(
+    value: String,
+    onDateSelected: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    DatePickerDocked(
+        label = stringResource(id = R.string.filter_min_date_game),
+        contentDescription = stringResource(id = R.string.description_filter_min_date),
+        value = value,
+        onDateSelected = onDateSelected,
+        modifier = modifier
+    )
 }

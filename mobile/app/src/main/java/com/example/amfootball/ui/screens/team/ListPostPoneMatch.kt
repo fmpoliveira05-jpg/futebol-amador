@@ -28,9 +28,9 @@ import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
-import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
+import com.example.amfootball.ui.components.lists.FilterIsHomeMatch
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
@@ -114,25 +114,9 @@ private fun FilterListPostPoneMatchContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                val locationOptions: List<Boolean?> = listOf(null, true, false)
-                LabelSelectBox(
-                    label = stringResource(id = R.string.filter_local_game),
-                    list = locationOptions,
+                FilterIsHomeMatch(
                     selectedValue = filters.isHome,
-                    onSelectItem = {filterActions.onIsHomeChange(it) },
-                    itemToString = { isHomeValue -> // 'isHomeValue' será null, true, or false
-                        when (isHomeValue) {
-                            true -> {
-                                stringResource(id = R.string.filter_home)
-                            }
-                            false -> {
-                                stringResource(id = R.string.filter_away)
-                            }
-                            null -> {
-                                stringResource(id = R.string.filter_both)
-                            }
-                        }
-                    },
+                    onSelectItem = { filterActions.onIsHomeChange(it) },
                     modifier = Modifier.weight(1f)
                 )
             }

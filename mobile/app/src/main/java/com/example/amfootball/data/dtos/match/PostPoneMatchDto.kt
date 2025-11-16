@@ -1,12 +1,12 @@
 package com.example.amfootball.data.dtos.match
 
-import com.example.amfootball.data.dtos.OpponentDto
+import com.example.amfootball.data.dtos.suporrtDto.TeamDto
 import java.time.LocalDateTime
 import java.util.UUID
 
 data class PostPoneMatchDto(
     val id: String,
-    val opponent: OpponentDto,
+    val opponent: TeamDto,
     val gameDate: LocalDateTime,
     val postPoneDate: LocalDateTime,
     val pitchMatch: String
@@ -37,7 +37,7 @@ data class PostPoneMatchDto(
 
                 val postPoneDate = gameDate.plusDays((7..30).random().toLong())
 
-                val opponent = OpponentDto(
+                val opponent = TeamDto(
                     id = UUID.randomUUID().toString(),
                     name = teamNames.random()
                 )

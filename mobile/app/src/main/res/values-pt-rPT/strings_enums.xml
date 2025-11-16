@@ -7,4 +7,12 @@
 
     <string name="type_member_player">Jogador</string>
     <string name="type_member_admin_team">Administrador</string>
+    
+    <string name="match_result_win">Vencedor</string>
+    <string name="match_result_draw">Empate</string>
+    <string name="match_result_lose">Derrotado</string>
+    <string name="match_result_undefined">Indeterminado</string>
+
+    <string name="type_match_competitive">Competitiva</string>
+    <string name="type_match_casual">Casual</string>
 </resources>
