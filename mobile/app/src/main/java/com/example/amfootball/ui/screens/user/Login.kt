@@ -26,7 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.BackTopBar
+import com.example.amfootball.ui.components.buttons.BackTopBar
 import com.example.amfootball.ui.components.inputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
 

@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.suporrtDto
+package com.example.amfootball.data.dtos.support
 
 import android.net.Uri
 

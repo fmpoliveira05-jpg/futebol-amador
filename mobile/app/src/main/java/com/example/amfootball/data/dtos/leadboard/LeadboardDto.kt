@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.leadboardDto
+package com.example.amfootball.data.dtos.leadboard
 
 data class LeadboardDto(
     val Position: Int,

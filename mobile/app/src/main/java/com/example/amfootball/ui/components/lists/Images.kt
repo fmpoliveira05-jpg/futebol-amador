@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,13 +38,22 @@ fun ProfilesImage(
 
 @Composable
 fun ImageList(
-    image: Uri
+    image: Uri?
 ) {
-    ImageIcon(
-        image = image,
-        contentDescription = "Foto do jogador",
-        sizeIamge = 40.dp
-    )
+    if (image != null && image != Uri.EMPTY) {
+        ImageIcon(
+            image = image,
+            contentDescription = "Foto do jogador",
+            sizeIamge = 40.dp
+        )
+    } else {
+        Icon(
+            imageVector = Icons.Default.AccountCircle,
+            contentDescription = "Foto do jogador",
+            modifier = Modifier.size(40.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 @Composable

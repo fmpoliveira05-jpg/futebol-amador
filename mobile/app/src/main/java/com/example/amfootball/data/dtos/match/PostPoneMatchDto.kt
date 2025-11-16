@@ -1,6 +1,6 @@
 package com.example.amfootball.data.dtos.match
 
-import com.example.amfootball.data.dtos.suporrtDto.TeamDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import java.time.LocalDateTime
 import java.util.UUID
 

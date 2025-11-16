@@ -189,8 +189,7 @@ private fun FilterListMemberContent(
         Spacer(Modifier.height(16.dp))
 
         LineClearFilterButtons(
-            onApplyFiltersClick = filterActions.buttonActions.onFilterApply,
-            onClearFilters = filterActions.buttonActions.onFilterClean,
+            buttonsActions = filterActions.buttonActions,
             modifier = Modifier.weight(1f)
         )
     }

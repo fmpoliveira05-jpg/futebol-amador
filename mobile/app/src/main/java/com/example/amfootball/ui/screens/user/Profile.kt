@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -18,7 +17,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.theme.AMFootballTheme
@@ -31,21 +29,10 @@ fun ProfileScreen(
 ) {
     val profileData by viewModel.uiProfilePlayer.observeAsState(initial = PlayerProfileDto.createExample())
 
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navController,
-                title = stringResource(id = R.string.page_profile_user)
-            )
-        },
-        content = { paddingValues ->
-            ProfileScreenContent(
-                profileData = profileData,
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            )
-        }
+    ProfileScreenContent(
+        profileData = profileData,
+        modifier = Modifier
+            .padding(16.dp)
     )
 }
 

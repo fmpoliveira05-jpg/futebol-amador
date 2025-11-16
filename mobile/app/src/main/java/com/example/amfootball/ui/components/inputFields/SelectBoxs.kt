@@ -27,7 +27,6 @@ fun<T> SelectBox(
     selectedValue: T,
     onSelectItem: (T) -> Unit,
     itemToString: @Composable (T) -> String,
-    isError: Boolean = false,
     modifier: Modifier = Modifier
 ) {
 
@@ -41,7 +40,7 @@ fun<T> SelectBox(
         TextField(
             value = itemToString(selectedValue),
             onValueChange = { },
-            readOnly = true,
+            readOnly = false,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
@@ -90,7 +89,6 @@ fun <T> LabelSelectBox(
             selectedValue = selectedValue,
             onSelectItem = onSelectItem,
             itemToString = itemToString,
-            isError = isError,
         )
 
         if (isError) {

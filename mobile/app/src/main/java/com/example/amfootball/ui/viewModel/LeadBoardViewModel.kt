@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.leadboardDto.LeadboardDto
+import com.example.amfootball.data.dtos.leadboard.LeadboardDto
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 
 class LeadBoardViewModel: ViewModel() {

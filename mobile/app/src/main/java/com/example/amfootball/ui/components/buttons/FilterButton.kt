@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
+import com.example.amfootball.data.actions.filters.ButtonFilterActions
 
 @Composable
 fun FilterApplyButton(
@@ -72,8 +73,7 @@ fun ClearFilterButton(onClick: () -> Unit,
 
 @Composable
 fun LineClearFilterButtons(
-    onApplyFiltersClick: () -> Unit,
-    onClearFilters: () -> Unit,
+    buttonsActions: ButtonFilterActions,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -81,12 +81,12 @@ fun LineClearFilterButtons(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterApplyButton(
-            onClick = onApplyFiltersClick,
+            onClick = buttonsActions.onFilterApply,
             modifier = modifier
         )
 
         ClearFilterButton(
-            onClick = onClearFilters,
+            onClick = buttonsActions.onFilterClean,
             modifier = modifier
         )
     }

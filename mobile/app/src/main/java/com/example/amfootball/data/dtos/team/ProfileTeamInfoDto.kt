@@ -1,7 +1,7 @@
 package com.example.amfootball.data.dtos.team
 
 import android.net.Uri
-import com.example.amfootball.data.dtos.suporrtDto.PitchInfo
+import com.example.amfootball.data.dtos.support.PitchInfo
 
 data class ProfileTeamInfoDto(
     val name: String = "",

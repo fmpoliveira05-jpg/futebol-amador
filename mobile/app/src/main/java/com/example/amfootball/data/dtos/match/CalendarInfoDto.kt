@@ -1,8 +1,8 @@
 package com.example.amfootball.data.dtos.match
 
 import android.net.Uri
-import com.example.amfootball.data.dtos.suporrtDto.TeamDto
-import com.example.amfootball.data.dtos.suporrtDto.TeamStatisticsDto
+import com.example.amfootball.data.dtos.support.TeamDto
+import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
 import com.example.amfootball.data.enums.TypeMatch
 import java.time.LocalDate

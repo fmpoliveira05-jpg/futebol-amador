@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.screens.team
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,14 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.EditCalendar
-import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,8 +37,10 @@ import com.example.amfootball.data.actions.filters.FilterCalendarActions
 import com.example.amfootball.data.actions.itemsList.ItensCalendarActions
 import com.example.amfootball.data.dtos.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
-import com.example.amfootball.data.dtos.suporrtDto.TeamStatisticsDto
+import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
+import com.example.amfootball.ui.components.MatchActionsMenu
+import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterIsCompetiveMatch
@@ -52,6 +48,7 @@ import com.example.amfootball.ui.components.lists.FilterIsFinishMatch
 import com.example.amfootball.ui.components.lists.FilterIsHomeMatch
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
+import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.Patterns
@@ -173,6 +170,11 @@ private fun FiltersCalendarContent(
                 )
             }
         )
+
+        LineClearFilterButtons(
+            buttonsActions = filterActions.onButtonFilterActions,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
@@ -255,78 +257,28 @@ private fun OptionsMatch(
             )
         }
 
-        DropdownMenu(
+        MatchActionsMenu(
             expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Iniciar Partida") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Iniciar Partida"
-                    )
-                },
-                onClick = {
-                    itensListAction.onStartMatch(match.idMatch)
-                    isMenuExpanded = false
-                }
-            )
-
-            DropdownMenuItem(
-                text = { Text("Finalizar Partida") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Flag,
-                        contentDescription = "Finalizar Partida"
-                    )
-                },
-                onClick = {
-                    itensListAction.onFinishMatch(
-                        match.idMatch,
-                        navHostController,
-                    )
-                    isMenuExpanded = false
-                }
-            )
-
-            DropdownMenuItem(
-                text = { Text("Adiar Partida") },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.EditCalendar,
-                        contentDescription = "Adiar Partida"
-                    )
-                },
-                onClick = {
-                    itensListAction.onPostPoneMatch(
-                        match.idMatch,
-                        navHostController
-                    )
-                    isMenuExpanded = false
-                }
-            )
-
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = "Cancelar Partida",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Cancel,
-                        contentDescription = "Cancelar Partida",
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                },
-                onClick = {
-                    itensListAction.onCancelMatch(match.idMatch)
-                    isMenuExpanded = false
-                }
-            )
-        }
+            onDismissRequest = { isMenuExpanded = false },
+            onStartMatch = {
+                itensListAction.onStartMatch(match.idMatch)
+            },
+            onFinishMatch = {
+                itensListAction.onFinishMatch(
+                    match.idMatch,
+                    navHostController
+                )
+            },
+            onPostPoneMatch = {
+                itensListAction.onPostPoneMatch(
+                    match.idMatch,
+                    navHostController
+                )
+            },
+            onCancelMatch = {
+                itensListAction.onCancelMatch(match.idMatch)
+            }
+        )
     }
 }
 
@@ -339,9 +291,15 @@ private fun ColumnTeams(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        TeamInfoRow(team = match.team)
+        TeamInfoRow(
+            team = match.team,
+            image = match.team.infoTeam.image
+        )
 
-        TeamInfoRow(team = match.opponent)
+        TeamInfoRow(
+            team = match.opponent,
+            image = match.opponent.infoTeam.image
+        )
     }
 }
 
@@ -355,7 +313,8 @@ private fun ColumnDataMatch(
         horizontalAlignment = Alignment.End
     ) {
         Text(
-            text = "FIM",
+            //TODO: Mter um sWITCH PARA DE ACORDO COM O RESULTADO DIA, ETC. Definir o texto
+            text = "Fim",
             style = MaterialTheme.typography.labelMedium
         )
 
@@ -367,13 +326,15 @@ private fun ColumnDataMatch(
 @Composable
 private fun TeamInfoRow(
     team: TeamStatisticsDto,
+    image: Uri? = Uri.EMPTY
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        //Trocar isto para a URi da team
-        Icon(Icons.Default.Person, contentDescription = null)
+        ImageList(
+            image = image,
+        )
 
         Text(
             text = team.infoTeam.name,

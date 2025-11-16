@@ -165,8 +165,7 @@ private fun FilterListPostPoneMatchContent(
         Spacer(Modifier.height(16.dp))
 
         LineClearFilterButtons(
-            onApplyFiltersClick = filterActions.buttonFilterActions.onFilterApply,
-            onClearFilters = filterActions.buttonFilterActions.onFilterClean,
+            buttonsActions = filterActions.buttonFilterActions,
             modifier = Modifier.weight(1f)
         )
     }

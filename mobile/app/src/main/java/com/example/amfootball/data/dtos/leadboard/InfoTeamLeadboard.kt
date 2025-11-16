@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.leadboardDto
+package com.example.amfootball.data.dtos.leadboard
 
 data class InfoTeamLeadboard(
     val id: String,

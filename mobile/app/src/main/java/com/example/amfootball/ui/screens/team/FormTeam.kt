@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GroupAdd
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -17,12 +16,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.forms.FormTeamActions
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.errors.TeamFormErros
-import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.ImagePicker
@@ -48,23 +45,12 @@ fun FormTeamScreen(
         onAddressPitchChange = viewModel::onAddressPitchChange,
     )
 
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = stringResource(id = R.string.title_page_create_team)
-            )},
-        content = { paddingValues ->
-            ContentCreateTeam(
-                filedsTeam = uiForm,
-                fieldTeamAction = fieldTeamAction,
-                fieldsErrors = uiErrors,
-                onSubmitClick = { viewModel.onSubmit(navHostController = navHostController) },
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
-            )
-        }
+    ContentCreateTeam(
+        filedsTeam = uiForm,
+        fieldTeamAction = fieldTeamAction,
+        fieldsErrors = uiErrors,
+        onSubmitClick = { viewModel.onSubmit(navHostController = navHostController) },
+        modifier = Modifier.padding(16.dp),
     )
 }
 

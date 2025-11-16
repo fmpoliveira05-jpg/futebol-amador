@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +17,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
-import com.example.amfootball.ui.components.BackTopBar
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
@@ -32,20 +29,10 @@ fun ProfileTeamScreen(
 ) {
     val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamInfoDto.profileExempleTeam())
 
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = stringResource(id = R.string.title_page_profile_team)
-            )},
-        content = { paddingValues ->
-            ContentProfileTeam(
-                profileInfo = profileTeam.value,
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(all = 16.dp),
-            )
-        }
+    //TODO: Meter para aparecer mais coisas
+    ContentProfileTeam(
+        profileInfo = profileTeam.value,
+        modifier = Modifier.padding(all = 16.dp),
     )
 }
 
