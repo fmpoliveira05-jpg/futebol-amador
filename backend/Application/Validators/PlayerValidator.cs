@@ -107,7 +107,7 @@ namespace Application.Validators
 
         public void LeaveTeamValidator(Player player)
         {
-            if (player.Team == null)
+            if (player.Team == null && player.IdTeam == null)
             {
                 throw new ValidationException("Player does not belong to any team.");
             }

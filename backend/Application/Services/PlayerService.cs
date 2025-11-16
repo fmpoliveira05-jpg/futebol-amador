@@ -139,15 +139,17 @@ namespace Application.Services
 
             playerValidator.LeaveTeamValidator(existingPlayer);
 
+            var team = await teamRepository.GetTeamByIdAsync((Guid)existingPlayer.IdTeam);
+
             if (existingPlayer.IsAdmin)
             {
-                if (existingPlayer.Team.Members.Count == 1)
+                if (team.Members.Count == 1)
                 {
                     await teamService.DeleteTeamAsync((Guid)existingPlayer.IdTeam, existingPlayer.Id);
                 }
                 else
                 {
-                    var otherAdmin = existingPlayer.Team.Members
+                    var otherAdmin = team.Members
                         .FirstOrDefault(p => p.IsAdmin && p.Id != existingPlayer.Id);
 
                     if (otherAdmin == null)
@@ -164,9 +166,9 @@ namespace Application.Services
                 }
             }
 
-            string teamName = existingPlayer.Team.Name;
+            string teamName = team.Name;
 
-            existingPlayer.Team.Members.Remove(existingPlayer);
+            team.Members.Remove(existingPlayer);
             existingPlayer.Team = null;
             existingPlayer.IdTeam = null;
 
