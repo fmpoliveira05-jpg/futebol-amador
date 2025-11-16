@@ -8,14 +8,16 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
@@ -29,7 +31,6 @@ fun<T> SelectBox(
     itemToString: @Composable (T) -> String,
     modifier: Modifier = Modifier
 ) {
-
     var isExpanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -37,14 +38,24 @@ fun<T> SelectBox(
         onExpandedChange = { isExpanded = !isExpanded },
         modifier = modifier
     ) {
-        TextField(
+        OutlinedTextField(
             value = itemToString(selectedValue),
             onValueChange = { },
-            readOnly = false,
+            readOnly = true,
+            enabled = false,
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = Color.Transparent, // Outlined é transparente
+                disabledBorderColor = MaterialTheme.colorScheme.outline,
+                disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         )
 
         ExposedDropdownMenu(
@@ -81,7 +92,6 @@ fun <T> LabelSelectBox(
     errorMessage: String = stringResource(id = R.string.mandatory_field)
 ) {
     Column(modifier = modifier) {
-
         Label(label = label, isRequired = isRequired)
 
         SelectBox(
