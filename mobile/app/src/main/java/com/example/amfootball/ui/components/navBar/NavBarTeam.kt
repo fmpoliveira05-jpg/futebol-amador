@@ -33,6 +33,7 @@ import kotlin.collections.arrayListOf
 fun NavigatonDrawerTeam(globalNavController: NavHostController,
                         isLoggedIn: Boolean,
                         onLogout: () -> Unit){
+   /*
     val drawerItemList = prepareNavigationDrawerItems()
     val internalNavController = rememberNavController()
 
@@ -54,8 +55,10 @@ fun NavigatonDrawerTeam(globalNavController: NavHostController,
             )
         }
     )
+   * */
 }
 
+/*
 //Metodo que define todas as rotas da NavBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -175,3 +178,4 @@ fun NavigatonDrawerTeamPreviewLogout() {
         )
     }
 }
+*/

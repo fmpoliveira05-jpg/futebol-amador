@@ -40,6 +40,7 @@ import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigatonDrawerNavBarHomePage(globalNavController: NavHostController,
@@ -163,7 +164,7 @@ private fun prepareNavigationDrawerItems(): List<NavigationItem> {
  * se não estiver logado e estiver na rota principal.
  */
 @Composable
-private fun RowScope.HomePageTopBarActions(
+fun RowScope.HomePageTopBarActions(
     isLoggedIn: Boolean,
     currentRoute: String?,
     onLogout: () -> Unit,
@@ -252,3 +253,4 @@ fun NavigatonDrawerNavBarPreviewLogout() {
         )
     }
 }
+*/

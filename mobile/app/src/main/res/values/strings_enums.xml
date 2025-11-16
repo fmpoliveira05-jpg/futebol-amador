@@ -7,4 +7,12 @@
 
     <string name="type_member_player">Player</string>
     <string name="type_member_admin_team">Admin</string>
+
+    <string name="match_result_win">Winner</string>
+    <string name="match_result_draw">Draw</string>
+    <string name="match_result_lose">Loser</string>
+    <string name="match_result_undefined">Undefined</string>
+
+    <string name="type_match_competitive">Competitive</string>
+    <string name="type_match_casual">Casual</string>
 </resources>

@@ -6,6 +6,7 @@
 
     <string name="filter_name">Nome</string>
     <string name="filter_name_team">Nome da Equipa</string>
+    <string name="filter_opponent">Adversário</string>
     <string name="filter_sender_name">Remetente</string>
     <string name="filter_city">Cidade</string>
 
@@ -37,6 +38,12 @@
     <string name="filter_home">Casa</string>
     <string name="filter_away">Fora</string>
 
+    <string name="filter_type_match">Tipo de Partida</string>
+    <string name="filter_finish_match">Finalizada</string>
+
+    <string name="filter_indifferente">Indiferrente</string>
+    <string name="filter_yes">Sim</string>
+    <string name="filter_no">Não</string>
     <string name="filter_selectbox_all">Todos</string>
     <string name="filter_both">Ambos</string>
 </resources>

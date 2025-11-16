@@ -115,7 +115,6 @@ private fun FilterListPlayerContent(
                     onValueChange = { filterActions.onNameChange(it) },
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(Modifier.width(8.dp))
 
                 LabelTextField(
                     label = stringResource(id = R.string.filter_city),

@@ -38,7 +38,6 @@ fun<T> SelectBox(
         onExpandedChange = { isExpanded = !isExpanded },
         modifier = modifier
     ) {
-
         TextField(
             value = itemToString(selectedValue),
             onValueChange = { },
@@ -46,9 +45,7 @@ fun<T> SelectBox(
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded)
             },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
 
         ExposedDropdownMenu(
