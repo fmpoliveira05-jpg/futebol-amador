@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -46,7 +45,6 @@ import com.example.amfootball.data.dtos.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.dtos.suporrtDto.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
-import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterIsCompetiveMatch
@@ -178,7 +176,6 @@ private fun FiltersCalendarContent(
     }
 }
 
-//TODO: Dividir isto em composables, nem que seja, um composable para cada linha
 @Composable
 private fun ListMatchCalendarItem(
     match: CalendarInfoDto,
@@ -187,7 +184,11 @@ private fun ListMatchCalendarItem(
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(modifier = modifier) {
-        Column(modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier.padding(
+                vertical = 12.dp,
+                horizontal = 16.dp)
+        ) {
             TitleMatchCalendar(
                 match = match,
                 itensListAction = itensListAction,
