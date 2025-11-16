@@ -75,7 +75,7 @@ private fun FieldProfileTeam(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_description_team),
         value = profileInfo.description,
-        isSingleLine = true,
+        isSingleLine = false,
         isReadOnly = true,
     )
 

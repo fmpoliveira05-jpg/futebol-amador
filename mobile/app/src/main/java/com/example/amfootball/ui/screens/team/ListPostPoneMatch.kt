@@ -88,7 +88,7 @@ fun ListPostPoneMatchScreen(
                     idPostPoneMatch = postPoneMatch.id,
                 )},
                 showMore = { viewModel.showMoreInfo(
-                    idPostPoneMatch = postPoneMatch.id,
+                    idOpponent = postPoneMatch.opponent.id,
                     navHostController = navHostController)
                 }
             )

@@ -61,7 +61,7 @@ fun MatchMakerScreen(
     MatchMakerContent(
         matchMakerInfo = infoTeam!!,
         cancelAction = {
-            viewModel.onCancelFind()
+            viewModel.onCancelFind(navHostController = navHostController)
         },
         modifier = Modifier
             .fillMaxSize()

@@ -57,8 +57,14 @@ class CalendarTeamViewModel: ViewModel() {
         //TODO: Recarregar a lista da API
     }
 
-    fun onCancelMatch(idMatch: String) {
-        //TODO: Chamar endPoint da API para cancelar a partida
+    //TODO: Mandar o Id Match para como parametro
+    fun onCancelMatch(
+        idMatch: String,
+        navHostController: NavHostController
+    ) {
+        navHostController.navigate(Routes.TeamRoutes.CANCEL_MATCH.route) {
+            launchSingleTop = true
+        }
     }
 
     //TODO: DEPOIS ARRANJAR FORMA DE TAMBEM MANDAR O ID

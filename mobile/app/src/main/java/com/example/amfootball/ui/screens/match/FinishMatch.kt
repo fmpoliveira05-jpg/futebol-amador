@@ -42,6 +42,7 @@ fun FinishMatchScreen(
     FormFinishMatch(
         result = result,
         formActions = formActions,
+        navHostController = navHostController,
         modifier = Modifier
         .padding(16.dp)
     )
@@ -51,6 +52,7 @@ fun FinishMatchScreen(
 private fun FormFinishMatch(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
+    navHostController: NavHostController,
     modifier: Modifier = Modifier) {
     Column(modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -59,6 +61,7 @@ private fun FormFinishMatch(
         TextFieldForm(
             result = result,
             formActions = formActions,
+            navHostController = navHostController
         )
     }
 }
@@ -67,6 +70,7 @@ private fun FormFinishMatch(
 private fun TextFieldForm(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
+    navHostController: NavHostController
 ) {
 
     TextFieldOutline(
@@ -86,7 +90,7 @@ private fun TextFieldForm(
     )
 
     SubmitFormButton(
-        onClick = { formActions.onSubmitForm() }
+        onClick = { formActions.onSubmitForm(navHostController) }
     )
 }
 

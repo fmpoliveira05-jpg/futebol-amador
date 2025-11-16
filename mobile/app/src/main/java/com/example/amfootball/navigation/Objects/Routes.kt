@@ -28,6 +28,7 @@ interface AppRouteInfo {
     val labelResId: Int
     val icon: ImageVector
     val contentDescription: Int
+    val haveBackButton: Boolean
 }
 
 object Routes {
@@ -36,7 +37,8 @@ object Routes {
         override val route: String,
         override val labelResId: Int,
         override val icon: ImageVector,
-        override val contentDescription: Int
+        override val contentDescription: Int,
+        override val haveBackButton: Boolean = false
     ) : AppRouteInfo {
         SETTINGS("Settings", R.string.item_settings, Icons.Default.Settings, R.string.item_settings_description),
         PREFERENCE("Preference", R.string.item_preference, Icons.Default.AccessibilityNew, R.string.item_preference_description),
@@ -49,13 +51,13 @@ object Routes {
         override val route: String,
         override val labelResId: Int,
         override val icon: ImageVector,
-        override val contentDescription: Int
+        override val contentDescription: Int,
+        override val haveBackButton: Boolean = false
     ) : AppRouteInfo {
         PLAYER_LIST("playerlist", R.string.item_list_players, Icons.Default.Group, R.string.item_list_players_description),
         TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description),
         CHAT_LIST("chatlist", R.string.item_list_chat, Icons.Default.Groups3, R.string.item_list_chat_description),
         LIST_MEMBERSHIP_REQUEST("playerMemberShipRequest", R.string.navbar_memberships_list, Icons.Default.Person, R.string.description_navbar_memberships_list),
-
     }
 
     // AGORA IMPLEMENTA RouteInfo
@@ -63,12 +65,22 @@ object Routes {
         override val route: String,
         override val labelResId: Int,
         override val icon: ImageVector,
-        override val contentDescription: Int
+        override val contentDescription: Int,
+        override val haveBackButton: Boolean = true
     ) : AppRouteInfo {
-        PROFILE("profile_user", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page),
+        PROFILE(
+            "profile_user",
+            R.string.page_profile_user,
+            Icons.Default.Person,
+            R.string.profile_user_title_page),
         LOGIN("Login", R.string.login_title, Icons.AutoMirrored.Filled.Login, R.string.login_title),
         SIGNUP("Signup", R.string.signup, Icons.Default.PersonAdd, R.string.signup_description),
-        LOGOUT("Logout", R.string.logout, Icons.AutoMirrored.Filled.Logout, R.string.logout_description),
+        LOGOUT(
+            "Logout",
+            R.string.logout,
+            Icons.AutoMirrored.Filled.Logout,
+            R.string.logout_description,
+            haveBackButton = false),
     }
 
     // AdminRoutes está vazio, pode deixar como está por agora.
@@ -78,16 +90,17 @@ object Routes {
         override val route: String,
         override val labelResId: Int,
         override val icon: ImageVector,
-        override val contentDescription: Int
+        override val contentDescription: Int,
+        override val haveBackButton: Boolean = false
     ) : AppRouteInfo {
         //Trocar a description
         CREATE_TEAM(
             "CreateTeam",
             R.string.navbar_create_tean,
             Icons.Default.GroupAdd,
-            R.string.button_create_team
+            R.string.button_create_team,
+            haveBackButton = true,
         ),
-
         HOMEPAGE(
             "HomePageTeam",
             R.string.team_homepage,
@@ -97,7 +110,8 @@ object Routes {
             "teamprofile",
             R.string.team_profile,
             Icons.Default.Person4,
-            R.string.team_profile_description),
+            R.string.team_profile_description,
+            haveBackButton = true),
         SETTINGS("teamsettings",
             R.string.team_settings,
             Icons.Default.RoomPreferences,
@@ -113,7 +127,8 @@ object Routes {
             "SendMatchInvite",
             R.string.title_page_send_match_Invite,
             Icons.Default.Person,
-            R.string.title_page_send_match_Invite),
+            R.string.title_page_send_match_Invite,
+            haveBackButton = true),
         CALENDAR(
             "calendar",
             R.string.navbar_calendar,
@@ -129,7 +144,11 @@ object Routes {
             R.string.navbar_memberships_list,
             Icons.Default.Person,
             R.string.description_navbar_memberships_list),
-        SEARCH_PLAYERS_WITH_OUT_TEAM("SearchPlayersWithoutTeam", R.string.navbar_players_without_team_list, Icons.Default.Person, R.string.description_navbar_players_without_team_list),
+        SEARCH_PLAYERS_WITH_OUT_TEAM(
+            "SearchPlayersWithoutTeam",
+            R.string.navbar_players_without_team_list,
+            Icons.Default.Person,
+            R.string.description_navbar_players_without_team_list),
 
         SEARCH_TEAMS_TO_MATCH_INVITE(
             "SearchTeamsToMatchInvite",
@@ -153,19 +172,29 @@ object Routes {
             "PostPoneMatch",
             R.string.button_post_pone_match,
             Icons.Default.EditCalendar,
-            R.string.button_post_pone_match_description
+            R.string.button_post_pone_match_description,
+            haveBackButton = true
         ),
         CANCEL_MATCH(
             "CancelMatch",
             R.string.button_cancel_match,
             Icons.Default.Flag,
-            R.string.button_cancel_match_description
+            R.string.button_cancel_match_description,
+            haveBackButton = true
         ),
         FINISH_MATCH(
             "FinishMatch",
             R.string.button_finish_match,
             Icons.Default.Flag,
-            R.string.button_finish_match_description
+            R.string.button_finish_match_description,
+            haveBackButton = true
+        ),
+        NEGOCIATE_MATCH_INVITE(
+            "NegociateMatchInvite",
+            R.string.negociate_button,
+            Icons.Default.EditCalendar,
+            R.string.negociate_button_description,
+            haveBackButton = true
         )
     }
 
@@ -174,13 +203,42 @@ object Routes {
         override val route: String,
         override val labelResId: Int,
         override val icon: ImageVector,
-        override val contentDescription: Int
+        override val contentDescription: Int,
+        override val haveBackButton: Boolean
     ) : AppRouteInfo {
         // A lógica aqui já estava quase correta, só precisa do override
-        HOMEPAGE(GeralRoutes.HOMEPAGE.route, GeralRoutes.HOMEPAGE.labelResId, GeralRoutes.HOMEPAGE.icon, GeralRoutes.HOMEPAGE.contentDescription),
-        TEAM_LIST(PlayerRoutes.TEAM_LIST.route, PlayerRoutes.TEAM_LIST.labelResId, PlayerRoutes.TEAM_LIST.icon, PlayerRoutes.TEAM_LIST.contentDescription),
-        PAGE_OPTIONS("pageoptions", R.string.page_options, Icons.Default.ArrowCircleUp, R.string.page_options_description),
-        CHAT_LIST(PlayerRoutes.CHAT_LIST.route, PlayerRoutes.CHAT_LIST.labelResId, Icons.AutoMirrored.Filled.Message, PlayerRoutes.CHAT_LIST.contentDescription),
-        USER_PROFILE(UserRoutes.PROFILE.route, UserRoutes.PROFILE.labelResId, UserRoutes.PROFILE.icon, UserRoutes.PROFILE.contentDescription)
+        HOMEPAGE(
+            GeralRoutes.HOMEPAGE.route,
+            GeralRoutes.HOMEPAGE.labelResId,
+            GeralRoutes.HOMEPAGE.icon,
+            GeralRoutes.HOMEPAGE.contentDescription,
+            GeralRoutes.HOMEPAGE.haveBackButton
+        ),
+        TEAM_LIST(
+            PlayerRoutes.TEAM_LIST.route,
+            PlayerRoutes.TEAM_LIST.labelResId,
+            PlayerRoutes.TEAM_LIST.icon,
+            PlayerRoutes.TEAM_LIST.contentDescription,
+            PlayerRoutes.TEAM_LIST.haveBackButton
+        ),
+        PAGE_OPTIONS(
+            "pageoptions",
+            R.string.page_options,
+            Icons.Default.ArrowCircleUp,
+            R.string.page_options_description,
+            haveBackButton = false),
+        CHAT_LIST(
+            PlayerRoutes.CHAT_LIST.route,
+            PlayerRoutes.CHAT_LIST.labelResId,
+            Icons.AutoMirrored.Filled.Message,
+            PlayerRoutes.CHAT_LIST.contentDescription,
+            PlayerRoutes.CHAT_LIST.haveBackButton
+        ),
+        USER_PROFILE(
+            UserRoutes.PROFILE.route,
+            UserRoutes.PROFILE.labelResId,
+            UserRoutes.PROFILE.icon,
+            UserRoutes.PROFILE.contentDescription,
+            UserRoutes.PROFILE.haveBackButton)
     }
 }

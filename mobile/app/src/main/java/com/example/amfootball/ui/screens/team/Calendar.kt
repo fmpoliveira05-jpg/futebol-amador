@@ -276,7 +276,10 @@ private fun OptionsMatch(
                 )
             },
             onCancelMatch = {
-                itensListAction.onCancelMatch(match.idMatch)
+                itensListAction.onCancelMatch(
+                    match.idMatch,
+                    navHostController
+                )
             }
         )
     }

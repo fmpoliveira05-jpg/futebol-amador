@@ -1,12 +1,12 @@
 package com.example.amfootball.ui.components.NavBar
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -15,6 +15,7 @@ import com.example.amfootball.R
 import com.example.amfootball.navigation.Objects.Routes
 import kotlin.collections.find
 import com.example.amfootball.navigation.Objects.AppRouteInfo
+import com.example.amfootball.ui.components.buttons.BackButton
 import com.example.amfootball.ui.viewModel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,12 +28,21 @@ fun MainTopAppBar(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routeTitleResId = getAllRoutes().find { it.route == currentRoute }?.labelResId
+    val haveBackButton = getAllRoutes().find { it.route == currentRoute }?.haveBackButton
     val authViewModel: AuthViewModel = viewModel()
 
     TopAppBar(
         title = {
-            if (routeTitleResId != null) {
-                Text(text = stringResource(id = routeTitleResId))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+
+                if (routeTitleResId != null) {
+                    Text(text = stringResource(id = routeTitleResId))
+                }
+            }
+        },
+        navigationIcon = {
+            if (haveBackButton == true) {
+                BackButton(navController = navController)
             }
         },
         actions = {

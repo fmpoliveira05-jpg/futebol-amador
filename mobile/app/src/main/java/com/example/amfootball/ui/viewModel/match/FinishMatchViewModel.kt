@@ -3,7 +3,9 @@ package com.example.amfootball.ui.viewModel.match
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.match.ResultMatchDto
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.FinishMatchConst
 
 class FinishMatchViewModel(): ViewModel() {
@@ -33,7 +35,14 @@ class FinishMatchViewModel(): ViewModel() {
 
     //Metodos
     //Sacar o id do parametro ou então buscar na url
-    fun onSubmitForm() {
+    fun onSubmitForm(
+        navHostController: NavHostController
+    ) {
+        navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
+            popUpTo(Routes.TeamRoutes.CALENDAR.route) {
+                inclusive = true
+            }
+        }
         //TODO: Meter verificações
 
         /*

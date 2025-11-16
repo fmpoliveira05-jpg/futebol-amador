@@ -29,6 +29,7 @@ import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
+import com.example.amfootball.ui.screens.match.CancelMatchScreen
 import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
@@ -207,6 +208,10 @@ private fun NavGraphBuilder.managementMatch(globalNavController: NavHostControll
     composable(Routes.TeamRoutes.FINISH_MATCH.route) {
         FinishMatchScreen(navHostController = globalNavController)
     }
+
+    composable(Routes.TeamRoutes.CANCEL_MATCH.route) {
+        CancelMatchScreen(navHostController = globalNavController)
+    }
 }
 
 
@@ -220,6 +225,10 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
     }
 
     composable(Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
+        FormMatchInviteScreen(navHostController = globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
         FormMatchInviteScreen(navHostController = globalNavController)
     }
 }

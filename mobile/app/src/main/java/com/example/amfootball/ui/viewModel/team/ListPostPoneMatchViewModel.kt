@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.extensions.toLocalDateTime
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
@@ -61,10 +62,13 @@ class ListPostPoneMatchViewModel: ViewModel() {
         //TODO: Implementar
     }
 
+    //TODO: Passar o id da equipa na rota
     fun showMoreInfo(
-        idPostPoneMatch: String,
+        idOpponent: String,
         navHostController: NavHostController
     ) {
-        //TODO: Levar para a pagina da Team Opponente
+        navHostController.navigate(Routes.TeamRoutes.TEAM_PROFILE.route) {
+            launchSingleTop = true
+        }
     }
 }

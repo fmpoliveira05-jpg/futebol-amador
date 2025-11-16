@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.utils.extensions.toLocalDateTime
 
@@ -54,23 +55,26 @@ class ListMatchInviteViewModel(): ViewModel() {
         //TODO: Remover da lista e fazer pedido há API para aceitar
     }
 
+    //TODO: Passar o idMatch por parametro
     fun negociateMatchInvite (
         idMatchInvite: String,
         navHostController: NavHostController
     ) {
-        //TODO: Chamar pagina de negociar matchInivte (Form)
+        navHostController.navigate(route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
+            launchSingleTop = true
+        }
     }
 
     fun rejectMatchInvite (idMatchInvite: String) {
         //TODO: Mandar pedido há API para rejeitar
     }
 
+    //TODO: Passar o id na rota
     fun showMoreDetails(
         idMatchInvite: String,
         navHostController: NavHostController
     ) {
-        //TODO: Corrigir deve levar para a pagina da matchInivte
-        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idMatchInvite}") {
+        navHostController.navigate(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
             launchSingleTop = true
         }
     }

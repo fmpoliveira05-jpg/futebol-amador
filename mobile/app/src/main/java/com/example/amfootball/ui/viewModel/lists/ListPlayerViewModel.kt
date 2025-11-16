@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.navigation.Objects.Routes
 
 class ListPlayerViewModel(): ViewModel() {
     private val filterState: MutableLiveData<FilterListPlayerDto> = MutableLiveData(FilterListPlayerDto())
@@ -72,10 +73,13 @@ class ListPlayerViewModel(): ViewModel() {
         //TODO: Fazer pedido há API, para a Team mandar o pedido de adesão
     }
 
+    //TODO: Mandar o id na Rota
     fun showMore(
         idPlayer: String,
         navHostController: NavHostController
     ) {
-        //TODO: Mandar para o perfil do Player
+        navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
+            launchSingleTop = true
+        }
     }
 }

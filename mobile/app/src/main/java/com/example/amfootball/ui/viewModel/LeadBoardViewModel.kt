@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.leadboard.LeadboardDto
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.Objects.Routes
 
 class LeadBoardViewModel: ViewModel() {
     private val listTeam: MutableLiveData<List<LeadboardDto>> = MutableLiveData(emptyList<LeadboardDto>())
@@ -34,11 +34,12 @@ class LeadBoardViewModel: ViewModel() {
         inicialSizeList.value = inicialSizeList.value.plus(10)
     }
 
+    //TODO: Mandar o ID da Team como Parametro
     fun showInfoTeam(
         idTeam: String,
         navHostController: NavHostController
     ) {
-        navHostController.navigate(route = "${CrudTeamRoutes.PROFILE_TEAM}/${idTeam}") {
+        navHostController.navigate(route = Routes.UserRoutes.PROFILE.route) {
             launchSingleTop = true
         }
     }

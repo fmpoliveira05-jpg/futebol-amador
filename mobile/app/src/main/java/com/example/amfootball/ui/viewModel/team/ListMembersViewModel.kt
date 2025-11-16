@@ -8,6 +8,7 @@ import com.example.amfootball.data.enums.TypeMember
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.amfootball.navigation.Objects.Routes
 
 class ListMembersViewModel(): ViewModel() {
     private val filterState: MutableLiveData<FilterMembersTeam> = MutableLiveData(FilterMembersTeam())
@@ -82,10 +83,13 @@ class ListMembersViewModel(): ViewModel() {
         //TODO: Chamar endPoint para remover o player da Teame e depois fazer update na lista
     }
 
+    //TODO: Mandar como parametro o idUser
     fun onShowMoreInfo(
         idUser: String,
         navHostController: NavHostController
     ) {
-        //TODO: Levar para a pagina de perfil
+        navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
+            launchSingleTop = true
+        }
     }
 }

@@ -13,6 +13,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.R
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.AppRouteInfo
+import com.example.amfootball.ui.components.buttons.BackButton
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopAppBar(
@@ -21,12 +23,20 @@ fun MainTopAppBar(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val routeTitleResId = getAllRoutes().find { it.route == currentRoute }?.labelResId
+    val routeInfo = getAllRoutes().find { it.route == currentRoute }
+    val routeTitleResId = routeInfo?.labelResId
+    val haveBackButton = routeInfo?.haveBackButton
 
     TopAppBar(
         title = {
             if (routeTitleResId != null) {
                 Text(text = stringResource(id = routeTitleResId))
+            }
+        },
+        navigationIcon = {
+            // A seta só aparece se a rota a definir
+            if (haveBackButton == true) {
+                BackButton(navController = navController)
             }
         },
         actions = {
