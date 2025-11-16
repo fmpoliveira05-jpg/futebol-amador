@@ -4,6 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -19,24 +23,28 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.amfootball.navigation.Objects.AppRouteInfo
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.ui.components.buttons.NavigateButton
+
+// ... imports
 
 @Composable
 fun MainBottomNavBar(
     navController: NavHostController,
-    onShowBottomSheet: () -> Unit
+    onShowBottomSheet: () -> Unit,
+    currentSelectedRoute: String,
+    onRouteSelected: (String) -> Unit
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-
     NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
         Routes.BottomNavBarRoutes.entries.forEach { destination ->
             NavigationBarItem(
-                selected = currentRoute == destination.route,
+                selected = currentSelectedRoute == destination.route,
                 onClick = {
                     if (destination == Routes.BottomNavBarRoutes.PAGE_OPTIONS) {
                         onShowBottomSheet()
                     } else {
+                        onRouteSelected(destination.route)
                         navController.navigate(destination.route) {
                             launchSingleTop = true
                             restoreState = true
@@ -53,45 +61,63 @@ fun MainBottomNavBar(
 
 @Composable
 fun BottomSheetContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     navController: NavHostController,
     currentScreenRoute: String?
 ){
-    Row(
+    val buttonsToShow = mutableListOf<AppRouteInfo>()
+
+    when (currentScreenRoute) {
+        Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
+            buttonsToShow.add(Routes.PlayerRoutes.PLAYER_LIST)
+        }
+        Routes.BottomNavBarRoutes.TEAM_LIST.route -> {
+            buttonsToShow.addAll(
+                listOf(
+                    Routes.TeamRoutes.HOMEPAGE,
+                    Routes.TeamRoutes.CALENDAR,
+                    Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST,
+                    Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE,
+                    Routes.TeamRoutes.LIST_MATCH_INVITES,
+                    Routes.TeamRoutes.SEND_MATCH_INVITE,
+                    Routes.TeamRoutes.MEMBERLIST,
+                    Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM
+                )
+            )
+        }
+        Routes.BottomNavBarRoutes.CHAT_LIST.route -> {
+
+        }
+        Routes.BottomNavBarRoutes.USER_PROFILE.route -> {
+
+        }
+    }
+
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 90.dp),
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        CommonContentBottomSheet(navController)
-
-        when (currentScreenRoute) {
-            Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
-                HomePageContentBottonSheet(navController)
-            }
-
-            Routes.BottomNavBarRoutes.TEAM_LIST.route -> {
-                TeamListContentBottomSheet(navController)
-            }
-
-            Routes.BottomNavBarRoutes.CHAT_LIST.route -> {
-                ChatContentBottomSheet(navController)
-            }
-
-            Routes.BottomNavBarRoutes.USER_PROFILE.route -> {
-                PlayerProfileContentBottomSheet(navController)
-            }
+        items(buttonsToShow) { routeInfo ->
+            NavigateButton(
+                icon = routeInfo.icon,
+                label = stringResource(id = routeInfo.labelResId),
+                onClick = { navController.navigate(routeInfo.route) }
+            )
         }
     }
 }
 
+
 @Composable
-private fun HomePageContentBottonSheet(navController: NavHostController) {
+private fun HomePageContentBottonSheet(modifier: Modifier,navController: NavHostController) {
     //NavigateButton()
 }
 @Composable
-private fun TeamListContentBottomSheet(navController: NavHostController){
+private fun TeamListContentBottomSheet(modifier: Modifier,navController: NavHostController){
     /*
     NavigateButton(
         icon = Routes.TeamRoutes.TEAM_LIST.icon,
@@ -106,6 +132,21 @@ private fun TeamListContentBottomSheet(navController: NavHostController){
         label = stringResource(id = Routes.TeamRoutes.HOMEPAGE.labelResId),
         onClick = {
             navController.navigate(Routes.TeamRoutes.HOMEPAGE.route)
+        }
+    )
+    NavigateButton(
+        icon = Routes.TeamRoutes.CALENDAR.icon,
+        label = stringResource(id = Routes.TeamRoutes.CALENDAR.labelResId),
+        onClick = {
+            navController.navigate(Routes.TeamRoutes.CALENDAR.route)
+        }
+    )
+
+    NavigateButton(
+        icon = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.icon,
+        label = stringResource(id = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.labelResId),
+        onClick = {
+            navController.navigate(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route)
         }
     )
 
@@ -166,23 +207,20 @@ private fun TeamListContentBottomSheet(navController: NavHostController){
     )
 }
 
-@Composable
-private fun NavigateButton(icon: ImageVector, label: String, onClick: () -> Unit) {
-    TODO("Not yet implemented")
-}
+
 
 @Composable
-private fun ChatContentBottomSheet(navController: NavHostController){
-
-}
-
-@Composable
-fun PlayerProfileContentBottomSheet(navController: NavHostController){
+private fun ChatContentBottomSheet(modifier: Modifier,navController: NavHostController){
 
 }
 
 @Composable
-fun CommonContentBottomSheet(navController: NavHostController){
-    NavigateButton(Routes.PlayerRoutes.PLAYER_LIST.icon, stringResource(Routes.PlayerRoutes.PLAYER_LIST.contentDescription), onClick = {navController.navigate(Routes.PlayerRoutes.PLAYER_LIST.route)})
+fun PlayerProfileContentBottomSheet(modifier: Modifier,navController: NavHostController){
+
+}
+
+@Composable
+fun CommonContentBottomSheet(modifier: Modifier,navController: NavHostController){
+    NavigateButton(modifier ,Routes.PlayerRoutes.PLAYER_LIST.icon, stringResource(Routes.PlayerRoutes.PLAYER_LIST.contentDescription), onClick = {navController.navigate(Routes.PlayerRoutes.PLAYER_LIST.route)})
 
 }

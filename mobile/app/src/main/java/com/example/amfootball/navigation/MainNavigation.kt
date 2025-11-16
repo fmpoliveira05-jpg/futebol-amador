@@ -27,8 +27,10 @@ import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
+import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
 import com.example.amfootball.ui.screens.team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 
@@ -40,6 +42,7 @@ fun MainNavigation() {
     var isLoggedIn by remember { mutableStateOf(false) }
 
     var showBottomSheet by remember { mutableStateOf(false) }
+    var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
 
     val onLogoutClick: () -> Unit = {
         isLoggedIn = false
@@ -58,7 +61,10 @@ fun MainNavigation() {
         bottomBar = {
             MainBottomNavBar(
                 navController = globalNavController,
-                onShowBottomSheet = { showBottomSheet = true }
+                onShowBottomSheet = { showBottomSheet = true },
+                currentSelectedRoute = selectedBottomNavRoute,
+                onRouteSelected = { newRoute -> selectedBottomNavRoute = newRoute }
+
             )
         }
     ) { innerPadding ->
@@ -83,7 +89,10 @@ fun MainNavigation() {
             val currentRoute = navBackStackEntry?.destination?.route
 
             AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
-                BottomSheetContent(Modifier, globalNavController, currentRoute)
+                BottomSheetContent(
+                    Modifier,
+                    globalNavController,
+                    selectedBottomNavRoute)
             }
         }
     }
@@ -100,6 +109,8 @@ private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
     CrudTeamPages(globalNavController = globalNavController)
 
     MatchInivitePages(globalNavController = globalNavController)
+
+    TeamPages(globalNavController = globalNavController)
 }
 
 /**
@@ -130,6 +141,24 @@ private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
         HomePageTeamScreen(globalNavController)
+    }
+
+}
+
+/**
+ * Paginas do Time
+ * */
+private fun NavGraphBuilder.TeamPages(globalNavController: NavHostController) {
+    composable(Routes.TeamRoutes.CALENDAR.route) {
+        CalendarScreen(globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.HOMEPAGE.route){
+        HomePageScreen(globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.MEMBERLIST.route){
+        ListMembersScreen(globalNavController)
     }
 
 }
