@@ -41,11 +41,6 @@ namespace Application.Validators
             {
                 throw new ValidationException("Invalid Date of birth");
             }
-
-            if (!int.TryParse(dto.Phone, out _))
-            {
-                throw new ValidationException("Phone number must only have numbers.");
-            }
         }
 
         public void DeleteSuperAdminValidator(SuperAdmin sadmin)
