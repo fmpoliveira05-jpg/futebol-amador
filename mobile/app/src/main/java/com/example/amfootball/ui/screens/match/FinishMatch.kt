@@ -39,22 +39,11 @@ fun FinishMatchScreen(
         onSubmitForm = viewModel::onSubmitForm
     )
 
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = stringResource(id = R.string.title_finish_Match)
-            )
-        },
-        content = { paddingValues ->
-            FormFinishMatch(
-                result = result,
-                formActions = formActions,
-                modifier = Modifier
-                .padding(paddingValues)
-                .padding(16.dp)
-            )
-        }
+    FormFinishMatch(
+        result = result,
+        formActions = formActions,
+        modifier = Modifier
+        .padding(16.dp)
     )
 }
 

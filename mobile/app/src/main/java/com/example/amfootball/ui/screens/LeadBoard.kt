@@ -21,6 +21,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,6 +30,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.dtos.leadboard.LeadboardDto
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
+import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.R
 
 @Composable
 fun LeaderboardScreen(
@@ -48,7 +51,7 @@ fun LeaderboardScreen(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "LeadBoard",
+                        text = stringResource(id = R.string.item_leadboard),
                         style = MaterialTheme.typography.headlineSmall // Estilo de título
                     )
                 }
@@ -71,7 +74,7 @@ fun LeaderboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(
-                            text = "Ver mais",
+                            text = stringResource(id = R.string.button_view_more),
                             style = MaterialTheme.typography.bodyMedium,
                             maxLines = 1
                         )
@@ -117,11 +120,8 @@ private fun LeaderBoardContent(
             )
         },
         leadingContent = {
-            Icon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "Logo Team",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
+            ImageList(
+                image = team.Team.logoTeam
             )
         },
         trailingContent = {

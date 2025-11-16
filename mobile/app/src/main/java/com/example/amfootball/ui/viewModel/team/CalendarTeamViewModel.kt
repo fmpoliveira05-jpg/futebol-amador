@@ -7,6 +7,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.extensions.toLocalDateTime
 
 class CalendarTeamViewModel: ViewModel() {
@@ -60,11 +61,14 @@ class CalendarTeamViewModel: ViewModel() {
         //TODO: Chamar endPoint da API para cancelar a partida
     }
 
+    //TODO: DEPOIS ARRANJAR FORMA DE TAMBEM MANDAR O ID
     fun onPostPoneMatch(
         idMatch: String,
         navHostController: NavHostController
     ) {
-        //TODO: Levar par ao Form de adiamento (FormMatchInvite)
+        navHostController.navigate(Routes.TeamRoutes.POST_PONE_MATCH.route) {
+            launchSingleTop = true
+        }
     }
 
     fun onStartMatch(idMatch: String) {
@@ -72,10 +76,13 @@ class CalendarTeamViewModel: ViewModel() {
         //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
     }
 
+    //TODO: Mandar o Id Match para como parametro
     fun onFinishMatch(
         idMatch: String,
         navHostController: NavHostController
     ) {
-        //TODO: Levar para o formulario de finishMatch
+        navHostController.navigate(Routes.TeamRoutes.FINISH_MATCH.route) {
+            launchSingleTop = true
+        }
     }
 }

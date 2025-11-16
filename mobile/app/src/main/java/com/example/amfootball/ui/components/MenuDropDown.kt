@@ -12,7 +12,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
-
+import androidx.compose.ui.res.stringResource
+import com.example.amfootball.R
 /**
  * O menu flutuante (DropdownMenu) com todas as ações
  * possíveis para uma partida.
@@ -31,7 +32,7 @@ fun MatchActionsMenu(
         onDismissRequest = onDismissRequest
     ) {
         DropdownItem(
-            text = "Iniciar Partida",
+            text = stringResource(id = R.string.button_start_match),
             onClick = {
                 onStartMatch()
                 onDismissRequest()
@@ -41,7 +42,7 @@ fun MatchActionsMenu(
         )
 
         DropdownItem(
-            text = "Finalizar Partida",
+            text = stringResource(id = R.string.button_finish_match),
             onClick = {
                 onFinishMatch()
                 onDismissRequest()
@@ -50,7 +51,7 @@ fun MatchActionsMenu(
         )
 
         DropdownItem(
-            text = "Adiar Partida",
+            text = stringResource(id = R.string.button_post_pone_match),
             onClick = {
                 onPostPoneMatch()
                 onDismissRequest()
@@ -59,7 +60,7 @@ fun MatchActionsMenu(
         )
 
         DropdownItem(
-            text = "Cancelar Partida",
+            text = stringResource(id = R.string.button_cancel_match),
             onClick = {
                 onCancelMatch()
                 onDismissRequest()

@@ -18,6 +18,9 @@ import androidx.compose.material.icons.filled.SportsBaseball
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.amfootball.R
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EditCalendar
+import androidx.compose.material.icons.filled.Flag
+import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.PersonAdd
 
 interface AppRouteInfo {
@@ -51,6 +54,7 @@ object Routes {
         PLAYER_LIST("playerlist", R.string.item_list_players, Icons.Default.Group, R.string.item_list_players_description),
         TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description),
         CHAT_LIST("chatlist", R.string.item_list_chat, Icons.Default.Groups3, R.string.item_list_chat_description),
+        LIST_MEMBERSHIP_REQUEST("playerMemberShipRequest", R.string.navbar_memberships_list, Icons.Default.Person, R.string.description_navbar_memberships_list),
 
     }
 
@@ -76,19 +80,93 @@ object Routes {
         override val icon: ImageVector,
         override val contentDescription: Int
     ) : AppRouteInfo {
-        // Criei os recursos de string para cada um. Terá de os adicionar a strings.xml
-        HOMEPAGE("HomePageTeam", R.string.team_homepage, Icons.Default.Home, R.string.team_homepage_description),
-        TEAM_PROFILE("teamprofile", R.string.team_profile, Icons.Default.Person4, R.string.team_profile_description),
-        SETTINGS("teamsettings", R.string.team_settings, Icons.Default.RoomPreferences, R.string.team_settings_description),
-        MEMBERLIST("ListMembersTeam", R.string.navbar_members_list, Icons.Default.Group, R.string.navbar_members_list),
+        //Trocar a description
+        CREATE_TEAM(
+            "CreateTeam",
+            R.string.navbar_create_tean,
+            Icons.Default.GroupAdd,
+            R.string.button_create_team
+        ),
+
+        HOMEPAGE(
+            "HomePageTeam",
+            R.string.team_homepage,
+            Icons.Default.Home,
+            R.string.team_homepage_description),
+        TEAM_PROFILE(
+            "teamprofile",
+            R.string.team_profile,
+            Icons.Default.Person4,
+            R.string.team_profile_description),
+        SETTINGS("teamsettings",
+            R.string.team_settings,
+            Icons.Default.RoomPreferences,
+            R.string.team_settings_description),
+        MEMBERLIST(
+            "ListMembersTeam",
+            R.string.navbar_members_list,
+            Icons.Default.Group,
+            R.string.navbar_members_list),
         //ADD_MEMBER("addmember", R.string.add_member, Icons.Default.PersonAddAlt1, R.string.add_member_description),
         //REMOVE_MEMBER("removemember", R.string.remove_member, Icons.Default.PersonRemoveAlt1, R.string.remove_member_description),
-        SEND_MATCH_INVITE("SendMatchInvite", R.string.title_page_send_match_Invite, Icons.Default.Person, R.string.title_page_send_match_Invite),
-        CALENDAR("calendar", R.string.navbar_calendar, Icons.Default.CalendarMonth, R.string.description_navbar_calendar),
-        LIST_MATCH_INVITES("ListMatchInvites", R.string.navbar_matchinvite_list, Icons.Default.SportsBaseball, R.string.description_navbar_matchinvite_list),
-        LIST_MEMBERSHIP_REQUEST("teamMemberShipRequest", R.string.navbar_memberships_list, Icons.Default.Person, R.string.description_navbar_memberships_list),
+        SEND_MATCH_INVITE(
+            "SendMatchInvite",
+            R.string.title_page_send_match_Invite,
+            Icons.Default.Person,
+            R.string.title_page_send_match_Invite),
+        CALENDAR(
+            "calendar",
+            R.string.navbar_calendar,
+            Icons.Default.CalendarMonth,
+            R.string.description_navbar_calendar),
+        LIST_MATCH_INVITES(
+            "ListMatchInvites",
+            R.string.navbar_matchinvite_list,
+            Icons.Default.SportsBaseball,
+            R.string.description_navbar_matchinvite_list),
+        LIST_MEMBERSHIP_REQUEST(
+            "teamMemberShipRequest",
+            R.string.navbar_memberships_list,
+            Icons.Default.Person,
+            R.string.description_navbar_memberships_list),
         SEARCH_PLAYERS_WITH_OUT_TEAM("SearchPlayersWithoutTeam", R.string.navbar_players_without_team_list, Icons.Default.Person, R.string.description_navbar_players_without_team_list),
-        SEARCH_TEAMS_TO_MATCH_INVITE("SearchTeamsToMatchInvite", R.string.navbar_teams_to_matchinvite_list, Icons.Default.Person, R.string.description_navbar_teams_to_matchinvite_list),
+
+        SEARCH_TEAMS_TO_MATCH_INVITE(
+            "SearchTeamsToMatchInvite",
+            R.string.navbar_teams_to_matchinvite_list,
+            Icons.Default.Person,
+            R.string.description_navbar_teams_to_matchinvite_list),
+
+        SEARCH_COMPETIVE_MATCH(
+            "SearchCompetitiveMatch",
+            R.string.navbar_find_competitive_match,
+            Icons.Default.EmojiEvents,
+            R.string.description_navbar_find_competitive_match
+        ),
+        LIST_POST_PONE_MATCH(
+            "ListPostponeMatch",
+            R.string.navbar_list_post_pone_match,
+            Icons.Default.EditCalendar,
+            R.string.description_navbar_list_post_pone_match
+        ),
+        POST_PONE_MATCH(
+            "PostPoneMatch",
+            R.string.button_post_pone_match,
+            Icons.Default.EditCalendar,
+            R.string.button_post_pone_match_description
+        ),
+        CANCEL_MATCH(
+            "CancelMatch",
+            R.string.button_cancel_match,
+            Icons.Default.Flag,
+            R.string.button_cancel_match_description
+        ),
+        FINISH_MATCH(
+            "FinishMatch",
+            R.string.button_finish_match,
+            Icons.Default.Flag,
+            R.string.button_finish_match_description
+        )
     }
 
     // AGORA IMPLEMENTA RouteInfo

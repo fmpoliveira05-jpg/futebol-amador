@@ -5,6 +5,8 @@
     <string name="navbar_home_page_team">Homepage Team</string>
     <string name="description_navbar_homepage_team">Team homepage</string>
 
+    <string name="navbar_create_tean">Create Team</string>
+    <string name="description_navbar_crate_team">Page create team</string>
     <string name="navbar_calendar">Calendar</string>
     <string name="description_navbar_calendar">Calendar with team matches</string>
 
@@ -22,4 +24,10 @@
 
     <string name="navbar_matchinvite_list">Match requests</string>
     <string name="description_navbar_matchinvite_list">List of match requests received by the team</string>
+
+    <string name="navbar_find_competitive_match">Find competitive match</string>
+    <string name="description_navbar_find_competitive_match">Feature that allows you to search for another team available for another competitive match</string>
+
+    <string name="navbar_list_post_pone_match">Postponed Matches List</string>
+    <string name="description_navbar_list_post_pone_match">List of all match postponed sent to the team</string>
 </resources>

@@ -24,7 +24,7 @@ import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 @Composable
 fun ProfileTeamScreen(
     navHostController: NavHostController,
-    idTeam: String,
+    //idTeam: String,
     viewModel: ProfileTeamViewModel = viewModel()
 ) {
     val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamInfoDto.profileExempleTeam())
@@ -109,7 +109,7 @@ private fun FieldProfileTeam(
 fun ProfileTeamScreenPreview() {
 //Depois meter Id valido, de exemplo ou da BD
     ProfileTeamScreen(
-        idTeam = "2",
+        //idTeam = "2",
         navHostController = rememberNavController()
     )
 }

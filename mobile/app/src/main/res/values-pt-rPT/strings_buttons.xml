@@ -24,6 +24,21 @@
     <string name="button_send_membership_request">Enviar Pedido de Adesão</string>
     <string name="button_send_membership_request_description">Botão que lhe permite mandar um pedido de adesão a uma equipa ou jogador</string>
 
+    <string name="button_start_match">Começar Partida</string>
+    <string name="button_start_match_description">Botão que permite começar uma partida</string>
+
+    <string name="button_finish_match">Terminar Partida</string>
+    <string name="button_finish_match_description">Botão que permite finalizar uma partida</string>
+
+    <string name="button_post_pone_match">Adiar Partida</string>
+    <string name="button_post_pone_match_description">Botão que permite ao utilizador adiar uma partida</string>
+
+    <string name="button_cancel_match">Cancelar Partida</string>
+    <string name="button_cancel_match_description">Botão que permite ao utilizador cancelar uma partida</string>
+
+    <string name="button_view_more">Ver Mais</string>
+    <string name="button_view_more_description">Botão que permite carregar mais itens da lista</string>
+
     <string name="button_create_team">Criar Equipa</string>
     <string name="button_description_create_team">Botão que permite após preencher o formulário criar uma equipa</string>
 </resources>

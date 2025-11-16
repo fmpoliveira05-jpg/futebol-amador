@@ -52,23 +52,13 @@ import java.util.TimeZone
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(navHostController: NavHostController) {
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = "Registo"
-            )
-        }
-    ) { paddingValues ->
-        ContentSignUp(
-            modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
-            .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-            navController = navHostController
-        )
-    }
+    ContentSignUp(
+        modifier = Modifier
+        .fillMaxSize()
+        .padding(16.dp)
+        .verticalScroll(rememberScrollState()),
+        navController = navHostController
+    )
 }
 
 @Composable

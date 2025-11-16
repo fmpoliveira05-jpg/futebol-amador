@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -14,7 +13,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.ui.components.buttons.BackTopBar
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,23 +43,12 @@ fun FormMatchInviteScreen(
         onSubmitForm = viewModel::onSubmitForm
     )
 
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = stringResource(id = R.string.title_page_send_match_Invite)
-            )},
-        content = { paddingValues ->
-            ContentSendMatchInviteScreen(
-                navHostController = navHostController,
-                fields = fields,
-                actions = actions,
-                errors = errors,
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
-            )
-        }
+    ContentSendMatchInviteScreen(
+        navHostController = navHostController,
+        fields = fields,
+        actions = actions,
+        errors = errors,
+        modifier = Modifier.padding(16.dp),
     )
 }
 

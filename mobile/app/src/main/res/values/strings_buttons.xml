@@ -24,6 +24,22 @@
     <string name="button_send_membership_request">Send Membership Request</string>
     <string name="button_send_membership_request_description">Button that allows you to send a membership request to a team or player</string>
 
+    <string name="button_start_match">Start Match</string>
+    <string name="button_start_match_description">Button that allows starting a match</string>
+
+    <string name="button_finish_match">Finish Match</string>
+    <string name="button_finish_match_description">Button that allows finishing a match</string>
+
+    <string name="button_post_pone_match">Postpone Match</string>
+    <string name="button_post_pone_match_description">Button that allows the user to postpone a match</string>
+
+    <string name="button_cancel_match">Cancel Match</string>
+    <string name="button_cancel_match_description">Button that allows the user to cancel a match</string>
+
+    <string name="button_view_more">View More</string>
+    <string name="button_view_more_description">Button that allows you to load more items from the list.</string>
+
+
     <string name="button_create_team">Create Team</string>
     <string name="button_description_create_team">Button to submit the submitted data and create the team</string>
 </resources>

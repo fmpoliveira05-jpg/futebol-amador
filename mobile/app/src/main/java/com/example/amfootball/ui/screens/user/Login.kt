@@ -33,20 +33,10 @@ import com.example.amfootball.ui.viewModel.AuthViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navHostController: NavHostController){
-    Scaffold(
-        topBar = {
-            BackTopBar(
-                navHostController = navHostController,
-                title = "Login"
-            )},
-        content = { paddingValues ->
-            ContentLogin(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                navHostController = navHostController
-            )
-        }
+    ContentLogin(
+        modifier = Modifier
+            .padding(16.dp),
+        navHostController = navHostController
     )
 }
 

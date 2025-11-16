@@ -1,10 +1,8 @@
 package com.example.amfootball.ui.components.NavBar
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -14,20 +12,14 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.navigation.Objects.AppRouteInfo
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.ui.components.buttons.NavigateButton
-
-// ... imports
 
 @Composable
 fun MainBottomNavBar(
@@ -69,19 +61,32 @@ fun BottomSheetContent(
 
     when (currentScreenRoute) {
         Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
-            buttonsToShow.add(Routes.PlayerRoutes.PLAYER_LIST)
+            buttonsToShow.addAll(
+                listOf(
+                    Routes.GeralRoutes.HOMEPAGE,
+                    Routes.PlayerRoutes.TEAM_LIST,
+                    Routes.PlayerRoutes.PLAYER_LIST,
+                    Routes.GeralRoutes.LEADERBOARD,
+                    Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST,
+                )
+            )
         }
         Routes.BottomNavBarRoutes.TEAM_LIST.route -> {
             buttonsToShow.addAll(
                 listOf(
                     Routes.TeamRoutes.HOMEPAGE,
                     Routes.TeamRoutes.CALENDAR,
+                    Routes.TeamRoutes.TEAM_PROFILE,
+
                     Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST,
+                    Routes.TeamRoutes.MEMBERLIST,
+                    Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM,
+
                     Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE,
                     Routes.TeamRoutes.LIST_MATCH_INVITES,
-                    Routes.TeamRoutes.SEND_MATCH_INVITE,
-                    Routes.TeamRoutes.MEMBERLIST,
-                    Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM
+                    Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH,
+
+                    Routes.TeamRoutes.LIST_POST_PONE_MATCH
                 )
             )
         }

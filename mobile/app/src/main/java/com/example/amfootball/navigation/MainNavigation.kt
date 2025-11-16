@@ -19,18 +19,25 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.Routes.PlayerRoutes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.HomePageScreen
+import com.example.amfootball.ui.screens.LeaderboardScreen
+import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
+import com.example.amfootball.ui.screens.lists.ListPlayersScreen
+import com.example.amfootball.ui.screens.lists.ListTeamScreen
+import com.example.amfootball.ui.screens.match.FinishMatchScreen
+import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
+import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
 import com.example.amfootball.ui.screens.team.HomePageTeamScreen
 import com.example.amfootball.ui.screens.team.ListMembersScreen
+import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 
@@ -73,14 +80,9 @@ fun MainNavigation() {
             startDestination = Routes.GeralRoutes.HOMEPAGE.route,
             modifier = Modifier.padding(innerPadding) // Aplica o padding do Scaffold!
         ) {
-            composable(Routes.GeralRoutes.HOMEPAGE.route) {
-                HomePageScreen(globalNavController = globalNavController)
-            }
-            composable(Routes.TeamRoutes.HOMEPAGE.route) {
-                HomePageTeamScreen(globalNavController = globalNavController)
-            }
+            homePages(globalNavController = globalNavController)
 
-            Pages(globalNavController = globalNavController)
+            pages(globalNavController = globalNavController)
         }
 
         // O BottomSheet fica aqui, fora do NavHost, controlado pelo estado local
@@ -98,25 +100,33 @@ fun MainNavigation() {
     }
 }
 
+private fun NavGraphBuilder.homePages(globalNavController: NavHostController) {
+    composable(Routes.GeralRoutes.HOMEPAGE.route) {
+        HomePageScreen(globalNavController = globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.HOMEPAGE.route){
+        HomePageTeamScreen(globalNavController)
+    }
+}
+
 /**
  * Função que declara todas as páginas da app
  * */
-private fun NavGraphBuilder.Pages(globalNavController: NavHostController) {
-    AutPages(globalNavController = globalNavController)
+private fun NavGraphBuilder.pages(globalNavController: NavHostController) {
+    autPages(globalNavController = globalNavController)
 
-    UserPages(globalNavController = globalNavController)
+    userPages(globalNavController = globalNavController)
 
-    CrudTeamPages(globalNavController = globalNavController)
+    teamPages(globalNavController = globalNavController)
 
-    MatchInivitePages(globalNavController = globalNavController)
-
-    TeamPages(globalNavController = globalNavController)
+    chatPages(globalNavController = globalNavController)
 }
 
 /**
  * Paginas de autentificação
  * */
-private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
     //Depois meter para os dois verificações para só user não autenticados
     composable(Routes.UserRoutes.LOGIN.route) {
         LoginScreen(globalNavController)
@@ -130,48 +140,114 @@ private fun NavGraphBuilder.AutPages(globalNavController: NavHostController) {
 /**
  * Paginas do Utilizador
  * */
-private fun NavGraphBuilder.UserPages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
     composable(Routes.UserRoutes.PROFILE.route) {
-        ProfileScreen(globalNavController)
-    }
-
-    composable(Routes.PlayerRoutes.CHAT_LIST.route){
-        ChatListScreen()
+        ProfileScreen(navController = globalNavController)
     }
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
-        HomePageTeamScreen(globalNavController)
+        ListTeamScreen(navHostController = globalNavController)
     }
 
+    composable(Routes.PlayerRoutes.PLAYER_LIST.route) {
+        ListPlayersScreen(navHostController = globalNavController)
+    }
+
+    composable(Routes.GeralRoutes.LEADERBOARD.route) {
+        LeaderboardScreen(navHostController = globalNavController)
+    }
+
+    composable(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
+        ListMemberShipRequest(navHostController = globalNavController)
+    }
 }
 
 /**
- * Paginas do Time
+ * Paginas da Time
  * */
-private fun NavGraphBuilder.TeamPages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
+    crudTeamPages(globalNavController = globalNavController)
+
+    teamMatch(globalNavController = globalNavController)
+
+    composable(Routes.TeamRoutes.MEMBERLIST.route) {
+        ListMembersScreen(navHostController = globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
+        ListMemberShipRequest(navHostController = globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route) {
+        ListPlayersScreen(navHostController = globalNavController)
+    }
+}
+
+private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController) {
     composable(Routes.TeamRoutes.CALENDAR.route) {
         CalendarScreen(globalNavController)
     }
 
-    composable(Routes.TeamRoutes.HOMEPAGE.route){
-        HomePageScreen(globalNavController)
+    managementMatch(globalNavController = globalNavController)
+
+    casualMatches(globalNavController = globalNavController)
+
+    competitiveMatches(globalNavController = globalNavController)
+
+    composable(Routes.TeamRoutes.LIST_POST_PONE_MATCH.route) {
+        ListPostPoneMatchScreen(navHostController = globalNavController)
+    }
+}
+
+private fun NavGraphBuilder.managementMatch(globalNavController: NavHostController) {
+    composable(Routes.TeamRoutes.POST_PONE_MATCH.route) {
+        FormMatchInviteScreen(navHostController = globalNavController)
     }
 
-    composable(Routes.TeamRoutes.MEMBERLIST.route){
-        ListMembersScreen(globalNavController)
+    composable(Routes.TeamRoutes.FINISH_MATCH.route) {
+        FinishMatchScreen(navHostController = globalNavController)
+    }
+}
+
+
+private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController) {
+    composable(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route) {
+        ListTeamScreen(navHostController = globalNavController)
     }
 
+    composable(Routes.TeamRoutes.LIST_MATCH_INVITES.route) {
+        ListMatchInviteScreen(navHostController = globalNavController)
+    }
+
+    composable(Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
+        FormMatchInviteScreen(navHostController = globalNavController)
+    }
+}
+
+private fun NavGraphBuilder.competitiveMatches(globalNavController: NavHostController) {
+    composable(Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route) {
+        MatchMakerScreen(navHostController = globalNavController)
+    }
 }
 
 /**
  * Páginas do CRUD da Equipa
  * */
-private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController){
-    composable(route = CrudTeamRoutes.CREATE_TEAM) {
+private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController){
+    composable(route = Routes.TeamRoutes.CREATE_TEAM.route) {
         FormTeamScreen(navHostController = globalNavController)
     }
 
-    composable(
+    composable(route = CrudTeamRoutes.UPDATE_TEAM) {
+        FormTeamScreen(navHostController = globalNavController)
+    }
+
+    composable(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
+        ProfileTeamScreen(navHostController = globalNavController)
+    }
+    //Esta forma provavelmente vai ser trocada pela a do Hitl
+    /*
+     composable(
         route = CrudTeamRoutes.PROFILE_TEAM_URL,
         arguments = listOf(
             navArgument(CrudTeamRoutes.ARG_TEAM_ID) {
@@ -195,13 +271,11 @@ private fun NavGraphBuilder.CrudTeamPages(globalNavController: NavHostController
             }
         }
     }
+    * */
 }
 
-/**
- * Páginas de MatchInvite
- * */
-private fun NavGraphBuilder.MatchInivitePages(globalNavController: NavHostController){
-    composable(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
-        FormMatchInviteScreen(navHostController = globalNavController)
+private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
+    composable(Routes.PlayerRoutes.CHAT_LIST.route){
+        ChatListScreen()
     }
 }

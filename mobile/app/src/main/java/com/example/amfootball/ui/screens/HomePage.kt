@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.Objects.Routes
 
 @Composable
 //fun HomePageScreen(currentUser: User?){
@@ -20,13 +20,15 @@ fun HomePageScreen(globalNavController: NavHostController) {
         Text(text = "AMFootball", modifier = Modifier.padding(8.dp))
         //Text(text = "Bem-vindo ${currentUser?.name ?: "Convidado"}", modifier = Modifier.padding(8.dp))
         Text(text = "Bem-vindo utilizador")
+
         Button(
             onClick = {
-                globalNavController.navigate(route = CrudTeamRoutes.CREATE_TEAM)
+                globalNavController.navigate(route = Routes.TeamRoutes.CREATE_TEAM.route)
             }
         ) {
             Text(text = "Criar equipa")
         }
+
     }
 }
 
