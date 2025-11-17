@@ -61,8 +61,8 @@ namespace Tests.Integration.MatchInvite
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockMatchInviteService
-    .Setup(s => s.SendMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()))
-    .ReturnsAsync(expectedResponse);
+                .Setup(s => s.SendMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()))
+                .ReturnsAsync(expectedResponse);
 
 
             mockAuthorizationService.Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam))
