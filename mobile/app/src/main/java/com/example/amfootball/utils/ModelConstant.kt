@@ -17,6 +17,10 @@ object UserConst {
     const val MIN_EMAIL_LENGTH = 4
     const val MAX_EMAIL_LENGTH = 256
 
+    const val MIN_PASSWORD_LENGTH = 8
+
+    const val MAX_PASSWORD_LENGTH = 18
+
     const val SIZE_PHONE_NUMBER = 13
 
     const val MIN_AGE = 18

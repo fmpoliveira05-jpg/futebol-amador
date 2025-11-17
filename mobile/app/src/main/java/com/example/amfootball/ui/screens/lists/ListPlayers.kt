@@ -44,7 +44,6 @@ import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
-import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
 @Composable
@@ -180,7 +179,7 @@ private fun FilterListPlayerContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_min_size),
                     value = filters.minSize?.toString(),
-                    onValueChange = { filterActions.onMinSizeChange },
+                    onValueChange = { filterActions.onMinSizeChange(it.toIntOrNull()) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     minLenght = PlayerConst.MIN_HEIGHT,
                     maxLenght = PlayerConst.MAX_HEIGHT,
@@ -190,7 +189,8 @@ private fun FilterListPlayerContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_max_size),
                     value = filters.maxSize?.toString(),
-                    onValueChange = { filterActions.onMaxSizeChange },
+                    onValueChange = { filterActions.onMaxSizeChange(it.toIntOrNull()) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     minLenght = PlayerConst.MIN_HEIGHT,
                     maxLenght = PlayerConst.MAX_HEIGHT,
                     modifier = Modifier.weight(1f)
