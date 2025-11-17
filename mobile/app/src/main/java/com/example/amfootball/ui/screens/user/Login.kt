@@ -72,6 +72,7 @@ private fun FieldsLogin(navHostController: NavHostController) {
         onValueChange = { newValue ->
             email = newValue
         },
+
         label = "Digite o seu email",
         isPassword = false
     )

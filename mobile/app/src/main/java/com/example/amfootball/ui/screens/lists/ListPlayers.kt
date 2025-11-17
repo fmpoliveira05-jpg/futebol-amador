@@ -42,6 +42,10 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ListPlayersScreen(
@@ -111,6 +115,7 @@ private fun FilterListPlayerContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_name),
                     value = filters.name,
+                    maxLenght = UserConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onNameChange(it) },
                     modifier = Modifier.weight(1f)
                 )
@@ -118,6 +123,7 @@ private fun FilterListPlayerContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_city),
                     value = filters.city,
+                    maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { filterActions.onCityChange(it) },
                     modifier = Modifier.weight(1f)
                 )
@@ -145,11 +151,15 @@ private fun FilterListPlayerContent(
 
         FilterRow(
             content = {
+                //Ver neste caso como meter o min
+                //Aqui ate daria para meter um if no maxLength de que acso o max, estivesse preenchido o seu max seria esse valor
                 LabelTextField(
                     label = stringResource(id = R.string.filter_min_age),
                     value = filters.minAge?.toString(),
                     onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    minLenght = UserConst.MIN_AGE,
+                    maxLenght = UserConst.MAX_AGE,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -157,6 +167,9 @@ private fun FilterListPlayerContent(
                     label = stringResource(id = R.string.filter_max_age),
                     value = filters.maxAge?.toString(),
                     onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    minLenght = UserConst.MIN_AGE,
+                    maxLenght = UserConst.MAX_AGE,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -169,6 +182,8 @@ private fun FilterListPlayerContent(
                     value = filters.minSize?.toString(),
                     onValueChange = { filterActions.onMinSizeChange },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    minLenght = PlayerConst.MIN_HEIGHT,
+                    maxLenght = PlayerConst.MAX_HEIGHT,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -176,6 +191,8 @@ private fun FilterListPlayerContent(
                     label = stringResource(id = R.string.filter_max_size),
                     value = filters.maxSize?.toString(),
                     onValueChange = { filterActions.onMaxSizeChange },
+                    minLenght = PlayerConst.MIN_HEIGHT,
+                    maxLenght = PlayerConst.MAX_HEIGHT,
                     modifier = Modifier.weight(1f)
                 )
             }

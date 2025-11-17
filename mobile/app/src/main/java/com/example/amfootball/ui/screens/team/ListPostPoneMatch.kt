@@ -39,6 +39,7 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
+import com.example.amfootball.utils.TeamConst
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -110,6 +111,7 @@ private fun FilterListPostPoneMatchContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_name),
                     value = filters.nameOpponent,
+                    maxLenght = TeamConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onOpponentNameChange(it) },
                     modifier = Modifier.weight(1f)
                 )

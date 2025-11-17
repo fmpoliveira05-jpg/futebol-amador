@@ -3,6 +3,12 @@ package com.example.amfootball.utils
 object GeneralConst {
     const val MIN_ADDRESS_LENGTH = 5
     const val MAX_ADDRESS_LENGTH = 250
+
+    const val MIN_CITY_LENGTH = 1
+    const val MAX_CITY_LENGTH = 50
+
+    const val MIN_GOALS = 0
+    const val MAX_GOALS = 100
 }
 object UserConst {
     const val MIN_NAME_LENGTH = 3

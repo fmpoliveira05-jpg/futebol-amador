@@ -21,6 +21,10 @@ import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ProfileScreen(
@@ -62,6 +66,8 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
     TextFieldOutline(
         label = stringResource(id = R.string.player_name),
         value = profileData.name,
+        minLenght = UserConst.MIN_NAME_LENGTH,
+        maxLenght = UserConst.MAX_NAME_LENGTH,
         isReadOnly = true
     )
 
@@ -74,18 +80,24 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
     TextFieldOutline(
         label = stringResource(id = R.string.email_field),
         value = profileData.email,
+        minLenght = UserConst.MIN_EMAIL_LENGTH,
+        maxLenght = UserConst.MAX_EMAIL_LENGTH,
         isReadOnly = true
     )
 
     TextFieldOutline(
         label = stringResource(id = R.string.phone_number),
         value = profileData.phoneNumber,
+        minLenght = UserConst.SIZE_PHONE_NUMBER,
+        maxLenght = UserConst.SIZE_PHONE_NUMBER,
         isReadOnly = true
     )
 
     TextFieldOutline(
         label = stringResource(id = R.string.address),
         value = profileData.address,
+        minLenght = GeneralConst.MIN_ADDRESS_LENGTH,
+        maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
         isSingleLine = false,
         isReadOnly = true
     )
@@ -99,12 +111,16 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
     TextFieldOutline(
         label = stringResource(id = R.string.player_size),
         value = profileData.size.toString() + " cm",
+        minLenght = PlayerConst.MIN_HEIGHT,
+        maxLenght = PlayerConst.MAX_HEIGHT,
         isReadOnly = true
     )
 
     TextFieldOutline(
         label = stringResource(id = R.string.player_team),
         value = profileData.team,
+        minLenght = TeamConst.MIN_NAME_LENGTH,
+        maxLenght = TeamConst.MAX_NAME_LENGTH,
         isReadOnly = true
     )
 }

@@ -43,6 +43,8 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.NumMembersTeamRow
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.TeamConst
 import kotlin.String
 
 /**
@@ -108,11 +110,13 @@ private fun FiltersListTeamContent(
                     label = stringResource(id = R.string.filter_name_team),
                     value = filters.name,
                     onValueChange = { onFiltersChange(filters.copy(name = it)) },
+                    maxLenght = TeamConst.MAX_NAME_LENGTH,
                     modifier = Modifier.weight(1f)
                 )
                 LabelTextField(
                     label = stringResource(id = R.string.filter_city),
                     value = filters.city,
+                    maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { onFiltersChange(filters.copy(city = it)) },
                     modifier = Modifier.weight(1f)
                 )

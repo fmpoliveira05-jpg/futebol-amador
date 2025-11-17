@@ -23,6 +23,7 @@ import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
+import com.example.amfootball.utils.GeneralConst
 
 //TODO: Mandar também o idMatch e depois com base disso fazer um pedido há API para carregar as teams da match
 @Composable
@@ -74,6 +75,8 @@ private fun TextFieldForm(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_team),
         value = result?.numGoals?.toString() ?: "",
+        minLenght = GeneralConst.MIN_GOALS,
+        maxLenght = GeneralConst.MAX_GOALS,
         onValueChange = { formActions.onNumGoalsTeamChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -82,6 +85,8 @@ private fun TextFieldForm(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_opponent_team),
         value = result?.numGoalsOpponent?.toString() ?: "",
+        minLenght = GeneralConst.MIN_GOALS,
+        maxLenght = GeneralConst.MAX_GOALS,
         onValueChange = { formActions.onNumGoalsOpponentChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)

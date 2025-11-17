@@ -10,7 +10,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +27,8 @@ fun LabelTextField(
     isError: Boolean = false,
     errorMessage: String = stringResource(id = R.string.mandatory_field),
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    maxLenght: Int = Int.MAX_VALUE,
+    minLenght: Int = 0,
+    maxLenght: Int = Int.MAX_VALUE
 ) {
     Column(
         modifier = modifier
@@ -41,6 +44,7 @@ fun LabelTextField(
             isError = isError,
             errorMessage = errorMessage,
             keyboardOptions = keyboardOptions,
+            minLenght = minLenght,
             maxLenght = maxLenght
         )
     }
@@ -67,8 +71,14 @@ fun TextFieldOutline(
         OutlinedTextField(
             value = value ?: "",
             onValueChange = { newValue ->
+                val isValid = isValueValid(
+                    newValue = newValue,
+                    keyboardOptions = keyboardOptions,
+                    minLenght = minLenght,
+                    maxLenght = maxLenght
+                )
 
-                if (newValue.length <= maxLenght) {
+                if (isValid) {
                     onValueChange(newValue)
                 }
             },
@@ -89,5 +99,41 @@ fun TextFieldOutline(
                 }
             }
         )
+    }
+}
+
+private fun isValueValid(
+    newValue: String,
+    keyboardOptions: KeyboardOptions,
+    minLenght: Int,
+    maxLenght: Int
+): Boolean {
+    if (newValue.isEmpty()) {
+        return true
+    }
+
+    when (keyboardOptions.keyboardType) {
+        KeyboardType.Number -> {
+            if (newValue.all { it.isDigit() } == false) {
+                return false
+            }
+
+            val number = newValue.toInt()
+            if(number < minLenght && newValue.length >= minLenght.toString().length){
+                return false
+            }
+
+            if(number > maxLenght){
+                return false
+            }
+
+            return true
+        }
+        KeyboardType.Text -> {
+            return (newValue.length <= maxLenght)
+        }
+        else -> {
+            return true
+        }
     }
 }

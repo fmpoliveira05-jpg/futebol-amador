@@ -20,6 +20,9 @@ import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PitchConst
+import com.example.amfootball.utils.TeamConst
 
 @Composable
 fun ProfileTeamScreen(
@@ -68,6 +71,8 @@ private fun FieldProfileTeam(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_team),
         value = profileInfo.name,
+        minLenght = TeamConst.MIN_NAME_LENGTH,
+        maxLenght = TeamConst.MAX_NAME_LENGTH,
         isSingleLine = true,
         isReadOnly = true,
     )
@@ -75,6 +80,7 @@ private fun FieldProfileTeam(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_description_team),
         value = profileInfo.description,
+        maxLenght = TeamConst.MAX_DESCRIPTION_LENGTH,
         isSingleLine = false,
         isReadOnly = true,
     )
@@ -83,6 +89,8 @@ private fun FieldProfileTeam(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
         value = profileInfo.pitch.namePitch,
+        minLenght = PitchConst.MIN_NAME_LENGTH,
+        maxLenght = PitchConst.MAX_NAME_LENGTH,
         isSingleLine = true,
         isReadOnly = true,
     )
@@ -90,6 +98,8 @@ private fun FieldProfileTeam(
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_address_pitch_team),
         value = profileInfo.pitch.addressPitch,
+        minLenght = GeneralConst.MIN_ADDRESS_LENGTH,
+        maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
         isSingleLine = true,
         isReadOnly = true,
     )
