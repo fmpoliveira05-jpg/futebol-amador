@@ -6,7 +6,7 @@ namespace Application.Interfaces.Services
 {
     public interface IMembershipRequestService
     {
-        Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, Player player);
+        Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, string sender);
 
         Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId, string adminId);
 

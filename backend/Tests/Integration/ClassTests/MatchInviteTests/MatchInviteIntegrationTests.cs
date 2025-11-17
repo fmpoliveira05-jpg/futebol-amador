@@ -43,7 +43,7 @@ namespace Tests.Integration.MatchInvite
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.Now.AddDays(1),
-                namePitch = "Pitch A"
+                NamePitch = "Pitch A"
             };
 
             var expectedResponse = new InfoMatchInviteDto
@@ -54,7 +54,7 @@ namespace Tests.Integration.MatchInvite
                 IdReceiver = dto.IdReceiver,
                 NameReceiver = "Receiver Team",
                 GameDate = dto.GameDate,
-                NamePitch = dto.namePitch
+                NamePitch = dto.NamePitch
             };
 
             var mockMatchInviteService = new Mock<IMatchInviteService>();
@@ -229,7 +229,7 @@ namespace Tests.Integration.MatchInvite
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.Now.AddDays(1),
-                namePitch = "Pitch A"
+                NamePitch = "Pitch A"
             };
 
             var expectedResponse = new InfoMatchInviteDto
@@ -240,7 +240,7 @@ namespace Tests.Integration.MatchInvite
                 IdReceiver = dto.IdReceiver,
                 NameReceiver = "Receiver Team",
                 GameDate = dto.GameDate,
-                NamePitch = dto.namePitch
+                NamePitch = dto.NamePitch
             };
 
             var mockMatchInviteService = new Mock<IMatchInviteService>();

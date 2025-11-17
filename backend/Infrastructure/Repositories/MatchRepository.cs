@@ -30,6 +30,7 @@ namespace Infrastructure.Repositories
         {
             return await context.Match
                 .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 
