@@ -55,11 +55,11 @@ android {
 //teste 2
 // Configuração da tarefa Jacoco para gerar o relatório XML
 tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest") // Corre depois dos testes unitários
+    dependsOn("testDebugUnitTest")
 
     reports {
         xml.required.set(true)
-        html.required.set(false) //falso porque o sonarqube so precisa do xml
+        html.required.set(false)
     }
 
     classDirectories.setFrom(
@@ -111,7 +111,6 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.ui)
-    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
