@@ -499,7 +499,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>()));
 
             // ACT
-            var result = await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin);
+            var result = await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, admin.Id);
 
             // ASSERT
             result.Should().BeEquivalentTo(requestDto, options => options.Excluding(r => r.RequestDate).Excluding(r => r.RequestId));
@@ -528,7 +528,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador não é administrador."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, playerNaoAdmin);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, playerNaoAdmin.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -563,7 +563,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("A equipa está cheia."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -598,7 +598,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador já pertence a outra equipa."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -635,7 +635,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("Já existe um pedido pendente."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -669,7 +669,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 .Throws(new ValidationException("O jogador já pertence a esta equipa."));
 
             // ACT
-            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer);
+            Func<Task> act = async () => await _sut.SendMembershipRequestTeam(teamId, playerIdToInvite, adminPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
