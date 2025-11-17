@@ -21,39 +21,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.chat.ItemListChatDto
+import com.example.amfootball.navigation.Objects.Routes
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatListScreen() {
+fun ChatListScreen(
+    navController: NavHostController
+) {
     val listChat = ItemListChatDto.generateListChat()
     
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Conversas",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
-                },
-                actions = {
-                    IconButton(onClick = { /* Ação de busca */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Buscar")
-                    }
-                    IconButton(onClick = { /* Menu */ }) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
-            )
-        },
+        /*
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* Nova conversa */ },
@@ -63,6 +44,8 @@ fun ChatListScreen() {
                 Icon(Icons.Default.Add, contentDescription = "Nova Conversa")
             }
         }
+
+         */
     ) { paddingValues ->
         // Lista de Chats
         LazyColumn(
@@ -72,7 +55,7 @@ fun ChatListScreen() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             items(listChat) { chat ->
-                ChatItem(chat)
+                ChatItem(chat, navController = navController)
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 80.dp),
                     thickness = 0.5.dp,
@@ -84,11 +67,13 @@ fun ChatListScreen() {
 }
 
 @Composable
-fun ChatItem(chat: ItemListChatDto) {
+fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* Abrir chat */ }
+            .clickable {
+                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route)
+            }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -171,7 +156,7 @@ fun ChatItem(chat: ItemListChatDto) {
         }
     }
 }
-
+/*
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun ChatListScreenPreview() {
@@ -179,4 +164,5 @@ fun ChatListScreenPreview() {
         ChatListScreen()
     }
 }
+ */
 

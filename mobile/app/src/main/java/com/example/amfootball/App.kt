@@ -7,7 +7,7 @@ class App : Application() {
 
     companion object {
         lateinit var sessionManager: SessionManager
-            private set // Só pode ser escrito por esta classe
+            private set
     }
 
     override fun onCreate() {
