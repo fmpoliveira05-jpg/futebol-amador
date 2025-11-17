@@ -85,7 +85,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = idReceiver,
                 GameDate = DateTime.UtcNow.AddDays(1),
-                namePitch = senderPitch.Name
+                NamePitch = senderPitch.Name
             };
 
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(idSender)).ReturnsAsync(senderTeam);
@@ -116,7 +116,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(2),
-                namePitch = "Campo A"
+                NamePitch = "Campo A"
             };
 
             _validatorMock
@@ -142,7 +142,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(3),
-                namePitch = "Campo B"
+                NamePitch = "Campo B"
             };
 
             _validatorMock
@@ -168,7 +168,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(1),
-                namePitch = "Campo Central"
+                NamePitch = "Campo Central"
             };
 
             var senderTeam = new Team("Team Sender", "Desc", new byte[] { 1 }, new Pitch("Campo Central", "Rua X"), _defaultRank);
@@ -177,7 +177,7 @@ namespace Unit.ApplicationTests.ServicesTests
                          .ReturnsAsync((Team)null!);
 
             _validatorMock
-                .Setup(v => v.ValidateSendMatchInvite(null, It.IsAny<Team>(), null, null, dto.namePitch))
+                .Setup(v => v.ValidateSendMatchInvite(null, It.IsAny<Team>(), null, null, dto.NamePitch))
                 .Throws(new ValidationException("A equipa de destino não existe."));
 
             // ACT
@@ -404,7 +404,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = receiverTeam.Id,
                 GameDate = newDate,
-                namePitch = pitch.Name
+                NamePitch = pitch.Name
             };
             _matchInviteRepoMock.Setup(r => r.GetMatchInviteWithPitchByTeams(senderTeam.Id, receiverTeam.Id))
                                 .ReturnsAsync(matchInvite);
@@ -413,7 +413,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             _validatorMock.Setup(v => v.ValidateSenderMatchInvite(dto, senderTeam.Id));
             _validatorMock.Setup(v => v.ValidateNegociateMatchInvite(
-                dto.namePitch, matchInvite.Pitch, matchInvite, senderTeam, receiverTeam, null));
+                dto.NamePitch, matchInvite.Pitch, matchInvite, senderTeam, receiverTeam, null));
             _validatorMock.Setup(v => v.ValidateHasChangeNegociateMatchInvite(It.IsAny<bool>()));
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -439,7 +439,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(1),
-                namePitch = "Campo Central"
+                NamePitch = "Campo Central"
             };
             _validatorMock
                 .Setup(v => v.ValidateSenderMatchInvite(dto, idSender))
@@ -469,7 +469,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = teamB.Id,
                 GameDate = DateTime.UtcNow.AddDays(2),
-                namePitch = pitch.Name
+                NamePitch = pitch.Name
             };
             _validatorMock
                 .Setup(v => v.ValidateSenderMatchInvite(dto, outsiderTeam.Id))

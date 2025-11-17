@@ -389,11 +389,11 @@ namespace Application.Validators
 
         private static bool AdminOlderThanSecondAdmin(Player? adminToDemote, Player? adminDemoting)
         {
-            bool isOlder = true;
+            bool isOlder = false;
             
             if (adminToDemote.IsAdminLastChangedAt >= adminDemoting.IsAdminLastChangedAt)
             {
-                isOlder = false;
+                isOlder = true;
             }
 
             return isOlder;

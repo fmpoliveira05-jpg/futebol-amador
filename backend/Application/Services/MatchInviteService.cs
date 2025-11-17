@@ -58,7 +58,7 @@ namespace Application.Services
             
             var idReceiver = dto.IdReceiver;
             var gameDate = dto.GameDate;
-            var pitchName = dto.namePitch;
+            var pitchName = dto.NamePitch;
             Pitch? pitch = null;
 
             var receiver = await TeamRepository.GetTeamByIdWithPitchAsync(idReceiver);
@@ -178,7 +178,7 @@ namespace Application.Services
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
             var gameDate = dto.GameDate;
-            var namePitch = dto.namePitch;
+            var namePitch = dto.NamePitch;
             var idReceiver = dto.IdReceiver;
             bool hasChanged = false;
             var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idSender, idReceiver);

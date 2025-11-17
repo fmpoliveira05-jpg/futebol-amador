@@ -90,7 +90,7 @@ namespace Infrastructure.Repositories
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) >= minDate);
             }
 
-            if (minDate == null)
+            if (maxDate != null)
             {
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) <= maxDate);
             }

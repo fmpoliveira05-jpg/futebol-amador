@@ -45,10 +45,11 @@ namespace Application.Services
 
         #region Pedidos de adesão da Team
 
-        public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, Player player)
+        public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, string sender)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
             var playerToInvite = await playerRepository.GetPlayerByIdAsync(playerIdToInvite);
+            var player = await playerRepository.GetPlayerByIdAsync(sender);
 
             var existing = await membershipRequestRepository.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId);
 
@@ -97,7 +98,6 @@ namespace Application.Services
             playerAccepted.IdTeam = teamId;
             team.Members.Add(playerAccepted);
 
-            //Remove todos os pedidos de adesão pendentes do jogador
             await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(playerAccepted.Id);
             await RemoveAllMatchInviteTeam(team);
 
