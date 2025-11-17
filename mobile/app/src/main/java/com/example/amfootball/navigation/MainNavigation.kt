@@ -22,6 +22,7 @@ import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
+import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -155,7 +156,6 @@ private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
     composable(Routes.GeralRoutes.LEADERBOARD.route) {
         LeaderboardScreen(navHostController = globalNavController)
     }
-
     composable(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
         ListMemberShipRequest(navHostController = globalNavController)
     }
@@ -283,6 +283,9 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
 
 private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
     composable(Routes.PlayerRoutes.CHAT_LIST.route){
-        ChatListScreen()
+        ChatListScreen(navController = globalNavController)
+    }
+    composable(Routes.PlayerRoutes.SINGLE_CHAT.route){
+        ChatScreen()
     }
 }

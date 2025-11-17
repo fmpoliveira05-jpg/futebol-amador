@@ -11,7 +11,7 @@ class ChatViewModel {
         val myUserId = Firebase.auth.currentUser?.uid ?: return
 
         db.collection("chatRooms")
-            .whereArrayContains("members", myUserId) // A "magia" está aqui
+            .whereArrayContains("members", myUserId)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 val rooms = querySnapshot.documents.map { doc ->

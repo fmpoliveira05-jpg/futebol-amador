@@ -44,6 +44,9 @@
 
     <string name="item_list_chat">Lista de conversas</string>
     <string name="item_list_chat_description">Lista de conversas</string>
+    <string name="single_chat">Conversa</string>
+    <string name="single_chat_description">Conversa</string>
+
 
 
 

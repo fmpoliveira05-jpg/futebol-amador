@@ -58,6 +58,8 @@ object Routes {
         TEAM_LIST("teamlist", R.string.item_list_team, Icons.Default.Groups3, R.string.item_list_team_description),
         CHAT_LIST("chatlist", R.string.item_list_chat, Icons.Default.Groups3, R.string.item_list_chat_description),
         LIST_MEMBERSHIP_REQUEST("playerMemberShipRequest", R.string.navbar_memberships_list, Icons.Default.Person, R.string.description_navbar_memberships_list),
+
+        SINGLE_CHAT("chat", R.string.single_chat, Icons.Default.Person, R.string.single_chat_description)
     }
 
     // AGORA IMPLEMENTA RouteInfo
@@ -198,7 +200,6 @@ object Routes {
         )
     }
 
-    // AGORA IMPLEMENTA RouteInfo
     enum class BottomNavBarRoutes(
         override val route: String,
         override val labelResId: Int,
@@ -206,7 +207,6 @@ object Routes {
         override val contentDescription: Int,
         override val haveBackButton: Boolean
     ) : AppRouteInfo {
-        // A lógica aqui já estava quase correta, só precisa do override
         HOMEPAGE(
             GeralRoutes.HOMEPAGE.route,
             GeralRoutes.HOMEPAGE.labelResId,
