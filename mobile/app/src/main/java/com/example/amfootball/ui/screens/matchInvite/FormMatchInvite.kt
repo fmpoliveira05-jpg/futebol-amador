@@ -89,7 +89,6 @@ private fun FieldsSendMatchInvite(
         isReadOnly = true,
     )
 
-
     DatePickerDockedLimitedDate(
         value = fields.gameDate ?: "",
         onDateSelected = actions.onGameDateChange,
@@ -124,8 +123,6 @@ private fun FieldsSendMatchInvite(
         contentDescription = stringResource(id = R.string.button_description_send_match_invite)
     )
 }
-
-
 
 @Preview(name = "Send Match Invite - EN", locale = "en", showBackground = true)
 @Preview(name = "Enviar Pedido de partida - PT", locale = "pt", showBackground = true)
