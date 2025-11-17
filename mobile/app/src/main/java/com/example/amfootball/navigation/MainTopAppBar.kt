@@ -11,15 +11,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.R
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.AppRouteInfo
 import com.example.amfootball.ui.components.buttons.BackButton
 
+/*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopAppBar(
     navController: NavHostController,
-    isLoggedIn: Boolean
+    isLoggedIn: Boolean,
+    sessionManager: SessionManager
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -74,3 +77,5 @@ private fun getAllRoutes(): List<AppRouteInfo> {
             Routes.PlayerRoutes.entries +
             Routes.BottomNavBarRoutes.entries
 }
+
+ */

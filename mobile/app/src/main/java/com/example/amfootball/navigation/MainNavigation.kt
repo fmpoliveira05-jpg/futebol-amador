@@ -1,5 +1,6 @@
 package com.example.amfootball.navigation
 
+import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -16,13 +17,14 @@ import com.example.amfootball.ui.screens.user.LoginScreen
 import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
+import com.example.amfootball.ui.components.NavBar.MainTopAppBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
-import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.Chat.GroupChatFootballPreview
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
@@ -34,6 +36,8 @@ import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
+import com.example.amfootball.ui.screens.settings.PreferenceScreen
+import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
 import com.example.amfootball.ui.screens.team.HomePageTeamScreen
@@ -48,22 +52,29 @@ fun MainNavigation() {
     val globalNavController = rememberNavController()
 
     var isLoggedIn by remember { mutableStateOf(false) }
-
+    var sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
+    var currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
 
+    if (currentUserId != null){
+        isLoggedIn = true
+    }
+    /*
     val onLogoutClick: () -> Unit = {
         isLoggedIn = false
         globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-            popUpTo(0) // Limpa toda a stack
+            popUpTo(0)
         }
     }
+
+     */
 
     Scaffold(
         topBar = {
             MainTopAppBar(
                 navController = globalNavController,
-                isLoggedIn = isLoggedIn
+                isLoggedIn = isLoggedIn,
             )
         },
         bottomBar = {
@@ -122,6 +133,8 @@ private fun NavGraphBuilder.pages(globalNavController: NavHostController) {
     teamPages(globalNavController = globalNavController)
 
     chatPages(globalNavController = globalNavController)
+
+    systemPages(globalNavController = globalNavController)
 }
 
 /**
@@ -288,5 +301,15 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
     }
     composable(Routes.PlayerRoutes.SINGLE_CHAT.route){
         GroupChatFootballPreview()
+    }
+}
+
+private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
+    composable(Routes.GeralRoutes.SETTINGS.route){
+        SettingsScreen()
+    }
+
+    composable(Routes.GeralRoutes.PREFERENCE.route){
+        PreferenceScreen()
     }
 }

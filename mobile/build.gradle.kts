@@ -6,7 +6,6 @@ plugins {
     id("org.sonarqube") version "7.0.1.6134" apply false
     id("com.google.gms.google-services") version "4.4.4" apply false
 
-    //Injeção de dependencias
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt.android) apply false
 }

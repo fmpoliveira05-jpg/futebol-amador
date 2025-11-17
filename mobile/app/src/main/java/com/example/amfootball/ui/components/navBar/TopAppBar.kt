@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.R
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.Objects.Routes
 import kotlin.collections.find
 import com.example.amfootball.navigation.Objects.AppRouteInfo
@@ -22,15 +23,13 @@ import com.example.amfootball.ui.viewModel.AuthViewModel
 @Composable
 fun MainTopAppBar(
     navController: NavHostController,
-    isLoggedIn: Boolean
+    isLoggedIn: Boolean,
 ) {
-    // Tenta obter o título da rota atual. Se não encontrar, não mostra título.
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val routeTitleResId = getAllRoutes().find { it.route == currentRoute }?.labelResId
     val haveBackButton = getAllRoutes().find { it.route == currentRoute }?.haveBackButton
     val authViewModel: AuthViewModel = viewModel()
-
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -52,7 +51,6 @@ fun MainTopAppBar(
                     contentDescription = stringResource(id = R.string.item_settings_description)
                 )
             }
-
             if (!isLoggedIn) {
                 IconButton(onClick = { navController.navigate(Routes.UserRoutes.LOGIN.route) }) {
                     Icon(
@@ -68,7 +66,10 @@ fun MainTopAppBar(
                 }
             }
             else {
-                IconButton(onClick = { authViewModel.logoutUser() }) {
+                IconButton(onClick = {
+                    authViewModel.logoutUser()
+                    navController.navigate(currentRoute!!)
+                }) {
                     Icon(
                         imageVector = Routes.UserRoutes.LOGOUT.icon,
                         contentDescription = stringResource(Routes.UserRoutes.LOGOUT.labelResId)
@@ -80,7 +81,6 @@ fun MainTopAppBar(
     )
 }
 
-// Função auxiliar para obter uma lista de todas as rotas para encontrar o título
 private fun getAllRoutes(): List<AppRouteInfo> {
     return Routes.GeralRoutes.entries +
             Routes.TeamRoutes.entries +
@@ -88,11 +88,3 @@ private fun getAllRoutes(): List<AppRouteInfo> {
             Routes.PlayerRoutes.entries +
             Routes.BottomNavBarRoutes.entries
 }
-
-// Adicione esta interface no seu ficheiro Routes.kt para unificar as suas rotas
-// Ficheiro: navigation/Objects/Routes.kt
-// interface RouteInfo {
-//     val route: String
-//     val labelResId: Int
-// }
-// E faça cada enum implementar isto: enum class GeralRoutes(...) : RouteInfo { ... }

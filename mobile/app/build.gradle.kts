@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+
     id("org.sonarqube")
     id("jacoco")
     id("com.google.gms.google-services")
@@ -110,6 +111,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.ui)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -125,7 +127,12 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     // Dependência do Firebase Authentication
     implementation("com.google.firebase:firebase-auth:24.0.1")
-    // Dependência para o Login com Google (necessária)
+
+    implementation("com.google.firebase:firebase-firestore")
+
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+    // Dependência para o Login com Google
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Analytics
