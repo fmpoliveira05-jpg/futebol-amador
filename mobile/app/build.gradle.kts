@@ -130,8 +130,6 @@ dependencies {
 
     implementation("com.google.firebase:firebase-firestore")
 
-    implementation("com.google.firebase:firebase-firestore-ktx")
-
     // Dependência para o Login com Google
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
