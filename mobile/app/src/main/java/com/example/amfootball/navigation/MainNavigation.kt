@@ -23,6 +23,7 @@ import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.Chat.ChatScreen
+import com.example.amfootball.ui.screens.Chat.GroupChatFootballPreview
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -286,6 +287,6 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
         ChatListScreen(navController = globalNavController)
     }
     composable(Routes.PlayerRoutes.SINGLE_CHAT.route){
-        ChatScreen()
+        GroupChatFootballPreview()
     }
 }
