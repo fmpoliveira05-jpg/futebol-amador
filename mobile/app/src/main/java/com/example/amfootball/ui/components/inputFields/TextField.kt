@@ -58,6 +58,7 @@ fun TextFieldOutline(
     isError: Boolean = false,
     errorMessage: String? = stringResource(id = R.string.mandatory_field),
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    minLenght: Int = 0,
     maxLenght: Int = Int.MAX_VALUE,
 ) {
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
@@ -66,6 +67,7 @@ fun TextFieldOutline(
         OutlinedTextField(
             value = value ?: "",
             onValueChange = { newValue ->
+
                 if (newValue.length <= maxLenght) {
                     onValueChange(newValue)
                 }
