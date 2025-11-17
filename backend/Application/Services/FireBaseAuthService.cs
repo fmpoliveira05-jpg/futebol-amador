@@ -80,8 +80,6 @@ namespace Application.Services
 
         public async Task<LoginResponseDto> LoginAsync(string email, string password)
         {
-
-            var firebaseAuthUrl = $"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FirebaseApiKey}";
             
             var requestBody = new
             {
@@ -101,43 +99,9 @@ namespace Application.Services
                     throw new AuthenticationException("Failed to parse Firebase response.");
                 }
 
-                var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(firebaseResponse.LocalId);
-                if (superAdminUser != null)
-                {
-                    return new LoginResponseDto
-                    {
-                        Address = superAdminUser.Address,
-                        Email = firebaseResponse.Email,
-                        DateOfBirth = superAdminUser.DateOfBirth,
-                        Name = superAdminUser.Name,
-                        Phone = superAdminUser.Phone,
-                        CreationDate = superAdminUser.CreationDate,
-                        FirebaseLoginResponseDto = firebaseResponse
-
-
-                    };
-                }
-                var playerUser = await PlayerRepository.GetPlayerByIdAsync(firebaseResponse.LocalId);
-                if (playerUser != null)
-                { 
-                    return new LoginResponseDto
-                    {
-                        Email = firebaseResponse.Email,
-                        DateOfBirth = playerUser.DateOfBirth,
-                        Name = playerUser.Name,
-                        Address = playerUser.Address,
-                        IsAdmin = playerUser.IsAdmin,
-                        Height = playerUser.Height,
-                        IdTeam = playerUser.IdTeam,
-                        Phone = playerUser.Phone,
-                        Position = playerUser.Position,
-                        CreationDate = playerUser.CreationDate,
-                        IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
-                        FirebaseLoginResponseDto = firebaseResponse
-                    };
-                }
-
-                throw new AuthenticationException("Usuário não encontrado na base de dados.");
+                var userData = await GetFullUserData(firebaseResponse.LocalId);
+                userData.FirebaseLoginResponseDto = firebaseResponse;
+                return userData;
 
             }
             else
@@ -189,6 +153,45 @@ namespace Application.Services
                 }
                 throw;
             }
+        }
+
+        public async Task<LoginResponseDto> GetFullUserData(string userId)
+        {
+            var superAdminUser = await SuperAdminRepository.GetSuperAdminByIdAsync(userId);
+            if (superAdminUser != null)
+            {
+                return new LoginResponseDto
+                {
+                    Address = superAdminUser.Address,
+                    Email = superAdminUser.Email,
+                    DateOfBirth = superAdminUser.DateOfBirth,
+                    Name = superAdminUser.Name,
+                    Phone = superAdminUser.Phone,
+                    CreationDate = superAdminUser.CreationDate,
+
+
+                };
+            }
+            var playerUser = await PlayerRepository.GetPlayerByIdAsync(userId);
+            if (playerUser != null)
+            {
+                return new LoginResponseDto
+                {
+                    Email = playerUser.Email,
+                    DateOfBirth = playerUser.DateOfBirth,
+                    Name = playerUser.Name,
+                    Address = playerUser.Address,
+                    IsAdmin = playerUser.IsAdmin,
+                    Height = playerUser.Height,
+                    IdTeam = playerUser.IdTeam,
+                    Phone = playerUser.Phone,
+                    Position = playerUser.Position,
+                    CreationDate = playerUser.CreationDate,
+                    IsAdminLastChanged = playerUser.IsAdminLastChangedAt,
+                };
+            }
+
+            throw new AuthenticationException("Usuário não encontrado na base de dados.");
         }
     }
 }

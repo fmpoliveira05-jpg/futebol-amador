@@ -47,7 +47,7 @@ namespace Api.Controllers
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    createPlayerResult
+                    createPlayerResult //a 
                     );
         }
 
@@ -89,25 +89,21 @@ namespace Api.Controllers
         [Authorize]
         public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
-            //playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
-            var userId= User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(userId, playerId);
 
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
-            }
-
-            if (playerId != userId)
-            {
-                return Forbid();
             }
             
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
+            
 
-            await playerService.UpdatePlayerAsync(userId, dto);
+            await playerService.UpdatePlayerAsync(dto.playerId, dto);
 
             return Ok("Player information updated succesfully.");
         }

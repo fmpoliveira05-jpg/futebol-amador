@@ -16,5 +16,7 @@ namespace Application.Interfaces.Services
         void DeleteUserAsync(string userId);
 
         Task<string> RegisterUser(string email, string password, string phoneNumber);
+
+        Task<LoginResponseDto> GetFullUserData(string userId);
     }
 }
