@@ -43,6 +43,9 @@ import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.UserConst
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -113,6 +116,7 @@ private fun FieldsSignUp(navHostController: NavHostController) {
         label = "Name",
         value = name,
         onValueChange = { name = it },
+        maxLenght = UserConst.MAX_NAME_LENGTH,
         isRequired = true
     )
 
@@ -126,6 +130,7 @@ private fun FieldsSignUp(navHostController: NavHostController) {
         value = phone,
         onValueChange = { phone = it },
         isRequired = true,
+        maxLenght = UserConst.SIZE_PHONE_NUMBER,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
     )
 
@@ -134,12 +139,14 @@ private fun FieldsSignUp(navHostController: NavHostController) {
         value = height,
         onValueChange = { height = it },
         isRequired = true,
+        maxLenght = PlayerConst.MAX_HEIGHT,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
     TextFieldOutline(
         label = "Address",
         value = address,
+        maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
         onValueChange = { address = it },
         isRequired = true,
     )
@@ -245,10 +252,8 @@ private fun FieldsSignUp(navHostController: NavHostController) {
 
                 scope.launch {
                     try {
-                        // Chamar a função de registo, não a de login
                         authViewModel.registerUser(userProfile, password)
 
-                        // Sucesso!
                         isLoading = false
                         navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                             popUpTo(navHostController.graph.startDestinationId) {
@@ -275,8 +280,14 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     }
 }
 
-@Preview(name = "SignUp Screen - EN", locale = "en", showBackground = true)
-@Preview(name = "SignUp Screen - PT", locale = "pt", showBackground = true)
+@Preview(
+    name = "SignUp Screen - EN",
+    locale = "en",
+    showBackground = true)
+@Preview(
+    name = "SignUp Screen - PT",
+    locale = "pt",
+    showBackground = true)
 @Composable
 fun SignUpScreenContentPreview() {
     AMFootballTheme {
