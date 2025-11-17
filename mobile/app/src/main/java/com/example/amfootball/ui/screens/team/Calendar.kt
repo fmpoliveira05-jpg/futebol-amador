@@ -52,6 +52,7 @@ import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.Patterns
+import com.example.amfootball.utils.TeamConst
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -123,6 +124,7 @@ private fun FiltersCalendarContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_name_team),
                     value = filters.opponentName,
+                    maxLenght = TeamConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onNameChange(it) },
                     modifier = Modifier.weight(1f)
                 )

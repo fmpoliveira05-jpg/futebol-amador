@@ -43,6 +43,8 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.NumMembersTeamRow
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.TeamConst
 import kotlin.String
 
 /**
@@ -108,11 +110,13 @@ private fun FiltersListTeamContent(
                     label = stringResource(id = R.string.filter_name_team),
                     value = filters.name,
                     onValueChange = { onFiltersChange(filters.copy(name = it)) },
+                    maxLenght = TeamConst.MAX_NAME_LENGTH,
                     modifier = Modifier.weight(1f)
                 )
                 LabelTextField(
                     label = stringResource(id = R.string.filter_city),
                     value = filters.city,
+                    maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { onFiltersChange(filters.copy(city = it)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -140,6 +144,8 @@ private fun FiltersListTeamContent(
                     label = stringResource(id = R.string.filter_min_points_Team),
                     value = filters.minPoint,
                     onValueChange = { onFiltersChange(filters.copy(minPoint = it)) },
+                    min = TeamConst.MIN_NUMBER_POINTS,
+                    max = TeamConst.MAX_NUMBER_POINTS,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -150,6 +156,8 @@ private fun FiltersListTeamContent(
                 NumberFilterField(
                     label = stringResource(id = R.string.filter_max_points_Team),
                     value = filters.maxPoint,
+                    min = TeamConst.MIN_NUMBER_POINTS,
+                    max = TeamConst.MAX_NUMBER_POINTS,
                     onValueChange = { onFiltersChange(filters.copy(maxPoint = it)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -157,6 +165,8 @@ private fun FiltersListTeamContent(
                 NumberFilterField(
                     label = stringResource(id = R.string.filter_min_average_age_team),
                     value = filters.minAge,
+                    min = TeamConst.MIN_AVERAGE_AGE,
+                    max = TeamConst.MAX_AVERAGE_AGE,
                     onValueChange = { onFiltersChange(filters.copy(minAge = it)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -168,6 +178,8 @@ private fun FiltersListTeamContent(
                NumberFilterField(
                    label = stringResource(id = R.string.filter_max_average_age_team),
                    value = filters.maxAge,
+                   min = TeamConst.MIN_AVERAGE_AGE,
+                   max = TeamConst.MAX_AVERAGE_AGE,
                    onValueChange = { onFiltersChange(filters.copy(maxAge = it)) },
                    modifier = Modifier.weight(1f)
                )
@@ -175,6 +187,8 @@ private fun FiltersListTeamContent(
                NumberFilterField(
                    label = stringResource(id = R.string.filter_min_members_team),
                    value = filters.minNumberMembers,
+                   min = TeamConst.MIN_MEMBERS,
+                   max = TeamConst.MAX_MEMBERS,
                    onValueChange = { onFiltersChange(filters.copy(minNumberMembers = it)) },
                    modifier = Modifier.weight(1f)
                )
@@ -186,6 +200,8 @@ private fun FiltersListTeamContent(
                 NumberFilterField(
                     label = stringResource(id = R.string.filter_max_members_team),
                     value = filters.maxNumberMembers,
+                    min = TeamConst.MIN_MEMBERS,
+                    max = TeamConst.MAX_MEMBERS,
                     onValueChange = { onFiltersChange(filters.copy(maxNumberMembers = it)) },
                     modifier = Modifier.weight(1f)
                 )
@@ -209,6 +225,8 @@ private fun NumberFilterField(
     label: String,
     value: Int?,
     onValueChange: (Int?) -> Unit,
+    min: Int = 0,
+    max: Int = Int.MAX_VALUE,
     modifier: Modifier = Modifier
 ) {
     val textValue by remember(value) {
@@ -218,14 +236,7 @@ private fun NumberFilterField(
     LabelTextField(
         label = label,
         value = textValue,
-        onValueChange = { newValue ->
-            val newIntValue = newValue.toIntOrNull()
-            if (newIntValue != null) {
-                onValueChange(newIntValue)
-            } else if (newValue.isEmpty()) {
-                onValueChange(null)
-            }
-        },
+        onValueChange = { onValueChange(it.toIntOrNull())},
         modifier = modifier,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )

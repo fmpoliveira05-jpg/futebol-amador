@@ -51,6 +51,7 @@ import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
+import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
 @Composable
@@ -126,6 +127,7 @@ private fun FilterListMemberContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_name),
                     value = filters.name ?: "",
+                    maxLenght = UserConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onNameChange(it) }, // ou { filterActions.onNameChange(it) }
                     modifier = Modifier.weight(1f)
                 )
@@ -137,6 +139,8 @@ private fun FilterListMemberContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_min_age),
                     value = filters.minAge?.toString() ?: "",
+                    minLenght = UserConst.MIN_AGE,
+                    maxLenght = UserConst.MAX_AGE,
                     onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
@@ -145,8 +149,9 @@ private fun FilterListMemberContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_max_age),
                     value = filters.maxAge?.toString() ?: "",
-                    onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
+                    minLenght = UserConst.MIN_AGE,
                     maxLenght = UserConst.MAX_AGE,
+                    onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     modifier = Modifier.weight(1f)
                 )
             },

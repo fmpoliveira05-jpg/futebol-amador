@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,14 +30,22 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.components.inputFields.DatePickerModalInput
-import com.example.amfootball.ui.components.inputFields.LabeledInputField
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.ui.components.inputFields.EmailTextField
+import com.example.amfootball.ui.components.inputFields.LabelSelectBox
+import com.example.amfootball.ui.components.inputFields.PasswordTextField
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.UserConst
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -89,7 +94,6 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     var showDatePicker by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    var isPositionMenuExpanded by remember { mutableStateOf(false) }
 
     // --- ViewModels e Scopes ---
     val authViewModel: AuthViewModel = viewModel()
@@ -108,95 +112,70 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     Text(text = "Criar nova conta")
     Spacer(Modifier.height(20.dp))
 
-    LabeledInputField(
-        name = "Name",
+    TextFieldOutline(
+        label = "Name",
         value = name,
         onValueChange = { name = it },
-        label = "Insira o seu nome"
+        maxLenght = UserConst.MAX_NAME_LENGTH,
+        isRequired = true
     )
 
-    LabeledInputField(
-        name = "Phone",
-        value = phone,
-        onValueChange = { phone = it },
-        label = "Telemóvel (9 dígitos)",
-        keyboardType = KeyboardType.Phone
-    )
-
-    LabeledInputField(
-        name = "Height",
-        value = height,
-        onValueChange = { height = it },
-        label = "Altura (em cm)",
-        keyboardType = KeyboardType.Number
-    )
-
-    LabeledInputField(
-        name = "Morada",
-        value = address,
-        onValueChange = { address = it },
-        label = "Insira a sua morada",
-    )
-
-    LabeledInputField(
-        name = "Email",
+    EmailTextField(
         value = email,
         onValueChange = { email = it },
-        label = "exemple@example.com",
-        keyboardType = KeyboardType.Email
+    )
+
+    TextFieldOutline(
+        label = "Phone",
+        value = phone,
+        onValueChange = { phone = it },
+        isRequired = true,
+        maxLenght = UserConst.SIZE_PHONE_NUMBER,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+    )
+
+    TextFieldOutline(
+        label = "Height",
+        value = height,
+        onValueChange = { height = it },
+        isRequired = true,
+        maxLenght = PlayerConst.MAX_HEIGHT,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+    )
+
+    TextFieldOutline(
+        label = "Address",
+        value = address,
+        maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
+        onValueChange = { address = it },
+        isRequired = true,
     )
 
     Spacer(Modifier.height(8.dp))
-    Text(text = "Position:")
     Spacer(Modifier.height(4.dp))
 
+    val listPosition: List<Position> = Position.values().toList()
+    val selectedPositionObject: Position? = listPosition.find { it.ordinal == position }
 
-    ExposedDropdownMenuBox(
-        expanded = isPositionMenuExpanded,
-        onExpandedChange = { isPositionMenuExpanded = !isPositionMenuExpanded },
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        val selectedPosition = position?.let { nonNullPosition ->
-            Position.values().getOrNull(nonNullPosition)
-        }
-
-        val displayText = if (selectedPosition != null) {
-            stringResource(id = selectedPosition.stringId)
-        } else {
-            ""
-        }
-        TextField(
-            value = displayText,
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Selecione a Posição") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isPositionMenuExpanded)
-            },
-            modifier = Modifier
-                .menuAnchor() // Liga o TextField ao menu
-                .fillMaxWidth()
-        )
-
-        // O menu que aparece
-        ExposedDropdownMenu(
-            expanded = isPositionMenuExpanded,
-            onDismissRequest = { isPositionMenuExpanded = false }
-        ) {
-            // Itera sobre o seu enum
-            Position.values().forEach { pos ->
-                DropdownMenuItem(
-                    text = { Text(stringResource(pos.stringId)) },
-                    onClick = {
-                        position = pos.ordinal // Guarda "FORWARD", "MIDFIELER", etc.
-                        isPositionMenuExpanded = false // Fecha o menu
-                    }
-                )
+    LabelSelectBox(
+        label = stringResource(id = R.string.filter_position),
+        list = listPosition,
+        selectedValue = selectedPositionObject,
+        onSelectItem = { selectedPosition ->
+            position = selectedPosition?.ordinal
+        },
+        itemToString = { pos ->
+            if (pos == null) {
+                "Escolha uma Posição"
+            } else {
+                stringResource(id = pos.stringId)
             }
-        }
-    }
+        },
+        modifier = Modifier.fillMaxWidth()
+    )
 
     Spacer(Modifier.height(8.dp))
+
     // Data de nascimento
     Text(text = "Data de Nascimento:")
     Button(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
@@ -220,20 +199,15 @@ private fun FieldsSignUp(navHostController: NavHostController) {
 
     Spacer(Modifier.height(8.dp))
 
-    LabeledInputField(
-        name = "Password",
+    PasswordTextField(
         value = password,
-        onValueChange = { password = it },
-        label = "Digite a password",
-        isPassword = true
+        onValueChange = { password = it }
     )
 
-    LabeledInputField(
-        name = "Password Verification",
+    PasswordTextField(
+        label = "Password Verification",
         value = passwordVerification,
         onValueChange = { passwordVerification = it },
-        label = "Confirme a sua password",
-        isPassword = true
     )
 
     Spacer(Modifier.height(16.dp))
@@ -278,10 +252,8 @@ private fun FieldsSignUp(navHostController: NavHostController) {
 
                 scope.launch {
                     try {
-                        // Chamar a função de registo, não a de login
                         authViewModel.registerUser(userProfile, password)
 
-                        // Sucesso!
                         isLoading = false
                         navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                             popUpTo(navHostController.graph.startDestinationId) {
@@ -308,8 +280,14 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     }
 }
 
-@Preview(name = "SignUp Screen - EN", locale = "en", showBackground = true)
-@Preview(name = "SignUp Screen - PT", locale = "pt", showBackground = true)
+@Preview(
+    name = "SignUp Screen - EN",
+    locale = "en",
+    showBackground = true)
+@Preview(
+    name = "SignUp Screen - PT",
+    locale = "pt",
+    showBackground = true)
 @Composable
 fun SignUpScreenContentPreview() {
     AMFootballTheme {

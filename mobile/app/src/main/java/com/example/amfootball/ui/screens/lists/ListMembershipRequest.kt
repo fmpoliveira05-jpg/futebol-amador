@@ -107,7 +107,6 @@ private fun FilterListMemberShipRequestContent(
     val displayFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
 
     Column(modifier = modifier) {
-
         FilterRow(
             content = {
                 LabelTextField(
