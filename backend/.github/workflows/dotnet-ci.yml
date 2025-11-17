@@ -110,9 +110,9 @@ jobs:
           $coverage = Get-ChildItem -Recurse -Filter "coverage.opencover.xml" | Select-Object -First 1
           if ($coverage) {
             Copy-Item $coverage.FullName -Destination "$PWD/coverage.opencover.xml" -Force
-            Write-Host "✅ Cobertura copiada de $($coverage.FullName)"
+            Write-Host "Cobertura copiada de $($coverage.FullName)"
           } else {
-            Write-Host "⚠️ Nenhum ficheiro de cobertura encontrado!"
+            Write-Host "Nenhum ficheiro de cobertura encontrado!"
             Get-ChildItem -Recurse | Where-Object { $_.Name -like "*coverage*" } | ForEach-Object { Write-Host "Encontrado: $($_.FullName)" }
           }
 
