@@ -37,6 +37,8 @@ import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
+import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.utils.UserConst
 import java.time.format.DateTimeFormatter
 
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
@@ -112,6 +114,7 @@ private fun FilterListMemberShipRequestContent(
                 LabelTextField(
                     label = stringResource(id = R.string.filter_sender_name),
                     value = filters.senderName ?: "",
+                    maxLength = UserConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onSenderNameChange(it) },
                     modifier = Modifier.weight(1f)
                 )
