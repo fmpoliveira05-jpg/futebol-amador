@@ -275,21 +275,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
                           .ReturnsAsync((Player)null);
 
-            // !! ARRANGE (A CORREÇÃO): Configure o MOCK do validador !!
-            // Diga ao mock para lançar a exceção quando receber null.
-            // (Estou a assumir que o seu mock se chama playerValidatorMock)
             validatorMock
-                .Setup(v => v.DeletePlayerValidator(It.IsAny<Player>())) // ou .Setup(v => v.DeletePlayerValidator(null))
+                .Setup(v => v.DeletePlayerValidator(It.IsAny<Player>())) 
                 .Throws(new NotFoundException("O Player não existe"));
 
             // ACT / ASSERT: 
-            // Mude de DoesNotThrowAsync para ThrowsAsync
             Assert.ThrowsAsync<NotFoundException>(async () =>
                 await service.DeletePlayerAsync(playerId));
 
             // VERIFY: Verifica comportamento
-            // Estas verificações agora vão passar, porque a exceção
-            // é lançada ANTES de DeletePlayer ou SaveChanges serem chamados.
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             playerRepoMock.Verify(r => r.DeletePlayer(It.IsAny<Player>()), Times.Never);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);

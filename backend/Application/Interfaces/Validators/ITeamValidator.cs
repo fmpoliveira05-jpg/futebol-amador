@@ -10,7 +10,6 @@ namespace Application.Interfaces.Validators
         void UpdateTeamValidation(Team? existingTeamNewName, Team? team);
         void DeleteTeamValidation(Team? team);
         void GetTeamByIdValidation(TeamDetailsDto team);
-        //validar depois se fica ca!
         void GetAllTeamsValidation(IEnumerable<Team?> Teams);
         void RemovePlayerFromTeamValidation(Team? team, Player? playerRemoving, Player? playerRemoved);
         void GetTeamMembersValidation(Team? team);
@@ -23,7 +22,7 @@ namespace Application.Interfaces.Validators
         void GetTeamScheduleValidation(Team? team);
         public void ValidateVariableSearchTeam(Guid idTeam);
         public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter);
-        public void ValidateTeamSearch(Team team);
+        public void ValidateTeamSearch(Team? team);
 
         public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto filter);
     }

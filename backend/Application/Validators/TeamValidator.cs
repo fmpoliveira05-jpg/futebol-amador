@@ -313,7 +313,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateTeamSearch(Team team)
+        public void ValidateTeamSearch(Team? team)
         {
             if (team == null)
             {

@@ -22,7 +22,7 @@ namespace Application.Services
         }
         #endregion
 
-        #region Player Auuthorization
+        #region Player Authorization
         public async Task UserAuthorizationIsAdminTeamById(string userId, Guid idTeam)
         {
             var user = await GetPlayerById(userId);

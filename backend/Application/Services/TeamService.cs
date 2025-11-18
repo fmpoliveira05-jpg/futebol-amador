@@ -63,17 +63,14 @@ namespace Application.Services
                 rank
             );
 
-            playerCreating.IdTeam = newTeam.Id;
-            playerCreating.IsAdmin = true;
-            playerCreating.IsAdminLastChangedAt = DateTime.UtcNow;
-
-            await TeamRepository.AddAsync(newTeam);
-
             playerCreating.IsAdmin = true;
             playerCreating.IdTeam = newTeam.Id;
             playerCreating.Team = newTeam;
+            playerCreating.IsAdminLastChangedAt = DateTime.UtcNow;
             newTeam.Members ??= new List<Player>();
             newTeam.Members.Add(playerCreating);
+
+            await TeamRepository.AddAsync(newTeam);
 
             PlayerRepository.UpdatePlayer(playerCreating);
 
@@ -89,6 +86,7 @@ namespace Application.Services
             var teamToDelete = await TeamRepository.GetTeamForDeletionAsync(teamId);
 
             TeamValidator.DeleteTeamValidation(teamToDelete);
+            
             foreach (var member in teamToDelete.Members)
             {
                 member.IdTeam = null;
@@ -98,6 +96,10 @@ namespace Application.Services
                     member.IsAdminLastChangedAt = DateTime.UtcNow;
                 }
             }
+
+            /*TODO: Meter para todas as partidas dessa team serem cancelados pelo 
+            motivo que a equipa foi eliminada
+            */
             TeamRepository.DeleteTeam(teamToDelete);
 
             await UnityOfWork.SaveChangesAsync();
@@ -106,10 +108,10 @@ namespace Application.Services
         public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId)
         {
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
+            AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
 
             var teamToUpdate = await TeamRepository.GetTeamForUpdateAsync(teamId);
-
-            Team teamWithSameName = null;
+            Team? teamWithSameName = null;
 
             if (dto.Name != null)
             {
@@ -117,8 +119,6 @@ namespace Application.Services
             }
 
             TeamValidator.UpdateTeamValidation(teamWithSameName, teamToUpdate);
-
-            AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
 
             teamToUpdate.Name = dto.Name ?? teamToUpdate.Name;
             teamToUpdate.Description = dto.Description ?? teamToUpdate.Description;
@@ -164,20 +164,17 @@ namespace Application.Services
 
         public async Task DemoteAdminToPlayerAsync(Guid teamId, string adminIdToDemote, string adminDemotingId)
         {
-
-            var playerToDemote = await PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
-
             var playerDemoting = await PlayerRepository.GetPlayerByIdAsync(adminDemotingId);
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerDemoting, teamId);
 
+            var playerToDemote = await PlayerRepository.GetPlayerByIdAsync(adminIdToDemote);
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
             TeamValidator.DemoteAdminToMemberValidation(existingTeam, playerToDemote, playerDemoting);
-
-            await notificationService.SendUserAsync(adminIdToDemote, "Team Demotion", $"You have been demoted to player of the team {existingTeam.Name}.");
 
             playerToDemote.IsAdmin = false;
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
             await UnityOfWork.SaveChangesAsync();
+            await notificationService.SendUserAsync(adminIdToDemote, "Team Demotion", $"You have been demoted to player of the team {existingTeam.Name}.");
         }
 
         #endregion
@@ -220,10 +217,7 @@ namespace Application.Services
 
             var existingTeam = await TeamRepository.GetTeamForMemberManagementAsync(teamId);
 
-
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
-
-            await notificationService.SendUserAsync(playerIdToRemove, "Team Ban", $"You have been removed from the team {existingTeam.Name}.");
 
             existingTeam.Members.Remove(playerToRemove);
             playerToRemove.IdTeam = null;
@@ -234,6 +228,7 @@ namespace Application.Services
             }
 
             await UnityOfWork.SaveChangesAsync();
+            await notificationService.SendUserAsync(playerIdToRemove, "Team Ban", $"You have been removed from the team {existingTeam.Name}.");
         }
 
         #endregion
@@ -245,7 +240,6 @@ namespace Application.Services
             var team = await TeamRepository.GetTeamByIdAsync(idTeam);
 
             TeamValidator.ValidateTeamSearch(team);
-
 
             return await TeamRepository.GetListTeamsForTeams(idTeam);
         }

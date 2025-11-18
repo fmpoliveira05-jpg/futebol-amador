@@ -8,12 +8,11 @@ namespace Application.Services
 {
     public class SuperAdminService : ISuperAdminService
     {
+        #region Variables and Inicializor
         private readonly ISuperAdminRepository superAdminRepository;
         private readonly IUserRepository userRepository;
         private readonly IUnityOfWork unityOfWork;
-
         private readonly IAuthService authService;
-
         private readonly ISuperAdminValidator superAdminValidator;
 
         public SuperAdminService(ISuperAdminRepository superAdminRepository, IUserRepository userRepository, IUnityOfWork unityOfWork, ISuperAdminValidator superAdminValidator, IAuthService authService)
@@ -23,9 +22,10 @@ namespace Application.Services
             this.unityOfWork = unityOfWork;
             this.superAdminValidator = superAdminValidator;
             this.authService = authService;
-
         }
+        #endregion
 
+        #region CRUD Super Admin
         public async Task<string> CreateSuperAdminAsync(CreateSuperAdminDTO dto)
         {
             var existingSadmin = new User[]{
@@ -41,7 +41,6 @@ namespace Application.Services
             {
                 throw new Exception("Error creating user in authentication service.");
             }
-
 
             var superAdmin = new SuperAdmin
             {
@@ -106,11 +105,11 @@ namespace Application.Services
             superAdmin.Email = dto.Email;
             await authService.UpdateEmailAsync(superAdminId, dto.Email);
 
-
-
             superAdminRepository.UpdateSuperAdmin(superAdmin);
             
             await unityOfWork.SaveChangesAsync();
         }
+
+        #endregion
     }
 }

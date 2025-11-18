@@ -38,9 +38,8 @@ namespace Application.Services
             this.userRepository = userRepository;
             this.authorizationValidator = authorizationValidator;
             this.teamService = teamService;
-            UserDataValidator = userDataValidator;
+            this.UserDataValidator = userDataValidator;
             this.AuthService = authService;
-
         }
 
         #endregion
@@ -51,7 +50,7 @@ namespace Application.Services
             UserDataValidator.PhoneNumberValidation(playerDto.Phone);
             UserDataValidator.EmailValidation(playerDto.Email);
 
-            var userSamePhoneNumber  = await playerRepository.GetPlayerByPhoneNumberAsync(playerDto.Phone);
+            var userSamePhoneNumber = await playerRepository.GetPlayerByPhoneNumberAsync(playerDto.Phone);
             var userSameEmail = await playerRepository.GetPlayerByEmailAsync(playerDto.Email);
 
             playerValidator.CreatePlayerValidator(playerDto, userSamePhoneNumber, userSameEmail);
