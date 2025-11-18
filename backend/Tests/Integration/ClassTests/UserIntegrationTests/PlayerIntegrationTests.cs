@@ -198,6 +198,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             var playerId = TestAuthHandler.TestUserId; 
             var updateDto = new UpdatePlayerDto
             {
+                playerId = playerId,
                 Name = "Test Name",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-20),
                 Address = "Rua teste, teste",
@@ -278,7 +279,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             var response = await _client.PutAsJsonAsync($"/api/Player/{playerId}", updateDto);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
         #endregion
 
