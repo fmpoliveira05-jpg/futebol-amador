@@ -18,43 +18,63 @@ jobs:
 
   build:
     name: Build Solution
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore & Build
-        run: |
-          dotnet restore ${{ env.SOLUTION_FILE }}
-          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+      - name: Restore
+        run: dotnet restore ${{ env.SOLUTION_FILE }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: |
+            **/bin/Release/
+            **/obj/Release/
+
 
   unit-tests:
     name: Unit Tests
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Restore & Build
-        run: |
-          dotnet restore ${{ env.SOLUTION_FILE }}
-          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
 
       - name: Run Unit Tests
         run: |
-          dotnet test ${{ env.TEST_PROJECT }} --configuration Release `
-            --filter "FullyQualifiedName~Unit" `
-            --logger "trx;LogFileName=unit-tests.trx" `
+          dotnet test ${{ env.TEST_PROJECT }} --configuration Release \
+            --filter "FullyQualifiedName~Unit" \
+            --logger "trx;LogFileName=unit-tests.trx" \
             --results-directory "${{ env.TEST_RESULTS_DIR }}"
 
       - name: Upload Unit Test Results
@@ -64,30 +84,64 @@ jobs:
           name: Unit-Test-Results
           path: ${{ env.TEST_RESULTS_DIR }}
 
-  integration-tests-and-sonar:
-    name: Integration Tests + SonarQube
-    runs-on: windows-latest
-    needs: build
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: [ build ]
+
     if: github.ref == 'refs/heads/master'
 
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
         with:
-          fetch-depth: 0
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Cache NuGet
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('**/*.csproj') }}
+
+      - name: Run Integration Tests with Coverage
+        run: |
+          dotnet test ${{ env.TEST_PROJECT }} --configuration Release \
+            --collect:"XPlat Code Coverage;Format=opencover" \
+            --filter "FullyQualifiedName~Integration" \
+            --results-directory "${{ env.TEST_RESULTS_DIR }}" \
+            --logger "trx;LogFileName=integration-tests.trx"
+
+      - name: Upload Integration Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Integration-Test-Results
+          path: ${{ env.TEST_RESULTS_DIR }}
+
+  sonar-analysis:
+    name: SonarQube Analysis
+    runs-on: windows-latest
+    needs: [ build, unit-tests, integration-tests ]
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup Java & .NET
         uses: actions/setup-java@v4
         with:
           java-version: 17
           distribution: zulu
+
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Install SonarQube Scanner
+      - name: Install Sonar Scanner
         run: dotnet tool install --global dotnet-sonarscanner
 
-      - name: Run Integration Tests + Sonar
+      - name: Sonar Begin
         shell: pwsh
         run: |
           dotnet-sonarscanner begin `
@@ -98,43 +152,32 @@ jobs:
             /d:sonar.cs.vstest.reportsPaths="**/*.trx" `
             /d:sonar.verbose=true
 
-          dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-incremental
+      - name: Build for Sonar
+        run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-incremental
 
-          dotnet test ${{ env.TEST_PROJECT }} --configuration Release `
-            --collect:"XPlat Code Coverage;Format=opencover" `
-            --filter "FullyQualifiedName~Integration" `
-            --results-directory "${{ env.TEST_RESULTS_DIR }}" `
-            --logger "trx;LogFileName=integration-tests.trx"
-
-          # Encontrar e mover ficheiro de cobertura para a raiz
-          $coverage = Get-ChildItem -Recurse -Filter "coverage.opencover.xml" | Select-Object -First 1
-          if ($coverage) {
-            Copy-Item $coverage.FullName -Destination "$PWD/coverage.opencover.xml" -Force
-            Write-Host "Cobertura copiada de $($coverage.FullName)"
-          } else {
-            Write-Host "Nenhum ficheiro de cobertura encontrado!"
-            Get-ChildItem -Recurse | Where-Object { $_.Name -like "*coverage*" } | ForEach-Object { Write-Host "Encontrado: $($_.FullName)" }
-          }
-
-          dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+      - name: Sonar End
+        shell: pwsh
+        run: |
+          dotnet-sonarscanner end `
+            /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
 
   dockerhub-deploy:
     name: Push Docker Image
     runs-on: ubuntu-latest
-    needs: integration-tests-and-sonar
+    needs: sonar-analysis
     if: success() && github.ref == 'refs/heads/master' && contains(github.event.head_commit.message, '[build]')
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login no Docker Hub
+      - name: Docker Hub Login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build e Push da Imagem
+      - name: Build & Push Docker Image
         run: |
           docker build -t ${{ env.DOCKER_IMAGE_NAME }}:latest -f ./Api/Dockerfile .
           docker push ${{ env.DOCKER_IMAGE_NAME }}:latest

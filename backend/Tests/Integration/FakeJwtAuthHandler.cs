@@ -24,7 +24,7 @@ namespace Api.IntegrationTests.Fixtures
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            // ✅ Claims simulados — correspondem ao que o controller espera
+            // Claims simulados — correspondem ao que o controller espera
             var claims = new[]
             {
                 new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
