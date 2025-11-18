@@ -93,7 +93,8 @@ fun ListPostPoneMatchScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_post_pone_match_empty)
     )
 }
 

@@ -89,7 +89,8 @@ fun ListTeamScreen(navHostController: NavHostController){
                 team = team,
                 navHostController = navHostController
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_teams_empty)
     )
 }
 

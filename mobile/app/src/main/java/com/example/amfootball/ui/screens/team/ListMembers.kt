@@ -109,7 +109,8 @@ fun ListMembersScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_members_empty)
     )
 }
 

@@ -103,7 +103,8 @@ fun ListMatchInviteScreen(
                     )
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(R.string.list_match_invite_empty)
     )
 }
 

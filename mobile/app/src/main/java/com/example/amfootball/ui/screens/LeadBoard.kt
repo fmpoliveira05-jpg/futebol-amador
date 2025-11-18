@@ -37,6 +37,9 @@ fun LeaderboardScreen(
     val list = viewModel.inicialList.value
     val showButton = viewModel.showMoreButton.value
 
+    /*
+    TODO: Trocar isto pela surface das listas e adicionar a essa surface o botão view More
+    * */
     Surface {
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)

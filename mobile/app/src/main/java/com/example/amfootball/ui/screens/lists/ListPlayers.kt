@@ -97,7 +97,8 @@ fun ListPlayersScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_player_empty)
     )
 }
 
