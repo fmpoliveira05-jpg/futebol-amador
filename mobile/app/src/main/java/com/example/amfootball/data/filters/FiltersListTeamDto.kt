@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.filters
+package com.example.amfootball.data.filters
 
 data class FiltersListTeamDto(
     val name: String? = null, 

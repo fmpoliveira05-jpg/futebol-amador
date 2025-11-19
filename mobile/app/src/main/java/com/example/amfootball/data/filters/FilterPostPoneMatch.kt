@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.filters
+package com.example.amfootball.data.filters
 
 import java.time.LocalDateTime
 

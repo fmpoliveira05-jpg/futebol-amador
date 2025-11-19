@@ -7,9 +7,20 @@
 
     <string name="error_min_name_team">The name of team must have at least %1$d characters</string>
     <string name="error_max_name_team">The name of team should only have up to %1$d characters</string>
+    <string name="error_nin_name_member">The member name must be at least %1$d characters long</string>
+    <string name="error_max_name_member">The member name must be at most %1$d characters long</string>
 
     <string name="error_max_description">The description should only be up to %1$d characters</string>
 
     <string name="error_min_pitch_name">The pitch name must be at least %1$d characters long</string>
     <string name="error_max_pitch_name">The pitch name should only have up to %1$d characters</string>
+
+    <string name="error_date_game">Game</string>
+    <string name="erro_min_date_after">The minimum %1$s date must be earlier than the maximum %1$s date</string>
+    <string name="error_max_date_before">The maximum %1$s date must be later than the minimum %1$s date</string>
+
+    <string name="error_min_age">The player\'s age must be greater than %1$d</string>
+    <string name="error_max_age">The player\'s age must be less than %1$d</string>
+    <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
+    <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
 </resources>

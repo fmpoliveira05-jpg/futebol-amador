@@ -24,7 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
-import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
+import com.example.amfootball.data.filters.FilterListPlayerDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons

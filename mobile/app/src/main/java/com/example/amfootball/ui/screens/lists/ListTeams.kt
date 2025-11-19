@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.data.dtos.filters.FiltersListTeamDto
+import com.example.amfootball.data.filters.FiltersListTeamDto
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto

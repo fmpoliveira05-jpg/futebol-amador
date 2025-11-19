@@ -35,7 +35,7 @@ fun LabelTextField(
     isReadOnly: Boolean = false,
     isRequired: Boolean = false,
     isError: Boolean = false,
-    errorMessage: String = stringResource(id = R.string.mandatory_field),
+    errorMessage: String? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     minLenght: Int = 0,
     maxLenght: Int = Int.MAX_VALUE

@@ -1,18 +1,26 @@
 package com.example.amfootball.ui.viewModel.team
 
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.filters.FilterMembersTeam
+import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.filtersError.ListMembersFilterError
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.utils.UserConst
+import com.example.amfootball.R
 
 class ListMembersViewModel(): ViewModel() {
     private val filterState: MutableLiveData<FilterMembersTeam> = MutableLiveData(FilterMembersTeam())
     val uiFilter: LiveData<FilterMembersTeam> = filterState
+
+    private val errorFilters: MutableLiveData<ListMembersFilterError> = MutableLiveData(ListMembersFilterError())
+
+    val uiErrorFilters: LiveData<ListMembersFilterError> = errorFilters
 
     private val listMemberState: MutableLiveData<List<MemberTeamDto>> = MutableLiveData(emptyList<MemberTeamDto>())
     val uiList: LiveData<List<MemberTeamDto>> = listMemberState
@@ -68,6 +76,9 @@ class ListMembersViewModel(): ViewModel() {
     }
 
     fun onApplyFilter() {
+        if(!validateFilter()) {
+            return
+        }
         //TODO: Fazer pedido há API de endPoint para filtro
     }
 
@@ -91,5 +102,61 @@ class ListMembersViewModel(): ViewModel() {
         navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
             launchSingleTop = true
         }
+    }
+
+    private fun validateFilter(): Boolean {
+        val name = filterState.value!!.name
+        val nameLength = name!!.length
+        val minAge = filterState.value!!.minAge
+        val maxAge = filterState.value!!.maxAge
+
+        var errorName: ErrorMessage? = null
+        var errorMinAge: ErrorMessage? = null
+        var errorMaxAge: ErrorMessage? = null
+
+        if(name != "") {
+            if (nameLength < UserConst.MIN_NAME_LENGTH) {
+                errorName = ErrorMessage(
+                    messageId = R.string.error_nin_name_member,
+                    args = listOf(UserConst.MIN_NAME_LENGTH)
+                )
+            } else if(nameLength > UserConst.MAX_NAME_LENGTH) {
+                errorName = ErrorMessage(
+                    messageId = R.string.error_max_name_member,
+                    args = listOf(UserConst.MAX_NAME_LENGTH)
+                )
+            }
+        }
+
+        var minAgeValid = true
+        if(minAge != null && minAge < UserConst.MIN_AGE) {
+            errorMinAge = ErrorMessage(
+                messageId = R.string.error_min_age,
+                args = listOf(UserConst.MIN_AGE)
+            )
+            minAgeValid = false
+        }
+
+        var maxAgeValid = true
+        if(maxAge != null && maxAge > UserConst.MAX_AGE) {
+            errorMaxAge = ErrorMessage(
+                messageId = R.string.error_max_age,
+                args = listOf(UserConst.MAX_AGE)
+            )
+            maxAgeValid = false
+        }
+
+        if (minAgeValid && maxAgeValid && maxAge != null && minAge != null) {
+            if (minAge > maxAge) {
+                errorMinAge = ErrorMessage(messageId = R.string.error_min_age_greater_max)
+                errorMaxAge = ErrorMessage(messageId = R.string.error_max_age_minor_min)
+            }
+        }
+
+        val isValid = listOf(errorName, errorMinAge, errorMaxAge).all {
+            it == null
+        }
+
+        return isValid
     }
 }

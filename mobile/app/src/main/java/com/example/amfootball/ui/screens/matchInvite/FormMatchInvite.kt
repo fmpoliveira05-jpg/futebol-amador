@@ -20,7 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.errors.MatchInviteFormErros
+import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedLimitedDate
@@ -96,7 +96,8 @@ private fun FieldsSendMatchInvite(
         contentDescription = stringResource(id = R.string.description_game_date),
         isError = errors.dateError != null,
         isSingleLine = false,
-        errorMessage = errors.dateError?.let { stringResource(id = it) }
+        errorMessage = errors.dateError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray()) }
     )
 
     FieldTimePicker(
@@ -105,7 +106,8 @@ private fun FieldsSendMatchInvite(
         label = stringResource(id = R.string.game_hours),
         contentDescription = stringResource(id = R.string.description_game_date) ,
         isError = errors.dateError != null,
-        errorMessage = errors.timeError?.let { stringResource(id = it) },
+        errorMessage = errors.timeError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray()) },
     )
 
     Switcher(
