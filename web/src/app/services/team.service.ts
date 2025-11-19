@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 export class TeamService {
   
   
-  getAll(): Team{
-    return teams;
-  }
+  // getAll(): Team{
+  //   return teams;
+  // }
 }

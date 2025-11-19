@@ -13,7 +13,7 @@ export class Home {
 
   teams:Team[] = [];
   constructor(private playerService:PlayerService, private teamService:TeamService){
-    this.teams = teamService.getAll();
+    // this.teams = teamService.getAll();
   }
 
 }
