@@ -9,7 +9,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.ListMembersFilterError
+import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
@@ -18,9 +18,9 @@ class ListMembersViewModel(): ViewModel() {
     private val filterState: MutableLiveData<FilterMembersTeam> = MutableLiveData(FilterMembersTeam())
     val uiFilter: LiveData<FilterMembersTeam> = filterState
 
-    private val errorFilters: MutableLiveData<ListMembersFilterError> = MutableLiveData(ListMembersFilterError())
+    private val errorFilters: MutableLiveData<FilterMembersFilterError> = MutableLiveData(FilterMembersFilterError())
 
-    val uiErrorFilters: LiveData<ListMembersFilterError> = errorFilters
+    val uiErrorFilters: LiveData<FilterMembersFilterError> = errorFilters
 
     private val listMemberState: MutableLiveData<List<MemberTeamDto>> = MutableLiveData(emptyList<MemberTeamDto>())
     val uiList: LiveData<List<MemberTeamDto>> = listMemberState
@@ -105,27 +105,19 @@ class ListMembersViewModel(): ViewModel() {
     }
 
     private fun validateFilter(): Boolean {
-        val name = filterState.value!!.name
-        val nameLength = name!!.length
-        val minAge = filterState.value!!.minAge
-        val maxAge = filterState.value!!.maxAge
+        val name = filterState.value?.name
+        val minAge = filterState.value?.minAge
+        val maxAge = filterState.value?.maxAge
 
         var errorName: ErrorMessage? = null
         var errorMinAge: ErrorMessage? = null
         var errorMaxAge: ErrorMessage? = null
 
-        if(name != "") {
-            if (nameLength < UserConst.MIN_NAME_LENGTH) {
-                errorName = ErrorMessage(
-                    messageId = R.string.error_nin_name_member,
-                    args = listOf(UserConst.MIN_NAME_LENGTH)
-                )
-            } else if(nameLength > UserConst.MAX_NAME_LENGTH) {
-                errorName = ErrorMessage(
-                    messageId = R.string.error_max_name_member,
-                    args = listOf(UserConst.MAX_NAME_LENGTH)
-                )
-            }
+        if(name != null && name.length > UserConst.MAX_NAME_LENGTH) {
+            errorName = ErrorMessage(
+                messageId = R.string.error_max_name_member,
+                args = listOf(UserConst.MAX_NAME_LENGTH)
+            )
         }
 
         var minAgeValid = true
@@ -152,6 +144,12 @@ class ListMembersViewModel(): ViewModel() {
                 errorMaxAge = ErrorMessage(messageId = R.string.error_max_age_minor_min)
             }
         }
+
+        errorFilters.value = FilterMembersFilterError(
+            nameError = errorName,
+            minAgeError = errorMinAge,
+            maxAgeError = errorMaxAge
+        )
 
         val isValid = listOf(errorName, errorMinAge, errorMaxAge).all {
             it == null

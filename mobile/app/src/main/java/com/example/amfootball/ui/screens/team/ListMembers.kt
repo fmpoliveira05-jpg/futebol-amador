@@ -36,7 +36,7 @@ import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
-import com.example.amfootball.data.errors.filtersError.ListMembersFilterError
+import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
@@ -60,7 +60,7 @@ fun ListMembersScreen(
     viewModel: ListMembersViewModel = viewModel()
 ) {
     val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
-    val filtersErrors by viewModel.uiErrorFilters.observeAsState(initial = ListMembersFilterError())
+    val filtersErrors by viewModel.uiErrorFilters.observeAsState(initial = FilterMembersFilterError())
     val list by viewModel.uiList.observeAsState(initial = emptyList())
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
@@ -120,7 +120,7 @@ fun ListMembersScreen(
 private fun FilterListMemberContent(
     filters: FilterMembersTeam,
     filterActions: FilterMemberTeamAction,
-    filterErros: ListMembersFilterError,
+    filterErros: FilterMembersFilterError,
     listTypeMember: List<TypeMember?>,
     listPosition: List<Position?>,
     modifier: Modifier = Modifier
@@ -132,7 +132,7 @@ private fun FilterListMemberContent(
                     label = stringResource(id = R.string.filter_name),
                     value = filters.name ?: "",
                     maxLenght = UserConst.MAX_NAME_LENGTH,
-                    onValueChange = { filterActions.onNameChange(it) }, // ou { filterActions.onNameChange(it) }
+                    onValueChange = { filterActions.onNameChange(it) },
                     modifier = Modifier.weight(1f),
                     isError = filterErros.nameError != null,
                     errorMessage = filterErros.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }

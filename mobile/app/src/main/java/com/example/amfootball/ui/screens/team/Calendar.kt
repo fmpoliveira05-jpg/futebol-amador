@@ -39,7 +39,7 @@ import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
-import com.example.amfootball.data.errors.filtersError.CalendarFiltersError
+import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
@@ -63,7 +63,7 @@ fun CalendarScreen(
 ) {
     val filters by viewModel.filter.observeAsState(initial = FilterCalendar())
     val list by viewModel.list.observeAsState(initial = emptyList())
-    val filterError by viewModel.uiErrors.observeAsState(initial = CalendarFiltersError())
+    val filterError by viewModel.uiErrors.observeAsState(initial = FilterCalendarError())
     val filterActons = FilterCalendarActions(
         onNameChange = viewModel::onNameChange,
         onMinDateGameChange = viewModel::onMinDateGameChange,
@@ -117,7 +117,7 @@ fun CalendarScreen(
 private fun FiltersCalendarContent(
     filters: FilterCalendar,
     filterActions: FilterCalendarActions,
-    filterError: CalendarFiltersError,
+    filterError: FilterCalendarError,
     modifier: Modifier = Modifier
 ) {
     val displayFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)

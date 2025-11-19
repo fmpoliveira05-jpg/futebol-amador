@@ -25,6 +25,7 @@ import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -47,6 +48,7 @@ fun ListMemberShipRequest(
     viewModel: ListMemberShipRequestViewModel = viewModel(),
 ){
     val filters by viewModel.uiFilterState.observeAsState(initial = FilterMemberShipRequest())
+    val filterError by viewModel.uiFilterErrorState.observeAsState(initial = FilterMemberShipRequestError())
     val list by viewModel.uiListState.observeAsState(initial = emptyList())
     val filterActions = FilterMemberShipRequestActions(
         onSenderNameChange = viewModel::onSenderNameChanged,
@@ -69,6 +71,7 @@ fun ListMemberShipRequest(
                 content = {
                     FilterListMemberShipRequestContent(
                         filters = filters,
+                        filterError = filterError,
                         filterActions = filterActions,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
                     )
@@ -78,20 +81,20 @@ fun ListMemberShipRequest(
         listItems = { request ->
             ListMemberShipRequestContent(
                 membershipRequest = request,
-                acceptMemberShipRequest = { viewModel.AcceptMemberShipRequest(
+                acceptMemberShipRequest = { viewModel.acceptMemberShipRequest(
                     idReceiver = request.receiver.id,
                     idRequest = request.id,
                     isPlayerSender = request.isPlayerSender,
                     navHostController = navHostController,
                 ) },
-                rejectMemberShipRequest = { viewModel.RejectMemberShipRequest(
+                rejectMemberShipRequest = { viewModel.rejectMemberShipRequest(
                     idReceiver = request.receiver.id,
                     idRequest = request.id,
                     isPlayerSender = request.isPlayerSender,
                 ) },
-                showMore = { viewModel.ShowMore(
+                showMore = { viewModel.showMore(
                     isPlayerSender = request.isPlayerSender,
-                    IdSender = request.sender.id,
+                    idSender = request.sender.id,
                     navHostController = navHostController,
                 ) }
             )
@@ -103,6 +106,7 @@ fun ListMemberShipRequest(
 @Composable
 private fun FilterListMemberShipRequestContent(
     filters: FilterMemberShipRequest,
+    filterError: FilterMemberShipRequestError,
     filterActions: FilterMemberShipRequestActions,
     modifier: Modifier = Modifier,
 ) {
@@ -116,6 +120,10 @@ private fun FilterListMemberShipRequestContent(
                     value = filters.senderName ?: "",
                     maxLenght = UserConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onSenderNameChange(it) },
+                    isError = filterError.senderNameError != null,
+                    errorMessage = filterError.senderNameError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -128,6 +136,10 @@ private fun FilterListMemberShipRequestContent(
                     contentDescription = stringResource(id = R.string.description_filter_min_date),
                     value = filters.minDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateSelected(it) },
+                    isError = filterError.minDateError != null,
+                    errorMessage = filterError.minDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -136,6 +148,10 @@ private fun FilterListMemberShipRequestContent(
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateSelected(it)},
+                    isError = filterError.maxDateError != null,
+                    errorMessage = filterError.maxDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

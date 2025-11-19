@@ -9,7 +9,7 @@ import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.CalendarFiltersError
+import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
@@ -21,8 +21,8 @@ class CalendarTeamViewModel: ViewModel() {
     private val listState: MutableLiveData<List<CalendarInfoDto>> = MutableLiveData(emptyList<CalendarInfoDto>())
     val list: LiveData<List<CalendarInfoDto>> = listState
 
-    private val listErrors: MutableLiveData<CalendarFiltersError> = MutableLiveData(CalendarFiltersError())
-    val uiErrors: LiveData<CalendarFiltersError> = listErrors
+    private val listErrors: MutableLiveData<FilterCalendarError> = MutableLiveData(FilterCalendarError())
+    val uiErrors: LiveData<FilterCalendarError> = listErrors
 
     init {
         //TODO: Meter para carregar os jogos do calendario da API
@@ -102,34 +102,25 @@ class CalendarTeamViewModel: ViewModel() {
     }
 
     private fun validateFilters(): Boolean {
-        val opponentName = filterState.value!!.opponentName
-        val opponenNameLength = opponentName!!.length
-
-        val minDateGame = filterState.value!!.minGameDate
-        val maxDateGame = filterState.value!!.maxGameDate
+        val opponentName = filterState.value?.opponentName
+        val minDateGame = filterState.value?.minGameDate
+        val maxDateGame = filterState.value?.maxGameDate
 
         var nameOpponentError: ErrorMessage? = null
         var minDateGameError: ErrorMessage? = null
         var maxDateGameError: ErrorMessage? = null
 
-        if (opponentName.isNotBlank()) {
-            if (opponenNameLength < TeamConst.MIN_NAME_LENGTH) {
-                nameOpponentError = ErrorMessage(
-                    messageId = R.string.error_min_name_team,
-                    args = listOf(TeamConst.MIN_NAME_LENGTH)
-                )
-            } else if(opponenNameLength > TeamConst.MAX_NAME_LENGTH) {
-                nameOpponentError = ErrorMessage(
-                    messageId = R.string.error_max_name_team,
-                    args = listOf(TeamConst.MAX_NAME_LENGTH)
-                )
-            }
+        if (opponentName != null && opponentName.length > TeamConst.MAX_NAME_LENGTH) {
+            nameOpponentError = ErrorMessage(
+                messageId = R.string.error_max_name_team,
+                args = listOf(TeamConst.MAX_NAME_LENGTH)
+            )
         }
 
         if (minDateGame != null && maxDateGame != null) {
             if (minDateGame.toLocalDate() > maxDateGame.toLocalDate()) {
                 minDateGameError = ErrorMessage(
-                    messageId = R.string.erro_min_date_after,
+                    messageId = R.string.error_min_date_after,
                     args = listOf(R.string.error_date_game)
                 )
 
@@ -139,6 +130,12 @@ class CalendarTeamViewModel: ViewModel() {
                 )
             }
         }
+
+        listErrors.value = FilterCalendarError(
+            opponentNameError = nameOpponentError,
+            minGameDateError =  minDateGameError,
+            maxGameDateError = maxDateGameError
+        )
 
         val isValid = listOf(nameOpponentError, minDateGameError, maxDateGameError).all {
             it == null

@@ -102,8 +102,6 @@ class FormMatchInviteViewModel @Inject constructor(
             )
         }
 
-
-
         erros.value = MatchInviteFormErros(
             dateError = errorDateGame,
             timeError = errorTime

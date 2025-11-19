@@ -4,24 +4,40 @@
 
     <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_address">A morada só deve até %1$d caracteres</string>
+    <string name="error_max_city">O nome da cidade deve ter até %1$d caracteres</string>
 
+    <string name="error_min_name_player">O nome do jogador deve ter pelo menos %1$d caracteres</string>
+    <string name="error_max_name_player">O nome do jogador deve ter até %1$d caracteres</string>
     <string name="error_min_name_team">O nome da equipa deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_name_team">O nome da equipa só deve ter até %1$d caracteres</string>
     <string name="error_nin_name_member">O nome do membero dever ter no minimo %1$d caracteres</string>
     <string name="error_max_name_member">O nome do membro deve ter no máximo %1$d caracteres</string>
+    <string name="error_min_name_opponent">O nome do opponente deve ter no mínimo %1$d caracteres</string>
+    <string name="error_max_name_opponent">O nome do opponente deve ter no máximo %1$d caracteres</string>
+    <string name="error_min_name_sender">O nome do emissor deve ter no mínimo %1$d caracteres</string>
+    <string name="error_max_name_sender">O nome do emissor deve ter até %1$d caracteres</string>
 
     <string name="error_max_description">A descrição só deve ter até %1$d caracteres</string>
 
     <string name="error_min_pitch_name">O nome do campo dever ter pelo menos %1$d caracteres</string>
     <string name="error_max_pitch_name">O nome do campo só deve ter até %1$d caracteres</string>
 
-    <string name="error_date_game">do Jogo</string>
+    <string name="error_post_pone_Date">adiamento</string>
+    <string name="error_date_game">do jogo</string>
+    <string name="erro_date_sende">envio</string>
     <string name="erro_min_date_after">A data mínima %1$s deve ser inferior à data máxima %1$s</string>
     <string name="error_max_date_before">A data máxima %1$s deve ser superior à data mínima %1$s</string>
+
+    <string name="error_min_size">O tamanho mínimo do jogo deve ser superior a %1$d</string>
+    <string name="error_max_size">O tamanho máximo do jogo deve ser inferior a %1$d</string>
+    <string name="error_min_size_greater_max">O tamanho mínima deve ser inferior ao tamnaho máxima</string>
+    <string name="error_max_size_minor_min">O tamanho máxima deve ser superior ao tamnaho minima</string>
 
     <string name="error_min_age">A data minima do jogador deve ser superior a %1$d</string>
     <string name="error_max_age">A data máxima do jogador deve ser inferior a %1$d</string>
     <string name="error_min_age_greater_max">A idade mínima deve ser inferior há idade máxima</string>
     <string name="error_max_age_minor_min">A idade máxima deve ser superior há idade minima</string>
-    
+
+    <string name="error_min_goals_team">O número mínimo de golos marcados por uma equipa é %1$d</string>
+    <string name="error_max_goals_team">O número máximo de golos marcados por uma equipa é 1$d</string>
 </resources>

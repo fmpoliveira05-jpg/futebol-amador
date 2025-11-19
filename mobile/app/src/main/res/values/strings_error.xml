@@ -2,25 +2,42 @@
 <resources>
     <string name="mandatory_field">Mandatory field</string>
 
-    <string name="error_min_address">The address must be at least %1$d characters long</string>
-    <string name="error_max_address">The address should only be up to %1$d characters</string>
+    <string name="error_min_address">Address must have at least %1$d characters</string>
+    <string name="error_max_address">Address must have at most %1$d characters</string>
+    <string name="error_max_city">City name must have at most %1$d characters</string>
 
-    <string name="error_min_name_team">The name of team must have at least %1$d characters</string>
-    <string name="error_max_name_team">The name of team should only have up to %1$d characters</string>
-    <string name="error_nin_name_member">The member name must be at least %1$d characters long</string>
-    <string name="error_max_name_member">The member name must be at most %1$d characters long</string>
+    <string name="error_min_name_player">Player name must have at least %1$d characters</string>
+    <string name="error_max_name_player">Player name must have at most %1$d characters</string>
+    <string name="error_min_name_team">Team name must have at least %1$d characters</string>
+    <string name="error_max_name_team">Team name must have at most %1$d characters</string>
+    <string name="error_nin_name_member">Member name must have at least %1$d characters</string>
+    <string name="error_max_name_member">Member name must have at most %1$d characters</string>
+    <string name="error_min_name_opponent">Opponent name must have at least %1$d characters</string>
+    <string name="error_max_name_opponent">Opponent name must have at most %1$d characters</string>
+    <string name="error_min_name_sender">Sender name must have at least %1$d characters</string>
+    <string name="error_max_name_sender">Sender name must have at most %1$d characters</string>
 
-    <string name="error_max_description">The description should only be up to %1$d characters</string>
+    <string name="error_max_description">Description must have at most %1$d characters</string>
 
-    <string name="error_min_pitch_name">The pitch name must be at least %1$d characters long</string>
-    <string name="error_max_pitch_name">The pitch name should only have up to %1$d characters</string>
+    <string name="error_min_pitch_name">Pitch name must have at least %1$d characters</string>
+    <string name="error_max_pitch_name">Pitch name must have at most %1$d characters</string>
 
-    <string name="error_date_game">Game</string>
-    <string name="erro_min_date_after">The minimum %1$s date must be earlier than the maximum %1$s date</string>
-    <string name="error_max_date_before">The maximum %1$s date must be later than the minimum %1$s date</string>
+    <string name="error_post_pone_Date">postponement</string>
+    <string name="error_date_game">game</string>
+    <string name="error_date_sende">sending</string>
+    <string name="error_min_date_after">Minimum %1$s date must be before maximum %1$s date</string>
+    <string name="error_max_date_before">Maximum %1$s date must be after minimum %1$s date</string>
 
-    <string name="error_min_age">The player\'s age must be greater than %1$d</string>
-    <string name="error_max_age">The player\'s age must be less than %1$d</string>
+    <string name="error_min_size">Minimum game size must be greater than %1$d</string>
+    <string name="error_max_size">Maximum game size must be less than %1$d</string>
+    <string name="error_min_size_greater_max">Minimum size must be less than maximum size</string>
+    <string name="error_max_size_minor_min">Maximum size must be greater than minimum size</string>
+
+    <string name="error_min_age">Player\'s minimum age must be greater than %1$d</string>
+    <string name="error_max_age">Player\'s maximum age must be less than %1$d</string>
     <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
     <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
+
+    <string name="error_min_goals_team">The minimum number of goals scored by a team is %1$d</string>
+    <string name="error_max_goals_team">The maximum number of goals scored by a team is %1$d</string>
 </resources>

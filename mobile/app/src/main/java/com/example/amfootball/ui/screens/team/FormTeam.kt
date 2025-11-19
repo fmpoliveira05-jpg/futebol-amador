@@ -103,7 +103,8 @@ private fun FieldsCreateTeam(
         maxLenght = TeamConst.MAX_NAME_LENGTH,
         isError = fieldsErrors.nameError != null,
         errorMessage = fieldsErrors.nameError?.let {
-            stringResource(id = it.messageId, *it.args.toTypedArray())
+            stringResource(id = it.messageId,
+                *it.args.toTypedArray())
         }
     )
 
