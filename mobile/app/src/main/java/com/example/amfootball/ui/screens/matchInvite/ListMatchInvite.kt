@@ -25,8 +25,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
-import com.example.amfootball.data.dtos.filters.FilterMatchInvite
+import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
@@ -49,8 +50,10 @@ fun ListMatchInviteScreen(
     navHostController: NavHostController,
     viewModel: ListMatchInviteViewModel = viewModel()
 ) {
+    val list by viewModel.uiList.observeAsState(initial = emptyList())
     val filters by viewModel.uiFilters.observeAsState(initial = FilterMatchInvite())
-    val list by viewModel.uiList.observeAsState(initial = emptyList<InfoMatchInviteDto>())
+    val filterError by viewModel.filterError.observeAsState(initial = FilterMatchInviteError())
+
     val filterActions = FilterMatchInviteActions(
         onSenderNameChange = viewModel::onNameSenderChange,
         onMinDateSelected = viewModel::onMinDateChange,
@@ -72,6 +75,7 @@ fun ListMatchInviteScreen(
                     FilterListMatchInvite(
                         filters = filters,
                         filterActions = filterActions,
+                        filterError = filterError,
                         modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     )
                 }
@@ -103,13 +107,15 @@ fun ListMatchInviteScreen(
                     )
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(R.string.list_match_invite_empty)
     )
 }
 
 @Composable
 private fun FilterListMatchInvite(
     filters: FilterMatchInvite,
+    filterError: FilterMatchInviteError,
     filterActions: FilterMatchInviteActions,
     modifier: Modifier = Modifier
 ) {
@@ -122,6 +128,10 @@ private fun FilterListMatchInvite(
                     label = stringResource(id = R.string.filter_sender_name),
                     value = filters.senderName ?: "",
                     onValueChange = { filterActions.onSenderNameChange(it) },
+                    isError = filterError.senderNameError != null,
+                    errorMessage = filterError.senderNameError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -134,6 +144,10 @@ private fun FilterListMatchInvite(
                     contentDescription = stringResource(id = R.string.description_filter_min_date),
                     value = filters.minDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateSelected(it) },
+                    isError = filterError.minDateError != null,
+                    errorMessage = filterError.minDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -142,6 +156,10 @@ private fun FilterListMatchInvite(
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateSelected(it)},
+                    isError = filterError.maxDateError != null,
+                    errorMessage = filterError.maxDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

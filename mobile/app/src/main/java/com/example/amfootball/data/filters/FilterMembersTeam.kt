@@ -1,4 +1,4 @@
-package com.example.amfootball.data.dtos.filters
+package com.example.amfootball.data.filters
 
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember

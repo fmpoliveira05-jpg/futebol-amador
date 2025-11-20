@@ -20,6 +20,7 @@ import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.forms.FormFinishMatchActions
 import com.example.amfootball.data.dtos.match.ResultMatchDto
+import com.example.amfootball.data.errors.formErrors.FinishMatchFormErrors
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
@@ -32,6 +33,7 @@ fun FinishMatchScreen(
     viewModel: FinishMatchViewModel = viewModel()
 ) {
     val result by viewModel.resutl.observeAsState(initial = null)
+    val formErrors by viewModel.resultError.observeAsState(initial = FinishMatchFormErrors())
     val formActions = FormFinishMatchActions(
         onNumGoalsTeamChange = viewModel::onNumGoalsTeamChange,
         onNumGoalsOpponentChange = viewModel::onNumGoalsOponnetChange,
@@ -41,6 +43,7 @@ fun FinishMatchScreen(
     FormFinishMatch(
         result = result,
         formActions = formActions,
+        formErrors = formErrors,
         navHostController = navHostController,
         modifier = Modifier
         .padding(16.dp)
@@ -51,8 +54,10 @@ fun FinishMatchScreen(
 private fun FormFinishMatch(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
+    formErrors: FinishMatchFormErrors,
     navHostController: NavHostController,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier
+) {
     Column(modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -60,6 +65,7 @@ private fun FormFinishMatch(
         TextFieldForm(
             result = result,
             formActions = formActions,
+            formErrors = formErrors,
             navHostController = navHostController
         )
     }
@@ -69,6 +75,7 @@ private fun FormFinishMatch(
 private fun TextFieldForm(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
+    formErrors: FinishMatchFormErrors,
     navHostController: NavHostController
 ) {
 
@@ -79,6 +86,10 @@ private fun TextFieldForm(
         maxLenght = GeneralConst.MAX_GOALS,
         onValueChange = { formActions.onNumGoalsTeamChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
+        isError = formErrors.numGoalTeamError != null,
+        errorMessage = formErrors.numGoalTeamError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
@@ -89,6 +100,10 @@ private fun TextFieldForm(
         maxLenght = GeneralConst.MAX_GOALS,
         onValueChange = { formActions.onNumGoalsOpponentChange(it.toIntOrNull() ?: 0) },
         isRequired = true,
+        isError = formErrors.numGoalOpponentError != null,
+        errorMessage = formErrors.numGoalOpponentError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
     )
 
@@ -97,8 +112,14 @@ private fun TextFieldForm(
     )
 }
 
-@Preview(name= "FinishMatch EN", locale = "en", showBackground = true)
-@Preview(name= "FinishMatch PT", locale = "pt", showBackground = true)
+@Preview(
+    name= "FinishMatch EN",
+    locale = "en",
+    showBackground = true)
+@Preview(
+    name= "Finalização de Partida - PT",
+    locale = "pt",
+    showBackground = true)
 @Composable
 fun PreviewFinishMatch(){
     AMFootballTheme{

@@ -8,11 +8,12 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.errors.TeamFormErros
+import com.example.amfootball.data.errors.formErrors.TeamFormErros
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.R
+import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.navigation.Objects.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 
@@ -72,7 +73,6 @@ class TeamFormViewModel @Inject constructor(
     fun onSubmit(
         navHostController: NavHostController
     ) {
-        //TODO: Chamar metodo para validar cada um dos campos
         if(!ValidateFormValid()) {
             return
         }
@@ -101,37 +101,63 @@ class TeamFormViewModel @Inject constructor(
         val pitchAddress = formState.value!!.pitch.address
         val pitchAddressLength = pitchAddress.length
 
-        var nameErr: Int? = null
-        var descErr: Int? = null
-        var pitchNameErr: Int? = null
-        var pitchAddrErr: Int? = null
+        var nameErr: ErrorMessage? = null
+        var descErr: ErrorMessage? = null
+        var pitchNameErr: ErrorMessage? = null
+        var pitchAddrErr: ErrorMessage? = null
 
         if (name.isBlank()) {
-            nameErr = R.string.mandatory_field
+            nameErr = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
         } else if (nameLength < TeamConst.MIN_NAME_LENGTH) {
-            nameErr = R.string.error_min_name_team
+            nameErr = ErrorMessage(
+                messageId = R.string.error_min_name_team,
+                args = listOf(TeamConst.MIN_NAME_LENGTH))
         } else if (nameLength > TeamConst.MAX_NAME_LENGTH) {
-            nameErr = R.string.error_max_name_team
+            nameErr = ErrorMessage(
+                messageId = R.string.error_max_name_team,
+                args = listOf(TeamConst.MAX_NAME_LENGTH)
+            )
         }
 
         if (description.isNotBlank() && descriptionLength > TeamConst.MAX_DESCRIPTION_LENGTH) {
-            descErr = R.string.error_max_description
+            descErr = ErrorMessage(
+                messageId = R.string.error_max_description,
+                args = listOf(TeamConst.MAX_DESCRIPTION_LENGTH)
+            )
         }
 
         if (pitchName.isBlank()) {
-            pitchNameErr = R.string.mandatory_field
+            pitchNameErr = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
         } else if (pitchNameLength < PitchConst.MIN_NAME_LENGTH) {
-            pitchNameErr = R.string.error_min_pitch_name
+            pitchNameErr = ErrorMessage(
+                messageId = R.string.error_min_pitch_name,
+                args = listOf(PitchConst.MIN_NAME_LENGTH)
+            )
         } else if (pitchNameLength > PitchConst.MAX_NAME_LENGTH) {
-            pitchNameErr = R.string.error_max_pitch_name
+            pitchNameErr = ErrorMessage(
+                messageId = R.string.error_max_pitch_name,
+                args = listOf(PitchConst.MAX_NAME_LENGTH)
+            )
         }
 
         if (pitchAddress.isBlank()) {
-            pitchAddrErr = R.string.mandatory_field
+            pitchAddrErr = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
         } else if (pitchAddressLength < GeneralConst.MIN_ADDRESS_LENGTH) {
-            pitchAddrErr = R.string.error_min_address
+            pitchAddrErr = ErrorMessage(
+                messageId = R.string.error_min_address,
+                args = listOf(GeneralConst.MIN_ADDRESS_LENGTH)
+            )
         } else if (pitchAddressLength > GeneralConst.MAX_ADDRESS_LENGTH) {
-            pitchAddrErr = R.string.error_max_address
+            pitchAddrErr = ErrorMessage(
+                messageId = R.string.error_max_address,
+                args = listOf(GeneralConst.MAX_ADDRESS_LENGTH)
+            )
         }
 
         errors.value = TeamFormErros(

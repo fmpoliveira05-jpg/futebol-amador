@@ -24,9 +24,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
-import com.example.amfootball.data.dtos.filters.FilterListPlayerDto
+import com.example.amfootball.data.filters.FilterListPlayerDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -52,6 +53,7 @@ fun ListPlayersScreen(
     viewModel: ListPlayerViewModel = viewModel()
 ) {
     val filters by viewModel.uiFilters.observeAsState(initial = FilterListPlayerDto())
+    val filtersError by viewModel.filterError.observeAsState(initial = FilterPlayersErrors())
     val list by viewModel.uiList.observeAsState(initial = emptyList())
     val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
 
@@ -80,6 +82,7 @@ fun ListPlayersScreen(
                 content = { paddingModifier ->
                     FilterListPlayerContent(
                         filters = filters,
+                        filtersError = filtersError,
                         filterActions = filterActions,
                         listPosition = listPosition,
                         modifier = paddingModifier
@@ -97,13 +100,15 @@ fun ListPlayersScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_player_empty)
     )
 }
 
 @Composable
 private fun FilterListPlayerContent(
     filters: FilterListPlayerDto,
+    filtersError: FilterPlayersErrors,
     filterActions: FilterListPlayersActions,
     listPosition: List<Position?>,
     modifier: Modifier = Modifier
@@ -116,6 +121,10 @@ private fun FilterListPlayerContent(
                     value = filters.name,
                     maxLenght = UserConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onNameChange(it) },
+                    isError = filtersError.nameError != null,
+                    errorMessage = filtersError.nameError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -124,6 +133,10 @@ private fun FilterListPlayerContent(
                     value = filters.city,
                     maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { filterActions.onCityChange(it) },
+                    isError = filtersError.cityError != null,
+                    errorMessage = filtersError.cityError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -150,18 +163,6 @@ private fun FilterListPlayerContent(
 
         FilterRow(
             content = {
-                //Ver neste caso como meter o min
-                //Aqui ate daria para meter um if no maxLength de que acso o max, estivesse preenchido o seu max seria esse valor
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_min_age),
-                    value = filters.minAge?.toString(),
-                    onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    minLenght = UserConst.MIN_AGE,
-                    maxLenght = UserConst.MAX_AGE,
-                    modifier = Modifier.weight(1f)
-                )
-
                 LabelTextField(
                     label = stringResource(id = R.string.filter_max_age),
                     value = filters.maxAge?.toString(),
@@ -169,6 +170,24 @@ private fun FilterListPlayerContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     minLenght = UserConst.MIN_AGE,
                     maxLenght = UserConst.MAX_AGE,
+                    isError = filtersError.maxAgeError != null,
+                    errorMessage = filtersError.maxAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                LabelTextField(
+                    label = stringResource(id = R.string.filter_min_age),
+                    value = filters.minAge?.toString(),
+                    onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    minLenght = UserConst.MIN_AGE,
+                    maxLenght = UserConst.MAX_AGE,
+                    isError = filtersError.minAgeError != null,
+                    errorMessage = filtersError.minAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -183,6 +202,10 @@ private fun FilterListPlayerContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     minLenght = PlayerConst.MIN_HEIGHT,
                     maxLenght = PlayerConst.MAX_HEIGHT,
+                    isError = filtersError.minSizeError != null,
+                    errorMessage = filtersError.minSizeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -193,6 +216,10 @@ private fun FilterListPlayerContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     minLenght = PlayerConst.MIN_HEIGHT,
                     maxLenght = PlayerConst.MAX_HEIGHT,
+                    isError = filtersError.maxSizeError != null,
+                    errorMessage = filtersError.maxSizeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

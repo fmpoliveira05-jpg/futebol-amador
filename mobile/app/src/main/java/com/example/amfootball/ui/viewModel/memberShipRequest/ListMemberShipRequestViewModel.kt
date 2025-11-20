@@ -4,17 +4,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.filters.FilterMemberShipRequest
+import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.utils.extensions.toLocalDateTime
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.utils.UserConst
+import com.example.amfootball.R
 
 class ListMemberShipRequestViewModel: ViewModel() {
 
     private val filterState: MutableLiveData<FilterMemberShipRequest> = MutableLiveData(FilterMemberShipRequest())
     val uiFilterState: LiveData<FilterMemberShipRequest> = filterState
-
+    private val filterErrorState: MutableLiveData<FilterMemberShipRequestError> = MutableLiveData(FilterMemberShipRequestError())
+    val uiFilterErrorState: LiveData<FilterMemberShipRequestError> = filterErrorState
     private val listState: MutableLiveData<List<MembershipRequestInfoDto>> = MutableLiveData(emptyList<MembershipRequestInfoDto>())
     private var originalList: List<MembershipRequestInfoDto> = emptyList()
     val uiListState: LiveData<List<MembershipRequestInfoDto>> = listState
@@ -47,10 +52,15 @@ class ListMemberShipRequestViewModel: ViewModel() {
      * Função que permite chamar o endPoint da BD para consutlar a lista com os filtros aplicados
      * */
     fun applyFilters() {
-        val currentFilters = filterState.value!!
+        if(!validateFilter()) {
+            return
+        }
         // TODO: Quando tiver a API, é aqui que a vai chamar:
 
-        println("A aplicar filtros (sem API): $currentFilters")
+        /*
+                val currentFilters = filterState.value!!
+
+         println("A aplicar filtros (sem API): $currentFilters")
 
         val masterList = listState.value
 
@@ -76,8 +86,8 @@ class ListMemberShipRequestViewModel: ViewModel() {
 
             matchesName && matchesMinDate && matchesMaxDate
         }
-
         listState.value = filteredList
+        * */
     }
 
 
@@ -92,7 +102,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
      * se foi o player a aceitar ou a Team
      * TODO: Depois dependendo do valor do if ou manda o pedido à API como se fosse a team ou o pedido como se fosse o player
      * */
-    fun AcceptMemberShipRequest(
+    fun acceptMemberShipRequest(
         idReceiver: String,
         idRequest: String,
         isPlayerSender: Boolean,
@@ -110,7 +120,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
     /**
      * TODO: Igual ao Accept mas para reject memberShipRequest
      * */
-    fun RejectMemberShipRequest(
+    fun rejectMemberShipRequest(
         idReceiver: String,
         idRequest: String,
         isPlayerSender: Boolean,
@@ -130,9 +140,9 @@ class ListMemberShipRequestViewModel: ViewModel() {
     /**
      * TODO: Falta apenas nas paginas de perfil carregar os dados e de seguida enviar esse dados aqui
      * */
-    fun ShowMore(
+    fun showMore(
         isPlayerSender: Boolean,
-        IdSender: String,
+        idSender: String,
         navHostController: NavHostController,
     ) {
         var route = Routes.UserRoutes.PROFILE.route
@@ -144,5 +154,45 @@ class ListMemberShipRequestViewModel: ViewModel() {
         navHostController.navigate(route) {
             launchSingleTop = true
         }
+    }
+
+    //Private Methods
+    private fun validateFilter(): Boolean{
+        val name = filterState.value?.senderName
+        val minDate = filterState.value?.minDate
+        val maxDate = filterState.value?.maxDate
+
+        var nameError: ErrorMessage? = null
+        var minDateError: ErrorMessage? = null
+        var maxDateError: ErrorMessage? = null
+
+        if(name != null && name.length > UserConst.MAX_NAME_LENGTH) {
+            nameError = ErrorMessage(
+                messageId = R.string.error_max_name_sender,
+                args = listOf(UserConst.MAX_NAME_LENGTH)
+            )
+        }
+
+        if(minDate != null && maxDate != null && minDate > maxDate) {
+            minDateError = ErrorMessage(
+                messageId = R.string.error_min_date_after,
+            )
+
+            maxDateError = ErrorMessage(
+                messageId = R.string.error_max_date_before
+            )
+        }
+
+        filterErrorState.value = FilterMemberShipRequestError(
+            senderNameError = nameError,
+            minDateError = minDateError,
+            maxDateError = maxDateError
+        )
+
+        val isValid = listOf(nameError, minDateError, maxDateError).all {
+            it == null
+        }
+
+        return isValid
     }
 }

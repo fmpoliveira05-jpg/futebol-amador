@@ -3,4 +3,12 @@
     <string name="list_teams_description_logo_team">Logo Team</string>
     <string name="list_teams_members">Members</string>
     <string name="list_teams_view_team">View Team</string>
+
+    <string name="list_player_empty">There are no players yet</string>
+    <string name="list_membership_request_empty">You haven\'t received any membership requests yet</string>
+    <string name="list_teams_empty">No teams were found</string>
+    <string name="list_match_invite_empty">You haven\'t received any departure requests yet</string>
+    <string name="list_members_empty">No player with these characteristics was found</string>
+    <string name="list_post_pone_match_empty">No requests for postponement were found</string>
+    <string name="leadboard_empty">We don\'t have any teams on the leaderboard yet</string>
 </resources>

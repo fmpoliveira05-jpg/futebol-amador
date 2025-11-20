@@ -32,10 +32,11 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
-import com.example.amfootball.data.dtos.filters.FilterMembersTeam
+import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
+import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
@@ -51,7 +52,6 @@ import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
-import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
 @Composable
@@ -60,6 +60,7 @@ fun ListMembersScreen(
     viewModel: ListMembersViewModel = viewModel()
 ) {
     val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
+    val filtersErrors by viewModel.uiErrorFilters.observeAsState(initial = FilterMembersFilterError())
     val list by viewModel.uiList.observeAsState(initial = emptyList())
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
@@ -90,6 +91,7 @@ fun ListMembersScreen(
                     FilterListMemberContent(
                         filters = filters,
                         filterActions = filterAction,
+                        filterErros = filtersErrors,
                         listTypeMember = listTypeMember,
                         listPosition = listPosition,
                         modifier = paddingModifier
@@ -109,7 +111,8 @@ fun ListMembersScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_members_empty)
     )
 }
 
@@ -117,6 +120,7 @@ fun ListMembersScreen(
 private fun FilterListMemberContent(
     filters: FilterMembersTeam,
     filterActions: FilterMemberTeamAction,
+    filterErros: FilterMembersFilterError,
     listTypeMember: List<TypeMember?>,
     listPosition: List<Position?>,
     modifier: Modifier = Modifier
@@ -128,8 +132,10 @@ private fun FilterListMemberContent(
                     label = stringResource(id = R.string.filter_name),
                     value = filters.name ?: "",
                     maxLenght = UserConst.MAX_NAME_LENGTH,
-                    onValueChange = { filterActions.onNameChange(it) }, // ou { filterActions.onNameChange(it) }
-                    modifier = Modifier.weight(1f)
+                    onValueChange = { filterActions.onNameChange(it) },
+                    modifier = Modifier.weight(1f),
+                    isError = filterErros.nameError != null,
+                    errorMessage = filterErros.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
                 )
             }
         )
@@ -142,6 +148,8 @@ private fun FilterListMemberContent(
                     minLenght = UserConst.MIN_AGE,
                     maxLenght = UserConst.MAX_AGE,
                     onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
+                    isError = filterErros.minAgeError != null,
+                    errorMessage = filterErros.minAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
@@ -151,6 +159,8 @@ private fun FilterListMemberContent(
                     value = filters.maxAge?.toString() ?: "",
                     minLenght = UserConst.MIN_AGE,
                     maxLenght = UserConst.MAX_AGE,
+                    isError = filterErros.maxAgeError != null,
+                    errorMessage = filterErros.maxAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
                     onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     modifier = Modifier.weight(1f)
                 )

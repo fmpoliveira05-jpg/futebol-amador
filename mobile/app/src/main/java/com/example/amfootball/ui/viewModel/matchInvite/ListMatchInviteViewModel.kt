@@ -4,15 +4,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.filters.FilterMatchInvite
+import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.utils.UserConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
+import com.example.amfootball.R
 
 class ListMatchInviteViewModel(): ViewModel() {
 
     private val filtersState: MutableLiveData<FilterMatchInvite> = MutableLiveData(FilterMatchInvite())
     val uiFilters: LiveData<FilterMatchInvite> = filtersState
+
+    private val filtersErrorState: MutableLiveData<FilterMatchInviteError> = MutableLiveData(FilterMatchInviteError())
+    val filterError: LiveData<FilterMatchInviteError> = filtersErrorState
 
     private val listState:MutableLiveData<List<InfoMatchInviteDto>> = MutableLiveData(emptyList<InfoMatchInviteDto>())
     val uiList = listState
@@ -39,7 +46,9 @@ class ListMatchInviteViewModel(): ViewModel() {
     }
 
     fun onApplyFilter() {
-        //TODO: Criar validações dos fitlros
+        if (!validateFitler()) {
+            return
+        }
         //TODO: Fazer pedido há API para carregar os novos dados
 
     }
@@ -76,5 +85,44 @@ class ListMatchInviteViewModel(): ViewModel() {
         navHostController.navigate(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
             launchSingleTop = true
         }
+    }
+
+    private fun validateFitler(): Boolean {
+        val nameSender = filtersState.value?.senderName
+        val minDate = filtersState.value?.minDate
+        val maxDate = filtersState.value?.maxDate
+
+        var nameSenderError: ErrorMessage? = null
+        var minDateError: ErrorMessage? = null
+        var maxDateError: ErrorMessage? = null
+
+        if(nameSender != null && nameSender.length > UserConst.MAX_NAME_LENGTH) {
+            nameSenderError = ErrorMessage(
+                messageId = R.string.error_max_name_sender,
+                args = listOf(UserConst.MAX_NAME_LENGTH)
+            )
+        }
+
+        if (minDate != null && maxDate != null && minDate > maxDate) {
+            minDateError = ErrorMessage(
+                messageId = R.string.error_min_date_after,
+                args = listOf(R.string.error_date_sende)
+            )
+
+            maxDateError = ErrorMessage(
+                messageId = R.string.error_max_date_before,
+                args = listOf(R.string.error_date_sende)
+            )
+        }
+
+        filtersErrorState.value = FilterMatchInviteError(
+            senderNameError = nameSenderError,
+            minDateError = minDateError,
+            maxDateError = maxDateError
+        )
+
+        val isValid = listOf(nameSender, minDateError, maxDateError).all { it == null }
+
+        return isValid
     }
 }

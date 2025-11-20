@@ -6,12 +6,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.errors.MatchInviteFormErros
+import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.amfootball.R
+import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.navigation.Objects.Routes
 
 //TODO: Adaptar isto para depois a pagina também servir para PostPoneMatch
@@ -86,15 +87,19 @@ class FormMatchInviteViewModel @Inject constructor(
         val dateGame = formState.value!!.gameDate
         val timeGame = formState.value!!.gameTime
 
-        var errorDateGame: Int? = null
-        var errorTime: Int? = null
+        var errorDateGame: ErrorMessage? = null
+        var errorTime: ErrorMessage? = null
 
         if (dateGame.isNullOrBlank()) {
-            errorDateGame = R.string.mandatory_field
+            errorDateGame = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
         }
 
         if (timeGame.isNullOrBlank()) {
-            errorTime = R.string.mandatory_field
+            errorTime = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
         }
 
         erros.value = MatchInviteFormErros(

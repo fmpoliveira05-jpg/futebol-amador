@@ -4,15 +4,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.filters.FilterPostPoneMatch
+import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
+import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
+import com.example.amfootball.R
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
 class ListPostPoneMatchViewModel: ViewModel() {
     private val filterState: MutableLiveData<FilterPostPoneMatch> = MutableLiveData<FilterPostPoneMatch>(FilterPostPoneMatch())
     val filter: LiveData<FilterPostPoneMatch> = filterState
+
+    private val filtersErrorsState: MutableLiveData<ListPostPoneMatchFiltersError> = MutableLiveData<ListPostPoneMatchFiltersError>(ListPostPoneMatchFiltersError())
+    val filterErros: LiveData<ListPostPoneMatchFiltersError> = filtersErrorsState
 
     private val listState: MutableLiveData<List<PostPoneMatchDto>> = MutableLiveData<List<PostPoneMatchDto>>(emptyList())
     val list: LiveData<List<PostPoneMatchDto>> = listState
@@ -47,6 +54,9 @@ class ListPostPoneMatchViewModel: ViewModel() {
     }
 
     fun onApplyFilter() {
+        if(!validateFilters()) {
+            return
+        }
         //TODO: Implementar
     }
 
@@ -70,5 +80,70 @@ class ListPostPoneMatchViewModel: ViewModel() {
         navHostController.navigate(Routes.TeamRoutes.TEAM_PROFILE.route) {
             launchSingleTop = true
         }
+    }
+
+    /*
+
+    * */
+    private fun validateFilters(): Boolean {
+        val nameOpponent = filterState.value?.nameOpponent
+        val minDateGame = filterState.value?.minDataGame
+        val maxDateGame = filterState.value?.maxDateGame
+        val minDatePostPone = filterState.value?.minDatePostPone
+        val maxDatePostPone = filterState.value?.maxDatePostPone
+
+        var nameOpponentError: ErrorMessage? = null
+        var minDateGameError: ErrorMessage? = null
+        var maxDateGameError: ErrorMessage? = null
+        var minDatePostPoneError: ErrorMessage? = null
+        var maxDatePostPoneError: ErrorMessage? = null
+
+        if (nameOpponent != null && nameOpponent.length > TeamConst.MAX_NAME_LENGTH) {
+            nameOpponentError = ErrorMessage(
+                messageId = R.string.error_max_name_opponent,
+                args = listOf(TeamConst.MAX_NAME_LENGTH)
+            )
+        }
+
+        if (minDateGame != null && maxDateGame != null) {
+            if (minDateGame > maxDateGame) {
+                minDateGameError = ErrorMessage(
+                    messageId = R.string.error_min_date_after,
+                    args = listOf(R.string.error_post_pone_Date)
+                )
+                maxDateGameError = ErrorMessage(
+                    messageId = R.string.error_max_date_before,
+                    args = listOf(R.string.error_post_pone_Date)
+                )
+            }
+        }
+
+        if (minDatePostPone != null && maxDatePostPone != null) {
+            if (minDatePostPone > maxDatePostPone) {
+                minDatePostPoneError = ErrorMessage(
+                    messageId = R.string.error_min_date_after,
+                    args = listOf(R.string.error_post_pone_Date)
+                )
+                maxDatePostPoneError = ErrorMessage(
+                    messageId = R.string.error_max_date_before,
+                    args = listOf(R.string.error_post_pone_Date)
+                )
+            }
+        }
+
+        filtersErrorsState.value = ListPostPoneMatchFiltersError(
+            nameOpponentError = nameOpponentError,
+            minDateGameError = minDateGameError,
+            maxDateGameError = maxDateGameError,
+            minDatePostPoneError = minDatePostPoneError,
+            maxDatePostPoneError = maxDatePostPoneError
+        )
+
+        val isValid = listOf(nameOpponentError, minDateGameError, maxDateGameError,
+            minDatePostPoneError, maxDatePostPoneError).all {
+            it == null
+        }
+
+        return isValid
     }
 }

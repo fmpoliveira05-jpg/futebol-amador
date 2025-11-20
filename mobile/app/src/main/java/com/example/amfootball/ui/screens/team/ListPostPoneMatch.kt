@@ -21,8 +21,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPostPoneMatchActions
-import com.example.amfootball.data.dtos.filters.FilterPostPoneMatch
+import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
+import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
@@ -48,6 +49,7 @@ fun ListPostPoneMatchScreen(
     viewModel: ListPostPoneMatchViewModel = viewModel()
 ) {
     val filters by viewModel.filter.observeAsState(initial = FilterPostPoneMatch())
+    val filtersError by viewModel.filterErros.observeAsState(initial = ListPostPoneMatchFiltersError())
     val list by viewModel.list.observeAsState(initial = emptyList())
 
     val filterActions = FilterListPostPoneMatchActions(
@@ -74,6 +76,7 @@ fun ListPostPoneMatchScreen(
                     FilterListPostPoneMatchContent(
                         filters = filters,
                         filterActions = filterActions,
+                        filtersError = filtersError,
                         modifier = paddingModifier
                     )
                 }
@@ -93,13 +96,15 @@ fun ListPostPoneMatchScreen(
                     navHostController = navHostController)
                 }
             )
-        }
+        },
+        messageEmptyList = stringResource(id = R.string.list_post_pone_match_empty)
     )
 }
 
 @Composable
 private fun FilterListPostPoneMatchContent(
     filters: FilterPostPoneMatch,
+    filtersError: ListPostPoneMatchFiltersError,
     filterActions: FilterListPostPoneMatchActions,
     modifier: Modifier
 ) {
@@ -113,6 +118,10 @@ private fun FilterListPostPoneMatchContent(
                     value = filters.nameOpponent,
                     maxLenght = TeamConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onOpponentNameChange(it) },
+                    isError = filtersError.nameOpponentError != null,
+                    errorMessage = filtersError.nameOpponentError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -131,6 +140,10 @@ private fun FilterListPostPoneMatchContent(
                     contentDescription = stringResource(id = R.string.description_filter_min_date),
                     value = filters.minDataGame?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateGameChange(it) },
+                    isError = filtersError.minDateGameError != null,
+                    errorMessage = filtersError.minDateGameError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -139,6 +152,10 @@ private fun FilterListPostPoneMatchContent(
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxDateGame?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateGameChange(it)},
+                    isError = filtersError.maxDateGameError != null,
+                    errorMessage = filtersError.maxDateGameError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -151,6 +168,10 @@ private fun FilterListPostPoneMatchContent(
                     contentDescription = stringResource(id = R.string.description_filter_min_date),
                     value = filters.minDatePostPone?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDatePostPoneChange(it) },
+                    isError = filtersError.minDatePostPoneError != null,
+                    errorMessage = filtersError.minDatePostPoneError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -159,6 +180,9 @@ private fun FilterListPostPoneMatchContent(
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxDatePostPone?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDatePostPoneChange(it)},
+                    errorMessage = filtersError.maxDatePostPoneError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

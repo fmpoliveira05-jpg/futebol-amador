@@ -2,7 +2,10 @@ package com.example.amfootball.ui.screens.team
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material3.Text
@@ -19,7 +22,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.forms.FormTeamActions
 import com.example.amfootball.data.dtos.team.FormTeamDto
-import com.example.amfootball.data.errors.TeamFormErros
+import com.example.amfootball.data.errors.formErrors.TeamFormErros
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.ImagePicker
@@ -61,8 +64,11 @@ private fun ContentCreateTeam(modifier: Modifier = Modifier,
                               fieldsErrors: TeamFormErros,
                               onSubmitClick: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .verticalScroll(scrollState)
+            .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -96,7 +102,10 @@ private fun FieldsCreateTeam(
         isRequired = true,
         maxLenght = TeamConst.MAX_NAME_LENGTH,
         isError = fieldsErrors.nameError != null,
-        errorMessage = fieldsErrors.nameError?.let { stringResource(id = it, TeamConst.MIN_NAME_LENGTH) }
+        errorMessage = fieldsErrors.nameError?.let {
+            stringResource(id = it.messageId,
+                *it.args.toTypedArray())
+        }
     )
 
     TextFieldOutline(
@@ -107,10 +116,12 @@ private fun FieldsCreateTeam(
         isRequired = false,
         maxLenght = TeamConst.MAX_DESCRIPTION_LENGTH,
         isError = fieldsErrors.descriptionError != null,
-        errorMessage = fieldsErrors.descriptionError?.let { stringResource(id = it, TeamConst.MAX_DESCRIPTION_LENGTH) }
+        errorMessage = fieldsErrors.descriptionError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        }
     )
 
-    Text(text = "Campo da equipa")
+    Text(text = stringResource(id = R.string.label_fields_pitch))
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
         value = filedTeam.pitch.name,
@@ -119,7 +130,9 @@ private fun FieldsCreateTeam(
         isRequired = true,
         maxLenght = PitchConst.MAX_NAME_LENGTH,
         isError = fieldsErrors.pitchNameError != null,
-        errorMessage = fieldsErrors.pitchNameError?.let { stringResource(id = it, PitchConst.MIN_NAME_LENGTH) }
+        errorMessage = fieldsErrors.pitchNameError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        }
     )
 
     TextFieldOutline(
@@ -131,7 +144,9 @@ private fun FieldsCreateTeam(
         isRequired = true,
         maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
         isError = fieldsErrors.pitchAddressError != null,
-        errorMessage = fieldsErrors.pitchAddressError?.let { stringResource(id = it, GeneralConst.MIN_ADDRESS_LENGTH) }
+        errorMessage = fieldsErrors.pitchAddressError?.let {
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        }
     )
 
     SubmitFormButton(
@@ -185,10 +200,9 @@ fun PreviewFormTeamEdit() {
                 onNamePitchChange = {},
                 onAddressPitchChange = {},
             ),
-            fieldsErrors = TeamFormErros(
-                nameError = R.string.mandatory_field
-            ),
+            fieldsErrors = TeamFormErros(),
             onSubmitClick = {},
             modifier = Modifier.padding(16.dp)
         )
-    }}
+    }
+}

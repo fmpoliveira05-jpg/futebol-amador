@@ -35,10 +35,11 @@ import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterCalendarActions
 import com.example.amfootball.data.actions.itemsList.ItensCalendarActions
-import com.example.amfootball.data.dtos.filters.FilterCalendar
+import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
+import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
@@ -62,6 +63,7 @@ fun CalendarScreen(
 ) {
     val filters by viewModel.filter.observeAsState(initial = FilterCalendar())
     val list by viewModel.list.observeAsState(initial = emptyList())
+    val filterError by viewModel.uiErrors.observeAsState(initial = FilterCalendarError())
     val filterActons = FilterCalendarActions(
         onNameChange = viewModel::onNameChange,
         onMinDateGameChange = viewModel::onMinDateGameChange,
@@ -94,7 +96,8 @@ fun CalendarScreen(
                     FiltersCalendarContent(
                         filters = filters,
                         filterActions = filterActons,
-                        modifier = paddingModifier
+                        filterError = filterError,
+                        modifier = paddingModifier,
                     )
                 }
             )
@@ -114,6 +117,7 @@ fun CalendarScreen(
 private fun FiltersCalendarContent(
     filters: FilterCalendar,
     filterActions: FilterCalendarActions,
+    filterError: FilterCalendarError,
     modifier: Modifier = Modifier
 ) {
     val displayFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
@@ -126,7 +130,11 @@ private fun FiltersCalendarContent(
                     value = filters.opponentName,
                     maxLenght = TeamConst.MAX_NAME_LENGTH,
                     onValueChange = { filterActions.onNameChange(it) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    isError = filterError.opponentNameError != null,
+                    errorMessage = filterError.opponentNameError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    }
                 )
 
                 FilterIsHomeMatch(
@@ -144,6 +152,10 @@ private fun FiltersCalendarContent(
                     contentDescription = stringResource(id = R.string.description_filter_min_date),
                     value = filters.minGameDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateGameChange(it) },
+                    isError = filterError.minGameDateError != null,
+                    errorMessage = filterError.minGameDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -152,6 +164,10 @@ private fun FiltersCalendarContent(
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxGameDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateGameChange(it)},
+                    isError = filterError.minGameDateError != null,
+                    errorMessage = filterError.maxGameDateError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
