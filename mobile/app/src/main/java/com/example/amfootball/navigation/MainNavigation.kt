@@ -306,7 +306,7 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
 
 private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
     composable(Routes.GeralRoutes.SETTINGS.route){
-        SettingsScreen()
+        SettingsScreen(navController = globalNavController)
     }
 
     composable(Routes.GeralRoutes.PREFERENCE.route){

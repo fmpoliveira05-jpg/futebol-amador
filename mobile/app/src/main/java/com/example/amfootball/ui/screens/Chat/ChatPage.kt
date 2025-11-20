@@ -28,6 +28,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,13 +41,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.data.dtos.chat.MessageDto
+import com.example.amfootball.ui.viewModel.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    chatViewModel: ChatViewModel = viewModel(),
+    roomId: String,
+    ) {
     var messageText by remember { mutableStateOf("") }
-    val listChat = MessageDto.generateMessageDtoList()
+    //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
             ChatTopBar(contactName = "Jane Doe") {
@@ -57,24 +64,30 @@ fun ChatScreen() {
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
+                LaunchedEffect(key1 = roomId) {
+                    chatViewModel.listenForMessages(roomId)
+                }
+
+                val messages by chatViewModel.messages.collectAsState()
+
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 16.dp),
                     reverseLayout = false
                 ) {
-                    items(listChat) { message ->
-                        MessageBubble(message = message)
+                    items(messages) { message ->
+                        MessageBubble(message = message, isSentByMe = chatViewModel.isSentByMe(message))
                     }
                 }
 
-                // --- 2. Campo de Entrada de Mensagem ---
                 MessageInput(
                     message = messageText,
                     onMessageChange = { messageText = it },
                     onSendClick = {
                         if (messageText.isNotBlank()) {
                             messageText = ""
+                            chatViewModel.sendMessage(roomId, messageText)
                         }
                     }
                 )
@@ -93,13 +106,11 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Placeholder para a foto do perfil
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondary,
                     modifier = Modifier.size(40.dp)
                 ) {
-                    // Você pode usar uma imagem real aqui com AsyncImage (Coil)
                     Box(contentAlignment = Alignment.Center) {
                         Text(
                             text = contactName.first().toString(),
@@ -145,11 +156,11 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
  * Balão de mensagem individual (distingue enviadas e recebidas).
  */
 @Composable
-fun MessageBubble(message: MessageDto) {
-    val alignment = if (message.isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
-    val bubbleColor = if (message.isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (message.isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-    val bubbleShape = if (message.isSentByMe) {
+fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
+    val alignment = if (isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
+    val bubbleColor = if (isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val textColor = if (isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val bubbleShape = if (isSentByMe) {
         RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
     } else {
         RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
@@ -224,5 +235,5 @@ fun MessageInput(
 @Preview(showBackground = true)
 @Composable
 fun ChatScreenPreview() {
-    ChatScreen()
+    //ChatScreen()
 }
