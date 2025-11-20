@@ -12,6 +12,7 @@ import { Team } from '../../../shared/models/Team';
 export class Home {
 
   teams:Team[] = [];
+  
   constructor(private playerService:PlayerService, private teamService:TeamService){
     // this.teams = teamService.getAll();
   }
