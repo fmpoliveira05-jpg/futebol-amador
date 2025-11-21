@@ -29,7 +29,7 @@ interface ApiBackend{
         @Body request: CreateProfileDto
     ): Response<Unit>
 
-    @POST("/api/chat/create-room")
+    @POST("api/chat/create-room")
     suspend fun createChatRoom(
         @Body request: CreateRoomRequest
     ): Response<CreateRoomResponse>

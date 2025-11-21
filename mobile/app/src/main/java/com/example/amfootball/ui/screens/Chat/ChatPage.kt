@@ -41,21 +41,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.data.dtos.chat.MessageDto
-import com.example.amfootball.ui.viewModel.ChatViewModel
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    chatViewModel: ChatViewModel = viewModel(),
-    roomId: String,
+    chatViewModel: ChatViewModel = hiltViewModel(),
     ) {
     var messageText by remember { mutableStateOf("") }
+    val roomName by chatViewModel.roomName.collectAsState()
     //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = "Jane Doe") {
+            ChatTopBar(contactName = roomName) {
             }
         },
         content = { paddingValues ->
@@ -64,8 +65,8 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                LaunchedEffect(key1 = roomId) {
-                    chatViewModel.listenForMessages(roomId)
+                LaunchedEffect(key1 = chatViewModel.chatRoomId) {
+                    chatViewModel.listenForMessages()
                 }
 
                 val messages by chatViewModel.messages.collectAsState()
@@ -86,8 +87,8 @@ fun ChatScreen(
                     onMessageChange = { messageText = it },
                     onSendClick = {
                         if (messageText.isNotBlank()) {
+                            chatViewModel.sendMessage(messageText)
                             messageText = ""
-                            chatViewModel.sendMessage(roomId, messageText)
                         }
                     }
                 )
@@ -109,11 +110,12 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(20.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
+                        val initial = contactName.firstOrNull()?.toString()?.uppercase() ?: "?"
                         Text(
-                            text = contactName.first().toString(),
+                            text = initial,
                             color = MaterialTheme.colorScheme.onSecondary,
                             fontWeight = FontWeight.Bold
                         )
@@ -129,16 +131,11 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
                         fontSize = 18.sp
                     )
                     Text(
-                        text = "Online", // Status
+                        text = "Online",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
             }
         },
         actions = {

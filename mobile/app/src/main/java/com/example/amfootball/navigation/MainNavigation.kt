@@ -27,7 +27,7 @@ import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.components.NavBar.MainTopAppBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
-import com.example.amfootball.ui.screens.Chat.GroupChatFootballPreview
+import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -49,6 +49,7 @@ import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 import com.example.amfootball.utils.extensions.composableProtected
 
@@ -322,9 +323,16 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
     composable(Routes.PlayerRoutes.CHAT_LIST.route){
         ChatListScreen(navController = globalNavController)
     }
-    composable(Routes.PlayerRoutes.SINGLE_CHAT.route){
-        GroupChatFootballPreview()
+
+    composable(Routes.PlayerRoutes.SINGLE_CHAT.route,
+        arguments = listOf(
+            navArgument(Routes.chatRoomId) { type = NavType.StringType }
+        )) {
+        val viewModel = hiltViewModel<ChatViewModel>()
+
+        ChatScreen(chatViewModel = viewModel)
     }
+
 }
 
 private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {

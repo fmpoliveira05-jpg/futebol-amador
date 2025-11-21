@@ -14,24 +14,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.ItemListChatDto
-import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.ui.viewModel.ChatViewModel
+import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
     navController: NavHostController,
-    viewModel: ChatViewModel = viewModel()
+    viewModel: ChatViewModel = hiltViewModel()
 ) {
-    val listChat = ItemListChatDto.generateListChat()
     val rooms by viewModel.rooms.collectAsState()
     Scaffold(
         /*
@@ -54,26 +56,32 @@ fun ChatListScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            items(listChat) { chat ->
-                ChatItem(chat, navController = navController)
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 80.dp),
-                    thickness = 0.5.dp,
-                    color = Color.LightGray.copy(alpha = 0.4f)
-                )
+            if (rooms.isEmpty())
+            {
+                item { Text("Sem chats") }
+            }
+            else {
+                items(rooms) { chat ->
+                    ChatItem(chat, navController = navController)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 80.dp),
+                        thickness = 0.5.dp,
+                        color = Color.LightGray.copy(alpha = 0.4f)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController: NavHostController) {
+//incluir em chatroom futuramente alguns campos do ItemListChatDto
+fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                //Alterar para a rota com parametros como o artur disse
-                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route)
+                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route.replaceAfter("/", chat.id ))
             }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -85,15 +93,16 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(contentAlignment = Alignment.Center) {
+                    val initial = chat.name.firstOrNull()?.toString()?.uppercase() ?: "?"
                     Text(
-                        text = chat.name.first().toString(),
+                        text = initial,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
             }
-
+            /*
             if (chat.isOnline) {
                 Box(
                     modifier = Modifier
@@ -106,6 +115,8 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                         .background(Color(0xFF4CAF50), CircleShape)
                 )
             }
+
+             */
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -117,6 +128,7 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            /*
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = chat.lastMessage,
@@ -125,8 +137,10 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-        }
 
+             */
+        }
+        /*
         Spacer(modifier = Modifier.width(8.dp))
 
         Column(horizontalAlignment = Alignment.End) {
@@ -155,6 +169,7 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 }
             }
         }
+         */
     }
 }
 /*

@@ -12,14 +12,14 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
 
     //private const val BASE_URL = "https://amfootballapi.duckdns.org/swagger/index.html"
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor()) // O teu interceptor de token
+            .addInterceptor(AuthInterceptor())
             .build()
     }
 

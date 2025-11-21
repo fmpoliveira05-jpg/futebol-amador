@@ -32,6 +32,9 @@ interface AppRouteInfo {
 }
 
 object Routes {
+    val chatRoomId = "chatRoomId"
+
+
     // AGORA IMPLEMENTA RouteInfo
     enum class GeralRoutes(
         override val route: String,
@@ -60,7 +63,7 @@ object Routes {
 
         LIST_MEMBERSHIP_REQUEST("playerMemberShipRequest", R.string.navbar_memberships_list, Icons.Default.Person, R.string.description_navbar_memberships_list),
 
-        SINGLE_CHAT("chat/{chatRoomId}", R.string.single_chat, Icons.Default.Person, R.string.single_chat_description, true)
+        SINGLE_CHAT("chat/{${chatRoomId}}", R.string.single_chat, Icons.Default.Person, R.string.single_chat_description, true)
     }
 
     // AGORA IMPLEMENTA RouteInfo
