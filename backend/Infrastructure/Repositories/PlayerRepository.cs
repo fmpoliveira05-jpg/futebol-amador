@@ -1,10 +1,10 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories
 {
@@ -29,11 +29,6 @@ namespace Infrastructure.Repositories
         public void DeletePlayer(Player playerToRemove)
         {
             context.Player.Remove(playerToRemove);
-        }
-
-        public async Task<List<Player>?> GetAllTPlayersAsync()
-        {
-            return await context.Player.ToListAsync();
         }
 
         public async Task<Player?> GetPlayerByEmailAsync(string email)
@@ -66,19 +61,69 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.IdPlayer == playerId);
         }
 
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync()
+        public async Task<List<InfoPlayerDto?>> GetPlayersList(FilterPlayersWithoutTeamDto? filters)
         {
-            return await context.Player
-                .Where(p => p.IdTeam == null || p.IdTeam == Guid.Empty)
-                .Select(p => new PlayerWithoutTeamInfoDto
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            var list = new List<InfoPlayerDto?>();
+            var query = context.Player.AsQueryable();
+
+            if (filters != null)
+            {
+                if (!string.IsNullOrEmpty(filters.PlayerName))
                 {
-                    PlayerId = p.Id,
+                    var upperCase = filters.PlayerName.ToLower();
+                    query = query.Where(p => p.Name.ToLower().Contains(upperCase));
+                }
+
+                if (!string.IsNullOrEmpty(filters.City))
+                {
+                    var fragment = filters.City.ToLower();
+                    query = query.Where(p =>
+                        EF.Functions.Like(p.Address.ToLower(), "%, %" + fragment + "%")
+                        &&
+                        !EF.Functions.Like(p.Address.ToLower(), "%, %" + fragment + "%,%")
+                    );
+                }
+
+                if (filters.MinAge.HasValue)
+                {
+                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) >= filters.MinAge);
+                }
+
+                if (filters.MaxAge.HasValue)
+                {
+                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) <= filters.MaxAge);
+                }
+
+                if (filters.MinHeight.HasValue)
+                {
+                    query = query.Where(p => p.Height >= filters.MinHeight);
+                }
+
+                if (filters.MaxHeight.HasValue)
+                {
+                    query = query.Where(p => p.Height <= filters.MaxHeight);
+                }
+
+                if (filters.Position.HasValue)
+                {
+                    query = query.Where(p => p.Position == filters.Position);
+                }
+            }
+
+            list = await query
+                .Select(p => new InfoPlayerDto
+                {
+                    Id = p.Id,
                     Name = p.Name,
-                    Age = DateTime.Now.Year - p.DateOfBirth.Year -
-                          ((DateTime.Now.DayOfYear < p.DateOfBirth.DayOfYear) ? 1 : 0),
-                    Position = p.Position
+                    Address = p.Address,
+                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                    Heigth = p.Height,
+                    Position = p.Position,
                 })
                 .ToListAsync();
+
+            return list; 
         }
     }
 }

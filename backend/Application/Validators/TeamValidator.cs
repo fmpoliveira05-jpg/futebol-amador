@@ -321,28 +321,25 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto filter)
+        public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto? filter)
         {
-            if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
+            if(filter != null)
             {
-                if(filter.MinAge > filter.MaxAge)
+                if (filter.MinAge.HasValue && filter.MaxAge.HasValue && filter.MinAge > filter.MaxAge)
                 {
                     throw new InvalidOperationException("A idade mínima do jogador deve ser inferior ou igual há idade máxima");
                 }
-            }
 
-            if (filter.MinHeight.HasValue && filter.MaxHeight.HasValue)
-            {
-                if (filter.MinHeight > filter.MaxHeight)
+                if (filter.MinHeight.HasValue && filter.MaxHeight.HasValue && filter.MinHeight > filter.MaxHeight)
                 {
                     throw new InvalidOperationException("A altura mínima do jogador deve ser inferior ou igual há altura máxima");
                 }
-            }
 
-            if (filter.Position.HasValue && !Enum.IsDefined(typeof(Position), filter.Position))
-            {
-                throw new InvalidOperationException("A posição que introduziu não existe. Por favor introduza uma posição valida!");
-            }
+                if (filter.Position.HasValue && !Enum.IsDefined(typeof(Position), filter.Position.Value))
+                {
+                    throw new InvalidOperationException("A posição que introduziu não existe. Por favor introduza uma posição valida!");
+                }
+            }  
         }
 
         #region Private Methods

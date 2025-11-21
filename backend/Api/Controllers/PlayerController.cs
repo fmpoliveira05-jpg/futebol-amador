@@ -1,14 +1,10 @@
-﻿using Application.DTOs;
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.PlayerDTOs;
-using Application.DTOs.SuperAdmin;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using FirebaseAdmin.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -47,7 +43,7 @@ namespace Api.Controllers
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    createPlayerResult //a 
+                    createPlayerResult 
                     );
         }
 
@@ -67,6 +63,15 @@ namespace Api.Controllers
             var playerDetails = await playerService.GetPlayerByIdAsync(playerId);
 
             return Ok(playerDetails);
+        }
+
+        [HttpGet("listPlayers")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPlayerList([FromQuery] FilterPlayersWithoutTeamDto? filter)
+        {
+            var listPlayers = await playerService.ListPlayers(filter);
+
+            return Ok(listPlayers);
         }
 
         [HttpGet()]

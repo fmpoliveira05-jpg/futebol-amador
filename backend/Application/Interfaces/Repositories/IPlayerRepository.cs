@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Player;
+﻿using Application.DTOs.Filters;
+using Application.DTOs.Player;
 using Domain.Entities;
 
 namespace Application.Interfaces.Repositories
@@ -8,8 +9,6 @@ namespace Application.Interfaces.Repositories
         Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList);
 
         Task<Player?> GetPlayerByPhoneNumberAsync(string phoneNumber);
-
-        Task<List<Player>?> GetAllTPlayersAsync();
 
         Task<Player?> GetPlayerByIdAsync(string id);
 
@@ -21,7 +20,6 @@ namespace Application.Interfaces.Repositories
 
         Task AddAsync(Player player);
         Task<MembershipRequest?> GetPlayerByIdWithRequestsAsync(string playerId);
-
-        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamAsync();
+        Task<List<InfoPlayerDto?>> GetPlayersList(FilterPlayersWithoutTeamDto? filters);
     }
 }

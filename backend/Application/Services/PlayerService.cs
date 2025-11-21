@@ -1,10 +1,10 @@
 ﻿using Application.DTOs.Filters;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 
 namespace Application.Services
@@ -14,32 +14,29 @@ namespace Application.Services
         #region Initializer
         private readonly IPlayerRepository playerRepository;
         private readonly IUserRepository userRepository;
-        private readonly ITeamRepository teamRepository;
-        
-        private readonly IUnityOfWork unityOfWork;
-        
+        private readonly ITeamRepository teamRepository;  
+        private readonly IUnityOfWork unityOfWork;    
         private readonly ITeamService teamService;
         private readonly IAuthService AuthService;
-        
-        private readonly IPlayerAuthorizationValidator authorizationValidator;
         private readonly IUserDataValidator UserDataValidator;
         private readonly IPlayerValidator playerValidator;
+        private readonly ITeamValidator teamValidator;
 
         public PlayerService(IPlayerRepository playerRepository, ITeamRepository teamRepository,
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator, IUserRepository userRepository,
-            IPlayerAuthorizationValidator authorizationValidator, ITeamService teamService, 
-            IUserDataValidator userDataValidator,IAuthService authService)
+            IPlayerValidator playerValidator, IUserRepository userRepository, 
+            ITeamService teamService, IUserDataValidator userDataValidator,
+            IAuthService authService, ITeamValidator teamValidator)
         {
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
             this.unityOfWork = unitOfWork;
             this.playerValidator = playerValidator;
             this.userRepository = userRepository;
-            this.authorizationValidator = authorizationValidator;
             this.teamService = teamService;
             this.UserDataValidator = userDataValidator;
             this.AuthService = authService;
+            this.teamValidator = teamValidator;
         }
 
         #endregion
@@ -93,6 +90,23 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
+        public async Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
+        {
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            var existingPlayers = new User[] {
+                await userRepository.GetUserByEmailAsync(dto.Email),
+                await userRepository.GetUserByPhoneAsync(dto.Phone),
+            };
+
+            playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
+
+            bool hasChange = await hasChangePlayer(dto, player);
+            playerValidator.ValidateHasChangeDataPlayer(hasChange);
+
+            await unityOfWork.SaveChangesAsync();
+        }
+
         public async Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
@@ -116,21 +130,11 @@ namespace Application.Services
             return playerDetails;
         }
 
-        public async Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
+        public async Task<List<InfoPlayerDto?>> ListPlayers(FilterPlayersWithoutTeamDto? filter)
         {
-            var player = await playerRepository.GetPlayerByIdAsync(playerId);
-
-            var existingPlayers = new User[] {
-                await userRepository.GetUserByEmailAsync(dto.Email),
-                await userRepository.GetUserByPhoneAsync(dto.Phone),
-            };
-
-            playerValidator.UpdatePlayerValidator(dto, player, existingPlayers);
-
-            bool hasChange =  await hasChangePlayer(dto, player);
-            playerValidator.ValidateHasChangeDataPlayer(hasChange);
-
-            await unityOfWork.SaveChangesAsync();
+            teamValidator.ValidateFiltersGetPlayersWithout(filter);
+           
+            return await playerRepository.GetPlayersList(filter);
         }
 
         #endregion

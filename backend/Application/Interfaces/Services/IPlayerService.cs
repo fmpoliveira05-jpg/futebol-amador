@@ -1,5 +1,5 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
+using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 
@@ -20,5 +20,7 @@ namespace Application.Interfaces.Services
         Task<List<InfoTeamsDto>> GetListTeams();
 
         Task<string> LeaveTeam(string playerId);
+
+        Task<List<InfoPlayerDto?>> ListPlayers(FilterPlayersWithoutTeamDto? filter);
     }
 }
