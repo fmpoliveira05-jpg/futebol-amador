@@ -1,34 +1,56 @@
-package com.example.amfootball.ui.viewModel
+package com.example.amfootball.ui.viewModel.chat
 
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.MessageDto
+import com.example.amfootball.navigation.Objects.Routes
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.getField
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
+@HiltViewModel
+class ChatViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
 
-class ChatViewModel : ViewModel() {
+    ): ViewModel() {
     private val db = Firebase.firestore
     private val myUserId = Firebase.auth.currentUser?.uid
 
+    val chatRoomId: String? = savedStateHandle[Routes.chatRoomId]
+
     private val _rooms = MutableStateFlow<List<ChatRoom>>(emptyList())
     val rooms = _rooms.asStateFlow() // A UI vai observar isto
+
+    private val _roomName = MutableStateFlow<String>("")
+
+    val roomName = _roomName.asStateFlow()
 
     private val _messages = MutableStateFlow<List<MessageDto>>(emptyList())
     val messages = _messages.asStateFlow() // A UI vai observar isto
 
     private var messagesListener: ListenerRegistration? = null
 
-    fun fetchMyChatRooms(userId: String) {
+    init {
+        if (myUserId != null) {
+            fetchMyChatRooms()
+        }
+    }
+
+    fun fetchMyChatRooms() {
+        if (myUserId == null) return
+
         db.collection("chatRooms")
-            .whereArrayContains("members", userId)
+            .whereArrayContains("members", myUserId)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 _rooms.value = querySnapshot.toObjects(ChatRoom::class.java)
@@ -38,11 +60,23 @@ class ChatViewModel : ViewModel() {
             }
     }
 
-    fun listenForMessages(roomId: String) {
-
+    fun listenForMessages() {
+        if (chatRoomId == null){
+            return
+        }
         messagesListener?.remove()
 
-        val query = db.collection("chatRooms").document(roomId)
+        db.collection("chatRooms")
+            .document(chatRoomId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                _roomName.value = querySnapshot.getField<String>("name") ?: ""
+            }
+            .addOnFailureListener { e ->
+                Log.e("Chat", "Erro ao listar salas", e)
+            }
+
+        val query = db.collection("chatRooms").document(chatRoomId)
             .collection("messages")
             .orderBy("timestamp", Query.Direction.ASCENDING) // ASCENDING = mais antigo primeiro
             .limit(50)
@@ -58,8 +92,9 @@ class ChatViewModel : ViewModel() {
             }
         }
     }
-    fun sendMessage(roomId: String, messageText: String) {
+    fun sendMessage( messageText: String) {
         if (myUserId == null) return
+        if (chatRoomId == null) return
 
         val message = hashMapOf(
             "text" to messageText,
@@ -67,7 +102,7 @@ class ChatViewModel : ViewModel() {
             "timestamp" to FieldValue.serverTimestamp()
         )
 
-        db.collection("chatRooms").document(roomId)
+        db.collection("chatRooms").document(chatRoomId)
             .collection("messages")
             .add(message)
             .addOnSuccessListener {
@@ -89,4 +124,3 @@ class ChatViewModel : ViewModel() {
         messagesListener?.remove()
     }
 }
-
