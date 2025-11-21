@@ -93,7 +93,7 @@ namespace Infrastructure.Repositories
                     FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
-                    PitchDto = new PitchDto
+                    PitchDto = new PitchDto 
                     {
                         Name = t.Pitch.Name,
                         Address = t.Pitch.Address,
