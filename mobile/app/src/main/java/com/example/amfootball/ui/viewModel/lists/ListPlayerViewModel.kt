@@ -131,15 +131,14 @@ class ListPlayerViewModel(): ViewModel() {
                     messageId = R.string.error_min_age,
                     args = listOf(UserConst.MIN_AGE)
                 )
-            }
-
-            if (minAge > UserConst.MAX_AGE) {
+                isValidMinAge = false
+            } else if (minAge > UserConst.MAX_AGE) {
                 minAgeError = ErrorMessage(
                     messageId = R.string.error_max_age,
                     args = listOf(UserConst.MAX_AGE)
                 )
+                isValidMinAge = false
             }
-            isValidMinAge = false
         }
 
         var isValidMaxAge = true
@@ -149,15 +148,15 @@ class ListPlayerViewModel(): ViewModel() {
                     messageId = R.string.error_min_age,
                     args = listOf(UserConst.MIN_AGE)
                 )
-            }
-
-            if (maxAge > UserConst.MAX_AGE) {
+                isValidMaxAge = false
+            } else if (maxAge > UserConst.MAX_AGE) {
                 maxAgeError = ErrorMessage(
                     messageId = R.string.error_max_age,
                     args = listOf(UserConst.MAX_AGE)
                 )
+                isValidMaxAge = false
+
             }
-            isValidMaxAge = false
         }
 
         if(isValidMinAge && isValidMaxAge && minAge != null && maxAge != null && minAge > maxAge) {
@@ -177,15 +176,14 @@ class ListPlayerViewModel(): ViewModel() {
                     messageId = R.string.error_min_size,
                     args = listOf(PlayerConst.MIN_HEIGHT)
                 )
-            }
-
-            if (minSize > PlayerConst.MAX_HEIGHT) {
+                isValidMinSize = false
+            } else if (minSize > PlayerConst.MAX_HEIGHT) {
                 minSizeError = ErrorMessage(
                     messageId = R.string.error_max_size,
                     args = listOf(PlayerConst.MAX_HEIGHT)
                 )
+                isValidMinSize = false
             }
-            isValidMinSize = false
         }
 
         var isValidMaxSize = true
@@ -195,15 +193,14 @@ class ListPlayerViewModel(): ViewModel() {
                     messageId = R.string.error_min_size,
                     args = listOf(PlayerConst.MIN_HEIGHT)
                 )
-            }
-
-            if (maxSize > PlayerConst.MAX_HEIGHT) {
+                isValidMaxSize = false
+            } else if (maxSize > PlayerConst.MAX_HEIGHT) {
                 maxSizeError = ErrorMessage(
                     messageId = R.string.error_max_size,
                     args = listOf(PlayerConst.MAX_HEIGHT)
                 )
+                isValidMaxSize = false
             }
-            isValidMaxSize = false
         }
 
         if (isValidMinSize && isValidMaxSize && minSize != null && maxSize != null && minSize > maxSize) {
