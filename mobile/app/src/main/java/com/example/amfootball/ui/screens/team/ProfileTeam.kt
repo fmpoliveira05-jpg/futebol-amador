@@ -12,20 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
+import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.lists.ProfilesImage
+import com.example.amfootball.ui.components.lists.ProfilesImageString
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 
 @Composable
 fun ProfileTeamScreen(
-    viewModel: ProfileTeamViewModel = viewModel()
+    viewModel: ProfileTeamViewModel = hiltViewModel()
 ) {
-    val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamInfoDto.profileExempleTeam())
+    val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamDto.profileExempleTeam())
 
     //TODO: Meter para aparecer mais coisas
     ContentProfileTeam(
@@ -37,7 +38,7 @@ fun ProfileTeamScreen(
 
 @Composable
 private fun ContentProfileTeam(
-    profileInfo: ProfileTeamInfoDto,
+    profileInfo: ProfileTeamDto,
     modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
@@ -55,9 +56,9 @@ private fun ContentProfileTeam(
  * */
 @Composable
 private fun FieldProfileTeam(
-    profileInfo: ProfileTeamInfoDto
+    profileInfo: ProfileTeamDto
 ) {
-    ProfilesImage(
+    ProfilesImageString(
         image = profileInfo.logo,
         contentDescription =  stringResource(id= R.string.description_logo_team, profileInfo.name),
         modifier = Modifier.fillMaxWidth()
@@ -81,7 +82,7 @@ private fun FieldProfileTeam(
     )
 
     TextFieldOutline(
-        label = "Data de Fundação",
+        label = stringResource(id = R.string.label_filed_foundation_date),
         value = profileInfo.foundationDate.toString(),
         isSingleLine = true,
         isReadOnly = true,
@@ -95,7 +96,7 @@ private fun FieldProfileTeam(
     )
 
     TextFieldOutline(
-        label = "Total Pontos",
+        label = stringResource(id = R.string.label_field_total_points),
         value = profileInfo.totalPoints.toString(),
         isSingleLine = true,
         isReadOnly = true,
@@ -104,7 +105,7 @@ private fun FieldProfileTeam(
     Text(text = stringResource(id = R.string.label_fields_pitch))
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
-        value = profileInfo.pitch,
+        value = profileInfo.pitch.name,
         minLenght = PitchConst.MIN_NAME_LENGTH,
         maxLenght = PitchConst.MAX_NAME_LENGTH,
         isSingleLine = true,

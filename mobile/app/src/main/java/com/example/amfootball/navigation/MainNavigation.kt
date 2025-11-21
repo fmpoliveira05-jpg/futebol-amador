@@ -48,6 +48,7 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 
@@ -159,20 +160,7 @@ private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
  * Paginas do Utilizador
  * */
 private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
-    composable(route = Routes.UserRoutes.PROFILE.route) {
-        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
-
-        ProfileScreen(viewModel = viewModel)
-    }
-
-    composable("${Routes.UserRoutes.PROFILE.route}/{playerId}",
-        arguments = listOf(
-            navArgument("playerId") { type = NavType.StringType }
-        )) {
-        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
-
-        ProfileScreen(viewModel = viewModel)
-    }
+    profilePlayer(globalNavController = globalNavController)
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
         ListTeamScreen(navHostController = globalNavController)
@@ -187,6 +175,24 @@ private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
     }
     composable(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
         ListMemberShipRequest(navHostController = globalNavController)
+    }
+}
+
+private fun NavGraphBuilder.profilePlayer(globalNavController: NavHostController) {
+    composable(route = Routes.UserRoutes.PROFILE.route) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
+    }
+
+    composable("${Routes.UserRoutes.PROFILE.route}/{playerId}",
+        arguments = listOf(
+            navArgument("playerId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
     }
 }
 
@@ -278,8 +284,24 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
         FormTeamScreen(navHostController = globalNavController)
     }
 
+    profileTeam(globalNavController = globalNavController)
+}
+
+private fun NavGraphBuilder.profileTeam(globalNavController: NavHostController) {
     composable(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
-        ProfileTeamScreen()
+        val viewModel = hiltViewModel<ProfileTeamViewModel>()
+
+        ProfileTeamScreen(viewModel = viewModel)
+    }
+
+    composable("${Routes.TeamRoutes.TEAM_PROFILE.route}/{teamId}",
+        arguments = listOf(
+            navArgument("teamId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel = hiltViewModel<ProfileTeamViewModel>()
+
+        ProfileTeamScreen(viewModel = viewModel)
     }
 }
 

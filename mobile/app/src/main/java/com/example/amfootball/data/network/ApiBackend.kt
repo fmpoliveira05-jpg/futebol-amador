@@ -4,7 +4,7 @@ import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
+import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -52,6 +52,6 @@ interface ApiBackend{
     @GET("api/Team/{id}")
     suspend fun getTeamProfile(
         @Path("id") teamId: String
-    ): Response<ProfileTeamInfoDto>
+    ): Response<ProfileTeamDto>
 
 }

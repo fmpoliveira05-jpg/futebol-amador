@@ -25,17 +25,28 @@ import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
+/**
+ * Ecrã principal de Perfil do Jogador.
+ *
+ * Este Composable é o ponto de entrada da UI para visualizar os detalhes de um jogador.
+ * Ele é responsável por:
+ * 1. Obter a instância do [ProfilePlayerViewModel] através de injeção de dependência (Hilt).
+ * 2. Observar o estado da UI ([uiState]) e os dados do perfil ([profile]).
+ * 3. Gerir os estados de carregamento e erro utilizando o componente [LoadingPage].
+ * 4. Renderizar o conteúdo do perfil quando os dados estão disponíveis.
+ *
+ * @param viewModel O ViewModel que fornece os dados e gere a lógica de negócio. Injetado automaticamente pelo Hilt.
+ */
 @Composable
 fun ProfileScreen(
     viewModel: ProfilePlayerViewModel = hiltViewModel()
 ) {
     val profile by viewModel.uiProfilePlayer.collectAsStateWithLifecycle()
-    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
-    val errorMsg by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LoadingPage(
-        isLoading = isLoading,
-        errorMsg= errorMsg,
+        isLoading = uiState.isLoading,
+        errorMsg= uiState.errorMessage,
         retry= { viewModel.retry() },
         content = {
             if(profile != null) {
@@ -49,6 +60,15 @@ fun ProfileScreen(
     )
 }
 
+/**
+ * Conteúdo interno do ecrã de perfil.
+ *
+ * Organiza os elementos visuais numa lista vertical com scroll ([LazyColumn]).
+ * Esta separação permite testar a UI isoladamente sem precisar do ViewModel.
+ *
+ * @param profileData O objeto de dados [PlayerProfileDto] com as informações do jogador a exibir.
+ * @param modifier Modificador para layout e estilização.
+ */
 @Composable
 private fun ProfileScreenContent(
     profileData: PlayerProfileDto,
@@ -65,6 +85,14 @@ private fun ProfileScreenContent(
     }
 }
 
+/**
+ * Componente que lista os campos de detalhe do perfil.
+ *
+ * Apresenta a imagem do jogador e uma série de campos de texto [TextFieldOutline]
+ * em modo de leitura (read-only) com as informações pessoais e desportivas.
+ *
+ * @param profileData Os dados do jogador a preencher nos campos.
+ */
 @Composable
 private fun TextFieldProfile(profileData: PlayerProfileDto) {
     ProfilesImageString(

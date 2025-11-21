@@ -27,7 +27,9 @@ import com.example.amfootball.data.dtos.chat.GroupMessageDto
 @Composable
 fun GroupChatScreen() {
     var messageText by remember { mutableStateOf("") }
+/*
     val listMessage = GroupMessageDto.generateExempleChat()
+
 
     Scaffold(
         topBar = {
@@ -63,6 +65,7 @@ fun GroupChatScreen() {
             }
         }
     )
+    */
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
