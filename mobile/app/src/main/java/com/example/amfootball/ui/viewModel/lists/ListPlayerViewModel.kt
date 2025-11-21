@@ -3,37 +3,81 @@ package com.example.amfootball.ui.viewModel.lists
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FilterListPlayerDto
+import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.repository.PlayerRepository
 import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.NetworkUtils
 import com.example.amfootball.utils.PlayerConst
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ListPlayerViewModel(
+/**
+ * ViewModel responsável pela gestão do ecrã de Listagem de Jogadores.
+ *
+ * Este ViewModel gere:
+ * - O estado dos filtros de pesquisa (nome, idade, posição, etc.).
+ * - A validação dos dados inseridos nos filtros.
+ * - O carregamento da lista de jogadores da API com base nos filtros aplicados.
+ * - A navegação para o perfil detalhado de um jogador.
+ * - O envio de pedidos de adesão a equipas (para administradores).
+ *
+ * @property repository O repositório para aceder aos dados dos jogadores.
+ */
+@HiltViewModel
+class ListPlayerViewModel @Inject constructor(
     private val repository: PlayerRepository
 ): ViewModel() {
-    private val filterState: MutableLiveData<FilterListPlayerDto> = MutableLiveData(FilterListPlayerDto())
-    val uiFilters: LiveData<FilterListPlayerDto> = filterState
+    /**
+     * Estado atual dos filtros aplicados pelo utilizador.
+     * A UI observa este LiveData para manter os campos de texto sincronizados.
+     */
+    private val filterState: MutableLiveData<FilterListPlayer> = MutableLiveData(FilterListPlayer())
+    val uiFilters: LiveData<FilterListPlayer> = filterState
 
+    /**
+     * Estado dos erros de validação dos filtros.
+     * Contém mensagens de erro específicas para cada campo (ex: idade inválida).
+     */
     private val filterErrorState: MutableLiveData<FilterPlayersErrors> = MutableLiveData(FilterPlayersErrors())
     val filterError: LiveData<FilterPlayersErrors> = filterErrorState
 
-    private val listState: MutableLiveData<List<InfoPlayerDto>> = MutableLiveData(emptyList<InfoPlayerDto>())
+    /**
+     * Lista de jogadores carregada da API.
+     * Exibe os resultados da pesquisa na UI.
+     */
+    private val listState: MutableLiveData<List<InfoPlayerDto>> = MutableLiveData(emptyList())
     val uiList: LiveData<List<InfoPlayerDto>> = listState
 
+    /**
+     * Lista de posições disponíveis para filtrar (incluindo opção 'null' para "Todas").
+     * Usado para popular o Dropdown de posições.
+     */
     private val listPositions: MutableLiveData<List<Position?>> = MutableLiveData(emptyList())
     val uiListPositions: LiveData<List<Position?>> = listPositions
 
+    /**
+     * Estado geral da UI (Loading e Erros de Rede/API).
+     */
+    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
+    val uiState: StateFlow<UiState> = _uiState
+
     init {
-        //TODO: Carregar a lista da API
-        listState.value = InfoPlayerDto.createExamplePlayerList()
+        loadingListPlayer()
+
         listPositions.value = listOf(
             null,
             Position.FORWARD,
@@ -43,7 +87,7 @@ class ListPlayerViewModel(
         )
     }
 
-    //Metodos
+    // --- Métodos de Atualização de Filtros (Data Binding) ---
     fun onNameChange(name: String) {
         filterState.value = filterState.value!!.copy(name = name)
     }
@@ -72,32 +116,96 @@ class ListPlayerViewModel(
         filterState.value = filterState.value!!.copy(maxSize = maxSize)
     }
 
+    /**
+     * Aplica os filtros definidos e recarrega a lista de jogadores.
+     *
+     * Antes de fazer o pedido à API, executa [validateForm]. Se os dados forem inválidos,
+     * o pedido é cancelado e os erros são mostrados na UI.
+     */
     fun filterApply() {
         if(!validateForm()) {
             return
         }
-        //TODO: Carregar a lista filtrada da API
+
+        loadingListPlayer()
     }
 
+    /**
+     * Limpa todos os filtros e recarrega a lista completa de jogadores.
+     */
     fun cleanFilters() {
-        filterState.value = FilterListPlayerDto()
-        //TODO: Carregar a lista da API
+        filterState.value = FilterListPlayer()
+        loadingListPlayer()
     }
 
+    /**
+     * Envia um pedido de adesão (convite) para um jogador se juntar à equipa do utilizador autenticado.
+     *
+     * Nota: Esta funcionalidade destina-se apenas a administradores de equipa.
+     *
+     * @param idPlayer O ID do jogador a convidar.
+     */
     fun sendMembershipRequest(idPlayer: String) {
         //TODO: Fazer pedido há API, para a Team mandar o pedido de adesão
     }
 
-    //TODO: Mandar o id na Rota
+    /**
+     * Navega para o perfil detalhado do jogador selecionado.
+     */
     fun showMore(
         idPlayer: String,
         navHostController: NavHostController
     ) {
-        navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
+        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${idPlayer}") {
             launchSingleTop = true
         }
     }
 
+    /**
+     * Tenta recarregar a lista de jogadores em caso de falha.
+     */
+    fun retry() {
+        loadingListPlayer()
+    }
+
+    /**
+     * Executa a chamada assíncrona à API para obter a lista de jogadores filtrada.
+     * Gere os estados de Loading e Erro no [_uiState].
+     */
+    private fun loadingListPlayer() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+
+            try {
+                val response = repository.getListPlayer(filterState.value)
+
+                if (response.isSuccessful && response.body() != null) {
+                    listState.value = response.body()
+                    _uiState.update { it.copy(isLoading = false) }
+                } else {
+                    val errorRaw = response.errorBody()?.string()
+                    val errorMsg = NetworkUtils.parseBackendError(errorRaw)
+                        ?: "Erro desconhecido: ${response.code()}"
+
+                    _uiState.update {
+                        it.copy(isLoading = false, errorMessage = errorMsg)
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Valida os dados introduzidos nos filtros.
+     * Verifica limites de caracteres, intervalos de idade/altura e lógica (Min < Max).
+     * Atualiza o [filterErrorState] com os resultados.
+     *
+     * @return `true` se todos os filtros forem válidos, `false` caso contrário.
+     */
     private fun validateForm(): Boolean {
         val name = filterState.value?.name
         val city = filterState.value?.city

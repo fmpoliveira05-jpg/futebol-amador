@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.match.MatchMakerInfo
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 
 //Vai ter um BackGorundService por tras
 //TODO: Depois adaptar o que for preciso por cuasa do BackGorundService

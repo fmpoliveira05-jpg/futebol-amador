@@ -62,6 +62,7 @@ fun DateRow(date: String) {
         modifier = Modifier.fillMaxWidth()
     )
 }
+
 @Composable
 fun AgeRow(age: Int) {
     InfoRow(

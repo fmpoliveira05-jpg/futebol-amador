@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.runtime.remember
+import kotlin.text.isNullOrEmpty
 
 @Composable
 fun ProfilesImage(
@@ -80,6 +81,25 @@ fun ImageList(
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+@Composable
+fun StringImageList(
+    image: String?
+) {
+    val imageUri = remember(image) {
+        if (image.isNullOrEmpty()) {
+            Uri.EMPTY
+        } else {
+            try {
+                Uri.parse(image)
+            } catch (e: Exception) {
+                Uri.EMPTY
+            }
+        }
+    }
+
+    ImageList(image = imageUri)
 }
 
 @Composable

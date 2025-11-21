@@ -7,13 +7,15 @@ import java.util.UUID
 data class InfoPlayerDto(
     val id: String = "",
     val name: String = "",
-    val image: Uri = Uri.EMPTY,
+    val image: String? = null,
     val address: String = "",
     val age: Int = 0,
     val position: Position,
-    val size: Int = 0,
+    val heigth: Int = 0,
+    val haveTeam: Boolean = false,
 ) {
-    companion object {
+    /*
+    * companion object {
         fun createExamplePlayerList(): List<InfoPlayerDto> {
             val firstNames = listOf(
                 "Diogo", "Bruno", "João", "Rui", "Cristiano", "Pedro",
@@ -40,4 +42,5 @@ data class InfoPlayerDto(
             }
         }
     }
+    * */
 }

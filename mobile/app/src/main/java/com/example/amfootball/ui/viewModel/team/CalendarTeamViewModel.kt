@@ -10,7 +10,7 @@ import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
 

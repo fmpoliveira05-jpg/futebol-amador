@@ -1,6 +1,5 @@
 package com.example.amfootball.navigation
 
-import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -21,8 +20,8 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
@@ -48,8 +47,10 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
+import com.example.amfootball.utils.extensions.composableProtected
 
 
 @Composable
@@ -57,23 +58,14 @@ fun MainNavigation() {
     val globalNavController = rememberNavController()
 
     var isLoggedIn by remember { mutableStateOf(false) }
-    var sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
+    val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
-    var currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
+    val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
 
     if (currentUserId != null){
         isLoggedIn = true
     }
-    /*
-    val onLogoutClick: () -> Unit = {
-        isLoggedIn = false
-        globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-            popUpTo(0)
-        }
-    }
-
-     */
 
     Scaffold(
         topBar = {
@@ -88,7 +80,6 @@ fun MainNavigation() {
                 onShowBottomSheet = { showBottomSheet = true },
                 currentSelectedRoute = selectedBottomNavRoute,
                 onRouteSelected = { newRoute -> selectedBottomNavRoute = newRoute }
-
             )
         }
     ) { innerPadding ->
@@ -99,7 +90,10 @@ fun MainNavigation() {
         ) {
             homePages(globalNavController = globalNavController)
 
-            pages(globalNavController = globalNavController)
+            pages(
+                globalNavController = globalNavController,
+                sessionManager = sessionManager
+            )
         }
 
         // O BottomSheet fica aqui, fora do NavHost, controlado pelo estado local
@@ -130,10 +124,16 @@ private fun NavGraphBuilder.homePages(globalNavController: NavHostController) {
 /**
  * Função que declara todas as páginas da app
  * */
-private fun NavGraphBuilder.pages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.pages(
+    globalNavController: NavHostController,
+    sessionManager: SessionManager
+) {
     autPages(globalNavController = globalNavController)
 
-    userPages(globalNavController = globalNavController)
+    userPages(
+        globalNavController = globalNavController,
+        sessionManager = sessionManager
+    )
 
     teamPages(globalNavController = globalNavController)
 
@@ -146,7 +146,6 @@ private fun NavGraphBuilder.pages(globalNavController: NavHostController) {
  * Paginas de autentificação
  * */
 private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
-    //Depois meter para os dois verificações para só user não autenticados
     composable(Routes.UserRoutes.LOGIN.route) {
         LoginScreen(globalNavController)
     }
@@ -159,15 +158,23 @@ private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
 /**
  * Paginas do Utilizador
  * */
-private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
-    profilePlayer(globalNavController = globalNavController)
+private fun NavGraphBuilder.userPages(
+    globalNavController: NavHostController,
+    sessionManager: SessionManager
+) {
+    profilePlayer(
+        globalNavController = globalNavController,
+        sessionManager = sessionManager
+    )
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
         ListTeamScreen(navHostController = globalNavController)
     }
 
     composable(Routes.PlayerRoutes.PLAYER_LIST.route) {
-        ListPlayersScreen(navHostController = globalNavController)
+        val viewModel = hiltViewModel<ListPlayerViewModel>()
+
+        ListPlayersScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
     composable(Routes.GeralRoutes.LEADERBOARD.route) {
@@ -178,22 +185,28 @@ private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
     }
 }
 
-private fun NavGraphBuilder.profilePlayer(globalNavController: NavHostController) {
+private fun NavGraphBuilder.profilePlayer(
+    globalNavController: NavHostController,
+    sessionManager: SessionManager) {
     composable(route = Routes.UserRoutes.PROFILE.route) {
         val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
         ProfileScreen(viewModel = viewModel)
     }
 
-    composable("${Routes.UserRoutes.PROFILE.route}/{playerId}",
+    composableProtected(
+        route = "${Routes.UserRoutes.PROFILE.route}/{playerId}",
         arguments = listOf(
             navArgument("playerId") { type = NavType.StringType }
-        )
-    ) {
-        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
-        ProfileScreen(viewModel = viewModel)
-    }
+            ProfileScreen(viewModel = viewModel)
+        }
+    )
 }
 
 /**
@@ -284,10 +297,10 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
         FormTeamScreen(navHostController = globalNavController)
     }
 
-    profileTeam(globalNavController = globalNavController)
+    profileTeam()
 }
 
-private fun NavGraphBuilder.profileTeam(globalNavController: NavHostController) {
+private fun NavGraphBuilder.profileTeam() {
     composable(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
         val viewModel = hiltViewModel<ProfileTeamViewModel>()
 

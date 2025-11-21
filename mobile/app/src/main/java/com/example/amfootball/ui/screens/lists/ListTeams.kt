@@ -25,13 +25,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.data.filters.FiltersListTeamDto
+import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.page.MembershipRequestRoutes
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.navigation.objects.page.MembershipRequestRoutes
 import com.example.amfootball.ui.components.buttons.FilterApplyButton
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -59,7 +59,7 @@ import kotlin.String
  * */
 @Composable
 fun ListTeamScreen(navHostController: NavHostController){
-    var filters by remember { mutableStateOf(FiltersListTeamDto()) }
+    var filters by remember { mutableStateOf(FiltersListTeam()) }
     var filtersExpanded by remember { mutableStateOf(false) }
     val listRanks = RankNameDto.generateExampleRanks()
 
@@ -99,8 +99,8 @@ fun ListTeamScreen(navHostController: NavHostController){
  * */
 @Composable
 private fun FiltersListTeamContent(
-    filters: FiltersListTeamDto,
-    onFiltersChange: (FiltersListTeamDto) -> Unit,
+    filters: FiltersListTeam,
+    onFiltersChange: (FiltersListTeam) -> Unit,
     listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier
 ) {
@@ -332,7 +332,7 @@ private fun ListTeamTrailing(
  * */
 private fun filterTeamList(
     teams: List<ItemTeamInfoDto>,
-    filters: FiltersListTeamDto
+    filters: FiltersListTeam
 ): List<ItemTeamInfoDto> {
     val minPoints = filters.minPoint
     val maxPoints = filters.maxPoint

@@ -17,8 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.amfootball.navigation.Objects.AppRouteInfo
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.AppRouteInfo
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.buttons.NavigateButton
 
 @Composable

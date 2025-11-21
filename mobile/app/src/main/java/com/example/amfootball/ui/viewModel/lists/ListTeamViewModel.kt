@@ -4,20 +4,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FiltersListTeamDto
+import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import kotlin.text.ifEmpty
 
 class ListTeamViewModel(): ViewModel() {
     private val listState: MutableLiveData<List<ItemTeamInfoDto>> = MutableLiveData(emptyList<ItemTeamInfoDto>())
     val listTeams: LiveData<List<ItemTeamInfoDto>> = listState
     
-    private val filterState: MutableLiveData<FiltersListTeamDto> = MutableLiveData(FiltersListTeamDto())
+    private val filterState: MutableLiveData<FiltersListTeam> = MutableLiveData(FiltersListTeam())
 
-    val uiFilterState: LiveData<FiltersListTeamDto> = filterState
+    val uiFilterState: LiveData<FiltersListTeam> = filterState
 
     private val listRanks: MutableLiveData<List<RankNameDto>> = MutableLiveData(emptyList<RankNameDto>())
     
@@ -143,7 +143,7 @@ class ListTeamViewModel(): ViewModel() {
     }
 
     fun clearFilters() {
-        filterState.value = FiltersListTeamDto()
+        filterState.value = FiltersListTeam()
         listState.value = listState.value
     }
 

@@ -18,16 +18,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
-import com.example.amfootball.data.filters.FilterListPlayerDto
+import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -38,10 +40,10 @@ import com.example.amfootball.ui.components.lists.AgeRow
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
@@ -50,9 +52,10 @@ import com.example.amfootball.utils.UserConst
 @Composable
 fun ListPlayersScreen(
     navHostController: NavHostController,
-    viewModel: ListPlayerViewModel = viewModel()
+    viewModel: ListPlayerViewModel = hiltViewModel()
 ) {
-    val filters by viewModel.uiFilters.observeAsState(initial = FilterListPlayerDto())
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val filters by viewModel.uiFilters.observeAsState(initial = FilterListPlayer())
     val filtersError by viewModel.filterError.observeAsState(initial = FilterPlayersErrors())
     val list by viewModel.uiList.observeAsState(initial = emptyList())
     val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
@@ -73,41 +76,48 @@ fun ListPlayersScreen(
 
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    ListSurface(
-        list = list,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                content = { paddingModifier ->
-                    FilterListPlayerContent(
-                        filters = filters,
-                        filtersError = filtersError,
-                        filterActions = filterActions,
-                        listPosition = listPosition,
-                        modifier = paddingModifier
-                    )
-                }
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg= uiState.errorMessage,
+        retry = { viewModel.retry() },
+        content = {
+            ListSurface(
+                list = list,
+                filterSection = {
+                    FilterSection(
+                        isExpanded = filtersExpanded,
+                        onToggleExpand = { filtersExpanded = !filtersExpanded },
+                        content = { paddingModifier ->
+                            FilterListPlayerContent(
+                                filters = filters,
+                                filtersError = filtersError,
+                                filterActions = filterActions,
+                                listPosition = listPosition,
+                                modifier = paddingModifier
+                            )
+                        }
 
+                    )
+                },
+                listItems = { player ->
+                    ItemListPlayer(
+                        player = player,
+                        sendMemberShipRequest = { viewModel.sendMembershipRequest(player.id) },
+                        showMore = { viewModel.showMore(
+                            idPlayer = player.id,
+                            navHostController = navHostController)
+                        }
+                    )
+                },
+                messageEmptyList = stringResource(id = R.string.list_player_empty)
             )
-        },
-        listItems = {  player ->
-            ItemListPlayer(
-                player = player,
-                sendMemberShipRequest = { viewModel.sendMembershipRequest(player.id) },
-                showMore = { viewModel.showMore(
-                    idPlayer = player.id,
-                    navHostController = navHostController)
-                }
-            )
-        },
-        messageEmptyList = stringResource(id = R.string.list_player_empty)
+        }
     )
 }
 
 @Composable
 private fun FilterListPlayerContent(
-    filters: FilterListPlayerDto,
+    filters: FilterListPlayer,
     filtersError: FilterPlayersErrors,
     filterActions: FilterListPlayersActions,
     listPosition: List<Position?>,
@@ -244,7 +254,7 @@ private fun ItemListPlayer(
         item = player,
         title = { it.name },
         leading = {
-            ImageList(
+            StringImageList(
                 image = player.image,
             )
         },
@@ -253,7 +263,7 @@ private fun ItemListPlayer(
                 AgeRow(age = player.age)
                 AddressRow(address = player.address)
                 PositionRow(position = player.position)
-                SizeRow(size = player.size)
+                SizeRow(size = player.heigth)
             }
         },
         trailing = {
@@ -261,7 +271,9 @@ private fun ItemListPlayer(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
-                ListSendMemberShipRequestButton(sendMemberShipRequest = sendMemberShipRequest)
+                if (!player.haveTeam) {
+                    ListSendMemberShipRequestButton(sendMemberShipRequest = sendMemberShipRequest)
+                }
 
                 ShowMoreInfoButton(
                     showMoreDetails = showMore,

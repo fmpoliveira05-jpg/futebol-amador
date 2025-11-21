@@ -1,21 +1,5 @@
 package com.example.amfootball.navigation
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.PersonAdd
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.amfootball.R
-import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.AppRouteInfo
-import com.example.amfootball.ui.components.buttons.BackButton
-
 /*
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

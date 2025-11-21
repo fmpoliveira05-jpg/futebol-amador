@@ -36,8 +36,7 @@ import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.components.inputFields.DatePickerModalInput
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.utils.NetworkUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -92,7 +93,13 @@ class ProfileTeamViewModel @Inject constructor(
 
                     _uiState.update { it.copy(isLoading = false) }
                 } else {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Erro ao carregar: ${response.code()}") }
+                    val errorRaw = response.errorBody()?.string()
+                    val errorMsg = NetworkUtils.parseBackendError(errorRaw)
+                        ?: "Erro desconhecido: ${response.code()}"
+
+                    _uiState.update {
+                        it.copy(isLoading = false, errorMessage = errorMsg)
+                    }
                 }
             } catch (e: Exception) {
                 _uiState.update {

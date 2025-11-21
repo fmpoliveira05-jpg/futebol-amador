@@ -3,18 +3,25 @@ package com.example.amfootball.ui.viewModel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.tasks.await
-import com.example.amfootball.App
 import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.RetrofitInstance
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
-
-class AuthViewModel : ViewModel() {
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val sessionManager: SessionManager
+) : ViewModel() {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val apiService = RetrofitInstance.api
 
-    private val sessionManager = App.sessionManager
+    private val _isUserLoggedIn = MutableStateFlow(sessionManager.getAuthToken() != null)
+    val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
             // fazer login no Firebase
@@ -39,7 +46,7 @@ class AuthViewModel : ViewModel() {
             sessionManager.saveAuthToken(token)
 
             // busca os dados na api backend (descomentar quando a rota estiver pronta)
-
+            _isUserLoggedIn.value = true
              //val profile = apiService.getMyProfile("Bearer $token")
             // sessionManager.saveUserProfile(profile)
 
@@ -55,6 +62,7 @@ class AuthViewModel : ViewModel() {
     fun logoutUser() {
         firebaseAuth.signOut()
         sessionManager.clearSession()
+        _isUserLoggedIn.value = false
     }
 
     /**
@@ -91,7 +99,7 @@ class AuthViewModel : ViewModel() {
             sessionManager.saveAuthToken(token)
 
             // criar o perfil no backend
-            val response = apiService.createProfile( profile)
+            val response = apiService.createProfile(profile)
 
             if (!response.isSuccessful) {
                 throw Exception("Falha ao criar perfil: ${response.code()}")
