@@ -6,17 +6,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.theme.AMFootballTheme
@@ -28,15 +27,23 @@ import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ProfileScreen(
-    navController: NavHostController,
-    viewModel: ProfilePlayerViewModel = viewModel()
+    viewModel: ProfilePlayerViewModel = hiltViewModel()
 ) {
-    val profileData by viewModel.uiProfilePlayer.observeAsState(initial = PlayerProfileDto.createExample())
+    val profile by viewModel.uiProfilePlayer.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val errorMsg by viewModel.errorMessage.collectAsStateWithLifecycle()
 
-    ProfileScreenContent(
-        profileData = profileData,
-        modifier = Modifier
-            .padding(16.dp)
+    LoadingPage(
+        isLoading = isLoading,
+        errorMsg= errorMsg,
+        retry= { viewModel.retry() },
+        content = {
+            ProfileScreenContent(
+                profileData = profile!!,
+                modifier = Modifier
+                    .padding(16.dp)
+            )
+        }
     )
 }
 
@@ -134,6 +141,6 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 @Composable
 fun ProfileScreenPreview() {
     AMFootballTheme {
-        ProfileScreen(navController = rememberNavController())
+        ProfileScreen()
     }
 }

@@ -60,7 +60,7 @@ fun LeaderboardScreen(
                 LeaderBoardContent(
                     team = team,
                     showInfoTeam = { viewModel.showInfoTeam(
-                        idTeam = team.Team.id,
+                        idTeam = team.team.id,
                         navHostController = navHostController)
                     }
                 )
@@ -92,25 +92,25 @@ private fun LeaderBoardContent(
     ListItem(
         overlineContent = {
             Text(
-                text = "#${team.Position}",
+                text = "#${team.position}",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold
             )
         },
         headlineContent = {
-            Text(text = team.Team.name)
+            Text(text = team.team.name)
         },
         supportingContent = {
             Text(
                 text = buildAnnotatedString {
                     pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append("Rank: ${team.Team.nameRank}")
+                    append("Rank: ${team.team.nameRank}")
                     pop()
 
                     append("  ")
 
                     pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    append("(${team.Team.currentPoints} Pts)")
+                    append("(${team.team.currentPoints} Pts)")
                     pop()
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -120,7 +120,7 @@ private fun LeaderBoardContent(
         },
         leadingContent = {
             ImageList(
-                image = team.Team.logoTeam
+                image = team.team.logoTeam
             )
         },
         trailingContent = {

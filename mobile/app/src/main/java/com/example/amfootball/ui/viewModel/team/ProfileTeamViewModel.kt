@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
 
 class ProfileTeamViewModel: ViewModel() {
-    private val infoTeam: MutableLiveData<ProfileTeamInfoDto> = MutableLiveData(ProfileTeamInfoDto())
+    private val infoTeam: MutableLiveData<ProfileTeamInfoDto> = MutableLiveData(null)
     val uiInfoTeam: LiveData<ProfileTeamInfoDto> = infoTeam
 
     init{

@@ -13,21 +13,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImage
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
-import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 
 @Composable
 fun ProfileTeamScreen(
-    navHostController: NavHostController,
-    //idTeam: String,
     viewModel: ProfileTeamViewModel = viewModel()
 ) {
     val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamInfoDto.profileExempleTeam())
@@ -85,17 +80,39 @@ private fun FieldProfileTeam(
         isReadOnly = true,
     )
 
+    TextFieldOutline(
+        label = "Data de Fundação",
+        value = profileInfo.foundationDate.toString(),
+        isSingleLine = true,
+        isReadOnly = true,
+    )
+
+    TextFieldOutline(
+        label = "Rank",
+        value = profileInfo.rank,
+        isSingleLine = true,
+        isReadOnly = true,
+    )
+
+    TextFieldOutline(
+        label = "Total Pontos",
+        value = profileInfo.totalPoints.toString(),
+        isSingleLine = true,
+        isReadOnly = true,
+    )
+
     Text(text = stringResource(id = R.string.label_fields_pitch))
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_name_pitch_team),
-        value = profileInfo.pitch.namePitch,
+        value = profileInfo.pitch,
         minLenght = PitchConst.MIN_NAME_LENGTH,
         maxLenght = PitchConst.MAX_NAME_LENGTH,
         isSingleLine = true,
         isReadOnly = true,
     )
 
-    TextFieldOutline(
+    /* Trocar isto pelo mapa com a morada
+    * TextFieldOutline(
         label = stringResource(id = R.string.label_field_address_pitch_team),
         value = profileInfo.pitch.addressPitch,
         minLenght = GeneralConst.MIN_ADDRESS_LENGTH,
@@ -103,6 +120,7 @@ private fun FieldProfileTeam(
         isSingleLine = true,
         isReadOnly = true,
     )
+    * */
 }
 
 @Preview(
@@ -117,9 +135,5 @@ private fun FieldProfileTeam(
 )
 @Composable
 fun ProfileTeamScreenPreview() {
-//Depois meter Id valido, de exemplo ou da BD
-    ProfileTeamScreen(
-        //idTeam = "2",
-        navHostController = rememberNavController()
-    )
+    ProfileTeamScreen()
 }
