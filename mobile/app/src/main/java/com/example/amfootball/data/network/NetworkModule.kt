@@ -14,6 +14,7 @@ import javax.inject.Singleton
 object NetworkModule {
     private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 
+    //private const val BASE_URL = "https://amfootballapi.duckdns.org/swagger/index.html"
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {

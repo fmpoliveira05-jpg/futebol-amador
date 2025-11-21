@@ -159,6 +159,12 @@ private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
  * Paginas do Utilizador
  * */
 private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
+    composable(route = Routes.UserRoutes.PROFILE.route) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
+    }
+
     composable("${Routes.UserRoutes.PROFILE.route}/{playerId}",
         arguments = listOf(
             navArgument("playerId") { type = NavType.StringType }

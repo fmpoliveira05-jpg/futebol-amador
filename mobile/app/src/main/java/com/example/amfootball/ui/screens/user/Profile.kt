@@ -17,7 +17,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.lists.ProfilesImage
+import com.example.amfootball.ui.components.lists.ProfilesImageString
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 import com.example.amfootball.utils.GeneralConst
@@ -38,11 +38,13 @@ fun ProfileScreen(
         errorMsg= errorMsg,
         retry= { viewModel.retry() },
         content = {
-            ProfileScreenContent(
-                profileData = profile!!,
-                modifier = Modifier
-                    .padding(16.dp)
-            )
+            if(profile != null) {
+                ProfileScreenContent(
+                    profileData = profile!!,
+                    modifier = Modifier
+                        .padding(16.dp)
+                )
+            }
         }
     )
 }
@@ -65,7 +67,7 @@ private fun ProfileScreenContent(
 
 @Composable
 private fun TextFieldProfile(profileData: PlayerProfileDto) {
-    ProfilesImage(
+    ProfilesImageString(
         image = profileData.icon,
         modifier = Modifier.fillMaxWidth()
     )
@@ -80,7 +82,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.date_of_birthday),
-        value = profileData.dateOfBirthday.toString(),
+        value = profileData.dateOfBirth,
         isReadOnly = true
     )
 
@@ -117,7 +119,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.player_size),
-        value = profileData.size.toString() + " cm",
+        value = profileData.height.toString() + " cm",
         minLenght = PlayerConst.MIN_HEIGHT,
         maxLenght = PlayerConst.MAX_HEIGHT,
         isReadOnly = true

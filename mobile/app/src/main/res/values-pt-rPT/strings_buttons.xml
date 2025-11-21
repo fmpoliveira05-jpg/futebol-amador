@@ -12,6 +12,9 @@
     <string name="button_back">Voltar</string>
     <string name="button_back_description">Botão que permite voltar para a pagina anterior</string>
 
+    <string name="button_try_again">Tentar Novamente</string>
+    <string name="button_try_again_description">Botão que permite voltar a recarregar os dados</string>
+    
     <string name="accept_button">Aceitar</string>
     <string name="accept_button_description">Botão que permite aceitar algo</string>
 

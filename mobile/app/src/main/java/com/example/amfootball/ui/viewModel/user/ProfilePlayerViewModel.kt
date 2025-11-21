@@ -17,12 +17,12 @@ class ProfilePlayerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: PlayerRepository
 ) : ViewModel() {
-    private val profilePlayer: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(PlayerProfileDto())
+    private val profilePlayer: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(null)
     val uiProfilePlayer: StateFlow<PlayerProfileDto?> = profilePlayer.asStateFlow()
 
     val playerId: String? = savedStateHandle["playerId"]
 
-    private val isLoadingState = MutableStateFlow(false)
+    private val isLoadingState = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = isLoadingState.asStateFlow()
 
     private val errorMessageState = MutableStateFlow<String?>(null)
@@ -33,7 +33,9 @@ class ProfilePlayerViewModel @Inject constructor(
         if(playerId != null) {
             loadPlayerProfile(playerId)
         } else {
-            errorMessageState.value = "ID de jogador não encontrado."
+            //TODO: Carregar dados da sessão (que atualmente não dá por causa do getUserProfile)
+            loadPlayerProfile("iIbMFBATjAYjPWu5dC8ezoEyzw12")
+            isLoadingState.value = false
         }
     }
 
