@@ -1,5 +1,6 @@
 using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Pitch;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Rank;
@@ -83,6 +84,7 @@ namespace Infrastructure.Repositories
         {
             return await DbContext.Team
                 .Where(t => t.Id == teamId)
+                .Include(t=> t.Pitch)
                 .Select(t => new TeamDetailsDto
                 {
                     Id = t.Id,
@@ -91,7 +93,11 @@ namespace Infrastructure.Repositories
                     FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
-                    PitchDto = $"{t.Pitch.Name}, {t.Pitch.Address}",
+                    PitchDto = new PitchDto
+                    {
+                        Name = t.Pitch.Name,
+                        Address = t.Pitch.Address,
+                    },
                     Players = t.Members.Select(player => new PlayerDetailsDto
                     {
                         PlayerId = player.Id,
