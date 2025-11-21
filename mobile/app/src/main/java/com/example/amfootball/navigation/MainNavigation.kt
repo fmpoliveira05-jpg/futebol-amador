@@ -28,7 +28,7 @@ import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.components.NavBar.MainTopAppBar
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
-import com.example.amfootball.ui.screens.Chat.GroupChatFootballPreview
+import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -48,7 +48,7 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
-import com.example.amfootball.ui.viewModel.ChatViewModel
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 
@@ -295,7 +295,7 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
         )) {
         val viewModel = hiltViewModel<ChatViewModel>()
 
-        ProfileScreen(viewModel = viewModel)
+        ChatScreen(chatViewModel = viewModel)
     }
 
 }

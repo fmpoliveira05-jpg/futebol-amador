@@ -41,21 +41,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.data.dtos.chat.MessageDto
-import com.example.amfootball.ui.viewModel.ChatViewModel
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    chatViewModel: ChatViewModel = viewModel(),
-    roomId: String,
+    chatViewModel: ChatViewModel = hiltViewModel(),
     ) {
     var messageText by remember { mutableStateOf("") }
     //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = "Jane Doe") {
+            ChatTopBar(contactName = chatViewModel.getChatRoomName()) {
             }
         },
         content = { paddingValues ->
@@ -64,8 +64,8 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                LaunchedEffect(key1 = roomId) {
-                    chatViewModel.listenForMessages(roomId)
+                LaunchedEffect(key1 = chatViewModel.chatRoomId) {
+                    chatViewModel.listenForMessages()
                 }
 
                 val messages by chatViewModel.messages.collectAsState()
@@ -86,8 +86,8 @@ fun ChatScreen(
                     onMessageChange = { messageText = it },
                     onSendClick = {
                         if (messageText.isNotBlank()) {
+                            chatViewModel.sendMessage(messageText)
                             messageText = ""
-                            chatViewModel.sendMessage(roomId, messageText)
                         }
                     }
                 )

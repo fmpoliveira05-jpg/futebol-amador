@@ -25,9 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.ItemListChatDto
 import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.viewModel.ChatViewModel
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,7 +37,6 @@ fun ChatListScreen(
     navController: NavHostController,
     viewModel: ChatViewModel = viewModel()
 ) {
-    val listChat = ItemListChatDto.generateListChat()
     val rooms by viewModel.rooms.collectAsState()
     Scaffold(
         /*
@@ -59,7 +59,7 @@ fun ChatListScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            items(listChat) { chat ->
+            items(rooms) { chat ->
                 ChatItem(chat, navController = navController)
                 HorizontalDivider(
                     modifier = Modifier.padding(start = 80.dp),
@@ -72,13 +72,13 @@ fun ChatListScreen(
 }
 
 @Composable
-fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController: NavHostController) {
+//incluir em chatroom futuramente alguns campos do ItemListChatDto
+fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                //Alterar para a rota com parametros como o artur disse
-                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route)
+                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route.replaceAfter("/", chat.id ))
             }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -98,7 +98,7 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                     )
                 }
             }
-
+            /*
             if (chat.isOnline) {
                 Box(
                     modifier = Modifier
@@ -111,6 +111,8 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                         .background(Color(0xFF4CAF50), CircleShape)
                 )
             }
+
+             */
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -122,6 +124,7 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
+            /*
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = chat.lastMessage,
@@ -130,8 +133,10 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-        }
 
+             */
+        }
+        /*
         Spacer(modifier = Modifier.width(8.dp))
 
         Column(horizontalAlignment = Alignment.End) {
@@ -160,6 +165,7 @@ fun ChatItem(chat: ItemListChatDto, modifier: Modifier = Modifier, navController
                 }
             }
         }
+         */
     }
 }
 /*
