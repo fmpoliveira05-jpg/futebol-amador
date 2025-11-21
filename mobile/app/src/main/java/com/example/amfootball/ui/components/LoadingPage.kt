@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.example.amfootball.R
 
 @Composable
 fun LoadingPage(
@@ -50,6 +52,8 @@ fun RetryButton(
 ) {
     Column {
         Text(text = errorMsg!!, color = Color.Red)
-        Button(onClick = retry) { Text("Tentar Novamente") }
+        Button(onClick = retry) {
+            Text(text = stringResource(id = R.string.button_try_again))
+        }
     }
 }

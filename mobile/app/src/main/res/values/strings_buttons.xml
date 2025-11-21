@@ -12,6 +12,9 @@
     <string name="button_back">Back</string>
     <string name="button_back_description">Button that allows you to go back to the previous page</string>
 
+    <string name="button_try_again">Try Again</string>
+    <string name="button_try_again_description">Button that allows reloading the data</string>
+
     <string name="accept_button">Accept</string>
     <string name="accept_button_description">Button that allows you to accept something</string>
 
