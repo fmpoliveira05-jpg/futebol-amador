@@ -17,7 +17,5 @@ namespace Application.Hubs
         public string? FirstAdminConnectionId { get; set; } //Guardar Connection string do 1º admin
 
         public Matches? Match { get; set; }
-
-        public bool? IsCoincides { get; set; }
     }
 }

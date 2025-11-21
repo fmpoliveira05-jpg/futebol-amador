@@ -3,12 +3,12 @@ using Application.Interfaces.Hub;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
 {
-    //Descomentar isto quando houver aut para so pessoas autenticadas acederem
-    //[Authorize]
+    [Authorize]
     public class StartMatchHub : Hub<IStartMatchHub>
     {
         private readonly IManagerStartMatchService startMatchManager;
@@ -124,7 +124,6 @@ namespace Api.Hubs
 
             return false;
         }
-
         private static string GetGroupName(Guid idMatch)
         {
             return ModelConstants.StartMatchHubConst.PrefixGroupName + idMatch;
