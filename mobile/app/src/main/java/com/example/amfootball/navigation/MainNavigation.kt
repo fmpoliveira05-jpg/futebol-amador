@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +17,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.ui.screens.user.LoginScreen
 import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.navArgument
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
@@ -45,6 +48,7 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 
 @Composable
@@ -155,8 +159,19 @@ private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
  * Paginas do Utilizador
  * */
 private fun NavGraphBuilder.userPages(globalNavController: NavHostController) {
-    composable(Routes.UserRoutes.PROFILE.route) {
-        ProfileScreen(navController = globalNavController)
+    composable(route = Routes.UserRoutes.PROFILE.route) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
+    }
+
+    composable("${Routes.UserRoutes.PROFILE.route}/{playerId}",
+        arguments = listOf(
+            navArgument("playerId") { type = NavType.StringType }
+        )) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
     }
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
@@ -264,35 +279,8 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
     }
 
     composable(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
-        ProfileTeamScreen(navHostController = globalNavController)
+        ProfileTeamScreen()
     }
-    //Esta forma provavelmente vai ser trocada pela a do Hitl
-    /*
-     composable(
-        route = CrudTeamRoutes.PROFILE_TEAM_URL,
-        arguments = listOf(
-            navArgument(CrudTeamRoutes.ARG_TEAM_ID) {
-                type = NavType.StringType
-            }
-        )
-    ) { navBackStackEntry ->
-
-        val idTeam = navBackStackEntry.arguments?.getString(CrudTeamRoutes.ARG_TEAM_ID)
-
-        if (!idTeam.isNullOrBlank()) {
-            ProfileTeamScreen(
-                navHostController = globalNavController,
-                idTeam = idTeam
-            )
-        } else {
-            //Posso depois aqui fazer algo personalizado
-            print("Error")
-            globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-                popUpTo(Routes.GeralRoutes.HOMEPAGE.route) { inclusive = true }
-            }
-        }
-    }
-    * */
 }
 
 private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {

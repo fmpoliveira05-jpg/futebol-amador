@@ -1,8 +1,8 @@
 package com.example.amfootball.data.dtos.leadboard
 
 data class LeadboardDto(
-    val Position: Int,
-    val Team: InfoTeamLeadboard
+    val position: Int,
+    val team: InfoTeamLeadboard
 ) {
     companion object {
         fun generateLeadboardExample(): List<LeadboardDto> {
@@ -20,8 +20,8 @@ data class LeadboardDto(
 
                     add(
                         LeadboardDto(
-                            Position = i,
-                            Team = InfoTeamLeadboard(
+                            position = i,
+                            team = InfoTeamLeadboard(
                                 id = "t-$i",
                                 name = "Equipa Exemplo $i",
                                 currentPoints = points,

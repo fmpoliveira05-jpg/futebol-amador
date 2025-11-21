@@ -17,6 +17,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import androidx.compose.runtime.remember
 
 @Composable
 fun ProfilesImage(
@@ -34,6 +35,31 @@ fun ProfilesImage(
             sizeIamge = 100.dp,
         )
     }
+}
+
+@Composable
+fun ProfilesImageString(
+    image: String?,
+    contentDescription: String? = "",
+    modifier: Modifier = Modifier
+) {
+    val imageUri = remember(image) {
+        if (image.isNullOrEmpty()) {
+            Uri.EMPTY
+        } else {
+            try {
+                Uri.parse(image)
+            } catch (e: Exception) {
+                Uri.EMPTY
+            }
+        }
+    }
+
+    ProfilesImage(
+        image = imageUri,
+        contentDescription = contentDescription,
+        modifier = modifier
+    )
 }
 
 @Composable

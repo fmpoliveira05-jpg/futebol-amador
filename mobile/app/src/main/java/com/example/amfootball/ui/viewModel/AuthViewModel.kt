@@ -15,7 +15,6 @@ class AuthViewModel : ViewModel() {
     private val apiService = RetrofitInstance.api
 
     private val sessionManager = App.sessionManager
-
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
             // fazer login no Firebase
