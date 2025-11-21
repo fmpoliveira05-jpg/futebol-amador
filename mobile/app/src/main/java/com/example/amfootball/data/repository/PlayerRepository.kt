@@ -1,5 +1,6 @@
 package com.example.amfootball.data.repository
 
+import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.network.ApiBackend
 import retrofit2.Response
@@ -13,4 +14,10 @@ class PlayerRepository @Inject constructor(
     ): Response<PlayerProfileDto> {
         return api.getPlayerProfile(playerId = playerId)
     }
+
+    /**
+     * suspend fun getListPlayer(): Response<List<InfoPlayerDto>> {
+     *         return api
+     *     }
+     * */
 }

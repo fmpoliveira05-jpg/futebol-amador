@@ -12,10 +12,13 @@ import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.navigation.Objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
+import com.example.amfootball.data.repository.PlayerRepository
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 
-class ListPlayerViewModel(): ViewModel() {
+class ListPlayerViewModel(
+    private val repository: PlayerRepository
+): ViewModel() {
     private val filterState: MutableLiveData<FilterListPlayerDto> = MutableLiveData(FilterListPlayerDto())
     val uiFilters: LiveData<FilterListPlayerDto> = filterState
 

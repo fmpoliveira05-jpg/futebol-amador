@@ -96,10 +96,10 @@ class ListMembersViewModel(): ViewModel() {
 
     //TODO: Mandar como parametro o idUser
     fun onShowMoreInfo(
-        idUser: String,
+        playerId: String,
         navHostController: NavHostController
     ) {
-        navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
+        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/{${playerId}}") {
             launchSingleTop = true
         }
     }
