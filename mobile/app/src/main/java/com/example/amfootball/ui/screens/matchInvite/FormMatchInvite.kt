@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -120,7 +120,7 @@ private fun FieldsSendMatchInvite(
 
     SubmitFormButton(
         onClick = { actions.onSubmitForm(navHostController) },
-        imageButton = Icons.Default.Send,
+        imageButton = Icons.AutoMirrored.Filled.Send,
         text = stringResource(R.string.button_send_match_invite),
         contentDescription = stringResource(id = R.string.button_description_send_match_invite)
     )

@@ -3,6 +3,7 @@ package com.example.amfootball.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
@@ -58,15 +60,13 @@ import com.example.amfootball.utils.extensions.composableProtected
 fun MainNavigation() {
     val globalNavController = rememberNavController()
 
-    var isLoggedIn by remember { mutableStateOf(false) }
+    val authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
+    val isLoggedIn by authViewModel.isUserLoggedIn.collectAsState()
+
     val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
-    val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
-
-    if (currentUserId != null){
-        isLoggedIn = true
-    }
+    //val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
 
     Scaffold(
         topBar = {
@@ -93,7 +93,8 @@ fun MainNavigation() {
 
             pages(
                 globalNavController = globalNavController,
-                sessionManager = sessionManager
+                sessionManager = sessionManager,
+                authViewModel = authViewModel
             )
         }
 
@@ -127,9 +128,13 @@ private fun NavGraphBuilder.homePages(globalNavController: NavHostController) {
  * */
 private fun NavGraphBuilder.pages(
     globalNavController: NavHostController,
-    sessionManager: SessionManager
+    sessionManager: SessionManager,
+    authViewModel: AuthViewModel
 ) {
-    autPages(globalNavController = globalNavController)
+    autPages(
+        globalNavController = globalNavController,
+        authViewModel = authViewModel
+    )
 
     userPages(
         globalNavController = globalNavController,
@@ -146,13 +151,22 @@ private fun NavGraphBuilder.pages(
 /**
  * Paginas de autentificação
  * */
-private fun NavGraphBuilder.autPages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.autPages(
+    globalNavController: NavHostController,
+    authViewModel: AuthViewModel
+) {
     composable(Routes.UserRoutes.LOGIN.route) {
-        LoginScreen(globalNavController)
+        LoginScreen(
+            navHostController = globalNavController,
+            authViewModel = authViewModel
+        )
     }
 
     composable(Routes.UserRoutes.SIGNUP.route) {
-        SignUpScreen(globalNavController)
+        SignUpScreen(
+            navHostController = globalNavController,
+            authViewModel = authViewModel
+        )
     }
 }
 

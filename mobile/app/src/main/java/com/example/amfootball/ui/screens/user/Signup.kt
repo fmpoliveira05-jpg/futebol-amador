@@ -27,7 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
@@ -53,19 +53,26 @@ import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navHostController: NavHostController) {
+fun SignUpScreen(
+    navHostController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     ContentSignUp(
         modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
-        navController = navHostController
+        navController = navHostController,
+        authViewModel = authViewModel
     )
 }
 
 @Composable
-private fun ContentSignUp(modifier: Modifier = Modifier,
-                          navController: NavHostController) {
+private fun ContentSignUp(
+    navController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
@@ -77,7 +84,10 @@ private fun ContentSignUp(modifier: Modifier = Modifier,
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun FieldsSignUp(navHostController: NavHostController) {
+private fun FieldsSignUp(
+    navHostController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     // --- Estados para os campos ---
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -95,7 +105,6 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     // --- ViewModels e Scopes ---
-    val authViewModel: AuthViewModel = viewModel()
     val scope = rememberCoroutineScope()
     val displayDateFormatter = remember {
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())

@@ -12,19 +12,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.chat.ChatRoom
-import com.example.amfootball.data.dtos.chat.ItemListChatDto
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 

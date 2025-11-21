@@ -21,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -31,31 +32,42 @@ import com.example.amfootball.ui.viewModel.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(navHostController: NavHostController){
+fun LoginScreen(
+    navHostController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+){
     ContentLogin(
         modifier = Modifier
             .padding(16.dp),
-        navHostController = navHostController
+        navHostController = navHostController,
+        authViewModel = authViewModel
     )
 }
 
 @Composable
-private fun ContentLogin(modifier: Modifier = Modifier,
-                         navHostController: NavHostController) {
+private fun ContentLogin(navHostController: NavHostController,
+                         authViewModel: AuthViewModel,
+                         modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FieldsLogin(navHostController)
+        FieldsLogin(
+            navHostController = navHostController,
+            authViewModel = authViewModel
+        )
     }
 }
 
 @Composable
-private fun FieldsLogin(navHostController: NavHostController) {
+private fun FieldsLogin(
+    navHostController: NavHostController,
+    authViewModel: AuthViewModel
+) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val authViewModel: AuthViewModel = viewModel()
 
     // --- 2. Obter um CoroutineScope para chamar funções 'suspend' ---
     val scope = rememberCoroutineScope()
