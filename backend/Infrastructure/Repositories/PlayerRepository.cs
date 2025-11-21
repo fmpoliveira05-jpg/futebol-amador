@@ -64,7 +64,6 @@ namespace Infrastructure.Repositories
         public async Task<List<InfoPlayerDto?>> GetPlayersList(FilterPlayersWithoutTeamDto? filters)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
-            var list = new List<InfoPlayerDto?>();
             var query = context.Player.AsQueryable();
 
             if (filters != null)
@@ -111,19 +110,19 @@ namespace Infrastructure.Repositories
                 }
             }
 
-            list = await query
+            var list = await query
                 .Select(p => new InfoPlayerDto
                 {
                     Id = p.Id,
                     Name = p.Name,
                     Address = p.Address,
-                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) / 365,
                     Heigth = p.Height,
                     Position = p.Position,
                 })
                 .ToListAsync();
 
-            return list; 
+            return list!; 
         }
     }
 }
