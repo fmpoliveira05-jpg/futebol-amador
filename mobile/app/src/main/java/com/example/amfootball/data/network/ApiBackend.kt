@@ -21,7 +21,7 @@ interface ApiBackend {
     @POST("api/Player/create-profile")
     suspend fun createProfile(
         @Body request: CreateProfileDto
-    ): Response<Unit> //alterar o Unit pra retornar o perfil!
+    ): Response<Unit>
 
     @POST("/api/chat/create-room")
     suspend fun createChatRoom(

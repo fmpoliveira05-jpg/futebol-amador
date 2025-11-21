@@ -6,7 +6,6 @@ import okhttp3.Response
 
 class AuthInterceptor : Interceptor {
 
-    // Obtém o sessionManager estático da classe App
     private val sessionManager = App.sessionManager
 
     override fun intercept(chain: Interceptor.Chain): Response {
