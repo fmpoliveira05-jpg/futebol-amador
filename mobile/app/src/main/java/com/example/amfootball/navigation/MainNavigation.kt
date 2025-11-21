@@ -48,6 +48,7 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.viewModel.ChatViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 
@@ -287,9 +288,16 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
     composable(Routes.PlayerRoutes.CHAT_LIST.route){
         ChatListScreen(navController = globalNavController)
     }
-    composable(Routes.PlayerRoutes.SINGLE_CHAT.route){
-        GroupChatFootballPreview()
+
+    composable(Routes.PlayerRoutes.SINGLE_CHAT.route,
+        arguments = listOf(
+            navArgument(Routes.chatRoomId) { type = NavType.StringType }
+        )) {
+        val viewModel = hiltViewModel<ChatViewModel>()
+
+        ProfileScreen(viewModel = viewModel)
     }
+
 }
 
 private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {

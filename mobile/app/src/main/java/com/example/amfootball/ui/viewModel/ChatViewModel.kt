@@ -10,10 +10,11 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-
+@HiltViewModel
 class ChatViewModel : ViewModel() {
     private val db = Firebase.firestore
     private val myUserId = Firebase.auth.currentUser?.uid
