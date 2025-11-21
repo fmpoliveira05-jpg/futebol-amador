@@ -119,6 +119,7 @@ namespace Infrastructure.Repositories
                     Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) / 365,
                     Heigth = p.Height,
                     Position = p.Position,
+                    HaveTeam = p.IdTeam != null
                 })
                 .ToListAsync();
 

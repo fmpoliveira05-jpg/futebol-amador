@@ -25,6 +25,9 @@ namespace Application.DTOs.Player
         public Position Position { get; set; }
 
         [Required]
-        public int Heigth { get; set; } 
+        public int Heigth { get; set; }
+
+        [Required]
+        public bool HaveTeam { get; set; }
     }
 }
