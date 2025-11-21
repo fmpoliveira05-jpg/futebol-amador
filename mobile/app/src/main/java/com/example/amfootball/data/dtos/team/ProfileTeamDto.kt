@@ -14,7 +14,7 @@ data class ProfileTeamDto(
     val totalPoints: Int,
     val rank: String,
     val logo: String? = null,
-    @SerializedName("PitchDto")
+    @SerializedName("PitchDto", alternate = ["pitchDto"])
     val pitch: PitchInfo = PitchInfo(),
 )
 {

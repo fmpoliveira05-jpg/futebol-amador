@@ -319,7 +319,7 @@ private fun ListTeamTrailing(
         ShowMoreInfoButton(
             showMoreDetails = {
                 val idTeam = team.id
-                navHostController.navigate(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
+                navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/{${idTeam}}") {
                     launchSingleTop = true
                 }
             }

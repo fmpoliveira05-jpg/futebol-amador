@@ -64,6 +64,11 @@ class ProfilePlayerViewModel @Inject constructor(
         }
     }
 
+    fun retry() {
+        val id = playerId ?: "iIbMFBATjAYjPWu5dC8ezoEyzw12"
+        loadPlayerProfile(playerId = id)
+    }
+
     /**
      * Carrega os dados do perfil do jogador da API de forma assíncrona.
      *
@@ -94,10 +99,5 @@ class ProfilePlayerViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun retry() {
-        val id = playerId ?: "iIbMFBATjAYjPWu5dC8ezoEyzw12"
-        loadPlayerProfile(playerId = id)
     }
 }

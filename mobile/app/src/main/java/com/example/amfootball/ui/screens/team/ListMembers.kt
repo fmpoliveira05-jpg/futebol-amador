@@ -97,7 +97,6 @@ fun ListMembersScreen(
                         modifier = paddingModifier
                     )
                 }
-
             )
         },
         listItems = { member ->
@@ -106,9 +105,11 @@ fun ListMembersScreen(
                 promote = { viewModel.onPromoteMember(idPlayer = member.id) },
                 despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
                 remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
-                showMore = { viewModel.onShowMoreInfo(
-                    idUser = member.id,
-                    navHostController = navHostController)
+                showMore = {
+                    viewModel.onShowMoreInfo(
+                        playerId = member.id,
+                        navHostController = navHostController
+                    )
                 }
             )
         },
