@@ -5,7 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.MessageDto
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
