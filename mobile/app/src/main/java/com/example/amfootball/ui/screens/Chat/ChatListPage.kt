@@ -18,11 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.chat.ChatRoom
@@ -35,7 +37,7 @@ import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 @Composable
 fun ChatListScreen(
     navController: NavHostController,
-    viewModel: ChatViewModel = viewModel()
+    viewModel: ChatViewModel = hiltViewModel()
 ) {
     val rooms by viewModel.rooms.collectAsState()
     Scaffold(
@@ -59,13 +61,19 @@ fun ChatListScreen(
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            items(rooms) { chat ->
-                ChatItem(chat, navController = navController)
-                HorizontalDivider(
-                    modifier = Modifier.padding(start = 80.dp),
-                    thickness = 0.5.dp,
-                    color = Color.LightGray.copy(alpha = 0.4f)
-                )
+            if (rooms.isEmpty())
+            {
+                item { Text("Sem chats") }
+            }
+            else {
+                items(rooms) { chat ->
+                    ChatItem(chat, navController = navController)
+                    HorizontalDivider(
+                        modifier = Modifier.padding(start = 80.dp),
+                        thickness = 0.5.dp,
+                        color = Color.LightGray.copy(alpha = 0.4f)
+                    )
+                }
             }
         }
     }
@@ -90,8 +98,9 @@ fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHo
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
                 Box(contentAlignment = Alignment.Center) {
+                    val initial = chat.name.firstOrNull()?.toString()?.uppercase() ?: "?"
                     Text(
-                        text = chat.name.first().toString(),
+                        text = initial,
                         fontSize = 24.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer

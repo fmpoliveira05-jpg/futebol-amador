@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.getField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +31,10 @@ class ChatViewModel @Inject constructor(
     private val _rooms = MutableStateFlow<List<ChatRoom>>(emptyList())
     val rooms = _rooms.asStateFlow() // A UI vai observar isto
 
+    private val _roomName = MutableStateFlow<String>("")
+
+    val roomName = _roomName.asStateFlow()
+
     private val _messages = MutableStateFlow<List<MessageDto>>(emptyList())
     val messages = _messages.asStateFlow() // A UI vai observar isto
 
@@ -39,10 +44,6 @@ class ChatViewModel @Inject constructor(
         if (myUserId != null) {
             fetchMyChatRooms()
         }
-    }
-
-    fun loadSingleChat(ChatRoomId: String) {
-
     }
 
     fun fetchMyChatRooms() {
@@ -64,6 +65,16 @@ class ChatViewModel @Inject constructor(
             return
         }
         messagesListener?.remove()
+
+        db.collection("chatRooms")
+            .document(chatRoomId)
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                _roomName.value = querySnapshot.getField<String>("name") ?: ""
+            }
+            .addOnFailureListener { e ->
+                Log.e("Chat", "Erro ao listar salas", e)
+            }
 
         val query = db.collection("chatRooms").document(chatRoomId)
             .collection("messages")
@@ -104,15 +115,6 @@ class ChatViewModel @Inject constructor(
 
     fun isSentByMe(message: MessageDto): Boolean {
         return message.senderId == myUserId
-    }
-
-    fun getChatRoomName(): String {
-        for (room in _rooms.value) {
-            if (room.id == chatRoomId) {
-                return room.name
-            }
-        }
-        return ""
     }
 
 

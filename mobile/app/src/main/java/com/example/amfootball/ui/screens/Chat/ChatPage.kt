@@ -52,10 +52,11 @@ fun ChatScreen(
     chatViewModel: ChatViewModel = hiltViewModel(),
     ) {
     var messageText by remember { mutableStateOf("") }
+    val roomName by chatViewModel.roomName.collectAsState()
     //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = chatViewModel.getChatRoomName()) {
+            ChatTopBar(contactName = roomName) {
             }
         },
         content = { paddingValues ->
@@ -109,11 +110,12 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(20.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
+                        val initial = contactName.firstOrNull()?.toString()?.uppercase() ?: "?"
                         Text(
-                            text = contactName.first().toString(),
+                            text = initial,
                             color = MaterialTheme.colorScheme.onSecondary,
                             fontWeight = FontWeight.Bold
                         )
@@ -129,16 +131,11 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
                         fontSize = 18.sp
                     )
                     Text(
-                        text = "Online", // Status
+                        text = "Online",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
             }
         },
         actions = {
