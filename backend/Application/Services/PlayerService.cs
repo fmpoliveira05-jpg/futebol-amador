@@ -100,12 +100,17 @@ namespace Application.Services
 
             PlayerDetailsDto playerDetails = new PlayerDetailsDto
             {
+                PlayerId = playerId,
                 Name = player.Name,
+                Email = player.Email,
+                PhoneNumber = player.Phone,
                 DateOfBirth = player.DateOfBirth,
                 Address = player.Address,
                 Position = player.Position,
                 Height = player.Height,
-                IdTeam = player.IdTeam
+                IdTeam = player.IdTeam,
+                IsAdmin = player.IsAdmin,
+                TeamName = player.Team?.Name
             };
 
             return playerDetails;
