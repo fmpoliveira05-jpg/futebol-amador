@@ -61,7 +61,7 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(p => p.IdPlayer == playerId);
         }
 
-        public async Task<List<InfoPlayerDto?>> GetPlayersList(FilterPlayersWithoutTeamDto? filters)
+        public async Task<List<InfoPlayerDto?>> GetPlayersList(FilterTeamDto? filters)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
             var query = context.Player.AsQueryable();

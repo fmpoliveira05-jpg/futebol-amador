@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Filters
 {
-    public class FilterPlayersWithoutTeamDto
+    public class FilterTeamDto
     {
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string? PlayerName { get; set; }

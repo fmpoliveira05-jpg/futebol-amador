@@ -541,7 +541,7 @@ namespace Infrastructure.Repositories
             return query;
         }
 
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterPlayersWithoutTeamDto filters)
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterTeamDto filters)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
 

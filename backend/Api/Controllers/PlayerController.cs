@@ -37,7 +37,6 @@ namespace Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
-
             var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
             var createPlayerResult = await authService.LoginAsync(playerDto.Email, playerDto.Password);
             return CreatedAtAction(
@@ -45,9 +44,21 @@ namespace Api.Controllers
                     new { playerId = newPlayerId },
                     createPlayerResult 
                     );
+            
+
+            /*
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
+
+            var loginResult = await authService.LoginAsync(playerDto.Email, playerDto.Password);
+
+            // nomear a rota do GetPlayer mais abaixo (Name = "GetPlayerById")
+            return CreatedAtRoute("GetPlayerById", new { playerId = newPlayerId }, loginResult);
+            */
         }
 
-        [HttpDelete("{playerId:required}")]
+        [HttpDelete("{playerId}")]
         public async Task<IActionResult> DeletePlayer(string playerId) 
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -56,7 +67,16 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("{playerId:required}")]
+        [HttpGet("listPlayers")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPlayerList([FromQuery] FilterTeamDto? filter)
+        {
+            var listPlayers = await playerService.ListPlayers(filter);
+
+            return Ok(listPlayers);
+        }
+
+        [HttpGet("details/{playerId}")]
         [AllowAnonymous]
         public async Task<IActionResult> GetPlayer(string playerId)
         {
@@ -65,14 +85,7 @@ namespace Api.Controllers
             return Ok(playerDetails);
         }
 
-        [HttpGet("listPlayers")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetPlayerList([FromQuery] FilterPlayersWithoutTeamDto? filter)
-        {
-            var listPlayers = await playerService.ListPlayers(filter);
 
-            return Ok(listPlayers);
-        }
 
         [HttpGet()]
         [Route("get-my-profile")]
@@ -90,7 +103,7 @@ namespace Api.Controllers
             return Ok(playerDetails);
         }
 
-        [HttpPut("{playerId:required}")]
+        [HttpPut("update/{playerId}")]
         [Authorize]
         public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
@@ -166,7 +179,7 @@ namespace Api.Controllers
             return Ok(requests);
         }
 
-        [HttpPost("{playerId:required}/membership-requests/accept")]
+        [HttpPost("{playerId}/membership-requests/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -175,7 +188,7 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
-        [HttpDelete("{playerId:required}/membership-requests/reject/{requestId:guid}")]
+        [HttpDelete("{playerId}/membership-requests/reject/{requestId:guid}")]
         public async Task<IActionResult> RejectMembershipRequest(string playerId, Guid requestId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -184,7 +197,7 @@ namespace Api.Controllers
             return Ok(dto);
         }
 
-        [HttpPost("{playerId:required}/membership-requests/send")]
+        [HttpPost("{playerId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
@@ -197,7 +210,7 @@ namespace Api.Controllers
 
         #region Teams Operations
 
-        [HttpPut("{playerId:required}/leave-team")]
+        [HttpPut("{playerId}/leave-team")]
         public async Task<IActionResult> LeaveTeam(string playerId)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);

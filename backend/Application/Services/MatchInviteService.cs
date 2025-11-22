@@ -6,9 +6,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using FirebaseAdmin.Messaging;
-using System.Numerics;
-using static Google.Rpc.Context.AttributeContext.Types;
 
 namespace Application.Services
 {
@@ -58,23 +55,14 @@ namespace Application.Services
             
             var idReceiver = dto.IdReceiver;
             var gameDate = dto.GameDate;
-            var pitchName = dto.NamePitch;
-            Pitch? pitch = null;
-
+            var isHome = dto.homePitch;
             var receiver = await TeamRepository.GetTeamByIdWithPitchAsync(idReceiver);
             var existingMatchInvite = await MatchInviteRepository.GetMatchInvite(idSender, idReceiver, gameDate);
             var findMatchWith12hours = await MatchRepository.GetMatchProxim12HoursMatchs(idSender, gameDate);
             var sender = await TeamRepository.GetTeamByIdWithPitchAsync(idSender);
-            MatchInviteValidator.ValidateSendMatchInvite(receiver, sender, existingMatchInvite, findMatchWith12hours, pitchName);
-            
-            if (pitchName == receiver.Pitch.Name)
-            {
-                pitch = receiver.Pitch;
-            } 
-            else
-            {
-                pitch = sender.Pitch;
-            }
+            MatchInviteValidator.ValidateSendMatchInvite(receiver, sender, existingMatchInvite, findMatchWith12hours);
+
+            Pitch pitch = GetPitchMatch(isHome, sender.Pitch, receiver.Pitch);
 
             var matchInvite = new MatchInvite(sender, receiver, gameDate, pitch);
 
@@ -88,7 +76,7 @@ namespace Application.Services
                 IdReceiver = matchInvite.IdReceiver,
                 NameReceiver = receiver.Name,
                 GameDate = gameDate,
-                NamePitch = pitchName
+                NamePitch = pitch.Name
             };
 
             var teamAdmins = receiver.Members
@@ -178,17 +166,17 @@ namespace Application.Services
             MatchInviteValidator.ValidateSenderMatchInvite(dto, idSender);
             
             var gameDate = dto.GameDate;
-            var namePitch = dto.NamePitch;
+            var isHome = dto.homePitch;
             var idReceiver = dto.IdReceiver;
-            bool hasChanged = false;
+            var hasChanged = false;
             var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idSender, idReceiver);
             var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
 
             var senderTeam = matchInvite?.Sender;
             var receiverTeam = matchInvite?.Receiver;
-            var pitch = matchInvite?.Pitch;
+            var pitch = GetPitchMatch(isHome, senderTeam.Pitch, receiverTeam.Pitch);
 
-            MatchInviteValidator.ValidateNegociateMatchInvite(namePitch, pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
+            MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
             
             hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); 
 
@@ -202,7 +190,7 @@ namespace Application.Services
                 IdReceiver = matchInvite.IdReceiver,
                 NameReceiver = receiverTeam.Name,
                 GameDate = gameDate,
-                NamePitch = namePitch
+                NamePitch = pitch.Name
             };
 
             await UnityOfWork.SaveChangesAsync();
@@ -268,6 +256,17 @@ namespace Application.Services
             }
 
             return hasChanged;
+        }
+
+        private Pitch GetPitchMatch(bool isHome, Pitch senderPitch, Pitch receiverPitch)
+        {
+            Pitch pitchGame = senderPitch;
+            if(!isHome)
+            {
+                pitchGame = receiverPitch;
+            }
+
+            return pitchGame;
         }
 
         #endregion

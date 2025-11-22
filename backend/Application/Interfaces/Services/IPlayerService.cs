@@ -21,6 +21,6 @@ namespace Application.Interfaces.Services
 
         Task<string> LeaveTeam(string playerId);
 
-        Task<List<InfoPlayerDto?>> ListPlayers(FilterPlayersWithoutTeamDto? filter);
+        Task<List<InfoPlayerDto?>> ListPlayers(FilterTeamDto? filter);
     }
 }

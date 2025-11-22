@@ -321,7 +321,7 @@ namespace Application.Validators
             }
         }
 
-        public void ValidateFiltersGetPlayersWithout(FilterPlayersWithoutTeamDto? filter)
+        public void ValidateFiltersGetPlayersWithout(FilterTeamDto? filter)
         {
             if(filter != null)
             {

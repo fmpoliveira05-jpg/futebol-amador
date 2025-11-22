@@ -58,6 +58,6 @@ namespace Application.Interfaces.Repositories
 
         Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam();
 
-        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterPlayersWithoutTeamDto filters);
+        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterTeamDto filters);
     }
 }

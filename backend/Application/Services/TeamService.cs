@@ -254,7 +254,7 @@ namespace Application.Services
             return await TeamRepository.GetListTeamsByTeamsWithFilters(idTeam, filters);
         }
 
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter)
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterTeamDto filter)
         {
             TeamValidator.ValidateFiltersGetPlayersWithout(filter);
 

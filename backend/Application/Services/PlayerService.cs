@@ -130,7 +130,7 @@ namespace Application.Services
             return playerDetails;
         }
 
-        public async Task<List<InfoPlayerDto?>> ListPlayers(FilterPlayersWithoutTeamDto? filter)
+        public async Task<List<InfoPlayerDto?>> ListPlayers(FilterTeamDto? filter)
         {
             teamValidator.ValidateFiltersGetPlayersWithout(filter);
            

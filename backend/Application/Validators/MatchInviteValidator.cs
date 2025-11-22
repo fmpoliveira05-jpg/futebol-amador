@@ -56,7 +56,7 @@ namespace Application.Validators
 
         //Talvez falte validar se pelo menos o sender já tem um convite igual
         public void ValidateSendMatchInvite(Team receiver, Team sender, MatchInvite matchInviteFind,
-            Matches findMatchWith12hours, string namePitch)
+            Matches findMatchWith12hours)
         {
             const string msgNullErrorReceiver = "A equipa que receberá o convite não foi encontrada";
             ValidateNullTeam(receiver, msgNullErrorReceiver);
@@ -71,11 +71,6 @@ namespace Application.Validators
 
             const string msgError = "Não pode marcar esse jogo a essa hora, porque já tem um a pelo menos 12 horas da data especificada";
             ValidateTwentyHoursMatch(findMatchWith12hours, msgError);
-
-            if (sender.Pitch.Name != namePitch && receiver.Pitch.Name != namePitch)
-            {
-                throw new BusinessRuleException("O campo da partida não pertence a nenhuma das equipas");
-            }
 
             if(receiver.Id == sender.Id)
             {
@@ -124,16 +119,11 @@ namespace Application.Validators
             ValidateSender(sender, matchInvite, errorMsgNullSender, errorMsg);
         }
 
-        public void ValidateNegociateMatchInvite(string namePitch, Pitch pitch, MatchInvite matchInvite, Team senderTeam,
+        public void ValidateNegociateMatchInvite(Pitch pitch, MatchInvite matchInvite, Team senderTeam,
             Team receiverTeam, Matches findMatchWith12hour)
         {
             const string msgNullPitch = "O campo da partida não pode estar a nulo";
             ValidateNullPitch(pitch, msgNullPitch);
-
-            if (pitch.Name != namePitch)
-            {
-                throw new InvalidOperationException("O nome do campo não bate com o da partida");
-            }
 
             if (matchInvite == null)
             {

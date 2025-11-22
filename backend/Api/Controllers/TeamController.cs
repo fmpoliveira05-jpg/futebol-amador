@@ -161,7 +161,7 @@ namespace Api.Controllers
         //Falta fazer validação de autentificação e autorização aqui ou se for no service, no proprio service
         [HttpGet("{teamId}/playersWithoutTeam")]
         [Authorize]
-        public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterPlayersWithoutTeamDto filter)
+        public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterTeamDto filter)
         {
             IEnumerable<PlayerWithoutTeamInfoDto> players;
             var hasFilter = !string.IsNullOrEmpty(filter.PlayerName) ||

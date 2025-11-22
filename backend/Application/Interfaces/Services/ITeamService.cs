@@ -32,6 +32,6 @@ namespace Application.Interfaces.Services
 
         Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam();
 
-        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterPlayersWithoutTeamDto filter);
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterTeamDto filter);
     }
 }
