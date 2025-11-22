@@ -47,6 +47,7 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.utils.PlayerConst
 
@@ -75,12 +76,40 @@ fun ListPlayersScreen(
         )
     )
 
+    ListPlayersContent(
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
+        list = list,
+        filters = filters,
+        filtersError = filtersError,
+        listPosition = listPosition,
+        onRetry = { viewModel.retry() },
+        filterActions = filterActions,
+        onSendMembership = { id -> viewModel.sendMembershipRequest(id) },
+        onShowMore = { id ->
+            viewModel.showMore(idPlayer = id, navHostController = navHostController)
+        }
+    )
+}
+@Composable
+fun ListPlayersContent(
+    isLoading: Boolean,
+    errorMessage: String?,
+    list: List<InfoPlayerDto>,
+    filters: FilterListPlayer,
+    filtersError: FilterPlayersErrors,
+    listPosition: List<Position?>,
+    onRetry: () -> Unit,
+    filterActions: FilterListPlayersActions,
+    onSendMembership: (String) -> Unit,
+    onShowMore: (String) -> Unit
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
     LoadingPage(
-        isLoading = uiState.isLoading,
-        errorMsg= uiState.errorMessage,
-        retry = { viewModel.retry() },
+        isLoading = isLoading,
+        errorMsg = errorMessage,
+        retry = onRetry,
         content = {
             ListSurface(
                 list = list,
@@ -89,6 +118,7 @@ fun ListPlayersScreen(
                         isExpanded = filtersExpanded,
                         onToggleExpand = { filtersExpanded = !filtersExpanded },
                         content = { paddingModifier ->
+                            // Nota: A função FilterListPlayerContent precisa ser pública ou estar neste ficheiro
                             FilterListPlayerContent(
                                 filters = filters,
                                 filtersError = filtersError,
@@ -97,17 +127,13 @@ fun ListPlayersScreen(
                                 modifier = paddingModifier
                             )
                         }
-
                     )
                 },
                 listItems = { player ->
                     ItemListPlayer(
                         player = player,
-                        sendMemberShipRequest = { viewModel.sendMembershipRequest(player.id) },
-                        showMore = { viewModel.showMore(
-                            idPlayer = player.id,
-                            navHostController = navHostController)
-                        }
+                        sendMemberShipRequest = { onSendMembership(player.id) },
+                        showMore = { onShowMore(player.id) }
                     )
                 },
                 messageEmptyList = stringResource(id = R.string.list_player_empty)
@@ -277,5 +303,55 @@ private fun ItemListPlayer(
 )
 @Composable
 fun ListPlayersPreview() {
-    ListPlayersScreen(rememberNavController())
+    val dummyList = listOf(
+        InfoPlayerDto(
+            id = "1",
+            name = "Lionel Messi",
+            age = 36,
+            address = "Miami, USA",
+            heigth = 170,
+            position = Position.FORWARD,
+            haveTeam = true,
+            image = ""
+        ),
+        InfoPlayerDto(
+            id = "2",
+            name = "Bernardo Silva",
+            age = 29,
+            address = "Manchester, UK",
+            heigth = 173,
+            position = Position.MIDFIELDER,
+            haveTeam = false,
+            image = ""
+        )
+    )
+
+    val dummyActions = FilterListPlayersActions(
+        onNameChange = {},
+        onCityChange = {},
+        onMinAgeChange = {},
+        onMaxAgeChange = {},
+        onPositionChange = {},
+        onMinSizeChange = {},
+        onMaxSizeChange = {},
+        buttonActions = ButtonFilterActions(
+            onFilterApply = {},
+            onFilterClean = {}
+        )
+    )
+
+    AMFootballTheme {
+        ListPlayersContent(
+            isLoading = false,
+            errorMessage = null,
+            list = dummyList,
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = Position.values().toList(),
+            onRetry = {},
+            filterActions = dummyActions,
+            onSendMembership = {},
+            onShowMore = {}
+        )
+    }
 }

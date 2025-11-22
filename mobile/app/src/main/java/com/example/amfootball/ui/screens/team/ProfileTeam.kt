@@ -16,26 +16,25 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
+import com.example.amfootball.data.dtos.PitchFormDto
+import com.example.amfootball.data.dtos.support.PitchInfo
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImageString
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 
 /**
- * Ecrã principal que exibe o perfil detalhado de uma equipa de futebol.
+ * Ecrã principal (Stateful) que exibe o perfil detalhado de uma equipa.
  *
- * Este Composable atua como o controlador da vista, gerindo a comunicação com o
- * [ProfileTeamViewModel] e os estados de carregamento/erro.
+ * Este Composable atua como o "Container" ou "Controller". Ele não desenha a UI diretamente,
+ * mas é responsável por obter os dados e gerir o estado através do ViewModel.
  *
- * Funcionalidades:
- * - Obtém os dados da equipa e o estado da UI do ViewModel.
- * - Utiliza [LoadingPage] para mostrar spinners ou mensagens de erro se necessário.
- * - Renderiza os detalhes da equipa quando o carregamento é concluído com sucesso.
- *
- * @param viewModel O ViewModel injetado pelo Hilt que fornece os dados da equipa.
+ * @param viewModel O ViewModel injetado pelo Hilt que fornece os dados da equipa e gere chamadas de API.
  */
 @Composable
 fun ProfileTeamScreen(
@@ -44,47 +43,56 @@ fun ProfileTeamScreen(
     val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamDto.profileExempleTeam())
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    //TODO: VER SE ESTÃO TODOS OS DADOS
+    ContentProfileTeam(
+        profileInfo = profileTeam.value,
+        uiState = uiState,
+        retry = { viewModel.retry() },
+        modifier = Modifier.padding(all = 16.dp)
+    )
+}
+
+/**
+ * Conteúdo visual (Stateless) do perfil da equipa.
+ *
+ * Este componente é "burro" (dumb component): não sabe de onde vêm os dados,
+ * apenas sabe desenhá-los. Isso torna-o ideal para Previews e Testes.
+ *
+ * @param profileInfo O objeto de transferência de dados (DTO) com as informações da equipa.
+ * @param uiState O estado atual da interface (se está a carregar ou se deu erro).
+ * @param retry Função callback a ser executada se o utilizador tentar recarregar após erro.
+ * @param modifier Modificadores de layout para personalização externa.
+ */
+@Composable
+private fun ContentProfileTeam(
+    profileInfo: ProfileTeamDto,
+    uiState: UiState,
+    retry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     LoadingPage(
         isLoading = uiState.isLoading,
         errorMsg = uiState.errorMessage,
-        retry= { viewModel.retry() },
-        content =  {
-            ContentProfileTeam(
-                profileInfo = profileTeam.value,
-                modifier = Modifier.padding(all = 16.dp)
-            )
+        retry= { retry() },
+        content = {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                FieldProfileTeam(
+                    profileInfo = profileInfo
+                )
+            }
         }
     )
 }
 
 /**
- * Estrutura de layout do conteúdo do perfil.
- * Centra vertical e horizontalmente os campos da equipa.
+ * Sub-componente responsável por renderizar os campos de texto e imagem da equipa.
  *
- * @param profileInfo Os dados da equipa a exibir.
- * @param modifier Modificadores de layout (margens, etc.).
- */
-@Composable
-private fun ContentProfileTeam(
-    profileInfo: ProfileTeamDto,
-    modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        FieldProfileTeam(
-            profileInfo = profileInfo
-        )
-    }
-}
-
-/**
- * Componente que desenha os campos individuais com a informação da equipa.
- * Inclui o logótipo, nome, descrição, data de fundação, rank, pontos e estádio.
+ * Isola a lógica de apresentação dos campos individuais para manter o [ContentProfileTeam] limpo.
  *
- * @param profileInfo O objeto DTO com os dados completos da equipa.
+ * @param profileInfo Os dados completos da equipa a serem apresentados nos campos.
  */
 @Composable
 private fun FieldProfileTeam(
@@ -157,16 +165,39 @@ private fun FieldProfileTeam(
 }
 
 @Preview(
-    name = "Página de Perfil da Equipa - PT",
+    name = "Perfil da Equipa - Sucesso (PT)",
     locale = "pt-rPT",
     showBackground = true
 )
 @Preview(
-    name = "Perfil Page Team - EN",
+    name = "Team Profile - Success (EN)",
     locale = "en",
     showBackground = true
 )
 @Composable
 fun ProfileTeamScreenPreview() {
-    ProfileTeamScreen()
+    val dummyPitch = PitchInfo(
+        name = "Estádio D. Afonso Henriques",
+        address = "Guimarães",
+    )
+
+    val dummyTeam = ProfileTeamDto(
+        id = "1",
+        name = "Vitória SC",
+        description = "O Conquistador. Clube histórico de Portugal.",
+        foundationDate = "1922",
+        rank = "Ouro",
+        totalPoints = 350,
+        logo = "",
+        pitch = dummyPitch,
+    )
+
+    AMFootballTheme {
+        ContentProfileTeam(
+            profileInfo = dummyTeam,
+            uiState = UiState(isLoading = false, errorMessage = null),
+            retry = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }

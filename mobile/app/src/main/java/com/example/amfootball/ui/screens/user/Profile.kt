@@ -1,9 +1,12 @@
 package com.example.amfootball.ui.screens.user
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -14,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
@@ -26,14 +30,14 @@ import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
 /**
- * Ecrã principal de Perfil do Jogador.
+ * Ecrã principal de Perfil do Jogador (Stateful).
  *
  * Este Composable é o ponto de entrada da UI para visualizar os detalhes de um jogador.
  * Ele é responsável por:
  * 1. Obter a instância do [ProfilePlayerViewModel] através de injeção de dependência (Hilt).
  * 2. Observar o estado da UI ([uiState]) e os dados do perfil ([profile]).
  * 3. Gerir os estados de carregamento e erro utilizando o componente [LoadingPage].
- * 4. Renderizar o conteúdo do perfil quando os dados estão disponíveis.
+ * 4. Delegar o desenho da UI para o [ProfileScreenContent].
  *
  * @param viewModel O ViewModel que fornece os dados e gere a lógica de negócio. Injetado automaticamente pelo Hilt.
  */
@@ -44,45 +48,50 @@ fun ProfileScreen(
     val profile by viewModel.uiProfilePlayer.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LoadingPage(
-        isLoading = uiState.isLoading,
-        errorMsg= uiState.errorMessage,
-        retry= { viewModel.retry() },
-        content = {
-            if(profile != null) {
-                ProfileScreenContent(
-                    profileData = profile!!,
-                    modifier = Modifier
-                        .padding(16.dp)
-                )
-            }
-        }
+    ProfileScreenContent(
+        profileData = profile,
+        uiState = uiState,
+        retry = { viewModel.retry() },
+        modifier = Modifier.padding(16.dp)
     )
 }
 
 /**
- * Conteúdo interno do ecrã de perfil.
+ * Conteúdo interno do ecrã de perfil (Stateless).
  *
- * Organiza os elementos visuais numa lista vertical com scroll ([LazyColumn]).
+ * Organiza os elementos visuais numa [Column] com scroll vertical ativado.
  * Esta separação permite testar a UI isoladamente sem precisar do ViewModel.
  *
- * @param profileData O objeto de dados [PlayerProfileDto] com as informações do jogador a exibir.
+ * @param profileData O objeto de dados [PlayerProfileDto] com as informações do jogador a exibir (pode ser nulo durante o loading).
+ * @param uiState O estado atual da UI (Loading, Erro, Sucesso).
+ * @param retry Função para tentar recarregar os dados em caso de erro.
  * @param modifier Modificador para layout e estilização.
  */
 @Composable
 private fun ProfileScreenContent(
-    profileData: PlayerProfileDto,
+    profileData: PlayerProfileDto?,
+    uiState: UiState,
+    retry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        item {
-            TextFieldProfile(profileData = profileData)
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg= uiState.errorMessage,
+        retry= { retry() },
+        content = {
+            if (profileData != null) {
+                Column(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState()), // Habilita o scroll numa Column normal
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    TextFieldProfile(profileData = profileData)
+                }
+            }
         }
-    }
+    )
 }
 
 /**
@@ -162,15 +171,38 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
     )
 }
 
-@Preview(name = "Preview Profile Screen PT",
+@Preview(
+    name = "Preview Profile Screen PT",
     locale = "pt",
-    showBackground = true)
-@Preview(name = "Preview Profile Screen Eng",
-        locale = "en",
-        showBackground = true)
+    showBackground = true
+)
+@Preview(
+    name = "Preview Profile Screen Eng",
+    locale = "en",
+    showBackground = true
+)
 @Composable
 fun ProfileScreenPreview() {
+    val dummyProfile = PlayerProfileDto(
+        icon = "",
+        name = "Lionel Messi",
+        dateOfBirth = "24/06/1987",
+        email = "lm10@email.com",
+        phoneNumber = "934567890",
+        address = "Rosario, Argentina",
+        position = "Avançado",
+        height = 170,
+        team = "Inter Miami CF"
+    )
+
     AMFootballTheme {
-        ProfileScreen()
+        ProfileScreenContent(
+            profileData = dummyProfile,
+            // CORREÇÃO: Passar o UiState de sucesso
+            uiState = UiState(isLoading = false, errorMessage = null),
+            // CORREÇÃO: Passar uma função vazia para o retry
+            retry = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
