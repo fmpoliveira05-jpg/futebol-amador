@@ -37,14 +37,13 @@ import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.inputFields.FilterListPosition
-import com.example.amfootball.ui.components.inputFields.FilterMaxAgeTextField
-import com.example.amfootball.ui.components.inputFields.FilterMinAgeTextField
-import com.example.amfootball.ui.components.inputFields.FilterNamePlayerTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
-import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.AgeRow
 import com.example.amfootball.ui.components.lists.FilterHeader
+import com.example.amfootball.ui.components.lists.FilterListPosition
+import com.example.amfootball.ui.components.lists.FilterMaxAgeTextField
+import com.example.amfootball.ui.components.lists.FilterMinAgeTextField
+import com.example.amfootball.ui.components.lists.FilterNamePlayerTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
@@ -54,7 +53,6 @@ import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
-import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ListMembersScreen(

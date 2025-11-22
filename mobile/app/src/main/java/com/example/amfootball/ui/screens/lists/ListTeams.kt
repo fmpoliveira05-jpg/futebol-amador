@@ -35,10 +35,10 @@ import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.inputFields.FilterNameTeamTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.NumberTextField
 import com.example.amfootball.ui.components.lists.AddressRow
+import com.example.amfootball.ui.components.lists.FilterNameTeamTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem

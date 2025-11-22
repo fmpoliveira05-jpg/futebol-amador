@@ -28,10 +28,10 @@ import com.example.amfootball.ui.components.buttons.EditButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.inputFields.FilterMaxDatePicker
-import com.example.amfootball.ui.components.inputFields.FilterMinDatePicker
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
+import com.example.amfootball.ui.components.lists.FilterMaxDatePicker
+import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem

@@ -27,9 +27,9 @@ import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.inputFields.FilterMaxDatePicker
-import com.example.amfootball.ui.components.inputFields.FilterMinDatePicker
 import com.example.amfootball.ui.components.inputFields.LabelTextField
+import com.example.amfootball.ui.components.lists.FilterMaxDatePicker
+import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem

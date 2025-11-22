@@ -42,12 +42,12 @@ import com.example.amfootball.data.enums.MatchResult
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.inputFields.FilterMaxDateGamePicker
-import com.example.amfootball.ui.components.inputFields.FilterMinDateGamePicker
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterIsCompetiveMatch
 import com.example.amfootball.ui.components.lists.FilterIsFinishMatch
 import com.example.amfootball.ui.components.lists.FilterIsHomeMatch
+import com.example.amfootball.ui.components.lists.FilterMaxDateGamePicker
+import com.example.amfootball.ui.components.lists.FilterMinDateGamePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.ImageList

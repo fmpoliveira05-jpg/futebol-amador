@@ -26,7 +26,7 @@ import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
-import com.example.amfootball.ui.components.NavBar.MainTopAppBar
+import com.example.amfootball.ui.components.navBar.MainTopAppBar
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
