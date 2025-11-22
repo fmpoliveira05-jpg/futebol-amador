@@ -16,8 +16,18 @@ import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
 
 /**
- * O menu flutuante (DropdownMenu) com todas as ações
+ * O menu flutuante ([DropdownMenu]) com todas as ações
  * possíveis para uma partida.
+ *
+ * Exibe quatro ações principais: Iniciar, Finalizar, Adiar e Cancelar.
+ * Após qualquer ação ser selecionada, o menu é automaticamente fechado ([onDismissRequest]).
+ *
+ * @param expanded Booleano que controla a visibilidade do menu.
+ * @param onDismissRequest Callback para fechar o menu (acionado ao clicar fora ou selecionar um item).
+ * @param onStartMatch Callback a ser executado para iniciar a partida.
+ * @param onFinishMatch Callback a ser executado para finalizar a partida.
+ * @param onPostPoneMatch Callback a ser executado para adiar a partida.
+ * @param onCancelMatch Callback a ser executado para cancelar a partida (usa cor de erro).
  */
 @Composable
 fun MatchActionsMenu(
@@ -72,6 +82,16 @@ fun MatchActionsMenu(
     }
 }
 
+/**
+ * Um componente Composable para um único item dentro de um DropdownMenu.
+ *
+ * Inclui um ícone à esquerda e permite definir cores customizadas para o texto e o ícone.
+ *
+ * @param text O texto principal a ser exibido no item (também usado como contentDescription do ícone).
+ * @param onClick Callback a ser executado quando o item é clicado.
+ * @param color A cor do texto e do ícone (padrão: [Color.Unspecified]).
+ * @param leadingIcon O [ImageVector] do ícone exibido à esquerda do texto.
+ */
 @Composable
 fun DropdownItem(
     text: String,

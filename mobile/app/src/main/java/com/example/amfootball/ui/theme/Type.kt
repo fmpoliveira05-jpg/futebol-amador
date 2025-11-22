@@ -6,8 +6,17 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Set of Material typography styles to start with
+/**
+ * Define o conjunto de estilos de tipografia (fonte, tamanho, peso) para a aplicação,
+ * em conformidade com as diretrizes do Material 3.
+ *
+ * Se um estilo não for definido explicitamente, o MaterialTheme utilizará os valores padrão
+ * do sistema Material Design.
+ */
 val Typography = Typography(
+    /**
+     * Estilo de texto customizado para o corpo principal e texto de listas.
+     */
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,

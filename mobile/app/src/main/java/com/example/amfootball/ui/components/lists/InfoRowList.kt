@@ -28,6 +28,17 @@ import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.utils.TeamConst
 
+/**
+ * Componente base que exibe um ícone e um texto numa linha horizontal.
+ *
+ * O ícone e o texto são estilizados com a cor de contorno ([MaterialTheme.colorScheme.outline])
+ * para um visual discreto. O tamanho do ícone é fixo em 16.dp.
+ *
+ * @param icon O [ImageVector] do ícone a ser exibido.
+ * @param contentDescription Descrição de conteúdo para acessibilidade do ícone.
+ * @param text A string de texto a ser exibida.
+ * @param modifier Modificador para estilizar o [Row].
+ */
 @Composable
 fun InfoRow(
     icon: ImageVector,
@@ -54,6 +65,10 @@ fun InfoRow(
     }
 }
 
+/**
+ * Exibe uma data formatada com o ícone de calendário.
+ * @param date A string da data a ser exibida.
+ */
 @Composable
 fun DateRow(date: String) {
     InfoRow(
@@ -63,6 +78,10 @@ fun DateRow(date: String) {
     )
 }
 
+/**
+ * Exibe a idade de uma pessoa com o ícone de calendário.
+ * @param age A idade (Int) a ser exibida. Adiciona a string "anos" do recurso.
+ */
 @Composable
 fun AgeRow(age: Int) {
     InfoRow(
@@ -72,6 +91,10 @@ fun AgeRow(age: Int) {
     )
 }
 
+/**
+ * Exibe um endereço de localização com o ícone de pino.
+ * @param address A string do endereço.
+ */
 @Composable
 fun AddressRow(address: String) {
     InfoRow(
@@ -81,6 +104,10 @@ fun AddressRow(address: String) {
     )
 }
 
+/**
+ * Exibe o tamanho (altura) com o ícone de régua.
+ * @param size O tamanho (Int) em centímetros.
+ */
 @Composable
 fun SizeRow(size: Int) {
     InfoRow(
@@ -90,6 +117,10 @@ fun SizeRow(size: Int) {
     )
 }
 
+/**
+ * Exibe a posição de jogo de um jogador.
+ * @param position A posição do jogador (Enum [Position]). O texto é obtido via [stringResource].
+ */
 @Composable
 fun PositionRow(position: Position) {
     InfoRow(
@@ -99,6 +130,10 @@ fun PositionRow(position: Position) {
     )
 }
 
+/**
+ * Exibe o tipo de membro da equipa (ex: Treinador, Jogador).
+ * @param typeMember O tipo de membro (Enum [TypeMember]). O texto é obtido via [stringResource].
+ */
 @Composable
 fun TypeMemberRow(typeMember: TypeMember) {
     InfoRow(
@@ -108,6 +143,10 @@ fun TypeMemberRow(typeMember: TypeMember) {
     )
 }
 
+/**
+ * Exibe o endereço do campo de jogo ou estádio.
+ * @param ptichAdrress O endereço do campo.
+ */
 @Composable
 fun PitchAddressRow(ptichAdrress: String) {
     InfoRow(
@@ -117,6 +156,10 @@ fun PitchAddressRow(ptichAdrress: String) {
     )
 }
 
+/**
+ * Exibe o número atual de membros de uma equipa comparado ao limite máximo.
+ * @param numMembers O número atual de membros. O limite máximo é obtido de [TeamConst.MAX_MEMBERS].
+ */
 @Composable
 fun NumMembersTeamRow(numMembers: Int) {
     InfoRow(

@@ -2,7 +2,22 @@ package com.example.amfootball.data.dtos.team
 
 import android.net.Uri
 
-//Posso meter metodo default para já me retornar uma lista de equipas default
+/**
+ * Data Transfer Object (DTO) que representa as informações detalhadas e resumidas de uma Equipa
+ * para exibição em listas de alto nível.
+ *
+ * Este objeto combina informações de identificação, estatísticas de ranking e detalhes demográficos.
+ *
+ * @property id O identificador único da equipa.
+ * @property name O nome da equipa.
+ * @property logoTeam A URI do logótipo da equipa. Padrão é [Uri.EMPTY].
+ * @property description Uma breve descrição da equipa.
+ * @property city A cidade de origem da equipa.
+ * @property rank O nível ou nome do rank atual da equipa.
+ * @property points A pontuação atual da equipa no ranking.
+ * @property averageAge A idade média dos membros da equipa.
+ * @property numberMembers O número atual de membros na equipa.
+ */
 data class ItemTeamInfoDto(
     val id: String,
     val name: String,

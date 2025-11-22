@@ -4,6 +4,20 @@ import android.net.Uri
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 
+/**
+ * Data Transfer Object (DTO) que representa os detalhes completos de um membro de equipa
+ * (seja jogador, administrador ou outro tipo de staff).
+ *
+ * Utilizado para listagens e gestão de membros dentro do contexto da equipa.
+ *
+ * @property id O identificador único do membro.
+ * @property name O nome completo do membro.
+ * @property typeMember O tipo de função do membro na equipa (Enum [TypeMember]).
+ * @property image A URI da imagem de perfil do membro.
+ * @property age A idade do membro.
+ * @property position A posição principal do membro em campo (Enum [Position]).
+ * @property size A altura do membro em centímetros.
+ */
 data class MemberTeamDto(
     val id: String = "",
     val name: String = "",

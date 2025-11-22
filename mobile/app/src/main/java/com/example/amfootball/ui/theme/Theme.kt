@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -12,12 +11,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
+/**
+ * Esquema de cores padrão para o Modo Escuro (Dark Theme).
+ *
+ * Utilizado em dispositivos Android mais antigos (< Android 12) ou quando a cor dinâmica está desativada.
+ */
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
     tertiary = Pink80
 )
 
+/**
+ * Esquema de cores padrão para o Modo Claro (Light Theme).
+ *
+ * Utilizado em dispositivos Android mais antigos (< Android 12) ou quando a cor dinâmica está desativada.
+ */
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
@@ -34,11 +43,26 @@ private val LightColorScheme = lightColorScheme(
     */
 )
 
+/** Cor Primária do Google (Azul). */
 val GoogleBlue = Color(0xFF4285F4)
+/** Cor Secundária do Google (Branco). */
 val GoogleWhite = Color(0xFFFFFFFF)
+/** Cor Primária do Facebook (Azul). */
 val FacebookBlue = Color(0xFF1877F2)
+/** Cor Secundária do Facebook (Branco). */
 val FacebookWhite = Color(0xFFFFFFFF)
 
+/**
+ * Componente Composable que aplica o tema Material 3 à aplicação.
+ *
+ * Determina o esquema de cores ([ColorScheme]) a ser usado com base na lógica:
+ * 1. Cor Dinâmica (Material You) no Android 12+ (Build.VERSION_CODES.S).
+ * 2. Esquema de cores padrão (DarkColorScheme ou LightColorScheme).
+ *
+ * @param darkTheme Determina se o tema deve ser escuro. O padrão é a preferência do sistema ([isSystemInDarkTheme]).
+ * @param dynamicColor Determina se deve ser usada a cor dinâmica do sistema (Material You). Padrão é true.
+ * @param content O conteúdo Composable ao qual este tema será aplicado.
+ */
 @Composable
 fun AMFootballTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

@@ -31,7 +31,19 @@ import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 
-
+/**
+ * Container principal que exibe uma lista dinâmica de itens ([LazyColumn]) e um cabeçalho de filtro.
+ *
+ * Lida com a exibição condicional: se a lista estiver vazia, mostra um ícone e uma mensagem.
+ * Caso contrário, itera sobre os itens e exibe-os.
+ *
+ * @param T O tipo de dados dos itens na lista.
+ * @param list A lista de dados a ser exibida.
+ * @param filterSection Slot Composable para a secção de filtros (geralmente [FilterSection]).
+ * @param listItems Slot Composable para renderizar a UI de um item individual da lista.
+ * @param itemSpacing O espaçamento vertical entre os itens da lista em dp (padrão: 12).
+ * @param messageEmptyList A mensagem a ser exibida quando a lista estiver vazia.
+ */
 @Composable
 fun<T> ListSurface(
     list: List<T>,
@@ -83,6 +95,21 @@ fun<T> ListSurface(
     }
 }
 
+/**
+ * Container genérico para um item individual da lista, estilizado como um [ElevatedCard].
+ *
+ * Utiliza o [ListItem] do Material 3 e oferece slots customizados para título,
+ * conteúdo à esquerda (leading), conteúdo de suporte e rodapé opcional.
+ *
+ * @param T O tipo de dados do item.
+ * @param item O objeto de dados a ser exibido.
+ * @param title Função que extrai a string principal do título a partir do item.
+ * @param overline Slot Composable para exibir conteúdo sobre o título.
+ * @param leading Slot Composable que exibe o conteúdo inicial (ex: imagem de perfil).
+ * @param supporting Slot Composable que exibe informações adicionais abaixo do título.
+ * @param trailing Slot Composable que exibe conteúdo no final da linha (ex: botões de ação).
+ * @param underneathItems Slot Composable opcional para exibir conteúdo abaixo do [ListItem] (ex: uma linha de botões).
+ */
 @Composable
 fun<T> GenericListItem(
     item: T,
@@ -96,7 +123,7 @@ fun<T> GenericListItem(
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column {
             ListItem(
-                headlineContent = { //Conteudo Principal
+                headlineContent = {
                     Text(
                         text = title(item),
                         style = MaterialTheme.typography.titleLarge,
@@ -133,6 +160,15 @@ fun<T> GenericListItem(
     }
 }
 
+/**
+ * Um agrupador de botões para ações comuns de listas, como pedidos de adesão ou detalhes.
+ *
+ * Exibe os botões [AcceptButton], [RejectButton] e [ShowMoreInfoButton] lado a lado.
+ *
+ * @param accept Callback executado ao pressionar o botão de aceitar.
+ * @param reject Callback executado ao pressionar o botão de rejeitar.
+ * @param showMore Callback executado ao pressionar o botão de ver mais detalhes.
+ */
 @Composable
 fun ItemAcceptRejectAndShowMore(
     accept: () -> Unit,

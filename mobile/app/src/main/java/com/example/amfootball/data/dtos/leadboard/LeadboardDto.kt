@@ -1,5 +1,13 @@
 package com.example.amfootball.data.dtos.leadboard
 
+/**
+ * DTO que representa uma entrada individual na Tabela de Classificação.
+ *
+ * Associa uma posição específica (ranking) aos dados de uma equipa.
+ *
+ * @property position A posição numérica da equipa na tabela (ex: 1, 2, 3...).
+ * @property team O objeto [InfoTeamLeadboard] contendo os detalhes da equipa nesta posição.
+ */
 data class LeadboardDto(
     val position: Int,
     val team: InfoTeamLeadboard

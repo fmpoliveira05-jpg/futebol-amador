@@ -3,14 +3,22 @@ package com.example.amfootball.utils
 import org.json.JSONObject
 
 /**
- * Utilitários para lidar com respostas de rede e erros de API.
+ * Utilitários para lidar com o processamento de respostas de rede e extração de mensagens
+ * de erro de APIs REST.
+ *
+ * Este objeto é crucial para padronizar o tratamento de erros HTTP não-sucesso (4xx/5xx).
  */
 object NetworkUtils {
+
     /**
-     * Tenta extrair uma mensagem de erro legível de um JSON de erro do Backend (.NET ProblemDetails).
+     * Tenta extrair uma mensagem de erro legível de um JSON de erro do Backend.
      *
-     * @param errorBody A string crua retornada pelo response.errorBody()?.string()
-     * @return A mensagem de erro limpa ("detail" ou "title") ou null se falhar.
+     * Assume-se que o corpo do erro (errorBody) segue o padrão **RFC 7807 (Problem Details)**
+     * (comum em APIs .NET/Spring Boot) e procura pelas chaves "detail" e "title".
+     *
+     * @param errorBody A string JSON crua ou texto não-JSON retornado por response.errorBody()?.string().
+     * @return A mensagem de erro limpa (dando prioridade a "detail", depois a "title").
+     * Retorna o [errorBody] original se não for um JSON válido, ou null se estiver vazio.
      */
     fun parseBackendError(errorBody: String?): String? {
         if (errorBody.isNullOrEmpty()) return null
@@ -23,11 +31,9 @@ object NetworkUtils {
             when {
                 !detail.isNullOrEmpty() -> detail
                 !title.isNullOrEmpty() -> title
-                else -> null // É JSON, mas não tem as chaves que esperamos
+                else -> null
             }
         } catch (e: Exception) {
-            // Se não for JSON válido (ex: HTML de erro 500), retorna o texto original cru
-            // ou null se preferires não mostrar HTML feio ao utilizador
             errorBody
         }
     }
