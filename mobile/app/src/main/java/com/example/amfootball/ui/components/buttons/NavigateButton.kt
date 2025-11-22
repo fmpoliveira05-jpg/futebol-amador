@@ -19,6 +19,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 
+/**
+ * Um componente Composable que cria um botão de navegação com ícone e rótulo dispostos verticalmente.
+ *
+ * O botão principal é renderizado como um círculo (usando [CircleShape]) e exibe um ícone.
+ * Abaixo do botão circular, é exibido um [Text] como rótulo.
+ * Este padrão é comumente usado em barras de navegação ou painéis de acesso rápido.
+ *
+ * @param modifier Um [Modifier] opcional para configurar o layout da coluna que contém o botão e o rótulo.
+ * @param icon O [ImageVector] do ícone a ser exibido dentro do botão circular.
+ * @param label A string de texto a ser usada como rótulo do botão (exibida abaixo do ícone)
+ * e também como a descrição de conteúdo (acessibilidade) do ícone.
+ * @param onClick A função lambda a ser executada quando o botão circular for clicado.
+ */
 @Composable
 fun NavigateButton (
     modifier: Modifier = Modifier,

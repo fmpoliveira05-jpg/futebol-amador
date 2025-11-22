@@ -2,7 +2,7 @@ package com.example.amfootball.data.actions.itemsList
 
 import androidx.navigation.NavHostController
 
-data class ItensCalendarActions(
+data class ItemsCalendarActions(
     val onCancelMatch: (String, NavHostController) -> Unit,
     val onPostPoneMatch: (String, NavHostController) -> Unit,
     val onStartMatch: (String) -> Unit,

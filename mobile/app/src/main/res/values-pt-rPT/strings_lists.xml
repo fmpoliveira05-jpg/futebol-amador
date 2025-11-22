@@ -4,7 +4,7 @@
     <string name="list_teams_members">Membros</string>
     <string name="list_teams_view_team">Ver Equipa</string>
 
-    <string name="list_player_empty">Não forma encontrados jogadores</string>
+    <string name="list_player_empty">Não foram encontrados jogadores</string>
     <string name="list_membership_request_empty">Ainda não recebeu nenhum pedido de adesão</string>
     <string name="list_teams_empty">Não foram encontradas equipas</string>
     <string name="list_match_invite_empty">Ainda não recebeu nenhum pedido de partida</string>

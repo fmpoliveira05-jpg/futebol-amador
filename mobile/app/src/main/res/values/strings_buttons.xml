@@ -12,14 +12,17 @@
     <string name="button_back">Back</string>
     <string name="button_back_description">Button that allows you to go back to the previous page</string>
 
+    <string name="remove_button">Remove</string>
+    <string name="remove_button_player_description">Button that allows you to remove a player from your team</string>
+
     <string name="button_try_again">Try Again</string>
     <string name="button_try_again_description">Button that allows reloading the data</string>
 
     <string name="accept_button">Accept</string>
     <string name="accept_button_description">Button that allows you to accept something</string>
 
-    <string name="negociate_button">Negociate</string>
-    <string name="negociate_button_description">Button that allows you to trade something</string>
+    <string name="negotiate_button">Negotiate</string>
+    <string name="negotiate_button_description">Button that allows you to trade something</string>
 
     <string name="reject_button">Refuse</string>
     <string name="reject_button_description">Button that allows rejecting something</string>

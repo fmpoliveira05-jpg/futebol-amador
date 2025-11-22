@@ -33,10 +33,10 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.ui.components.inputFields.DatePickerModalInput
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedPastLimitedDate
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
@@ -184,26 +184,16 @@ private fun FieldsSignUp(
 
     Spacer(Modifier.height(8.dp))
 
-    // Data de nascimento
     Text(text = "Data de Nascimento:")
-    Button(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
-        // Mostra a data formatada se não for nula
-        val displayDate = dateOfBirth?.let {
-            displayDateFormatter.format(Date(it))
-        } ?: "Selecionar Data"
-        Text(displayDate)
-    }
-
-    if (showDatePicker) {
-        DatePickerModalInput( // Ou DatePickerModal
-            onDateSelected = { selectedMillis ->
-                // O 'selectedMillis' já está em UTC, guarde-o diretamente
-                dateOfBirth = selectedMillis
-            },
-            onDismiss = { showDatePicker = false }
-        )
-    }
-    // --- Fim do Campo de Data ---
+    DatePickerDockedPastLimitedDate(
+        value = dateOfBirth.toString(),
+        onDateSelected = { selectedMillis ->
+            dateOfBirth = selectedMillis
+        },
+        label = "Data de Nascimento",
+        contentDescription = "Data de nascimento do utilizador",
+        isSingleLine = true,
+    )
 
     Spacer(Modifier.height(8.dp))
 

@@ -34,7 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterCalendarActions
-import com.example.amfootball.data.actions.itemsList.ItensCalendarActions
+import com.example.amfootball.data.actions.itemsList.ItemsCalendarActions
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.CalendarInfoDto
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
@@ -42,7 +42,8 @@ import com.example.amfootball.data.enums.MatchResult
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.ui.components.inputFields.FilterMaxDateGamePicker
+import com.example.amfootball.ui.components.inputFields.FilterMinDateGamePicker
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterIsCompetiveMatch
 import com.example.amfootball.ui.components.lists.FilterIsFinishMatch
@@ -77,7 +78,7 @@ fun CalendarScreen(
         )
     )
 
-    val itensListAction = ItensCalendarActions(
+    val itensListAction = ItemsCalendarActions(
         onCancelMatch = viewModel::onCancelMatch,
         onPostPoneMatch = viewModel::onPostPoneMatch,
         onStartMatch = viewModel::onStartMatch,
@@ -147,10 +148,8 @@ private fun FiltersCalendarContent(
 
         FilterRow(
             content = {
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_min_date_game),
-                    contentDescription = stringResource(id = R.string.description_filter_min_date),
-                    value = filters.minGameDate?.format(displayFormatter) ?: "",
+                FilterMinDateGamePicker(
+                    minDateGame = filters.minGameDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateGameChange(it) },
                     isError = filterError.minGameDateError != null,
                     errorMessage = filterError.minGameDateError?.let {
@@ -159,10 +158,8 @@ private fun FiltersCalendarContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_max_date_game),
-                    contentDescription = stringResource(id = R.string.description_filter_max_date),
-                    value = filters.maxGameDate?.format(displayFormatter) ?: "",
+                FilterMaxDateGamePicker(
+                    maxDateGame = filters.maxGameDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateGameChange(it)},
                     isError = filterError.minGameDateError != null,
                     errorMessage = filterError.maxGameDateError?.let {
@@ -199,7 +196,7 @@ private fun FiltersCalendarContent(
 @Composable
 private fun ListMatchCalendarItem(
     match: CalendarInfoDto,
-    itensListAction: ItensCalendarActions,
+    itensListAction: ItemsCalendarActions,
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -238,7 +235,7 @@ private fun ListMatchCalendarItem(
 @Composable
 private fun TitleMatchCalendar(
     match: CalendarInfoDto,
-    itensListAction: ItensCalendarActions,
+    itensListAction: ItemsCalendarActions,
     navHostController: NavHostController
 ) {
     Row(
@@ -263,7 +260,7 @@ private fun TitleMatchCalendar(
 @Composable
 private fun OptionsMatch(
     match: CalendarInfoDto,
-    itensListAction: ItensCalendarActions,
+    itensListAction: ItemsCalendarActions,
     navHostController: NavHostController
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }

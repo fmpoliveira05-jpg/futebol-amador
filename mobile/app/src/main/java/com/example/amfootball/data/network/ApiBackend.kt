@@ -42,7 +42,7 @@ interface ApiBackend{
     /**
     * Vai buscar há API um player através do seu ID
     * */
-    @GET("api/Player/{playerId}")
+    @GET("api/Player/details/{playerId}")
     suspend fun getPlayerProfile(
         @Path("playerId") playerId: String
     ): Response<PlayerProfileDto>

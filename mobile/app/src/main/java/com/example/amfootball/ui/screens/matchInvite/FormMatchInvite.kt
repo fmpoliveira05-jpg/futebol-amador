@@ -22,8 +22,8 @@ import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.inputFields.DatePickerDockedLimitedDate
 import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
@@ -89,7 +89,7 @@ private fun FieldsSendMatchInvite(
         isReadOnly = true,
     )
 
-    DatePickerDockedLimitedDate(
+    DatePickerDockedFutureLimitedDate(
         value = fields.gameDate ?: "",
         onDateSelected = actions.onGameDateChange,
         label = stringResource(id = R.string.game_date),

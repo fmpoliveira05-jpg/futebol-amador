@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,7 +32,11 @@ import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.inputFields.LabelSelectBox
+import com.example.amfootball.ui.components.inputFields.FilterCityTextField
+import com.example.amfootball.ui.components.inputFields.FilterListPosition
+import com.example.amfootball.ui.components.inputFields.FilterMaxAgeTextField
+import com.example.amfootball.ui.components.inputFields.FilterMinAgeTextField
+import com.example.amfootball.ui.components.inputFields.FilterNamePlayerTextField
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.AddressRow
 import com.example.amfootball.ui.components.lists.AgeRow
@@ -45,9 +48,7 @@ import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
-import com.example.amfootball.utils.UserConst
 
 @Composable
 fun ListPlayersScreen(
@@ -55,10 +56,10 @@ fun ListPlayersScreen(
     viewModel: ListPlayerViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val filters by viewModel.uiFilters.observeAsState(initial = FilterListPlayer())
-    val filtersError by viewModel.filterError.observeAsState(initial = FilterPlayersErrors())
-    val list by viewModel.uiList.observeAsState(initial = emptyList())
-    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
+    val filters by viewModel.uiFilters.collectAsStateWithLifecycle()
+    val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
 
     val filterActions = FilterListPlayersActions(
         onNameChange = viewModel::onNameChange,
@@ -126,11 +127,9 @@ private fun FilterListPlayerContent(
     Column(modifier = modifier) {
         FilterRow(
             content = {
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_name),
-                    value = filters.name,
-                    maxLenght = UserConst.MAX_NAME_LENGTH,
-                    onValueChange = { filterActions.onNameChange(it) },
+                FilterNamePlayerTextField(
+                    playerName = filters.name,
+                    onPlayerNameChange = { filterActions.onNameChange(it) },
                     isError = filtersError.nameError != null,
                     errorMessage = filtersError.nameError?.let {
                         stringResource(it.messageId, *it.args.toTypedArray())
@@ -138,11 +137,9 @@ private fun FilterListPlayerContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_city),
-                    value = filters.city,
-                    maxLenght = GeneralConst.MAX_CITY_LENGTH,
-                    onValueChange = { filterActions.onCityChange(it) },
+                FilterCityTextField(
+                    city = filters.city,
+                    onCityChange = { filterActions.onCityChange(it) },
                     isError = filtersError.cityError != null,
                     errorMessage = filtersError.cityError?.let {
                         stringResource(it.messageId, *it.args.toTypedArray())
@@ -154,18 +151,10 @@ private fun FilterListPlayerContent(
 
         FilterRow(
             content = {
-                LabelSelectBox(
-                    label = stringResource(id = R.string.filter_position),
-                    list = listPosition,
-                    selectedValue = filters.position,
-                    onSelectItem = { filterActions.onPositionChange(it) },
-                    itemToString = { typeMember ->
-                        if (typeMember == null) {
-                            stringResource(id = R.string.filter_selectbox_all)
-                        } else {
-                            stringResource(id = typeMember.stringId)
-                        }
-                    },
+                FilterListPosition(
+                    listPosition = listPosition,
+                    selectPosition = filters.position,
+                    onSelectPosition = { filterActions.onPositionChange(it) },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -173,13 +162,9 @@ private fun FilterListPlayerContent(
 
         FilterRow(
             content = {
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_max_age),
-                    value = filters.maxAge?.toString(),
-                    onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    minLenght = UserConst.MIN_AGE,
-                    maxLenght = UserConst.MAX_AGE,
+                FilterMaxAgeTextField(
+                    maxAge = filters.maxAge?.toString(),
+                    onMaxAgeChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     isError = filtersError.maxAgeError != null,
                     errorMessage = filtersError.maxAgeError?.let {
                         stringResource(it.messageId, *it.args.toTypedArray())
@@ -187,17 +172,12 @@ private fun FilterListPlayerContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_min_age),
-                    value = filters.minAge?.toString(),
-                    onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    minLenght = UserConst.MIN_AGE,
-                    maxLenght = UserConst.MAX_AGE,
+                FilterMinAgeTextField(
+                    minAge = filters.minAge?.toString(),
+                    onMinAgeChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     isError = filtersError.minAgeError != null,
                     errorMessage = filtersError.minAgeError?.let {
-                        stringResource(it.messageId, *it.args.toTypedArray())
-                    },
+                        stringResource(it.messageId, *it.args.toTypedArray())},
                     modifier = Modifier.weight(1f)
                 )
             }

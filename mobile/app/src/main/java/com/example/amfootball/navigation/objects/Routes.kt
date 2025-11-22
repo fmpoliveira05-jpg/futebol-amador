@@ -124,7 +124,7 @@ object Routes {
         CANCEL_MATCH("CancelMatch",R.string.button_cancel_match,Icons.Default.Flag,R.string.button_cancel_match_description,haveBackButton = true
         ),
         FINISH_MATCH("FinishMatch",R.string.button_finish_match,Icons.Default.Flag,R.string.button_finish_match_description,haveBackButton = true),
-        NEGOCIATE_MATCH_INVITE("NegociateMatchInvite",R.string.negociate_button,Icons.Default.EditCalendar,R.string.negociate_button_description,haveBackButton = true)
+        NEGOCIATE_MATCH_INVITE("NegociateMatchInvite",R.string.negotiate_button,Icons.Default.EditCalendar,R.string.negotiate_button_description,haveBackButton = true)
     }
 
     enum class BottomNavBarRoutes(

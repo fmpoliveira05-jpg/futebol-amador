@@ -6,6 +6,7 @@ plugins {
     id("org.sonarqube")
     id("jacoco")
     id("com.google.gms.google-services")
+    id("org.jetbrains.dokka")
 
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)

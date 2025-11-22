@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,25 +30,148 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 import com.example.amfootball.R
+import java.util.Calendar
 
 /**
- * Docker
- * */
+ * Um componente DatePicker que permite selecionar apenas datas presentes (hoje) ou futuras.
+ *
+ * Útil para agendamentos, prazos ou eventos futuros.
+ * Internamente, calcula o timestamp do início do dia atual para validar a seleção.
+ *
+ * @param value A string que representa a data formatada a ser exibida no campo de texto.
+ * @param onDateSelected Callback executado quando uma data válida é selecionada. Retorna o valor em milissegundos.
+ * @param label O rótulo do campo de texto (ex: "Data de Vencimento").
+ * @param contentDescription Descrição para acessibilidade do ícone de calendário.
+ * @param isSingleLine Define se o campo de texto deve ser de linha única. Padrão é false.
+ * @param isError Indica se o campo está em estado de erro (borda vermelha).
+ * @param errorMessage A mensagem de erro a ser exibida abaixo do campo se [isError] for true.
+ * @param modifier Modificador para estilizar o componente.
+ */
+@Composable
+fun DatePickerDockedFutureLimitedDate(
+    value: String,
+    onDateSelected: (millis: Long) -> Unit,
+    label: String,
+    contentDescription: String,
+    isSingleLine: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = stringResource(id = R.string.mandatory_field),
+    modifier: Modifier = Modifier
+) {
+    LimitedDatePickerBase(
+        value = value,
+        onDateSelected = onDateSelected,
+        label = label,
+        contentDescription = contentDescription,
+        isSingleLine = isSingleLine,
+        isError = isError,
+        errorMessage = errorMessage,
+        modifier = modifier,
+        validator = { dateMillis, todayMillis -> dateMillis >= todayMillis }
+    )
+}
+
+/**
+ * Um componente DatePicker que permite selecionar apenas datas passadas ou o dia de hoje.
+ *
+ * Útil para datas de nascimento, histórico de eventos ou registos passados.
+ * Internamente, calcula o timestamp do início do dia atual para validar a seleção.
+ *
+ * @param value A string que representa a data formatada a ser exibida no campo de texto.
+ * @param onDateSelected Callback executado quando uma data válida é selecionada. Retorna o valor em milissegundos.
+ * @param label O rótulo do campo de texto (ex: "Data de Nascimento").
+ * @param contentDescription Descrição para acessibilidade do ícone de calendário.
+ * @param isSingleLine Define se o campo de texto deve ser de linha única. Padrão é false.
+ * @param isError Indica se o campo está em estado de erro.
+ * @param errorMessage A mensagem de erro a ser exibida abaixo do campo se [isError] for true.
+ * @param modifier Modificador para estilizar o componente.
+ */
+@Composable
+fun DatePickerDockedPastLimitedDate(
+    value: String,
+    onDateSelected: (millis: Long) -> Unit,
+    label: String,
+    contentDescription: String,
+    isSingleLine: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = stringResource(id = R.string.mandatory_field),
+    modifier: Modifier = Modifier
+) {
+    LimitedDatePickerBase(
+        value = value,
+        onDateSelected = onDateSelected,
+        label = label,
+        contentDescription = contentDescription,
+        isSingleLine = isSingleLine,
+        isError = isError,
+        errorMessage = errorMessage,
+        modifier = modifier,
+        validator = { dateMillis, todayMillis -> dateMillis <= todayMillis }
+    )
+}
+
+/**
+ * Um componente DatePicker padrão sem restrições de data.
+ *
+ * Permite selecionar qualquer data (passado, presente ou futuro).
+ *
+ * @param value A string que representa a data formatada a ser exibida no campo de texto.
+ * @param onDateSelected Callback executado quando uma data é selecionada. Retorna o valor em milissegundos.
+ * @param label O rótulo do campo de texto.
+ * @param modifier Modificador para estilizar o componente.
+ * @param contentDescription Descrição para acessibilidade do ícone de calendário.
+ * @param isError Indica se o campo está em estado de erro.
+ * @param errorMessage A mensagem de erro a ser exibida abaixo do campo se [isError] for true.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDockedLimitedDate(value: String,
-                                onDateSelected: (millis: Long) -> Unit,
-                                label: String,
-                                contentDescription: String,
-                                isSingleLine: Boolean = false,
-                                isError: Boolean = false,
-                                errorMessage: String? = stringResource(id = R.string.mandatory_field),
-                                modifier: Modifier = Modifier
+fun DatePickerDocked(value: String,
+                     onDateSelected: (millis: Long) -> Unit,
+                     label: String,
+                     modifier: Modifier = Modifier,
+                     contentDescription: String,
+                     isError: Boolean = false,
+                     errorMessage: String? = null
+) {
+    var showDatePicker by remember { mutableStateOf(value = false) }
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerImpl(
+        label = label,
+        value = value,
+        onIconClick = { showDatePicker = !showDatePicker },
+        contentDescription = contentDescription,
+        showDatePicker = showDatePicker,
+        datePickerState = datePickerState,
+        onDismiss = { showDatePicker = false },
+        onDateSelected = onDateSelected,
+        isError = isError,
+        errorMessage = errorMessage,
+        modifier = modifier
+    )
+}
+
+/**
+ * Base privada para DatePickers com validação de limites (Passado ou Futuro).
+ *
+ * Centraliza a lógica de inicialização do calendário (zerando horas/minutos para obter o "hoje")
+ * e configura o [SelectableDates] com base no validador fornecido.
+ *
+ * @param validator Uma função lambda que recebe (dataSelecionada, dataDeHoje) e retorna true se a data for válida.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LimitedDatePickerBase(
+    value: String,
+    onDateSelected: (millis: Long) -> Unit,
+    label: String,
+    contentDescription: String,
+    isSingleLine: Boolean,
+    isError: Boolean,
+    errorMessage: String?,
+    modifier: Modifier,
+    validator: (dateMillis: Long, todayMillis: Long) -> Boolean
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
 
@@ -64,10 +184,11 @@ fun DatePickerDockedLimitedDate(value: String,
         }.timeInMillis
     }
 
-    // Só permite datas que sejam >= hoje
-    val selectableDates = object : SelectableDates {
-        override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-            return utcTimeMillis >= todayMillis
+    val selectableDates = remember(todayMillis, validator) {
+        object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                return validator(utcTimeMillis, todayMillis)
+            }
         }
     }
 
@@ -75,7 +196,7 @@ fun DatePickerDockedLimitedDate(value: String,
         selectableDates = selectableDates
     )
 
-    DatePicker(
+    DatePickerImpl(
         label = label,
         value = value,
         onIconClick = { showDatePicker = !showDatePicker },
@@ -91,111 +212,33 @@ fun DatePickerDockedLimitedDate(value: String,
     )
 }
 
-@Composable
-fun DatePickerDocked(value: String,
-                     onDateSelected: (millis: Long) -> Unit,
-                     label: String,
-                     modifier: Modifier = Modifier,
-                     contentDescription: String,
-                     isError: Boolean = false,
-                     errorMessage: String? = null
-) {
-    var showDatePicker by remember { mutableStateOf(value = false) }
-    val datePickerState = rememberDatePickerState()
-
-    DatePicker(
-        label = label,
-        value = value,
-        onIconClick = { showDatePicker = !showDatePicker },
-        contentDescription = contentDescription,
-        showDatePicker = showDatePicker,
-        datePickerState = datePickerState,
-        onDismiss = { showDatePicker = false },
-        onDateSelected = onDateSelected,
-        isError = isError,
-        errorMessage = errorMessage,
-        modifier = modifier
-    )
-}
-
 /**
- * Modal
- * */
+ * Implementação visual e estrutural do DatePicker.
+ *
+ * Combina o campo de texto ([DateOutlineOutlinedTextField]) com o popup flutuante ([PopUpDatePicker]).
+ * Gerencia a lógica de exibição do popup e delega os eventos de seleção.
+ *
+ * @param showDatePicker Booleano que controla a visibilidade do popup.
+ * @param datePickerState O estado do DatePicker do Material3.
+ * @param onDismiss Ação para fechar o popup.
+ * @param onIconClick Ação ao clicar no ícone do calendário (abrir/fechar popup).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerModal(
-    onDateSelected: (Long?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
-                onDismiss()
-            }) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DatePickerModalInput(
-    onDateSelected: (Long?) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState(initialDisplayMode = DisplayMode.Input)
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis)
-                onDismiss()
-            }) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    ) {
-        DatePicker(state = datePickerState)
-    }
-}
-
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
-}
-
-@Composable
-private fun DatePicker(label: String,
-                       value: String,
-                       onIconClick: () -> Unit,
-                       contentDescription: String,
-                       showDatePicker: Boolean,
-                       datePickerState: DatePickerState,
-                       onDismiss: () -> Unit,
-                       onDateSelected: (millis: Long) -> Unit,
-                       isSingleLine: Boolean = false,
-                       isError: Boolean = false,
-                       errorMessage: String? = null,
-                       modifier: Modifier = Modifier){
-
+private fun DatePickerImpl(
+    label: String,
+    value: String,
+    onIconClick: () -> Unit,
+    contentDescription: String,
+    showDatePicker: Boolean,
+    datePickerState: DatePickerState,
+    onDismiss: () -> Unit,
+    onDateSelected: (millis: Long) -> Unit,
+    isSingleLine: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    modifier: Modifier = Modifier
+){
     LaunchedEffectDatePicker(
         datePickerState = datePickerState,
         onDateSelected = onDateSelected,
@@ -224,6 +267,13 @@ private fun DatePicker(label: String,
     }
 }
 
+/**
+ * Helper que observa alterações no estado do DatePicker.
+ *
+ * Quando o usuário seleciona uma data no calendário, este efeito é disparado para:
+ * 1. Notificar o pai via [onDateSelected].
+ * 2. Fechar o popup via [onDismiss].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LaunchedEffectDatePicker(
@@ -239,14 +289,21 @@ private fun LaunchedEffectDatePicker(
     }
 }
 
+/**
+ * O campo de texto "fake" que exibe a data selecionada.
+ *
+ * É configurado como `readOnly = true` para impedir digitação manual, forçando o uso do calendário.
+ * Inclui um ícone de calendário no final (trailingIcon) que serve de gatilho para o popup.
+ */
 @Composable
-private fun DateOutlineOutlinedTextField(value: String,
-                                         label: String,
-                                         contentDescription: String,
-                                         onIconClick: () -> Unit,
-                                         isSingleLine: Boolean = false,
-                                         isError: Boolean = false,
-                                         errorMessage: String? = null,
+private fun DateOutlineOutlinedTextField(
+    value: String,
+    label: String,
+    contentDescription: String,
+    onIconClick: () -> Unit,
+    isSingleLine: Boolean = false,
+    isError: Boolean = false,
+    errorMessage: String? = null,
 ) {
     OutlinedTextField(
         value = value,
@@ -279,6 +336,12 @@ private fun DateOutlineOutlinedTextField(value: String,
     )
 }
 
+/**
+ * O container flutuante (Popup) que abriga o calendário.
+ *
+ * Utiliza um [Popup] do Compose para sobrepor o conteúdo na tela, alinhado abaixo do campo de texto.
+ * Possui sombra e fundo de superfície para aderir ao Material Design.
+ */
 @Composable
 private fun PopUpDatePicker(
     onDismiss: () -> Unit,

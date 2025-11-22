@@ -39,6 +39,17 @@ import androidx.compose.ui.res.stringResource
 import java.util.Locale
 import com.example.amfootball.R
 
+/**
+ * Componente Composable que exibe um campo de texto de leitura, que, ao ser clicado,
+ * abre o diálogo customizado [TimePickerApp] para selecionar um horário.
+ *
+ * @param value A string atual do horário selecionado (ex: "14:30").
+ * @param onValueChange Callback chamado quando um novo horário é confirmado, retornando a string formatada ("HH:mm").
+ * @param label O rótulo a ser exibido no campo de texto.
+ * @param contentDescription Descrição para acessibilidade do ícone do relógio.
+ * @param isError Indica se o campo deve mostrar o estado de erro.
+ * @param errorMessage Mensagem de erro a ser exibida se [isError] for true.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FieldTimePicker(
@@ -95,6 +106,15 @@ fun FieldTimePicker(
     }
 }
 
+/**
+ * Componente privado que contém o estado do seletor de tempo e a lógica de alternância
+ * entre os modos [TimePicker] (Relógio) e [TimeInput] (Teclado).
+ *
+ * Utiliza o [TimePickerDialog] para envolver o seletor numa caixa de diálogo.
+ *
+ * @param onConfirm Callback executado ao pressionar "Ok". Recebe o [TimePickerState] final.
+ * @param onDismiss Callback executado ao pressionar "Cancel" ou fora do diálogo.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerApp(
@@ -144,6 +164,17 @@ private fun TimePickerApp(
     }
 }
 
+/**
+ * Componente privado que cria a estrutura básica do [Dialog] para o seletor de tempo.
+ *
+ * Garante que o diálogo utilize o [SurfaceTimePickerDialog] para estilização Material 3.
+ *
+ * @param title O título exibido no cabeçalho do diálogo.
+ * @param onDismiss Ação para fechar o diálogo.
+ * @param onConfirm Ação executada ao confirmar a seleção.
+ * @param toggle Slot Composable para o ícone de alternância de modo (Dial/Input).
+ * @param content O conteúdo principal do diálogo (o [TimePicker] ou [TimeInput]).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TimePickerDialog(
@@ -167,6 +198,17 @@ private fun TimePickerDialog(
     }
 }
 
+/**
+ * Componente privado que define a aparência e a estrutura de botões (Ok/Cancel) e título do diálogo.
+ *
+ * Utiliza [Surface] para aplicar a forma arredondada do Material 3 e tonalElevation.
+ *
+ * @param title O título a ser exibido no cabeçalho.
+ * @param onDismiss Ação executada ao clicar em "Cancel".
+ * @param onConfirm Ação executada ao clicar em "Ok".
+ * @param toggle Slot Composable para o ícone de alternância (Dial/Input).
+ * @param content O conteúdo principal do diálogo (o seletor de tempo).
+ */
 @Composable
 private fun SurfaceTimePickerDialog(title: String,
                                     onDismiss: () -> Unit,

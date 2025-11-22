@@ -1,7 +1,5 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
@@ -43,31 +41,31 @@ class ListPlayerViewModel @Inject constructor(
 ): ViewModel() {
     /**
      * Estado atual dos filtros aplicados pelo utilizador.
-     * A UI observa este LiveData para manter os campos de texto sincronizados.
+     * A UI observa este StateFlow para manter os campos de texto sincronizados.
      */
-    private val filterState: MutableLiveData<FilterListPlayer> = MutableLiveData(FilterListPlayer())
-    val uiFilters: LiveData<FilterListPlayer> = filterState
+    private val filterState: MutableStateFlow<FilterListPlayer> = MutableStateFlow(FilterListPlayer())
+    val uiFilters: StateFlow<FilterListPlayer> = filterState
 
     /**
      * Estado dos erros de validação dos filtros.
      * Contém mensagens de erro específicas para cada campo (ex: idade inválida).
      */
-    private val filterErrorState: MutableLiveData<FilterPlayersErrors> = MutableLiveData(FilterPlayersErrors())
-    val filterError: LiveData<FilterPlayersErrors> = filterErrorState
+    private val filterErrorState: MutableStateFlow<FilterPlayersErrors> = MutableStateFlow(FilterPlayersErrors())
+    val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
 
     /**
      * Lista de jogadores carregada da API.
      * Exibe os resultados da pesquisa na UI.
      */
-    private val listState: MutableLiveData<List<InfoPlayerDto>> = MutableLiveData(emptyList())
-    val uiList: LiveData<List<InfoPlayerDto>> = listState
+    private val listState: MutableStateFlow<List<InfoPlayerDto>> = MutableStateFlow(emptyList())
+    val uiList: StateFlow<List<InfoPlayerDto>> = listState
 
     /**
      * Lista de posições disponíveis para filtrar (incluindo opção 'null' para "Todas").
      * Usado para popular o Dropdown de posições.
      */
-    private val listPositions: MutableLiveData<List<Position?>> = MutableLiveData(emptyList())
-    val uiListPositions: LiveData<List<Position?>> = listPositions
+    private val listPositions: MutableStateFlow<List<Position?>> = MutableStateFlow(emptyList())
+    val uiListPositions: StateFlow<List<Position?>> = listPositions
 
     /**
      * Estado geral da UI (Loading e Erros de Rede/API).
@@ -76,6 +74,7 @@ class ListPlayerViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState
 
     init {
+        android.util.Log.e("TESTE_CRITICO", "ViewModel INICIADO!")
         loadingListPlayer()
 
         listPositions.value = listOf(
@@ -89,31 +88,31 @@ class ListPlayerViewModel @Inject constructor(
 
     // --- Métodos de Atualização de Filtros (Data Binding) ---
     fun onNameChange(name: String) {
-        filterState.value = filterState.value!!.copy(name = name)
+        filterState.value = filterState.value.copy(name = name)
     }
 
     fun onCityChange(city: String) {
-        filterState.value = filterState.value!!.copy(city = city)
+        filterState.value = filterState.value.copy(city = city)
     }
 
     fun onMinAgeChange(minAge: Int?) {
-        filterState.value = filterState.value!!.copy(minAge = minAge)
+        filterState.value = filterState.value.copy(minAge = minAge)
     }
 
     fun onMaxAgeChange(maxAge: Int?) {
-        filterState.value = filterState.value!!.copy(maxAge = maxAge)
+        filterState.value = filterState.value.copy(maxAge = maxAge)
     }
 
     fun onPositionChange(position: Position?) {
-        filterState.value = filterState.value!!.copy(position = position)
+        filterState.value = filterState.value.copy(position = position)
     }
 
     fun onMinSizeChange(minSize: Int?) {
-        filterState.value = filterState.value!!.copy(minSize = minSize)
+        filterState.value = filterState.value.copy(minSize = minSize)
     }
 
     fun onMaxSizeChange(maxSize: Int?) {
-        filterState.value = filterState.value!!.copy(maxSize = maxSize)
+        filterState.value = filterState.value.copy(maxSize = maxSize)
     }
 
     /**
@@ -173,17 +172,32 @@ class ListPlayerViewModel @Inject constructor(
      * Gere os estados de Loading e Erro no [_uiState].
      */
     private fun loadingListPlayer() {
+        android.util.Log.d("TESTE_CRITICO", "1. Função loadingListPlayer chamada.")
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
             try {
-                val response = repository.getListPlayer(filterState.value)
+                val filtrosAtuais = filterState.value
+                android.util.Log.d("TESTE_CRITICO", "2. A preparar pedido. Filtros: $filtrosAtuais")
 
+                // 2. Fazer o pedido
+                val response = repository.getListPlayer(filtrosAtuais)
+
+                android.util.Log.d("TESTE_CRITICO", "3. Resposta recebida. Código HTTP: ${response.code()}")
                 if (response.isSuccessful && response.body() != null) {
-                    listState.value = response.body()
+                    val players = response.body()!!
+
+                    android.util.Log.d("TESTE_CRITICO", "4. SUCESSO! Tamanho da lista: ${players.size}")
+                    if (players.isNotEmpty()) {
+                        android.util.Log.d("TESTE_CRITICO", "   Exemplo do 1º player: ${players[0].name}")
+                    } else {
+                        android.util.Log.w("TESTE_CRITICO", "   AVISO: A lista veio vazia [] da API.")
+                    }
+                    listState.value = players
                     _uiState.update { it.copy(isLoading = false) }
                 } else {
                     val errorRaw = response.errorBody()?.string()
+                    android.util.Log.e("TESTE_CRITICO", "4. ERRO DO SERVIDOR: $errorRaw")
                     val errorMsg = NetworkUtils.parseBackendError(errorRaw)
                         ?: "Erro desconhecido: ${response.code()}"
 
@@ -192,6 +206,8 @@ class ListPlayerViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                android.util.Log.e("TESTE_CRITICO", "5. EXCEÇÃO (Crash/Rede): ${e.message}")
+                e.printStackTrace()
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")
                 }
@@ -207,12 +223,12 @@ class ListPlayerViewModel @Inject constructor(
      * @return `true` se todos os filtros forem válidos, `false` caso contrário.
      */
     private fun validateForm(): Boolean {
-        val name = filterState.value?.name
-        val city = filterState.value?.city
-        val minAge = filterState.value?.minAge
-        val maxAge = filterState.value?.maxAge
-        val minSize = filterState.value?.minSize
-        val maxSize = filterState.value?.maxSize
+        val name = filterState.value.name
+        val city = filterState.value.city
+        val minAge = filterState.value.minAge
+        val maxAge = filterState.value.maxAge
+        val minSize = filterState.value.minSize
+        val maxSize = filterState.value.maxSize
 
         var nameError: ErrorMessage? = null
         var cityError: ErrorMessage? = null

@@ -27,7 +27,8 @@ import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.ui.components.inputFields.FilterMaxDatePicker
+import com.example.amfootball.ui.components.inputFields.FilterMinDatePicker
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
@@ -131,9 +132,7 @@ private fun FilterListMemberShipRequestContent(
 
         FilterRow(
             content = {
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_min_date),
-                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                FilterMinDatePicker(
                     value = filters.minDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateSelected(it) },
                     isError = filterError.minDateError != null,
@@ -143,9 +142,7 @@ private fun FilterListMemberShipRequestContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_max_date),
-                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                FilterMaxDatePicker(
                     value = filters.maxDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateSelected(it)},
                     isError = filterError.maxDateError != null,

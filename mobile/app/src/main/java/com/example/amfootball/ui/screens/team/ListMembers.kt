@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Delete
@@ -23,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,6 +37,10 @@ import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
+import com.example.amfootball.ui.components.inputFields.FilterListPosition
+import com.example.amfootball.ui.components.inputFields.FilterMaxAgeTextField
+import com.example.amfootball.ui.components.inputFields.FilterMinAgeTextField
+import com.example.amfootball.ui.components.inputFields.FilterNamePlayerTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.AgeRow
@@ -129,40 +131,31 @@ private fun FilterListMemberContent(
     Column(modifier = modifier) {
         FilterRow (
             content = {
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_name),
-                    value = filters.name ?: "",
-                    maxLenght = UserConst.MAX_NAME_LENGTH,
-                    onValueChange = { filterActions.onNameChange(it) },
-                    modifier = Modifier.weight(1f),
+                FilterNamePlayerTextField(
+                    playerName = filters.name ?: "",
+                    onPlayerNameChange = { filterActions.onNameChange(it) },
                     isError = filterErros.nameError != null,
-                    errorMessage = filterErros.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+                    errorMessage = filterErros.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
+                    modifier = Modifier.weight(1f)
                 )
             }
         )
 
         FilterRow(
             content = {
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_min_age),
-                    value = filters.minAge?.toString() ?: "",
-                    minLenght = UserConst.MIN_AGE,
-                    maxLenght = UserConst.MAX_AGE,
-                    onValueChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
+                FilterMinAgeTextField(
+                    minAge = filters.minAge?.toString(),
+                    onMinAgeChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     isError = filterErros.minAgeError != null,
                     errorMessage = filterErros.minAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.weight(1f)
                 )
 
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_max_age),
-                    value = filters.maxAge?.toString() ?: "",
-                    minLenght = UserConst.MIN_AGE,
-                    maxLenght = UserConst.MAX_AGE,
+                FilterMaxAgeTextField(
+                    maxAge = filters.maxAge?.toString() ?: "",
+                    onMaxAgeChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     isError = filterErros.maxAgeError != null,
                     errorMessage = filterErros.maxAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
-                    onValueChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     modifier = Modifier.weight(1f)
                 )
             },
@@ -185,18 +178,10 @@ private fun FilterListMemberContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                LabelSelectBox(
-                    label = stringResource(id = R.string.filter_position),
-                    list = listPosition,
-                    selectedValue = filters.position,
-                    onSelectItem = { filterActions.onPositionChange(it) },
-                    itemToString = { typeMember ->
-                        if (typeMember == null) {
-                            stringResource(id = R.string.filter_selectbox_all)
-                        } else {
-                            stringResource(id = typeMember.stringId)
-                        }
-                    },
+                FilterListPosition(
+                    listPosition = listPosition,
+                    selectPosition = filters.position,
+                    onSelectPosition = { filterActions.onPositionChange(it) },
                     modifier = Modifier.weight(1f)
                 )
             },
@@ -289,8 +274,7 @@ private fun MemberTrailingButtons(
         IconButton(onClick = remove) {
             Icon(
                 imageVector = Icons.Default.Delete,
-                //contentDescription = stringResource(id = R.string.remove_button_description),
-                contentDescription = "Remove",
+                contentDescription = stringResource(id = R.string.remove_button_player_description),
                 tint = MaterialTheme.colorScheme.error
             )
         }

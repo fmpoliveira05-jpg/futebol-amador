@@ -22,6 +22,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
+/**
+ * Um componente Composable genérico que implementa um Exposed Dropdown Menu (Select Box).
+ *
+ * Utiliza um [OutlinedTextField] para exibir o valor selecionado e um [ExposedDropdownMenu]
+ * para mostrar a lista de opções. É responsável por gerenciar o estado de expansão do menu.
+ *
+ * @param T O tipo de dados dos itens na lista (ex: String, DataObject, Enum).
+ * @param list A lista de itens disponíveis para seleção.
+ * @param selectedValue O item atualmente selecionado que será exibido no campo de texto.
+ * @param onSelectItem Callback executado quando um item da lista é clicado.
+ * @param itemToString Uma função Composable que define como o item do tipo [T] deve ser convertido
+ * em uma String para exibição (tanto no campo quanto nos itens do menu).
+ * @param modifier Modificador para estilizar o [ExposedDropdownMenuBox].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun<T> SelectBox(
@@ -78,6 +92,24 @@ fun<T> SelectBox(
     }
 }
 
+/**
+ * Um componente Composable genérico que combina um rótulo ([Label]) e o seletor
+ * [SelectBox] com suporte para exibir mensagens de erro abaixo.
+ *
+ * É ideal para uso em formulários onde é necessário indicar se o campo é obrigatório
+ * ou se há um erro de validação.
+ *
+ * @param T O tipo de dados dos itens na lista.
+ * @param label A string do rótulo a ser exibida acima do campo de seleção.
+ * @param list A lista de itens disponíveis para seleção.
+ * @param selectedValue O item atualmente selecionado.
+ * @param onSelectItem Callback executado ao selecionar um item.
+ * @param itemToString Função que converte o item do tipo [T] para String.
+ * @param modifier Modificador para estilizar o [Column] que envolve o rótulo e o campo.
+ * @param isRequired Booleano para indicar se o campo é obrigatório (adiciona '*' ao rótulo).
+ * @param isError Booleano que indica se deve ser exibida a mensagem de erro.
+ * @param errorMessage A mensagem de erro a ser exibida abaixo do campo se [isError] for true.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> LabelSelectBox(

@@ -23,6 +23,22 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
+/**
+ * Um componente Composable para selecionar uma imagem da galeria do dispositivo,
+ * renderizado como um círculo.
+ *
+ * O componente exibe a imagem selecionada (se houver) ou um ícone de placeholder
+ * (AddAPhoto). Ao ser clicado, ele lança o Photo Picker do sistema Android.
+ *
+ * @param modifier Modificador para estilizar o componente (tamanho, preenchimento, etc.).
+ * @param imageSelectedUri A URI da imagem atualmente selecionada. Se for null, o placeholder é exibido.
+ * @param onImageSelected Callback executado quando uma URI é retornada pelo Photo Picker.
+ * A URI pode ser null se o usuário cancelar a seleção.
+ * @param contentDescription Descrição de conteúdo para acessibilidade da imagem exibida.
+ * Deve ser fornecida apenas quando [imageSelectedUri] não for null.
+ * @param contentDescriptionWithoutImage Descrição de conteúdo para acessibilidade do ícone
+ * [Icons.Default.AddAPhoto] (placeholder).
+ */
 @Composable
 fun ImagePicker(
     modifier: Modifier = Modifier,
@@ -31,7 +47,6 @@ fun ImagePicker(
     contentDescription: String? = null,
     contentDescriptionWithoutImage: String? = null,
 ) {
-
     //Cria o launcher para o Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
@@ -55,7 +70,6 @@ fun ImagePicker(
             },
         contentAlignment = Alignment.Center
     ) {
-        //Decide o que mostrar: a imagem ou um placeholder
         if (imageSelectedUri != null) {
             AsyncImage(
                 model = imageSelectedUri,

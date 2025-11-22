@@ -27,10 +27,10 @@ import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
 import com.example.amfootball.ui.components.NavBar.MainTopAppBar
-import com.example.amfootball.ui.screens.Chat.ChatListScreen
-import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
+import com.example.amfootball.ui.screens.Chat.ChatListScreen
+import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
@@ -53,8 +53,6 @@ import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
-import com.example.amfootball.utils.extensions.composableProtected
-
 
 @Composable
 fun MainNavigation() {
@@ -202,26 +200,23 @@ private fun NavGraphBuilder.userPages(
 
 private fun NavGraphBuilder.profilePlayer(
     globalNavController: NavHostController,
-    sessionManager: SessionManager) {
+    sessionManager: SessionManager
+) {
     composable(route = Routes.UserRoutes.PROFILE.route) {
         val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
         ProfileScreen(viewModel = viewModel)
     }
 
-    composableProtected(
-        route = "${Routes.UserRoutes.PROFILE.route}/{playerId}",
+    composable(route = "${Routes.UserRoutes.PROFILE.route}/{playerId}",
         arguments = listOf(
             navArgument("playerId") { type = NavType.StringType }
-        ),
-        sessionManager = sessionManager,
-        navController = globalNavController,
-        content = {
-            val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+        )
+    ) {
+        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
-            ProfileScreen(viewModel = viewModel)
-        }
-    )
+        ProfileScreen(viewModel = viewModel)
+    }
 }
 
 /**
