@@ -66,6 +66,17 @@ builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, HttpClien
 );
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 app.MapHubs();
@@ -80,6 +91,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseCors("AllowAngular");
 app.UseAuthorization();
 
 app.MapControllers();
