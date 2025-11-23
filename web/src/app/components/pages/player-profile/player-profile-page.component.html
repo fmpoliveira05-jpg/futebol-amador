@@ -132,25 +132,26 @@
       <hr class="divider" />
 
       <h3 class="side-card__subtitle">Pedidos de adesão</h3>
-      <p class="side-card__text">
-        Estes botões são apenas atalhos visuais. No futuro irão abrir páginas dedicadas para
-        gerir os pedidos de adesão.
-      </p>
-
-      <div class="side-card__actions">
-        <button type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
-          Ver pedidos
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="onSendMembershipRequest()">
-          Enviar pedido
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="onAcceptMembershipRequest()">
-          Aceitar pedidos
-        </button>
-        <button type="button" class="btn btn-secondary" (click)="onRejectMembershipRequest()">
-          Rejeitar pedidos
-        </button>
-      </div>
+        <p class="side-card__text">
+          Aqui vais conseguir ver e gerir os pedidos de adesão.
+        </p>
+        <div class="side-card__actions">
+          <button
+            *ngIf="!hasTeam()"
+            type="button"
+            class="btn btn-secondary"
+            (click)="onViewMembershipRequests()"
+          >
+            Ver pedidos de adesão
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="onSendMembershipRequest()"
+          >
+            Enviar pedido de adesão
+          </button>
+        </div>
     </aside>
   </div>
 </section>

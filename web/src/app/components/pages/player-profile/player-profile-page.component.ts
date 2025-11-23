@@ -177,20 +177,12 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  protected onViewMembershipRequests(): void {
-    alert('Aqui, no futuro, vais para a página de pedidos de adesão do jogador.');
+  onViewMembershipRequests(): void {
+    this.router.navigate(['/players/membership-requests']);
   }
 
   protected onSendMembershipRequest(): void {
     alert('Aqui, no futuro, vais enviar um pedido de adesão a uma equipa.');
-  }
-
-  protected onAcceptMembershipRequest(): void {
-    alert('Aqui, no futuro, vais aceitar pedidos de adesão.');
-  }
-
-  protected onRejectMembershipRequest(): void {
-    alert('Aqui, no futuro, vais rejeitar pedidos de adesão.');
   }
 
   private loadPlayer(playerIdOrMe: string, showLoader: boolean = true): void {

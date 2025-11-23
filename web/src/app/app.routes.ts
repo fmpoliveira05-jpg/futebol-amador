@@ -8,6 +8,8 @@ import { LoginComponent } from './components/pages/login/login.component';
 import { SignupComponent } from './components/pages/signup/signup.component';
 import { LogoutComponent } from './components/pages/login/logout.component';
 import { AuthGuard } from './shared/auth/auth.guard';
+import { PlayerMembershipRequestsPageComponent } from './components/pages/membership-requests/player-membership-requests.component';
+
 
 export const routes: Routes = [
     {path: '', component: Home},
@@ -43,6 +45,12 @@ export const routes: Routes = [
     path: 'players/details/:playerId',
     component: PlayerProfilePageComponent,
     canActivate: [AuthGuard],
+  },
+  {
+    path: 'players/membership-requests',
+    component: PlayerMembershipRequestsPageComponent,
+    canActivate: [AuthGuard],
+    data: { requiresNoTeam: true },
   },
   {
     path: 'settings',
