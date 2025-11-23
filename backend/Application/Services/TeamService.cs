@@ -140,6 +140,18 @@ namespace Application.Services
             return team;
         }
 
+        public async Task<List<InfoTeamsDto>> GetListTeams(FilterListTeamDto? filters)
+        {
+            if (filters != null)
+            {
+                TeamValidator.ValidateFilterTeams(filters);
+            }
+
+            var listTeam = await TeamRepository.GetListTeams(filters);
+
+            return listTeam;
+        }
+
         #endregion
 
         #region Admins Manager

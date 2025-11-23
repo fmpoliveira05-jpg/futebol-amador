@@ -70,6 +70,16 @@ namespace Api.Controllers
 
         #region Search Teams 
 
+
+        [HttpGet("listTeams")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ListTeam([FromQuery] FilterListTeamDto? filter)
+        {
+            var list = await TeamService.GetListTeams(filter);
+
+            return Ok(list);
+        }
+
         [HttpGet("{teamId}/search")]
         [AllowAnonymous]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
@@ -98,6 +108,7 @@ namespace Api.Controllers
 
             return Ok(list);
         }
+
         #endregion
 
         #region Team Members Management

@@ -287,30 +287,12 @@ namespace Application.Validators
         public void ValidateVaribleSearchTeamWithFilters(Guid idTeam, FilterListTeamDto filter)
         {
             ValidateVariableSearchTeam(idTeam);
+            validateFilterTeam(filter);
+        }
 
-            if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
-            {
-                if (filter.MinNumberPoints > filter.MaxNumberPoints)
-                {
-                    throw new InvalidOperationException("O numero minimo de pontos de uma equipa, não deve ser superior ao numero maximo");
-                }
-            }
-
-            if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
-            {
-                if (filter.MinAge.Value > filter.MaxAge.Value)
-                {
-                    throw new InvalidOperationException("O numero minimo de idade minima tem de ser inferior à idade media maxima");
-                }
-            }
-
-            if (filter.MinNumberPlayers.HasValue && filter.MaxNumberPlayers.HasValue)
-            {
-                if (filter.MinNumberPlayers.Value > filter.MaxNumberPlayers.Value)
-                {
-                    throw new InvalidOperationException("O número minimo de membros deve ser superior ao numero maximo de membros");
-                }
-            }
+        public void ValidateFilterTeams(FilterListTeamDto? filter)
+        {
+            validateFilterTeam(filter);
         }
 
         public void ValidateTeamSearch(Team? team)
@@ -343,6 +325,37 @@ namespace Application.Validators
         }
 
         #region Private Methods
+
+        private void validateFilterTeam(FilterListTeamDto? filter)
+        {
+            if (filter != null)
+            {
+                if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
+                {
+                    if (filter.MinNumberPoints > filter.MaxNumberPoints)
+                    {
+                        throw new InvalidOperationException("O numero minimo de pontos de uma equipa, não deve ser superior ao numero maximo");
+                    }
+                }
+
+                if (filter.MinAge.HasValue && filter.MaxAge.HasValue)
+                {
+                    if (filter.MinAge.Value > filter.MaxAge.Value)
+                    {
+                        throw new InvalidOperationException("O numero minimo de idade minima tem de ser inferior à idade media maxima");
+                    }
+                }
+
+                if (filter.MinNumberPlayers.HasValue && filter.MaxNumberPlayers.HasValue)
+                {
+                    if (filter.MinNumberPlayers.Value > filter.MaxNumberPlayers.Value)
+                    {
+                        throw new InvalidOperationException("O número minimo de membros deve ser superior ao numero maximo de membros");
+                    }
+                }
+            }
+        }
+
 
         private static void ValidateTeamFull(Team? team)
         {

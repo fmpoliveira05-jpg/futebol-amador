@@ -5,13 +5,13 @@ namespace Application.DTOs.Filters
 {
     public class FilterListTeamDto
     {
-        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
+        [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? NameTeam { get; set; }
 
-        [MinLength(ModelConstants.RankConts.MinNameLength), MaxLength(ModelConstants.RankConts.MaxNameLength)]
+        [MaxLength(ModelConstants.RankConts.MaxNameLength)]
         public string? NameRank { get; set; }
 
-        [MinLength(ModelConstants.GeneralConst.MinCityLength), MaxLength(ModelConstants.GeneralConst.MaxCityLength)]
+        [MaxLength(ModelConstants.GeneralConst.MaxCityLength)]
         public string? City { get; set; }
 
         [Range(ModelConstants.TeamConst.MinNumberPoints, ModelConstants.TeamConst.MaxNumberPoints)]

@@ -15,6 +15,7 @@ namespace Application.Interfaces.Services
 
         Task DeleteTeamAsync(Guid teamId, string currentUserId);
 
+        Task<List<InfoTeamsDto>> GetListTeams(FilterListTeamDto? filters);
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsync(Guid teamId);
 
         Task<List<PlayerDetailsDto>> GetTeamPlayersAsyncWithFilters(Guid teamId, FilterTeamPlayers filters);
