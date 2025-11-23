@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { PlayerDetails, UpdatePlayerRequest } from '../models/player.model';
-import { environment } from '../../../environments/environment';
-import { PlayerListItem } from '../models/player-list-item.model';
+import { PlayerDetails, UpdatePlayerRequest } from '../shared/models/player.model';
+import { environment } from '../environments/environment';
+import { PlayerListItem } from '../shared/models/player-list-item.model';
 
 @Injectable({
   providedIn: 'root',

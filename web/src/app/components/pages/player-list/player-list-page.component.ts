@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
-import { PlayerService } from '../../services/player.service';
-import { PlayerDetails } from '../../models/player.model';
-import { POSITION_MAP } from '../../../../shared/constants/position-map';
-import { PlayerListItem } from '../../models/player-list-item.model';
+import { PlayerService } from '../../../services/player.service';
+import { PlayerDetails } from '../../../shared/models/player.model';
+import { POSITION_MAP } from '../../../shared/constants/position-map';
+import { PlayerListItem } from '../../../shared/models/player-list-item.model';
 
 @Component({
   selector: 'app-player-list-page',
