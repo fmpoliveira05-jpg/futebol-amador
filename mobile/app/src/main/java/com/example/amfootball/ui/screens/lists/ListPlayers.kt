@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
@@ -61,6 +60,7 @@ fun ListPlayersScreen(
     val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
     val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
+    val showMorePlayersVisible by viewModel.showMoreButtonVisible.collectAsStateWithLifecycle()
 
     val filterActions = FilterListPlayersActions(
         onNameChange = viewModel::onNameChange,
@@ -88,7 +88,9 @@ fun ListPlayersScreen(
         onSendMembership = { id -> viewModel.sendMembershipRequest(id) },
         onShowMore = { id ->
             viewModel.showMore(idPlayer = id, navHostController = navHostController)
-        }
+        },
+        isValidShowMore = showMorePlayersVisible,
+        showMoreItems = { viewModel.loadMorePlayers() }
     )
 }
 @Composable
@@ -100,6 +102,8 @@ fun ListPlayersContent(
     filtersError: FilterPlayersErrors,
     listPosition: List<Position?>,
     onRetry: () -> Unit,
+    isValidShowMore: Boolean,
+    showMoreItems: () -> Unit,
     filterActions: FilterListPlayersActions,
     onSendMembership: (String) -> Unit,
     onShowMore: (String) -> Unit
@@ -136,6 +140,8 @@ fun ListPlayersContent(
                         showMore = { onShowMore(player.id) }
                     )
                 },
+                isValidShowMore = isValidShowMore,
+                showMoreItems = showMoreItems,
                 messageEmptyList = stringResource(id = R.string.list_player_empty)
             )
         }
@@ -290,7 +296,6 @@ private fun ItemListPlayer(
     )
 }
 
-
 @Preview(
     name = "Lista de Jogadores - PT",
     locale = "pt",
@@ -351,7 +356,53 @@ fun ListPlayersPreview() {
             onRetry = {},
             filterActions = dummyActions,
             onSendMembership = {},
-            onShowMore = {}
+            onShowMore = {},
+            isValidShowMore = true,
+            showMoreItems = {}
+        )
+    }
+}
+
+@Preview(
+    name = "Lista Vazia - PT",
+    locale = "pt",
+    showBackground = true
+)
+@Preview(
+    name = "Empty List - En",
+    locale = "en",
+    showBackground = true
+)
+@Composable
+fun ListPlayersEmptyPreview() {
+    val dummyActions = FilterListPlayersActions(
+        onNameChange = {},
+        onCityChange = {},
+        onMinAgeChange = {},
+        onMaxAgeChange = {},
+        onPositionChange = {},
+        onMinSizeChange = {},
+        onMaxSizeChange = {},
+        buttonActions = ButtonFilterActions(
+            onFilterApply = {},
+            onFilterClean = {}
+        )
+    )
+
+    AMFootballTheme {
+        ListPlayersContent(
+            isLoading = false,
+            errorMessage = null,
+            list = emptyList(),
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = Position.values().toList(),
+            onRetry = {},
+            filterActions = dummyActions,
+            onSendMembership = {},
+            onShowMore = {},
+            isValidShowMore = false,
+            showMoreItems = {}
         )
     }
 }

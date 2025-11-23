@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Inbox
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -32,23 +34,30 @@ import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 
 /**
- * Container principal que exibe uma lista dinâmica de itens ([LazyColumn]) e um cabeçalho de filtro.
+ * Container principal que exibe uma lista dinâmica de itens ([LazyColumn]) com suporte a cabeçalho de filtro,
+ * estados vazios e paginação.
  *
- * Lida com a exibição condicional: se a lista estiver vazia, mostra um ícone e uma mensagem.
- * Caso contrário, itera sobre os itens e exibe-os.
+ * Este componente orquestra a UI delegando a renderização para funções de extensão do [LazyListScope]:
+ * - [filterSection]: Renderiza a área de filtros no topo.
+ * - [emptyListState]: Renderiza uma mensagem e ícone se a lista estiver vazia.
+ * - [populatedListContent]: Renderiza os itens da lista e o botão de "Carregar Mais".
  *
  * @param T O tipo de dados dos itens na lista.
  * @param list A lista de dados a ser exibida.
- * @param filterSection Slot Composable para a secção de filtros (geralmente [FilterSection]).
+ * @param filterSection Slot Composable para a secção de filtros (opcional).
  * @param listItems Slot Composable para renderizar a UI de um item individual da lista.
+ * @param isValidShowMore Booleano que indica se o botão "Ver Mais" deve estar visível (geralmente true se houver mais páginas).
+ * @param showMoreItems Callback executado ao clicar no botão "Ver Mais".
  * @param itemSpacing O espaçamento vertical entre os itens da lista em dp (padrão: 12).
  * @param messageEmptyList A mensagem a ser exibida quando a lista estiver vazia.
  */
 @Composable
 fun<T> ListSurface(
     list: List<T>,
-    filterSection: @Composable () -> Unit,
+    filterSection: @Composable () -> Unit = {},
     listItems: @Composable (T) -> Unit,
+    isValidShowMore: Boolean = false,
+    showMoreItems: () -> Unit = {},
     itemSpacing: Int = 12,
     messageEmptyList: String = "asd"
 ) {
@@ -56,40 +65,111 @@ fun<T> ListSurface(
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
         ) {
-            item {
-                filterSection()
-                Spacer(Modifier.height(16.dp))
-            }
+            filterSection(filterSection = filterSection)
 
             if (list.isEmpty()) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 64.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Inbox,
-                            contentDescription = null,
-                            modifier = Modifier.size(72.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Text(
-                            text = messageEmptyList,
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
+               emptyListState(message = messageEmptyList)
             } else {
-                items(list) { item ->
-                    listItems(item)
-                    Spacer(Modifier.height(itemSpacing.dp))
-                }
+                populatedListContent(
+                    list = list,
+                    itemRender = listItems,
+                    itemSpacing = itemSpacing,
+                    isValidShowMore = isValidShowMore,
+                    onShowMoreClick = showMoreItems
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Extensão do [LazyListScope] para renderizar a secção de filtros.
+ * Adiciona um espaçador vertical após o conteúdo do filtro.
+ *
+ * @param filterSection O conteúdo Composable do filtro.
+ */
+private fun LazyListScope.filterSection(
+    filterSection: @Composable () -> Unit
+) {
+    if(filterSection != {}) {
+        item {
+            filterSection()
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+/**
+ * Extensão do [LazyListScope] para renderizar o estado de lista vazia.
+ * Exibe um ícone [Icons.Default.Inbox] e uma mensagem centralizada.
+ *
+ * @param message A mensagem a ser exibida ao utilizador.
+ */
+private fun LazyListScope.emptyListState(
+    message: String
+) {
+    item {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 64.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Inbox,
+                contentDescription = null,
+                modifier = Modifier.size(72.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Text(
+                text = message,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+/**
+ * Extensão do [LazyListScope] para renderizar o conteúdo da lista quando esta tem dados.
+ *
+ * Responsável por:
+ * 1. Iterar sobre a [list] e renderizar cada item usando [itemRender].
+ * 2. Adicionar espaçamento ([itemSpacing]) entre os itens.
+ * 3. Adicionar o botão "Ver Mais" no final da lista se [isValidShowMore] for verdadeiro.
+ *
+ * @param list A lista de itens a renderizar.
+ * @param itemRender O Composable que define a aparência de cada item.
+ * @param itemSpacing Espaçamento em dp entre itens.
+ * @param isValidShowMore Controla a visibilidade do botão de paginação.
+ * @param onShowMoreClick Ação ao clicar no botão de paginação.
+ */
+private fun <T> LazyListScope.populatedListContent(
+    list: List<T>,
+    itemRender: @Composable (T) -> Unit,
+    itemSpacing: Int,
+    isValidShowMore: Boolean = false,
+    onShowMoreClick: () -> Unit
+) {
+    items(list) { item ->
+        itemRender(item)
+        Spacer(Modifier.height(itemSpacing.dp))
+    }
+
+    if (isValidShowMore) {
+        item {
+            FilledTonalButton(
+                onClick = onShowMoreClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(id = R.string.button_view_more),
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1
+                )
             }
         }
     }

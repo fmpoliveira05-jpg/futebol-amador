@@ -1,6 +1,30 @@
 package com.example.amfootball.utils
 
 /**
+ * Constantes globais para o controlo de paginação e dimensionamento de listas na aplicação.
+ *
+ * Este objeto centraliza os valores usados para limitar a quantidade de dados carregados
+ * da API ou exibidos na UI, garantindo consistência no comportamento de "Infinite Scroll"
+ * ou botões de "Ver Mais".
+ */
+object ListsSizesConst {
+    /**
+     * Define o número inicial de itens a serem carregados ou exibidos quando a lista
+     * é aberta pela primeira vez.
+     *
+     * Valor atual: 10
+     */
+    const val INICIAL_SIZE = 10
+
+    /**
+     * Define a quantidade de novos itens a serem adicionados à lista a cada
+     * pedido de paginação (ação de carregar mais dados).
+     *
+     * Valor atual: 10
+     */
+    const val INCREMENT_SIZE = 10
+}
+/**
  * Objeto que contém constantes de validação de uso geral na aplicação.
  *
  * Utilizado para validações transversais como endereços, nomes de cidades e

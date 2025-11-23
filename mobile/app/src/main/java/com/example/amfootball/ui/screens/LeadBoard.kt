@@ -1,22 +1,14 @@
 package com.example.amfootball.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.amfootball.ui.viewModel.LeadBoardViewModel
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -24,68 +16,90 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.data.actions.lists.LeadBoardActions
 import com.example.amfootball.data.dtos.leadboard.LeadboardDto
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.lists.ImageList
+import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.R
+import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
 
+/**
+ * Ecrã principal da Tabela de Classificação (Leaderboard).
+ *
+ * Este Composable atua como o ponto de entrada (Stateful), conectando o [LeadBoardViewModel]
+ * à interface do utilizador. Responsável por coletar o estado da lista e definir as ações.
+ *
+ * @param navHostController Controlador de navegação.
+ * @param viewModel ViewModel responsável pela lógica de negócio e carregamento de dados.
+ */
 @Composable
 fun LeaderboardScreen(
     navHostController: NavHostController,
     viewModel: LeadBoardViewModel = viewModel()
 ) {
     val list = viewModel.inicialList.value
-    val showButton = viewModel.showMoreButton.value
+    val leadBoardActions = LeadBoardActions(
+        onShowMore = viewModel::showInfoTeam,
+        isValidShowMoreTeams = viewModel::showMoreButton,
+        onLoadMoreTeams = viewModel::loadMoreTeams
+    )
 
-    /*
-    TODO: Trocar isto pela surface das listas e adicionar a essa surface o botão view More
-    * */
-    Surface {
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.item_leadboard),
-                        style = MaterialTheme.typography.headlineSmall // Estilo de título
-                    )
-                }
-            }
-
-            items(list) { team ->
-                LeaderBoardContent(
-                    team = team,
-                    showInfoTeam = { viewModel.showInfoTeam(
-                        idTeam = team.team.id,
-                        navHostController = navHostController)
-                    }
-                )
-            }
-
-            if (showButton) {
-                item {
-                    FilledTonalButton(
-                        onClick = { viewModel.loadMoreTeams() },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.button_view_more),
-                            style = MaterialTheme.typography.bodyMedium,
-                            maxLines = 1
-                        )
-                    }
-                }
-            }
-        }
-    }
+    LeadBoardContent(
+        list = list,
+        leadBoardActions = leadBoardActions,
+        navHostController = navHostController
+    )
 }
 
+/**
+ * Conteúdo UI da Tabela de Classificação (Stateless).
+ *
+ * Utiliza o [ListSurface] para renderizar a lista de equipas ou o estado vazio.
+ *
+ * @param list Lista de DTOs da classificação a exibir.
+ * @param leadBoardActions Ações disponíveis (carregar mais, ver detalhes).
+ * @param navHostController Controlador de navegação para transição de ecrãs.
+ */
 @Composable
-private fun LeaderBoardContent(
+private fun LeadBoardContent(
+    list: List<LeadboardDto>,
+    leadBoardActions: LeadBoardActions,
+    navHostController: NavHostController
+) {
+
+    ListSurface(
+        list = list,
+        listItems = { team ->
+            LeaderBoardItems(
+                team = team,
+                showInfoTeam = { leadBoardActions.onShowMore(
+                    team.team.id,
+                    navHostController)
+                }
+            )
+        },
+        isValidShowMore = leadBoardActions.isValidShowMoreTeams().value ,
+        showMoreItems = { leadBoardActions.onLoadMoreTeams() },
+        messageEmptyList = stringResource(id = R.string.leadboard_empty)
+    )
+}
+
+/**
+ * Item individual da lista de classificação.
+ *
+ * Apresenta:
+ * - Posição (#1, #2...).
+ * - Nome da equipa.
+ * - Rank e Pontos atuais.
+ * - Logótipo da equipa.
+ * - Botão para ver mais detalhes.
+ *
+ * @param team Dados da equipa na classificação.
+ * @param showInfoTeam Callback executado ao clicar no botão de detalhes.
+ */
+@Composable
+private fun LeaderBoardItems(
     team: LeadboardDto,
     showInfoTeam: () -> Unit
 ) {
@@ -132,16 +146,86 @@ private fun LeaderBoardContent(
 }
 
 @Preview(
-    name = "LeadBoard - PT",
+    name = "Leaderboard - Com Dados",
     locale = "pt-rPT",
     showBackground = true
 )
 @Preview(
-    name = "LeadBoard - EN",
+    name = "Leaderboard - With Data",
     locale = "en",
     showBackground = true
 )
 @Composable
-fun LeaderboardScreenPreview() {
-    LeaderboardScreen(rememberNavController())
+fun PreviewLeaderboardContentPopulated() {
+    val fakeList = listOf(
+        LeadboardDto(
+            position = 1,
+            team = InfoTeamLeadboard(
+                id = "1",
+                name = "Porto Lions",
+                currentPoints = 1250,
+                nameRank = "Elite",
+                logoTeam = null
+            )
+        ),
+        LeadboardDto(
+            position = 2,
+            team = InfoTeamLeadboard(
+                id = "2",
+                name = "Lisboa Navigators",
+                currentPoints = 980,
+                nameRank = "Pro",
+                logoTeam = null
+            )
+        ),
+        LeadboardDto(
+            position = 3,
+            team = InfoTeamLeadboard(
+                id = "3",
+                name = "Braga Warriors",
+                currentPoints = 450,
+                nameRank = "Amateur",
+                logoTeam = null
+            )
+        )
+    )
+
+    val showMoreState = remember { mutableStateOf(true) }
+    val fakeActions = LeadBoardActions(
+        onShowMore = { _, _ -> },
+        isValidShowMoreTeams = { showMoreState },
+        onLoadMoreTeams = {}
+    )
+
+    LeadBoardContent(
+        list = fakeList,
+        leadBoardActions = fakeActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(
+    name = "Leaderboard - Vazia",
+    locale = "pt-rPT",
+    showBackground = true
+)
+@Preview(
+    name = "Leaderboard - Empty",
+    locale = "en",
+    showBackground = true
+)
+@Composable
+fun PreviewLeaderboardContentEmpty() {
+    val showMoreState = remember { mutableStateOf(true) }
+    val fakeActions = LeadBoardActions(
+        onShowMore = { _, _ -> },
+        isValidShowMoreTeams = { showMoreState },
+        onLoadMoreTeams = {}
+    )
+
+    LeadBoardContent(
+        list = emptyList(),
+        leadBoardActions = fakeActions,
+        navHostController = rememberNavController()
+    )
 }

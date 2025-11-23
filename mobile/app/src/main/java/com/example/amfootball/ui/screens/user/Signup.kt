@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,21 +35,31 @@ import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.components.Loading
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedPastLimitedDate
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
+import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.UserConst
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+/**
+ * Ecrã de Registo de Novo Utilizador.
+ *
+ * Este Composable é o ponto de entrada (Stateful) que conecta o [AuthViewModel] à UI.
+ * Gere a navegação e delega a lógica de registo para o ViewModel.
+ *
+ * @param navHostController Controlador de navegação para transição entre ecrãs.
+ * @param authViewModel ViewModel injetado pelo Hilt para gerir a autenticação.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
@@ -63,14 +72,14 @@ fun SignUpScreen(
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
         navController = navHostController,
-        authViewModel = authViewModel
+        onRegister = authViewModel::registerUser
     )
 }
 
 @Composable
 private fun ContentSignUp(
     navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel(),
+    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -78,15 +87,23 @@ private fun ContentSignUp(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FieldsSignUp(navHostController = navController)
+        FieldsSignUp(
+            navHostController = navController,
+            onRegister = onRegister
+        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Formulário de Registo contendo todos os campos de entrada e validações.
+ *
+ * @param navHostController Usado para navegação após sucesso.
+ * @param onRegister Callback para executar a lógica de registo (recebe DTO, Password, Sucesso, Erro).
+ */
 @Composable
 private fun FieldsSignUp(
     navHostController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit
 ) {
     // --- Estados para os campos ---
     var email by remember { mutableStateOf("") }
@@ -96,6 +113,7 @@ private fun FieldsSignUp(
     var position by remember { mutableStateOf<Int?>(null) }
     var dateOfBirth by remember { mutableStateOf<Long?>(null) }
     var phone by remember { mutableStateOf("") }
+    var countryCode by remember { mutableStateOf("+351") }
     var height by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
@@ -110,14 +128,12 @@ private fun FieldsSignUp(
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     }
 
-    // Formato para enviar para a API (ex: 2025-10-30)
     val apiDateFormatter = remember {
         SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
     }
 
-    Text(text = "Criar nova conta")
     Spacer(Modifier.height(20.dp))
 
     TextFieldOutline(
@@ -133,13 +149,19 @@ private fun FieldsSignUp(
         onValueChange = { email = it },
     )
 
-    TextFieldOutline(
-        label = "Phone",
-        value = phone,
-        onValueChange = { phone = it },
+    PhoneInputWithDynamicCountries(
+        phoneNumber = phone,
+        onPhoneNumberChange = { novoNumero ->
+            if (novoNumero.length <= UserConst.SIZE_PHONE_NUMBER) {
+                phone = novoNumero
+            }
+        },
+        initialCountryCode = countryCode,
+        onCountryCodeChange = { novoPais ->
+            countryCode = novoPais.dialCode
+        },
         isRequired = true,
-        maxLenght = UserConst.SIZE_PHONE_NUMBER,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+        modifier = Modifier.fillMaxWidth()
     )
 
     TextFieldOutline(
@@ -186,7 +208,7 @@ private fun FieldsSignUp(
 
     Text(text = "Data de Nascimento:")
     DatePickerDockedPastLimitedDate(
-        value = dateOfBirth.toString(),
+        value = if (dateOfBirth == null) "" else displayDateFormatter.format(Date(dateOfBirth!!)),
         onDateSelected = { selectedMillis ->
             dateOfBirth = selectedMillis
         },
@@ -234,13 +256,14 @@ private fun FieldsSignUp(
             if (!validationResult.isValid) {
                 errorMessage = "${validationResult.fieldName}: ${validationResult.errorMessage}"
             } else {
-                // Validação OK!
+                // 2. Preparar para envio
                 isLoading = true
                 errorMessage = null
+                val fullPhoneNumber = "$countryCode$phone"
 
                 val userProfile = CreateProfileDto(
                     userName = name,
-                    phone = phone,
+                    phone = fullPhoneNumber,
                     height = height.toInt(),
                     dateOfBirth = apiDateFormatter.format(Date(dateOfBirth!!)),
                     position = position!!,
@@ -248,10 +271,10 @@ private fun FieldsSignUp(
                     email = email
                 )
 
-                scope.launch {
-                    try {
-                        authViewModel.registerUser(userProfile, password)
-
+                onRegister(
+                    userProfile,
+                    password,
+                    {
                         isLoading = false
                         navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                             popUpTo(navHostController.graph.startDestinationId) {
@@ -259,36 +282,45 @@ private fun FieldsSignUp(
                             }
                             launchSingleTop = true
                         }
-                    } catch (e: Exception) {
-                        // Erro (do ViewModel)
+                    },
+                    { msgErro ->
                         isLoading = false
-                        errorMessage = e.message ?: "Ocorreu um erro no registo."
+                        errorMessage = msgErro
                     }
-                }
+                )
             }
         },
         modifier = Modifier.fillMaxWidth(),
         enabled = !isLoading
     ) {
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.height(24.dp))
+            Loading()
         } else {
             Text("Registar")
         }
     }
+
+
 }
 
 @Preview(
     name = "SignUp Screen - EN",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
     name = "SignUp Screen - PT",
-    locale = "pt",
-    showBackground = true)
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Composable
 fun SignUpScreenContentPreview() {
     AMFootballTheme {
-        SignUpScreen(rememberNavController())
+        ContentSignUp(
+            navController = rememberNavController(),
+            onRegister = { _, _, onSuccess, _ ->
+                onSuccess()
+            }
+        )
     }
 }

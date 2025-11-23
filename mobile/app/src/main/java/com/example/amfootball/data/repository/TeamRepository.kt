@@ -5,7 +5,7 @@ import com.example.amfootball.data.network.ApiBackend
 import retrofit2.Response
 import javax.inject.Inject
 
-class TeamRepository@Inject constructor(
+class TeamRepository @Inject constructor(
     private val api: ApiBackend
 ) {
     suspend fun getTeamProfile(

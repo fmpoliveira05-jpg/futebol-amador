@@ -14,11 +14,15 @@ import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.repository.PlayerRepository
 import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.NetworkUtils
 import com.example.amfootball.utils.PlayerConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,6 +34,7 @@ import javax.inject.Inject
  * - O estado dos filtros de pesquisa (nome, idade, posição, etc.).
  * - A validação dos dados inseridos nos filtros.
  * - O carregamento da lista de jogadores da API com base nos filtros aplicados.
+ * - A lógica de paginação local ("Mostrar Mais").
  * - A navegação para o perfil detalhado de um jogador.
  * - O envio de pedidos de adesão a equipas (para administradores).
  *
@@ -54,11 +59,46 @@ class ListPlayerViewModel @Inject constructor(
     val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
 
     /**
-     * Lista de jogadores carregada da API.
-     * Exibe os resultados da pesquisa na UI.
+     * Lista completa de jogadores carregada da API.
+     * Mantém todos os dados recuperados, independentemente de quantos estão visíveis.
      */
     private val listState: MutableStateFlow<List<InfoPlayerDto>> = MutableStateFlow(emptyList())
-    val uiList: StateFlow<List<InfoPlayerDto>> = listState
+
+    /**
+     * Controlo de quantos itens devem ser exibidos inicialmente ou após clicar em "Mostrar Mais".
+     */
+    private val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
+
+    /**
+     * Lista fatiada para exibição na UI.
+     *
+     * Combina a [listState] (lista total) com o [inicialSizeList] (limite atual)
+     * para retornar apenas o número de jogadores permitido pela paginação atual.
+     */
+    val uiList: StateFlow<List<InfoPlayerDto>> =
+        combine(listState, inicialSizeList) { lista, numero ->
+            lista.take(numero)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
+
+    /**
+     * Controla a visibilidade do botão "Mostrar Mais".
+     *
+     * Verifica dinamicamente se o número de itens exibidos atualmente ([inicialSizeList])
+     * é menor que o total de itens disponíveis na lista ([listState]).
+     * Retorna `true` se houver mais itens para mostrar.
+     */
+    val showMoreButtonVisible: StateFlow<Boolean> =
+        combine(listState, inicialSizeList) { listaCompleta, tamanhoAtual ->
+            tamanhoAtual < listaCompleta.size
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = false
+        )
 
     /**
      * Lista de posições disponíveis para filtrar (incluindo opção 'null' para "Todas").
@@ -74,7 +114,6 @@ class ListPlayerViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState
 
     init {
-        android.util.Log.e("TESTE_CRITICO", "ViewModel INICIADO!")
         loadingListPlayer()
 
         listPositions.value = listOf(
@@ -113,6 +152,14 @@ class ListPlayerViewModel @Inject constructor(
 
     fun onMaxSizeChange(maxSize: Int?) {
         filterState.value = filterState.value.copy(maxSize = maxSize)
+    }
+
+    /**
+     * Incrementa o limite de jogadores visíveis na lista.
+     * Chamado quando o utilizador clica no botão "Mostrar Mais".
+     */
+    fun loadMorePlayers() {
+        inicialSizeList.value = inicialSizeList.value.plus(ListsSizesConst.INCREMENT_SIZE)
     }
 
     /**
@@ -170,34 +217,24 @@ class ListPlayerViewModel @Inject constructor(
     /**
      * Executa a chamada assíncrona à API para obter a lista de jogadores filtrada.
      * Gere os estados de Loading e Erro no [_uiState].
+     *
+     * Reinicia a paginação ([inicialSizeList]) para o valor padrão a cada nova pesquisa.
      */
     private fun loadingListPlayer() {
-        android.util.Log.d("TESTE_CRITICO", "1. Função loadingListPlayer chamada.")
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+            inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
 
             try {
-                val filtrosAtuais = filterState.value
-                android.util.Log.d("TESTE_CRITICO", "2. A preparar pedido. Filtros: $filtrosAtuais")
+                val response = repository.getListPlayer(filterState.value)
 
-                // 2. Fazer o pedido
-                val response = repository.getListPlayer(filtrosAtuais)
-
-                android.util.Log.d("TESTE_CRITICO", "3. Resposta recebida. Código HTTP: ${response.code()}")
                 if (response.isSuccessful && response.body() != null) {
                     val players = response.body()!!
 
-                    android.util.Log.d("TESTE_CRITICO", "4. SUCESSO! Tamanho da lista: ${players.size}")
-                    if (players.isNotEmpty()) {
-                        android.util.Log.d("TESTE_CRITICO", "   Exemplo do 1º player: ${players[0].name}")
-                    } else {
-                        android.util.Log.w("TESTE_CRITICO", "   AVISO: A lista veio vazia [] da API.")
-                    }
                     listState.value = players
                     _uiState.update { it.copy(isLoading = false) }
                 } else {
                     val errorRaw = response.errorBody()?.string()
-                    android.util.Log.e("TESTE_CRITICO", "4. ERRO DO SERVIDOR: $errorRaw")
                     val errorMsg = NetworkUtils.parseBackendError(errorRaw)
                         ?: "Erro desconhecido: ${response.code()}"
 
@@ -206,7 +243,6 @@ class ListPlayerViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("TESTE_CRITICO", "5. EXCEÇÃO (Crash/Rede): ${e.message}")
                 e.printStackTrace()
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")

@@ -1,9 +1,11 @@
 package com.example.amfootball.ui.screens.user
 
+import android.widget.Toast
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -20,9 +22,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.navigation.objects.Routes
@@ -106,38 +108,27 @@ private fun FieldsLogin(
         )
     }
 
-    //Depois meter logica para validar dados
-    Button(onClick = {
-        if (email.isNotBlank() && password.isNotBlank()){
-            isLoading = true
-            errorMessage = null
+    val context = LocalContext.current
 
-            scope.launch {
-                val loginSucesso = authViewModel.loginUser(email, password)
-                isLoading = false
-
-                if (loginSucesso){
+    Button(
+        onClick = {
+            authViewModel.loginUser(email, password) { loginComSucesso ->
+                if (loginComSucesso) {
                     navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-                        popUpTo(navHostController.graph.startDestinationId){
-                            inclusive = true
-                        }
-                        launchSingleTop = true
+                        popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
                     }
                 } else {
-                    //Lemmbrar de fazer as cenas da lingua como o artur disse
-                    errorMessage = "Email ou password inválidos"
+                    Toast.makeText(
+                        context,
+                        "Erro no login. Verifica o email e a password.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
-        } else {
-            errorMessage = "Por favor, preencha todos os campos."
-        }
-
-    }) {
-        if (isLoading){
-            CircularProgressIndicator(modifier = Modifier.height(24.dp))
-        } else {
-            Text("Entrar")
-        }
+        },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text("Entrar")
     }
 }
 

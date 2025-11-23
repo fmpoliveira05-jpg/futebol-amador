@@ -123,6 +123,9 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.9.0")
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    //Dependencia para ir buscar as dependências dos prefixos de numero telefonico
+    implementation("com.googlecode.libphonenumber:libphonenumber:8.13.27")
+
     //Dependencias FireBas para Auth
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
     // Dependência do Firebase Authentication

@@ -14,8 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,15 +47,14 @@ import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
-    chatViewModel: ChatViewModel = hiltViewModel(),
-    ) {
+    chatViewModel: ChatViewModel = hiltViewModel()
+) {
     var messageText by remember { mutableStateOf("") }
     val roomName by chatViewModel.roomName.collectAsState()
     //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = roomName) {
-            }
+            ChatTopBar(contactName = roomName) { }
         },
         content = { paddingValues ->
             Column(
@@ -95,13 +94,14 @@ fun ChatScreen(
     )
 }
 
-
 /**
  * Barra superior com nome, foto (placeholder) e ações.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
+fun ChatTopBar(contactName: String,
+               onBackClick: () -> Unit
+) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -217,7 +217,7 @@ fun MessageInput(
                     .clip(CircleShape)
             ) {
                 Icon(
-                    Icons.Default.Send,
+                    Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Enviar mensagem",
                     tint = MaterialTheme.colorScheme.primary
                 )
