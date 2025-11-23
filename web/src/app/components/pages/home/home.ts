@@ -3,10 +3,11 @@ import { PlayerService } from '../../../services/player.service';
 import { TeamService } from '../../../services/team.service';
 import { Team } from '../../../shared/models/Team';
 import { RouterLink } from '@angular/router';
+import { Header } from '../../partials/header/header';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, Header],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
