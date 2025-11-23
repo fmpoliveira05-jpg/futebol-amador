@@ -248,17 +248,15 @@ namespace Api.Controllers
             return Ok();
         }
 
-        /*
         [HttpPost("{teamId}/membership-requests/send")]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
-            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
-            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId);
+            var senderId = GetCurrentUserId();
+            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId, senderId);
 
             return Ok(dto);
-           
         }
-        */
 
         #endregion
 
