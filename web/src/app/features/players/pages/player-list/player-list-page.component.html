@@ -1,0 +1,65 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Jogadores</h1>
+      <p class="page-subtitle">Consulta a lista de jogadores registados na plataforma.</p>
+    </div>
+
+    <div class="page-header__actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Procurar por nome ou posição"
+        [value]="searchTerm()"
+        (input)="onSearchTermChange($any($event.target).value)"
+      />
+    </div>
+  </header>
+
+  <div class="card">
+    <div *ngIf="isLoading()" class="state state--loading">
+      A carregar jogadores…
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error">
+      {{ errorMessage() }}
+    </div>
+
+    <div *ngIf="!isLoading() && !errorMessage()">
+      <table class="players-table" *ngIf="visiblePlayers().length; else noPlayers">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Posição</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of visiblePlayers()" class="players-table__row">
+            <td>{{ player.name }}</td>
+            <td>{{ POSITION_MAP[player.position] }}</td>
+
+            <td>
+              <button class="details-btn" (click)="openDetails(player.id)">
+                Ver detalhes
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div
+        class="load-more-container"
+        *ngIf="visiblePlayers().length < filteredPlayers().length"
+      >
+        <button class="load-more-btn" (click)="loadMore()">
+          Carregar mais
+        </button>
+      </div>
+
+      <ng-template #noPlayers>
+        <div class="state">Não há jogadores para apresentar.</div>
+      </ng-template>
+    </div>
+  </div>
+</section>

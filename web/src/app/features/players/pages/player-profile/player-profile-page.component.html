@@ -1,0 +1,160 @@
+<section class="page" *ngIf="player() as p">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">{{ p.name }}</h1>
+      <p class="page-subtitle">
+        {{ p.position }} ·
+        <span *ngIf="p.teamName; else noTeam">Equipa: {{ p.teamName }}</span>
+        <ng-template #noTeam>Sem equipa</ng-template>
+      </p>
+    </div>
+
+    <div class="page-header__actions">
+      <button *ngIf="isOwnProfile()" type="button" class="btn btn-secondary" (click)="toggleEdit()">
+        {{ isEditMode() ? 'Cancelar' : 'Editar perfil' }}
+      </button>
+
+      <button *ngIf="isOwnProfile()" type="button" class="btn btn-danger" (click)="deleteAccount()" [disabled]="isSaving()">
+        Apagar conta
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="card">
+      <h2 class="card-title">Informações do jogador</h2>
+
+      <div *ngIf="isLoading()" class="state state--loading">A carregar…</div>
+      <div *ngIf="errorMessage()" class="state state--error">{{ errorMessage() }}</div>
+      <div *ngIf="successMessage()" class="state state--success">{{ successMessage() }}</div>
+
+      <dl class="details-grid" *ngIf="!isEditMode() && !isLoading()">
+        <div class="details-grid__item">
+          <dt>Nome</dt>
+          <dd>{{ p.name }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Email</dt>
+          <dd>{{ p.email }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Telemóvel</dt>
+          <dd>{{ p.phoneNumber }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Data de nascimento</dt>
+          <dd>{{ p.dateOfBirth }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Morada</dt>
+          <dd>{{ p.address }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Posição</dt>
+          <dd>{{ p.position }}</dd>
+        </div>
+        <div class="details-grid__item">
+          <dt>Altura</dt>
+          <dd>{{ p.height }} cm</dd>
+        </div>
+      </dl>
+
+      <form class="form" [formGroup]="form" *ngIf="isOwnProfile() && isEditMode() && !isLoading()">
+        <div class="form-grid">
+          <label class="form-field">
+            <span>Nome</span>
+            <input type="text" formControlName="name" />
+          </label>
+
+          <label class="form-field">
+            <span>Email</span>
+            <input type="email" formControlName="email" />
+          </label>
+
+          <label class="form-field">
+            <span>Telemóvel</span>
+            <input type="text" formControlName="phone" />
+          </label>
+
+          <label class="form-field">
+            <span>Data de nascimento (YYYY-MM-DD)</span>
+            <input type="text" formControlName="dateOfBirth" />
+          </label>
+
+          <label class="form-field form-field--full">
+            <span>Morada</span>
+            <input type="text" formControlName="address" />
+          </label>
+
+          <label class="form-field">
+            <span>Posição</span>
+            <input type="text" formControlName="position" />
+          </label>
+
+          <label class="form-field">
+            <span>Altura (cm)</span>
+            <input type="number" formControlName="height" />
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
+            Cancelar
+          </button>
+
+          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+            {{ isSaving() ? 'A guardar…' : 'Guardar alterações' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="card side-card" *ngIf="isOwnProfile()">
+      <h2 class="card-title">Gestão de equipa</h2>
+
+      <p class="side-card__text" *ngIf="hasTeam(); else noTeamSide">
+        Estás atualmente na equipa <strong>{{ p.teamName }}</strong>.
+      </p>
+
+      <ng-template #noTeamSide>
+        <p class="side-card__text">Atualmente não estás em nenhuma equipa.</p>
+      </ng-template>
+
+      <button
+        type="button"
+        class="btn btn-warning"
+        (click)="leaveTeam()"
+        [disabled]="!hasTeam() || isSaving()"
+      >
+        Abandonar equipa
+      </button>
+
+      <hr class="divider" />
+
+      <h3 class="side-card__subtitle">Pedidos de adesão</h3>
+      <p class="side-card__text">
+        Estes botões são apenas atalhos visuais. No futuro irão abrir páginas dedicadas para
+        gerir os pedidos de adesão.
+      </p>
+
+      <div class="side-card__actions">
+        <button type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
+          Ver pedidos
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="onSendMembershipRequest()">
+          Enviar pedido
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="onAcceptMembershipRequest()">
+          Aceitar pedidos
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="onRejectMembershipRequest()">
+          Rejeitar pedidos
+        </button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<div *ngIf="!player() && !isLoading()" class="state state--error">
+  Jogador não encontrado.
+</div>
