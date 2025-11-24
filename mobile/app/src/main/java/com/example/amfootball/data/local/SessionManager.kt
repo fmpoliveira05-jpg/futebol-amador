@@ -13,7 +13,8 @@ import javax.inject.Inject
  * @param context O contexto da aplicação, usado para obter SharedPreferences.
  */
 class SessionManager @Inject constructor(
-    @ApplicationContext context: Context) {
+    @ApplicationContext context: Context
+) {
 
     private val prefs: SharedPreferences
     private val gson = Gson()
