@@ -216,6 +216,13 @@ class ListTeamViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Inicia a observação contínua do estado da conectividade de rede.
+     *
+     * Lança uma corrotina no [viewModelScope] que subscreve o fluxo (Flow) do [networkObserver].
+     * Sempre que o estado da rede altera (Online <-> Offline), a variável [_isOnline] é atualizada
+     * automaticamente, permitindo que a UI reaja em tempo real (ex: exibir/ocultar banner de "Sem Internet").
+     */
     private fun observeNetworkChanges() {
         viewModelScope.launch {
             networkObserver.observeConnectivity()
