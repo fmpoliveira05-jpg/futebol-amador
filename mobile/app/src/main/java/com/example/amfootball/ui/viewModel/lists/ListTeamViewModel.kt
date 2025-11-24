@@ -23,7 +23,6 @@ import com.example.amfootball.data.errors.filtersError.FilterTeamError
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.TeamConst
 
-//TODO: Arranjar forma de filtrar na lista de teams de maneira offline ou seja é preciso estar online para carregar os dados mas caso fique offline é possivel na mesma filtrar na lista
 // TODO: Falta implementar a chamada à API no método memberShipRequest
 /**
  * ViewModel responsável pela gestão do ecrã de listagem de equipas.
