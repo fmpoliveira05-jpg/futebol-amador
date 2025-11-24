@@ -12,44 +12,99 @@
         <label for="name">Nome</label>
         <input id="name" formControlName="name" type="text" placeholder="Introduz o teu nome" />
       </div>
+      <div *ngIf="signupForm.controls['name'].hasError('required') && signupForm.controls['name'].touched">
+          <small style="color: red;">Nome é obrigatório.</small>
+        </div>
 
       <div class="form-field">
         <label for="email">E-mail</label>
         <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
       </div>
-
+      <div *ngIf="signupForm.controls['email'].hasError('required') && signupForm.controls['email'].touched">
+        <small style="color: red;">E-mail é obrigatório.</small>
+      </div>
+      <div *ngIf="signupForm.controls['email'].hasError('email') && signupForm.controls['email'].touched">
+        <small style="color: red;">Por favor, introduz um e-mail válido.</small>
+      </div>
+      <div *ngIf="signupForm.controls['email'].hasError('minlength') && signupForm.controls['email'].touched">
+        <small style="color: red;">O e-mail deve ter pelo menos 4 caracteres.</small>
+      </div>
+      <div *ngIf="signupForm.controls['email'].hasError('maxlength') && signupForm.controls['email'].touched">
+        <small style="color: red;">O e-mail deve ter no máximo 256 caracteres.</small>
+      </div>
+      
       <div class="form-field">
         <label for="password">Palavra-passe</label>
         <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
+        <div *ngIf="signupForm.controls['password'].hasError('required') && signupForm.controls['password'].touched">
+          <small style="color: red;">Palavra-passe é obrigatória.</small>
+        </div>
+        <div *ngIf="signupForm.controls['password'].hasError('minlength') && signupForm.controls['password'].touched">
+          <small style="color: red;">A palavra-passe deve ter pelo menos 6 caracteres.</small>
+        </div>
+        <div *ngIf="signupForm.controls['password'].hasError('maxlength') && signupForm.controls['password'].touched">
+          <small style="color: red;">A palavra-passe deve ter no máximo 32 caracteres.</small>
+        </div>
       </div>
 
       <div class="form-field">
         <label for="dateOfBirth">Data de nascimento</label>
         <input id="dateOfBirth" formControlName="dateOfBirth" type="date" />
+        <div *ngIf="signupForm.controls['dateOfBirth'].hasError('required') && signupForm.controls['dateOfBirth'].touched">
+          <small style="color: red;">Data de nascimento é obrigatória.</small>
+        </div>
       </div>
 
       <div class="form-field">
         <label for="address">Morada</label>
         <input id="address" formControlName="address" type="text" placeholder="Introduz a tua morada" />
+        <div *ngIf="signupForm.controls['address'].hasError('required') && signupForm.controls['address'].touched">
+          <small style="color: red;">Morada é obrigatória.</small>
+        </div>
       </div>
 
       <div class="form-field">
         <label for="phone">Telefone</label>
         <input id="phone" formControlName="phone" type="text" placeholder="Introduz o teu número de telefone/telemóvel" />
+        <div *ngIf="signupForm.controls['phone'].hasError('required') && signupForm.controls['phone'].touched">
+          <small style="color: red;">Telefone é obrigatório.</small>
+        </div>
+        <div *ngIf="signupForm.controls['phone'].hasError('pattern') && signupForm.controls['phone'].touched">
+          <small style="color: red;">Por favor, introduz um número de telefone válido.</small>
+        </div>
       </div>
 
       <div class="form-field">
         <label for="position">Posição</label>
         <input id="position" formControlName="position" type="number" placeholder="Introduz a tua posição" />
+        <div *ngIf="signupForm.controls['position'].hasError('required') && signupForm.controls['position'].touched">
+          <small style="color: red;">Posição é obrigatória.</small>
+        </div>
+        <div *ngIf="signupForm.controls['position'].hasError('pattern') && signupForm.controls['position'].touched">
+          <small style="color: red;">Posição deve ser um número inteiro entre 0 e 3.</small>
+        </div>
       </div>
 
       <div class="form-field">
         <label for="height">Altura</label>
         <input id="height" formControlName="height" type="number" placeholder="Introduz a tua altura (em cm)" />
+        <div *ngIf="signupForm.controls['height'].hasError('required') && signupForm.controls['height'].touched">
+          <small style="color: red;">Altura é obrigatória.</small>
+          <div *ngIf="signupForm.controls['height'].hasError('min') && signupForm.controls['height'].touched">
+            <small style="color: red;">Altura mínima é 100 cm.</small>
+          </div>
+          <div *ngIf="signupForm.controls['height'].hasError('max') && signupForm.controls['height'].touched">
+            <small style="color: red;">Altura máxima é 250 cm.</small>
+          </div>
+        </div>
       </div>
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="signupForm.invalid">Criar Conta</button>
+      </div>
+
+      <div *ngIf="errorMessage" style="color: red; margin-top: 10px;">
+        {{ errorMessage }}
       </div>
     </form>
   </div>

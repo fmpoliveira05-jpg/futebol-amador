@@ -1,20 +1,22 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
 import { jwtDecode } from 'jwt-decode';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}`;
+  private cookieService = inject(CookieService);
 
   getToken(): string | null {
-    return localStorage.getItem('access_token');
+    return this.cookieService.get('access_token');
   }
 
   getCurrentPlayerId(): string | null {
-    return localStorage.getItem('user_id');
+    return this.cookieService.get('user_id');
   }
 
   isAuthenticated(): boolean {
@@ -42,8 +44,8 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/User/login`, { email, password }).pipe(
       map((response: any) => {
-        localStorage.setItem('access_token', response?.firebaseLoginResponseDto?.idToken);
-        localStorage.setItem('user_id', response?.firebaseLoginResponseDto?.localId);
+        this.cookieService.set('access_token', response?.firebaseLoginResponseDto?.idToken, 7, '/');
+        this.cookieService.set('user_id', response?.firebaseLoginResponseDto?.localId, 7, '/');
         
         return response;
       })
@@ -60,7 +62,7 @@ export class AuthService {
     position: number,
     height: number
   ): Observable<any> {
-    return this.http.post(`${this.baseUrl}/User/signup`, {
+    return this.http.post(`${this.baseUrl}/Player/create-profile`, {
       name,
       email,
       password,
@@ -69,7 +71,9 @@ export class AuthService {
       phone,
       position,
       height,
-    });
+    }).pipe(catchError((error) => {
+      return throwError(error);
+    }));
   }
   
   getPlayerData(playerId: string): Observable<any> {
