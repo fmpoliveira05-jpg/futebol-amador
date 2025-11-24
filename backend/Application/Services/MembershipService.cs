@@ -6,6 +6,9 @@ using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Exceptions;
+using System.Globalization;
+using System.Security.Claims;
 
 namespace Application.Services
 {
@@ -118,17 +121,28 @@ namespace Application.Services
             }).Unwrap();
         }
 
-        public Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, Player player)
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string playerId)
         {
-            return teamRepository.GetTeamForMemberManagementAsync(teamId).ContinueWith(async teamTask =>
-            {
-                var team = await teamTask;
-                membershipValidator.ValidateGetRequestsByTeam(team, player);
+            var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
 
-                var list = await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
-                return list ?? new List<MemberShipRequestDto>();
-            }).Unwrap();
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            membershipValidator.ValidateGetRequestsByTeam(team, player);
+
+            return await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
         }
+
+        public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters, string playerId)
+        {
+            var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
+
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            membershipValidator.ValidateGetRequestsByTeam(team, player);
+
+            return await membershipRequestRepository.GetMembershipRequestsByTeamWithFilters(teamId, filters);
+        }
+
 
         #endregion
 
@@ -152,7 +166,13 @@ namespace Application.Services
 
         public async Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var membershipRequest = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
+            var membershipRequest = await membershipRequestRepository.GetMembershipRequestById(requestId);
+
+            if (membershipRequest == null)
+            {
+                throw new ValidationException("O pedido de adesão não foi encontrado.");
+            }
+
             var player = membershipRequest.Player;
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
@@ -164,24 +184,25 @@ namespace Application.Services
             player.IdTeam = team.Id;
             team.Members.Add(player);
 
-            var teamAdmins = team.Members
-                            .Where(p => p.IsAdmin == true)
-                            .ToList();
-
             player.MembershipRequests?.Remove(membershipRequest);
             team.MembershipRequests?.Remove(membershipRequest);
 
             await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(player.Id);
+
             await RemoveAllMatchInviteTeam(team);
+
             await unityOfWork.SaveChangesAsync();
 
             var fullPlayer = await playerRepository.GetPlayerByIdAsync(membershipRequest.IdPlayer);
             var fullTeam = await teamRepository.GetTeamByIdAsync(membershipRequest.IdTeam);
 
+            var teamAdmins = team.Members.Where(p => p.IsAdmin).ToList();
+
             foreach (var admin in teamAdmins)
             {
-                await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!.");
+                await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!");
             }
+
             return new MemberShipRequestDto
             {
                 RequestId = membershipRequest.Id,
@@ -194,39 +215,47 @@ namespace Application.Services
             };
         }
 
-        public async Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
+        public Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            var membershipRequest = await playerRepository.GetPlayerByIdWithRequestsAsync(playerId);
-            var player = membershipRequest?.Player;
-
-            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
-            membershipValidator.ValidateRejectRequestByPlayer(membershipRequest, player);
-
-            player.MembershipRequests?.Remove(membershipRequest);
-            await unityOfWork.SaveChangesAsync();
-
-            var teamAdmins = membershipRequest.Team.Members
-                            .Where(p => p.IsAdmin == true)
-                            .ToList();
-
-            foreach (var admin in teamAdmins)
+            return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
             {
-                await notificationService.SendUserAsync(admin.Id, "Membership Invite Rejected", $"{player.Name} rejected your membership invite.");
-            }
+                var request = await requestTask;
+                var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
-            var fullPlayer = await playerRepository.GetPlayerByIdAsync(membershipRequest.IdPlayer);
-            var fullTeam = await teamRepository.GetTeamByIdAsync(membershipRequest.IdTeam);
+                authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
+                membershipValidator.ValidateRejectRequestByPlayer(request, player);
 
-            return new MemberShipRequestDto
-            {
-                RequestId = membershipRequest.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
-                RequestDate = membershipRequest.InviteDate,
-                IsPlayerSender = membershipRequest.IsPlayerSender
-            };
+                player.MembershipRequests?.Remove(request);
+                await unityOfWork.SaveChangesAsync();
+
+                if (request?.Team != null)
+                {
+                    var teamAdmins = request.Team.Members.Where(p => p.IsAdmin).ToList();
+
+                    foreach (var admin in teamAdmins)
+                    {
+                        await notificationService.SendUserAsync(admin.Id, "Membership Invite Rejected", $"{player.Name} rejected your membership invite.");
+                    }
+                }
+                else
+                {
+                    throw new InvalidOperationException("A equipa associada ao pedido de adesão não foi encontrada.");
+                }
+
+                var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
+                var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
+
+                return new MemberShipRequestDto
+                {
+                    RequestId = request.Id,
+                    PlayerId = fullPlayer.Id,
+                    PlayerName = fullPlayer.Name,
+                    TeamId = fullTeam.Id,
+                    TeamName = fullTeam.Name,
+                    RequestDate = request.InviteDate,
+                    IsPlayerSender = request.IsPlayerSender
+                };
+            }).Unwrap();
         }
 
         public async Task<MemberShipRequestDto> SendMembershipRequestAsyncPlayer(string playerId, Guid teamId)
