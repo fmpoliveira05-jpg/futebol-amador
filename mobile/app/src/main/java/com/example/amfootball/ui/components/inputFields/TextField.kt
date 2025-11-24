@@ -47,7 +47,7 @@ fun NumberTextField(
 ) {
     LabelTextField(
         label = label,
-        value = value.toString(),
+        value = value?.toString() ?: "",
         minLenght = min,
         maxLenght = max,
         onValueChange = { onValueChange(it.toIntOrNull())},

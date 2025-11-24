@@ -52,6 +52,7 @@ import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
+import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 @Composable
@@ -181,7 +182,9 @@ private fun NavGraphBuilder.userPages(
     )
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
-        ListTeamScreen(navHostController = globalNavController)
+        val viewModel = hiltViewModel<ListTeamViewModel>()
+
+        ListTeamScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
     composable(Routes.PlayerRoutes.PLAYER_LIST.route) {

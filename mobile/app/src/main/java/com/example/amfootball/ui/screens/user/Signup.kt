@@ -256,7 +256,6 @@ private fun FieldsSignUp(
             if (!validationResult.isValid) {
                 errorMessage = "${validationResult.fieldName}: ${validationResult.errorMessage}"
             } else {
-                // 2. Preparar para envio
                 isLoading = true
                 errorMessage = null
                 val fullPhoneNumber = "$countryCode$phone"
@@ -268,6 +267,7 @@ private fun FieldsSignUp(
                     dateOfBirth = apiDateFormatter.format(Date(dateOfBirth!!)),
                     position = position!!,
                     address = address,
+                    password = password,
                     email = email
                 )
 

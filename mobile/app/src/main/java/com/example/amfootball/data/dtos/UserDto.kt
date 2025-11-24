@@ -32,6 +32,8 @@ data class CreateProfileDto(
     val phone: String,
     @SerializedName("Email")
     val email: String,
+    @SerializedName("Password")
+    val password: String,
     @SerializedName("Address")
     val address: String,
     @SerializedName("Position")

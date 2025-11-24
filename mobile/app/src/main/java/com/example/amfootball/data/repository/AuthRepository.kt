@@ -48,15 +48,17 @@ class AuthRepository @Inject constructor(
     }
 
     suspend fun registerUser(profile: CreateProfileDto, password: String) {
-        var createdFirebaseUser: FirebaseUser? = null
+        val createdFirebaseUser: FirebaseUser? = null
 
         try {
+            /*
             val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
             createdFirebaseUser = authResult.user
 
             if (createdFirebaseUser == null) {
                 throw Exception("Utilizador Firebase não foi criado.")
             }
+
 
             val idTokenResult = createdFirebaseUser.getIdToken(true).await()
             val token = idTokenResult.token
@@ -68,6 +70,7 @@ class AuthRepository @Inject constructor(
             Log.d("TOKEN_TEST", "Bearer $token")
 
             sessionManager.saveAuthToken(token)
+*/
 
             val response = apiService.createProfile(profile)
 

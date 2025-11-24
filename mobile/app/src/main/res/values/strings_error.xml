@@ -41,6 +41,16 @@
     <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
     <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
 
+    <string name="error_min_number_points">Minimum points must be greater than %1$d</string>
+    <string name="error_max_number_points">Maximum points must be less than %1$d</string>
+    <string name="error_min_number_points_greater_max">Minimum number must be less than maximum number</string>
+    <string name="error_max_number_points_minor_min">Maximum number must be greater than minimum number</string>
+
+    <string name="error_min_number_members">Minimum number of members must be greater than %1$d</string>
+    <string name="error_max_number_members">Maximum number of members must be less than %1$d</string>
+    <string name="error_min_number_members_greater_max">Minimum members must be less than maximum members</string>
+    <string name="error_max_number_members_minor_min">Maximum members must be greater than minimum members</string>
+
     <string name="error_min_goals_team">The minimum number of goals scored by a team is %1$d</string>
     <string name="error_max_goals_team">The maximum number of goals scored by a team is %1$d</string>
 </resources>

@@ -27,6 +27,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.utils.extensions.toOneDecimal
 
 /**
  * Componente base que exibe um ícone e um texto numa linha horizontal.
@@ -87,6 +88,26 @@ fun AgeRow(age: Int) {
     InfoRow(
         icon = Icons.Default.CalendarToday,
         text = age.toString() + stringResource(id = R.string.age),
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+/**
+ * Componente UI que exibe uma linha informativa com a Idade Média.
+ *
+ * Utiliza o componente genérico [InfoRow] com um ícone de calendário.
+ * O valor da idade é formatado automaticamente para apresentar apenas uma casa decimal.
+ *
+ * @param age O valor numérico (Double) da idade média a ser exibido (ex: 22.543 -> 22.5).
+ */
+@Composable
+fun AverageAgeRow(age: Double) {
+    val formattedAge = age.toOneDecimal()
+    val label = stringResource(id = R.string.average_age)
+
+    InfoRow(
+        icon = Icons.Default.CalendarToday,
+        text = "$formattedAge $label",
         modifier = Modifier.fillMaxWidth()
     )
 }

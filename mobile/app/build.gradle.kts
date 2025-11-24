@@ -121,7 +121,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation("androidx.activity:activity-compose:1.9.0")
-    implementation("io.coil-kt:coil-compose:2.6.0")
 
     //Dependencia para ir buscar as dependências dos prefixos de numero telefonico
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.27")
@@ -151,7 +150,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:maps-compose:2.12.0")
     // Coil for images
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Bibliotecas para chamadas de rede
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

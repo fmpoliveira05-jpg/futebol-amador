@@ -41,6 +41,16 @@
     <string name="error_min_age_greater_max">A idade mínima deve ser inferior há idade máxima</string>
     <string name="error_max_age_minor_min">A idade máxima deve ser superior há idade minima</string>
 
+    <string name="error_min_number_points">O número mínimo de pontos deve ser superior a %1$d</string>
+    <string name="error_max_number_points">O número mínimo de pontos tem de ser inferiror a %1$d</string>
+    <string name="error_min_number_points_greater_max">O número mínima deve ser inferior ao número máxima</string>
+    <string name="error_max_number_points_minor_min">O número máxima deve ser superior ao número minima</string>
+
+    <string name="error_min_number_members">O número mínimo de membros deve ser superior a %1$d</string>
+    <string name="error_max_number_members">O número máximo de membros deve ser inferior a %1$d</string>
+    <string name="error_min_number_members_greater_max">O número mínimo de membros deve ser inferior ao número máximo</string>
+    <string name="error_max_number_members_minor_min">O número máximo de membros deve ser superior ao número mínimo</string>
+
     <string name="error_min_goals_team">O número mínimo de golos marcados por uma equipa é %1$d</string>
     <string name="error_max_goals_team">O número máximo de golos marcados por uma equipa é 1$d</string>
 </resources>

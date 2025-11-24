@@ -5,6 +5,7 @@ import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import retrofit2.Response
 import retrofit2.http.Body
@@ -61,4 +62,8 @@ interface ApiBackend{
         @Path("id") teamId: String
     ): Response<ProfileTeamDto>
 
+    @GET("api/Team/listTeams")
+    suspend fun getListTeam(
+        @QueryMap filters: Map<String, String>
+    ): Response<List<ItemTeamInfoDto>>
 }

@@ -22,6 +22,7 @@ data class RankNameDto(
          */
         fun generateExampleRanks(): List<RankNameDto> {
             val list = ArrayList<RankNameDto>()
+            list.add(RankNameDto("0", "Todos"))
             list.add(RankNameDto("1", "Unranked"))
             list.add(RankNameDto("2", "Bronze"))
             list.add(RankNameDto("3", "Silver"))
