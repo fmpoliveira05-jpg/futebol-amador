@@ -16,7 +16,7 @@ import { TeamMembershipRequestsPageComponent } from './components/pages/membersh
 export const routes: Routes = [
   {path: '', component: Home},
   {path: 'teams', component: Teams},
-  {path: 'search/:searchTerm', component: Teams},
+  {path: 'teams/:searchTerm', component: Teams},
   // {path: '', component: Profile},
   // {path: 'login', component: Login},
   // {path: 'register', component: Register},

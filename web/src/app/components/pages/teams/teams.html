@@ -1,11 +1,6 @@
-<app-auth-header></app-auth-header>
+<!-- <app-auth-header></app-auth-header> -->
 <app-search-team></app-search-team>
 <div class="row">
-    <div *ngIf="teams == []" class="container">
-        <h2>
-            We couldn't find any team!
-        </h2>
-    </div>
     <div class="small-container" *ngFor="let team of teams">
         <a routerLink="/team/{{team.id}}">
             <img height="200" width="200" src="undefined" />

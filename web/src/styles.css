@@ -71,7 +71,7 @@ header nav a:hover {
 }
 
 button, .btn {
-    width: 100%;
+    width: 50%;
     padding: 14px;
     border-radius: 22px;
     border: none;
@@ -219,11 +219,11 @@ footer {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  width: 25%;
-  height: 100%;
+  width: fit-content;
+  height: fit-content;
   background-color: var(--bg);
   border: 5px solid var(--border);
-  padding: 10px 0;
+  padding: 10px 10px;
   border-radius: 0.5rem;
 }
 
@@ -252,4 +252,11 @@ img {
 img.main {
   border: none;
   border-radius: 0rem;
+}
+
+a
+{
+   color: none;
+   text-decoration: none; 
+   background-color: none;
 }

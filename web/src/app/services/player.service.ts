@@ -1,9 +1,9 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
-import { PlayerDetails, UpdatePlayerRequest } from '../shared/models/player.model';
+import { PlayerDetails, UpdatePlayerRequest } from '../shared/Dtos/player.model';
 import { environment } from '../environments/environment';
-import { PlayerListItem } from '../shared/models/player-list-item.model';
+import { PlayerListItem } from '../shared/Dtos/player-list-item.model';
 import { FilterListTeamDto } from '../shared/Dtos/Filters/FilterListTeamDto';
 
 @Injectable({
@@ -43,15 +43,16 @@ export class PlayerService {
    * @returns backend response for a filtered list of teams
    */
   public searchTeams(filter?: FilterListTeamDto): Observable<any> {
-  let params = new HttpParams();
+    let params = new HttpParams();
 
-  if (filter) {
-    Object.entries(filter).forEach(([key, value]) => {
-      if (value !== null && value !== undefined && value !== '') {
-        params = params.append(key, value);
-      }
-    });
+    if (filter) {
+      Object.entries(filter).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.append(key, value);
+        }
+      });
+    }
+
+    return this.http.get(`${this.baseUrl}/listTeamsToMemberShipRequest`, { params });
   }
-
-  return this.http.get(`${this.baseUrl}/listTeamsToMemberShipRequest`, { params });
 }

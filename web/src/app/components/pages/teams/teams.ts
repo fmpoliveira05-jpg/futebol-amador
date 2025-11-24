@@ -23,6 +23,7 @@ export class Teams {
 
   ngOnInit() {
     this.loadTeams();
+    // this.teams   = sample_teams;
   }
 
   loadTeams() {
@@ -33,7 +34,6 @@ export class Teams {
       },
       error: (err) => {
         console.error(err)
-        // this.teams = sample_teams;
       },
     });
   }

@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
-import { TeamMember } from '../shared/models/team-member.model';
+import { TeamMember } from '../shared/Dtos/team-member.model';
 
 export interface TeamMembersFilters {
   isAdmin?: boolean;
