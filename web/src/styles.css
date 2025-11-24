@@ -71,7 +71,7 @@ header nav a:hover {
 }
 
 button, .btn {
-    width: 100%;
+    width: 50%;
     padding: 14px;
     border-radius: 22px;
     border: none;
@@ -184,7 +184,20 @@ footer {
   flex-direction: column;
   overflow: hidden;
   /* color: navy; */
-  padding: 10px;
+  padding: 20px;
+}
+
+.small-container {
+  height: 400px;
+  width: 340px;
+  background: var(--bg);
+  border-radius: 0.5rem;
+  margin: 0.5rem;
+
+  flex-direction: column;
+  text-align: center;
+  overflow: hidden;
+  padding: 20px;
 }
 
 .title {
@@ -195,4 +208,55 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.search-container {
+  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
+  /* margin-bottom: 3rem; */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: fit-content;
+  height: fit-content;
+  background-color: var(--bg);
+  border: 5px solid var(--border);
+  padding: 10px 10px;
+  border-radius: 0.5rem;
+}
+
+.search-form {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  list-style-type: none;
+  padding: 0;
+  margin: 0px auto;
+  margin-bottom: auto;
+}
+
+img {
+  border: 5px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+img.main {
+  border: none;
+  border-radius: 0rem;
+}
+
+a
+{
+   color: none;
+   text-decoration: none; 
+   background-color: none;
 }

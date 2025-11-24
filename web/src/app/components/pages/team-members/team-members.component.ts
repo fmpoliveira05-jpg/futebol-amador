@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { TeamMembersService } from '../../../services/team-members.service';
-import { TeamMember } from '../../../shared/models/team-member.model';
+import { TeamMember } from '../../../shared/Dtos/team-member.model';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 
 @Component({

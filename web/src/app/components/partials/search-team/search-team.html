@@ -1,0 +1,20 @@
+<div class="search-container">
+    <div class="search-form">
+        <input #s type="text" placeholder="Team Name" (keyup.enter)="search()" [(ngModel)]="filters.NameTeam" />
+        <input #s type="text" placeholder="Rank Name" (keyup.enter)="search()" [(ngModel)]="filters.NameRank" />
+        <input #s type="text" placeholder="City" (keyup.enter)="search()" [(ngModel)]="filters.City" />
+    </div>
+    <div class="search-form">
+        <input #s type="number" min="0" placeholder="Min Points" (keyup.enter)="search()"
+            [(ngModel)]="filters.MinNumberPoints" />
+        <input #s type="number" min="0" placeholder="Max Points" (keyup.enter)="search()"
+            [(ngModel)]="filters.MaxNumberPoints" />
+        <input #s type="number" min="18" max="80" placeholder="Min Age" (keyup.enter)="search()" [(ngModel)]="filters.MinAge" />
+        <input #s type="number" min="18" max="80" placeholder="Max Age" (keyup.enter)="search()" [(ngModel)]="filters.MaxAge" />
+        <input #s type="number" min="1" placeholder="Min Players" (keyup.enter)="search()"
+            [(ngModel)]="filters.MinNumberPlayers" />
+        <input #s type="number" min="1" placeholder="Max Players" (keyup.enter)="search()"
+            [(ngModel)]="filters.MaxNumberPlayers" />
+    </div>
+    <button class="btn btn-primary" (click)="search()">Search</button>
+</div>

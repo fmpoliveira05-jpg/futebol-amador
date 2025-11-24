@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { Home } from './components/pages/home/home';
+import { Teams } from './components/pages/teams/teams';
 import { PlayerListPageComponent } from './components/pages/player-list/player-list-page.component';
 import { PlayerProfilePageComponent } from './components/pages/player-profile/player-profile-page.component';
 import { SettingsPageComponent } from './components/pages/settings-page/settings-page.component';
@@ -11,13 +12,15 @@ import { AuthGuard } from './shared/auth/auth.guard';
 import { PlayerMembershipRequestsPageComponent } from './components/pages/membership-requests/player-membership-requests.component';
 import { TeamMembersPageComponent } from './components/pages/team-members/team-members.component';
 import { TeamMembershipRequestsPageComponent } from './components/pages/membership-requests/team-membership-requests.component';
+import { TeamProfile } from './components/pages/team-profile/team-profile';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  // {path: '', component: Team},
-  // {path: '', component: Profile},
-  // {path: 'login', component: Login},
-  // {path: 'register', component: Register},
+  { path: '', component: Home},
+  { path: 'teams', component: Teams, canActivate: [AuthGuard]},
+  { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard]},
+  { path: 'team/:teamId', component: TeamProfile, canActivate: [AuthGuard]}, /* cena de is admin aq tb */ 
+  { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard], /*data: { isAdmin: true, requiresTeam: true },*/},
+  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], /*data: { requiresTeam: true },*/},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
   { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard]},
@@ -25,8 +28,6 @@ export const routes: Routes = [
   { path: 'players/me', component: PlayerProfileRedirectComponent, canActivate: [AuthGuard]},
   { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard]},
   { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { requiresTeam: false },},
-  { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard], /*data: { isAdmin: true, requiresTeam: true },*/},
-  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], /*data: { requiresTeam: true },*/},
   { path: 'settings', component: SettingsPageComponent},
   { path: '**', redirectTo: 'players'},
 ];

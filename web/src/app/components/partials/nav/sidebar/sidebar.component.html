@@ -1,14 +1,20 @@
 <aside class="sidebar">
   <div class="sidebar__brand">
-    <img src="assets/football.ico" alt="Logo" class="sidebar__logo" />
-    <span class="sidebar__title">Futebol Amador</span>
+    <a routerLink="/">
+      <img src="assets/football.ico" alt="Logo" class="sidebar__logo" />
+      <span class="sidebar__title">Futebol Amador</span>
+    </a>
   </div>
 
   <nav class="sidebar__nav">
     <a *ngIf="isAuthenticated" routerLink="/players" routerLinkActive="active" class="sidebar__link">
       Jogadores
     </a>
-    
+
+    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" class="sidebar__link">
+      Equipas
+    </a>
+
     <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" class="sidebar__link">
       O meu perfil
     </a>

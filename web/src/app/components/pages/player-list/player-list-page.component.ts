@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { PlayerService } from '../../../services/player.service';
-import { PlayerDetails } from '../../../shared/models/player.model';
+import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
-import { PlayerListItem } from '../../../shared/models/player-list-item.model';
+import { PlayerListItem } from '../../../shared/Dtos/player-list-item.model';
 import { FormsModule } from '@angular/forms';
 
 @Component({

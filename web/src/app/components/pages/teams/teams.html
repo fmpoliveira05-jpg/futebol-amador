@@ -1,0 +1,27 @@
+<!-- <app-auth-header></app-auth-header> -->
+<app-search-team></app-search-team>
+<div class="row">
+    <div class="small-container" *ngFor="let team of teams()">
+        <a routerLink="/team/{{team.id}}">
+            <img height="200" width="200" src="undefined" />
+            <div class="name">
+                {{team.name}}
+            </div>
+            <div class="rank">
+                Rank: {{team.rank.name}}
+            </div>
+            <div class="city">
+                Address: {{team.address}}
+            </div>
+            <div class="points">
+                Points: {{team.currentPoints}}
+            </div>
+            <div class="averageAge">
+                Average Age: {{team.averageAge}}
+            </div>
+            <div class="playerCount">
+                Players: {{team.playerCount}}
+            </div>
+        </a>
+    </div>
+</div>

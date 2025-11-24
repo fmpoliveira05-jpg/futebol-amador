@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PlayerDetails, UpdatePlayerRequest } from '../../../shared/models/player.model';
+import { PlayerDetails, UpdatePlayerRequest } from '../../../shared/Dtos/player.model';
 import { PlayerService } from '../../../services/player.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
