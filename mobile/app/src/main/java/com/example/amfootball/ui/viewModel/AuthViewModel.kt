@@ -69,8 +69,8 @@ class AuthViewModel : ViewModel() {
         var createdFirebaseUser: FirebaseUser? = null
         try {
             // Tenta criar o utilizador no Firebase
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
-
+            //val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
+            /*
             createdFirebaseUser = authResult.user
             if (createdFirebaseUser == null) {
                 // Lançar erro, registo falhou
@@ -87,8 +87,9 @@ class AuthViewModel : ViewModel() {
             }
 
             Log.d("TOKEN_TEST", "Bearer $token")
-
             sessionManager.saveAuthToken(token)
+
+            */
 
             // criar o perfil no backend
             val response = apiService.createProfile( profile)
