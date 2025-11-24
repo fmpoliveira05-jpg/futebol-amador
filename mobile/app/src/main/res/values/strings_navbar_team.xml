@@ -7,6 +7,10 @@
 
     <string name="navbar_create_tean">Create Team</string>
     <string name="description_navbar_crate_team">Page create team</string>
+
+    <string name="navbar_update_team">Update Team</string>
+    <string name="description_navbar_update_team">Page that allows you to update your team\'s data</string>
+
     <string name="navbar_calendar">Calendar</string>
     <string name="description_navbar_calendar">Calendar with team matches</string>
 

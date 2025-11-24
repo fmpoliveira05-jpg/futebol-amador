@@ -22,7 +22,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.NavBar.BottomSheetContent
 import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
@@ -306,7 +305,7 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
         FormTeamScreen(navHostController = globalNavController)
     }
 
-    composable(route = CrudTeamRoutes.UPDATE_TEAM) {
+    composable(route = Routes.TeamRoutes.UPDATE_TEAM.route) {
         FormTeamScreen(navHostController = globalNavController)
     }
 

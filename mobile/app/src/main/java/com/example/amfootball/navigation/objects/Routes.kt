@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Sync
 
 interface AppRouteInfo {
     val route: String
@@ -94,8 +95,8 @@ object Routes {
         override val haveBackButton: Boolean = false
     ) : AppRouteInfo {
         //Trocar a description
-        CREATE_TEAM("CreateTeam",R.string.navbar_create_tean,Icons.Default.GroupAdd,R.string.button_create_team,haveBackButton = true,
-        ),
+        CREATE_TEAM("CreateTeam",R.string.navbar_create_tean,Icons.Default.GroupAdd,R.string.button_create_team,haveBackButton = true,),
+        UPDATE_TEAM("UpdateTeam", R.string.navbar_update_team, Icons.Default.Sync, R.string.description_navbar_update_team, haveBackButton = true),
         HOMEPAGE("HomePageTeam",R.string.team_homepage,Icons.Default.Home,R.string.team_homepage_description),
         TEAM_PROFILE("teamprofile",R.string.team_profile,Icons.Default.Person4,R.string.team_profile_description,haveBackButton = true),
 
@@ -121,8 +122,7 @@ object Routes {
         LIST_POST_PONE_MATCH("ListPostponeMatch",R.string.navbar_list_post_pone_match,Icons.Default.EditCalendar,R.string.description_navbar_list_post_pone_match),
         POST_PONE_MATCH("PostPoneMatch",R.string.button_post_pone_match,Icons.Default.EditCalendar,R.string.button_post_pone_match_description,haveBackButton = true),
 
-        CANCEL_MATCH("CancelMatch",R.string.button_cancel_match,Icons.Default.Flag,R.string.button_cancel_match_description,haveBackButton = true
-        ),
+        CANCEL_MATCH("CancelMatch",R.string.button_cancel_match,Icons.Default.Flag,R.string.button_cancel_match_description,haveBackButton = true),
         FINISH_MATCH("FinishMatch",R.string.button_finish_match,Icons.Default.Flag,R.string.button_finish_match_description,haveBackButton = true),
         NEGOCIATE_MATCH_INVITE("NegociateMatchInvite",R.string.negotiate_button,Icons.Default.EditCalendar,R.string.negotiate_button_description,haveBackButton = true)
     }

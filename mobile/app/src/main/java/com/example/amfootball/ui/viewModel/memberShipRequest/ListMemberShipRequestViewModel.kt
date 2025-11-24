@@ -11,7 +11,6 @@ import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.utils.extensions.toLocalDateTime
 import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -179,7 +178,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
         var route = Routes.UserRoutes.PROFILE.route
 
         if (isPlayerSender) {
-            route = CrudTeamRoutes.PROFILE_TEAM
+            route = Routes.TeamRoutes.TEAM_PROFILE.route
         }
 
         navHostController.navigate(route) {
