@@ -28,14 +28,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileTeamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: TeamRepository
+    private val teamRepository: TeamRepository
 ): ViewModel() {
     /**
      * LiveData que contém os dados da equipa ([ProfileTeamDto]) quando carregados com sucesso.
      * A UI observa esta variável para preencher os campos do perfil.
      */
-    private val infoTeam: MutableLiveData<ProfileTeamDto> = MutableLiveData(null)
-    val uiInfoTeam: LiveData<ProfileTeamDto> = infoTeam
+    private val infoTeam: MutableStateFlow<ProfileTeamDto> = MutableStateFlow(ProfileTeamDto())
+    val uiInfoTeam: StateFlow<ProfileTeamDto> = infoTeam
 
     /**
      * O ID da equipa recuperado dos argumentos da navegação.
@@ -54,7 +54,7 @@ class ProfileTeamViewModel @Inject constructor(
     init {
         if (teamId != null) {
             // Carrega a equipa específica passada pela navegação
-            loadTeamProfile("B5225BE4-8336-4CC3-BB7A-E695A39A4FD0")
+            loadTeamProfile(teamId = teamId)
         } else {
             //Carrega a equipa do utilizador
             //TODO: Carregar com base no nome da team
@@ -86,21 +86,10 @@ class ProfileTeamViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val response = repository.getTeamProfile(teamId = teamId)
+                val profile = teamRepository.getTeamProfile(teamId = teamId)
 
-                if (response.isSuccessful && response.body() != null) {
-                    infoTeam.value = response.body()
-
-                    _uiState.update { it.copy(isLoading = false) }
-                } else {
-                    val errorRaw = response.errorBody()?.string()
-                    val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-                        ?: "Erro desconhecido: ${response.code()}"
-
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = errorMsg)
-                    }
-                }
+                infoTeam.value = profile
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")

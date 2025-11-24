@@ -23,8 +23,8 @@ import androidx.navigation.navArgument
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.AppModalBottomSheet
-import com.example.amfootball.ui.components.NavBar.BottomSheetContent
-import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
+import com.example.amfootball.ui.components.navBar.BottomSheetContent
+import com.example.amfootball.ui.components.navBar.MainBottomNavBar
 import com.example.amfootball.ui.components.navBar.MainTopAppBar
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
@@ -52,6 +52,7 @@ import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
+import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 @Composable
@@ -302,11 +303,20 @@ private fun NavGraphBuilder.competitiveMatches(globalNavController: NavHostContr
  * */
 private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController){
     composable(route = Routes.TeamRoutes.CREATE_TEAM.route) {
-        FormTeamScreen(navHostController = globalNavController)
+        val viewModel = hiltViewModel<TeamFormViewModel>()
+
+        FormTeamScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
-    composable(route = Routes.TeamRoutes.UPDATE_TEAM.route) {
-        FormTeamScreen(navHostController = globalNavController)
+    //TODO: Meter para ser security Route e validar o tipo de user e também mandar o id na rota e trocar para hiltViewModel
+    composable("${Routes.TeamRoutes.UPDATE_TEAM.route}/{teamId}",
+        arguments = listOf(
+            navArgument("teamId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel = hiltViewModel<TeamFormViewModel>()
+
+        FormTeamScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
     profileTeam()

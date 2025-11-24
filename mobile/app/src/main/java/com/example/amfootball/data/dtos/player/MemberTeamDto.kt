@@ -25,7 +25,7 @@ data class MemberTeamDto(
     val image: Uri = Uri.EMPTY,
     val age: Int = 0,
     val position: Position = Position.MIDFIELDER,
-    val size: Int = 0
+    val size: Double = 0.0
 ) {
     companion object{
         fun createExampleList(): List<MemberTeamDto> {

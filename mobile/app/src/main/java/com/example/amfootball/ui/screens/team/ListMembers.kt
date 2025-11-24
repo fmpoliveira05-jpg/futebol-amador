@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.screens.team
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
+import com.example.amfootball.data.actions.itemsList.ItemsListMemberAction
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
@@ -59,9 +61,12 @@ fun ListMembersScreen(
     navHostController: NavHostController,
     viewModel: ListMembersViewModel = viewModel()
 ) {
+    val list by viewModel.uiList.observeAsState(initial = emptyList())
+    val listTypeMember by viewModel.uiListTypeMember.observeAsState(initial = emptyList())
+    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
+
     val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
     val filtersErrors by viewModel.uiErrorFilters.observeAsState(initial = FilterMembersFilterError())
-    val list by viewModel.uiList.observeAsState(initial = emptyList())
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
         onNameChange = viewModel::onNameChange,
@@ -74,8 +79,36 @@ fun ListMembersScreen(
         )
     )
 
-    val listTypeMember by viewModel.uiListTypeMember.observeAsState(initial = emptyList())
-    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
+    val itemsListActions = ItemsListMemberAction(
+        onPromoteMember = viewModel::onPromoteMember,
+        onDemoteMember = viewModel::onDemoteMember,
+        onRemovePlayer = viewModel::onRemovePlayer,
+        onShowMoreInfo = viewModel::onShowMoreInfo
+    )
+
+    ListMemberContent(
+        filters = filters,
+        filterActions = filterAction,
+        filtersErrors = filtersErrors,
+        list = list,
+        listTypeMember = listTypeMember,
+        listPosition = listPosition,
+        itemsListActions = itemsListActions,
+        navHostController = navHostController,
+    )
+}
+
+@Composable
+private fun ListMemberContent(
+    filters: FilterMembersTeam,
+    filterActions: FilterMemberTeamAction,
+    filtersErrors: FilterMembersFilterError,
+    list: List<MemberTeamDto>,
+    listTypeMember: List<TypeMember?>,
+    listPosition: List<Position?>,
+    itemsListActions: ItemsListMemberAction,
+    navHostController: NavHostController
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
     ListSurface(
@@ -90,7 +123,7 @@ fun ListMembersScreen(
                 content = { paddingModifier ->
                     FilterListMemberContent(
                         filters = filters,
-                        filterActions = filterAction,
+                        filterActions = filterActions,
                         filterErros = filtersErrors,
                         listTypeMember = listTypeMember,
                         listPosition = listPosition,
@@ -102,15 +135,10 @@ fun ListMembersScreen(
         listItems = { member ->
             ListMemberItem(
                 member = member,
-                promote = { viewModel.onPromoteMember(idPlayer = member.id) },
-                despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
-                remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
-                showMore = {
-                    viewModel.onShowMoreInfo(
-                        playerId = member.id,
-                        navHostController = navHostController
-                    )
-                }
+                promote = { itemsListActions.onPromoteMember(member.id) },
+                despromote = { itemsListActions.onDemoteMember(member.id) },
+                remove = { itemsListActions.onRemovePlayer(member.id) },
+                showMore = { itemsListActions.onShowMoreInfo(member.id, navHostController) }
             )
         },
         messageEmptyList = stringResource(id = R.string.list_members_empty)
@@ -285,17 +313,76 @@ private fun MemberTrailingButtons(
 }
 
 
-@Preview(
-    name = "Lista de Memberos - PT",
-    locale = "pt-rPT",
-    showBackground = true
+private val mockMembers = listOf(
+    MemberTeamDto(
+        id = "1",
+        name = "João Silva",
+        age = 25,
+        position = Position.FORWARD,
+        typeMember = TypeMember.ADMIN_TEAM,
+        image = Uri.EMPTY,
+        size = 1.85
+    ),
+    MemberTeamDto(
+        id = "2",
+        name = "Pedro Santos",
+        age = 22,
+        position = Position.DEFENDER,
+        typeMember = TypeMember.PLAYER,
+        image = Uri.EMPTY,
+        size = 1.78
+    ),
+    MemberTeamDto(
+        id = "3",
+        name = "Miguel Costa",
+        age = 28,
+        position = Position.MIDFIELDER,
+        typeMember = TypeMember.PLAYER,
+        image = Uri.EMPTY,
+        size = 1.92
+    )
 )
-@Preview(
-    name = "Members List - EN",
-    locale = "en",
-    showBackground = true
+
+private val mockFilterActions = FilterMemberTeamAction(
+    {}, {}, {}, {}, {}, ButtonFilterActions({}, {})
 )
+
+private val mockItemActions = ItemsListMemberAction(
+    {}, {}, {}, { _, _ -> }
+)
+
+// ----------------------------------------------------------------
+// PREVIEWS
+// ----------------------------------------------------------------
+
+@Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMembers() {
-    ListMembersScreen(rememberNavController())
+fun PreviewListMemberContent_Normal() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = mockMembers,
+        listTypeMember = emptyList(), // Pode popular se tiveres um enum.values().toList()
+        listPosition = emptyList(),   // Pode popular se tiveres um enum.values().toList()
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. List Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Empty() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = emptyList(),
+        listTypeMember = emptyList(),
+        listPosition = emptyList(),
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
 }

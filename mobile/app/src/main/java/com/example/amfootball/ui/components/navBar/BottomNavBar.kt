@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.components.NavBar
+package com.example.amfootball.ui.components.navBar
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
