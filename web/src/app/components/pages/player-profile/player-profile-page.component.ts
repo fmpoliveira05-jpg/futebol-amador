@@ -6,6 +6,7 @@ import { PlayerDetails, UpdatePlayerRequest } from '../../../shared/models/playe
 import { PlayerService } from '../../../services/player.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { POSITION_MAP_TONUMBER } from '../../../shared/constants/position-map-to-number';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 
 @Component({
@@ -27,6 +28,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
   protected readonly successMessage = signal<string | null>(null);
   protected readonly isEditMode = signal<boolean>(false);
   protected readonly player = signal<PlayerDetails | null>(null);
+  protected readonly POSITION_MAP_TONUMBER = POSITION_MAP_TONUMBER;
   protected readonly POSITION_MAP = POSITION_MAP;
 
   private auth = inject(AuthService);
@@ -99,21 +101,34 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
 
     const current = this.player()!;
-    const payload: UpdatePlayerRequest = {
-      playerId: current.playerId,
-      name: this.form.value['name'],
-      dateOfBirth: this.form.value['dateOfBirth'],
-      address: this.form.value['address'],
-      email: this.form.value['email'],
-      phone: this.form.value['phone'],
-      position: this.form.value['position'],
-      height: Number(this.form.value['height']),
+
+    const position = this.form.value['position'];
+
+    const positionEnumValue = this.POSITION_MAP_TONUMBER[position];
+
+    if (positionEnumValue === undefined) {
+      this.errorMessage.set('Valor de posição inválido.');
+      return;
+    }
+
+    const payload = {
+      dto: {
+        playerId: current.playerId,
+        Name: this.form.value['name'] || current.name,
+        DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
+        Address: this.form.value['address'] || current.address,
+        Email: this.form.value['email'] || current.email,
+        Phone: this.form.value['phone'] || current.phoneNumber,
+        Position: positionEnumValue,
+        Height: Number(this.form.value['height']),
+      }
     };
 
     this.isSaving.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
+    console.log('Payload for update:', payload);
     this.playerService.updatePlayer(current.playerId, payload).subscribe({
       next: () => {
         this.successMessage.set('Perfil atualizado com sucesso.');
@@ -194,7 +209,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!player.idTeam) {
+    if (player.idTeam == null) {
       this.router.navigate(['/players/membership-requests']);
     } else if (player.isAdmin) {
       this.router.navigate(['/team/membership-requests']);

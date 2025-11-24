@@ -25,7 +25,7 @@ export class PlayerService {
   }
 
   updatePlayer(playerId: string, data: UpdatePlayerRequest): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${playerId}`, data);
+    return this.http.put<void>(`${this.baseUrl}/update/${playerId}`, data);
   }
 
   deletePlayer(playerId: string): Observable<void> {

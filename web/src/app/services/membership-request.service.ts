@@ -35,49 +35,49 @@ export class MembershipRequestService {
     );
   }
 
-  acceptMembershipRequestPlayer(requestId: string): Observable<void> {
+  acceptMembershipRequestPlayer(request: { requestId: string }): Observable<void> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
       throw new Error('No authenticated player');
     }
 
     return this.http.post<void>(
-      `${this.baseUrl}/${playerId}/membership-requests/accept`,
-      { requestId }
+      `${this.baseUrl}/Player/${playerId}/membership-requests/accept`,
+      request
     );
   }
 
-  rejectMembershipRequestPlayer(requestId: string): Observable<void> {
+  rejectMembershipRequestPlayer(request: { requestId: string }): Observable<void> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
       throw new Error('No authenticated player');
     }
 
     return this.http.delete<void>(
-      `${this.baseUrl}/${playerId}/membership-requests/reject/${requestId}`
+      `${this.baseUrl}/Player/${playerId}/membership-requests/reject/${request.requestId}`
     );
   }
 
-  acceptMembershipRequestTeam(requestId: string): Observable<void> {
+  acceptMembershipRequestTeam(request: { requestId: string }): Observable<void> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
       throw new Error('No authenticated player');
     }
 
     return this.http.post<void>(
-      `${this.baseUrl}/${playerId}/Team/membership-requests/accept`,
-      { requestId }
+      `${this.baseUrl}/Team/${playerId}/membership-requests/accept`,
+      request
     );
   }
 
-  rejectMembershipRequestTeam(requestId: string): Observable<void> {
+  rejectMembershipRequestTeam(request: { requestId: string }): Observable<void> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
       throw new Error('No authenticated player');
     }
 
     return this.http.delete<void>(
-      `${this.baseUrl}/${playerId}/Team/membership-requests/reject/${requestId}`
+      `${this.baseUrl}/Team/${playerId}/membership-requests/reject/${request.requestId}`
     );
   }
 }
