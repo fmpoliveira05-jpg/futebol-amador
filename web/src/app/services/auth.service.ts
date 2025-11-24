@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable, of } from 'rxjs';
+import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 
@@ -60,7 +60,7 @@ export class AuthService {
     position: number,
     height: number
   ): Observable<any> {
-    return this.http.post(`${this.baseUrl}/User/signup`, {
+    return this.http.post(`${this.baseUrl}/Player/create-profile`, {
       name,
       email,
       password,
@@ -69,7 +69,9 @@ export class AuthService {
       phone,
       position,
       height,
-    });
+    }).pipe(catchError((error) => {
+      return throwError(error);
+    }));
   }
   
   getPlayerData(playerId: string): Observable<any> {
