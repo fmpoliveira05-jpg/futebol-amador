@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="unknown_error">Erro desconhecido</string>
+    <string name="connection_error">Sem conexão</string>
+
     <string name="mandatory_field">Campo obrigatório</string>
 
     <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>
@@ -10,7 +13,7 @@
     <string name="error_max_name_player">O nome do jogador deve ter até %1$d caracteres</string>
     <string name="error_min_name_team">O nome da equipa deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_name_team">O nome da equipa só deve ter até %1$d caracteres</string>
-    <string name="error_nin_name_member">O nome do membero dever ter no minimo %1$d caracteres</string>
+    <string name="error_nin_name_member">O nome do membero dever ter no mínimo %1$d caracteres</string>
     <string name="error_max_name_member">O nome do membro deve ter no máximo %1$d caracteres</string>
     <string name="error_min_name_opponent">O nome do opponente deve ter no mínimo %1$d caracteres</string>
     <string name="error_max_name_opponent">O nome do opponente deve ter no máximo %1$d caracteres</string>
@@ -24,8 +27,8 @@
 
     <string name="error_post_pone_Date">adiamento</string>
     <string name="error_date_game">do jogo</string>
-    <string name="erro_date_sende">envio</string>
-    <string name="erro_min_date_after">A data mínima %1$s deve ser inferior à data máxima %1$s</string>
+    <string name="error_date_sende">envio</string>
+    <string name="error_min_date_after">A data mínima %1$s deve ser inferior à data máxima %1$s</string>
     <string name="error_max_date_before">A data máxima %1$s deve ser superior à data mínima %1$s</string>
 
     <string name="error_min_size">O tamanho mínimo do jogo deve ser superior a %1$d</string>

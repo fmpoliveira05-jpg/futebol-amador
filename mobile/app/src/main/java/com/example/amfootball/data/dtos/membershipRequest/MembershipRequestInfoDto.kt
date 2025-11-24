@@ -3,6 +3,17 @@ package com.example.amfootball.data.dtos.membershipRequest
 import android.net.Uri
 import java.time.LocalDateTime
 
+/**
+ * Data Transfer Object (DTO) que representa os detalhes de um pedido de adesão (membership request).
+ *
+ * Contém informações sobre quem enviou e quem recebeu o pedido, a data e o contexto (se foi iniciado pelo jogador ou pela equipa).
+ *
+ * @property id O identificador único do pedido.
+ * @property receiver Informações sobre a entidade recetora do pedido.
+ * @property sender Informações sobre a entidade que enviou o pedido.
+ * @property dateSend A data e hora em que o pedido foi enviado.
+ * @property isPlayerSender Indica se o pedido foi enviado pelo jogador (true) ou pela equipa (false).
+ */
 data class MembershipRequestInfoDto(
     val id: String,
     val receiver: ReceiverInfo,

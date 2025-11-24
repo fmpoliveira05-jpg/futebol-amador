@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -17,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -27,8 +27,9 @@ import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
+import com.example.amfootball.ui.components.lists.FilterMaxDatePicker
+import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
@@ -47,9 +48,9 @@ fun ListMemberShipRequest(
     navHostController: NavHostController,
     viewModel: ListMemberShipRequestViewModel = viewModel(),
 ){
-    val filters by viewModel.uiFilterState.observeAsState(initial = FilterMemberShipRequest())
-    val filterError by viewModel.uiFilterErrorState.observeAsState(initial = FilterMemberShipRequestError())
-    val list by viewModel.uiListState.observeAsState(initial = emptyList())
+    val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
+    val filterError by viewModel.uiFilterErrorState.collectAsStateWithLifecycle()
+    val list by viewModel.uiListState.collectAsStateWithLifecycle()
     val filterActions = FilterMemberShipRequestActions(
         onSenderNameChange = viewModel::onSenderNameChanged,
         onMinDateSelected = viewModel::onMinDateSelected,
@@ -131,9 +132,7 @@ private fun FilterListMemberShipRequestContent(
 
         FilterRow(
             content = {
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_min_date),
-                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                FilterMinDatePicker(
                     value = filters.minDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateSelected(it) },
                     isError = filterError.minDateError != null,
@@ -143,9 +142,7 @@ private fun FilterListMemberShipRequestContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_max_date),
-                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                FilterMaxDatePicker(
                     value = filters.maxDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateSelected(it)},
                     isError = filterError.maxDateError != null,

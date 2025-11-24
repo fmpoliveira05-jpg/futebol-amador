@@ -1,4 +1,4 @@
-package com.example.amfootball.navigation.Objects.page
+package com.example.amfootball.navigation.objects.page
 
 object CrudTeamRoutes {
     const val ARG_TEAM_ID = "teamId"

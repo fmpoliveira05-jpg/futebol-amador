@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,58 +26,85 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.ui.components.inputFields.DatePickerModalInput
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.components.Loading
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedPastLimitedDate
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
+import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.UserConst
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
+/**
+ * Ecrã de Registo de Novo Utilizador.
+ *
+ * Este Composable é o ponto de entrada (Stateful) que conecta o [AuthViewModel] à UI.
+ * Gere a navegação e delega a lógica de registo para o ViewModel.
+ *
+ * @param navHostController Controlador de navegação para transição entre ecrãs.
+ * @param authViewModel ViewModel injetado pelo Hilt para gerir a autenticação.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SignUpScreen(navHostController: NavHostController) {
+fun SignUpScreen(
+    navHostController: NavHostController,
+    authViewModel: AuthViewModel = hiltViewModel()
+) {
     ContentSignUp(
         modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)
         .verticalScroll(rememberScrollState()),
-        navController = navHostController
+        navController = navHostController,
+        onRegister = authViewModel::registerUser
     )
 }
 
 @Composable
-private fun ContentSignUp(modifier: Modifier = Modifier,
-                          navController: NavHostController) {
+private fun ContentSignUp(
+    navController: NavHostController,
+    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FieldsSignUp(navHostController = navController)
+        FieldsSignUp(
+            navHostController = navController,
+            onRegister = onRegister
+        )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Formulário de Registo contendo todos os campos de entrada e validações.
+ *
+ * @param navHostController Usado para navegação após sucesso.
+ * @param onRegister Callback para executar a lógica de registo (recebe DTO, Password, Sucesso, Erro).
+ */
 @Composable
-private fun FieldsSignUp(navHostController: NavHostController) {
+private fun FieldsSignUp(
+    navHostController: NavHostController,
+    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit
+) {
     // --- Estados para os campos ---
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -87,6 +113,7 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     var position by remember { mutableStateOf<Int?>(null) }
     var dateOfBirth by remember { mutableStateOf<Long?>(null) }
     var phone by remember { mutableStateOf("") }
+    var countryCode by remember { mutableStateOf("+351") }
     var height by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
@@ -96,20 +123,17 @@ private fun FieldsSignUp(navHostController: NavHostController) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     // --- ViewModels e Scopes ---
-    val authViewModel: AuthViewModel = viewModel()
     val scope = rememberCoroutineScope()
     val displayDateFormatter = remember {
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     }
 
-    // Formato para enviar para a API (ex: 2025-10-30)
     val apiDateFormatter = remember {
         SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
             timeZone = TimeZone.getTimeZone("UTC")
         }
     }
 
-    Text(text = "Criar nova conta")
     Spacer(Modifier.height(20.dp))
 
     TextFieldOutline(
@@ -125,13 +149,19 @@ private fun FieldsSignUp(navHostController: NavHostController) {
         onValueChange = { email = it },
     )
 
-    TextFieldOutline(
-        label = "Phone",
-        value = phone,
-        onValueChange = { phone = it },
+    PhoneInputWithDynamicCountries(
+        phoneNumber = phone,
+        onPhoneNumberChange = { novoNumero ->
+            if (novoNumero.length <= UserConst.SIZE_PHONE_NUMBER) {
+                phone = novoNumero
+            }
+        },
+        initialCountryCode = countryCode,
+        onCountryCodeChange = { novoPais ->
+            countryCode = novoPais.dialCode
+        },
         isRequired = true,
-        maxLenght = UserConst.SIZE_PHONE_NUMBER,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+        modifier = Modifier.fillMaxWidth()
     )
 
     TextFieldOutline(
@@ -176,26 +206,16 @@ private fun FieldsSignUp(navHostController: NavHostController) {
 
     Spacer(Modifier.height(8.dp))
 
-    // Data de nascimento
     Text(text = "Data de Nascimento:")
-    Button(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
-        // Mostra a data formatada se não for nula
-        val displayDate = dateOfBirth?.let {
-            displayDateFormatter.format(Date(it))
-        } ?: "Selecionar Data"
-        Text(displayDate)
-    }
-
-    if (showDatePicker) {
-        DatePickerModalInput( // Ou DatePickerModal
-            onDateSelected = { selectedMillis ->
-                // O 'selectedMillis' já está em UTC, guarde-o diretamente
-                dateOfBirth = selectedMillis
-            },
-            onDismiss = { showDatePicker = false }
-        )
-    }
-    // --- Fim do Campo de Data ---
+    DatePickerDockedPastLimitedDate(
+        value = if (dateOfBirth == null) "" else displayDateFormatter.format(Date(dateOfBirth!!)),
+        onDateSelected = { selectedMillis ->
+            dateOfBirth = selectedMillis
+        },
+        label = "Data de Nascimento",
+        contentDescription = "Data de nascimento do utilizador",
+        isSingleLine = true,
+    )
 
     Spacer(Modifier.height(8.dp))
 
@@ -236,13 +256,14 @@ private fun FieldsSignUp(navHostController: NavHostController) {
             if (!validationResult.isValid) {
                 errorMessage = "${validationResult.fieldName}: ${validationResult.errorMessage}"
             } else {
-                // Validação OK!
+                // 2. Preparar para envio
                 isLoading = true
                 errorMessage = null
+                val fullPhoneNumber = "$countryCode$phone"
 
                 val userProfile = CreateProfileDto(
                     userName = name,
-                    phone = phone,
+                    phone = fullPhoneNumber,
                     height = height.toInt(),
                     dateOfBirth = apiDateFormatter.format(Date(dateOfBirth!!)),
                     position = position!!,
@@ -250,10 +271,10 @@ private fun FieldsSignUp(navHostController: NavHostController) {
                     email = email
                 )
 
-                scope.launch {
-                    try {
-                        authViewModel.registerUser(userProfile, password)
-
+                onRegister(
+                    userProfile,
+                    password,
+                    {
                         isLoading = false
                         navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
                             popUpTo(navHostController.graph.startDestinationId) {
@@ -261,36 +282,45 @@ private fun FieldsSignUp(navHostController: NavHostController) {
                             }
                             launchSingleTop = true
                         }
-                    } catch (e: Exception) {
-                        // Erro (do ViewModel)
+                    },
+                    { msgErro ->
                         isLoading = false
-                        errorMessage = e.message ?: "Ocorreu um erro no registo."
+                        errorMessage = msgErro
                     }
-                }
+                )
             }
         },
         modifier = Modifier.fillMaxWidth(),
         enabled = !isLoading
     ) {
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.height(24.dp))
+            Loading()
         } else {
             Text("Registar")
         }
     }
+
+
 }
 
 @Preview(
     name = "SignUp Screen - EN",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
     name = "SignUp Screen - PT",
-    locale = "pt",
-    showBackground = true)
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Composable
 fun SignUpScreenContentPreview() {
     AMFootballTheme {
-        SignUpScreen(rememberNavController())
+        ContentSignUp(
+            navController = rememberNavController(),
+            onRegister = { _, _, onSuccess, _ ->
+                onSuccess()
+            }
+        )
     }
 }

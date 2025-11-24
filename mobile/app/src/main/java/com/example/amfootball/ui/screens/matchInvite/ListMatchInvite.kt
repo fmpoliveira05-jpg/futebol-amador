@@ -4,11 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -29,12 +24,14 @@ import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.ui.components.buttons.AcceptButton
+import com.example.amfootball.ui.components.buttons.EditButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
+import com.example.amfootball.ui.components.lists.FilterMaxDatePicker
+import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
@@ -139,9 +136,7 @@ private fun FilterListMatchInvite(
 
         FilterRow(
             content = {
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_min_date),
-                    contentDescription = stringResource(id = R.string.description_filter_min_date),
+                FilterMinDatePicker(
                     value = filters.minDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateSelected(it) },
                     isError = filterError.minDateError != null,
@@ -151,9 +146,7 @@ private fun FilterListMatchInvite(
                     modifier = Modifier.weight(1f)
                 )
 
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_max_date),
-                    contentDescription = stringResource(id = R.string.description_filter_max_date),
+                FilterMaxDatePicker(
                     value = filters.maxDate?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateSelected(it)},
                     isError = filterError.maxDateError != null,
@@ -208,25 +201,10 @@ private fun ItemListMatchInivite(
         },
         underneathItems = {
             AcceptButton(accept = acceptMatchInvite)
-            NegociateMatchIniviteButton(negociateMatchInvite = negociateMatchInvite)
+            EditButton(edit = negociateMatchInvite, contentDescription = stringResource(id = R.string.negotiate_button_description))
             RejectButton(reject = rejectMatchInvite)
         }
     )
-}
-
-@Composable
-fun NegociateMatchIniviteButton(
-    negociateMatchInvite: () -> Unit
-) {
-    IconButton(
-        onClick = negociateMatchInvite
-    ) {
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = stringResource(id = R.string.negociate_button_description),
-            tint = MaterialTheme.colorScheme.secondary
-        )
-    }
 }
 
 @Preview(

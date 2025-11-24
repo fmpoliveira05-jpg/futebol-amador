@@ -1,6 +1,5 @@
 package com.example.amfootball.data.network
 
-import com.example.amfootball.data.network.interfaces.LeadBoardServices
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,7 +15,7 @@ object RetrofitInstance {
 
     // MUDE ISTO para o URL base da sua API .NET
     //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/" // link com ngrok
+    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 
     //Cria o cliente aqui
     /*
@@ -26,36 +25,45 @@ object RetrofitInstance {
         .build()
 
     * */
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AuthInterceptor()) // Mantém o seu AuthInterceptor
-        .addInterceptor { chain ->
-            val original = chain.request()
-            val request = original.newBuilder()
-                .header("ngrok-skip-browser-warning", "true")
-                .method(original.method, original.body)
-                .build()
-            chain.proceed(request)
-        }
-        .build()
-
+    @Provides
     @Singleton
-    private val retrofit by lazy {
-        Retrofit.Builder()
+    fun provideOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor())
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val request = original.newBuilder()
+                    .header("ngrok-skip-browser-warning", "true")
+                    .method(original.method, original.body)
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    val api: ApiBackend by lazy {
-        retrofit.create(ApiBackend::class.java)
+    @Provides
+    @Singleton
+    fun provideApiBackend(retrofit: Retrofit): ApiBackend {
+        return retrofit.create(ApiBackend::class.java)
     }
 
+    /*
     @Provides
     @Singleton
     fun provideLeadBoardService(retrofit: Retrofit): LeadBoardServices {
         return retrofit.create(LeadBoardServices::class.java)
     }
+    */
 }
 
 /*
@@ -94,5 +102,40 @@ object RetrofitInstance {
     val api: ApiBackend by lazy {
         retrofit.create(ApiBackend::class.java)
     }
+
+    /*
+    Atual mas com cenas do Hitl
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .addInterceptor(AuthInterceptor()) // Mantém o seu AuthInterceptor
+        .addInterceptor { chain ->
+            val original = chain.request()
+            val request = original.newBuilder()
+                .header("ngrok-skip-browser-warning", "true")
+                .method(original.method, original.body)
+                .build()
+            chain.proceed(request)
+        }
+        .build()
+
+    @Singleton
+    private val retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
+    val api: ApiBackend by lazy {
+        retrofit.create(ApiBackend::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLeadBoardService(retrofit: Retrofit): LeadBoardServices {
+        return retrofit.create(LeadBoardServices::class.java)
+    }
+    */
 
 } */

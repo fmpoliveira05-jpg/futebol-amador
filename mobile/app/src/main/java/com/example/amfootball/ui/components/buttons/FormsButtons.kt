@@ -16,6 +16,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
+/**
+ * Um componente Composable que renderiza um botão de envio (submit) para formulários.
+ *
+ * Este botão segue o padrão de design Material 3, ocupa a largura máxima disponível
+ * ([Modifier.fillMaxWidth]) e tem uma altura fixa de 56.dp. Por padrão, ele
+ * exibe o ícone [Icons.Default.Save].
+ *
+ * @param onClick A função lambda a ser executada quando o botão for clicado, tipicamente
+ * contendo a lógica de validação e envio do formulário.
+ * @param imageButton O [ImageVector] opcional para customizar o ícone exibido no botão
+ * (padrão: [Icons.Default.Save]).
+ * @param text A string de texto a ser exibida no botão (padrão: [R.string.submit_button]).
+ * @param contentDescription A descrição de conteúdo para acessibilidade do ícone (padrão:
+ * [R.string.submit_button_description]).
+ */
 @Composable
 fun SubmitFormButton(onClick: () -> Unit,
                      imageButton: ImageVector = Icons.Default.Save,

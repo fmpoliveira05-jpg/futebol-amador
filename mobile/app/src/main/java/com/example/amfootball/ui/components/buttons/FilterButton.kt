@@ -21,6 +21,47 @@ import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 
+/**
+ * Agrupa os botões de Limpeza de Filtros lado a lado.
+ *
+ * Utiliza um [Row] para alinhar [FilterApplyButton] e [ClearFilterButton] horizontalmente,
+ * ocupando toda a largura disponível e espaçados por 8.dp.
+ *
+ * @param buttonsActions Um objeto contendo as lambdas de ação ([onFilterApply] e [onFilterClean])
+ * a serem executadas quando os botões são clicados.
+ * @param modifier Um [Modifier] opcional para configurar o layout da linha.
+ */
+@Composable
+fun LineClearFilterButtons(
+    buttonsActions: ButtonFilterActions,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterApplyButton(
+            onClick = buttonsActions.onFilterApply,
+            modifier = modifier
+        )
+
+        ClearFilterButton(
+            onClick = buttonsActions.onFilterClean,
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * Um botão principal ([Button] preenchido) usado para aplicar filtros.
+ *
+ * Exibe o ícone [Icons.Default.FilterAlt] e um texto padrão configurável.
+ *
+ * @param onClick A função lambda a ser executada quando o botão for clicado (ação de aplicar filtro).
+ * @param text A string de texto a ser exibida no botão (padrão: [R.string.filter_button]).
+ * @param contentDescription A descrição de conteúdo para acessibilidade do ícone (padrão: [R.string.filter_button_description]).
+ * @param modifier Um [Modifier] opcional para configurar o botão.
+ */
 @Composable
 fun FilterApplyButton(
     onClick: () -> Unit,
@@ -46,6 +87,16 @@ fun FilterApplyButton(
     }
 }
 
+/**
+ * Um botão secundário ([OutlinedButton]) usado para limpar ou resetar filtros.
+ *
+ * Exibe o ícone [Icons.Default.Clear] e um texto padrão configurável.
+ *
+ * @param onClick A função lambda a ser executada quando o botão for clicado (ação de limpar filtro).
+ * @param text A string de texto a ser exibida no botão (padrão: [R.string.clear_button]).
+ * @param contentDescription A descrição de conteúdo para acessibilidade do ícone (padrão: [R.string.clear_button_description]).
+ * @param modifier Um [Modifier] opcional para configurar o botão.
+ */
 @Composable
 fun ClearFilterButton(onClick: () -> Unit,
                       text: String = stringResource(id = R.string.clear_button),
@@ -66,28 +117,6 @@ fun ClearFilterButton(onClick: () -> Unit,
         Text(
             text = text,
             style = MaterialTheme.typography.labelLarge
-        )
-    }
-
-}
-
-@Composable
-fun LineClearFilterButtons(
-    buttonsActions: ButtonFilterActions,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        FilterApplyButton(
-            onClick = buttonsActions.onFilterApply,
-            modifier = modifier
-        )
-
-        ClearFilterButton(
-            onClick = buttonsActions.onFilterClean,
-            modifier = modifier
         )
     }
 }

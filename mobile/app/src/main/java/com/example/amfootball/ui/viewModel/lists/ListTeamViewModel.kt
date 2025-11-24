@@ -1,69 +1,70 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FiltersListTeamDto
+import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.navigation.Objects.Routes
-import com.example.amfootball.navigation.Objects.page.CrudTeamRoutes
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.text.ifEmpty
 
+//TODO: Arranjar forma de filtrar na lista de teams de maneira offline ou seja é preciso estar online para carregar os dados mas caso fique offline é possivel na mesma filtrar na lista
 class ListTeamViewModel(): ViewModel() {
-    private val listState: MutableLiveData<List<ItemTeamInfoDto>> = MutableLiveData(emptyList<ItemTeamInfoDto>())
-    val listTeams: LiveData<List<ItemTeamInfoDto>> = listState
+    private val listState: MutableStateFlow<List<ItemTeamInfoDto>> = MutableStateFlow(emptyList())
+    val listTeams: StateFlow<List<ItemTeamInfoDto>> = listState
     
-    private val filterState: MutableLiveData<FiltersListTeamDto> = MutableLiveData(FiltersListTeamDto())
+    private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
 
-    val uiFilterState: LiveData<FiltersListTeamDto> = filterState
+    val uiFilterState: StateFlow<FiltersListTeam> = filterState
 
-    private val listRanks: MutableLiveData<List<RankNameDto>> = MutableLiveData(emptyList<RankNameDto>())
+    private val listRanks: MutableStateFlow<List<RankNameDto>> = MutableStateFlow(emptyList())
     
-    var listRank: LiveData<List<RankNameDto>> = listRanks
+    var listRank: StateFlow<List<RankNameDto>> = listRanks
 
     //Setters
     fun onNameChange(name: String) {
-        filterState.value = filterState.value!!.copy(
+        filterState.value = filterState.value.copy(
             name = name.ifEmpty {null}
         )
     }
 
     fun onCityChange(city: String) {
-        filterState.value = filterState.value!!.copy(
+        filterState.value = filterState.value.copy(
             city = city.ifEmpty {null}
         )
     }
 
     fun onRankChange(rank: String) {
-        filterState.value = filterState.value!!.copy(
+        filterState.value = filterState.value.copy(
             rank = rank.ifEmpty {null}
         )
     }
 
     fun onMinPointChange(minPoint: Int?) {
-        filterState.value = filterState.value!!.copy(minPoint = minPoint)
+        filterState.value = filterState.value.copy(minPoint = minPoint)
     }
 
     fun onMaxPointChange(maxPoint: Int?) {
-        filterState.value = filterState.value!!.copy(maxPoint = maxPoint)
+        filterState.value = filterState.value.copy(maxPoint = maxPoint)
     }
 
     fun onMinAgeChange(minAge: Int?) {
-        filterState.value = filterState.value!!.copy(minAge = minAge)
+        filterState.value = filterState.value.copy(minAge = minAge)
     }
 
     fun onMaxAgeChange(maxAge: Int?) {
-        filterState.value = filterState.value!!.copy(maxAge = maxAge)
+        filterState.value = filterState.value.copy(maxAge = maxAge)
     }
 
     fun onMinNumberMembersChange(minNumberMembers: Int?) {
-        filterState.value = filterState.value!!.copy(minNumberMembers = minNumberMembers)
+        filterState.value = filterState.value.copy(minNumberMembers = minNumberMembers)
     }
 
     fun onMaxNumberMembersChange(maxNumberMembers: Int?) {
-        filterState.value = filterState.value!!.copy(maxNumberMembers = maxNumberMembers)
+        filterState.value = filterState.value.copy(maxNumberMembers = maxNumberMembers)
     }
 
     //Initializer
@@ -75,12 +76,14 @@ class ListTeamViewModel(): ViewModel() {
 
     //Metodos
     fun applyFilters() {
-        val currentFilters = filterState.value!!
+
+        //TODO: Faltar validar filtros
+        val currentFilters = filterState.value
         // TODO: Quando tiver a API, é aqui que a vai chamar:
 
         val list = listState.value
 
-        val filteredList = list!!.filter { item ->
+        val filteredList = list.filter { item ->
             val teamName = if (currentFilters.name.isNullOrBlank()) {
                 true
             } else {
@@ -143,16 +146,13 @@ class ListTeamViewModel(): ViewModel() {
     }
 
     fun clearFilters() {
-        filterState.value = FiltersListTeamDto()
+        filterState.value = FiltersListTeam()
         listState.value = listState.value
     }
 
-
     fun sendMatchInvite(idTeam: String,
                         navHostController: NavHostController) {
-
-        //Mandar o id da equipa como parametro
-        navHostController.navigate(route = Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
+        navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}") {
             launchSingleTop = true
         }
     }
@@ -162,10 +162,7 @@ class ListTeamViewModel(): ViewModel() {
         //TODO: Executar chamada há API para o sendMemberShipRequest
     }
 
-    /**
-     * TODO: Falta depois carregar os dados reais da team
-     * */
-    fun ShowMore(
+    fun showMore(
         idTeam: String,
         navHostController: NavHostController,
     ) {

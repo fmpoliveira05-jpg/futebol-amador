@@ -1,8 +1,6 @@
-package com.example.amfootball.ui.components.NavBar
+package com.example.amfootball.ui.components.navBar
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -12,10 +10,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.R
-import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import kotlin.collections.find
-import com.example.amfootball.navigation.Objects.AppRouteInfo
+import com.example.amfootball.navigation.objects.AppRouteInfo
 import com.example.amfootball.ui.components.buttons.BackButton
 import com.example.amfootball.ui.viewModel.AuthViewModel
 
@@ -30,10 +27,10 @@ fun MainTopAppBar(
     val routeTitleResId = getAllRoutes().find { it.route == currentRoute }?.labelResId
     val haveBackButton = getAllRoutes().find { it.route == currentRoute }?.haveBackButton
     val authViewModel: AuthViewModel = viewModel()
+
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-
                 if (routeTitleResId != null) {
                     Text(text = stringResource(id = routeTitleResId))
                 }

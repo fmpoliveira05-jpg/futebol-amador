@@ -7,7 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.leadboard.LeadboardDto
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 
 class LeadBoardViewModel: ViewModel() {
     private val listTeam: MutableLiveData<List<LeadboardDto>> = MutableLiveData(emptyList<LeadboardDto>())

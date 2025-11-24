@@ -64,10 +64,9 @@ private fun ContentCreateTeam(modifier: Modifier = Modifier,
                               fieldsErrors: TeamFormErros,
                               onSubmitClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
     Column(
         modifier = modifier
-            .verticalScroll(scrollState)
+            .verticalScroll(rememberScrollState())
             .imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

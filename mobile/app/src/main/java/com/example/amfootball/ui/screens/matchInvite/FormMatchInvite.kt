@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,8 +22,8 @@ import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
+import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.inputFields.DatePickerDockedLimitedDate
 import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
@@ -89,7 +89,7 @@ private fun FieldsSendMatchInvite(
         isReadOnly = true,
     )
 
-    DatePickerDockedLimitedDate(
+    DatePickerDockedFutureLimitedDate(
         value = fields.gameDate ?: "",
         onDateSelected = actions.onGameDateChange,
         label = stringResource(id = R.string.game_date),
@@ -120,7 +120,7 @@ private fun FieldsSendMatchInvite(
 
     SubmitFormButton(
         onClick = { actions.onSubmitForm(navHostController) },
-        imageButton = Icons.Default.Send,
+        imageButton = Icons.AutoMirrored.Filled.Send,
         text = stringResource(R.string.button_send_match_invite),
         contentDescription = stringResource(id = R.string.button_description_send_match_invite)
     )

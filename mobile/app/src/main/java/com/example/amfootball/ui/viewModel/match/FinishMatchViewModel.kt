@@ -7,7 +7,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.FinishMatchFormErrors
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.FinishMatchConst
 import com.example.amfootball.R
 

@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import com.example.amfootball.R
 import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 
 //TODO: Adaptar isto para depois a pagina também servir para PostPoneMatch
 class FormMatchInviteViewModel @Inject constructor(

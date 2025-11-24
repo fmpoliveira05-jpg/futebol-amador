@@ -4,13 +4,16 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.google.gson.Gson // Importe o Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
 /**
  * Gere a sessão do utilizador, guardando e lendo o token de autenticação.
  *
  * @param context O contexto da aplicação, usado para obter SharedPreferences.
  */
-class SessionManager(context: Context) {
+class SessionManager @Inject constructor(
+    @ApplicationContext context: Context) {
 
     private val prefs: SharedPreferences
     private val gson = Gson()

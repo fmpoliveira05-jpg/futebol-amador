@@ -3,13 +3,16 @@ package com.example.amfootball.data.network
 import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.dtos.team.ProfileTeamInfoDto
+import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
+import retrofit2.http.QueryMap
 
 // Isto é apenas um contrato, não tem lógica
 interface ApiBackend{
@@ -39,11 +42,15 @@ interface ApiBackend{
     /**
     * Vai buscar há API um player através do seu ID
     * */
-    @GET("api/Player/{playerId}")
+    @GET("api/Player/details/{playerId}")
     suspend fun getPlayerProfile(
         @Path("playerId") playerId: String
     ): Response<PlayerProfileDto>
 
+    @GET("api/Player/listPlayers")
+    suspend fun getPlayersList(
+        @QueryMap filters: Map<String, String>
+    ): Response<List<InfoPlayerDto>>
 
     //Teams
     /**
@@ -52,6 +59,6 @@ interface ApiBackend{
     @GET("api/Team/{id}")
     suspend fun getTeamProfile(
         @Path("id") teamId: String
-    ): Response<ProfileTeamInfoDto>
+    ): Response<ProfileTeamDto>
 
 }

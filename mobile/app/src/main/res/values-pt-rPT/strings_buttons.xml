@@ -9,6 +9,9 @@
     <string name="clear_button">Limpar</string>
     <string name="clear_button_description">Botão que permite apagar os filtros aplicados</string>
 
+    <string name="remove_button">Remover</string>
+    <string name="remove_button_player_description">Botão que lhe permite remover um jogador da sua equipa</string>
+
     <string name="button_back">Voltar</string>
     <string name="button_back_description">Botão que permite voltar para a pagina anterior</string>
 
@@ -18,8 +21,8 @@
     <string name="accept_button">Aceitar</string>
     <string name="accept_button_description">Botão que permite aceitar algo</string>
 
-    <string name="negociate_button">Negociar</string>
-    <string name="negociate_button_description">Botão que permite negociar algo</string>
+    <string name="negotiate_button">Negociar</string>
+    <string name="negotiate_button_description">Botão que permite negociar algo</string>
 
     <string name="reject_button">Rejeitar</string>
     <string name="reject_button_description">Botão que permite rejetiar algo</string>

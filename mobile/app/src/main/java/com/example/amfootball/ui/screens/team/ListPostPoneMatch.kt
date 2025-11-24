@@ -29,9 +29,11 @@ import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
-import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.DateRow
 import com.example.amfootball.ui.components.lists.FilterIsHomeMatch
+import com.example.amfootball.ui.components.lists.FilterMaxDateGamePicker
+import com.example.amfootball.ui.components.lists.FilterMinDateGamePicker
+import com.example.amfootball.ui.components.lists.FilterNameTeamTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
@@ -40,7 +42,6 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
-import com.example.amfootball.utils.TeamConst
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -113,11 +114,9 @@ private fun FilterListPostPoneMatchContent(
     Column(modifier = modifier) {
         FilterRow(
             content = {
-                LabelTextField(
-                    label = stringResource(id = R.string.filter_name),
-                    value = filters.nameOpponent,
-                    maxLenght = TeamConst.MAX_NAME_LENGTH,
-                    onValueChange = { filterActions.onOpponentNameChange(it) },
+                FilterNameTeamTextField(
+                    nameTeam = filters.nameOpponent,
+                    onNameTeamChange = { filterActions.onOpponentNameChange(it) },
                     isError = filtersError.nameOpponentError != null,
                     errorMessage = filtersError.nameOpponentError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
@@ -135,10 +134,8 @@ private fun FilterListPostPoneMatchContent(
 
         FilterRow(
             content = {
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_min_date_game),
-                    contentDescription = stringResource(id = R.string.description_filter_min_date),
-                    value = filters.minDataGame?.format(displayFormatter) ?: "",
+                FilterMinDateGamePicker(
+                    minDateGame = filters.minDataGame?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMinDateGameChange(it) },
                     isError = filtersError.minDateGameError != null,
                     errorMessage = filtersError.minDateGameError?.let {
@@ -147,10 +144,8 @@ private fun FilterListPostPoneMatchContent(
                     modifier = Modifier.weight(1f)
                 )
 
-                DatePickerDocked(
-                    label = stringResource(id = R.string.filter_max_date_game),
-                    contentDescription = stringResource(id = R.string.description_filter_max_date),
-                    value = filters.maxDateGame?.format(displayFormatter) ?: "",
+                FilterMaxDateGamePicker(
+                    maxDateGame = filters.maxDateGame?.format(displayFormatter) ?: "",
                     onDateSelected = { filterActions.onMaxDateGameChange(it)},
                     isError = filtersError.maxDateGameError != null,
                     errorMessage = filtersError.maxDateGameError?.let {

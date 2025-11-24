@@ -1,115 +1,104 @@
 package com.example.amfootball.ui.viewModel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.tasks.await
-import com.example.amfootball.App
+import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.dtos.CreateProfileDto
-import com.example.amfootball.data.network.RetrofitInstance
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.example.amfootball.data.repository.AuthRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+/**
+ * ViewModel responsável pela gestão da lógica de Autenticação (Login, Registo e Logout).
+ *
+ * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([AuthRepository]).
+ * Gere o estado de sessão do utilizador e executa operações assíncronas, notificando a UI através de callbacks e StateFlows.
+ *
+ * @property repository O repositório injetado que contém a lógica de negócio (Firebase + API + Sessão Local).
+ */
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val repository: AuthRepository
+) : ViewModel() {
 
-class AuthViewModel : ViewModel() {
-    private val firebaseAuth = FirebaseAuth.getInstance()
-    private val apiService = RetrofitInstance.api
+    /**
+     * Estado interno mutável que indica se o utilizador tem uma sessão ativa.
+     * Inicializado verificando se existe um token válido no armazenamento local.
+     */
+    private val _isUserLoggedIn = MutableStateFlow(repository.isUserLoggedIn())
 
-    private val sessionManager = App.sessionManager
-    suspend fun loginUser(email: String, password: String): Boolean {
-        try {
-            // fazer login no Firebase
-            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+    /**
+     * Fluxo de estado público (apenas leitura) que a UI deve observar para determinar a navegação.
+     * - `true`: O utilizador está autenticado (mostrar Home).
+     * - `false`: O utilizador não está autenticado (mostrar Login).
+     */
+    val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
-            val firebaseUser = authResult.user
-            if (firebaseUser == null) {
-                throw Exception("Utilizador Firebase não encontrado após login.")
+    /**
+     * Executa o processo de login de forma assíncrona.
+     *
+     * Chama o repositório para autenticar no Firebase e guardar o token.
+     * Se o login for bem-sucedido, atualiza o estado [_isUserLoggedIn] para `true`.
+     *
+     * @param email O email do utilizador.
+     * @param password A palavra-passe do utilizador.
+     * @param onResult Callback executado quando a operação termina. Recebe `true` se o login foi bem-sucedido, `false` caso contrário.
+     */
+    fun loginUser(email: String, password: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = repository.loginUser(email, password)
+
+            if (success) {
+                _isUserLoggedIn.value = true
             }
 
-            // token JWT do utilizador
-            val idTokenResult = firebaseUser.getIdToken(true).await()
-            val token = idTokenResult.token
-
-            if (token.isNullOrEmpty()) {
-                throw Exception("Não foi possível obter o token do Firebase.")
-            }
-
-            Log.d("TOKEN_TEST", "Bearer $token")
-
-            // guarda o token localmente
-            sessionManager.saveAuthToken(token)
-
-            // busca os dados na api backend (descomentar quando a rota estiver pronta)
-
-             //val profile = apiService.getMyProfile("Bearer $token")
-            // sessionManager.saveUserProfile(profile)
-
-            return true // Login bem-sucedido
-
-        } catch (e: Exception) {
-            // Tratamento de erros
-            println("Erro no login: ${e.message}")
-            return false // Login falhou
+            onResult(success)
         }
     }
 
+    /**
+     * Termina a sessão do utilizador.
+     *
+     * Limpa os dados de autenticação no Firebase e no armazenamento local,
+     * e atualiza o estado [_isUserLoggedIn] para `false`, forçando a UI a voltar ao ecrã de login.
+     */
     fun logoutUser() {
-        firebaseAuth.signOut()
-        sessionManager.clearSession()
+        repository.logout()
+        _isUserLoggedIn.value = false
     }
 
     /**
-     * Regista um novo utilizador.
-     * Comporta-se da seguinte forma:
-     * - Se for bem-sucedida, o user é criado no Firebase E no backend.
-     * - Se falhar a meio, faz um rollback para limpar os dados.
+     * Regista um novo utilizador na aplicação.
      *
-     * @throws Exception se o registo falhar em qualquer ponto.
+     * Coordena o processo de criação de conta, que envolve:
+     * 1. Criar o utilizador no sistema de autenticação (Firebase).
+     * 2. Enviar os detalhes do perfil ([CreateProfileDto]) para a API Backend.
+     *
+     * Se o registo for bem-sucedido, o utilizador é automaticamente considerado "logado".
+     * Em caso de erro, a mensagem de exceção é passada para o callback [onError].
+     *
+     * @param profile DTO contendo os dados pessoais do utilizador (nome, idade, posição, etc.).
+     * @param password A palavra-passe escolhida para a conta.
+     * @param onSuccess Callback executado apenas se o registo for concluído com sucesso.
+     * @param onError Callback executado se ocorrer alguma falha (rede, validação, etc.), fornecendo a mensagem de erro.
      */
-    suspend fun registerUser(profile: CreateProfileDto, password: String) {
-        var createdFirebaseUser: FirebaseUser? = null
-        try {
-            // Tenta criar o utilizador no Firebase
-            //val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
-            /*
-            createdFirebaseUser = authResult.user
-            if (createdFirebaseUser == null) {
-                // Lançar erro, registo falhou
-                throw Exception("Utilizador Firebase não foi criado.")
-            }
+    fun registerUser(
+        profile: CreateProfileDto,
+        password: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                repository.registerUser(profile, password)
 
-            // Obtem o token JWT do utilizador
-            //pos forceRefresh = true garante que obtemos um token fresco
-            val idTokenResult = createdFirebaseUser.getIdToken(true).await()
-            val token = idTokenResult.token
+                _isUserLoggedIn.value = true
 
-            if (token.isNullOrEmpty()) {
-                throw Exception("Não foi possível obter o token do Firebase.")
-            }
-
-            Log.d("TOKEN_TEST", "Bearer $token")
-            sessionManager.saveAuthToken(token)
-
-            */
-
-            // criar o perfil no backend
-            val response = apiService.createProfile( profile)
-
-            if (!response.isSuccessful) {
-                throw Exception("Falha ao criar perfil: ${response.code()}")
-            }
-
-        } catch (e: Exception) {
-            println("Erro no registo: ${e.message}")
-            sessionManager.clearSession()
-
-            if (createdFirebaseUser != null) {
-                try {
-                    createdFirebaseUser.delete().await()
-                    Log.d("AuthViewModel", "Rollback: Utilizador ${createdFirebaseUser.uid} apagado do Firebase.")
-                } catch (deleteEx: Exception) {
-                    Log.e("AuthViewModel", "CRÍTICO: Falha ao apagar user do Firebase durante o rollback. Erro: ${deleteEx.message}")
-                }
-                throw Exception("Erro no registo: ${e.message}")
+                onSuccess()
+            } catch (e: Exception) {
+                onError(e.message ?: "Erro desconhecido no registo")
             }
         }
     }

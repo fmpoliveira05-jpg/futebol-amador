@@ -4,4 +4,6 @@
     <string name="label_field_description_team">Descrição</string>
     <string name="label_field_name_pitch_team">Nome do campo</string>
     <string name="label_field_address_pitch_team">Morada do campo</string>
+    <string name="label_filed_foundation_date">Data de fundação</string>
+    <string name="label_field_total_points">Pontos Totais</string>
 </resources>

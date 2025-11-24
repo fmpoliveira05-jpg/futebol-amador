@@ -26,6 +26,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
+/**
+ * Componente Composable que cria uma secção de filtro colapsável (Accordion-style).
+ *
+ * Utiliza um [ElevatedCard] como container e [AnimatedVisibility] para exibir ou ocultar
+ * o conteúdo com transições verticais suaves.
+ *
+ * @param isExpanded Booleano que define se a secção de conteúdo está visível.
+ * @param onToggleExpand Callback chamado quando o cabeçalho é clicado para alternar o estado de expansão.
+ * @param modifier Modificador para estilizar o [ElevatedCard].
+ * @param header O slot Composable para o cabeçalho da secção. Por padrão, usa [FilterHeader].
+ * @param content O slot Composable que contém os elementos de filtro. É passado um [Modifier]
+ * com preenchimento (padding) aplicado.
+ */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FilterSection(
@@ -51,6 +64,16 @@ fun FilterSection(
         }
     }
 }
+
+/**
+ * O cabeçalho padrão para o [FilterSection].
+ *
+ * Exibe o título ("Filtros") e um ícone que reflete o estado atual (seta para cima/baixo).
+ * Todo o Row é clicável para alternar o estado de expansão.
+ *
+ * @param isExpanded Booleano que indica se a secção de conteúdo está atualmente aberta.
+ * @param onToggleExpand Callback para acionar a expansão/colapso.
+ */
 @Composable
 fun FilterHeader(
     isExpanded: Boolean,
@@ -79,10 +102,20 @@ fun FilterHeader(
     }
 }
 
+/**
+ * Um componente de layout Composable que exibe os elementos de filtro numa única linha horizontal.
+ *
+ * Utiliza [Row] e [Arrangement.spacedBy] para adicionar espaçamento entre os itens de filtro.
+ *
+ * @param modifier Modificador para estilizar o [Row] (padrão: fillMaxWidth).
+ * @param content Um [RowScope] que aceita múltiplos Composable, permitindo que os filtros
+ * sejam dispostos lado a lado.
+ * @param horizontalSpacing O espaçamento horizontal a ser aplicado entre cada item (padrão: 8.dp).
+ */
 @Composable
 fun FilterRow(
     modifier: Modifier = Modifier.fillMaxWidth(),
-    content: @Composable RowScope.() -> Unit, //Permite-me mandar os filtros que quisser para a row
+    content: @Composable RowScope.() -> Unit,
     horizontalSpacing: Dp = 8.dp,
 ) {
     Row(modifier = modifier,

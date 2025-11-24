@@ -10,7 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 
@@ -96,10 +96,10 @@ class ListMembersViewModel(): ViewModel() {
 
     //TODO: Mandar como parametro o idUser
     fun onShowMoreInfo(
-        idUser: String,
+        playerId: String,
         navHostController: NavHostController
     ) {
-        navHostController.navigate(Routes.UserRoutes.PROFILE.route) {
+        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/{${playerId}}") {
             launchSingleTop = true
         }
     }

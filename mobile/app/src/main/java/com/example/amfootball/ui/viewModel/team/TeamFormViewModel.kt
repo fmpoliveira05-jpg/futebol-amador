@@ -14,7 +14,7 @@ import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.R
 import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.navigation.Objects.Routes
+import com.example.amfootball.navigation.objects.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 /**

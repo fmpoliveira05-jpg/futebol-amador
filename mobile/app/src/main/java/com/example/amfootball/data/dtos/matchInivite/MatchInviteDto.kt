@@ -4,6 +4,21 @@ import com.example.amfootball.utils.Patterns
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * Data Transfer Object (DTO) que representa os detalhes completos de um convite de partida.
+ *
+ * Este objeto é desenhado para facilitar a interação com formulários, armazenando tanto o
+ * objeto temporal [LocalDateTime] (para lógica de negócio) quanto as representações em
+ * String separadas ([gameDate] e [gameTime]) para exibição na UI.
+ *
+ * @property id O identificador único do convite (pode ser null se for um novo convite ainda não persistido).
+ * @property idOpponent O identificador da equipa adversária.
+ * @property nameOpponent O nome da equipa adversária.
+ * @property isHomeGame Indica se o jogo é realizado em casa (true) ou fora (false). Padrão é true.
+ * @property gameDate A representação em String da data do jogo (formato: "dd/MM/yyyy").
+ * @property gameTime A representação em String da hora do jogo (formato: "HH:mm").
+ * @property gameDateTime O objeto [LocalDateTime] real contendo a data e hora do jogo.
+ */
 data class MatchInviteDto(
     val id: String? = null,
     val idOpponent: String? = null,

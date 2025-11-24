@@ -9,6 +9,19 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+/**
+ * Data Transfer Object (DTO) que representa as informações resumidas de uma partida
+ * para visualização num calendário ou lista de histórico.
+ *
+ * Agrega informações sobre as duas equipas envolvidas, o resultado (se houver),
+ * o tipo de jogo e a data.
+ *
+ * @property idMatch O identificador único da partida.
+ * @property team As estatísticas e informações da equipa principal (ou equipa do utilizador) neste contexto.
+ * @property opponent As estatísticas e informações da equipa adversária.
+ * @property typeMatch O tipo de jogo (ex: [TypeMatch.COMPETITIVE] ou [TypeMatch.CASUAL]).
+ * @property matchDate A data em que a partida ocorreu ou está agendada para ocorrer.
+ */
 data class CalendarInfoDto(
     val idMatch: String,
     val team: TeamStatisticsDto,
