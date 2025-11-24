@@ -38,7 +38,9 @@ namespace Infrastructure.Repositories
 
         public async Task<Player?> GetPlayerByIdAsync(string id)
         {
-            return await context.Player.FindAsync(id);
+            return await context.Player
+                .Include(p => p.Team)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<List<Player>> GetPlayersListByIdListAsync(List<string> playerIdList)
