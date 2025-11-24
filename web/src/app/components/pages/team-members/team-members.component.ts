@@ -90,73 +90,63 @@ export class TeamMembersPageComponent {
   }
 
   protected promote(member: TeamMember): void {
-    this.authService.getCurrentTeamId().subscribe((teamId) => {
-      if (!teamId || !member.playerId) {
-        return;
-      }
+    const teamId = member.idTeam;
 
-      if (!confirm(`Queres promover "${member.name}" a administrador?`)) {
-        return;
-      }
+    if (!teamId || !member.playerId) return;
 
-      this.teamMembersService.promoteMember(teamId, member.playerId).subscribe({
-        next: () => {
-          this.members.update((list) =>
-            list.map((m) =>
-              m.playerId === member.playerId ? { ...m, isAdmin: true } : m
-            )
-          );
-        },
-        error: () => {
-          this.errorMessage.set('Não foi possível promover o jogador.');
-        },
-      });
+    if (!confirm(`Queres promover "${member.name}" a administrador?`)) return;
+
+    this.teamMembersService.promoteMember(teamId, member.playerId).subscribe({
+      next: () => {
+        this.members.update((list) =>
+          list.map((m) =>
+            m.playerId === member.playerId ? { ...m, isAdmin: true } : m
+          )
+        );
+      },
+      error: () => {
+        this.errorMessage.set('Não foi possível promover o jogador.');
+      },
     });
   }
 
   protected demote(member: TeamMember): void {
-    this.authService.getCurrentTeamId().subscribe((teamId) => {
-      if (!teamId || !member.playerId) {
-        return;
-      }
+    const teamId = member.idTeam;
 
-      if (!confirm(`Queres remover o estatuto de administrador de "${member.name}"?`)) {
-        return;
-      }
+    if (!teamId || !member.playerId) return;
 
-      this.teamMembersService.demoteAdmin(teamId, member.playerId).subscribe({
-        next: () => {
-          this.members.update((list) =>
-            list.map((m) =>
-              m.playerId === member.playerId ? { ...m, isAdmin: false } : m
-            )
-          );
-        },
-        error: () => {
-          this.errorMessage.set('Não foi possível rebaixar o jogador.');
-        },
-      });
+    if (!confirm(`Queres remover o estatuto de administrador de "${member.name}"?`)) return;
+
+    this.teamMembersService.demoteAdmin(teamId, member.playerId).subscribe({
+      next: () => {
+        this.members.update((list) =>
+          list.map((m) =>
+            m.playerId === member.playerId ? { ...m, isAdmin: false } : m
+          )
+        );
+      },
+      error: () => {
+        this.errorMessage.set('Não foi possível rebaixar o jogador.');
+      },
     });
   }
 
   protected remove(member: TeamMember): void {
-    this.authService.getCurrentTeamId().subscribe((teamId) => {
-      if (!teamId || !member.playerId) return;
+    const teamId = member.idTeam;
 
-      if (!confirm(`Queres expulsar o jogador "${member.name}" da equipa?`)) {
-        return;
-      }
+    if (!teamId || !member.playerId) return;
 
-      this.teamMembersService.removeMember(teamId, member.playerId).subscribe({
-        next: () => {
-          this.members.update((list) =>
-            list.filter((m) => m.playerId !== member.playerId)
-          );
-        },
-        error: () => {
-          this.errorMessage.set('Não foi possível expulsar o jogador.');
-        },
-      });
+    if (!confirm(`Queres expulsar o jogador "${member.name}" da equipa?`)) return;
+
+    this.teamMembersService.removeMember(teamId, member.playerId).subscribe({
+      next: () => {
+        this.members.update((list) =>
+          list.filter((m) => m.playerId !== member.playerId)
+        );
+      },
+      error: () => {
+        this.errorMessage.set('Não foi possível expulsar o jogador.');
+      },
     });
   }
 }

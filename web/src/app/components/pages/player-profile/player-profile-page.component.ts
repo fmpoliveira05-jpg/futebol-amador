@@ -187,8 +187,20 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  onViewMembershipRequests(): void {
-    this.router.navigate(['/players/membership-requests']);
+  protected onViewMembershipRequests(): void {
+    const player = this.player();
+    
+    if (!player) {
+      return;
+    }
+
+    if (!player.idTeam) {
+      this.router.navigate(['/players/membership-requests']);
+    } else if (player.isAdmin) {
+      this.router.navigate(['/team/membership-requests']);
+    } else {
+      this.errorMessage.set('Apenas administradores de equipa podem gerir pedidos de adesão.');
+    }
   }
 
   protected onSendMembershipRequest(): void {

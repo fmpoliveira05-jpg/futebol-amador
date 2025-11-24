@@ -4,13 +4,13 @@ import { MembershipRequestService } from '../../../services/membership-request.s
 import { MembershipRequest } from '../../..//shared/models/membership-request.model';
 
 @Component({
-  selector: 'app-player-membership-requests-page',
+  selector: 'app-team-membership-requests-page',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './player-membership-requests.component.html',
-  styleUrl: './player-membership-requests.component.css',
+  templateUrl: './team-membership-requests.component.html',
+  styleUrl: './team-membership-requests.component.css',
 })
-export class PlayerMembershipRequestsPageComponent {
+export class TeamMembershipRequestsPageComponent {
   private readonly membershipRequestService = inject(MembershipRequestService);
 
   protected readonly requests = signal<MembershipRequest[]>([]);
@@ -19,7 +19,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected readonly requestsToShow = signal<number>(10);
 
   protected readonly filteredRequests = computed(() =>
-    this.requests().filter((r) => !r.isPlayerSender)
+    this.requests().filter((r) => r.isPlayerSender)
   );
 
   protected readonly visibleRequests = computed(() =>
@@ -35,7 +35,7 @@ export class PlayerMembershipRequestsPageComponent {
     this.errorMessage.set(null);
 
     this.membershipRequestService
-      .getMembershipRequestsForCurrentPlayer()
+      .getMembershipRequestsForCurrentTeam()
       .subscribe({
         next: (requests) => {
           this.requests.set(requests);
@@ -57,7 +57,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected accept(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres aceitar o pedido de adesão da equipa "${request.teamName}"?`
+        `Tens a certeza que queres aceitar o pedido de adesão do jogador "${request.playerName}"?`
       )
     ) {
       return;
@@ -67,7 +67,7 @@ export class PlayerMembershipRequestsPageComponent {
     this.errorMessage.set(null);
 
     this.membershipRequestService
-      .acceptMembershipRequestPlayer(request.requestId)
+      .acceptMembershipRequestTeam(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>
@@ -85,7 +85,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected reject(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres rejeitar o pedido de adesão da equipa "${request.teamName}"?`
+        `Tens a certeza que queres rejeitar o pedido do jogador "${request.playerName}"?`
       )
     ) {
       return;
@@ -95,7 +95,7 @@ export class PlayerMembershipRequestsPageComponent {
     this.errorMessage.set(null);
 
     this.membershipRequestService
-      .rejectMembershipRequestPlayer(request.requestId)
+      .rejectMembershipRequestTeam(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>
