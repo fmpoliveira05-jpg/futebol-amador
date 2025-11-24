@@ -137,7 +137,7 @@ private fun FieldsSignUp(
     Spacer(Modifier.height(20.dp))
 
     TextFieldOutline(
-        label = "Name",
+        label = stringResource(id = R.string.player_name),
         value = name,
         onValueChange = { name = it },
         maxLenght = UserConst.MAX_NAME_LENGTH,
@@ -165,7 +165,7 @@ private fun FieldsSignUp(
     )
 
     TextFieldOutline(
-        label = "Height",
+        label = stringResource(id = R.string.player_size),
         value = height,
         onValueChange = { height = it },
         isRequired = true,
@@ -174,7 +174,7 @@ private fun FieldsSignUp(
     )
 
     TextFieldOutline(
-        label = "Address",
+        label = stringResource(id = R.string.address),
         value = address,
         maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
         onValueChange = { address = it },
@@ -196,7 +196,7 @@ private fun FieldsSignUp(
         },
         itemToString = { pos ->
             if (pos == null) {
-                "Escolha uma Posição"
+                stringResource(R.string.player_position_picker)
             } else {
                 stringResource(id = pos.stringId)
             }
@@ -206,26 +206,27 @@ private fun FieldsSignUp(
 
     Spacer(Modifier.height(8.dp))
 
-    Text(text = "Data de Nascimento:")
+    Text(text = "${stringResource(R.string.date_of_birthday)}:")
     DatePickerDockedPastLimitedDate(
         value = if (dateOfBirth == null) "" else displayDateFormatter.format(Date(dateOfBirth!!)),
         onDateSelected = { selectedMillis ->
             dateOfBirth = selectedMillis
         },
-        label = "Data de Nascimento",
-        contentDescription = "Data de nascimento do utilizador",
+        label = stringResource(R.string.date_of_birthday),
+        contentDescription = stringResource(R.string.date_of_birthday_description),
         isSingleLine = true,
     )
 
     Spacer(Modifier.height(8.dp))
 
     PasswordTextField(
+        label = stringResource(id = R.string.password_field),
         value = password,
         onValueChange = { password = it }
     )
 
     PasswordTextField(
-        label = "Password Verification",
+        label = stringResource(id = R.string.password_field_validation),
         value = passwordVerification,
         onValueChange = { passwordVerification = it },
     )
@@ -296,7 +297,7 @@ private fun FieldsSignUp(
         if (isLoading) {
             Loading()
         } else {
-            Text("Registar")
+            Text(stringResource(id = R.string.signup))
         }
     }
 
