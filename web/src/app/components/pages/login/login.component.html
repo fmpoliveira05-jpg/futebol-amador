@@ -12,11 +12,29 @@
         <label for="email">E-mail</label>
         <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
       </div>
+      <div *ngIf="loginForm.controls['email'].hasError('required') && loginForm.controls['email'].touched">
+        <small style="color: red;">E-mail é obrigatório.</small>
+      </div>
+      <div *ngIf="loginForm.controls['email'].hasError('email') && loginForm.controls['email'].touched">
+        <small style="color: red;">Por favor, introduz um e-mail válido.</small>
+      </div>
+      <div *ngIf="loginForm.controls['email'].hasError('minlength') && loginForm.controls['email'].touched">
+        <small style="color: red;">O e-mail deve ter pelo menos 4 caracteres.</small>
+      </div>
+      <div *ngIf="loginForm.controls['email'].hasError('maxlength') && loginForm.controls['email'].touched">
+        <small style="color: red;">O e-mail deve ter no máximo 256 caracteres.</small>
+      </div>
 
       <div class="form-field">
         <label for="password">Palavra-passe</label>
         <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
       </div>
+      <div *ngIf="loginForm.controls['password'].hasError('required') && loginForm.controls['password'].touched">
+          <small style="color: red;">Palavra-passe é obrigatória.</small>
+        </div>
+        <div *ngIf="loginForm.controls['password'].hasError('minlength') && loginForm.controls['password'].touched">
+          <small style="color: red;">A palavra-passe deve ter pelo menos 6 caracteres.</small>
+        </div>
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Entrar</button>

@@ -3,13 +3,14 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css'],
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
 })
 export class LoginComponent {
   private authService = inject(AuthService);
@@ -17,7 +18,7 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   
   loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(256)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 

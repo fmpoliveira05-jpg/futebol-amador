@@ -20,13 +20,13 @@ export class SignupComponent {
 
   signupForm = this.fb.group({
     name: ['', [Validators.required]],
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(6)]],
+    email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(256)]],
+    password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(32)]],
     dateOfBirth: ['', [Validators.required]],
     address: ['', [Validators.required]],
-    phone: ['', [Validators.required]],
-    position: [0, [Validators.required]],
-    height: [0, [Validators.required]],
+    phone: ['', [Validators.required, Validators.pattern(/^\+\d{3,3}\d{9,9}$/)]],
+    position: [0, [Validators.required, Validators.pattern(/^[0-3]{1}$/)]],
+    height: [0, [Validators.required, Validators.min(100), Validators.max(250)]],
   });
 
   onSignup() {
