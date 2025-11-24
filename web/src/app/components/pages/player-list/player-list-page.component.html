@@ -1,43 +1,68 @@
 <div class="filters-container" *ngIf="showFilters()">
   <div>
     <label for="city">Cidade:</label>
-    <input id="city" type="text" [(ngModel)]="cityFilter" placeholder="Digite a cidade">
+    <input id="city" type="text" [(ngModel)]="filterDto().city" placeholder="Introduz a cidade">
   </div>
 
   <div>
     <label for="minAge">Idade Mínima:</label>
-    <input id="minAge" type="number" [(ngModel)]="minAge" min="0" max="100">
+    <input id="minAge" type="number" [(ngModel)]="filterDto().minAge" min="18" max="70">
   </div>
 
   <div>
     <label for="maxAge">Idade Máxima:</label>
-    <input id="maxAge" type="number" [(ngModel)]="maxAge" min="0" max="100">
+    <input id="maxAge" type="number" [(ngModel)]="filterDto().maxAge" min="18" max="70">
   </div>
 
   <div>
     <label for="minHeight">Altura Mínima (cm):</label>
-    <input id="minHeight" type="number" [(ngModel)]="minHeight" min="0" max="250">
+    <input id="minHeight" type="number" [(ngModel)]="filterDto().minHeight" min="100" max="250">
   </div>
 
   <div>
     <label for="maxHeight">Altura Máxima (cm):</label>
-    <input id="maxHeight" type="number" [(ngModel)]="maxHeight" min="0" max="250">
+    <input id="maxHeight" type="number" [(ngModel)]="filterDto().maxHeight" min="100" max="250">
   </div>
 
-  <button (click)="loadPlayers()">Aplicar Filtros</button>
+  <div>
+    <label for="position">Posição:</label>
+    <input id="position" type="text" [(ngModel)]="filterDto().position" placeholder="Introduz a posição (Ex: Avançado)">
+  </div>
+
+  <div>
+    <label for="name">Nome do Jogador:</label>
+    <input id="name" type="text" [(ngModel)]="filterDto().name" placeholder="Introduz o nome do jogador">
+  </div>
+
+  <button (click)="applyFilters()">Aplicar Filtros</button>
+  <button (click)="clearSearchResults()">Limpar Resultados</button>
 </div>
 
-<button (click)="showFilters.set(!showFilters())">
+<button class="mt-4" (click)="showFilters.set(!showFilters())">
   {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
 </button>
 
 <div *ngIf="isLoading()">Carregando...</div>
 <div *ngIf="errorMessage()">{{ errorMessage() }}</div>
 
-<div *ngFor="let player of visiblePlayers()">
-  <div class="player-item">
-    <h3>{{ player.name }}</h3>
-    <p>{{ player.address }}</p>
-    <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
+<div *ngIf="!noResults() && !isLoading()">
+  <div *ngFor="let player of visiblePlayers()">
+    <div class="player-item">
+      <h3>{{ player.name }}</h3>
+      <p>{{ player.address }}</p>
+      <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
+    </div>
+  </div>
+
+  <div class="pagination-controls">
+    <button *ngIf="hasPreviousPage()" (click)="goToPreviousPage()" class="pagination-btn previous">
+      <span>&lt;</span>
+    </button>
+    
+    <button *ngIf="hasMorePlayers()" (click)="loadMorePlayers()" class="pagination-btn">
+      <span>&gt;</span>
+    </button>
   </div>
 </div>
+
+<div *ngIf="noResults() && !isLoading()" class="state--no-results">Sem resultados.</div>
