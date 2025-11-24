@@ -4,7 +4,7 @@
       <h1 class="page-title">{{ p.name }}</h1>
       <p class="page-subtitle">
         {{ p.position }} ·
-        <span *ngIf="p.teamName; else noTeam">Equipa: {{ p.teamName }}</span>
+        <span *ngIf="p.idTeam; else noTeam">Equipa: {{ p.idTeam }}</span>
         <ng-template #noTeam>Sem equipa</ng-template>
       </p>
     </div>
@@ -51,7 +51,7 @@
         </div>
         <div class="details-grid__item">
           <dt>Posição</dt>
-          <dd>{{ p.position }}</dd>
+          <dd>{{ POSITION_MAP[p.position] }}</dd>
         </div>
         <div class="details-grid__item">
           <dt>Altura</dt>
@@ -128,6 +128,16 @@
       >
         Abandonar equipa
       </button>
+
+      <button
+        *ngIf="hasTeam() && player()?.isAdmin"
+        type="button"
+        class="btn btn-secondary"
+        (click)="goToTeamMembers()"
+      >
+        Gerir membros da equipa
+      </button>
+
 
       <hr class="divider" />
 

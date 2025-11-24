@@ -9,6 +9,7 @@ import { SignupComponent } from './components/pages/signup/signup.component';
 import { LogoutComponent } from './components/pages/login/logout.component';
 import { AuthGuard } from './shared/auth/auth.guard';
 import { PlayerMembershipRequestsPageComponent } from './components/pages/membership-requests/player-membership-requests.component';
+import { TeamMembersPageComponent } from './components/pages/team-members/team-members.component';
 
 
 export const routes: Routes = [
@@ -34,7 +35,7 @@ export const routes: Routes = [
     path: 'players',
     component: PlayerListPageComponent,
     canActivate: [AuthGuard],
-    data: { isAdmin: true }
+    //data: { isAdmin: true }
   },
   {
     path: 'players/me',
@@ -50,7 +51,13 @@ export const routes: Routes = [
     path: 'players/membership-requests',
     component: PlayerMembershipRequestsPageComponent,
     canActivate: [AuthGuard],
-    data: { requiresNoTeam: true },
+    data: { requiresTeam: false },
+  },
+  {
+    path: 'team/members',
+    component: TeamMembersPageComponent,
+    canActivate: [AuthGuard],
+    //data: { isAdmin: true, requiresTeam: true },
   },
   {
     path: 'settings',

@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (route.data['requiresNoTeam'] && this.authService.hasTeam()) {
+    if (route.data['requiresTeam'] && !this.authService.hasTeam()) {
       this.router.navigate(['/players']);
       return false;
     }

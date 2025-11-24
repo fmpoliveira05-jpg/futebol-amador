@@ -1,0 +1,68 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Membros da equipa</h1>
+    </div>
+
+    <div class="page-header__actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Procurar por nome ou posição"
+        [value]="searchTerm()"
+        (input)="onSearchTermChange($any($event.target).value)"
+      />
+    </div>
+  </header>
+
+  <div class="card">
+    <div *ngIf="isLoading()" class="state state--loading">
+      A carregar membros da equipa…
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error">
+      {{ errorMessage() }}
+    </div>
+
+    <div *ngIf="!isLoading() && !errorMessage()">
+      <table class="members-table" *ngIf="filteredMembers().length; else noMembers">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Posição</th>
+            <th>Administrador</th>
+            <th class="members-table__actions-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let member of filteredMembers()">
+            <td>{{ member.name }}</td>
+            <td>{{ POSITION_MAP[member.position] || 'Sem posição' }}</td>
+            <td>
+              <span class="badge" [class.badge--admin]="member.isAdmin">
+                {{ member.isAdmin ? 'Admin' : 'Jogador' }}
+              </span>
+            </td>
+            <td class="members-table__actions">
+              <button *ngIf="canPromote(member)" type="button" class="btn btn-secondary" (click)="promote(member)">
+                Promover a admin
+              </button>
+
+              <button *ngIf="canDemote(member)" type="button" class="btn btn-secondary" (click)="demote(member)">
+                Rebaixar admin
+              </button>
+
+              <button *ngIf="canRemove(member)" type="button" class="btn btn-danger" (click)="remove(member)">
+                Expulsar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #noMembers>
+        <div class="state">Não há membros para apresentar.</div>
+      </ng-template>
+    </div>
+  </div>
+</section>

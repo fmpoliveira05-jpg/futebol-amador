@@ -17,7 +17,7 @@ export class PlayerService {
   }
 
   getPlayerById(playerId: string): Observable<PlayerDetails> {
-    return this.http.get<PlayerDetails>(`${this.baseUrl}/${playerId}`);
+    return this.http.get<PlayerDetails>(`${this.baseUrl}/details/${playerId}`);
   }
 
   getMyProfile(): Observable<PlayerDetails> {

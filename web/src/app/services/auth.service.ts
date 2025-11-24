@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { map, Observable, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = `${environment.apiBaseUrl}/User`;
+  private readonly baseUrl = `${environment.apiBaseUrl}`;
 
   getToken(): string | null {
     return localStorage.getItem('access_token');
@@ -40,7 +40,7 @@ export class AuthService {
   }
 
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/login`, { email, password }).pipe(
+    return this.http.post(`${this.baseUrl}/User/login`, { email, password }).pipe(
       map((response: any) => {
         localStorage.setItem('access_token', response?.firebaseLoginResponseDto?.idToken);
         localStorage.setItem('user_id', response?.firebaseLoginResponseDto?.localId);
@@ -60,7 +60,7 @@ export class AuthService {
     position: number,
     height: number
   ): Observable<any> {
-    return this.http.post(`${this.baseUrl}/signup`, {
+    return this.http.post(`${this.baseUrl}/User/signup`, {
       name,
       email,
       password,
@@ -70,5 +70,20 @@ export class AuthService {
       position,
       height,
     });
+  }
+  
+  getPlayerData(playerId: string): Observable<any> {
+    return this.http.get(`${this.baseUrl}/Player/details/${playerId}`);
+  }
+
+  getCurrentTeamId(): Observable<string | null> {
+    const playerId = this.getCurrentPlayerId();
+    if (!playerId) {
+      return of(null);
+    }
+
+    return this.getPlayerData(playerId).pipe(
+      map(playerData => playerData?.idTeam ?? null)
+    );
   }
 }

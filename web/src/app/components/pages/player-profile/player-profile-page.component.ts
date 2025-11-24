@@ -6,6 +6,7 @@ import { PlayerDetails, UpdatePlayerRequest } from '../../../shared/models/playe
 import { PlayerService } from '../../../services/player.service';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
+import { POSITION_MAP } from '../../../shared/constants/position-map';
 
 @Component({
   selector: 'app-player-profile-page',
@@ -26,6 +27,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
   protected readonly successMessage = signal<string | null>(null);
   protected readonly isEditMode = signal<boolean>(false);
   protected readonly player = signal<PlayerDetails | null>(null);
+  protected readonly POSITION_MAP = POSITION_MAP;
 
   private auth = inject(AuthService);
 
@@ -33,8 +35,8 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
   private sub?: Subscription;
 
-  protected readonly hasTeam = computed(
-    () => !!this.player() && !!this.player()!.idTeam && !!this.player()!.teamName,
+  protected readonly hasTeam = computed(() =>
+    !!this.player()?.idTeam
   );
 
   protected readonly isOwnProfile = computed(() =>
@@ -80,10 +82,14 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
         address: p.address,
         email: p.email,
         phone: p.phoneNumber,
-        position: p.position,
-        height: p.heigth,
+        position: POSITION_MAP[p.position],
+        height: p.height,
       });
     }
+  }
+
+  protected goToTeamMembers(): void {
+    this.router.navigate(['/team/members']);
   }
 
   protected save(): void {
@@ -125,9 +131,13 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
   protected leaveTeam(): void {
     const p = this.player();
-    if (!p || !p.idTeam) return;
+    if (!p || !p.idTeam) {
+      return;
+    }
 
-    if (!confirm('Tens a certeza que queres abandonar a equipa?')) return;
+    if (!confirm('Tens a certeza que queres abandonar a equipa?')) {
+      return;
+    }
 
     this.isSaving.set(true);
     this.errorMessage.set(null);
