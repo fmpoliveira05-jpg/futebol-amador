@@ -1,24 +1,40 @@
 import { inject, Injectable } from '@angular/core';
-import { Player } from '../shared/Dtos/Player';
-import { environment } from '../environments/environment';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
+import { PlayerDetails, UpdatePlayerRequest } from '../shared/models/player.model';
+import { environment } from '../environments/environment';
+import { PlayerListItem } from '../shared/models/player-list-item.model';
 import { FilterListTeamDto } from '../shared/Dtos/Filters/FilterListTeamDto';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PlayerService {
-  private http = inject(HttpClient);
-  private apiUrl = environment.apiURL + '/api/Player';
+  private readonly http = inject(HttpClient);
+  private readonly baseUrl = `${environment.apiBaseUrl}/Player`;
 
-  /**
-   *
-   * @param id
-   * @returns a player by id from backend
-   */
-  public getById(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  getPlayers(): Observable<PlayerListItem[]> {
+    return this.http.get<PlayerListItem[]>(`${this.baseUrl}/listPlayers`);
+  }
+
+  getPlayerById(playerId: string): Observable<PlayerDetails> {
+    return this.http.get<PlayerDetails>(`${this.baseUrl}/details/${playerId}`);
+  }
+
+  getMyProfile(): Observable<PlayerDetails> {
+    return this.http.get<PlayerDetails>(`${this.baseUrl}/get-my-profile`);
+  }
+
+  updatePlayer(playerId: string, data: UpdatePlayerRequest): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${playerId}`, data);
+  }
+
+  deletePlayer(playerId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${playerId}`);
+  }
+
+  leaveTeam(playerId: string): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${playerId}/leave-team`, {});
   }
 
   /**
@@ -37,6 +53,5 @@ export class PlayerService {
     });
   }
 
-  return this.http.get(`${this.apiUrl}/listTeamsToMemberShipRequest`, { params });
-}
+  return this.http.get(`${this.baseUrl}/listTeamsToMemberShipRequest`, { params });
 }

@@ -1,0 +1,56 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Criar Conta</h1>
+      <p class="page-subtitle">Preenche com os teus dados para criar uma conta.</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
+      <div class="form-field">
+        <label for="name">Nome</label>
+        <input id="name" formControlName="name" type="text" placeholder="Introduz o teu nome" />
+      </div>
+
+      <div class="form-field">
+        <label for="email">E-mail</label>
+        <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
+      </div>
+
+      <div class="form-field">
+        <label for="password">Palavra-passe</label>
+        <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
+      </div>
+
+      <div class="form-field">
+        <label for="dateOfBirth">Data de nascimento</label>
+        <input id="dateOfBirth" formControlName="dateOfBirth" type="date" />
+      </div>
+
+      <div class="form-field">
+        <label for="address">Morada</label>
+        <input id="address" formControlName="address" type="text" placeholder="Introduz a tua morada" />
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Telefone</label>
+        <input id="phone" formControlName="phone" type="text" placeholder="Introduz o teu número de telefone/telemóvel" />
+      </div>
+
+      <div class="form-field">
+        <label for="position">Posição</label>
+        <input id="position" formControlName="position" type="number" placeholder="Introduz a tua posição" />
+      </div>
+
+      <div class="form-field">
+        <label for="height">Altura</label>
+        <input id="height" formControlName="height" type="number" placeholder="Introduz a tua altura (em cm)" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="signupForm.invalid">Criar Conta</button>
+      </div>
+    </form>
+  </div>
+</section>

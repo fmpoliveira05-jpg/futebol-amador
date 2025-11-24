@@ -1,0 +1,26 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Login</h1>
+      <p class="page-subtitle">Entra com a tua conta para aceder à plataforma.</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+      <div class="form-field">
+        <label for="email">E-mail</label>
+        <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
+      </div>
+
+      <div class="form-field">
+        <label for="password">Palavra-passe</label>
+        <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Entrar</button>
+      </div>
+    </form>
+  </div>
+</section>

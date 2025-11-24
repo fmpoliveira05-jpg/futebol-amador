@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 export class TeamService {
   
   private http = inject(HttpClient);
-  private apiUrl = environment.apiURL + '/api/Team';
+  private apiUrl = environment.apiBaseUrl + '/api/Team';
 
   public getById(id: string): Observable<any>{
     return this.http.get(`${this.apiUrl}/${id}`);

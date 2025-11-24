@@ -1,0 +1,75 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Pedidos de adesão</h1>
+      <p class="page-subtitle">
+        Aqui vês os pedidos de adesão que as equipas te enviaram.
+      </p>
+    </div>
+  </header>
+
+  <div class="card">
+    <div *ngIf="isLoading()" class="state state--loading">
+      A carregar pedidos de adesão…
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error">
+      {{ errorMessage() }}
+    </div>
+
+    <div *ngIf="!isLoading() && !errorMessage()">
+      <table
+        class="requests-table"
+        *ngIf="visibleRequests().length; else noRequests"
+      >
+        <thead>
+          <tr>
+            <th>Equipa</th>
+            <th>Data do pedido</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let request of visibleRequests()"
+            class="requests-table__row"
+          >
+            <td>{{ request.teamName }}</td>
+            <td>{{ request.requestDate | date: 'short' }}</td>
+            <td class="requests-table__actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                (click)="accept(request)"
+              >
+                Aceitar
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                (click)="reject(request)"
+              >
+                Rejeitar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div
+        class="load-more-container"
+        *ngIf="visibleRequests().length < filteredRequests().length"
+      >
+        <button class="load-more-btn" (click)="loadMore()">
+          Carregar mais
+        </button>
+      </div>
+
+      <ng-template #noRequests>
+        <div class="state">
+          Neste momento não tens pedidos de adesão de equipas.
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</section>

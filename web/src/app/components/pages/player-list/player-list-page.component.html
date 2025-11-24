@@ -1,0 +1,43 @@
+<div class="filters-container" *ngIf="showFilters()">
+  <div>
+    <label for="city">Cidade:</label>
+    <input id="city" type="text" [(ngModel)]="cityFilter" placeholder="Digite a cidade">
+  </div>
+
+  <div>
+    <label for="minAge">Idade Mínima:</label>
+    <input id="minAge" type="number" [(ngModel)]="minAge" min="0" max="100">
+  </div>
+
+  <div>
+    <label for="maxAge">Idade Máxima:</label>
+    <input id="maxAge" type="number" [(ngModel)]="maxAge" min="0" max="100">
+  </div>
+
+  <div>
+    <label for="minHeight">Altura Mínima (cm):</label>
+    <input id="minHeight" type="number" [(ngModel)]="minHeight" min="0" max="250">
+  </div>
+
+  <div>
+    <label for="maxHeight">Altura Máxima (cm):</label>
+    <input id="maxHeight" type="number" [(ngModel)]="maxHeight" min="0" max="250">
+  </div>
+
+  <button (click)="loadPlayers()">Aplicar Filtros</button>
+</div>
+
+<button (click)="showFilters.set(!showFilters())">
+  {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
+</button>
+
+<div *ngIf="isLoading()">Carregando...</div>
+<div *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<div *ngFor="let player of visiblePlayers()">
+  <div class="player-item">
+    <h3>{{ player.name }}</h3>
+    <p>{{ player.address }}</p>
+    <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
+  </div>
+</div>
