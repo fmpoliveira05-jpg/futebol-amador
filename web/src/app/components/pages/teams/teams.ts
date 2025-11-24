@@ -17,15 +17,15 @@ export class Teams {
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
 
-  filter = signal<FilterListTeamDto>({}); // start empty
+  filter = signal<FilterListTeamDto>({});
 
   constructor(private playerService: PlayerService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.filter.set(params as FilterListTeamDto);
-    this.loadTeams(); // Show all teams immediately
-    })
+      this.loadTeams();
+    });
   }
 
   loadTeams() {
@@ -46,7 +46,7 @@ export class Teams {
   }
 
   applyFilter(newFilter: FilterListTeamDto) {
-    this.filter.set(newFilter); // overwrite with new clean filter
-    this.loadTeams();           // load filtered data
+    this.filter.set(newFilter);
+    this.loadTeams();
   }
 }

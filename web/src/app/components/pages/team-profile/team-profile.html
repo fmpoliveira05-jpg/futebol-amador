@@ -1,1 +1,45 @@
-<p>team-profile works!</p>
+<section class="page" *ngIf="team() as t">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ t.name }}</h1>
+        </div>
+
+        <div class="layout">
+            <div class="card">
+                <h2 class="card-title">Informações da Equipa</h2>
+
+                <dl class="details-grid">
+                    <div class="details-grid__item">
+                        <dt>Nome</dt>
+                        <dd>{{ t.name }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Descrição</dt>
+                        <dd>{{ t.description }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Fundado em</dt>
+                        <dd>{{ t.foundationDate }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Rank</dt>
+                        <dd>{{ t.rankName }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Pontos</dt>
+                        <dd>{{ t.totalPoints }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Endereço</dt>
+                        <dd>{{ t.pitchDto.name }}</dd>
+                        <dd>{{ t.pitchDto.address }}</dd>
+                    </div>
+                    <div class="details-grid__item">
+                        <dt>Numero de Jogadores</dt>
+                        <dd>{{ t.players.length }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </header>
+</section>
