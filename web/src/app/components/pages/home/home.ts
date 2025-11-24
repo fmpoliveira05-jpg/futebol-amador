@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { PlayerService } from '../../../services/player.service';
 import { TeamService } from '../../../services/team.service';
-import { Team } from '../../../shared/models/Team';
+import { InfoTeamDto } from '../../../shared/Dtos/Team/InfoTeamDto';
 import { RouterLink } from '@angular/router';
 import { Header } from '../../partials/header/header';
 
@@ -13,7 +13,7 @@ import { Header } from '../../partials/header/header';
 })
 export class Home {
 
-  teams:Team[] = [];
+  teams:InfoTeamDto[] = [];
   
   constructor(private playerService:PlayerService, private teamService:TeamService){
     // this.teams = teamService.getAll();
