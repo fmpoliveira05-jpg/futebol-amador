@@ -130,7 +130,7 @@ fun AddressRow(address: String) {
  * @param size O tamanho (Int) em centímetros.
  */
 @Composable
-fun SizeRow(size: Int) {
+fun SizeRow(size: Double) {
     InfoRow(
         icon = Icons.Default.Straighten,
         text = "$size cm",
