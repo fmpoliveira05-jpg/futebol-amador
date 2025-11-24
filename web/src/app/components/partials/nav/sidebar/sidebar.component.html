@@ -11,6 +11,10 @@
       Jogadores
     </a>
 
+    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" class="sidebar__link">
+      Equipas
+    </a>
+
     <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" class="sidebar__link">
       O meu perfil
     </a>

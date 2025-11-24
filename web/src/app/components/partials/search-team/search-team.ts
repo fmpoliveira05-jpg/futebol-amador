@@ -12,15 +12,9 @@ import { FormsModule } from '@angular/forms';
 export class SearchTeam {
   filters = new FilterListTeamDto();
 
-  constructor(activatedRoute: ActivatedRoute, private router: Router) {
-    activatedRoute.params.subscribe((params) => {
-      // if (params.searchTerm) {
-      //   this.searchTerm = params.searchTerm;
-      // }
-    });
-  }
+  constructor(private router: Router) {}
 
-  search(filters: FilterListTeamDto): void {
-    this.router.navigate(['/teams'], { queryParams: filters });
+  search(): void {
+    this.router.navigate(['/teams'], { queryParams: this.filters });
   }
 }

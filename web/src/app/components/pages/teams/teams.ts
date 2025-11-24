@@ -1,78 +1,52 @@
-import { Component, inject } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { PlayerService } from '../../../services/player.service';
 import { InfoTeamDto } from '../../../shared/Dtos/Team/InfoTeamDto';
-import { AuthHeader } from '../../partials/auth-header/auth-header';
-import { SearchTeam } from '../../partials/search-team/search-team';
-import { NgFor } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
-import { InfoRankDto } from '../../../shared/Dtos/Rank/InfoRankDto';
+import { NgFor } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { SearchTeam } from '../../partials/search-team/search-team';
 
 @Component({
   selector: 'app-teams',
-  imports: [AuthHeader, SearchTeam, NgFor, RouterLink],
+  imports: [SearchTeam, NgFor, RouterLink],
   templateUrl: './teams.html',
   styleUrl: './teams.css',
 })
 export class Teams {
-  teams: InfoTeamDto[] = [];
+  teams = signal<InfoTeamDto[]>([]);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string | null>(null);
 
-  filter?: FilterListTeamDto;
+  filter = signal<FilterListTeamDto>({}); // start empty
 
-  constructor(private playerService: PlayerService) {}
+  constructor(private playerService: PlayerService, private route: ActivatedRoute) {}
 
   ngOnInit() {
-    this.loadTeams();
-    // this.teams   = sample_teams;
+    this.route.queryParams.subscribe((params) => {
+      this.filter.set(params as FilterListTeamDto);
+    this.loadTeams(); // Show all teams immediately
+    })
   }
 
   loadTeams() {
-    this.playerService.searchTeams(this.filter).subscribe({
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.playerService.searchTeams(this.filter()).subscribe({
       next: (data) => {
-        console.log('Teams from backend:', data);
-        this.teams = data;
+        this.teams.set(data);
+        this.isLoading.set(false);
       },
       error: (err) => {
-        console.error(err)
+        console.error(err);
+        this.errorMessage.set('Error loading teams');
+        this.isLoading.set(false);
       },
     });
   }
 
   applyFilter(newFilter: FilterListTeamDto) {
-    this.filter = { ...this.filter, ...newFilter };
-    this.loadTeams();
+    this.filter.set(newFilter); // overwrite with new clean filter
+    this.loadTeams();           // load filtered data
   }
 }
-
-const sample_teams: InfoTeamDto[] = [
-  {
-    id: '01',
-    name: 'AASIO FC',
-    description: 'aaa',
-    address: 'rua voliuntarions da patrai',
-    rank: new InfoRankDto(),
-    currentPoints: 300,
-    averageAge: 22,
-    playerCount: 12,
-  },
-  {
-    id: '02',
-    name: 'Botafogo',
-    description: 'fogao',
-    address: 'largo dos leoes',
-    rank: new InfoRankDto(),
-    currentPoints: 200,
-    averageAge: 26,
-    playerCount: 13,
-  },
-  {
-    id: '03',
-    name: 'Vasco',
-    description: 'vascao',
-    address: 'rua vascoc',
-    rank: new InfoRankDto(),
-    currentPoints: 100,
-    averageAge: 25,
-    playerCount: 15,
-  }
-];
