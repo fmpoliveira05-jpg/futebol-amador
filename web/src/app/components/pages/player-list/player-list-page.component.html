@@ -1,65 +1,43 @@
-<section class="page">
-  <header class="page-header">
-    <div>
-      <h1 class="page-title">Jogadores</h1>
-      <p class="page-subtitle">Consulta a lista de jogadores registados na plataforma.</p>
-    </div>
-
-    <div class="page-header__actions">
-      <input
-        type="search"
-        class="search-input"
-        placeholder="Procurar por nome ou posição"
-        [value]="searchTerm()"
-        (input)="onSearchTermChange($any($event.target).value)"
-      />
-    </div>
-  </header>
-
-  <div class="card">
-    <div *ngIf="isLoading()" class="state state--loading">
-      A carregar jogadores…
-    </div>
-
-    <div *ngIf="errorMessage()" class="state state--error">
-      {{ errorMessage() }}
-    </div>
-
-    <div *ngIf="!isLoading() && !errorMessage()">
-      <table class="players-table" *ngIf="visiblePlayers().length; else noPlayers">
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Posição</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let player of visiblePlayers()" class="players-table__row">
-            <td>{{ player.name }}</td>
-            <td>{{ POSITION_MAP[player.position] }}</td>
-
-            <td>
-              <button class="details-btn" (click)="openDetails(player.id)">
-                Ver detalhes
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div
-        class="load-more-container"
-        *ngIf="visiblePlayers().length < filteredPlayers().length"
-      >
-        <button class="load-more-btn" (click)="loadMore()">
-          Carregar mais
-        </button>
-      </div>
-
-      <ng-template #noPlayers>
-        <div class="state">Não há jogadores para apresentar.</div>
-      </ng-template>
-    </div>
+<div class="filters-container" *ngIf="showFilters()">
+  <div>
+    <label for="city">Cidade:</label>
+    <input id="city" type="text" [(ngModel)]="cityFilter" placeholder="Digite a cidade">
   </div>
-</section>
+
+  <div>
+    <label for="minAge">Idade Mínima:</label>
+    <input id="minAge" type="number" [(ngModel)]="minAge" min="0" max="100">
+  </div>
+
+  <div>
+    <label for="maxAge">Idade Máxima:</label>
+    <input id="maxAge" type="number" [(ngModel)]="maxAge" min="0" max="100">
+  </div>
+
+  <div>
+    <label for="minHeight">Altura Mínima (cm):</label>
+    <input id="minHeight" type="number" [(ngModel)]="minHeight" min="0" max="250">
+  </div>
+
+  <div>
+    <label for="maxHeight">Altura Máxima (cm):</label>
+    <input id="maxHeight" type="number" [(ngModel)]="maxHeight" min="0" max="250">
+  </div>
+
+  <button (click)="loadPlayers()">Aplicar Filtros</button>
+</div>
+
+<button (click)="showFilters.set(!showFilters())">
+  {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
+</button>
+
+<div *ngIf="isLoading()">Carregando...</div>
+<div *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+<div *ngFor="let player of visiblePlayers()">
+  <div class="player-item">
+    <h3>{{ player.name }}</h3>
+    <p>{{ player.address }}</p>
+    <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
+  </div>
+</div>

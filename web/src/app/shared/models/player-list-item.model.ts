@@ -6,4 +6,5 @@ export interface PlayerListItem {
   haveTeam: boolean;
   age: number;
   teamName?: string | null;
+  address: string;
 }
