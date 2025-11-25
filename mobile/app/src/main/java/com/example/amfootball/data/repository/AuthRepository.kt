@@ -1,14 +1,16 @@
 package com.example.amfootball.data.repository
 
 import android.util.Log
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.ApiBackend
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val apiService: ApiBackend,
@@ -34,12 +36,28 @@ class AuthRepository @Inject constructor(
 
             sessionManager.saveAuthToken(token)
 
-            /*
-                    _isUserLoggedIn.value = true
-        //val profile = apiService.getMyProfile("Bearer $token")
-        // sessionManager.saveUserProfile(profile)
-            * */
-            true
+            //TODO: É preciso fazer pedido há API para buscar o perfil
+            val response = apiService.getMyProfile()
+
+            if (response.isSuccessful && response.body() != null) {
+                val userProfile = response.body()!!
+
+                Log.d("LOGIN_DEBUG", "4. API Sucesso! Dados recebidos: $userProfile")
+                Log.d("LOGIN_DEBUG", "   -> Nome: ${userProfile.name}")
+                Log.d("LOGIN_DEBUG", "   -> ID: ${userProfile.id}")
+
+                // A guardar...
+                sessionManager.saveUserProfile(userProfile)
+                Log.d("AuthRepository", "Login completo e dados guardados.")
+
+                true
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
+
+                sessionManager.clearSession()
+                throw Exception(errorMsg)
+            }
         } catch (e: Exception) {
             Log.e("AuthRepository", "Erro no login: ${e.message}")
             e.printStackTrace()

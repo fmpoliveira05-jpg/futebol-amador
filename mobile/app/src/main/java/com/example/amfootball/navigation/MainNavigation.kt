@@ -21,6 +21,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.navigation.objects.Arguments
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.navBar.BottomSheetContent
@@ -52,6 +53,7 @@ import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
+import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
@@ -177,10 +179,7 @@ private fun NavGraphBuilder.userPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    profilePlayer(
-        globalNavController = globalNavController,
-        sessionManager = sessionManager
-    )
+    profilePlayer()
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
         val viewModel = hiltViewModel<ListTeamViewModel>()
@@ -203,19 +202,16 @@ private fun NavGraphBuilder.userPages(
     }
 }
 
-private fun NavGraphBuilder.profilePlayer(
-    globalNavController: NavHostController,
-    sessionManager: SessionManager
-) {
+private fun NavGraphBuilder.profilePlayer() {
     composable(route = Routes.UserRoutes.PROFILE.route) {
         val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
         ProfileScreen(viewModel = viewModel)
     }
 
-    composable(route = "${Routes.UserRoutes.PROFILE.route}/{playerId}",
+    composable(route = "${Routes.UserRoutes.PROFILE.route}/{${Arguments.PLAYER_ID}}",
         arguments = listOf(
-            navArgument("playerId") { type = NavType.StringType }
+            navArgument(Arguments.PLAYER_ID) { type = NavType.StringType }
         )
     ) {
         val viewModel = hiltViewModel<ProfilePlayerViewModel>()
@@ -233,9 +229,9 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
     teamMatch(globalNavController = globalNavController)
 
     composable(
-        route = "${Routes.TeamRoutes.MEMBERLIST.route}/{teamId}",
+        route = "${Routes.TeamRoutes.MEMBERLIST.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
-            navArgument("teamId") { type = NavType.StringType }
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         )
     ) {
         val viewModel = hiltViewModel<ListMembersViewModel>()
@@ -253,8 +249,15 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
 }
 
 private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController) {
-    composable(Routes.TeamRoutes.CALENDAR.route) {
-        CalendarScreen(globalNavController)
+    composable(
+        route = "${Routes.TeamRoutes.CALENDAR.route}/{${Arguments.TEAM_ID}}",
+        arguments = listOf(
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
+        )
+    ) {
+        val viewModel = hiltViewModel<CalendarTeamViewModel>()
+
+        CalendarScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
     managementMatch(globalNavController = globalNavController)
@@ -318,9 +321,9 @@ private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController
     }
 
     //TODO: Meter para ser security Route e validar o tipo de user e também mandar o id na rota e trocar para hiltViewModel
-    composable("${Routes.TeamRoutes.UPDATE_TEAM.route}/{teamId}",
+    composable("${Routes.TeamRoutes.UPDATE_TEAM.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
-            navArgument("teamId") { type = NavType.StringType }
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         )
     ) {
         val viewModel = hiltViewModel<TeamFormViewModel>()
@@ -338,9 +341,9 @@ private fun NavGraphBuilder.profileTeam() {
         ProfileTeamScreen(viewModel = viewModel)
     }
 
-    composable("${Routes.TeamRoutes.TEAM_PROFILE.route}/{teamId}",
+    composable("${Routes.TeamRoutes.TEAM_PROFILE.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
-            navArgument("teamId") { type = NavType.StringType }
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         )
     ) {
         val viewModel = hiltViewModel<ProfileTeamViewModel>()

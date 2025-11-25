@@ -30,7 +30,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
@@ -226,7 +226,7 @@ private fun FieldsSignUp(
     )
 
     PasswordTextField(
-        label = stringResource(id = R.string.password_field_validation),
+        label = stringResource(id = R.string.password_field),
         value = passwordVerification,
         onValueChange = { passwordVerification = it },
     )

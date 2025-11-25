@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="player_name">Name</string>
+    <string name="player_name_description">Name of the player</string>
 
     <string name="date_of_birthday">Date of Birth</string>
     <string name="date_of_birthday_description">Player Date of Birth</string>
@@ -21,10 +22,4 @@
 
     <string name="player_team">Team</string>
     <string name="player_team_description">Player Team</string>
-
-    <string name="password_field">Password</string>
-    <string name="password_field_validation">Confirm your password</string>
-
-
-
 </resources>

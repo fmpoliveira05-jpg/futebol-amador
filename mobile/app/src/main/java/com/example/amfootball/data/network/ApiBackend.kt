@@ -2,7 +2,7 @@ package com.example.amfootball.data.network
 
 import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
@@ -55,7 +55,7 @@ interface ApiBackend{
      */
     @GET("api/Player/get-my-profile")
     suspend fun getMyProfile(
-    ): Response<CreateProfileDto>
+    ): Response<PlayerProfileDto>
 
     // ============================================================================================
     //  CHAT

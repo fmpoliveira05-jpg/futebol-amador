@@ -1,27 +1,7 @@
-package com.example.amfootball.data.dtos
+package com.example.amfootball.data.dtos.player
 
 import com.google.gson.annotations.SerializedName
-
-data class FullProfileDto(
-    val userProfile: UserProfileDto,
-    val playerProfile: PlayerProfileDto
-    )
-
-data class PlayerProfileDto(
-    val userName: String,
-    val teamName: String,
-    val position: String,
-    val isAdmin: Boolean,
-    val height: Int
-)
-
-data class UserProfileDto(
-    val userName: String,
-    val dateOfBirth: String,
-    val phone: String,
-    val email: String,
-    val address: String,
-)
+import java.time.LocalDate
 
 data class CreateProfileDto(
     @SerializedName("Name")

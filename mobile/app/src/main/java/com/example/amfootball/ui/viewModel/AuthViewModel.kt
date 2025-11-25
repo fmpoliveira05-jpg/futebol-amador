@@ -2,7 +2,7 @@ package com.example.amfootball.ui.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

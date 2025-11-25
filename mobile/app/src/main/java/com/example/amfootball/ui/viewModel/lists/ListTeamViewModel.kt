@@ -168,8 +168,7 @@ class ListTeamViewModel @Inject constructor(
     /**
      * Navega para o perfil detalhado da equipa.
      */
-    fun showMore(idTeam: String, navHostController: NavHostController,
-    ) {
+    fun showMore(idTeam: String, navHostController: NavHostController) {
         navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/${idTeam}") {
             launchSingleTop = true
         }

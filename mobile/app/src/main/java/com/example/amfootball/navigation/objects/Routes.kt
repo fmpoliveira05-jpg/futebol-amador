@@ -35,7 +35,6 @@ interface AppRouteInfo {
 object Routes {
     val chatRoomId = "chatRoomId"
 
-
     // AGORA IMPLEMENTA RouteInfo
     enum class GeralRoutes(
         override val route: String,

@@ -184,6 +184,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 fun ProfileScreenPreview() {
     val dummyProfile = PlayerProfileDto(
         icon = "",
+        id = "1",
         name = "Lionel Messi",
         dateOfBirth = "24/06/1987",
         email = "lm10@email.com",
@@ -191,7 +192,9 @@ fun ProfileScreenPreview() {
         address = "Rosario, Argentina",
         position = "Avançado",
         height = 170,
-        team = "Inter Miami CF"
+        team = "Inter Miami CF",
+        idTeam = "2",
+        isAdmin = false
     )
 
     AMFootballTheme {
