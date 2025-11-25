@@ -10,17 +10,17 @@ import androidx.navigation.NavHostController
  * permanência de membros na equipa.
  *
  * @property onPromoteMember Callback para elevar o nível de acesso de um membro (ex: de Membro para Admin).
- * Recebe o [idPlayer] do membro a ser promovido.
+ * Recebe o [playerId] do membro a ser promovido.
  * @property onDemoteMember Callback para reduzir o nível de acesso de um membro (ex: de Admin para Membro).
  * Recebe o [idAdmin] do administrador a ser despromovido.
  * @property onRemovePlayer Callback para remover (expulsar) um jogador da equipa.
- * Recebe o [idPlayer] do jogador a ser removido.
+ * Recebe o [playerId] do jogador a ser removido.
  * @property onShowMoreInfo Callback para navegar para o ecrã de detalhes/perfil do jogador.
  * Recebe o [playerId] e o [NavHostController] necessário para a navegação.
  */
 data class ItemsListMemberAction(
-    val onPromoteMember: (idPlayer: String) -> Unit,
+    val onPromoteMember: (playerId: String) -> Unit,
     val onDemoteMember: (idAdmin: String) -> Unit,
-    val onRemovePlayer: (idPlayer: String) -> Unit,
+    val onRemovePlayer: (playerId: String) -> Unit,
     val onShowMoreInfo: (playerId: String, navHostController: NavHostController) -> Unit,
 )

@@ -52,6 +52,7 @@ import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
+import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
@@ -196,6 +197,7 @@ private fun NavGraphBuilder.userPages(
     composable(Routes.GeralRoutes.LEADERBOARD.route) {
         LeaderboardScreen(navHostController = globalNavController)
     }
+
     composable(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
         ListMemberShipRequest(navHostController = globalNavController)
     }
@@ -230,8 +232,15 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
 
     teamMatch(globalNavController = globalNavController)
 
-    composable(Routes.TeamRoutes.MEMBERLIST.route) {
-        ListMembersScreen(navHostController = globalNavController)
+    composable(
+        route = "${Routes.TeamRoutes.MEMBERLIST.route}/{teamId}",
+        arguments = listOf(
+            navArgument("teamId") { type = NavType.StringType }
+        )
+    ) {
+        val viewModel = hiltViewModel<ListMembersViewModel>()
+
+        ListMembersScreen(navHostController = globalNavController, viewModel = viewModel)
     }
 
     composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {

@@ -128,7 +128,7 @@ class ListTeamViewModel @Inject constructor(
 
         if(!networkObserver.isOnlineOneShot()) {
             listState.value = offlineFilterList(
-                originalList = listState.value,
+                originalList = allTeamOriginal,
                 filters = filterState.value
             )
         } else {
@@ -152,8 +152,7 @@ class ListTeamViewModel @Inject constructor(
     /**
      * Navega para o ecrã de envio de convite de jogo.
      */
-    fun sendMatchInvite(idTeam: String,
-                        navHostController: NavHostController) {
+    fun sendMatchInvite(idTeam: String, navHostController: NavHostController) {
         navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}") {
             launchSingleTop = true
         }
@@ -162,17 +161,14 @@ class ListTeamViewModel @Inject constructor(
     /**
      * Envia um pedido de adesão (Membership) a uma equipa.
      */
-    fun sendMemberShipRequest(idTeam: String,
-                              navHostController: NavHostController) {
+    fun sendMemberShipRequest(idTeam: String, navHostController: NavHostController) {
         //TODO: Executar chamada há API para o sendMemberShipRequest
     }
 
     /**
      * Navega para o perfil detalhado da equipa.
      */
-    fun showMore(
-        idTeam: String,
-        navHostController: NavHostController,
+    fun showMore(idTeam: String, navHostController: NavHostController,
     ) {
         navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/${idTeam}") {
             launchSingleTop = true

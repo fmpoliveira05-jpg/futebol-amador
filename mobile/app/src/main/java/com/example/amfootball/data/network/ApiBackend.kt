@@ -4,12 +4,15 @@ import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
+import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
+import com.example.amfootball.data.filters.FilterMembersTeam
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -119,6 +122,16 @@ interface ApiBackend{
         @Body team: FormTeamDto
     ): Response<String>
 
+    /**
+     * Atualiza os dados de uma equipa existente.
+     *
+     * Este método envia um pedido PUT para substituir ou atualizar as informações
+     * da equipa identificada pelo [teamId].
+     *
+     * @param teamId O ID único da equipa a ser atualizada.
+     * @param team O objeto [FormTeamDto] contendo os novos dados da equipa (nome, sigla, etc.).
+     * @return Um [Response] contendo o [FormTeamDto] com os dados atualizados confirmados pelo servidor.
+     */
     @PUT("api/Team/{teamId}")
     suspend fun updateTeam(
         @Path("teamId") teamId: String,
@@ -152,4 +165,59 @@ interface ApiBackend{
     suspend fun getListTeam(
         @QueryMap filters: Map<String, String>
     ): Response<List<ItemTeamInfoDto>>
+
+    /**
+     * Obtém a lista de membros de uma equipa específica, aplicando filtros de pesquisa.
+     *
+     * @param teamId O ID da equipa da qual se pretende listar os membros.
+     * @param filter O objeto [FilterMembersTeam] contendo os critérios de filtragem (nome, idade, posição, etc.).
+     * @return Um [Response] contendo uma lista de [MemberTeamDto] correspondente aos filtros.
+     */
+    @GET("api/Team/{teamId}/members")
+    suspend fun getListMembers(
+        @Path("teamId") teamId: String,
+        @QueryMap filters: Map<String, String>
+    ): Response<List<MemberTeamDto>>
+
+    /**
+     * Remove (expulsa) um jogador de uma equipa.
+     *
+     * Apenas administradores da equipa devem ter permissão para executar esta ação.
+     *
+     * @param teamId O ID da equipa.
+     * @param playerId O ID do jogador que será removido da equipa.
+     */
+    @DELETE("api/Team/{teamId}/members/{playerIdToRemove}")
+    suspend fun removePlayerforTeam(
+        @Path("teamId") teamId: String,
+        @Path("playerIdToRemove") playerId: String
+    ): Response<Unit>
+
+    /**
+     * Promove um membro da equipa a Administrador.
+     *
+     * Altera o tipo de membro de PLAYER para ADMIN_TEAM.
+     *
+     * @param teamId O ID da equipa.
+     * @param playerId O ID do jogador que será promovido a administrador.
+     */
+    @PUT("api/Team/{teamId}/members/{playerId}/promote/{playerIdToPromote}")
+    suspend fun promotePlayer(
+        @Path("teamId") teamId: String,
+        @Path("playerIdToPromote") playerId: String
+    ): Response<Unit>
+
+    /**
+     * Despromove um Administrador da equipa a membro normal.
+     *
+     * Altera o tipo de membro de ADMIN_TEAM para PLAYER.
+     *
+     * @param teamId O ID da equipa.
+     * @param playerId O ID do administrador que perderá os privilégios.
+     */
+    @PUT("api/Team/{teamId}/members/{playerId}/demote/{adminIdToDemote}")
+    suspend fun desmoteAdmin(
+        @Path("teamId") teamId: String,
+        @Path("adminIdToDemote") playerId: String
+    ): Response<Unit>
 }
