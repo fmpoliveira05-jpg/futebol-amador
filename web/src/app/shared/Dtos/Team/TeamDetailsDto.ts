@@ -1,5 +1,5 @@
 import { PitchDto } from "../Pitch/PitchDto";
-import { PlayerDetailsDto } from "../Player/PlayerDetailsDto";
+import { PlayerDetails } from "../player.model";
 
 export class TeamDetailsDto{
     id!: string;
@@ -9,5 +9,5 @@ export class TeamDetailsDto{
     totalPoints!: number;
     rankName!: string;
     pitchDto!: PitchDto;
-    players!: PlayerDetailsDto[];
+    players!: PlayerDetails[];
 }
