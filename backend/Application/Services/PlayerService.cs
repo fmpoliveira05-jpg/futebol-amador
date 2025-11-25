@@ -6,6 +6,8 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Application.Services
 {
@@ -163,7 +165,7 @@ namespace Application.Services
 
         #region Actions Player in Team
         //Falta tirar o player da lista de players do team
-        public async Task<string> LeaveTeam(string playerId)
+        public async Task<InfoPlayerDto> LeaveTeam(string playerId)
         {
             var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -206,7 +208,24 @@ namespace Application.Services
 
             await unityOfWork.SaveChangesAsync();
 
-            return teamName;
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            int age = dateNow.Year - existingPlayer.DateOfBirth.Year;
+            if (dateNow < existingPlayer.DateOfBirth.AddYears(age)) {
+                age--;
+            }
+
+            var playerDto = new InfoPlayerDto
+            {
+                Id = existingPlayer.Id,
+                Name = existingPlayer.Name,
+                Address = existingPlayer.Address,
+                Age = age,
+                Position = existingPlayer.Position,
+                Heigth = existingPlayer.Height,
+                HaveTeam = existingPlayer.IdTeam != null
+            };
+
+            return playerDto;
         }
         #endregion
 

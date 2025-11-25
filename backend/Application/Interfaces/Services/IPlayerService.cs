@@ -19,7 +19,7 @@ namespace Application.Interfaces.Services
 
         Task<List<InfoTeamsDto>> GetListTeams();
 
-        Task<string> LeaveTeam(string playerId);
+        Task<InfoPlayerDto> LeaveTeam(string playerId);
 
         Task<List<InfoPlayerDto?>> ListPlayers(FilterTeamDto? filter);
     }

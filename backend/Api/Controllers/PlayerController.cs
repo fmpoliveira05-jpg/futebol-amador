@@ -215,9 +215,9 @@ namespace Api.Controllers
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            string teamName = await playerService.LeaveTeam(playerId);
+            var playerDto = await playerService.LeaveTeam(playerId);
 
-            return Ok("Player succesfully left the team" + teamName + ".");
+            return Ok(playerDto);
         }
 
         #endregion
