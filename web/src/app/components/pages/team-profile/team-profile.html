@@ -4,42 +4,97 @@
             <h1 class="page-title">{{ t.name }}</h1>
         </div>
 
-        <div class="layout">
-            <div class="card">
-                <h2 class="card-title">Informações da Equipa</h2>
+        <div *ngIf="isAdmin()" class="page-header__actions">
+            <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
+                {{ isEditMode() ? 'Cancelar' : 'Editar Equipa' }}
+            </button>
 
-                <dl class="details-grid">
-                    <div class="details-grid__item">
-                        <dt>Nome</dt>
-                        <dd>{{ t.name }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Descrição</dt>
-                        <dd>{{ t.description }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Fundado em</dt>
-                        <dd>{{ t.foundationDate }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Rank</dt>
-                        <dd>{{ t.rankName }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Pontos</dt>
-                        <dd>{{ t.totalPoints }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Endereço</dt>
-                        <dd>{{ t.pitchDto.name }}</dd>
-                        <dd>{{ t.pitchDto.address }}</dd>
-                    </div>
-                    <div class="details-grid__item">
-                        <dt>Numero de Jogadores</dt>
-                        <dd>{{ t.players.length }}</dd>
-                    </div>
-                </dl>
-            </div>
+            <button type="button" class="btn btn-danger" (click)="deleteTeam()" [disabled]="isSaving()">
+                Apagar Equipa
+            </button>
         </div>
     </header>
+
+    <div class="layout">
+        <div class="card">
+            <h2 class="card-title">Informações da Equipa</h2>
+
+            <dl class="details-grid" *ngIf="!isEditMode() && !isLoading()">
+                <div class="details-grid__item">
+                    <dt>Nome</dt>
+                    <dd>{{ t.name }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Descrição</dt>
+                    <dd>{{ t.description }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Fundado em</dt>
+                    <dd>{{ t.foundationDate }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Rank</dt>
+                    <dd>{{ t.rankName }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Pontos</dt>
+                    <dd>{{ t.totalPoints }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Endereço</dt>
+                    <dd>{{ t.pitchDto.name }}</dd>
+                    <dd>{{ t.pitchDto.address }}</dd>
+                </div>
+                <div class="details-grid__item">
+                    <dt>Numero de Jogadores</dt>
+                    <dd>{{ t.players.length }}</dd>
+                </div>
+                <button type="button" class="btn btn-secondary" (click)="goToTeamMembers()">
+                    Gerir membros da equipa
+                </button>
+            </dl>
+
+            <form class="form" [formGroup]="form" *ngIf="isAdmin() && isEditMode() && !isLoading()">
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span>Nome</span>
+                        <input type="text" formControlName="name" />
+                    </label>
+
+                    <label class="form-field">
+                        <span>Descrição</span>
+                        <input type="text" formControlName="description" />
+                    </label>
+
+                    <label class="form-field">
+                        <span>Nome da Localização</span>
+                        <input type="text" formControlName="pitchName" />
+                    </label>
+
+                    <label class="form-field">
+                        <span>Endereço</span>
+                        <input type="text" formControlName="pitchLocation" />
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
+                        Cancelar
+                    </button>
+
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
+                        {{ isSaving() ? 'A guardar…' : 'Guardar alterações' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <aside class="card img-card">
+            <img height="250" width="250" src="../../../../assets/placeholder.png" />
+        </aside>
+    </div>
 </section>
+
+<div *ngIf="!team() && !isLoading()" class="state state--error">
+    Equipa não encontrada.
+</div>

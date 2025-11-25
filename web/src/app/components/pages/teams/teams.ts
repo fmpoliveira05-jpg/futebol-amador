@@ -2,13 +2,13 @@ import { Component, signal } from '@angular/core';
 import { PlayerService } from '../../../services/player.service';
 import { InfoTeamDto } from '../../../shared/Dtos/Team/InfoTeamDto';
 import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
-import { NgFor } from '@angular/common';
+import { CommonModule} from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { SearchTeam } from '../../partials/search-team/search-team';
 
 @Component({
   selector: 'app-teams',
-  imports: [SearchTeam, NgFor, RouterLink],
+  imports: [SearchTeam, CommonModule, RouterLink],
   templateUrl: './teams.html',
   styleUrl: './teams.css',
 })

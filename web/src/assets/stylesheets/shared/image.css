@@ -1,0 +1,9 @@
+img {
+  border: 5px solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+img.main {
+  border: none;
+  border-radius: 0rem;
+}
