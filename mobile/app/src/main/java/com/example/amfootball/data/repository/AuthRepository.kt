@@ -44,7 +44,7 @@ class AuthRepository @Inject constructor(
 
                 Log.d("LOGIN_DEBUG", "4. API Sucesso! Dados recebidos: $userProfile")
                 Log.d("LOGIN_DEBUG", "   -> Nome: ${userProfile.name}")
-                Log.d("LOGIN_DEBUG", "   -> ID: ${userProfile.id}")
+                Log.d("LOGIN_DEBUG", "   -> ID: ${userProfile.loginResponseDto.localId}")
 
                 // A guardar...
                 sessionManager.saveUserProfile(userProfile)

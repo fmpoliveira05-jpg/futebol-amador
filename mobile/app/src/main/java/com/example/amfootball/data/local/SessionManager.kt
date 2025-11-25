@@ -75,7 +75,7 @@ class SessionManager @Inject constructor(
      * Útil para o ViewModel decidir se carrega o perfil ou não.
      */
     fun fetchUserId(): String? {
-        return getUserProfile()?.id
+        return getUserProfile()?.loginResponseDto?.localId
     }
 
     fun clearSession() {
