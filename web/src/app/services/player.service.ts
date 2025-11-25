@@ -13,6 +13,8 @@ export class PlayerService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/Player`;
 
+  private readonly headers = { 'Content-Type': 'application/json' };
+
   getPlayers(): Observable<PlayerListItem[]> {
     return this.http.get<PlayerListItem[]>(`${this.baseUrl}/listPlayers`);
   }
@@ -26,7 +28,7 @@ export class PlayerService {
   }
 
   updatePlayer(playerId: string, data: UpdatePlayerRequest): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/update/${playerId}`, data);
+    return this.http.put<void>(`${this.baseUrl}/update/${playerId}`, data, { headers: this.headers });
   }
 
   deletePlayer(playerId: string): Observable<void> {

@@ -15,14 +15,12 @@ export interface PlayerDetails {
 }
 
 export interface UpdatePlayerRequest {
-  dto: {
-    playerId: string;
-    Name: string;
-    DateOfBirth: string;
-    Address: string;
-    Email: string;
-    Phone: string;
-    Position: number;
-    Height: number;
-  };
+  playerId: string;
+  Name: string;
+  DateOfBirth: string;
+  Address: string;
+  Email: string;
+  Phone: string;
+  Position: number;
+  Height: number;
 }

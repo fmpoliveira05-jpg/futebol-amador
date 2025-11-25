@@ -108,24 +108,26 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
 
     const payload = {
-      dto: {
-        playerId: current.playerId,
-        Name: this.form.value['name'] || current.name,
-        DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
-        Address: this.form.value['address'] || current.address,
-        Email: this.form.value['email'] || current.email,
-        Phone: this.form.value['phone'] || current.phoneNumber,
-        Position: positionEnumValue,
-        Height: Number(this.form.value['height']),
-      }
+      playerId: current.playerId,
+      Name: this.form.value['name'] || current.name,
+      DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
+      Address: this.form.value['address'] || current.address,
+      Email: this.form.value['email'] || current.email,
+      Phone: this.form.value['phone'] || current.phoneNumber,
+      Position: positionEnumValue,
+      Height: Number(this.form.value['height']) || current.heigth,
     };
+
+    if (!payload.Name || !payload.Email || !payload.Phone || !payload.Address || !payload.Height) {
+      this.errorMessage.set('Campos obrigatórios não preenchidos.');
+      return;
+    }
 
     this.isSaving.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    console.log('Payload for update:', payload);
-    this.playerService.updatePlayer(current.playerId, payload).subscribe({
+    this.playerService.updatePlayer(payload.playerId, payload).subscribe({
       next: () => {
         this.successMessage.set('Perfil atualizado com sucesso.');
         this.isSaving.set(false);
