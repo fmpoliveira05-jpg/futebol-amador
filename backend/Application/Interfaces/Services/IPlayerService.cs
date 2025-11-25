@@ -11,7 +11,7 @@ namespace Application.Interfaces.Services
 
         Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId);
 
-        Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
+        Task<UpdatePlayerDto> UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
 
         Task DeletePlayerAsync(string playerId);
 

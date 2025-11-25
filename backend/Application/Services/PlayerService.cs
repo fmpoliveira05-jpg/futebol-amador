@@ -90,7 +90,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
+        public async Task<UpdatePlayerDto> UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -105,6 +105,28 @@ namespace Application.Services
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
             await unityOfWork.SaveChangesAsync();
+
+            player.Name = dto.Name;
+            player.DateOfBirth = dto.DateOfBirth;
+            player.Address = dto.Address;
+            player.Email = dto.Email;
+            player.Phone = dto.Phone;
+            player.Position = dto.Position;
+            player.Height = dto.Height;
+
+            var updatedDto = new UpdatePlayerDto
+            {
+                playerId = player.Id,
+                Name = player.Name,
+                DateOfBirth = player.DateOfBirth,
+                Address = player.Address,
+                Email = player.Email,
+                Phone = player.Phone,
+                Position = player.Position,
+                Height = player.Height
+            };
+
+            return updatedDto;
         }
 
         public async Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId)

@@ -121,9 +121,9 @@ namespace Api.Controllers
             }
             
 
-            await playerService.UpdatePlayerAsync(dto.playerId, dto);
+            var updatedPlayer = await playerService.UpdatePlayerAsync(dto.playerId, dto);
 
-            return Ok("Player information updated succesfully.");
+            return Ok(updatedPlayer);
         }
 
         #endregion
