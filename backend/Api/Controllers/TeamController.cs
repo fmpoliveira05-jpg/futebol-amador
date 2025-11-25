@@ -206,29 +206,28 @@ namespace Api.Controllers
             }
         }
 
-        /*
         [HttpGet("{teamId}/membership-request")]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
             await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+            var playerId = GetCurrentUserId();
+
+            var hasFilter = filters.MinDate.HasValue ||
+                            filters.MaxDate.HasValue ||
+                            !string.IsNullOrEmpty(filters.SenderName);
 
             IEnumerable<MemberShipRequestDto> membershipRequests;
-            var hasFilter = filters.MinDate.HasValue ||
-                filters.MaxDate.HasValue ||
-                !string.IsNullOrEmpty(filters.SenderName);
-
             if (hasFilter)
             {
-                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeamWithFilters(teamId, filters);
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeamWithFilters(teamId, filters, playerId);
             }
             else
             {
-                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeam(teamId);
+                membershipRequests = await MemberShipRequestService.GetMembershipRequestsByTeam(teamId, playerId);
             }
 
             return Ok(membershipRequests);
         }
-        */
 
         [HttpPost("{teamId}/membership-request/accept")]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)

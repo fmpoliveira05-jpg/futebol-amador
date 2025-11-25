@@ -121,9 +121,9 @@ namespace Api.Controllers
             }
             
 
-            await playerService.UpdatePlayerAsync(dto.playerId, dto);
+            var updatedPlayer = await playerService.UpdatePlayerAsync(dto.playerId, dto);
 
-            return Ok("Player information updated succesfully.");
+            return Ok(updatedPlayer);
         }
 
         #endregion
@@ -215,9 +215,9 @@ namespace Api.Controllers
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            string teamName = await playerService.LeaveTeam(playerId);
+            var playerDto = await playerService.LeaveTeam(playerId);
 
-            return Ok("Player succesfully left the team" + teamName + ".");
+            return Ok(playerDto);
         }
 
         #endregion

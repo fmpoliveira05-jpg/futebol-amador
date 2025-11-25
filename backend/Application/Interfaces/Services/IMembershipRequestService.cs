@@ -12,9 +12,9 @@ namespace Application.Interfaces.Services
 
         Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string userId);
 
-        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, Player player);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string playerId);
 
-        //Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters);
+        Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters, string playerId);
 
         Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayer(string playerId);
 

@@ -11,7 +11,7 @@ namespace Application.Interfaces.Services
 
         Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId);
 
-        Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
+        Task<UpdatePlayerDto> UpdatePlayerAsync(string playerId, UpdatePlayerDto dto);
 
         Task DeletePlayerAsync(string playerId);
 
@@ -19,7 +19,7 @@ namespace Application.Interfaces.Services
 
         Task<List<InfoTeamsDto>> GetListTeams();
 
-        Task<string> LeaveTeam(string playerId);
+        Task<InfoPlayerDto> LeaveTeam(string playerId);
 
         Task<List<InfoPlayerDto?>> ListPlayers(FilterTeamDto? filter);
     }

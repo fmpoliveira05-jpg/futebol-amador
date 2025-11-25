@@ -1,7 +1,7 @@
 ﻿using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Exceptions;
-using System.Numerics;
+using System.Linq;
 
 namespace Application.Validators
 {
@@ -47,7 +47,7 @@ namespace Application.Validators
                 throw new ValidationException("O jogador a convidar não existe.");
             }
 
-            if (invitedPlayer.Team != player.Team && invitedPlayer.Team != null)
+            if (invitedPlayer.Team != null && invitedPlayer.Team != player.Team)
             {
                 throw new ValidationException("O jogador convidado já pertence a outra equipa.");
             }
@@ -61,13 +61,6 @@ namespace Application.Validators
             {
                 throw new ValidationException("O jogador não é administrador da equipa.");
             }
-
-            /*
-            if (invitedPlayer.IdTeam != null)
-            {
-                throw new ValidationException("O jogador já pertence a uma equipa.");
-            }
-            */
 
             if (existingRequest != null)
             {
@@ -132,7 +125,7 @@ namespace Application.Validators
             {
                 throw new ValidationException("O jogador não pertence à equipa.");
             }
-            
+
             if (!player.IsAdmin)
             {
                 throw new ValidationException("O jogador não é administrador da equipa.");

@@ -6,6 +6,8 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Application.Services
 {
@@ -90,7 +92,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
+        public async Task<UpdatePlayerDto> UpdatePlayerAsync(string playerId, UpdatePlayerDto dto)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -105,6 +107,28 @@ namespace Application.Services
             playerValidator.ValidateHasChangeDataPlayer(hasChange);
 
             await unityOfWork.SaveChangesAsync();
+
+            player.Name = dto.Name;
+            player.DateOfBirth = dto.DateOfBirth;
+            player.Address = dto.Address;
+            player.Email = dto.Email;
+            player.Phone = dto.Phone;
+            player.Position = dto.Position;
+            player.Height = dto.Height;
+
+            var updatedDto = new UpdatePlayerDto
+            {
+                playerId = player.Id,
+                Name = player.Name,
+                DateOfBirth = player.DateOfBirth,
+                Address = player.Address,
+                Email = player.Email,
+                Phone = player.Phone,
+                Position = player.Position,
+                Height = player.Height
+            };
+
+            return updatedDto;
         }
 
         public async Task<PlayerDetailsDto> GetPlayerByIdAsync(string playerId)
@@ -141,7 +165,7 @@ namespace Application.Services
 
         #region Actions Player in Team
         //Falta tirar o player da lista de players do team
-        public async Task<string> LeaveTeam(string playerId)
+        public async Task<InfoPlayerDto> LeaveTeam(string playerId)
         {
             var existingPlayer = await playerRepository.GetPlayerByIdAsync(playerId);
 
@@ -184,7 +208,24 @@ namespace Application.Services
 
             await unityOfWork.SaveChangesAsync();
 
-            return teamName;
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            int age = dateNow.Year - existingPlayer.DateOfBirth.Year;
+            if (dateNow < existingPlayer.DateOfBirth.AddYears(age)) {
+                age--;
+            }
+
+            var playerDto = new InfoPlayerDto
+            {
+                Id = existingPlayer.Id,
+                Name = existingPlayer.Name,
+                Address = existingPlayer.Address,
+                Age = age,
+                Position = existingPlayer.Position,
+                Heigth = existingPlayer.Height,
+                HaveTeam = existingPlayer.IdTeam != null
+            };
+
+            return playerDto;
         }
         #endregion
 
