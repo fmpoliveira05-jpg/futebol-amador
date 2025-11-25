@@ -18,7 +18,7 @@ export const routes: Routes = [
   { path: '', component: Home},
   { path: 'teams', component: Teams, canActivate: [AuthGuard]},
   { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard]},
-  //{ path: 'team/:teamId', component: TeamProfile, canActivate: [AuthGuard]}, /* cena de is admin aq tb */
+  { path: 'team/:teamId', component: TeamProfile, canActivate: [AuthGuard]}, /* cena de is admin aq tb */
   { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], /*data: { requiresTeam: true },*/},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
