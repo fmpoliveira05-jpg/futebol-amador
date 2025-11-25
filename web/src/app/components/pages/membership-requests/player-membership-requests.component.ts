@@ -2,14 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { MembershipRequest } from '../../..//shared/Dtos/membership-request.model';
-import { validate } from 'uuid';
 
 @Component({
   selector: 'app-player-membership-requests-page',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './player-membership-requests.component.html',
-  styleUrl: './player-membership-requests.component.css',
+  styleUrls: ['./player-membership-requests.component.css'],
 })
 export class PlayerMembershipRequestsPageComponent {
   private readonly membershipRequestService = inject(MembershipRequestService);
@@ -29,14 +28,6 @@ export class PlayerMembershipRequestsPageComponent {
 
   constructor() {
     this.loadRequests();
-  }
-
-  private formatRequestId(requestId: string): string {
-    if (validate(requestId)) {
-      return requestId;
-    }
-
-    return requestId.replace(/^(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})$/, '$1-$2-$3-$4-$5');
   }
 
   private loadRequests(): void {
@@ -75,10 +66,8 @@ export class PlayerMembershipRequestsPageComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const formattedRequestId = this.formatRequestId(request.requestId);
-
     this.membershipRequestService
-      .acceptMembershipRequestPlayer({ requestId: formattedRequestId })
+      .acceptMembershipRequestPlayer(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>
@@ -105,10 +94,8 @@ export class PlayerMembershipRequestsPageComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const formattedRequestId = this.formatRequestId(request.requestId);
-
     this.membershipRequestService
-      .rejectMembershipRequestPlayer({ requestId: formattedRequestId })
+      .rejectMembershipRequestPlayer(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>

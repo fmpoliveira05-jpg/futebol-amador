@@ -7,6 +7,8 @@ import { POSITION_MAP_TONUMBER } from '../../../shared/constants/position-map-to
 import { PlayerListItem } from '../../../shared/Dtos/player-list-item.model';
 import { FormsModule } from '@angular/forms';
 import { PlayerFilterDto } from '../../../shared/Dtos/Player/PlayerFilterDto';
+import { MembershipRequestService } from '../../../services/membership-request.service';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-player-list-page',
@@ -22,12 +24,16 @@ export class PlayerListPageComponent {
   protected readonly players = signal<PlayerListItem[]>([]);
   protected readonly isLoading = signal<boolean>(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly successMessage = signal<string | null>(null);
 
   protected readonly filterDto = signal<PlayerFilterDto>(new PlayerFilterDto());
   protected readonly showFilters = signal<boolean>(false);
 
   protected readonly playersPerPage = 10;
   protected readonly currentPage = signal<number>(1);
+
+  private readonly membershipRequestService = inject(MembershipRequestService);
+  private readonly authService = inject(AuthService);
 
   protected readonly visiblePlayers = computed(() =>
     this.filteredPlayers().slice(
@@ -123,5 +129,19 @@ export class PlayerListPageComponent {
 
   protected hasPreviousPage(): boolean {
     return this.currentPage() > 1;
+  }
+
+  protected sendMembershipRequest(playerId: string): void {
+    this.membershipRequestService
+      .sendMembershipRequestTeam(playerId)
+      .subscribe({
+        next: () => {
+          this.successMessage.set('Pedido de adesão enviado com sucesso!');
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage.set('Não foi possível enviar o pedido de adesão.');
+        },
+      });
   }
 }

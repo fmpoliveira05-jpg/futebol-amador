@@ -52,6 +52,8 @@
       <p>{{ player.address }}</p>
       <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
     </div>
+
+    <button (click)="sendMembershipRequest(player.id)">Convidar para o clube</button>
   </div>
 
   <div class="pagination-controls">

@@ -90,10 +90,6 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  protected goToTeamMembers(): void {
-    this.router.navigate(['/team/members']);
-  }
-
   protected save(): void {
     if (!this.player() || this.form.invalid) {
       this.form.markAllAsTouched();
@@ -211,10 +207,8 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
     if (player.idTeam == null) {
       this.router.navigate(['/players/membership-requests']);
-    } else if (player.isAdmin) {
-      this.router.navigate(['/team/membership-requests']);
     } else {
-      this.errorMessage.set('Apenas administradores de equipa podem gerir pedidos de adesão.');
+      this.router.navigate(['/team/membership-requests']);
     }
   }
 

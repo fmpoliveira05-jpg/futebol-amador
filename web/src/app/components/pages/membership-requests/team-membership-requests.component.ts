@@ -8,7 +8,7 @@ import { MembershipRequest } from '../../..//shared/Dtos/membership-request.mode
   standalone: true,
   imports: [CommonModule],
   templateUrl: './team-membership-requests.component.html',
-  styleUrl: './team-membership-requests.component.css',
+  styleUrls: ['./team-membership-requests.component.css'],
 })
 export class TeamMembershipRequestsPageComponent {
   private readonly membershipRequestService = inject(MembershipRequestService);
@@ -67,7 +67,7 @@ export class TeamMembershipRequestsPageComponent {
     this.errorMessage.set(null);
 
     this.membershipRequestService
-      .acceptMembershipRequestTeam({ requestId: request.requestId })
+      .acceptMembershipRequestTeam(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>
@@ -95,7 +95,7 @@ export class TeamMembershipRequestsPageComponent {
     this.errorMessage.set(null);
 
     this.membershipRequestService
-      .rejectMembershipRequestTeam({ requestId: request.requestId })
+      .rejectMembershipRequestTeam(request.requestId)
       .subscribe({
         next: () => {
           this.requests.update((list) =>

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { MembershipRequest } from '../shared/Dtos/membership-request.model';
 import { AuthService } from './auth.service';
+import { validate } from 'uuid';
 
 @Injectable({
   providedIn: 'root',
@@ -11,7 +12,19 @@ import { AuthService } from './auth.service';
 export class MembershipRequestService {
   private readonly http = inject(HttpClient);
   private readonly auth = inject(AuthService);
-  private readonly baseUrl = `${environment.apiBaseUrl}`;
+
+  private readonly baseUrlPlayer = `${environment.apiBaseUrl}/Player`;
+  private readonly baseUrlTeam = `${environment.apiBaseUrl}/Team`;
+
+  private readonly headers = { 'Content-Type': 'application/json' };
+
+  formatId(Id: string): string {
+    if (validate(Id)) {
+      return Id;
+    }
+
+    return Id.replace(/^(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})$/, '$1-$2-$3-$4-$5');
+  }
 
   getMembershipRequestsForCurrentPlayer(): Observable<MembershipRequest[]> {
     const playerId = this.auth.getCurrentPlayerId();
@@ -20,64 +33,171 @@ export class MembershipRequestService {
     }
 
     return this.http.get<MembershipRequest[]>(
-      `${this.baseUrl}/Player/${playerId}/membership-requests`
+      `${this.baseUrlPlayer}/${playerId}/membership-requests`
     );
+  }
+
+  acceptMembershipRequestPlayer(requestId: string): Observable<void> {
+    return new Observable((observer) => {
+      const playerId = this.auth.getCurrentPlayerId();
+      if (!playerId) {
+        observer.error('No authenticated player');
+        return;
+      }
+
+      const formattedRequestId = this.formatId(requestId);
+
+      this.http
+        .post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/accept`, JSON.stringify(formattedRequestId), { headers: this.headers })
+        .subscribe({
+          next: () => {
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+    });
+  }
+
+  rejectMembershipRequestPlayer(requestId: string): Observable<void> {
+    return new Observable((observer) => {
+      const playerId = this.auth.getCurrentPlayerId();
+      if (!playerId) {
+        observer.error('No authenticated player');
+        return;
+      }
+
+      this.http
+        .delete<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/reject/${requestId}`)
+        .subscribe({
+          next: () => {
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+    });
   }
 
   getMembershipRequestsForCurrentTeam(): Observable<MembershipRequest[]> {
-    const playerId = this.auth.getCurrentPlayerId();
-    if (!playerId) {
-      throw new Error('No authenticated player');
-    }
+    return new Observable((observer) => {
+      this.auth.getCurrentTeamId().subscribe({
+        next: (teamId) => {
+          if (!teamId) {
+            observer.error('No team associated');
+            return;
+          }
 
-    return this.http.get<MembershipRequest[]>(
-      `${this.baseUrl}/Team/${playerId}/membership-requests`
-    );
+          this.http.get<MembershipRequest[]>(`${this.baseUrlTeam}/${teamId}/membership-request`).subscribe({
+            next: (requests) => {
+              observer.next(requests);
+              observer.complete();
+            },
+            error: (err) => observer.error(err),
+          });
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 
-  acceptMembershipRequestPlayer(request: { requestId: string }): Observable<void> {
-    const playerId = this.auth.getCurrentPlayerId();
-    if (!playerId) {
-      throw new Error('No authenticated player');
-    }
+  acceptMembershipRequestTeam(requestId: string): Observable<void> {
+    return new Observable((observer) => {
+      this.auth.getCurrentTeamId().subscribe({
+        next: (teamId) => {
+          if (!teamId) {
+            observer.error('No team associated');
+            return;
+          }
 
-    return this.http.post<void>(
-      `${this.baseUrl}/Player/${playerId}/membership-requests/accept`,
-      request
-    );
+          const formattedRequestId = this.formatId(requestId);
+
+          this.http
+            .post<void>(`${this.baseUrlTeam}/${teamId}/membership-request/accept`, JSON.stringify(formattedRequestId), { headers: this.headers })
+            .subscribe({
+              next: () => {
+                observer.next();
+                observer.complete();
+              },
+              error: (err) => observer.error(err),
+            });
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 
-  rejectMembershipRequestPlayer(request: { requestId: string }): Observable<void> {
-    const playerId = this.auth.getCurrentPlayerId();
-    if (!playerId) {
-      throw new Error('No authenticated player');
-    }
-
-    return this.http.delete<void>(
-      `${this.baseUrl}/Player/${playerId}/membership-requests/reject/${request.requestId}`
-    );
+  rejectMembershipRequestTeam(requestId: string): Observable<void> {
+    return new Observable((observer) => {
+      this.auth.getCurrentTeamId().subscribe({
+        next: (teamId) => {
+          if (!teamId) {
+            observer.error('No team associated');
+            return;
+          }
+          
+          this.http
+            .delete<void>(`${this.baseUrlTeam}/${teamId}/membership-request/${requestId}/reject`)
+            .subscribe({
+              next: () => {
+                observer.next();
+                observer.complete();
+              },
+              error: (err) => observer.error(err),
+            });
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 
-  acceptMembershipRequestTeam(request: { requestId: string }): Observable<void> {
-    const playerId = this.auth.getCurrentPlayerId();
-    if (!playerId) {
-      throw new Error('No authenticated player');
-    }
+  sendMembershipRequestPlayer(teamId: string): Observable<void> {
+    return new Observable((observer) => {
+      const playerId = this.auth.getCurrentPlayerId();
+      if (!playerId) {
+        observer.error('No authenticated player');
+        return;
+      }
 
-    return this.http.post<void>(
-      `${this.baseUrl}/Team/${playerId}/membership-requests/accept`,
-      request
-    );
+      const formattedTeamId = this.formatId(teamId);
+
+      this.http
+        .post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/send`, JSON.stringify(formattedTeamId), { headers: this.headers })
+        .subscribe({
+          next: () => {
+            observer.next();
+            observer.complete();
+          },
+          error: (err) => {
+            observer.error(err);
+          },
+        });
+    });
   }
 
-  rejectMembershipRequestTeam(request: { requestId: string }): Observable<void> {
-    const playerId = this.auth.getCurrentPlayerId();
-    if (!playerId) {
-      throw new Error('No authenticated player');
-    }
+  sendMembershipRequestTeam(playerId: string): Observable<void> {
+    return new Observable((observer) => {
+      this.auth.getCurrentTeamId().subscribe({
+        next: (teamId) => {
+        if (!teamId) {
+          observer.error('No team associated');
+          return;
+        }
 
-    return this.http.delete<void>(
-      `${this.baseUrl}/Team/${playerId}/membership-requests/reject/${request.requestId}`
-    );
+        const formattedPlayerId = this.formatId(playerId);
+
+        this.http
+          .post<void>(`${this.baseUrlTeam}/${teamId}/membership-requests/send`, JSON.stringify(formattedPlayerId), { headers: this.headers })
+          .subscribe({
+              next: () => {
+                observer.next();
+                observer.complete();
+              },
+              error: (err) => observer.error(err),
+            });
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 }
