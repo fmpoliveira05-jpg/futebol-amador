@@ -26,12 +26,11 @@ namespace Application.Services
 
         public async Task<string> CreateMatchRoomAsync(CreateChatRoomRequestDto request, string createdByUserId)
         {
-            // Criar uma lista de membros única (HashSet evita duplicados)
             var memberIds = new HashSet<string> { createdByUserId };
 
             foreach (var teamId in request.TeamIds)
             {
-                //adicionar verificação se a equipa existe e se os membros existem
+
                 List<string> userIds = await TeamRepository.GetAdminsIdsByTeamIdAsync(teamId);
                 foreach (var id in userIds)
                 {
