@@ -11,7 +11,7 @@ namespace Application.Interfaces.Services
 
         Task<TeamDetailsDto> GetTeamByIdAsync(Guid teamId);
 
-        Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId);
+        Task UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId);
 
         Task DeleteTeamAsync(Guid teamId, string currentUserId);
 

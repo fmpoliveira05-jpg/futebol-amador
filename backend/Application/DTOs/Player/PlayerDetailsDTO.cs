@@ -25,6 +25,10 @@ namespace Application.DTOs.PlayerDTOs
         public DateOnly DateOfBirth { get; set; }
 
         [Required]
+        [Range(ModelConstants.UserConst.MinAge, ModelConstants.UserConst.MaxAge)]
+        public int Age { get; set; }
+
+        [Required]
         [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
         public string Address { get; set; } = null!;
 

@@ -105,7 +105,7 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
-        public async Task UpdateTeamInfoAsync(Guid teamId, UpdateTeamDto dto, string currentUserId)
+        public async Task UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId)
         {
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
@@ -123,8 +123,8 @@ namespace Application.Services
             teamToUpdate.Name = dto.Name ?? teamToUpdate.Name;
             teamToUpdate.Description = dto.Description ?? teamToUpdate.Description;
             teamToUpdate.Icon = dto.icon ?? teamToUpdate.Icon;
-            teamToUpdate.Pitch.Name = dto.PitchName ?? teamToUpdate.Pitch.Name;
-            teamToUpdate.Pitch.Address = dto.PitchLocation ?? teamToUpdate.Pitch.Address;
+            teamToUpdate.Pitch.Name = dto.HomePitch.Name ?? teamToUpdate.Pitch.Name;
+            teamToUpdate.Pitch.Address = dto.HomePitch.Address ?? teamToUpdate.Pitch.Address;
 
             TeamRepository.UpdateTeam(teamToUpdate);
 
@@ -198,13 +198,17 @@ namespace Application.Services
 
             TeamValidator.GetTeamMembersValidation(team);
 
+            var today = DateTime.Today;
             var playerDtos = team.Members.Select(player => new PlayerDetailsDto
             {
+                PlayerId = player.Id,
                 Name = player.Name,
+                IsAdmin = player.IsAdmin,
                 Height = player.Height,
-                IdTeam = player.IdTeam,
                 Position = player.Position,
-                IsAdmin = player.IsAdmin
+                DateOfBirth = player.DateOfBirth,
+                Age = today.Year - player.DateOfBirth.Year,
+                IdTeam = player.IdTeam,
             }).ToList();
 
             return playerDtos;

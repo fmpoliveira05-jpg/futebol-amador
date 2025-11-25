@@ -51,7 +51,7 @@ namespace Api.Controllers
         }
 
         [HttpPut("{teamId}")]
-        public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] UpdateTeamDto dto)
+        public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] CreateTeamDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
