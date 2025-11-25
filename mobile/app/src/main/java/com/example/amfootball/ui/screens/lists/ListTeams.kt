@@ -428,9 +428,6 @@ private fun ListTeamTrailing(
 /**
  * Mock Data para os Previews
  */
-/**
- * Mock Data para os Previews
- */
 private val mockRanks = listOf(
     RankNameDto(id = "1", name = "Bronze"),
     RankNameDto(id = "2", name = "Prata"),

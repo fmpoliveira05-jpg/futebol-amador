@@ -29,6 +29,24 @@ fun HomePageScreen(globalNavController: NavHostController) {
             Text(text = "Criar equipa")
         }
 
+        Button(
+            onClick = {
+                globalNavController.navigate(
+                    route = "${Routes.TeamRoutes.UPDATE_TEAM.route}/CC2B558C-F362-4B40-B05A-79E8EABA2F8F")
+            }
+        ) {
+            Text(text = "Editar equipa")
+        }
+
+        Button(
+            onClick = {
+                globalNavController.navigate(
+                    route = "${Routes.TeamRoutes.MEMBERLIST.route}/105ABBA3-76FF-4499-A6BD-44179287E563")
+            }
+        ) {
+            Text(text = "Lista de membros")
+        }
+
     }
 }
 

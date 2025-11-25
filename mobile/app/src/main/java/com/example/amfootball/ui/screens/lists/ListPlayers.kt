@@ -93,6 +93,7 @@ fun ListPlayersScreen(
         showMoreItems = { viewModel.loadMorePlayers() }
     )
 }
+
 @Composable
 fun ListPlayersContent(
     isLoading: Boolean,
@@ -275,7 +276,7 @@ private fun ItemListPlayer(
                 AgeRow(age = player.age)
                 AddressRow(address = player.address)
                 PositionRow(position = player.position)
-                SizeRow(size = player.heigth)
+                SizeRow(height = player.heigth)
             }
         },
         trailing = {

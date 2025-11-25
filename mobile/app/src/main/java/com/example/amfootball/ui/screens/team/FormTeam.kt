@@ -11,34 +11,54 @@ import androidx.compose.material.icons.filled.GroupAdd
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.forms.FormTeamActions
+import com.example.amfootball.data.dtos.support.PitchInfo
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.errors.formErrors.TeamFormErros
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.ImagePicker
+import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.components.notification.showOfflineToast
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
 import com.example.amfootball.utils.TeamConst
 
+/**
+ * Ecrã principal para Criação e Edição de Equipas.
+ *
+ * Este Composable atua como contentor de estado (Stateful):
+ * - Coleta o estado do formulário, erros e rede do [TeamFormViewModel].
+ * - Define as ações de interação com os campos (callbacks).
+ * - Gere o estado de Loading e Erros de submissão.
+ *
+ * @param navHostController Controlador de navegação.
+ * @param viewModel O ViewModel que gere a lógica do formulário.
+ */
 @Composable
 fun FormTeamScreen(
     navHostController: NavHostController,
-    viewModel: TeamFormViewModel = viewModel()
+    viewModel: TeamFormViewModel = hiltViewModel()
 ) {
-    val uiForm by viewModel.uiFormState.observeAsState(initial = FormTeamDto())
-    val uiErrors by viewModel.uiErrors.observeAsState(initial = TeamFormErros())
+    val context = LocalContext.current
+    val uiForm by viewModel.uiFormState.collectAsStateWithLifecycle()
+    val uiErrors by viewModel.uiErrors.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnlie.collectAsStateWithLifecycle()
 
     val fieldTeamAction = FormTeamActions(
         onNameChange = viewModel::onNameChange,
@@ -52,35 +72,77 @@ fun FormTeamScreen(
         filedsTeam = uiForm,
         fieldTeamAction = fieldTeamAction,
         fieldsErrors = uiErrors,
-        onSubmitClick = { viewModel.onSubmit(navHostController = navHostController) },
+        uiState = uiState,
+        isOnline = isOnline,
+        onSubmitClick = {
+            if (isOnline) {
+                viewModel.onSubmit(navHostController = navHostController)
+            } else {
+                showOfflineToast(context = context)
+            }
+        },
+        onRetry = {
+            if(viewModel.isEditMode) {
+                viewModel.loadDataTeam()
+            }
+        },
         modifier = Modifier.padding(16.dp),
     )
 }
 
+/**
+ * Conteúdo visual do formulário (Stateless).
+ *
+ * Responsável por organizar o layout, exibir o loading/erro global e o banner offline.
+ * Envolve os campos do formulário num scroll vertical.
+ *
+ * @param filedsTeam Estado atual dos dados do formulário.
+ * @param fieldTeamAction Ações para atualizar os campos.
+ * @param fieldsErrors Erros de validação específicos de cada campo.
+ * @param uiState Estado global da UI (Loading/Erro de rede).
+ * @param isOnline Estado da conectividade para exibir o banner.
+ * @param onRetry Callback para tentar novamente em caso de erro global.
+ * @param onSubmitClick Callback para submeter o formulário.
+ */
 @Composable
-private fun ContentCreateTeam(modifier: Modifier = Modifier,
-                              filedsTeam: FormTeamDto,
-                              fieldTeamAction: FormTeamActions,
-                              fieldsErrors: TeamFormErros,
-                              onSubmitClick: () -> Unit
+private fun ContentCreateTeam(
+    filedsTeam: FormTeamDto,
+    fieldTeamAction: FormTeamActions,
+    fieldsErrors: TeamFormErros,
+    uiState: UiState,
+    isOnline: Boolean,
+    onRetry: () -> Unit,
+    onSubmitClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .verticalScroll(rememberScrollState())
-            .imePadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        FieldsCreateTeam(
-            filedTeam = filedsTeam,
-            fieldTeamAction = fieldTeamAction,
-            fieldsErrors = fieldsErrors,
-            onSubmitClick = onSubmitClick
-        )
-    }
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = onRetry,
+        content = {
+            Column(
+                modifier = modifier
+                    .verticalScroll(rememberScrollState())
+                    .imePadding(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                OfflineBanner(isVisible = !isOnline)
+
+                FieldsCreateTeam(
+                    filedTeam = filedsTeam,
+                    fieldTeamAction = fieldTeamAction,
+                    fieldsErrors = fieldsErrors,
+                    onSubmitClick = onSubmitClick
+                )
+            }
+        }
+    )
 }
 
-//Falta criar campo para afixar imagem
+/**
+ * Composable interno que contém apenas os campos de input e o botão de submissão.
+ */
 @Composable
 private fun FieldsCreateTeam(
     filedTeam: FormTeamDto,
@@ -156,51 +218,51 @@ private fun FieldsCreateTeam(
     )
 }
 
+//Mocks de Dados
+private val mockEditTeam = FormTeamDto(
+    name = "Vitória SC",
+    description = "Os Conquistadores. A maior equipa do Minho.",
+    pitch = PitchInfo(
+        name = "Estádio D. Afonso Henriques",
+        address = "Praça 26 de Maio, Guimarães"
+    )
+)
 
-@Preview(name = "Create Team - En",
-    locale = "en",
-    showBackground = true)
-@Preview(name = "Criar Equipa - PT",
-    locale = "pt-rPT",
-    showBackground = true)
+private val mockActions = FormTeamActions(
+    {}, {}, {}, {}, {}
+)
+
+@Preview(name = "Create Team - En", locale = "en", showBackground = true)
+@Preview(name = "Criar Equipa - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun PreviewFormTeamCreate() {
     AMFootballTheme {
         ContentCreateTeam(
             filedsTeam = FormTeamDto(),
-            fieldTeamAction = FormTeamActions(
-                onNameChange = {},
-                onDescriptionChange = {},
-                onImageChange = {},
-                onNamePitchChange = {},
-                onAddressPitchChange = {},
-            ),
-            fieldsErrors = TeamFormErros(), // Sem erros
-            onSubmitClick = {}, // Botão não faz nada no preview
+            fieldTeamAction = mockActions,
+            fieldsErrors = TeamFormErros(),
+            uiState = UiState(isLoading = false), // Mock State
+            isOnline = true, // Mock Online
+            onSubmitClick = {},
+            onRetry = {},
             modifier = Modifier.padding(16.dp)
         )
-    }}
+    }
+}
 
-@Preview(name = "Edit Team - En",
-    locale = "en",
-    showBackground = true)
-@Preview(name = "Editar Equipa - PT",
-    locale = "pt-rPT",
-    showBackground = true)
+@Preview(name = "Edit Team - En", locale = "en", showBackground = true)
+@Preview(name = "Editar Equipa - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun PreviewFormTeamEdit() {
     AMFootballTheme {
         ContentCreateTeam(
-            filedsTeam = FormTeamDto.generateEditExampleTeam(),
-            fieldTeamAction = FormTeamActions(
-                onNameChange = {},
-                onDescriptionChange = {},
-                onImageChange = {},
-                onNamePitchChange = {},
-                onAddressPitchChange = {},
-            ),
+            filedsTeam = mockEditTeam,
+            fieldTeamAction = mockActions,
             fieldsErrors = TeamFormErros(),
+            uiState = UiState(isLoading = false),
+            isOnline = true,
             onSubmitClick = {},
+            onRetry = {},
             modifier = Modifier.padding(16.dp)
         )
     }

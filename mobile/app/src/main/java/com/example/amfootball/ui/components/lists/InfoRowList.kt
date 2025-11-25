@@ -127,13 +127,13 @@ fun AddressRow(address: String) {
 
 /**
  * Exibe o tamanho (altura) com o ícone de régua.
- * @param size O tamanho (Int) em centímetros.
+ * @param heigth O tamanho (Int) em centímetros.
  */
 @Composable
-fun SizeRow(size: Int) {
+fun SizeRow(height: Int) {
     InfoRow(
         icon = Icons.Default.Straighten,
-        text = "$size cm",
+        text = "$height cm",
         modifier = Modifier.fillMaxWidth()
     )
 }

@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.screens.team
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -24,17 +24,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
+import com.example.amfootball.data.actions.itemsList.ItemsListMemberAction
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
@@ -54,14 +58,17 @@ import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
+//TODO: Corrigir previews + toast de network + retry
 @Composable
 fun ListMembersScreen(
     navHostController: NavHostController,
-    viewModel: ListMembersViewModel = viewModel()
+    viewModel: ListMembersViewModel = hiltViewModel()
 ) {
-    val filters by viewModel.uiFilter.observeAsState(initial = FilterMembersTeam())
-    val filtersErrors by viewModel.uiErrorFilters.observeAsState(initial = FilterMembersFilterError())
-    val list by viewModel.uiList.observeAsState(initial = emptyList())
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val listTypeMember by viewModel.uiListTypeMember.collectAsStateWithLifecycle()
+    val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
+    val filters by viewModel.uiFilter.collectAsStateWithLifecycle()
+    val filtersErrors by viewModel.uiErrorFilters.collectAsStateWithLifecycle()
     val filterAction = FilterMemberTeamAction(
         onTypeMemberChange = viewModel::onTypeMemberChange,
         onNameChange = viewModel::onNameChange,
@@ -74,46 +81,80 @@ fun ListMembersScreen(
         )
     )
 
-    val listTypeMember by viewModel.uiListTypeMember.observeAsState(initial = emptyList())
-    val listPosition by viewModel.uiListPositions.observeAsState(initial = emptyList())
+    val itemsListActions = ItemsListMemberAction(
+        onPromoteMember = viewModel::onPromoteMember,
+        onDemoteMember = viewModel::onDemoteMember,
+        onRemovePlayer = viewModel::onRemovePlayer,
+        onShowMoreInfo = viewModel::onShowMoreInfo
+    )
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    ListMemberContent(
+        filters = filters,
+        filterActions = filterAction,
+        filtersErrors = filtersErrors,
+        list = list,
+        listTypeMember = listTypeMember,
+        listPosition = listPosition,
+        uiState = uiState,
+        itemsListActions = itemsListActions,
+        navHostController = navHostController,
+    )
+}
+
+@Composable
+private fun ListMemberContent(
+    filters: FilterMembersTeam,
+    filterActions: FilterMemberTeamAction,
+    filtersErrors: FilterMembersFilterError,
+    list: List<MemberTeamDto>,
+    listTypeMember: List<TypeMember?>,
+    listPosition: List<Position?>,
+    uiState: UiState,
+    itemsListActions: ItemsListMemberAction,
+    navHostController: NavHostController
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    ListSurface(
-        list = list,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                header = {
-                    FilterHeader(isExpanded = filtersExpanded, onToggleExpand = { filtersExpanded = !filtersExpanded })
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = {},
+        content = {
+            ListSurface(
+                list = list,
+                filterSection = {
+                    FilterSection(
+                        isExpanded = filtersExpanded,
+                        onToggleExpand = { filtersExpanded = !filtersExpanded },
+                        header = {
+                            FilterHeader(isExpanded = filtersExpanded, onToggleExpand = { filtersExpanded = !filtersExpanded })
+                        },
+                        content = { paddingModifier ->
+                            FilterListMemberContent(
+                                filters = filters,
+                                filterActions = filterActions,
+                                filterErros = filtersErrors,
+                                listTypeMember = listTypeMember,
+                                listPosition = listPosition,
+                                modifier = paddingModifier
+                            )
+                        }
+                    )
                 },
-                content = { paddingModifier ->
-                    FilterListMemberContent(
-                        filters = filters,
-                        filterActions = filterAction,
-                        filterErros = filtersErrors,
-                        listTypeMember = listTypeMember,
-                        listPosition = listPosition,
-                        modifier = paddingModifier
+                listItems = { member ->
+                    ListMemberItem(
+                        member = member,
+                        promote = { itemsListActions.onPromoteMember(member.id) },
+                        despromote = { itemsListActions.onDemoteMember(member.id) },
+                        remove = { itemsListActions.onRemovePlayer(member.id) },
+                        showMore = { itemsListActions.onShowMoreInfo(member.id, navHostController) }
                     )
-                }
+                },
+                messageEmptyList = stringResource(id = R.string.list_members_empty)
             )
-        },
-        listItems = { member ->
-            ListMemberItem(
-                member = member,
-                promote = { viewModel.onPromoteMember(idPlayer = member.id) },
-                despromote = { viewModel.onDemoteMember(idAdmin = member.id) },
-                remove = { viewModel.onRemovePlayer(idPlayer = member.id) },
-                showMore = {
-                    viewModel.onShowMoreInfo(
-                        playerId = member.id,
-                        navHostController = navHostController
-                    )
-                }
-            )
-        },
-        messageEmptyList = stringResource(id = R.string.list_members_empty)
+        }
     )
 }
 
@@ -231,7 +272,7 @@ private fun MemberSupportingInfo(member: MemberTeamDto) {
         AgeRow(age = member.age)
         PositionRow(position = member.position)
         TypeMemberRow(typeMember = member.typeMember)
-        SizeRow(size = member.size)
+        SizeRow(height = member.height)
     }
 }
 
@@ -284,18 +325,114 @@ private fun MemberTrailingButtons(
     }
 }
 
+private val mockListTypes = listOf(null) + TypeMember.values().toList()
+private val mockListPositions = listOf(null) + Position.values().toList()
 
-@Preview(
-    name = "Lista de Memberos - PT",
-    locale = "pt-rPT",
-    showBackground = true
+private val mockMembers = listOf(
+    MemberTeamDto(
+        id = "1",
+        name = "João Silva",
+        age = 25,
+        positionId = 0,
+        isAdmin = true,
+        image = Uri.EMPTY,
+        height = 185
+    ),
+    MemberTeamDto(
+        id = "2",
+        name = "Pedro Santos",
+        age = 22,
+        positionId = 2,
+        isAdmin = false,
+        image = Uri.EMPTY,
+        height = 178
+    ),
+    MemberTeamDto(
+        id = "3",
+        name = "Miguel Costa",
+        age = 28,
+        positionId = 1,
+        isAdmin = false,
+        image = Uri.EMPTY,
+        height = 192
+    )
 )
-@Preview(
-    name = "Members List - EN",
-    locale = "en",
-    showBackground = true
+
+private val mockFilterActions = FilterMemberTeamAction(
+    {}, {}, {}, {}, {}, ButtonFilterActions({}, {})
 )
+
+private val mockItemActions = ItemsListMemberAction(
+    onPromoteMember = {},
+    onDemoteMember = {},
+    onRemovePlayer = {},
+    onShowMoreInfo = { _, _ -> }
+)
+
+@Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMembers() {
-    ListMembersScreen(rememberNavController())
+fun PreviewListMemberContent_Normal() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = mockMembers,
+        listTypeMember = mockListTypes,
+        listPosition = mockListPositions,
+        uiState = UiState(isLoading = false),
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. List Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Empty() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = emptyList(),
+        listTypeMember = mockListTypes,
+        listPosition = mockListPositions,
+        uiState = UiState(isLoading = false),
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "3. Loading - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Loading - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Loading() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = emptyList(),
+        listTypeMember = mockListTypes,
+        listPosition = mockListPositions,
+        uiState = UiState(isLoading = true),
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "4. Erro - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "4. Error - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Error() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = emptyList(),
+        listTypeMember = mockListTypes,
+        listPosition = mockListPositions,
+        uiState = UiState(isLoading = false, errorMessage = "Falha ao conectar ao servidor."),
+        itemsListActions = mockItemActions,
+        navHostController = rememberNavController()
+    )
 }

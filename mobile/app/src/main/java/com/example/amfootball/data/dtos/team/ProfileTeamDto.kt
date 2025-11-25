@@ -16,35 +16,25 @@ import com.google.gson.annotations.SerializedName
  * @property totalPoints A pontuação total atual da equipa.
  * @property rank O nível ou nome do rank atual da equipa.
  * @property logo A URL ou caminho do logótipo da equipa (pode ser null).
- * @property pitch O objeto [PitchInfo] que contém os dados do campo de jogo. A chave JSON esperada é "PitchDto" ou "pitchDto".
+ * @property pitch O objeto [PitchInfo] que contém os dados do campo de jogo.
  */
 data class ProfileTeamDto(
     val id: String = "",
     val name: String = "",
     val description: String = "",
     val foundationDate: String? = null,
-    val totalPoints: Int,
-    val rank: String,
+    val totalPoints: Int = 0,
+    val rank: String = "",
     val logo: String? = null,
     @SerializedName("PitchDto", alternate = ["pitchDto"])
     val pitch: PitchInfo = PitchInfo(),
 )
-{
-    companion object {
-        fun profileExempleTeam(): ProfileTeamDto {
-            return ProfileTeamDto(
-                id = "team_demo_001",
-                name = "Os Invencíveis FC",
-                description = "Equipa de exemplo.",
-                foundationDate = "2024-01-01",
-                totalPoints = 42,
-                rank = "Ouro",
-                pitch = PitchInfo(
-                    name = "Estádio Demo",
-                    address = "Rua dos Testes, Nº 10"
-                ),
-                logo = null
-            )
-        }
-    }
+
+fun ProfileTeamDto.toFormTeamDto(): FormTeamDto {
+    return FormTeamDto(
+        id = this.id,
+        name = this.name,
+        pitch = this.pitch,
+        description = this.description,
+    )
 }
