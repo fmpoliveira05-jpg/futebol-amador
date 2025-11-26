@@ -32,7 +32,7 @@ export class PlayerService {
 
   /**
    * Obtém a lista de jogadores.
-   * @returns Um Observable contendo uma lista de objetos `PlayerListItem` com informações resumidas dos jogadores.
+   * @returns Um Observable que contém uma lista de objetos `PlayerListItem` com informações resumidas dos jogadores.
    */
   getPlayers(): Observable<PlayerListItem[]> {
     return this.http.get<PlayerListItem[]>(`${this.baseUrl}/listPlayers`);
@@ -41,7 +41,7 @@ export class PlayerService {
   /**
    * Obtém os detalhes de um jogador pelo seu ID.
    * @param playerId O ID do jogador.
-   * @returns Um Observable contendo os detalhes completos do jogador.
+   * @returns Um Observable que contém os detalhes completos do jogador.
    */
   getPlayerById(playerId: string): Observable<PlayerDetails> {
     return this.http.get<PlayerDetails>(`${this.baseUrl}/details/${playerId}`);
@@ -49,7 +49,7 @@ export class PlayerService {
 
   /**
    * Obtém o perfil do jogador autenticado.
-   * @returns Um Observable contendo os detalhes do perfil do jogador.
+   * @returns Um Observable que contém os detalhes do perfil do jogador.
    */
   getMyProfile(): Observable<PlayerDetails> {
     return this.http.get<PlayerDetails>(`${this.baseUrl}/get-my-profile`);

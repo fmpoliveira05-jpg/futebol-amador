@@ -7,7 +7,7 @@ import { AuthService } from './auth.service';
 import { validate } from 'uuid';
 
 /**
- * Serviço responsável pelo gerenciamento dos pedidos de adesão, tanto para jogadores quanto para equipas.
+ * Serviço responsável pela gestão dos pedidos de adesão, tanto para jogadores quanto para equipas.
  * Inclui funções para obter, aceitar, rejeitar e enviar pedidos de adesão.
  */
 @Injectable({
@@ -55,7 +55,7 @@ export class MembershipRequestService {
 
   /**
    * Obtém os pedidos de adesão para o jogador autenticado.
-   * @returns Um Observable contendo uma lista de pedidos de adesão.
+   * @returns Um Observable que contém uma lista de pedidos de adesão.
    * @throws Um erro se o jogador não estiver autenticado.
    */
   getMembershipRequestsForCurrentPlayer(): Observable<MembershipRequest[]> {
@@ -125,7 +125,7 @@ export class MembershipRequestService {
 
   /**
    * Obtém os pedidos de adesão para a equipa atual associada ao jogador autenticado.
-   * @returns Um Observable contendo uma lista de pedidos de adesão.
+   * @returns Um Observable que contém uma lista de pedidos de adesão.
    * @throws Um erro se não houver equipa associada ao jogador.
    */
   getMembershipRequestsForCurrentTeam(): Observable<MembershipRequest[]> {

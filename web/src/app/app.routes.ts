@@ -10,25 +10,43 @@ import { SignupComponent } from './components/pages/signup/signup.component';
 import { LogoutComponent } from './components/pages/login/logout.component';
 import { AuthGuard } from './shared/auth/auth.guard';
 import { PlayerMembershipRequestsPageComponent } from './components/pages/membership-requests/player-membership-requests.component';
-import { TeamMembersPageComponent } from './components/pages/team-members/team-members.component';
 import { TeamMembershipRequestsPageComponent } from './components/pages/membership-requests/team-membership-requests.component';
 import { TeamProfile } from './components/pages/team-profile/team-profile';
 import { CreateTeam } from './components/pages/create-team/create-team';
 
+/**
+ * Configuração de rotas da aplicação.
+ * Define as rotas e os componentes associados, incluindo proteção com guardas de autenticação e permissões.
+ */
 export const routes: Routes = [
-  { path: '', component: Home},
-  { path: 'teams', component: Teams, canActivate: [AuthGuard]},
-  { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard]},
-  { path: 'team/:teamId', component: TeamProfile, canActivate: [AuthGuard]}, /* cena de is admin aq tb */
-  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], /*data: { requiresTeam: true },*/},
-  { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard]},
+  // Página inicial
+  { path: '', component: Home },
+
+  // Páginas relacionadas às equipas, com proteção de acesso autenticado
+  { path: 'teams', component: Teams, canActivate: [AuthGuard] },
+  { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard] },
+  { path: 'team/:teamId', component: TeamProfile, canActivate: [AuthGuard] },
+  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard] },
+  { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard] },
+
+  // Páginas de registo e login
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
-  { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard]},
-  { path: 'players', component: PlayerListPageComponent, canActivate: [AuthGuard], /*data: { isAdmin: true }*/ },
-  { path: 'players/me', component: PlayerProfileRedirectComponent, canActivate: [AuthGuard]},
-  { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard]},
-  { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { requiresTeam: false },},
-  { path: 'settings', component: SettingsPageComponent},
-  { path: '**', redirectTo: 'players'},
+  
+  // Logout (proteção de acesso com AuthGuard)
+  { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard] },
+
+  // Páginas relacionadas aos jogadores
+  { path: 'players', component: PlayerListPageComponent, canActivate: [AuthGuard] },
+  { path: 'players/me', component: PlayerProfileRedirectComponent, canActivate: [AuthGuard] },
+  { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard] },
+
+  // Página de pedidos de adesão de jogadores
+  { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { requiresTeam: false } },
+
+  // Página de definições do utilizador
+  { path: 'settings', component: SettingsPageComponent },
+
+  // Redirecionamento para a página de jogadores em caso de rota inválida
+  { path: '**', redirectTo: 'players' },
 ];

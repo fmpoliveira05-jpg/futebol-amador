@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 
 /**
  * Componente responsável pelo processo de registo de um novo jogador.
- * Permite ao utilizador criar uma nova conta fornecendo dados como nome, email, senha, entre outros.
+ * Permite ao utilizador criar uma nova conta ao fornecer dados como nome, email, senha, entre outros.
  */
 @Component({
   selector: 'app-signup',
@@ -29,7 +29,7 @@ export class SignupComponent {
   private authService = inject(AuthService);
 
   /**
-   * Serviço de roteamento, utilizado para navegar entre as páginas.
+   * Serviço de routing, utilizado para navegar entre as páginas.
    */
   private router = inject(Router);
 
@@ -39,7 +39,7 @@ export class SignupComponent {
   private fb = inject(FormBuilder);
 
   /**
-   * Formulário reativo para registo do jogador, contendo campos como nome, email, senha, etc.
+   * Formulário reativo para registo do jogador, que contém campos como nome, email, senha, etc.
    * Cada campo possui validações específicas.
    */
   signupForm = this.fb.group({

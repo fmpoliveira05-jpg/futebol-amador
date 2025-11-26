@@ -20,12 +20,12 @@ export interface MembershipRequest {
   playerId: string;
 
   /**
-   * ID da equipa para a qual o jogador está pedindo adesão.
+   * ID da equipa para a qual o jogador está a pedir adesão.
    */
   teamId: string;
 
   /**
-   * Nome da equipa para a qual o jogador está pedindo adesão.
+   * Nome da equipa para a qual o jogador está a pedir adesão.
    */
   teamName: string;
 

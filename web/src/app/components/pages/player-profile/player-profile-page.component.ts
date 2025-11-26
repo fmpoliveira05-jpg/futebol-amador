@@ -11,7 +11,7 @@ import { POSITION_MAP } from '../../../shared/constants/position-map';
 
 /**
  * Componente responsável pela gestão do perfil do jogador.
- * Permite visualizar, editar, e atualizar o perfil do jogador, bem como gerenciar a adesão à equipa e a exclusão de conta.
+ * Permite visualizar, editar, e atualizar o perfil do jogador, bem como gerir a adesão à equipa e a exclusão de conta.
  */
 @Component({
   selector: 'app-player-profile-page',

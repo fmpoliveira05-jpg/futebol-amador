@@ -7,8 +7,8 @@ import { CommonModule } from '@angular/common';
 import { CookieService } from 'ngx-cookie-service';
 
 /**
- * Componente responsável pela tela de login.
- * Realiza a autenticação do utilizador e gerencia o redirecionamento.
+ * Componente responsável pelo ecrã de login.
+ * Realiza a autenticação do utilizador e gere o redirecionamento.
  */
 @Component({
   selector: 'app-login',
@@ -20,7 +20,7 @@ import { CookieService } from 'ngx-cookie-service';
 export class LoginComponent {
 
   private authService = inject(AuthService); // Serviço de autenticação
-  private router = inject(Router); // Serviço de roteamento
+  private router = inject(Router); // Serviço de routing
   private fb = inject(FormBuilder); // Serviço de construção de formulários
   private cookieService = inject(CookieService); // Serviço para manipulação de cookies
 

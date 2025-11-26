@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
    * Método que determina se a navegação para uma rota específica pode ocorrer.
    * Verifica a autenticidade do utilizador, permissões de administrador e se o utilizador tem uma equipa associada.
    * Caso alguma dessas verificações falhe, o utilizador será redirecionado para a página de login ou outra página apropriada.
-   * @param route A rota ativada que está sendo verificada.
+   * @param route A rota ativada que está a ser verificada.
    * @param state O estado da rota, que contém informações sobre a navegação.
    * @returns Um valor booleano ou um Observable/Promise que determina se a navegação pode continuar.
    */
