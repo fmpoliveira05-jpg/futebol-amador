@@ -56,6 +56,7 @@ fun DatePickerDockedFutureLimitedDate(
     contentDescription: String,
     isSingleLine: Boolean = false,
     isError: Boolean = false,
+    enabled: Boolean = true,
     errorMessage: String? = stringResource(id = R.string.mandatory_field),
     modifier: Modifier = Modifier
 ) {
@@ -67,6 +68,7 @@ fun DatePickerDockedFutureLimitedDate(
         isSingleLine = isSingleLine,
         isError = isError,
         errorMessage = errorMessage,
+        enabled = enabled,
         modifier = modifier,
         validator = { dateMillis, todayMillis -> dateMillis >= todayMillis }
     )
@@ -96,6 +98,7 @@ fun DatePickerDockedPastLimitedDate(
     isSingleLine: Boolean = false,
     isError: Boolean = false,
     errorMessage: String? = stringResource(id = R.string.mandatory_field),
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     LimitedDatePickerBase(
@@ -107,6 +110,7 @@ fun DatePickerDockedPastLimitedDate(
         isError = isError,
         errorMessage = errorMessage,
         modifier = modifier,
+        enabled = enabled,
         validator = { dateMillis, todayMillis -> dateMillis <= todayMillis }
     )
 }
@@ -132,6 +136,7 @@ fun DatePickerDocked(value: String,
                      modifier: Modifier = Modifier,
                      contentDescription: String,
                      isError: Boolean = false,
+                     enabled: Boolean = false,
                      errorMessage: String? = null
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
@@ -148,6 +153,7 @@ fun DatePickerDocked(value: String,
         onDateSelected = onDateSelected,
         isError = isError,
         errorMessage = errorMessage,
+        enabled = enabled,
         modifier = modifier
     )
 }
@@ -170,6 +176,7 @@ private fun LimitedDatePickerBase(
     isSingleLine: Boolean,
     isError: Boolean,
     errorMessage: String?,
+    enabled: Boolean = false,
     modifier: Modifier,
     validator: (dateMillis: Long, todayMillis: Long) -> Boolean
 ) {
@@ -207,6 +214,7 @@ private fun LimitedDatePickerBase(
         onDateSelected = onDateSelected,
         isSingleLine = isSingleLine,
         isError = isError,
+        enabled = enabled,
         errorMessage = errorMessage,
         modifier = modifier
     )
@@ -237,6 +245,7 @@ private fun DatePickerImpl(
     isSingleLine: Boolean = false,
     isError: Boolean = false,
     errorMessage: String? = null,
+    enabled: Boolean,
     modifier: Modifier = Modifier
 ){
     LaunchedEffectDatePicker(
@@ -255,6 +264,7 @@ private fun DatePickerImpl(
             onIconClick = onIconClick,
             isSingleLine = isSingleLine,
             isError = isError,
+            enabled = enabled,
             errorMessage = errorMessage
         )
 
@@ -303,6 +313,7 @@ private fun DateOutlineOutlinedTextField(
     onIconClick: () -> Unit,
     isSingleLine: Boolean = false,
     isError: Boolean = false,
+    enabled: Boolean,
     errorMessage: String? = null,
 ) {
     OutlinedTextField(
@@ -329,6 +340,7 @@ private fun DateOutlineOutlinedTextField(
                 )
             }
         },
+        enabled = true,
         singleLine = isSingleLine,
         modifier = Modifier
             .fillMaxWidth()
