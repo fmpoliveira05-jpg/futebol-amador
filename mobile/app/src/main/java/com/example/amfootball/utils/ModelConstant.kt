@@ -169,3 +169,16 @@ object FinishMatchConst {
     /** Máximo de golos a registar num resultado final. */
     const val MAX_GOALS = 100
 }
+
+/**
+ * Constantes especificas para as partidas de futebol
+ * */
+object MatchConsts {
+    /** Tamanho Mínimo da mensagem do Motivo de Cancelamento da Partida*/
+    const val MIN_CANCEL_REASON_LENGTH = 50
+
+    /** Tamanho Máximo da mensagem do Motivo de Cancelamento da Partida*/
+    const val MAX_CANCEL_REASON_LENGTH = 5
+
+
+}

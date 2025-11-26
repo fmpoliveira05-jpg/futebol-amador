@@ -92,9 +92,6 @@ class FormMatchInviteViewModel @Inject constructor(
             MatchFormMode.SEND.name -> {
                 //TODO: Mandar pedido há API para ir buscar apenas o nome do Opponente
             }
-            MatchFormMode.CANCEL.name -> {
-                //TODO: Fazer o pedido ao endPoint de cancelMatch
-            }
             MatchFormMode.POSTPONE.name -> {
                 //TODO: Fazer o pedido ao endPoint de postponeMatch
             }
@@ -106,6 +103,10 @@ class FormMatchInviteViewModel @Inject constructor(
         navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
             popUpTo(0)
         }
+    }
+
+    //TODO: Implementar
+    fun onCancelForm(navHostController: NavHostController, cancelReason: String) {
     }
 
     //Metodo Privados

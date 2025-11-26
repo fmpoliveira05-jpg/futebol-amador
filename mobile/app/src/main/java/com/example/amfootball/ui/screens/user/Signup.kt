@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,16 +107,16 @@ private fun FieldsSignUp(
     onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit
 ) {
     // --- Estados para os campos ---
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordVerification by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
-    var position by remember { mutableStateOf<Int?>(null) }
-    var dateOfBirth by remember { mutableStateOf<Long?>(null) }
-    var phone by remember { mutableStateOf("") }
-    var countryCode by remember { mutableStateOf("+351") }
-    var height by remember { mutableStateOf("") }
-    var address by remember { mutableStateOf("") }
+    var email by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    var passwordVerification by rememberSaveable { mutableStateOf("") }
+    var name by rememberSaveable { mutableStateOf("") }
+    var position by rememberSaveable { mutableStateOf<Int?>(null) }
+    var dateOfBirth by rememberSaveable { mutableStateOf<Long?>(null) }
+    var phone by rememberSaveable { mutableStateOf("") }
+    var countryCode by rememberSaveable { mutableStateOf("+351") }
+    var height by rememberSaveable { mutableStateOf("") }
+    var address by rememberSaveable { mutableStateOf("") }
 
     // --- Estados da UI ---
     var showDatePicker by remember { mutableStateOf(false) }

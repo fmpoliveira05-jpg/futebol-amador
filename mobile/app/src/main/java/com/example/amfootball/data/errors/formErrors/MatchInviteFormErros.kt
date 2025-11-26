@@ -8,8 +8,11 @@ import com.example.amfootball.data.errors.ErrorMessage
  *
  * @property dateError Mensagem de erro para o campo de data do jogo.
  * @property timeError Mensagem de erro para o campo de hora do jogo.
+ * @property cancelReasonError Mensagem de erro para o campo de cancelamento de partida.
+ *
  */
 data class MatchInviteFormErros(
     val dateError: ErrorMessage? = null,
-    val timeError: ErrorMessage? = null
+    val timeError: ErrorMessage? = null,
+    val cancelReasonError: ErrorMessage? = null
 )

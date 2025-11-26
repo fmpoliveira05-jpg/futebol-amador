@@ -15,6 +15,9 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -24,12 +27,15 @@ import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
+import com.example.amfootball.utils.MatchConsts
+import com.example.amfootball.utils.TeamConst
 
 //TODO: Meter no Cancel para ser enabled os campos todos e no caso do POstPOne o Home também, por enquato para simplificar simplesmente não aparece
 @Composable
@@ -44,10 +50,12 @@ fun FormMatchInviteScreen(
         onGameDateChange = viewModel::onGameDateChange,
         onTimeGameChange = viewModel::onTimeGameChange,
         onLocalGameChange = viewModel::onLocalGameChange,
-        onSubmitForm = viewModel::onSubmitForm
+        onSubmitForm = viewModel::onSubmitForm,
+        onCancelForm = viewModel::onCancelForm
     )
 
     val mode = viewModel.mode
+
     ContentSendMatchInviteScreen(
         navHostController = navHostController,
         fields = fields,
@@ -82,7 +90,6 @@ private fun ContentSendMatchInviteScreen(
     }
 }
 
-//TODO: Meter para os datePicker e TimePicker receberem texto de erro
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FieldsSendMatchInvite(
@@ -92,6 +99,8 @@ private fun FieldsSendMatchInvite(
     mode: MatchFormMode,
     navHostController: NavHostController
 ) {
+    var cancelReason by rememberSaveable() { mutableStateOf("") }
+
     TextFieldOutline(
         label = "Opponente",
         value = fields.nameOpponent,
@@ -130,15 +139,38 @@ private fun FieldsSendMatchInvite(
     }
 
     if (mode == MatchFormMode.CANCEL) {
-        //TODO: TextField para descrever o motivo de cancelamento
+        TextFieldOutline(
+            label = stringResource(id = R.string.label_field_description_team),
+            value = cancelReason,
+            onValueChange = { newValue ->
+                cancelReason = newValue
+            },
+            isSingleLine = false,
+            isRequired = true,
+            minLenght = MatchConsts.MIN_CANCEL_REASON_LENGTH,
+            maxLenght = MatchConsts.MAX_CANCEL_REASON_LENGTH,
+            isError = errors.cancelReasonError != null,
+            errorMessage = errors.cancelReasonError?.let {
+                stringResource(id = it.messageId, *it.args.toTypedArray())
+            }
+        )
+
     }
 
-    SubmitFormButton(
-        onClick = { actions.onSubmitForm(navHostController) },
-        imageButton = Icons.AutoMirrored.Filled.Send,
-        text = stringResource(R.string.button_send_match_invite),
-        contentDescription = stringResource(id = R.string.button_description_send_match_invite)
-    )
+    if(mode != MatchFormMode.CANCEL) {
+        SubmitFormButton(
+            onClick = { actions.onSubmitForm(navHostController) },
+            imageButton = Icons.AutoMirrored.Filled.Send,
+            text = stringResource(R.string.button_send_match_invite),
+            contentDescription = stringResource(id = R.string.button_description_send_match_invite)
+        )
+    } else {
+        SubmitCancelButton(
+            text = stringResource(id = R.string.button_cancel_match),
+            contentDescription = stringResource(id = R.string.button_cancel_match_description),
+            onClick = { actions.onCancelForm(navHostController, cancelReason) }
+        )
+    }
 }
 
 @Preview(name = "Send Match Invite - EN", locale = "en", showBackground = true)

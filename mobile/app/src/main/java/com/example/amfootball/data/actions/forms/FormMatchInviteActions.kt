@@ -17,5 +17,6 @@ data class FormMatchInviteActions(
     val onGameDateChange: (newDate: Long) -> Unit,
     val onTimeGameChange: (newTime: String) -> Unit,
     val onLocalGameChange: (isHome: Boolean) -> Unit,
-    val onSubmitForm: (navHostController: NavHostController) -> Unit
+    val onSubmitForm: (navHostController: NavHostController) -> Unit,
+    val onCancelForm: (navHostController: NavHostController, cancelReason: String) -> Unit
 )
