@@ -71,7 +71,7 @@ export class Teams {
   sendMembershipRequest(teamId: string): void {
     this.membershipRequestService.sendMembershipRequestPlayer(teamId).subscribe({
       next: () => {
-        this.successMessage.set('Pedido de adesão enviado para a equipe com sucesso!');
+        this.successMessage.set('Pedido de adesão enviado para a equipa com sucesso!');
         this.errorMessage.set(null);
       },
       error: (err) => {
