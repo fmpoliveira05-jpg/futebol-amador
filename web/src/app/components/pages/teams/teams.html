@@ -1,5 +1,10 @@
 <!-- <app-auth-header></app-auth-header> -->
 <app-search-team></app-search-team>
+<div class="container container-button" *ngIf="!hasTeam()">
+    <button class="btn btn-primary" (click)="goToCreateTeam()">
+        Crie sua Própria Equipa!
+    </button>
+</div>
 <div class="row">
     <div class="small-container" *ngFor="let team of teams()">
         <a routerLink="/team/{{team.id}}">

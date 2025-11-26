@@ -4,6 +4,7 @@ import { catchError, map, Observable, of, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { CookieService } from 'ngx-cookie-service';
+import { PlayerDetails } from '../shared/Dtos/player.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -76,8 +77,8 @@ export class AuthService {
     }));
   }
   
-  getPlayerData(playerId: string): Observable<any> {
-    return this.http.get(`${this.baseUrl}/Player/details/${playerId}`);
+  getPlayerData(playerId: string): Observable<PlayerDetails> {
+    return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`);
   }
 
   getCurrentTeamId(): Observable<string | null> {
