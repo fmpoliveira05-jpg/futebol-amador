@@ -9,6 +9,10 @@ import { AuthService } from '../../../services/auth.service';
 import { POSITION_MAP_TONUMBER } from '../../../shared/constants/position-map-to-number';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 
+/**
+ * Componente responsável pela gestão do perfil do jogador.
+ * Permite visualizar, editar, e atualizar o perfil do jogador, bem como gerenciar a adesão à equipa e a exclusão de conta.
+ */
 @Component({
   selector: 'app-player-profile-page',
   standalone: true,
@@ -17,33 +21,28 @@ import { POSITION_MAP } from '../../../shared/constants/position-map';
   styleUrl: './player-profile-page.component.css',
 })
 export class PlayerProfilePageComponent implements OnInit, OnDestroy {
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-  private readonly playerService = inject(PlayerService);
-  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute); // Serviço para capturar parâmetros da rota
+  private readonly router = inject(Router); // Serviço para navegação
+  private readonly playerService = inject(PlayerService); // Serviço de jogador
+  private readonly fb = inject(FormBuilder); // Serviço para construção de formulários reativos
 
-  protected readonly isLoading = signal<boolean>(false);
-  protected readonly isSaving = signal<boolean>(false);
-  protected readonly errorMessage = signal<string | null>(null);
-  protected readonly successMessage = signal<string | null>(null);
-  protected readonly isEditMode = signal<boolean>(false);
-  protected readonly player = signal<PlayerDetails | null>(null);
-  protected readonly POSITION_MAP_TONUMBER = POSITION_MAP_TONUMBER;
-  protected readonly POSITION_MAP = POSITION_MAP;
+  protected readonly isLoading = signal<boolean>(false); // Estado de carregamento
+  protected readonly isSaving = signal<boolean>(false); // Estado de salvamento
+  protected readonly errorMessage = signal<string | null>(null); // Mensagem de erro
+  protected readonly successMessage = signal<string | null>(null); // Mensagem de sucesso
+  protected readonly isEditMode = signal<boolean>(false); // Estado de edição do perfil
+  protected readonly player = signal<PlayerDetails | null>(null); // Dados do jogador
+  protected readonly POSITION_MAP_TONUMBER = POSITION_MAP_TONUMBER; // Mapeamento de posições para valores numéricos
+  protected readonly POSITION_MAP = POSITION_MAP; // Mapeamento de posições
 
-  private auth = inject(AuthService);
+  private auth = inject(AuthService); // Serviço de autenticação
 
-  protected form!: FormGroup;
+  protected form!: FormGroup; // Formulário de edição de perfil
 
-  private sub?: Subscription;
+  private sub?: Subscription; // Assinatura do parâmetro da rota
 
-  protected readonly hasTeam = computed(() =>
-    !!this.player()?.idTeam
-  );
-
-  protected readonly isOwnProfile = computed(() =>
-    this.player()?.playerId === this.auth.getCurrentPlayerId()
-  );
+  protected readonly hasTeam = computed(() => !!this.player()?.idTeam); // Verifica se o jogador pertence a uma equipa
+  protected readonly isOwnProfile = computed(() => this.player()?.playerId === this.auth.getCurrentPlayerId()); // Verifica se o perfil é do próprio jogador
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -71,6 +70,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  /**
+   * Alterna entre o modo de visualização e edição do perfil do jogador.
+   */
   protected toggleEdit(): void {
     this.isEditMode.set(!this.isEditMode());
     this.successMessage.set(null);
@@ -90,6 +92,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Salva as alterações feitas no perfil do jogador.
+   */
   protected save(): void {
     if (!this.player() || this.form.invalid) {
       this.form.markAllAsTouched();
@@ -97,9 +102,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
 
     const current = this.player()!;
-
     const position = this.form.value['position'];
-
     const positionEnumValue = this.POSITION_MAP_TONUMBER[position];
 
     if (positionEnumValue === undefined) {
@@ -142,6 +145,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Permite ao jogador abandonar a sua equipa.
+   */
   protected leaveTeam(): void {
     const p = this.player();
     if (!p || !p.idTeam) {
@@ -170,6 +176,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Apaga a conta do jogador de forma irreversível.
+   */
   protected deleteAccount(): void {
     const p = this.player();
     if (!p) return;
@@ -200,6 +209,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Redireciona para a página de pedidos de adesão, dependendo se o jogador tem ou não equipa.
+   */
   protected onViewMembershipRequests(): void {
     const player = this.player();
     
@@ -214,10 +226,16 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Método fictício para enviar um pedido de adesão a uma equipa.
+   */
   protected onSendMembershipRequest(): void {
     alert('Aqui, no futuro, vais enviar um pedido de adesão a uma equipa.');
   }
 
+  /**
+   * Carrega os dados de um jogador a partir do ID ou carrega o perfil do jogador autenticado.
+   */
   private loadPlayer(playerIdOrMe: string, showLoader: boolean = true): void {
     if (showLoader) {
       this.isLoading.set(true);
