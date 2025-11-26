@@ -1,5 +1,5 @@
     <section class="page">
-        <div class="card" *ngIf="!hasTeam">
+        <div class="card" *ngIf="!hasTeam()">
             <h2 class="card-title">Criar nova equipa:</h2>
             <form class="form" [formGroup]="form">
                 <div class="form-grid">
@@ -33,7 +33,7 @@
                 </div>
             </form>
         </div>
-        <div class="card" *ngIf="hasTeam">
+        <div class="card" *ngIf="hasTeam()">
             <h2 class="card-title">Você já pertence à uma equipa.</h2>
         </div>
     </section>

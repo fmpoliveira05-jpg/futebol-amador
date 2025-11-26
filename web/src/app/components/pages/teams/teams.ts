@@ -1,12 +1,13 @@
-import { Component, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { PlayerService } from '../../../services/player.service';
 import { InfoTeamDto } from '../../../shared/Dtos/Team/InfoTeamDto';
 import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
-import { CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SearchTeam } from '../../partials/search-team/search-team';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { AuthService } from '../../../services/auth.service';
+import { PlayerDetails } from '../../../shared/Dtos/player.model';
 
 @Component({
   selector: 'app-teams',
@@ -19,6 +20,7 @@ export class Teams {
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  player = signal<PlayerDetails | null>(null);
 
   filter = signal<FilterListTeamDto>({});
 
@@ -30,11 +32,15 @@ export class Teams {
     private authService: AuthService
   ) {}
 
+  protected readonly hasTeam = computed(() => !!this.player()?.idTeam);
+
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.filter.set(params as FilterListTeamDto);
       this.loadTeams();
     });
+
+    this.loadPlayer();
   }
 
   loadTeams() {
@@ -61,9 +67,7 @@ export class Teams {
   }
 
   sendMembershipRequest(teamId: string): void {
-    this.membershipRequestService
-    .sendMembershipRequestPlayer(teamId)
-    .subscribe({
+    this.membershipRequestService.sendMembershipRequestPlayer(teamId).subscribe({
       next: () => {
         this.successMessage.set('Pedido de adesão enviado para a equipe com sucesso!');
         this.errorMessage.set(null);
@@ -75,7 +79,21 @@ export class Teams {
     });
   }
 
-  goToCreateTeam(){
+  loadPlayer(): void {
+    this.playerService.getMyProfile().subscribe({
+      next: (player) => {
+        this.player.set(player);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Não foi possível carregar as informações do jogador.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
+  goToCreateTeam() {
     this.router.navigate(['/createTeam']);
   }
 }

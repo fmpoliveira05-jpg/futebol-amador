@@ -17,7 +17,6 @@ import { PlayerService } from '../../../services/player.service';
 })
 export class CreateTeam {
   player = signal<PlayerDetails | null>(null);
-  hasTeam = signal<boolean>(false);
 
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
@@ -33,6 +32,10 @@ export class CreateTeam {
   ) {}
 
   form!: FormGroup;
+
+  protected readonly hasTeam = computed(() =>
+    !!this.player()?.idTeam
+  );
 
   ngOnInit(): void {
     this.form = this.fb.group({

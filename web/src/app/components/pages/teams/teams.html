@@ -1,6 +1,6 @@
 <!-- <app-auth-header></app-auth-header> -->
 <app-search-team></app-search-team>
-<div class="container container-button">
+<div class="container container-button" *ngIf="!hasTeam()">
     <button class="btn btn-primary" (click)="goToCreateTeam()">
         Crie sua Própria Equipa!
     </button>
