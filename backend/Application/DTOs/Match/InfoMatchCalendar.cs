@@ -16,16 +16,14 @@ namespace Application.DTOs.Match
         [Required]
         public DateTime GameDate { get; set; }
 
-        public string? Result { get; set; }
-
         [Required]
         public MatchResult MatchResult { get; set; }
 
         [Required]
-        public TeamDto Team { get; set; } = null!;
+        public TeamStatisticsDto Team { get; set; } = null!;
 
         [Required]
-        public TeamDto Opponent { get; set; } = null!;
+        public TeamStatisticsDto Opponent { get; set; } = null!;
 
         [Required]
         public PitchDto pitchGame { get; set; } = null!;

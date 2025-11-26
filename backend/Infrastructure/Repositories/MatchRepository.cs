@@ -112,18 +112,17 @@ namespace Infrastructure.Repositories
                                    MatchStatus = m.MatchStatus,
                                    GameDate = m.MatchDate,
                                    MatchResult = myTeam.MatchResult,
-                                   Result = m.MatchStatus == MatchStatus.DONE
-                                      ? (myTeam.NumGoals + " - " + opponentTeam.NumGoals)
-                                      : "x-x",
-                                   Team = new TeamDto
+                                   Team = new TeamStatisticsDto
                                    {
                                        IdTeam = idTeam,
-                                       Name = myTeam.Team.Name
+                                       Name = myTeam.Team.Name,
+                                       NumGoals = myTeam.NumGoals
                                    },
-                                   Opponent = new TeamDto
+                                   Opponent = new TeamStatisticsDto
                                    {
                                        IdTeam = opponentTeam.IdTeam,
-                                       Name = opponentTeam.Team.Name
+                                       Name = opponentTeam.Team.Name,
+                                       NumGoals = opponentTeam.NumGoals
                                    },
                                    pitchGame = new PitchDto
                                    {
@@ -218,18 +217,17 @@ namespace Infrastructure.Repositories
                     MatchStatus = x.Match.MatchStatus,
                     GameDate = x.Match.MatchDate,
                     MatchResult = x.MyTeam.MatchResult,
-                    Result = x.Match.MatchStatus == MatchStatus.DONE
-                           ? (x.MyTeam.NumGoals + " - " + x.OpponentTeam.NumGoals)
-                           : "x-x",
-                    Team = new TeamDto
+                    Team = new TeamStatisticsDto
                     {
                         IdTeam = idTeam,
-                        Name = x.MyTeam.Team.Name
+                        Name = x.MyTeam.Team.Name,
+                        NumGoals = x.MyTeam.NumGoals
                     },
-                    Opponent = new TeamDto
+                    Opponent = new TeamStatisticsDto
                     {
                         IdTeam = x.OpponentTeam.IdTeam,
-                        Name = x.OpponentTeam.Team.Name
+                        Name = x.OpponentTeam.Team.Name,
+                        NumGoals = x.OpponentTeam.NumGoals
                     },
                     pitchGame = new PitchDto
                     {
@@ -357,16 +355,18 @@ namespace Infrastructure.Repositories
                     MatchStatus = m.MatchStatus,
                     GameDate = m.MatchDate,
 
-                    Team = new TeamDto
+                    Team = new TeamStatisticsDto
                     {
                         IdTeam = m.Teams.First().Team.Id,
                         Name = m.Teams.First().Team.Name,
+                        NumGoals = m.Teams.First().NumGoals,
                     },
 
-                    Opponent = new TeamDto
+                    Opponent = new TeamStatisticsDto
                     {
                         IdTeam = m.Teams.Skip(1).First().Team.Id,
                         Name = m.Teams.Skip(1).First().Team.Name,
+                        NumGoals = m.Teams.Skip(1).First().NumGoals,
                     },
 
                     pitchGame = new PitchDto
