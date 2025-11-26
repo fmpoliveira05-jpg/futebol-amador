@@ -6,18 +6,45 @@ import { MembershipRequest } from '../shared/Dtos/membership-request.model';
 import { AuthService } from './auth.service';
 import { validate } from 'uuid';
 
+/**
+ * Serviço responsável pelo gerenciamento dos pedidos de adesão, tanto para jogadores quanto para equipas.
+ * Inclui funções para obter, aceitar, rejeitar e enviar pedidos de adesão.
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class MembershipRequestService {
+  
+  /**
+   * Serviço HTTP utilizado para realizar requisições à API.
+   */
   private readonly http = inject(HttpClient);
+
+  /**
+   * Serviço de autenticação, utilizado para acessar informações sobre o jogador e a equipa atual.
+   */
   private readonly auth = inject(AuthService);
 
+  /**
+   * URL base para requisições relacionadas a jogadores.
+   */
   private readonly baseUrlPlayer = `${environment.apiBaseUrl}/Player`;
+
+  /**
+   * URL base para requisições relacionadas a equipas.
+   */
   private readonly baseUrlTeam = `${environment.apiBaseUrl}/Team`;
 
+  /**
+   * Cabeçalhos para as requisições HTTP, incluindo o tipo de conteúdo como JSON.
+   */
   private readonly headers = { 'Content-Type': 'application/json' };
 
+  /**
+   * Formata o ID de acordo com o padrão UUID, se necessário.
+   * @param Id O ID a ser formatado.
+   * @returns O ID formatado no padrão UUID.
+   */
   formatId(Id: string): string {
     if (validate(Id)) {
       return Id;
@@ -26,6 +53,11 @@ export class MembershipRequestService {
     return Id.replace(/^(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})$/, '$1-$2-$3-$4-$5');
   }
 
+  /**
+   * Obtém os pedidos de adesão para o jogador autenticado.
+   * @returns Um Observable contendo uma lista de pedidos de adesão.
+   * @throws Um erro se o jogador não estiver autenticado.
+   */
   getMembershipRequestsForCurrentPlayer(): Observable<MembershipRequest[]> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
@@ -37,6 +69,12 @@ export class MembershipRequestService {
     );
   }
 
+  /**
+   * Aceita um pedido de adesão para o jogador autenticado.
+   * @param requestId O ID do pedido de adesão a ser aceito.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se o jogador não estiver autenticado.
+   */
   acceptMembershipRequestPlayer(requestId: string): Observable<void> {
     return new Observable((observer) => {
       const playerId = this.auth.getCurrentPlayerId();
@@ -59,6 +97,12 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Rejeita um pedido de adesão para o jogador autenticado.
+   * @param requestId O ID do pedido de adesão a ser rejeitado.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se o jogador não estiver autenticado.
+   */
   rejectMembershipRequestPlayer(requestId: string): Observable<void> {
     return new Observable((observer) => {
       const playerId = this.auth.getCurrentPlayerId();
@@ -79,6 +123,11 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Obtém os pedidos de adesão para a equipa atual associada ao jogador autenticado.
+   * @returns Um Observable contendo uma lista de pedidos de adesão.
+   * @throws Um erro se não houver equipa associada ao jogador.
+   */
   getMembershipRequestsForCurrentTeam(): Observable<MembershipRequest[]> {
     return new Observable((observer) => {
       this.auth.getCurrentTeamId().subscribe({
@@ -101,6 +150,12 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Aceita um pedido de adesão para a equipa atual.
+   * @param requestId O ID do pedido de adesão a ser aceito.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se não houver equipa associada ao jogador.
+   */
   acceptMembershipRequestTeam(requestId: string): Observable<void> {
     return new Observable((observer) => {
       this.auth.getCurrentTeamId().subscribe({
@@ -127,6 +182,12 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Rejeita um pedido de adesão para a equipa atual.
+   * @param requestId O ID do pedido de adesão a ser rejeitado.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se não houver equipa associada ao jogador.
+   */
   rejectMembershipRequestTeam(requestId: string): Observable<void> {
     return new Observable((observer) => {
       this.auth.getCurrentTeamId().subscribe({
@@ -151,6 +212,12 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Envia um pedido de adesão de jogador para a equipa especificada.
+   * @param teamId O ID da equipa para a qual o jogador quer se candidatar.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se o jogador não estiver autenticado.
+   */
   sendMembershipRequestPlayer(teamId: string): Observable<void> {
     return new Observable((observer) => {
       const playerId = this.auth.getCurrentPlayerId();
@@ -175,6 +242,12 @@ export class MembershipRequestService {
     });
   }
 
+  /**
+   * Envia um pedido de adesão de equipa para o jogador especificado.
+   * @param playerId O ID do jogador para o qual a equipa deseja enviar um pedido de adesão.
+   * @returns Um Observable vazio após o sucesso.
+   * @throws Um erro se não houver equipa associada ao jogador.
+   */
   sendMembershipRequestTeam(playerId: string): Observable<void> {
     return new Observable((observer) => {
       this.auth.getCurrentTeamId().subscribe({
