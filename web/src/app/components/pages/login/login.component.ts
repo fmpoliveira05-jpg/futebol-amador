@@ -6,6 +6,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { CookieService } from 'ngx-cookie-service';
 
+/**
+ * Componente responsável pela tela de login.
+ * Realiza a autenticação do utilizador e gerencia o redirecionamento.
+ */
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -14,16 +18,24 @@ import { CookieService } from 'ngx-cookie-service';
   imports: [ReactiveFormsModule, CommonModule],
 })
 export class LoginComponent {
-  private authService = inject(AuthService);
-  private router = inject(Router);
-  private fb = inject(FormBuilder);
-  private cookieService = inject(CookieService);
-  
+
+  private authService = inject(AuthService); // Serviço de autenticação
+  private router = inject(Router); // Serviço de roteamento
+  private fb = inject(FormBuilder); // Serviço de construção de formulários
+  private cookieService = inject(CookieService); // Serviço para manipulação de cookies
+
+  /**
+   * Formulário reativo para login.
+   */
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(256)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
 
+  /**
+   * Método para realizar o login.
+   * Autentica o utilizador e redireciona após sucesso.
+   */
   onLogin() {
     if (this.loginForm.invalid) return;
 
@@ -31,10 +43,8 @@ export class LoginComponent {
 
     this.authService.login(email, password).subscribe({
       next: (response) => {
-        console.log(response);
         this.cookieService.set('access_token', response.firebaseLoginResponseDto.idToken, 7, '/');
         this.cookieService.set('user_id', response.firebaseLoginResponseDto.localId, 7, '/');
-
         this.router.navigate(['/players/me']);
       },
       error: (err) => {

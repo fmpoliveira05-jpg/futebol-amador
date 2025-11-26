@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "compodoc": "npx compodoc -p tsconfig.app.json -d ./documentation --disableGraph --theme readthedocs"
   },
   "prettier": {
     "printWidth": 100,
@@ -29,7 +30,7 @@
     "@angular/platform-browser": "^20.3.0",
     "@angular/router": "^20.3.0",
     "jwt-decode": "^4.0.0",
-    "ngx-cookie-service": "^16.0.0",
+    "ngx-cookie-service": "^20.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.8.1",
     "uuid": "^13.0.0",
@@ -39,6 +40,7 @@
     "@angular/build": "^20.3.10",
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
+    "@compodoc/compodoc": "^1.1.32",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
