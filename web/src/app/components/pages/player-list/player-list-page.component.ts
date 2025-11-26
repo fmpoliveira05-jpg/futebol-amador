@@ -10,6 +10,10 @@ import { PlayerFilterDto } from '../../../shared/Dtos/Player/PlayerFilterDto';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { AuthService } from '../../../services/auth.service';
 
+/**
+ * Componente responsável pela gestão da lista de jogadores.
+ * Permite visualizar, filtrar, carregar mais jogadores e enviar pedidos de adesão.
+ */
 @Component({
   selector: 'app-player-list-page',
   standalone: true,
@@ -18,23 +22,23 @@ import { AuthService } from '../../../services/auth.service';
   styleUrls: ['./player-list-page.component.css'],
 })
 export class PlayerListPageComponent {
-  private readonly playerService = inject(PlayerService);
-  private readonly router = inject(Router);
+  private readonly playerService = inject(PlayerService); // Serviço de jogadores
+  private readonly router = inject(Router); // Serviço de navegação
 
-  protected readonly players = signal<PlayerListItem[]>([]);
-  protected readonly isLoading = signal<boolean>(false);
-  protected readonly errorMessage = signal<string | null>(null);
-  protected readonly successMessage = signal<string | null>(null);
+  protected readonly players = signal<PlayerListItem[]>([]); // Lista de jogadores
+  protected readonly isLoading = signal<boolean>(false); // Estado de carregamento
+  protected readonly errorMessage = signal<string | null>(null); // Mensagem de erro
+  protected readonly successMessage = signal<string | null>(null); // Mensagem de sucesso
 
-  protected readonly filterDto = signal<PlayerFilterDto>(new PlayerFilterDto());
-  protected readonly showFilters = signal<boolean>(false);
+  protected readonly filterDto = signal<PlayerFilterDto>(new PlayerFilterDto()); // Filtros aplicados
+  protected readonly showFilters = signal<boolean>(false); // Estado de exibição dos filtros
 
-  protected readonly playersPerPage = 10;
-  protected readonly currentPage = signal<number>(1);
+  protected readonly playersPerPage = 10; // Número de jogadores por página
+  protected readonly currentPage = signal<number>(1); // Página atual
 
-  private readonly membershipRequestService = inject(MembershipRequestService);
-  private readonly authService = inject(AuthService);
+  private readonly membershipRequestService = inject(MembershipRequestService); // Serviço de pedidos de adesão
 
+  // Lista de jogadores visíveis com base nos filtros e na página atual
   protected readonly visiblePlayers = computed(() =>
     this.filteredPlayers().slice(
       (this.currentPage() - 1) * this.playersPerPage,
@@ -42,6 +46,7 @@ export class PlayerListPageComponent {
     )
   );
 
+  // Verifica se há resultados de pesquisa
   protected readonly noResults = computed(() => {
     const { city, minAge, maxAge, minHeight, maxHeight, position, name } = this.filterDto();
 
@@ -57,6 +62,7 @@ export class PlayerListPageComponent {
     );
   });
 
+  // Aplica os filtros na lista de jogadores
   protected readonly filteredPlayers = computed(() => {
     const { city, minAge, maxAge, minHeight, maxHeight, position, name } = this.filterDto();
 
@@ -79,13 +85,14 @@ export class PlayerListPageComponent {
     return filtered;
   });
 
-  constructor() {
-  }
+  constructor() {}
 
+  // Abre a página de detalhes do jogador
   protected openPlayer(player: PlayerDetails): void {
     this.router.navigate(['/players', player.playerId]);
   }
 
+  // Carrega a lista de jogadores
   protected loadPlayers(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -101,21 +108,25 @@ export class PlayerListPageComponent {
     });
   }
 
+  // Aplica os filtros e recarrega os jogadores
   protected applyFilters(): void {
     this.currentPage.set(1);
     this.loadPlayers();
   }
 
+  // Limpa os resultados de pesquisa
   protected clearSearchResults(): void {
     this.players.set([]);
     this.currentPage.set(1);
   }
 
+  // Carrega mais jogadores, incrementando a página atual
   protected loadMorePlayers(): void {
     this.currentPage.set(this.currentPage() + 1);
     this.loadPlayers();
   }
 
+  // Vai para a página anterior
   protected goToPreviousPage(): void {
     if (this.currentPage() > 1) {
       this.currentPage.set(this.currentPage() - 1);
@@ -123,14 +134,17 @@ export class PlayerListPageComponent {
     }
   }
 
+  // Verifica se há mais jogadores para carregar
   protected hasMorePlayers(): boolean {
     return this.filteredPlayers().length > this.currentPage() * this.playersPerPage;
   }
 
+  // Verifica se a página atual é maior que 1
   protected hasPreviousPage(): boolean {
     return this.currentPage() > 1;
   }
 
+  // Envia o pedido de adesão para um jogador
   protected sendMembershipRequest(playerId: string): void {
     this.membershipRequestService
       .sendMembershipRequestTeam(playerId)
