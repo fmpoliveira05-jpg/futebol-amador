@@ -3,7 +3,7 @@ import { PlayerService } from '../../../services/player.service';
 import { InfoTeamDto } from '../../../shared/Dtos/Team/InfoTeamDto';
 import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
 import { CommonModule} from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SearchTeam } from '../../partials/search-team/search-team';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { AuthService } from '../../../services/auth.service';
@@ -25,6 +25,7 @@ export class Teams {
   constructor(
     private playerService: PlayerService,
     private route: ActivatedRoute,
+    private router: Router,
     private membershipRequestService: MembershipRequestService,
     private authService: AuthService
   ) {}
@@ -72,5 +73,9 @@ export class Teams {
         this.errorMessage.set('Não foi possível enviar o pedido de adesão.');
       },
     });
+  }
+
+  goToCreateTeam(){
+    this.router.navigate(['/createTeam']);
   }
 }
