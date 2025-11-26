@@ -49,11 +49,6 @@ class AuthRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 val userProfile = response.body()!!
 
-                Log.d("LOGIN_DEBUG", "4. API Sucesso! Dados recebidos: $userProfile")
-                Log.d("LOGIN_DEBUG", "   -> Nome: ${userProfile.name}")
-                Log.d("LOGIN_DEBUG", "   -> ID: ${userProfile.loginResponseDto.localId}")
-
-                // A guardar...
                 sessionManager.saveUserProfile(userProfile)
                 sessionManager.saveAuthToken(userProfile.loginResponseDto.idToken)
                 Log.d("AuthRepository", "Login completo e dados guardados.")

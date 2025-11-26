@@ -5,10 +5,12 @@ import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.ApiBackend
-import com.example.amfootball.utils.NetworkUtils
+import com.example.amfootball.utils.handleApiError
 import retrofit2.Response
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class PlayerRepository @Inject constructor(
     private val api: ApiBackend
 ) {
@@ -47,16 +49,4 @@ class PlayerRepository @Inject constructor(
         }
     }
 
-    //todo: meter a função global para os repositorys
-    /**
-     * Função genérica para tratar erros da API.
-     * Recebe qualquer Response, extrai a mensagem de erro e lança a exceção.
-     */
-    private fun <T> handleApiError(response: Response<T>): Nothing {
-        val errorRaw = response.errorBody()?.string()
-        val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-            ?: "Erro desconhecido: ${response.code()}"
-
-        throw Exception(errorMsg)
-    }
 }

@@ -15,4 +15,10 @@
 
     <string name="type_match_competitive">Competitiva</string>
     <string name="type_match_casual">Casual</string>
+
+    <string name="match_status_scheduled">Agendada</string>
+    <string name="match_status_in_progress">Em andamento"</string>
+    <string name="match_status_done">Finalizada</string>
+    <string name="match_status_post_poned">Adiada</string>
+    <string name="match_status_canceled">Cancelada</string>
 </resources>

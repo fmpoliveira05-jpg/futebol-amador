@@ -40,6 +40,7 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -211,8 +212,8 @@ private fun ItemListPosPoneMatch(
             }
         },
         leading = {
-            ImageList(
-                image = postPoneMatch.opponent.image ?: Uri.EMPTY
+            StringImageList(
+                image = postPoneMatch.opponent.image
             )
         },
         trailing = {

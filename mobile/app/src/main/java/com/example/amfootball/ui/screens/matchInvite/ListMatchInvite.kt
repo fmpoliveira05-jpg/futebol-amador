@@ -38,6 +38,7 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -176,10 +177,10 @@ private fun ItemListMatchInivite(
 ) {
     GenericListItem(
         item = matchInvite,
-        title = { it.nameOpponent },
+        title = { it.opponent.name },
         leading = {
-            ImageList(
-                image = matchInvite.logoOpponent,
+            StringImageList(
+                image = matchInvite.opponent.image,
             )
         },
         supporting = {

@@ -1,6 +1,8 @@
 package com.example.amfootball.data.dtos.matchInivite
 
 import android.net.Uri
+import com.example.amfootball.data.dtos.support.TeamDto
+import com.google.gson.annotations.SerializedName
 
 /**
  * Data Transfer Object (DTO) que representa as informações essenciais de um convite de partida.
@@ -9,18 +11,18 @@ import android.net.Uri
  * os detalhes do adversário, a data proposta e o local.
  *
  * @property id O identificador único do convite.
- * @property idOpponent O identificador da equipa adversária (quem convida ou é convidado).
- * @property nameOpponent O nome da equipa adversária para exibição.
- * @property logoOpponent A URI do logótipo da equipa adversária.
+ * @property opponent O objeto [TeamDto] com os dados da equipa adversária (Id, Nome, Imagem).
  * @property gameDate A data proposta para o jogo (armazenada como String para exibição direta).
  * @property pitchGame O nome do campo ou local onde o jogo está proposto acontecer.
  */
 data class InfoMatchInviteDto(
+    @SerializedName("Id", alternate = ["id"])
     val id: String = "",
-    val idOpponent: String = "",
-    val nameOpponent: String = "",
-    val logoOpponent: Uri = Uri.EMPTY,
+    @SerializedName("Receiver", alternate = ["receiver"])
+    val opponent: TeamDto,
+    @SerializedName("GameDate", alternate = ["gameDate"])
     val gameDate: String = "",
+    @SerializedName("PitchGame", alternate = ["pitchGame"])
     val pitchGame: String = ""
 ) {
     companion object {
@@ -37,9 +39,12 @@ data class InfoMatchInviteDto(
             return (1..20).map { i ->
                 InfoMatchInviteDto(
                     id = "invite_$i",
-                    idOpponent = "opponent_$i",
-                    nameOpponent = opponentNames[i % opponentNames.size],
-                    logoOpponent = Uri.EMPTY,
+                    // CORREÇÃO: Criar o objeto TeamDto em vez de passar strings soltas
+                    opponent = TeamDto(
+                        id = "opponent_$i",
+                        name = opponentNames[i % opponentNames.size],
+                        image = null
+                    ),
                     gameDate = "${10 + (i % 20)}/11/2025",
                     pitchGame = pitches[i % pitches.size]
                 )

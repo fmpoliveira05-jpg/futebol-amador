@@ -15,4 +15,10 @@
 
     <string name="type_match_competitive">Competitive</string>
     <string name="type_match_casual">Casual</string>
+
+    <string name="match_status_scheduled">Scheduled</string>
+    <string name="match_status_in_progress">In Progress"</string>
+    <string name="match_status_done">Done</string>
+    <string name="match_status_post_poned">Post Poned</string>
+    <string name="match_status_canceled">Canceled</string>
 </resources>

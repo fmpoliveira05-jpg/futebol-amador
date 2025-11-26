@@ -7,7 +7,8 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.filters.FilterCalendar
-import com.example.amfootball.data.dtos.match.CalendarInfoDto
+import com.example.amfootball.data.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.enums.MatchStatus
 import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
@@ -54,14 +55,14 @@ class CalendarTeamViewModel @Inject constructor(
      * Lista de jogos visível na UI.
      * Pode ser o resultado direto da API ou uma versão filtrada localmente.
      */
-    private val listState: MutableStateFlow<List<CalendarInfoDto>> = MutableStateFlow(emptyList())
-    val list: StateFlow<List<CalendarInfoDto>> = listState
+    private val listState: MutableStateFlow<List<InfoMatchCalendar>> = MutableStateFlow(emptyList())
+    val list: StateFlow<List<InfoMatchCalendar>> = listState
 
     /**
      * Cache da lista original carregada da API.
      * Usada para permitir a limpeza de filtros e filtragem offline sem novos pedidos à rede.
      */
-    private var originalList: List<CalendarInfoDto> = emptyList()
+    private var originalList: List<InfoMatchCalendar> = emptyList()
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
     private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
@@ -106,7 +107,7 @@ class CalendarTeamViewModel @Inject constructor(
 
     /** Atualiza o filtro de local (Casa/Fora). */
     fun onGameLocalChange(newLocalGame: Boolean?) {
-        filterState.value = filterState.value.copy(gameLocale = newLocalGame)
+        filterState.value = filterState.value.copy(isHome = newLocalGame)
     }
 
     /** Atualiza o filtro de tipo de jogo (Competitivo/Casual). */
@@ -115,8 +116,8 @@ class CalendarTeamViewModel @Inject constructor(
     }
 
     /** Atualiza o filtro de estado do jogo (Finalizado/Não Finalizado). */
-    fun onIsFinishedChange(isFinished: Boolean?) {
-        filterState.value = filterState.value.copy(isFinish = isFinished)
+    fun onIsFinishedChange(isFinish: Boolean?) {
+        filterState.value = filterState.value.copy(isFinish = isFinish)
     }
 
     // --- AÇÕES PRINCIPAIS ---
@@ -238,6 +239,7 @@ class CalendarTeamViewModel @Inject constructor(
      * - Atualiza [listState] e [originalList] com os dados recebidos.
      * - Gere o estado de Loading.
      */
+    //TODO: Falta fazer pedido há API
     fun loadCalendar() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -291,17 +293,21 @@ class CalendarTeamViewModel @Inject constructor(
      * Filtra a lista de jogos em memória (offline).
      * Utiliza lógica "AND" (todos os critérios devem ser verdadeiros).
      */
-    private fun filterOffline(originalList: List<CalendarInfoDto>, filter: FilterCalendar): List<CalendarInfoDto> {
+    private fun filterOffline(originalList: List<InfoMatchCalendar>, filter: FilterCalendar): List<InfoMatchCalendar> {
         return originalList.filter { item ->
             val name = filter.opponentName.isNullOrBlank()
-                    || item.opponent.infoTeam.name.contains(filter.opponentName, ignoreCase = true)
-            val minDate = filter.minGameDate == null || item.matchDate >= filter.minGameDate
-            val maxDate = filter.maxGameDate == null || item.matchDate <= filter.maxGameDate
-            val isFinish = filter.isFinish == null || item.isFinish == filter.isFinish
-            val gameLocal = filter.gameLocale == null || item.gameLocale == filter.gameLocale
+                    || item.opponent.name.contains(filter.opponentName, ignoreCase = true)
+            val minDate = filter.minGameDate == null || item.gameDate.toLocalDate() >= filter.minGameDate
+            val maxDate = filter.maxGameDate == null || item.gameDate.toLocalDate() <= filter.maxGameDate
+            val matchStatus = filter.isFinish == null || if(filter.isFinish) {
+                item.matchStatus == MatchStatus.DONE
+            } else {
+                item.matchStatus != MatchStatus.SCHEDULED
+            }
+            val gameLocal = filter.isHome == null || item.isHome == filter.isHome
             val typeMatch = filter.typeMatch == null || item.typeMatch == filter.typeMatch
 
-            name && minDate && maxDate && isFinish && gameLocal && typeMatch
+            name && minDate && maxDate && matchStatus && gameLocal && typeMatch
         }
     }
 

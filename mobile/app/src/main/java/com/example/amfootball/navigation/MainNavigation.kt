@@ -20,6 +20,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Arguments
 import com.example.amfootball.navigation.objects.Routes
@@ -53,6 +54,7 @@ import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
+import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
@@ -69,8 +71,6 @@ fun MainNavigation() {
     val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
-    //val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
-
     Scaffold(
         topBar = {
             MainTopAppBar(
@@ -103,14 +103,15 @@ fun MainNavigation() {
 
         // O BottomSheet fica aqui, fora do NavHost, controlado pelo estado local
         if (showBottomSheet) {
-            val navBackStackEntry by globalNavController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
+            val currentUser = sessionManager.getUserProfile()
+            val currentTeamId = currentUser?.idTeam ?: ""
 
             AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
                 BottomSheetContent(
                     Modifier,
                     globalNavController,
-                    selectedBottomNavRoute)
+                    selectedBottomNavRoute,
+                    teamId = currentTeamId)
             }
         }
     }
@@ -144,7 +145,7 @@ private fun NavGraphBuilder.pages(
         sessionManager = sessionManager
     )
 
-    teamPages(globalNavController = globalNavController)
+    teamPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
     chatPages(globalNavController = globalNavController)
 
@@ -235,10 +236,10 @@ private fun NavGraphBuilder.profilePlayer(
 /**
  * Paginas da Time
  * */
-private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.teamPages(globalNavController: NavHostController, sessionManager: SessionManager) {
     crudTeamPages(globalNavController = globalNavController)
 
-    teamMatch(globalNavController = globalNavController)
+    teamMatch(sessionManager = sessionManager, globalNavController = globalNavController)
 
     composable(
         route = "${Routes.TeamRoutes.MEMBERLIST.route}/{${Arguments.TEAM_ID}}",
@@ -260,21 +261,24 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController) {
     }
 }
 
-private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController) {
-    composable(
+private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController, sessionManager: SessionManager) {
+    composableProtected(
+        navController = globalNavController,
         route = "${Routes.TeamRoutes.CALENDAR.route}/{${Arguments.TEAM_ID}}",
+        sessionManager = sessionManager,
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
-        )
-    ) {
-        val viewModel = hiltViewModel<CalendarTeamViewModel>()
+        ),
+        content = {
+            val viewModel = hiltViewModel<CalendarTeamViewModel>()
 
-        CalendarScreen(navHostController = globalNavController, viewModel = viewModel)
-    }
+            CalendarScreen(navHostController = globalNavController, viewModel = viewModel)
+        }
+    )
 
-    managementMatch(globalNavController = globalNavController)
+    managementMatch(globalNavController = globalNavController, sessionManager = sessionManager)
 
-    casualMatches(globalNavController = globalNavController)
+    casualMatches(globalNavController = globalNavController, sessionManager = sessionManager)
 
     competitiveMatches(globalNavController = globalNavController)
 
@@ -283,22 +287,45 @@ private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController) {
     }
 }
 
-private fun NavGraphBuilder.managementMatch(globalNavController: NavHostController) {
-    composable(Routes.TeamRoutes.POST_PONE_MATCH.route) {
-        FormMatchInviteScreen(navHostController = globalNavController)
-    }
+private fun NavGraphBuilder.managementMatch(globalNavController: NavHostController, sessionManager: SessionManager) {
+    composableProtected(
+        route = "${Routes.TeamRoutes.POST_PONE_MATCH.route}/${Arguments.MATCH_ID}",
+        arguments = listOf(
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
+            navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.POSTPONE.name }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
+
+            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+        }
+    )
 
     composable(Routes.TeamRoutes.FINISH_MATCH.route) {
         FinishMatchScreen(navHostController = globalNavController)
     }
 
-    composable(Routes.TeamRoutes.CANCEL_MATCH.route) {
-        CancelMatchScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = "${Routes.TeamRoutes.CANCEL_MATCH.route}/${Arguments.MATCH_ID}",
+        arguments = listOf(
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
+            navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.CANCEL.name }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
+
+            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            //CancelMatchScreen(navHostController = globalNavController)
+        }
+    )
 }
 
 
-private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController) {
+private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController, sessionManager: SessionManager) {
     composable(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route) {
         ListTeamScreen(navHostController = globalNavController)
     }
@@ -307,9 +334,35 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         ListMatchInviteScreen(navHostController = globalNavController)
     }
 
-    composable(Routes.TeamRoutes.SEND_MATCH_INVITE.route) {
-        FormMatchInviteScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.SEND_MATCH_INVITE.route,
+        arguments = listOf(
+            navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.SEND.name }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
+
+            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+        }
+    )
+
+    composableProtected(
+        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/${Arguments.TEAM_ID}/CancelMatch/${Arguments.MATCH_INVITE_ID}",
+        arguments = listOf(
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
+            navArgument(Arguments.MATCH_INVITE_ID) { type = NavType.StringType },
+            navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.NEGOCIATE.name }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
+
+            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+        }
+    )
 
     composable(Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
         FormMatchInviteScreen(navHostController = globalNavController)

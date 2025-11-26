@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
+import com.example.amfootball.data.enums.MatchStatus
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
@@ -99,12 +100,11 @@ fun FilterIsCompetiveMatch(
 }
 
 /**
- * Seletor de filtro para o estado da partida (Finalizado, Não Finalizado ou Indiferente).
+ * Seletor de filtro para o estado da partida (Finalizado vs Agendado).
  *
  * Utiliza o [LabelSelectBox] com opções [Boolean] (true/false) e a opção 'null' para Indiferente.
- * A lógica de [itemToString] converte os valores booleanos para as strings de recurso correspondentes ("Sim" / "Não").
  *
- * @param selectedValue O valor atualmente selecionado: true (Finalizado), false (Não Finalizado), ou null (Indiferente).
+ * @param selectedValue O valor selecionado: true (Finalizado), false (Agendado), null (Indiferente).
  * @param onSelectItem Callback executado ao selecionar uma opção (recebe Boolean?).
  * @param modifier Modificador para estilizar o componente.
  */
@@ -114,29 +114,24 @@ fun FilterIsFinishMatch(
     onSelectItem: (Boolean?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // A lista tem de ser de Boolean?, pois é o que o teu filtro espera
     val finishMatchOptions: List<Boolean?> = listOf(null, true, false)
+
     LabelSelectBox(
         label = stringResource(id = R.string.filter_finish_match),
         list = finishMatchOptions,
         selectedValue = selectedValue,
         onSelectItem = onSelectItem,
-        itemToString = { isFinishMatchValue ->
-            when (isFinishMatchValue) {
-                true -> {
-                    stringResource(id = R.string.filter_yes)
-                }
-                false -> {
-                    stringResource(id = R.string.filter_no)
-                }
-                null -> {
-                    stringResource(id = R.string.filter_indifferente)
-                }
+        itemToString = { isFinished ->
+            when (isFinished) {
+                true -> stringResource(id = R.string.match_status_done) // "Finalizado" (ou usa R.string.filter_yes)
+                false -> stringResource(id = R.string.match_status_scheduled) // "Agendado" (ou usa R.string.filter_no)
+                null -> stringResource(id = R.string.filter_indifferente)
             }
         },
         modifier = modifier
     )
 }
-
 /**
  * Campo de input para filtrar equipas pelo nome.
  *
@@ -314,11 +309,10 @@ fun FilterListPosition(
         list = listPosition,
         selectedValue = selectPosition,
         onSelectItem = onSelectPosition,
-        itemToString = { typeMember ->
-            if (typeMember == null) {
-                stringResource(id = R.string.filter_selectbox_all)
-            } else {
-                stringResource(id = typeMember.stringId)
+        itemToString = { position ->
+            when (position) {
+                null -> stringResource(id = R.string.filter_selectbox_all)
+                else -> stringResource(id = position.stringId)
             }
         },
         modifier = modifier

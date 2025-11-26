@@ -16,10 +16,13 @@ import com.example.amfootball.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
@@ -28,13 +31,14 @@ import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 
+//TODO: Meter no Cancel para ser enabled os campos todos e no caso do POstPOne o Home também, por enquato para simplificar simplesmente não aparece
 @Composable
 fun FormMatchInviteScreen(
-    viewModel: FormMatchInviteViewModel = viewModel(),
+    viewModel: FormMatchInviteViewModel = hiltViewModel(),
     navHostController: NavHostController
 ) {
-    val fields by viewModel.uiFormState.observeAsState(initial = MatchInviteDto())
-    val errors by viewModel.uiErrorsForm.observeAsState(initial = MatchInviteFormErros())
+    val fields by viewModel.uiFormState.collectAsStateWithLifecycle()
+    val errors by viewModel.uiErrorsForm.collectAsStateWithLifecycle()
 
     val actions = FormMatchInviteActions(
         onGameDateChange = viewModel::onGameDateChange,
@@ -43,11 +47,13 @@ fun FormMatchInviteScreen(
         onSubmitForm = viewModel::onSubmitForm
     )
 
+    val mode = viewModel.mode
     ContentSendMatchInviteScreen(
         navHostController = navHostController,
         fields = fields,
         actions = actions,
         errors = errors,
+        mode = mode,
         modifier = Modifier.padding(16.dp),
     )
 }
@@ -58,6 +64,7 @@ private fun ContentSendMatchInviteScreen(
     fields: MatchInviteDto,
     actions: FormMatchInviteActions,
     errors: MatchInviteFormErros,
+    mode: MatchFormMode,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -69,6 +76,7 @@ private fun ContentSendMatchInviteScreen(
             fields = fields,
             errors = errors,
             actions = actions,
+            mode = mode,
             navHostController = navHostController
         )
     }
@@ -81,8 +89,9 @@ private fun FieldsSendMatchInvite(
     fields: MatchInviteDto,
     errors: MatchInviteFormErros,
     actions: FormMatchInviteActions,
-    navHostController: NavHostController) {
-
+    mode: MatchFormMode,
+    navHostController: NavHostController
+) {
     TextFieldOutline(
         label = "Opponente",
         value = fields.nameOpponent,
@@ -110,13 +119,19 @@ private fun FieldsSendMatchInvite(
             stringResource(id = it.messageId, *it.args.toTypedArray()) },
     )
 
-    Switcher(
-        value = fields.isHomeGame,
-        onCheckedChange = actions.onLocalGameChange,
-        text = stringResource(id = R.string.playing_home),
-        textChecked = stringResource(id = R.string.checked_playing_home),
-        textUnChecked = stringResource(id = R.string.unchecked_playing_home),
-    )
+    if(mode != MatchFormMode.POSTPONE) {
+        Switcher(
+            value = fields.isHomeGame,
+            onCheckedChange = actions.onLocalGameChange,
+            text = stringResource(id = R.string.playing_home),
+            textChecked = stringResource(id = R.string.checked_playing_home),
+            textUnChecked = stringResource(id = R.string.unchecked_playing_home),
+        )
+    }
+
+    if (mode == MatchFormMode.CANCEL) {
+        //TODO: TextField para descrever o motivo de cancelamento
+    }
 
     SubmitFormButton(
         onClick = { actions.onSubmitForm(navHostController) },

@@ -1,6 +1,7 @@
 package com.example.amfootball.data.repository
 
 import com.example.amfootball.data.dtos.player.MemberTeamDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
@@ -9,9 +10,9 @@ import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.ApiBackend
-import com.example.amfootball.utils.NetworkUtils
-import retrofit2.Response
+import com.example.amfootball.utils.handleApiError
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Repositório responsável por toda a lógica de dados relacionada com as Equipas.
@@ -19,6 +20,7 @@ import javax.inject.Inject
  *
  * Gere as chamadas à API, tratamento de erros HTTP e transformação de dados (DTOs).
  */
+@Singleton
 class TeamRepository @Inject constructor(
     private val api: ApiBackend
 ) {
@@ -60,6 +62,21 @@ class TeamRepository @Inject constructor(
                 val fullProfile = response.body()!!
 
                 fullProfile.toFormTeamDto()
+            } else {
+                handleApiError(response)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Exception("Sem conexão: ${e.localizedMessage}")
+        }
+    }
+
+    suspend fun getNameTeam(teamId: String): TeamDto {
+        try {
+            val response = api.getOpponentTeam(teamId = teamId)
+
+            if (response.isSuccessful && response.body() != null) {
+                return response.body()!!
             } else {
                 handleApiError(response)
             }
@@ -233,17 +250,5 @@ class TeamRepository @Inject constructor(
             e.printStackTrace()
             throw Exception("Sem conexão: ${e.localizedMessage}")
         }
-    }
-
-    /**
-     * Função genérica para tratar erros da API.
-     * Recebe qualquer Response, extrai a mensagem de erro e lança a exceção.
-     */
-    private fun <T> handleApiError(response: Response<T>): Nothing {
-        val errorRaw = response.errorBody()?.string()
-        val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-            ?: "Erro desconhecido: ${response.code()}"
-
-        throw Exception(errorMsg)
     }
 }

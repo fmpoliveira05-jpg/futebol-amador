@@ -2,11 +2,16 @@ package com.example.amfootball.data.network
 
 import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
+import com.example.amfootball.data.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.dtos.match.PostPoneMatchDto
+import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
@@ -143,6 +148,12 @@ interface ApiBackend{
         @Body team: FormTeamDto
     ): Response<FormTeamDto>
 
+    @GET("api/Team/opponent/{teamId}")
+    suspend fun getOpponentTeam(
+        @Path("teamId") teamId: String
+    ): Response<TeamDto>
+
+
     /**
      * Obtém o perfil completo e detalhado de uma equipa.
      * Inclui dados do estádio, ranking e estatísticas.
@@ -225,4 +236,37 @@ interface ApiBackend{
         @Path("teamId") teamId: String,
         @Path("adminIdToDemote") playerId: String
     ): Response<Unit>
+
+    //Calendar
+    @GET("api/Calendar/{idTeam}")
+    suspend fun getCalendar(
+        @Path("idTeam") idTeam: String,
+        @QueryMap filters: Map<String, String>
+    ): Response<List<InfoMatchCalendar>>
+
+    @PUT("api/Calendar/{idTeam}/PostponeMatch")
+    suspend fun postponeMatch(
+        @Path("idTeam") idTeam: String,
+        @Body postponeMatch: PostPoneMatchDto
+    ): Response<Unit>
+
+    @DELETE("api/Calendar/{idTeam}/CancelMatch/{idMatch}")
+    suspend fun cancelMatch(
+        @Path("idTeam") idTeam: String,
+        @Path("idMatch") idMatch: String,
+        @Body description: String
+    ): Response<Unit>
+
+    //MatchInvite
+    @POST("api/MatchInvite/{idTeam}/match-invites")
+    suspend fun sendMatchInvite(
+        @Path("idTeam") idTeam: String,
+        @Body matchInivite: SendMatchInviteDto
+    ): Response<InfoMatchInviteDto>
+
+    @PUT("api/MatchInvite/{idTeam}/Negociate")
+    suspend fun negotiateMatch(
+        @Path("idTeam") idTeam: String,
+        @Body matchInivite: SendMatchInviteDto
+    ): Response<InfoMatchInviteDto>
 }
