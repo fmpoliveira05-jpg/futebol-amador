@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
@@ -107,10 +108,16 @@ namespace Application.Services
             {
                 IdMatch = idMatch,
                 PostPoneDate = newDate,
-                IdTeam = idTeam,
-                nameTeam = team.Name,
-                IdOpponent = idOpponnent,
-                nameOpponent = opponentStatistics.Team.Name
+                Team = new TeamDto
+                {
+                    IdTeam = team.Id,
+                    Name = team.Name,
+                },
+                Opponent =
+                {
+                    IdTeam = idOpponnent,
+                    Name = opponentStatistics.Team.Name
+                }
             };
 
             await UnityOfWork.SaveChangesAsync();

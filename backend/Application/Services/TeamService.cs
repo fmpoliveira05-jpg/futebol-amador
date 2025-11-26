@@ -284,12 +284,12 @@ namespace Application.Services
 
         #endregion
 
-        public async Task<string> getNameTeam(Guid teamId)
+        public async Task<TeamDto> getOpponent(Guid teamId)
         {
-            var team = await TeamRepository.GetNameTeamById(teamId);
-            if(team == "")
+            var team = await TeamRepository.GetOpponentTeamById(teamId);
+            if(team == null)
             {
-                throw new ArgumentException("Não foi encontrada nenhuma equipa");
+                throw new ArgumentException("A equipa não foi encontrada");
             }
 
             return team;

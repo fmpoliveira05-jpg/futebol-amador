@@ -8,7 +8,7 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
-        Task<string> GetNameTeamById(Guid idTeam);
+        Task<TeamDto> GetOpponentTeamById(Guid idTeam);
 
         Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId);
 

@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -71,10 +72,16 @@ namespace Application.Services
             var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
-                IdSender = matchInvite.IdSender,
-                NameSender = sender.Name,
-                IdReceiver = matchInvite.IdReceiver,
-                NameReceiver = receiver.Name,
+                Sender = new TeamDto
+                {
+                    IdTeam = sender.Id,
+                    Name = sender.Name
+                },
+                Receiver =
+                {
+                    IdTeam = receiver.Id,
+                    Name = receiver.Name,
+                },             
                 GameDate = gameDate,
                 NamePitch = pitch.Name
             };
@@ -185,10 +192,16 @@ namespace Application.Services
             var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
-                IdSender = matchInvite.IdSender,
-                NameSender = senderTeam.Name,
-                IdReceiver = matchInvite.IdReceiver,
-                NameReceiver = receiverTeam.Name,
+                Sender =
+                {
+                    IdTeam = senderTeam.Id,
+                    Name = senderTeam.Name
+                },
+                Receiver =
+                {
+                    IdTeam = receiverTeam.Id,
+                    Name = receiverTeam.Name
+                },
                 GameDate = gameDate,
                 NamePitch = pitch.Name
             };

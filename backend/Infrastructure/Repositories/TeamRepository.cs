@@ -53,11 +53,15 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.Name == name); 
         }
 
-        public async Task<string> GetNameTeamById(Guid idTeam) 
+        public async Task<TeamDto> GetOpponentTeamById(Guid idTeam)
         {
             return await DbContext.Team
                     .Where(t => t.Id == idTeam)  
-                    .Select(t => t.Name)        
+                    .Select(t => new TeamDto
+                    {
+                        IdTeam = t.Id,
+                        Name = t.Name
+                    })        
                     .FirstOrDefaultAsync();
         }
 

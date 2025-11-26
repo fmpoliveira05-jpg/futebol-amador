@@ -9,6 +9,7 @@ using Domain.Enums;
 using Google.Api;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Infrastructure.Repositories
 {
@@ -263,10 +264,15 @@ namespace Infrastructure.Repositories
                              IdMatch = m.Id,
                              GameDate = m.MatchDate,
                              PostPoneDate = ppm.PostPoneDate,
-                             IdTeam = idReceiver,
-                             nameTeam = receiverTeam.Team.Name,
-                             IdOpponent = opponentTeam.Team.Id,
-                             nameOpponent = opponentTeam.Team.Name
+                             Team = new TeamDto
+                             {
+                                 IdTeam = idReceiver,
+                                 Name = receiverTeam.Team.Name
+                             },
+                             Opponent = new TeamDto{
+                                IdTeam = opponentTeam.Team.Id,
+                                Name = opponentTeam.Team.Name
+                             }
                          })
                          .ToListAsync();
 
@@ -337,10 +343,16 @@ namespace Infrastructure.Repositories
                     IdMatch = x.Match.Id,
                     GameDate = x.Match.MatchDate,
                     PostPoneDate = x.PostPoneMatch.PostPoneDate,
-                    IdTeam = idReceiver,
-                    nameTeam = x.MyTeam.Name,
-                    IdOpponent = x.OpponentTeam.Id,
-                    nameOpponent = x.OpponentTeam.Name,
+                    Team = new TeamDto
+                    {
+                        IdTeam = idReceiver,
+                        Name = x.MyTeam.Name
+                    },
+                    Opponent =
+                    {
+                        IdTeam = x.OpponentTeam.Id,
+                        Name = x.OpponentTeam.Name,
+                    }
                 })
                 .ToListAsync();
 

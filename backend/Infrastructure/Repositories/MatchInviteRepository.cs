@@ -56,10 +56,16 @@ namespace Infrastructure.Repositories
                 .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
-                    IdSender = mi.IdSender,
-                    NameSender = mi.Sender.Name,
-                    IdReceiver = mi.IdReceiver,
-                    NameReceiver = mi.Receiver.Name,
+                    Sender =
+                    {
+                        IdTeam = mi.IdSender,
+                        Name = mi.Sender.Name
+                    },
+                    Receiver =
+                    {
+                        IdTeam = mi.IdReceiver,
+                        Name = mi.Receiver.Name
+                    },
                     GameDate = mi.GameDate,
                     NamePitch = mi.Pitch.Name
                 }).ToListAsync();
@@ -99,10 +105,16 @@ namespace Infrastructure.Repositories
                 .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
-                    IdSender = mi.IdSender,
-                    NameSender = mi.Sender.Name,
-                    IdReceiver = mi.IdReceiver,
-                    NameReceiver = mi.Receiver.Name,
+                    Sender =
+                    {
+                        IdTeam = mi.IdSender,
+                        Name = mi.Sender.Name
+                    },
+                    Receiver =
+                    {
+                        IdTeam = mi.IdReceiver,
+                        Name = mi.Receiver.Name
+                    },
                     GameDate = mi.GameDate,
                     NamePitch = mi.Pitch.Name
                 }).ToListAsync();

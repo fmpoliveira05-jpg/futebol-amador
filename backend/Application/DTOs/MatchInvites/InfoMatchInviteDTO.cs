@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.DTOs.Team;
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.MatchInvites
@@ -8,19 +9,11 @@ namespace Application.DTOs.MatchInvites
         [Required(ErrorMessage = "O id da matchInvite é obrigatorio")]
         public Guid Id { get; set; }
 
-        [Required(ErrorMessage = "O id do emissor é obrigatório")]
-        public Guid IdSender { get; set; }
+        [Required]
+        public TeamDto Sender { get; set; } = null!;
 
-        [Required(ErrorMessage = "O nome do emissor é obrigatorio")]
-        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
-        public string NameSender { get; set; } = null!;
-
-        [Required(ErrorMessage = "O id do recetor é obrigatório")]
-        public Guid IdReceiver { get; set; }
-
-        [Required(ErrorMessage = "O nome do recetor é obrigatorio")]
-        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
-        public string NameReceiver { get; set; } = null!;
+        [Required]
+        public TeamDto Receiver { get; set; } = null!;
 
         [Required(ErrorMessage = "A data do jogo é obrigatoria")]
         public DateTime GameDate { get; set; }

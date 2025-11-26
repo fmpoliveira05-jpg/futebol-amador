@@ -68,11 +68,11 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("name/{teamId}")]
+        [HttpGet("opponent/{teamId}")]
         [AllowAnonymous]
         public async Task<IActionResult> TeamName(Guid teamId)
         {
-            var team = await TeamService.getNameTeam(teamId);
+            var team = await TeamService.getOpponent(teamId);
             return Ok(team);
         }
         #endregion
