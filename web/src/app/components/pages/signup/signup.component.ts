@@ -5,6 +5,10 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
+/**
+ * Componente responsável pelo processo de registo de um novo jogador.
+ * Permite ao utilizador criar uma nova conta fornecendo dados como nome, email, senha, entre outros.
+ */
 @Component({
   selector: 'app-signup',
   templateUrl: './signup.component.html',
@@ -13,11 +17,31 @@ import { CommonModule } from '@angular/common';
   imports: [ReactiveFormsModule, CommonModule],
 })
 export class SignupComponent {
+  
+  /**
+   * Mensagem de erro que será exibida se ocorrer algum problema durante o processo de registo.
+   */
   errorMessage: string | null = null;
+
+  /**
+   * Serviço de autenticação, utilizado para realizar o registo do jogador.
+   */
   private authService = inject(AuthService);
+
+  /**
+   * Serviço de roteamento, utilizado para navegar entre as páginas.
+   */
   private router = inject(Router);
+
+  /**
+   * Serviço para construir o formulário de registo com suas respectivas validações.
+   */
   private fb = inject(FormBuilder);
 
+  /**
+   * Formulário reativo para registo do jogador, contendo campos como nome, email, senha, etc.
+   * Cada campo possui validações específicas.
+   */
   signupForm = this.fb.group({
     name: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(256)]],
@@ -29,6 +53,10 @@ export class SignupComponent {
     height: [0, [Validators.required, Validators.min(100), Validators.max(250)]],
   });
 
+  /**
+   * Método responsável por processar o envio do formulário de registo.
+   * Realiza validações e, se o formulário for válido, chama o serviço de autenticação para criar a conta.
+   */
   onSignup() {
     if (this.signupForm.invalid) {
       this.signupForm.markAllAsTouched();
@@ -62,6 +90,11 @@ export class SignupComponent {
     });
   }
 
+  /**
+   * Formata os erros de validação recebidos da API em uma string legível.
+   * @param errors Erros de validação retornados pela API.
+   * @returns Mensagem formatada com os erros.
+   */
   private formatValidationErrors(errors: any): string {
     let message = '';
     for (const field in errors) {
