@@ -112,6 +112,7 @@ namespace Infrastructure.Repositories
                                    MatchStatus = m.MatchStatus,
                                    GameDate = m.MatchDate,
                                    MatchResult = myTeam.MatchResult,
+                                   IsCompetitive = m.IsCompetive,
                                    Team = new TeamStatisticsDto
                                    {
                                        IdTeam = idTeam,
@@ -124,11 +125,12 @@ namespace Infrastructure.Repositories
                                        Name = opponentTeam.Team.Name,
                                        NumGoals = opponentTeam.NumGoals
                                    },
-                                   pitchGame = new PitchDto
+                                   PitchGame = new PitchDto
                                    {
                                        Name = pitch.Name,
                                        Address = pitch.Address
-                                   }
+                                   },
+                                   IsHome = m.idPitch == myTeam.Team.IdPitch
                                })
                          .ToListAsync();
 
@@ -217,6 +219,7 @@ namespace Infrastructure.Repositories
                     MatchStatus = x.Match.MatchStatus,
                     GameDate = x.Match.MatchDate,
                     MatchResult = x.MyTeam.MatchResult,
+                    IsCompetitive = x.Match.IsCompetive,
                     Team = new TeamStatisticsDto
                     {
                         IdTeam = idTeam,
@@ -229,11 +232,13 @@ namespace Infrastructure.Repositories
                         Name = x.OpponentTeam.Team.Name,
                         NumGoals = x.OpponentTeam.NumGoals
                     },
-                    pitchGame = new PitchDto
+                    PitchGame = new PitchDto
                     {
                         Name = x.Pitch.Name,
                         Address = x.Pitch.Address
-                    }
+                    },
+                    IsHome = x.Match.idPitch == x.MyTeam.Team.IdPitch
+
                 })
                 .ToListAsync();
 
@@ -353,27 +358,26 @@ namespace Infrastructure.Repositories
                 {
                     IdMatch = m.Id,
                     MatchStatus = m.MatchStatus,
+                    IsCompetitive = m.IsCompetive,
                     GameDate = m.MatchDate,
-
                     Team = new TeamStatisticsDto
                     {
                         IdTeam = m.Teams.First().Team.Id,
                         Name = m.Teams.First().Team.Name,
                         NumGoals = m.Teams.First().NumGoals,
                     },
-
                     Opponent = new TeamStatisticsDto
                     {
                         IdTeam = m.Teams.Skip(1).First().Team.Id,
                         Name = m.Teams.Skip(1).First().Team.Name,
                         NumGoals = m.Teams.Skip(1).First().NumGoals,
                     },
-
-                    pitchGame = new PitchDto
+                    PitchGame = new PitchDto
                     {
                         Name = m.Pitch.Name,
                         Address = m.Pitch.Address
-                    }
+                    },
+                    IsHome = m.idPitch == m.Teams.First().Team.IdPitch
                 })
                 .ToListAsync();
         }

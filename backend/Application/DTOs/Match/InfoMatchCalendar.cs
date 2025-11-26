@@ -20,12 +20,18 @@ namespace Application.DTOs.Match
         public MatchResult MatchResult { get; set; }
 
         [Required]
+        public bool IsCompetitive { get; set; }
+
+        [Required]
         public TeamStatisticsDto Team { get; set; } = null!;
 
         [Required]
         public TeamStatisticsDto Opponent { get; set; } = null!;
 
         [Required]
-        public PitchDto pitchGame { get; set; } = null!;
+        public PitchDto PitchGame { get; set; } = null!;
+
+        [Required]
+        public bool IsHome { get; set; }
     }
 }
