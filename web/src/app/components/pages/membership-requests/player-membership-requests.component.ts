@@ -3,6 +3,10 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { MembershipRequest } from '../../..//shared/Dtos/membership-request.model';
 
+/**
+ * Componente responsável pela gestão de pedidos de adesão de jogadores.
+ * Permite carregar, aceitar, rejeitar e filtrar os pedidos de adesão.
+ */
 @Component({
   selector: 'app-player-membership-requests-page',
   standalone: true,
@@ -11,17 +15,19 @@ import { MembershipRequest } from '../../..//shared/Dtos/membership-request.mode
   styleUrls: ['./player-membership-requests.component.css'],
 })
 export class PlayerMembershipRequestsPageComponent {
-  private readonly membershipRequestService = inject(MembershipRequestService);
+  private readonly membershipRequestService = inject(MembershipRequestService); // Serviço de pedidos de adesão
 
-  protected readonly requests = signal<MembershipRequest[]>([]);
-  protected readonly isLoading = signal<boolean>(false);
-  protected readonly errorMessage = signal<string | null>(null);
-  protected readonly requestsToShow = signal<number>(10);
+  protected readonly requests = signal<MembershipRequest[]>([]); // Lista de pedidos de adesão
+  protected readonly isLoading = signal<boolean>(false); // Estado de carregamento
+  protected readonly errorMessage = signal<string | null>(null); // Mensagem de erro
+  protected readonly requestsToShow = signal<number>(10); // Número de pedidos a mostrar por vez
 
+  // Filtra os pedidos de adesão que não são enviados pelo jogador
   protected readonly filteredRequests = computed(() =>
     this.requests().filter((r) => !r.isPlayerSender)
   );
 
+  // Define os pedidos visíveis de acordo com o número de pedidos a mostrar
   protected readonly visibleRequests = computed(() =>
     this.filteredRequests().slice(0, this.requestsToShow())
   );
@@ -30,6 +36,10 @@ export class PlayerMembershipRequestsPageComponent {
     this.loadRequests();
   }
 
+  /**
+   * Carrega os pedidos de adesão do jogador atual.
+   * Exibe uma mensagem de erro caso não seja possível carregar os pedidos.
+   */
   private loadRequests(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -50,10 +60,17 @@ export class PlayerMembershipRequestsPageComponent {
       });
   }
 
+  /**
+   * Carrega mais pedidos de adesão, aumentando o número de pedidos visíveis.
+   */
   protected loadMore(): void {
     this.requestsToShow.update((v) => v + 10);
   }
 
+  /**
+   * Aceita o pedido de adesão de um jogador à equipa.
+   * Exibe uma confirmação antes de aceitar o pedido.
+   */
   protected accept(request: MembershipRequest): void {
     if (
       !confirm(
@@ -82,6 +99,10 @@ export class PlayerMembershipRequestsPageComponent {
       });
   }
 
+  /**
+   * Rejeita o pedido de adesão de um jogador à equipa.
+   * Exibe uma confirmação antes de rejeitar o pedido.
+   */
   protected reject(request: MembershipRequest): void {
     if (
       !confirm(
