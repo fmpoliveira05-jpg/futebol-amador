@@ -8,7 +8,7 @@
 <div class="row">
     <div class="small-container" *ngFor="let team of teams()">
         <a routerLink="/team/{{team.id}}">
-            <img height="200" width="200" src="../../../../assets/placeholder.png" />
+            <img height="225" width="225" src="../../../../assets/placeholder.png" />
             <div class="name">
                 {{team.name}}
             </div>
@@ -22,12 +22,11 @@
                 Points: {{team.currentPoints}}
             </div>
             <div class="averageAge">
-                Average Age: {{team.averageAge}}
+                Average Age: {{math.trunc(team.averageAge)}}
             </div>
             <div class="playerCount">
                 Players: {{team.playerCount}}
             </div>
         </a>
-        <button (click)="sendMembershipRequest(team.id)">Pedir para entrar</button>
     </div>
 </div>

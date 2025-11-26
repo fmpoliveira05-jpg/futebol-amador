@@ -24,6 +24,8 @@ export class Teams {
 
   filter = signal<FilterListTeamDto>({});
 
+  math = Math;
+
   constructor(
     private playerService: PlayerService,
     private route: ActivatedRoute,
