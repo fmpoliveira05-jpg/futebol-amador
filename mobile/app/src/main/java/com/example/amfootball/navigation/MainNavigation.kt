@@ -57,6 +57,7 @@ import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
+import com.example.amfootball.utils.extensions.composableProtected
 
 @Composable
 fun MainNavigation() {
@@ -179,7 +180,10 @@ private fun NavGraphBuilder.userPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    profilePlayer()
+    profilePlayer(
+        navHostController = globalNavController,
+        sessionManager = sessionManager
+    )
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
         val viewModel = hiltViewModel<ListTeamViewModel>()
@@ -202,12 +206,20 @@ private fun NavGraphBuilder.userPages(
     }
 }
 
-private fun NavGraphBuilder.profilePlayer() {
-    composable(route = Routes.UserRoutes.PROFILE.route) {
-        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
+private fun NavGraphBuilder.profilePlayer(
+    sessionManager: SessionManager,
+    navHostController: NavHostController
+) {
+    composableProtected(
+        route = Routes.UserRoutes.PROFILE.route,
+        sessionManager = sessionManager,
+        navController = navHostController,
+        content = {
+            val viewModel = hiltViewModel<ProfilePlayerViewModel>()
 
-        ProfileScreen(viewModel = viewModel)
-    }
+            ProfileScreen(viewModel = viewModel)
+        }
+    )
 
     composable(route = "${Routes.UserRoutes.PROFILE.route}/{${Arguments.PLAYER_ID}}",
         arguments = listOf(

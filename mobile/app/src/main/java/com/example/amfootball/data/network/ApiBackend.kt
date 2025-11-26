@@ -4,6 +4,7 @@ import com.example.amfootball.data.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
+import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.dtos.team.FormTeamDto
@@ -57,6 +58,10 @@ interface ApiBackend{
     suspend fun getMyProfile(
     ): Response<PlayerProfileDto>
 
+    @POST("api/User/login")
+    suspend fun loginUser(
+        @Body request: LoginDto
+    ): Response<PlayerProfileDto>
     // ============================================================================================
     //  CHAT
     // ============================================================================================
