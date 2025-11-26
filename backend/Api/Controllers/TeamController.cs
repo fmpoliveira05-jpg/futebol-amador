@@ -7,6 +7,7 @@ using Application.Interfaces.Services;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -65,6 +66,14 @@ namespace Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await TeamService.DeleteTeamAsync(teamId, userId);
             return NoContent();
+        }
+
+        [HttpGet("name/{teamId}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> TeamName(Guid teamId)
+        {
+            var team = await TeamService.getNameTeam(teamId);
+            return Ok(team);
         }
         #endregion
 

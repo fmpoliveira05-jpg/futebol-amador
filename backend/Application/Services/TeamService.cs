@@ -283,5 +283,16 @@ namespace Application.Services
         }
 
         #endregion
+
+        public async Task<string> getNameTeam(Guid teamId)
+        {
+            var team = await TeamRepository.GetNameTeamById(teamId);
+            if(team == "")
+            {
+                throw new ArgumentException("Não foi encontrada nenhuma equipa");
+            }
+
+            return team;
+        }
     }
 }

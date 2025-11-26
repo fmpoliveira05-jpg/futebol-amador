@@ -8,6 +8,8 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
+        Task<string> GetNameTeamById(Guid idTeam);
+
         Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId);
 
         Task<List<string>> GetMemberIdsByTeamIdAsync(Guid teamId);
