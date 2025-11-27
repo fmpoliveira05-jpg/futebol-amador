@@ -22,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
@@ -139,12 +140,13 @@ private fun FieldsSendMatchInvite(
 
     TextFieldOutline(
         label = stringResource(id = R.string.filter_opponent),
-        value = fields.nameOpponent,
+        value = fields.opponent?.name
+        ,
         isReadOnly = true,
     )
 
     DatePickerDockedFutureLimitedDate(
-        value = fields.gameDate ?: "",
+        value = fields.gameDateString ?: "",
         onDateSelected = actions.onGameDateChange,
         label = stringResource(id = R.string.game_date),
         contentDescription = stringResource(id = R.string.description_game_date),
@@ -156,7 +158,7 @@ private fun FieldsSendMatchInvite(
     )
 
     FieldTimePicker(
-        value = fields.gameTime ?: "",
+        value = fields.gameTimeString ?: "",
         onValueChange = actions.onTimeGameChange,
         label = stringResource(id = R.string.game_hours),
         contentDescription = stringResource(id = R.string.description_game_date) ,
@@ -174,7 +176,6 @@ private fun FieldsSendMatchInvite(
         textUnChecked = stringResource(id = R.string.unchecked_playing_home),
         enabled = mode != MatchFormMode.CANCEL && mode != MatchFormMode.POSTPONE,
     )
-
 
     if (mode == MatchFormMode.CANCEL) {
         TextFieldOutline(
@@ -215,17 +216,23 @@ private fun FieldsSendMatchInvite(
 // MOCKS PARA PREVIEWS
 // =============================================================================
 val emptyFields = MatchInviteDto(
-    nameOpponent = "",
-    gameDate = null,
-    gameTime = null,
+    opponent = TeamDto(
+        id = "1",
+        name = ""
+    ),
+    gameDateString = null,
+    gameTimeString = null,
     isHomeGame = true
 )
 
 val filledFields = MatchInviteDto(
-    nameOpponent = "Lisboa Navigators",
-    gameDate = "2024-12-25",
-    gameTime = "15:30",
-    isHomeGame = true // Jogo em casa
+    opponent = TeamDto(
+        id = "2",
+        name="Lisboa Navigators"
+    ),
+    gameDateString = "2024-12-25",
+    gameTimeString = "15:30",
+    isHomeGame = true
 )
 
 val dummyActions = FormMatchInviteActions(
@@ -239,7 +246,6 @@ val dummyActions = FormMatchInviteActions(
 // =============================================================================
 // PREVIEWS
 // =============================================================================
-
 /**
  * Preview do modo [MatchFormMode.SEND].
  * Apresenta o formulário vazio para iniciar um convite.
@@ -247,11 +253,11 @@ val dummyActions = FormMatchInviteActions(
 @Preview(name = "1. Send (EN)", group = "Forms", locale = "en", showBackground = true)
 @Preview(name = "1. Send (PT)", group = "Forms", locale = "pt", showBackground = true)
 @Composable
-fun PreviewMatchInvite_Send() {
+fun PreviewMatchInviteSend() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = emptyFields, // <--- Sem dados
+            fields = emptyFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.SEND
@@ -266,14 +272,14 @@ fun PreviewMatchInvite_Send() {
 @Preview(name = "2. Negotiate (EN)", group = "Forms", locale = "en", showBackground = true)
 @Preview(name = "2. Negotiate (PT)", group = "Forms", locale = "pt", showBackground = true)
 @Composable
-fun PreviewMatchInvite_Negotiate() {
+fun PreviewMatchInviteNegotiate() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields.copy(isHomeGame = false), // Simulando proposta do adversário (Fora)
+            fields = filledFields.copy(isHomeGame = false),
             actions = dummyActions,
             errors = MatchInviteFormErros(),
-            mode = MatchFormMode.NEGOCIATE // Verifica se no teu Enum é NEGOTIATE ou NEGOCIATE
+            mode = MatchFormMode.NEGOCIATE
         )
     }
 }
@@ -285,11 +291,11 @@ fun PreviewMatchInvite_Negotiate() {
 @Preview(name = "3. Postpone (EN)", group = "Forms", locale = "en", showBackground = true)
 @Preview(name = "3. Postpone (PT)", group = "Forms", locale = "pt", showBackground = true)
 @Composable
-fun PreviewMatchInvite_Postpone() {
+fun PreviewMatchInvitePostpone() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields, // Com dados antigos
+            fields = filledFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.POSTPONE
@@ -304,11 +310,11 @@ fun PreviewMatchInvite_Postpone() {
 @Preview(name = "4. Cancel (EN)", group = "Forms", locale = "en", showBackground = true)
 @Preview(name = "4. Cancel (PT)", group = "Forms", locale = "pt", showBackground = true)
 @Composable
-fun PreviewMatchInvite_Cancel() {
+fun PreviewMatchInviteCancel() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields, // Com dados do jogo a cancelar
+            fields = filledFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.CANCEL

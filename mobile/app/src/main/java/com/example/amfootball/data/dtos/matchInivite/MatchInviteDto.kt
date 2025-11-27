@@ -1,6 +1,8 @@
 package com.example.amfootball.data.dtos.matchInivite
 
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.utils.Patterns
+import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -12,82 +14,50 @@ import java.time.format.DateTimeFormatter
  * String separadas ([gameDate] e [gameTime]) para exibição na UI.
  *
  * @property id O identificador único do convite (pode ser null se for um novo convite ainda não persistido).
- * @property idOpponent O identificador da equipa adversária.
- * @property nameOpponent O nome da equipa adversária.
+ * @property opponent guarda os dados do opponent, nome e id.
  * @property isHomeGame Indica se o jogo é realizado em casa (true) ou fora (false). Padrão é true.
  * @property gameDate A representação em String da data do jogo (formato: "dd/MM/yyyy").
  * @property gameTime A representação em String da hora do jogo (formato: "HH:mm").
  * @property gameDateTime O objeto [LocalDateTime] real contendo a data e hora do jogo.
+ * @property isCompetitive Indica se o jogo é competitivo (true) ou casual (false). Padrão é false.
  */
 data class MatchInviteDto(
+    @SerializedName("", alternate = ["idMatch"])
     val id: String? = null,
-    val idOpponent: String? = null,
-    val nameOpponent: String? = null,
+    @SerializedName("Opponent", alternate = ["opponent"])
+    val opponent: TeamDto? = null,
+    @SerializedName("IsHome", alternate = ["isHome"])
     val isHomeGame: Boolean = true,
-    val gameDate: String? = null,
-    val gameTime: String? = null,
-    val gameDateTime: LocalDateTime? = null
+    @SerializedName("GameDate", alternate = ["gameDate"])
+    val gameDateRaw: String? = null,
+    val gameDateString: String? = null,
+    val gameTimeString: String? = null,
+    @SerializedName("IsCompetitive", alternate = ["isCompetitive"])
+    val isCompetitive: Boolean? = false
 ) {
     companion object {
-        private val dateTimeFormatter =
-            DateTimeFormatter.ofPattern(Patterns.DATE_TIME)
-        private val dateFormatter =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        private val timeFormatter =
-            DateTimeFormatter.ofPattern("HH:mm")
+        private val dateFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
+        private val timeFormatter = DateTimeFormatter.ofPattern(Patterns.TIME)
+        private val apiParser = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-        // criar DTO vindo do backend
-        fun fromBackend(
-            id: String?,
-            idOpponent: String?,
-            nameOpponent: String?,
-            isHomeGame: Boolean,
-            gameDateTime: LocalDateTime?
-        ): MatchInviteDto {
-
-            return MatchInviteDto(
-                id = id,
-                idOpponent = idOpponent,
-                nameOpponent = nameOpponent,
-                isHomeGame = isHomeGame,
-                gameDate = gameDateTime?.format(dateFormatter),
-                gameTime = gameDateTime?.format(timeFormatter),
-                gameDateTime = gameDateTime
-            )
-        }
-
-        fun genericForCreate(nameOpponent: String): MatchInviteDto {
-            return MatchInviteDto(
-                id = null,
-                idOpponent = null,
-                nameOpponent = nameOpponent,
-                isHomeGame = true,
-                gameDate = null,
-                gameTime = null,
-                gameDateTime = null
-            )
-        }
-
-        fun genericForNegotiate(): MatchInviteDto {
-            val sampleDateTime = LocalDateTime.now().plusDays(2).withHour(18).withMinute(0) // ex: daqui 2 dias às 18:00
-            return MatchInviteDto(
-                id = "12345",
-                idOpponent = "opponent_001",
-                nameOpponent = "FC Barcelona",
-                isHomeGame = false,
-                gameDate = sampleDateTime.format(dateFormatter),
-                gameTime = sampleDateTime.format(timeFormatter),
-                gameDateTime = sampleDateTime
-            )
-        }
-
-        fun combineToDateTime(date: String?, time: String?): LocalDateTime? {
-            if (date == null || time == null) return null
-            return try {
-                LocalDateTime.parse("$date $time", dateTimeFormatter)
+        fun createFromBackend(dto: MatchInviteDto): MatchInviteDto {
+            val parsedDateTime: LocalDateTime? = try {
+                if (!dto.gameDateRaw.isNullOrBlank()) {
+                    LocalDateTime.parse(dto.gameDateRaw, apiParser)
+                } else {
+                    null
+                }
             } catch (e: Exception) {
+                e.printStackTrace()
                 null
             }
+
+            return dto.copy(
+                gameDateString = parsedDateTime?.format(dateFormatter),
+                gameTimeString = parsedDateTime?.format(timeFormatter)
+            )
         }
+
+        fun createEmpty(): MatchInviteDto = MatchInviteDto()
     }
 }

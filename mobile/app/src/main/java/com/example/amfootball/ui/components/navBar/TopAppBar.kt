@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -24,9 +25,12 @@ fun MainTopAppBar(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
-    val routeTitleResId = getAllRoutes().find { it.route == currentRoute }?.labelResId
-    val haveBackButton = getAllRoutes().find { it.route == currentRoute }?.haveBackButton
-    val authViewModel: AuthViewModel = viewModel()
+    val foundRoute = getAllRoutes().find {
+        currentRoute?.startsWith(it.route) == true
+    }
+    val haveBackButton = foundRoute?.haveBackButton
+    val routeTitleResId = foundRoute?.labelResId
+    val authViewModel = hiltViewModel<AuthViewModel>()
 
     TopAppBar(
         title = {

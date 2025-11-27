@@ -308,7 +308,7 @@ private fun NavGraphBuilder.managementMatch(globalNavController: NavHostControll
     }
 
     composableProtected(
-        route = "${Routes.TeamRoutes.CANCEL_MATCH.route}/${Arguments.MATCH_ID}",
+        route = "${Routes.TeamRoutes.CANCEL_MATCH.route}/{${Arguments.MATCH_ID}}",
         arguments = listOf(
             navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
             navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.CANCEL.name }

@@ -67,7 +67,6 @@ fun FieldTimePicker(
         value = value,
         onValueChange = {},
         label = { Text(text = label) },
-        readOnly = true,
         trailingIcon = {
             IconButton(onClick = { showTimePicker = true }) {
                 Icon(
@@ -84,11 +83,12 @@ fun FieldTimePicker(
                 )
             }
         },
+        readOnly = true,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
-        enabled = enabled
     )
 
-    if (showTimePicker) {
+    if (showTimePicker && enabled) {
         TimePickerApp(
             onDismiss = {
                 showTimePicker = false

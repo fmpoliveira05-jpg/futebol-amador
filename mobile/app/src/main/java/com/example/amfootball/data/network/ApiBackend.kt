@@ -5,6 +5,7 @@ import com.example.amfootball.data.dtos.chat.CreateRoomResponse
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
@@ -243,6 +244,12 @@ interface ApiBackend{
         @Path("idTeam") idTeam: String,
         @QueryMap filters: Map<String, String>
     ): Response<List<InfoMatchCalendar>>
+
+    @GET("api/Calendar/{idTeam}/{idMatch}")
+    suspend fun getMatchTeam(
+        @Path("idTeam") idTeam: String,
+        @Path("idMatch") idMatch: String
+    ): Response<MatchInviteDto>
 
     @PUT("api/Calendar/{idTeam}/PostponeMatch")
     suspend fun postponeMatch(

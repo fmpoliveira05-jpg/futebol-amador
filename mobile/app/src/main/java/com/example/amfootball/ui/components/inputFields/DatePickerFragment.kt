@@ -206,7 +206,11 @@ private fun LimitedDatePickerBase(
     DatePickerImpl(
         label = label,
         value = value,
-        onIconClick = { showDatePicker = !showDatePicker },
+        onIconClick = {
+            if(enabled) {
+                showDatePicker = !showDatePicker
+            }
+        },
         contentDescription = contentDescription,
         showDatePicker = showDatePicker,
         datePickerState = datePickerState,
