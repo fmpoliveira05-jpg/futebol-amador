@@ -9,7 +9,8 @@
         {{ isEditMode() ? 'Cancelar' : 'Editar perfil' }}
       </button>
 
-      <button *ngIf="isOwnProfile()" type="button" class="btn btn-danger" (click)="deleteAccount()" [disabled]="isSaving()">
+      <button *ngIf="isOwnProfile()" type="button" class="btn btn-danger" (click)="deleteAccount()"
+        [disabled]="isSaving()">
         Apagar conta
       </button>
     </div>
@@ -115,30 +116,25 @@
         <p class="side-card__text">Atualmente não estás em nenhuma equipa.</p>
       </ng-template>
 
-      <button
-        type="button"
-        class="btn btn-warning"
-        (click)="leaveTeam()"
-        [disabled]="!hasTeam() || isSaving()"
-      >
+      <button *ngIf="hasTeam()" type="button" class="btn btn-secondary" (click)="goToTeamProfile()">
+        Ver sua Equipa.
+      </button>
+
+      <button type="button" class="btn btn-warning" (click)="leaveTeam()" [disabled]="!hasTeam() || isSaving()">
         Abandonar equipa
       </button>
 
       <hr class="divider" />
 
       <h3 class="side-card__subtitle">Pedidos de adesão</h3>
-        <p class="side-card__text">
-          Aqui vais conseguir ver e gerir os pedidos de adesão.
-        </p>
-        <div class="side-card__actions">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            (click)="onViewMembershipRequests()"
-          >
-            Ver pedidos de adesão
-          </button>
-        </div>
+      <p class="side-card__text">
+        Aqui vais conseguir ver e gerir os pedidos de adesão.
+      </p>
+      <div class="side-card__actions">
+        <button type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
+          Ver pedidos de adesão
+        </button>
+      </div>
     </aside>
   </div>
 </section>

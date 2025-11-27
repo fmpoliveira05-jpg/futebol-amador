@@ -8,6 +8,7 @@ import { SearchTeam } from '../../partials/search-team/search-team';
 import { MembershipRequestService } from '../../../services/membership-request.service';
 import { AuthService } from '../../../services/auth.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
+import { TeamService } from '../../../services/team.service';
 
 @Component({
   selector: 'app-teams',
@@ -26,21 +27,32 @@ export class Teams {
 
   constructor(
     private playerService: PlayerService,
+    private teamService: TeamService,
     private route: ActivatedRoute,
     private router: Router,
-    private membershipRequestService: MembershipRequestService,
-    private authService: AuthService
+    private membershipRequestService: MembershipRequestService
   ) {}
 
   protected readonly hasTeam = computed(() => !!this.player()?.idTeam);
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      this.filter.set(params as FilterListTeamDto);
-      this.loadTeams();
+    this.playerService.getMyProfile().subscribe({
+      next: (player) => {
+        this.player.set(player);
+        this.isLoading.set(false);
+        console.log(player);
+        
+        this.route.queryParams.subscribe((params) => {
+          this.filter.set(params as FilterListTeamDto);
+          this.loadTeams();
+        });
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Não foi possível carregar as informações do jogador.');
+        this.isLoading.set(false);
+      },
     });
-
-    this.loadPlayer();
   }
 
   loadTeams() {
@@ -48,17 +60,35 @@ export class Teams {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    this.playerService.searchTeams(this.filter()).subscribe({
-      next: (data) => {
-        this.teams.set(data);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Error loading teams');
-        this.isLoading.set(false);
-      },
-    });
+    if (this.hasTeam()) {
+      this.teamService.searchTeams(this.player()?.idTeam!).subscribe({
+        next: (data) => {
+          this.teams.set(data);
+          this.isLoading.set(false);
+          console.log('teams for teams');
+          console.log(data);
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage.set('Error loading teams');
+          this.isLoading.set(false);
+        },
+      });
+    } else {
+      this.playerService.searchTeams(this.filter()).subscribe({
+        next: (data) => {
+          this.teams.set(data);
+          this.isLoading.set(false);
+          console.log('teams for players');
+          console.log(data);
+        },
+        error: (err) => {
+          console.error(err);
+          this.errorMessage.set('Error loading teams');
+          this.isLoading.set(false);
+        },
+      });
+    }
   }
 
   applyFilter(newFilter: FilterListTeamDto) {
@@ -79,19 +109,19 @@ export class Teams {
     });
   }
 
-  loadPlayer(): void {
-    this.playerService.getMyProfile().subscribe({
-      next: (player) => {
-        this.player.set(player);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível carregar as informações do jogador.');
-        this.isLoading.set(false);
-      },
-    });
-  }
+  // loadPlayer(): void {
+  //   this.playerService.getMyProfile().subscribe({
+  //     next: (player) => {
+  //       this.player.set(player);
+  //       this.isLoading.set(false);
+  //     },
+  //     error: (err) => {
+  //       console.error(err);
+  //       this.errorMessage.set('Não foi possível carregar as informações do jogador.');
+  //       this.isLoading.set(false);
+  //     },
+  //   });
+  // }
 
   goToCreateTeam() {
     this.router.navigate(['/createTeam']);

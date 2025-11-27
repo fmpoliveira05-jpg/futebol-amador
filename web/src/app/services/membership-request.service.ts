@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { MembershipRequest } from '../shared/Dtos/membership-request.model';
 import { AuthService } from './auth.service';
 import { validate } from 'uuid';
+import { FilterMembershipRequestsPlayer } from '../shared/Dtos/Filters/FilterMembershipRequestPlayer';
 
 @Injectable({
   providedIn: 'root',
@@ -26,14 +27,25 @@ export class MembershipRequestService {
     return Id.replace(/^(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})$/, '$1-$2-$3-$4-$5');
   }
 
-  getMembershipRequestsForCurrentPlayer(): Observable<MembershipRequest[]> {
+  getMembershipRequestsForCurrentPlayer(
+    filters?: FilterMembershipRequestsPlayer
+  ): Observable<MembershipRequest[]> {
     const playerId = this.auth.getCurrentPlayerId();
     if (!playerId) {
       throw new Error('No authenticated player');
     }
 
+    let params = new HttpParams();
+
+    if (filters) {
+      if (filters.senderName) params = params.set('SenderName', filters.senderName!);
+      if (filters.minDate) params = params.set('MinDate', filters.minDate.toString());
+      if (filters.maxDate) params = params.set('MaxDate', filters.maxDate.toString());
+    }
+
     return this.http.get<MembershipRequest[]>(
-      `${this.baseUrlPlayer}/${playerId}/membership-requests`
+      `${this.baseUrlPlayer}/${playerId}/membership-requests`,
+      { params }
     );
   }
 
@@ -48,7 +60,11 @@ export class MembershipRequestService {
       const formattedRequestId = this.formatId(requestId);
 
       this.http
-        .post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/accept`, JSON.stringify(formattedRequestId), { headers: this.headers })
+        .post<void>(
+          `${this.baseUrlPlayer}/${playerId}/membership-requests/accept`,
+          JSON.stringify(formattedRequestId),
+          { headers: this.headers }
+        )
         .subscribe({
           next: () => {
             observer.next();
@@ -88,13 +104,15 @@ export class MembershipRequestService {
             return;
           }
 
-          this.http.get<MembershipRequest[]>(`${this.baseUrlTeam}/${teamId}/membership-request`).subscribe({
-            next: (requests) => {
-              observer.next(requests);
-              observer.complete();
-            },
-            error: (err) => observer.error(err),
-          });
+          this.http
+            .get<MembershipRequest[]>(`${this.baseUrlTeam}/${teamId}/membership-request`)
+            .subscribe({
+              next: (requests) => {
+                observer.next(requests);
+                observer.complete();
+              },
+              error: (err) => observer.error(err),
+            });
         },
         error: (err) => observer.error(err),
       });
@@ -113,7 +131,11 @@ export class MembershipRequestService {
           const formattedRequestId = this.formatId(requestId);
 
           this.http
-            .post<void>(`${this.baseUrlTeam}/${teamId}/membership-request/accept`, JSON.stringify(formattedRequestId), { headers: this.headers })
+            .post<void>(
+              `${this.baseUrlTeam}/${teamId}/membership-request/accept`,
+              JSON.stringify(formattedRequestId),
+              { headers: this.headers }
+            )
             .subscribe({
               next: () => {
                 observer.next();
@@ -135,7 +157,7 @@ export class MembershipRequestService {
             observer.error('No team associated');
             return;
           }
-          
+
           this.http
             .delete<void>(`${this.baseUrlTeam}/${teamId}/membership-request/${requestId}/reject`)
             .subscribe({
@@ -162,7 +184,11 @@ export class MembershipRequestService {
       const formattedTeamId = this.formatId(teamId);
 
       this.http
-        .post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/send`, JSON.stringify(formattedTeamId), { headers: this.headers })
+        .post<void>(
+          `${this.baseUrlPlayer}/${playerId}/membership-requests/send`,
+          JSON.stringify(formattedTeamId),
+          { headers: this.headers }
+        )
         .subscribe({
           next: () => {
             observer.next();
@@ -179,16 +205,20 @@ export class MembershipRequestService {
     return new Observable((observer) => {
       this.auth.getCurrentTeamId().subscribe({
         next: (teamId) => {
-        if (!teamId) {
-          observer.error('No team associated');
-          return;
-        }
+          if (!teamId) {
+            observer.error('No team associated');
+            return;
+          }
 
-        const formattedPlayerId = this.formatId(playerId);
+          const formattedPlayerId = this.formatId(playerId);
 
-        this.http
-          .post<void>(`${this.baseUrlTeam}/${teamId}/membership-requests/send`, JSON.stringify(formattedPlayerId), { headers: this.headers })
-          .subscribe({
+          this.http
+            .post<void>(
+              `${this.baseUrlTeam}/${teamId}/membership-requests/send`,
+              JSON.stringify(formattedPlayerId),
+              { headers: this.headers }
+            )
+            .subscribe({
               next: () => {
                 observer.next();
                 observer.complete();

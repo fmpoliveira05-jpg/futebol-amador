@@ -7,10 +7,13 @@ import { PlayerService } from '../../../services/player.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { UpdateTeamDto } from '../../../shared/Dtos/Team/UpdateTeamDto';
+import { MembershipRequestService } from '../../../services/membership-request.service';
+import { FilterMembershipRequestsPlayer } from '../../../shared/Dtos/Filters/FilterMembershipRequestPlayer';
+import { MembershipRequest } from '../../../shared/Dtos/membership-request.model';
 
 @Component({
   selector: 'app-team-profile',
-  imports: [CommonModule, NgFor, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './team-profile.html',
   styleUrl: './team-profile.css',
 })
@@ -31,7 +34,8 @@ export class TeamProfile {
     private route: ActivatedRoute,
     private router: Router,
     private playerService: PlayerService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private membershipRequestService: MembershipRequestService
   ) {}
 
   ngOnInit() {
@@ -66,17 +70,46 @@ export class TeamProfile {
   });
 
   isAdmin = computed(() => {
-    const team = this.team();
+    // const team = this.team();
     const user = this.currentUser();
 
-    if (!team || !user) return false;
+    // if (!team || !user) return false;
 
-    const member = team.players.find((p) => p.playerId === user.playerId);
-    return member?.isAdmin === true;
+    // const member = team.players.find((p) => p.playerId === user.playerId);
+    return user?.isAdmin === true;
+  });
+
+  sentMembershipRequest = computed(() => {
+    let filter = new FilterMembershipRequestsPlayer;
+    
+    filter.senderName = this.team()?.name;
+
+    let result: boolean = false;
+
+    this.membershipRequestService.getMembershipRequestsForCurrentPlayer().subscribe({
+      next: (data) =>{
+        if (data.length < 1){
+          result =  false;
+          console.log(data);
+          console.log(result);
+        }else{
+          result = true
+        }
+      },
+      error: (err) => {
+        console.error(err);
+      }
+    })
+
+    return result;
   });
 
   protected goToTeamMembers(): void {
     this.router.navigate(['/team/members']);
+  }
+
+  protected goToMatchInvites(): void {
+    this.router.navigate(['/team/matchInvites']);
   }
 
   protected toggleEdit(): void {
@@ -143,6 +176,31 @@ export class TeamProfile {
       },
     });
   }
+
+  protected sendMembershipRequest(): void {
+    const t = this.team();
+    if (!t) return;
+
+    if (!confirm('Confirma envio de pedido de adesão à equipa?')) {
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    this.membershipRequestService.sendMembershipRequestPlayer(this.team()?.id!).subscribe({
+      next: () => {
+        alert('Pedido de adesão enviado com sucesso.');
+      },
+      error: (err) => {
+        console.error(err);
+        this.errorMessage.set('Não foi possível apagar a equipa.');
+      },
+    });
+  }
+
+  protected sendMatchRequest(): void {}
 
   protected deleteTeam(): void {
     const t = this.team();

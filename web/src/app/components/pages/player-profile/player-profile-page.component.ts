@@ -218,6 +218,10 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     alert('Aqui, no futuro, vais enviar um pedido de adesão a uma equipa.');
   }
 
+  goToTeamProfile(): void{
+    this.router.navigate(['/team/details', this.player()?.idTeam]);
+  }
+
   private loadPlayer(playerIdOrMe: string, showLoader: boolean = true): void {
     if (showLoader) {
       this.isLoading.set(true);

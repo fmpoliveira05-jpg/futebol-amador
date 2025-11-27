@@ -4,7 +4,7 @@
             <h1 class="page-title">{{ t.name }}</h1>
         </div>
 
-        <div *ngIf="isAdmin()" class="page-header__actions">
+        <div *ngIf="isMember() && isAdmin()" class="page-header__actions">
             <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
                 {{ isEditMode() ? 'Cancelar' : 'Editar Equipa' }}
             </button>
@@ -49,12 +49,21 @@
                     <dt>Numero de Jogadores</dt>
                     <dd>{{ t.players.length }}</dd>
                 </div>
-                <button type="button" class="btn btn-secondary" (click)="goToTeamMembers()">
+                <button *ngIf="isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="goToTeamMembers()">
                     Gerir membros da equipa
+                </button>
+                <button *ngIf="isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="goToMatchInvites()">
+                    Gerir convites de partida
+                </button>
+                <button *ngIf="!isMember() && !isAdmin() && !sentMembershipRequest()" type="button" class="btn btn-secondary" (click)="sendMembershipRequest()">
+                    Enviar pedido de adesão
+                </button>
+                <button *ngIf="!isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="sendMatchRequest()">
+                    Enviar pedido de partida
                 </button>
             </dl>
 
-            <form class="form" [formGroup]="form" *ngIf="isAdmin() && isEditMode() && !isLoading()">
+            <form class="form" [formGroup]="form" *ngIf="isMember() && isAdmin() && isEditMode() && !isLoading()">
                 <div class="form-grid">
                     <label class="form-field">
                         <span>Nome</span>
