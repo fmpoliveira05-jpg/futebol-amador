@@ -9,6 +9,7 @@ namespace Application.Interfaces.Services
     {
         public Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam);
         public Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendarDto filter);
+        public Task<InfoMatch> GetMatchById(Guid idMatch, Guid idTeam);
         public Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto);
         public Task<MatchDto> AcceptPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto);
         public Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto);

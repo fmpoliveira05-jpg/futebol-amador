@@ -57,6 +57,14 @@ namespace Api.Controllers
             return Ok(matches);  
         }
 
+        [HttpGet("{idMatch}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetMatchTeam(Guid idTeam, Guid idMatch)
+        {
+            var match = await matchController.GetMatchById(idMatch, idTeam);
+            return Ok(match);
+        }
+
         #endregion
 
         #region PostPoneMatch

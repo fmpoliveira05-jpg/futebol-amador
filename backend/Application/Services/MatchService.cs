@@ -56,6 +56,48 @@ namespace Application.Services
             return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
         }
 
+        public async Task<InfoMatch> GetMatchById(Guid idMatch, Guid idTeam)
+        {
+            var match = await MatchRepository.GetMatchById(idMatch);
+
+            if (match == null)
+            {
+                throw new ArgumentException("A match não foi encontrada");
+            }
+
+            var team = match.Teams.FirstOrDefault(ts => ts.Team.Id == idTeam);
+
+            if (team == null)
+            {
+                throw new ArgumentException("A equipa solicitante não faz parte desta partida.");
+            }
+
+            var opponent = match.Teams.FirstOrDefault(ts => ts.Team.Id != idTeam);
+
+            if (opponent == null)
+            {
+                throw new Exception("Oponente não encontrado.");
+            }
+
+            return new InfoMatch
+            {
+                IdMatch = match.Id,
+                Team = new TeamDto
+                {
+                    IdTeam = team.Id,
+                    Name = team.Team.Name,
+                },
+                Opponent = new TeamDto
+                {
+                    IdTeam = opponent.Id,
+                    Name = opponent.Team.Name,
+                },
+                GameDate = match.MatchDate,
+                IsCompetitive = match.IsCompetive,
+                IsHome = match.idPitch == team.Team.IdPitch
+            };
+        }
+
         #endregion
 
         #region PostPoneMatch
