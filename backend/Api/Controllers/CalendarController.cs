@@ -61,7 +61,7 @@ namespace Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> GetMatchTeam(Guid idTeam, Guid idMatch)
         {
-            var match = await matchController.GetMatchById(idMatch, idTeam);
+            var match = await matchController.GetMatchById(idTeam, idMatch);
             return Ok(match);
         }
 

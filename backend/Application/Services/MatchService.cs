@@ -56,7 +56,7 @@ namespace Application.Services
             return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
         }
 
-        public async Task<InfoMatch> GetMatchById(Guid idMatch, Guid idTeam)
+        public async Task<InfoMatch> GetMatchById(Guid idTeam, Guid idMatch)
         {
             var match = await MatchRepository.GetMatchById(idMatch);
 
