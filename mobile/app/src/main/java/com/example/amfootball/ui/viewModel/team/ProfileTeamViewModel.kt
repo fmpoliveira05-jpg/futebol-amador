@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.repository.TeamRepository
 import com.example.amfootball.utils.NetworkUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +29,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileTeamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val teamRepository: TeamRepository
+    private val teamRepository: TeamRepository,
+    private val sessionManager: SessionManager
 ): ViewModel() {
     /**
      * LiveData que contém os dados da equipa ([ProfileTeamDto]) quando carregados com sucesso.
@@ -52,15 +54,15 @@ class ProfileTeamViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState
 
     init {
+        val teamIdSessionManager = sessionManager.getUserProfile()?.idTeam
+
         if (teamId != null) {
-            // Carrega a equipa específica passada pela navegação
             loadTeamProfile(teamId = teamId)
+        } else if (teamId == null && teamIdSessionManager != null) {
+            loadTeamProfile(teamId = teamIdSessionManager)
         } else {
-            //Carrega a equipa do utilizador
-            //TODO: Carregar com base no nome da team
-            loadTeamProfile("B5225BE4-8336-4CC3-BB7A-E695A39A4FD0")
+            //TODO: Exceção
         }
-        //infoTeam.value = ProfileTeamInfoDto.profileExempleTeam()
     }
 
     /**

@@ -18,7 +18,6 @@ import com.example.amfootball.ui.screens.user.LoginScreen
 import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.local.SessionManager
@@ -35,7 +34,6 @@ import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
-import com.example.amfootball.ui.screens.match.CancelMatchScreen
 import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
@@ -51,16 +49,12 @@ import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
-import com.example.amfootball.ui.viewModel.chat.ChatViewModel
-import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
-import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
-import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
-import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
+import com.example.amfootball.utils.extensions.composableNotProtectedRoute
 import com.example.amfootball.utils.extensions.composableProtected
 
+//TODO: Colocar autorização nas rotas, até agora só temos autorização
 @Composable
 fun MainNavigation() {
     val globalNavController = rememberNavController()
@@ -71,6 +65,7 @@ fun MainNavigation() {
     val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
+
     Scaffold(
         topBar = {
             MainTopAppBar(
@@ -90,9 +85,9 @@ fun MainNavigation() {
         NavHost(
             navController = globalNavController,
             startDestination = Routes.GeralRoutes.HOMEPAGE.route,
-            modifier = Modifier.padding(innerPadding) // Aplica o padding do Scaffold!
+            modifier = Modifier.padding(innerPadding)
         ) {
-            homePages(globalNavController = globalNavController)
+            homePages(globalNavController = globalNavController, sessionManager = sessionManager)
 
             pages(
                 globalNavController = globalNavController,
@@ -117,14 +112,19 @@ fun MainNavigation() {
     }
 }
 
-private fun NavGraphBuilder.homePages(globalNavController: NavHostController) {
+private fun NavGraphBuilder.homePages(globalNavController: NavHostController, sessionManager: SessionManager) {
     composable(Routes.GeralRoutes.HOMEPAGE.route) {
         HomePageScreen(globalNavController = globalNavController)
     }
 
-    composable(Routes.TeamRoutes.HOMEPAGE.route){
-        HomePageTeamScreen(globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.HOMEPAGE.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            HomePageTeamScreen(globalNavController)
+        }
+    )
 }
 
 /**
@@ -137,7 +137,8 @@ private fun NavGraphBuilder.pages(
 ) {
     autPages(
         globalNavController = globalNavController,
-        authViewModel = authViewModel
+        authViewModel = authViewModel,
+        sessionManager = sessionManager
     )
 
     userPages(
@@ -147,7 +148,7 @@ private fun NavGraphBuilder.pages(
 
     teamPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
-    chatPages(globalNavController = globalNavController)
+    chatPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
     systemPages(globalNavController = globalNavController)
 }
@@ -157,21 +158,32 @@ private fun NavGraphBuilder.pages(
  * */
 private fun NavGraphBuilder.autPages(
     globalNavController: NavHostController,
+    sessionManager: SessionManager,
     authViewModel: AuthViewModel
 ) {
-    composable(Routes.UserRoutes.LOGIN.route) {
-        LoginScreen(
-            navHostController = globalNavController,
-            authViewModel = authViewModel
-        )
-    }
+    composableNotProtectedRoute(
+        route = Routes.UserRoutes.LOGIN.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            LoginScreen(
+                navHostController = globalNavController,
+                authViewModel = authViewModel
+            )
+        }
+    )
 
-    composable(Routes.UserRoutes.SIGNUP.route) {
-        SignUpScreen(
-            navHostController = globalNavController,
-            authViewModel = authViewModel
-        )
-    }
+    composableNotProtectedRoute(
+        route = Routes.UserRoutes.SIGNUP.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            SignUpScreen(
+                navHostController = globalNavController,
+                authViewModel = authViewModel
+            )
+        }
+    )
 }
 
 /**
@@ -187,15 +199,11 @@ private fun NavGraphBuilder.userPages(
     )
 
     composable(Routes.PlayerRoutes.TEAM_LIST.route){
-        val viewModel = hiltViewModel<ListTeamViewModel>()
-
-        ListTeamScreen(navHostController = globalNavController, viewModel = viewModel)
+        ListTeamScreen(navHostController = globalNavController)
     }
 
     composable(Routes.PlayerRoutes.PLAYER_LIST.route) {
-        val viewModel = hiltViewModel<ListPlayerViewModel>()
-
-        ListPlayersScreen(navHostController = globalNavController, viewModel = viewModel)
+        ListPlayersScreen(navHostController = globalNavController)
     }
 
     composable(Routes.GeralRoutes.LEADERBOARD.route) {
@@ -216,9 +224,7 @@ private fun NavGraphBuilder.profilePlayer(
         sessionManager = sessionManager,
         navController = navHostController,
         content = {
-            val viewModel = hiltViewModel<ProfilePlayerViewModel>()
-
-            ProfileScreen(viewModel = viewModel)
+            ProfileScreen()
         }
     )
 
@@ -227,9 +233,7 @@ private fun NavGraphBuilder.profilePlayer(
             navArgument(Arguments.PLAYER_ID) { type = NavType.StringType }
         )
     ) {
-        val viewModel = hiltViewModel<ProfilePlayerViewModel>()
-
-        ProfileScreen(viewModel = viewModel)
+        ProfileScreen()
     }
 }
 
@@ -237,28 +241,41 @@ private fun NavGraphBuilder.profilePlayer(
  * Paginas da Time
  * */
 private fun NavGraphBuilder.teamPages(globalNavController: NavHostController, sessionManager: SessionManager) {
-    crudTeamPages(globalNavController = globalNavController)
+    crudTeamPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
     teamMatch(sessionManager = sessionManager, globalNavController = globalNavController)
 
-    composable(
-        route = "${Routes.TeamRoutes.MEMBERLIST.route}/{${Arguments.TEAM_ID}}",
-        arguments = listOf(
-            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
-        )
-    ) {
-        val viewModel = hiltViewModel<ListMembersViewModel>()
+    composableProtected(
+        route = Routes.TeamRoutes.MEMBERLIST.route,
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            ListMembersScreen(navHostController = globalNavController)
+        }
+    )
 
-        ListMembersScreen(navHostController = globalNavController, viewModel = viewModel)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListMemberShipRequest(navHostController = globalNavController)
+        }
+    )
 
-    composable(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route) {
-        ListMemberShipRequest(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            val viewModel = hiltViewModel<ListPlayerViewModel>()
 
-    composable(Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route) {
-        ListPlayersScreen(navHostController = globalNavController)
-    }
+            ListPlayersScreen(navHostController = globalNavController, viewModel = viewModel)
+        }
+    )
+
+
+
 }
 
 private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController, sessionManager: SessionManager) {
@@ -280,11 +297,16 @@ private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController, se
 
     casualMatches(globalNavController = globalNavController, sessionManager = sessionManager)
 
-    competitiveMatches(globalNavController = globalNavController)
+    competitiveMatches(globalNavController = globalNavController, sessionManager = sessionManager)
 
-    composable(Routes.TeamRoutes.LIST_POST_PONE_MATCH.route) {
-        ListPostPoneMatchScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.LIST_POST_PONE_MATCH.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListPostPoneMatchScreen(navHostController = globalNavController)
+        }
+    )
 }
 
 private fun NavGraphBuilder.managementMatch(globalNavController: NavHostController, sessionManager: SessionManager) {
@@ -297,15 +319,18 @@ private fun NavGraphBuilder.managementMatch(globalNavController: NavHostControll
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 
-    composable(Routes.TeamRoutes.FINISH_MATCH.route) {
-        FinishMatchScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.FINISH_MATCH.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            FinishMatchScreen(navHostController = globalNavController)
+        }
+    )
 
     composableProtected(
         route = "${Routes.TeamRoutes.CANCEL_MATCH.route}/{${Arguments.MATCH_ID}}",
@@ -316,23 +341,30 @@ private fun NavGraphBuilder.managementMatch(globalNavController: NavHostControll
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
-            //CancelMatchScreen(navHostController = globalNavController)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 }
 
 
 private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController, sessionManager: SessionManager) {
-    composable(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route) {
-        ListTeamScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListTeamScreen(navHostController = globalNavController)
+        }
+    )
 
-    composable(Routes.TeamRoutes.LIST_MATCH_INVITES.route) {
-        ListMatchInviteScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.LIST_MATCH_INVITES.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListMatchInviteScreen(navHostController = globalNavController)
+        }
+    )
 
     composableProtected(
         route = Routes.TeamRoutes.SEND_MATCH_INVITE.route,
@@ -364,72 +396,95 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         }
     )
 
-    composable(Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
-        FormMatchInviteScreen(navHostController = globalNavController)
-    }
+    composableProtected(
+        route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            FormMatchInviteScreen(navHostController = globalNavController)
+        }
+    )
 }
 
-private fun NavGraphBuilder.competitiveMatches(globalNavController: NavHostController) {
-    composable(Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route) {
-        MatchMakerScreen(navHostController = globalNavController)
-    }
+private fun NavGraphBuilder.competitiveMatches(globalNavController: NavHostController, sessionManager: SessionManager) {
+    composableProtected(
+        route = Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            MatchMakerScreen(navHostController = globalNavController)
+        }
+    )
 }
 
 /**
  * Páginas do CRUD da Equipa
  * */
-private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController){
-    composable(route = Routes.TeamRoutes.CREATE_TEAM.route) {
-        val viewModel = hiltViewModel<TeamFormViewModel>()
+private fun NavGraphBuilder.crudTeamPages(globalNavController: NavHostController, sessionManager: SessionManager){
+    composableProtected(
+        route = Routes.TeamRoutes.CREATE_TEAM.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            FormTeamScreen(navHostController = globalNavController)
+        }
+    )
 
-        FormTeamScreen(navHostController = globalNavController, viewModel = viewModel)
-    }
-
-    //TODO: Meter para ser security Route e validar o tipo de user e também mandar o id na rota e trocar para hiltViewModel
-    composable("${Routes.TeamRoutes.UPDATE_TEAM.route}/{${Arguments.TEAM_ID}}",
+    composableProtected(
+        route = "${Routes.TeamRoutes.UPDATE_TEAM.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
-        )
-    ) {
-        val viewModel = hiltViewModel<TeamFormViewModel>()
+        ),
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            FormTeamScreen(navHostController = globalNavController)
+        }
+    )
 
-        FormTeamScreen(navHostController = globalNavController, viewModel = viewModel)
-    }
-
-    profileTeam()
+    profileTeam(globalNavController = globalNavController, sessionManager = sessionManager)
 }
 
-private fun NavGraphBuilder.profileTeam() {
-    composable(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
-        val viewModel = hiltViewModel<ProfileTeamViewModel>()
-
-        ProfileTeamScreen(viewModel = viewModel)
-    }
+private fun NavGraphBuilder.profileTeam(globalNavController: NavHostController, sessionManager: SessionManager) {
+    composableProtected(
+        route = Routes.TeamRoutes.TEAM_PROFILE.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ProfileTeamScreen()
+        }
+    )
 
     composable("${Routes.TeamRoutes.TEAM_PROFILE.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         )
     ) {
-        val viewModel = hiltViewModel<ProfileTeamViewModel>()
-
-        ProfileTeamScreen(viewModel = viewModel)
+        ProfileTeamScreen()
     }
 }
 
-private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
-    composable(Routes.PlayerRoutes.CHAT_LIST.route){
-        ChatListScreen(navController = globalNavController)
-    }
+private fun NavGraphBuilder.chatPages(globalNavController: NavHostController, sessionManager: SessionManager) {
+    composableProtected(
+        route = Routes.PlayerRoutes.CHAT_LIST.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ChatListScreen(navController = globalNavController)
+        }
+    )
 
-    composable(Routes.PlayerRoutes.SINGLE_CHAT.route,
+    composableProtected(
+        route = Routes.PlayerRoutes.SINGLE_CHAT.route,
         arguments = listOf(
             navArgument(Routes.chatRoomId) { type = NavType.StringType }
-        )) {
-        val viewModel = hiltViewModel<ChatViewModel>()
-
-        ChatScreen(chatViewModel = viewModel)
-    }
+        ),
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ChatScreen()
+        }
+    )
 
 }
 

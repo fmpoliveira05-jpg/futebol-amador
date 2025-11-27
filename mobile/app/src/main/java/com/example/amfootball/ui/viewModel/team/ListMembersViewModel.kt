@@ -14,6 +14,7 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.TeamRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,7 +41,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ListMembersViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager,
     private val teamRepository: TeamRepository
 ): ViewModel() {
 
@@ -49,7 +50,7 @@ class ListMembersViewModel @Inject constructor(
      * É fundamental para todas as operações deste ecrã.
      * @throws IllegalStateException Se o argumento "teamId" não for fornecido.
      */
-    private val teamId: String = checkNotNull(savedStateHandle["teamId"]) { "TeamId é obrigatório!" }
+    private val teamId: String = sessionManager.getUserProfile()?.idTeam ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
     private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())

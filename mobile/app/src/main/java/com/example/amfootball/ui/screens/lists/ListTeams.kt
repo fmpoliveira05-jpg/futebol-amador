@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -69,8 +70,8 @@ import com.example.amfootball.utils.TeamConst
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
-    viewModel: ListTeamViewModel = viewModel()
-){
+    viewModel: ListTeamViewModel = hiltViewModel()
+) {
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
     val listTeams by viewModel.listTeams.collectAsStateWithLifecycle()
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
