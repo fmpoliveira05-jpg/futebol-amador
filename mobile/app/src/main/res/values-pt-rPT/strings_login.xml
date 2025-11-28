@@ -4,7 +4,6 @@
     <string name="login_title" translatable="false">Login</string>
     <string name="email_field">Email</string>
     <string name="email_label">Escreva o seu email</string>
-    <string name="password_field">Palavra Passe</string>
     <string name="password_label">Escreva a sua palavra passe</string>
     <string name="login_button">Entrar</string>
 </resources>

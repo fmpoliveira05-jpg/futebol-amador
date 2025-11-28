@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.viewModel
 
+import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.dtos.CreateProfileDto

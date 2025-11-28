@@ -2,6 +2,7 @@ package com.example.amfootball.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.preference.PreferenceManager
 import com.example.amfootball.data.dtos.CreateProfileDto
 import com.google.gson.Gson // Importe o Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -12,6 +13,7 @@ import javax.inject.Inject
  *
  * @param context O contexto da aplicação, usado para obter SharedPreferences.
  */
+// TODO: deixar de guardar o user nas preferences e guardar na room
 class SessionManager @Inject constructor(
     @ApplicationContext context: Context) {
 
@@ -62,7 +64,7 @@ class SessionManager @Inject constructor(
     fun getUserProfile(): CreateProfileDto? {
         val jsonString = prefs.getString(KEY_USER_PROFILE, null)
         return if (jsonString != null) {
-            gson.fromJson(jsonString, CreateProfileDto::class.java) // Converte JSON para objeto
+            gson.fromJson(jsonString, CreateProfileDto::class.java)
         } else {
             null
         }

@@ -43,4 +43,6 @@
 
     <string name="error_min_goals_team">O número mínimo de golos marcados por uma equipa é %1$d</string>
     <string name="error_max_goals_team">O número máximo de golos marcados por uma equipa é 1$d</string>
+
+    <string name="error_login">Erro no login. Verifica o email e a password.</string>
 </resources>

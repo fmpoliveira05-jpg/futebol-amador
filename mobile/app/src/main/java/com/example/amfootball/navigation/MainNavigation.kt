@@ -1,14 +1,18 @@
 package com.example.amfootball.navigation
 
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -20,12 +24,13 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.navArgument
+import com.example.amfootball.data.SettingsStore
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.navigation.objects.page.CrudTeamRoutes
 import com.example.amfootball.ui.components.AppModalBottomSheet
-import com.example.amfootball.ui.components.NavBar.BottomSheetContent
-import com.example.amfootball.ui.components.NavBar.MainBottomNavBar
+import com.example.amfootball.ui.components.navBar.BottomSheetContent
+import com.example.amfootball.ui.components.navBar.MainBottomNavBar
 import com.example.amfootball.ui.components.navBar.MainTopAppBar
 import com.example.amfootball.ui.screens.HomePageScreen
 import com.example.amfootball.ui.screens.LeaderboardScreen
@@ -39,6 +44,8 @@ import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
+import com.example.amfootball.ui.screens.settings.AppLanguage
+import com.example.amfootball.ui.screens.settings.AppTheme
 import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
@@ -48,11 +55,13 @@ import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
+import java.util.Locale
 
 @Composable
 fun MainNavigation() {
@@ -62,50 +71,88 @@ fun MainNavigation() {
     val isLoggedIn by authViewModel.isUserLoggedIn.collectAsState()
 
     val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
+    val settingsStore by remember { mutableStateOf(SettingsStore(context = globalNavController.context)) }
+    var savedLanguage by remember { mutableStateOf(settingsStore.getLanguage()) }
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
+
+    var currentAppTheme by remember { mutableStateOf(AppTheme.SYSTEM_DEFAULT) }
+
+    val useDarkTheme = when (currentAppTheme) {
+        AppTheme.LIGHT_MODE -> false
+        AppTheme.DARK_MODE -> true
+        AppTheme.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+    }
+    LaunchedEffect (savedLanguage) {
+        val tag = if (savedLanguage == AppLanguage.PORTUGUESE.name) "pt" else "en"
+        AppCompatDelegate.setApplicationLocales(
+            LocaleListCompat.forLanguageTags(tag)
+        )
+    }
     //val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
-
-    Scaffold(
-        topBar = {
-            MainTopAppBar(
+    AMFootballTheme (
+        darkTheme = useDarkTheme,
+        dynamicColor = false
+    ) {
+        Scaffold(
+            topBar = {
+                MainTopAppBar(
+                    navController = globalNavController,
+                    isLoggedIn = isLoggedIn,
+                )
+            },
+            bottomBar = {
+                MainBottomNavBar(
+                    navController = globalNavController,
+                    onShowBottomSheet = { showBottomSheet = true },
+                    currentSelectedRoute = selectedBottomNavRoute,
+                    onRouteSelected = { newRoute -> selectedBottomNavRoute = newRoute }
+                )
+            }
+        ) { innerPadding ->
+            NavHost(
                 navController = globalNavController,
-                isLoggedIn = isLoggedIn,
-            )
-        },
-        bottomBar = {
-            MainBottomNavBar(
-                navController = globalNavController,
-                onShowBottomSheet = { showBottomSheet = true },
-                currentSelectedRoute = selectedBottomNavRoute,
-                onRouteSelected = { newRoute -> selectedBottomNavRoute = newRoute }
-            )
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = globalNavController,
-            startDestination = Routes.GeralRoutes.HOMEPAGE.route,
-            modifier = Modifier.padding(innerPadding) // Aplica o padding do Scaffold!
-        ) {
-            homePages(globalNavController = globalNavController)
+                startDestination = Routes.GeralRoutes.HOMEPAGE.route,
+                modifier = Modifier.padding(innerPadding) // Aplica o padding do Scaffold!
+            ) {
+                homePages(globalNavController = globalNavController)
 
-            pages(
-                globalNavController = globalNavController,
-                sessionManager = sessionManager,
-                authViewModel = authViewModel
-            )
-        }
+                pages(
+                    globalNavController = globalNavController,
+                    sessionManager = sessionManager,
+                    authViewModel = authViewModel
+                )
 
-        // O BottomSheet fica aqui, fora do NavHost, controlado pelo estado local
-        if (showBottomSheet) {
-            val navBackStackEntry by globalNavController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
+                composable(Routes.GeralRoutes.SETTINGS.route){
+                    SettingsScreen(
+                        navController = globalNavController,
+                        currentTheme = currentAppTheme,
+                        onThemeChanged = { newTheme -> currentAppTheme = newTheme },
+                        currentLanguage = if (Locale.getDefault().language == "pt-rPT") AppLanguage.PORTUGUESE else AppLanguage.ENGLISH,
+                        onLanguageChanged = { newLanguage ->
+                            settingsStore.saveLanguage(newLanguage)
+                            savedLanguage = newLanguage.name
 
-            AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
-                BottomSheetContent(
-                    Modifier,
-                    globalNavController,
-                    selectedBottomNavRoute)
+                            val tag = if (newLanguage == AppLanguage.PORTUGUESE) "pt-rPT" else "en"
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags(tag)
+                            )
+                        })
+                }
+            }
+
+            // O BottomSheet fica aqui, fora do NavHost, controlado pelo estado local
+            if (showBottomSheet) {
+                val navBackStackEntry by globalNavController.currentBackStackEntryAsState()
+                //val currentRoute = navBackStackEntry?.destination?.route
+
+                AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
+                    BottomSheetContent(
+                        Modifier,
+                        globalNavController,
+                        selectedBottomNavRoute
+                    )
+                }
             }
         }
     }
@@ -345,9 +392,7 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController) {
 }
 
 private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
-    composable(Routes.GeralRoutes.SETTINGS.route){
-        SettingsScreen(navController = globalNavController)
-    }
+
 
     composable(Routes.GeralRoutes.PREFERENCE.route){
         PreferenceScreen()
