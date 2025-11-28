@@ -61,9 +61,9 @@ namespace Infrastructure.Repositories
         public async Task<Matches?> GetMatchToCancelById(Guid idMatch)
         {
             return await context.Match
-                .Include(m => m.Teams).Include(ts => ts.Teams)
+                .Include(m => m.Teams).ThenInclude(ts => ts.Team)
                 .FirstOrDefaultAsync(match => match.Id == idMatch
-                                    && match.MatchStatus == MatchStatus.SCHEDULED || match.MatchStatus == MatchStatus.POST_PONED);
+                                    && (match.MatchStatus == MatchStatus.SCHEDULED || match.MatchStatus == MatchStatus.POST_PONED));
         }
 
         public async Task<Matches?> GetMatchWitchPitchById(Guid idMatch)
