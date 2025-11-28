@@ -139,7 +139,7 @@ class ListPlayerViewModel @Inject constructor(
         filterErrorState.value = FilterPlayersErrors()
         resetPagination()
 
-        if(networkObserver.isOnlineOneShot()) {
+        if (networkObserver.isOnlineOneShot()) {
             loadingListPlayer()
         } else {
             listState.value = originalList

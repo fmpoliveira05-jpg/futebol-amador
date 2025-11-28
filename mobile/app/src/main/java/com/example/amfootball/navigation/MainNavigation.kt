@@ -388,15 +388,12 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 
-    //TODO: Ver esta rota, kkkk
     composableProtected(
-        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/CancelMatch/{${Arguments.MATCH_INVITE_ID}}",
+        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.MATCH_INVITE_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
             navArgument(Arguments.MATCH_INVITE_ID) { type = NavType.StringType },
@@ -405,9 +402,7 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 
