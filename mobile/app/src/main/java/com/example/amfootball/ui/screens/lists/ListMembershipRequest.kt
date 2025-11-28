@@ -105,31 +105,11 @@ private fun ContentListMemberShipRequest(
                 }
             )
         },
-        /*
-        Arranjar forma de distinguir quem é o sender e o receiver
-          acceptMemberShipRequest = { itemsActions.acceptMemberShipRequest(
-                    request.receiver.id,
-                    request.id,
-                    request.isPlayerSender,
-                    navHostController,
-                ) },
-                rejectMemberShipRequest = { itemsActions.rejectMemberShipRequest(
-                    request.receiver.id,
-                    request.id,
-                    request.isPlayerSender,
-                ) },
-                showMore = { itemsActions.showMore(
-                    request.sender.id,
-                    request.isPlayerSender,
-                    navHostController,
-                ) }
-        * */
         listItems = { request ->
             ListMemberShipRequestContent(
                 membershipRequest = request,
-                acceptMemberShipRequest = {},
-                rejectMemberShipRequest = {},
-                showMore = {}
+                itemsActions = itemsActions,
+                navHostController = navHostController
             )
         },
         messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
@@ -198,13 +178,29 @@ private fun FilterListMemberShipRequestContent(
 @Composable
 private fun ListMemberShipRequestContent(
     membershipRequest: MembershipRequestInfoDto,
-    acceptMemberShipRequest: () -> Unit = {},
-    rejectMemberShipRequest: () -> Unit = {},
-    showMore: () -> Unit = {},
+    itemsActions: ItemsMemberShipRequest,
+    navHostController: NavHostController
 ) {
+    var receiver = ""
+    var sender = ""
+
+    if(membershipRequest.isPlayerSender) {
+        sender = membershipRequest.player.id
+        receiver = membershipRequest.team.id
+    } else {
+        sender = membershipRequest.team.id
+        receiver = membershipRequest.player.id
+    }
+
     GenericListItem(
         item = membershipRequest,
-        title = { it.team.name },
+        title = { entity ->
+            if(membershipRequest.isPlayerSender) {
+                entity.player.name
+            } else {
+                entity.team.name
+            }
+        },
         leading = {
             StringImageList(
                 image = membershipRequest.team.image,
@@ -225,9 +221,24 @@ private fun ListMemberShipRequestContent(
         },
         trailing = {
             ItemAcceptRejectAndShowMore(
-                accept = acceptMemberShipRequest,
-                reject = rejectMemberShipRequest,
-                showMore = showMore
+                accept = {
+                    itemsActions.acceptMemberShipRequest(
+                        receiver,
+                        membershipRequest.id,
+                        membershipRequest.isPlayerSender,
+                        navHostController
+                    )
+                },
+                reject = {itemsActions.rejectMemberShipRequest(
+                    receiver,
+                    membershipRequest.id,
+                    membershipRequest.isPlayerSender,
+                ) },
+                showMore =  { itemsActions.showMore(
+                    sender,
+                    membershipRequest.isPlayerSender,
+                    navHostController,
+                ) }
             )
         }
     )
