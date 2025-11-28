@@ -22,10 +22,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
@@ -108,7 +110,7 @@ private fun FieldsLogin(
     }
 
     val context = LocalContext.current
-
+    val errText = stringResource(R.string.error_login)
     Button(
         onClick = {
             authViewModel.loginUser(email, password) { loginComSucesso ->
@@ -119,7 +121,7 @@ private fun FieldsLogin(
                 } else {
                     Toast.makeText(
                         context,
-                        "Erro no login. Verifica o email e a password.",
+                        errText,
                         Toast.LENGTH_LONG
                     ).show()
                 }

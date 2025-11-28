@@ -50,4 +50,21 @@
 
     <string name="button_create_team">Criar Equipa</string>
     <string name="button_description_create_team">Botão que permite após preencher o formulário criar uma equipa</string>
+
+    <string name="app_theme">Tema</string>
+    <string name="darkMode">Modo escuro</string>
+    <string name="light_mode">Modo Claro</string>
+    <string name="theme_same_then_system">Sincronizar com o tema do sistema</string>
+
+    <string name="app_language">Idioma</string>
+    <string name="language_english">Inglês</string>
+    <string name="language_portuguese">Português</string>
+
+    <string name="notifications">Notificações</string>
+    <string name="activate_notifications">Ativar Notificações</string>
+
+    <string name="delete_profile_confirmation">Tem certeza que deseja apagar a conta? Esta ação é irreversível.</string>
+    <string name="delete_profile_action">Sim, apagar minha conta</string>
+
+    <string name="cancel">Cancelar</string>
 </resources>
