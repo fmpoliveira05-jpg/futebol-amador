@@ -52,8 +52,6 @@ import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.AuthViewModel
 import com.example.amfootball.ui.viewModel.SettingsViewModel
-import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
 import com.example.amfootball.utils.extensions.composableProtected
