@@ -1,7 +1,5 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
@@ -11,129 +9,59 @@ import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.PlayerRepository
+import com.example.amfootball.ui.viewModel.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.PlayerConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
- * ViewModel responsável pela gestão do ecrã de Listagem de Jogadores.
+ * ViewModel responsável pela lógica de negócio do ecrã de Listagem de Jogadores.
  *
- * Este ViewModel gere:
- * - O estado dos filtros de pesquisa (nome, idade, posição, etc.).
- * - A validação dos dados inseridos nos filtros.
- * - O carregamento da lista de jogadores da API com base nos filtros aplicados.
- * - A lógica de paginação local ("Mostrar Mais").
- * - A navegação para o perfil detalhado de um jogador.
- * - O envio de pedidos de adesão a equipas (para administradores).
+ * Esta classe herda de [ListsViewModels] para obter automaticamente a gestão de lista (paginação,
+ * cache, estado de loading), focando-se exclusivamente nas regras específicas de jogadores:
+ * - Gestão de Filtros (Nome, Cidade, Idade, Posição, Altura).
+ * - Validação de dados do formulário de pesquisa.
+ * - Comunicação com o [PlayerRepository].
+ * - Navegação para detalhes do jogador.
  *
- * @property repository O repositório para aceder aos dados dos jogadores.
+ * @property repository Repositório para acesso aos dados dos jogadores via API.
  */
 @HiltViewModel
 class ListPlayerViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val repository: PlayerRepository
-): ViewModel() {
+): ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
     /**
      * Estado atual dos filtros aplicados pelo utilizador.
-     * A UI observa este StateFlow para manter os campos de texto sincronizados.
+     * Observado pela UI para manter os campos de texto e seletores sincronizados.
      */
     private val filterState: MutableStateFlow<FilterListPlayer> = MutableStateFlow(FilterListPlayer())
     val uiFilters: StateFlow<FilterListPlayer> = filterState
 
     /**
      * Estado dos erros de validação dos filtros.
-     * Contém mensagens de erro específicas para cada campo (ex: idade inválida).
+     * Se um filtro for inválido (ex: Idade Min > Max), este estado conterá a mensagem de erro.
      */
     private val filterErrorState: MutableStateFlow<FilterPlayersErrors> = MutableStateFlow(FilterPlayersErrors())
     val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
 
     /**
-     * Lista completa de jogadores carregada da API.
-     * Mantém todos os dados recuperados, independentemente de quantos estão visíveis.
+     * Lista de posições disponíveis para preencher o Dropdown de filtro.
+     * Inclui a opção `null` para representar "Todas as posições".
      */
-    private val listState: MutableStateFlow<List<InfoPlayerDto>> = MutableStateFlow(emptyList())
-
-    /**
-     * Cache da lista original carregada da API.
-     * Usada para permitir a limpeza de filtros e filtragem offline sem novos pedidos à rede.
-     */
-    private var originalList: List<InfoPlayerDto> = emptyList()
-
-    /**
-     * Controlo de quantos itens devem ser exibidos inicialmente ou após clicar em "Mostrar Mais".
-     */
-    private val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
-
-    /**
-     * Lista fatiada para exibição na UI.
-     *
-     * Combina a [listState] (lista total) com o [inicialSizeList] (limite atual)
-     * para retornar apenas o número de jogadores permitido pela paginação atual.
-     */
-    val uiList: StateFlow<List<InfoPlayerDto>> =
-        combine(listState, inicialSizeList) { lista, numero ->
-            lista.take(numero)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = emptyList()
-        )
-
-    /**
-     * Controla a visibilidade do botão "Mostrar Mais".
-     *
-     * Verifica dinamicamente se o número de itens exibidos atualmente ([inicialSizeList])
-     * é menor que o total de itens disponíveis na lista ([listState]).
-     * Retorna `true` se houver mais itens para mostrar.
-     */
-    val showMoreButtonVisible: StateFlow<Boolean> =
-        combine(listState, inicialSizeList) { listaCompleta, tamanhoAtual ->
-            tamanhoAtual < listaCompleta.size
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = false
-        )
-
-    /**
-     * Lista de posições disponíveis para filtrar (incluindo opção 'null' para "Todas").
-     * Usado para popular o Dropdown de posições.
-     */
-    private val listPositions: MutableStateFlow<List<Position?>> = MutableStateFlow(emptyList())
+    private val listPositions = MutableStateFlow(
+        listOf(null, Position.FORWARD, Position.MIDFIELDER, Position.DEFENDER, Position.GOALKEEPER)
+    )
     val uiListPositions: StateFlow<List<Position?>> = listPositions
 
-    /**
-     * Estado geral da UI (Loading e Erros de Rede/API).
-     */
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
-    val uiState: StateFlow<UiState> = _uiState
-
-    private val isConnected: MutableStateFlow<Boolean> = MutableStateFlow(networkObserver.isOnlineOneShot())
-    val isOnline: StateFlow<Boolean> = isConnected
-
     init {
-        observeNetworkChanges()
         loadingListPlayer()
-
-        listPositions.value = listOf(
-            null,
-            Position.FORWARD,
-            Position.MIDFIELDER,
-            Position.DEFENDER,
-            Position.GOALKEEPER
-        )
     }
 
     // --- Métodos de Atualização de Filtros (Data Binding) ---
@@ -166,43 +94,48 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
-     * Incrementa o limite de jogadores visíveis na lista.
-     * Chamado quando o utilizador clica no botão "Mostrar Mais".
+     * Solicita o carregamento de mais itens para a lista (Paginação).
+     * Chama o método [loadMoreItems] da classe pai [ListsViewModels].
      */
     fun loadMorePlayers() {
         inicialSizeList.value = inicialSizeList.value.plus(ListsSizesConst.INCREMENT_SIZE)
     }
 
     /**
-     * Aplica os filtros definidos e recarrega a lista de jogadores.
+     * Aplica os filtros definidos pelo utilizador.
      *
-     * Antes de fazer o pedido à API, executa [validateForm]. Se os dados forem inválidos,
-     * o pedido é cancelado e os erros são mostrados na UI.
+     * Fluxo:
+     * 1. Valida os filtros via [validateForm]. Se inválido, aborta.
+     * 2. Reinicia a paginação via [resetPagination].
+     * 3. Se Online: Faz pedido à API via [loadingListPlayer].
+     * 4. Se Offline: Filtra a [originalList] (cache) localmente via [filterOffline].
      */
     fun filterApply() {
         if(!validateForm()) {
             return
         }
 
-        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
-
-        if (networkObserver.isOnlineOneShot()) {
+        if (isNetworkAvailable()) {
             loadingListPlayer()
         } else {
-            filterOffline(
-                originalList = originalList,
-                filter = filterState.value
-            )
+            resetPagination()
+            listState.value = filterOffline(originalList = originalList, filter = filterState.value)
         }
     }
 
     /**
-     * Limpa todos os filtros e recarrega a lista completa de jogadores.
+     * Limpa todos os filtros e restaura a lista original.
+     *
+     * - Restaura o estado visual dos filtros para vazio.
+     * - Limpa erros de validação.
+     * - Reinicia a paginação.
+     * - Se houver cache ([originalList]), restaura-a instantaneamente sem chamar a API.
+     * - Se estiver online, pode optar por recarregar dados frescos.
      */
     fun cleanFilters() {
         filterState.value = FilterListPlayer()
         filterErrorState.value = FilterPlayersErrors()
-        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+        resetPagination()
 
         if(networkObserver.isOnlineOneShot()) {
             loadingListPlayer()
@@ -212,26 +145,20 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
-     * Envia um pedido de adesão (convite) para um jogador se juntar à equipa do utilizador autenticado.
-     *
-     * Nota: Esta funcionalidade destina-se apenas a administradores de equipa.
-     *
+     * Navega para o perfil detalhado do jogador selecionado.
+     */
+    fun showMore(idPlayer: String, navHostController: NavHostController) {
+        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${idPlayer}") {
+            launchSingleTop = true
+        }
+    }
+
+    /**
+     * Envia um pedido de adesão (convite) para um jogador se juntar à equipa do utilizador.
      * @param idPlayer O ID do jogador a convidar.
      */
     fun sendMembershipRequest(idPlayer: String) {
         //TODO: Fazer pedido há API, para a Team mandar o pedido de adesão
-    }
-
-    /**
-     * Navega para o perfil detalhado do jogador selecionado.
-     */
-    fun showMore(
-        idPlayer: String,
-        navHostController: NavHostController
-    ) {
-        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${idPlayer}") {
-            launchSingleTop = true
-        }
     }
 
     /**
@@ -242,63 +169,31 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
-     * Inicia a observação contínua do estado da conectividade de rede.
-     * Atualiza [isConnected] em tempo real.
-     */
-    private fun observeNetworkChanges() {
-        viewModelScope.launch {
-            networkObserver.observeConnectivity()
-                .collect { isOnline ->
-                    isConnected.value = isOnline
-                }
-        }
-    }
-
-    /**
-     * Executa a chamada assíncrona à API para obter a lista de jogadores filtrada.
-     * Gere os estados de Loading e Erro no [_uiState].
+     * Carrega a lista de jogadores da API.
      *
-     * Reinicia a paginação ([inicialSizeList]) para o valor padrão a cada nova pesquisa.
+     * Utiliza [launchDataLoad] do BaseViewModel para gerir automaticamente:
+     * - Verificação de internet.
+     * - Estado de Loading (`uiState.isLoading`).
+     * - Tratamento de exceções (Try-Catch).
+     *
+     * Se os filtros estiverem vazios após o carregamento, atualiza a cache [originalList].
      */
     private fun loadingListPlayer() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+        launchDataLoad {
+            val players = repository.getListPlayer(filterState.value)
 
-            try {
-                if (!networkObserver.isOnlineOneShot()) {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Sem conexão há internet"
-                        )
-                    }
-
-                    return@launch
-                }
-
-                val players = repository.getListPlayer(filterState.value)
-
-                listState.value = players
-                if (filterState.value == FilterListPlayer()) {
-                    originalList = players
-                }
-
-                _uiState.update { it.copy(isLoading = false)}
-            } catch (e: Exception) {
-                    e.printStackTrace()
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            errorMessage = "Sem conexão: ${e.localizedMessage}"
-                        )
-                }
+            listState.value = players
+            if (filterState.value == FilterListPlayer()) {
+                originalList = players
             }
         }
     }
 
-
     //TODO: Melhorar filtro da cidade
+    /**
+     * Filtra a lista de jogadores localmente (Modo Offline).
+     * Aplica lógica "AND" para todos os campos (Nome E Cidade E Idade...).
+     */
     private fun filterOffline(originalList: List<InfoPlayerDto>, filter: FilterListPlayer): List<InfoPlayerDto> {
         return originalList.filter { item ->
             val name = filter.name.isNullOrBlank() || item.name.contains(filter.name, ignoreCase = true)
@@ -311,15 +206,17 @@ class ListPlayerViewModel @Inject constructor(
 
             name && city && minAge && maxAge && minSize && maxSize && position
         }
-
     }
 
     /**
-     * Valida os dados introduzidos nos filtros.
-     * Verifica limites de caracteres, intervalos de idade/altura e lógica (Min < Max).
-     * Atualiza o [filterErrorState] com os resultados.
+     * Valida os dados introduzidos no formulário de filtros.
      *
-     * @return `true` se todos os filtros forem válidos, `false` caso contrário.
+     * Verifica:
+     * - Tamanho máximo de strings (Nome, Cidade).
+     * - Intervalos lógicos (Idade Mínima <= Idade Máxima).
+     * - Valores dentro dos limites permitidos (ex: Idade entre 16 e 100).
+     *
+     * @return `true` se todos os dados forem válidos, `false` caso contrário (atualizando [uiErrors]).
      */
     private fun validateForm(): Boolean {
         val name = filterState.value.name
