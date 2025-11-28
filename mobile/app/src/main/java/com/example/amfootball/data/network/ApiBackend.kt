@@ -7,6 +7,7 @@ import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
+import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.LoginDto
@@ -116,6 +117,14 @@ interface ApiBackend{
     suspend fun getPlayersList(
         @QueryMap filters: Map<String, String>
     ): Response<List<InfoPlayerDto>>
+
+
+    //TODO: Validar se a Response é Unit ou se é um DTO
+    @POST("api/Player/{playerId}/membership-requests/send")
+    suspend fun sendMemberShipRequestToTeam(
+        @Path("playerId") playerId: String,
+        @Body teamId: String
+    ): Response<MembershipRequestInfoDto>
 
     // ============================================================================================
     //  TEAMS (EQUIPAS)
@@ -277,4 +286,10 @@ interface ApiBackend{
         @Path("idTeam") idTeam: String,
         @Body matchInivite: SendMatchInviteDto
     ): Response<InfoMatchInviteDto>
+
+    @POST("api/Team/{teamId}/membership-requests/send")
+    suspend fun sendMemberShipRequestToPlayer(
+        @Path("teamId") teamId: String,
+        @Body playerId: String
+    ): Response<MembershipRequestInfoDto>
 }

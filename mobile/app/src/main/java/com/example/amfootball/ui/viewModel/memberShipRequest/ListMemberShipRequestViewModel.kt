@@ -170,11 +170,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
     /**
      * TODO: Falta apenas nas paginas de perfil carregar os dados e de seguida enviar esse dados aqui
      * */
-    fun showMore(
-        isPlayerSender: Boolean,
-        idSender: String,
-        navHostController: NavHostController,
-    ) {
+    fun showMore(idSender: String, isPlayerSender: Boolean, navHostController: NavHostController) {
         var route = Routes.UserRoutes.PROFILE.route
 
         if (isPlayerSender) {

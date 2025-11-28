@@ -23,6 +23,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
+import com.example.amfootball.data.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
@@ -33,10 +34,10 @@ import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
 import com.example.amfootball.ui.components.lists.ListSurface
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
 import com.example.amfootball.utils.UserConst
@@ -61,6 +62,31 @@ fun ListMemberShipRequest(
         ),
     )
 
+    val itemsActions = ItemsMemberShipRequest(
+        acceptMemberShipRequest = viewModel::acceptMemberShipRequest,
+        rejectMemberShipRequest = viewModel::rejectMemberShipRequest,
+        showMore = viewModel::showMore
+    )
+
+    ContentListMemberShipRequest(
+        filters = filters,
+        filterError = filterError,
+        filterActions = filterActions,
+        list = list,
+        itemsActions = itemsActions,
+        navHostController = navHostController
+    )
+}
+
+@Composable
+private fun ContentListMemberShipRequest(
+    filters: FilterMemberShipRequest,
+    filterError: FilterMemberShipRequestError,
+    filterActions: FilterMemberShipRequestActions,
+    list: List<MembershipRequestInfoDto>,
+    itemsActions: ItemsMemberShipRequest,
+    navHostController: NavHostController,
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
     ListSurface(
@@ -79,25 +105,31 @@ fun ListMemberShipRequest(
                 }
             )
         },
+        /*
+        Arranjar forma de distinguir quem é o sender e o receiver
+          acceptMemberShipRequest = { itemsActions.acceptMemberShipRequest(
+                    request.receiver.id,
+                    request.id,
+                    request.isPlayerSender,
+                    navHostController,
+                ) },
+                rejectMemberShipRequest = { itemsActions.rejectMemberShipRequest(
+                    request.receiver.id,
+                    request.id,
+                    request.isPlayerSender,
+                ) },
+                showMore = { itemsActions.showMore(
+                    request.sender.id,
+                    request.isPlayerSender,
+                    navHostController,
+                ) }
+        * */
         listItems = { request ->
             ListMemberShipRequestContent(
                 membershipRequest = request,
-                acceptMemberShipRequest = { viewModel.acceptMemberShipRequest(
-                    idReceiver = request.receiver.id,
-                    idRequest = request.id,
-                    isPlayerSender = request.isPlayerSender,
-                    navHostController = navHostController,
-                ) },
-                rejectMemberShipRequest = { viewModel.rejectMemberShipRequest(
-                    idReceiver = request.receiver.id,
-                    idRequest = request.id,
-                    isPlayerSender = request.isPlayerSender,
-                ) },
-                showMore = { viewModel.showMore(
-                    isPlayerSender = request.isPlayerSender,
-                    idSender = request.sender.id,
-                    navHostController = navHostController,
-                ) }
+                acceptMemberShipRequest = {},
+                rejectMemberShipRequest = {},
+                showMore = {}
             )
         },
         messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
@@ -172,10 +204,10 @@ private fun ListMemberShipRequestContent(
 ) {
     GenericListItem(
         item = membershipRequest,
-        title = { it.sender.name },
+        title = { it.team.name },
         leading = {
-            ImageList(
-                image = membershipRequest.sender.image,
+            StringImageList(
+                image = membershipRequest.team.image,
             )
         },
         supporting = {

@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.viewModel
+package com.example.amfootball.ui.viewModel.generics
 
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow

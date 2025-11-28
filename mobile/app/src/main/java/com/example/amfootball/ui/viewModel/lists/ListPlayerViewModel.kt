@@ -11,7 +11,7 @@ import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.PlayerRepository
-import com.example.amfootball.ui.viewModel.ListsViewModels
+import com.example.amfootball.ui.viewModel.generics.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.PlayerConst

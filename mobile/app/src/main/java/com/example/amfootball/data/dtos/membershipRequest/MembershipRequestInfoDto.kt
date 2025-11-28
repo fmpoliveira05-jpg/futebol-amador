@@ -1,6 +1,8 @@
 package com.example.amfootball.data.dtos.membershipRequest
 
 import android.net.Uri
+import com.example.amfootball.data.dtos.support.TeamDto
+import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 
 /**
@@ -15,10 +17,15 @@ import java.time.LocalDateTime
  * @property isPlayerSender Indica se o pedido foi enviado pelo jogador (true) ou pela equipa (false).
  */
 data class MembershipRequestInfoDto(
+    @SerializedName("RequestId", alternate = ["requestId"])
     val id: String,
-    val receiver: ReceiverInfo,
-    val sender: SenderInfo,
+    @SerializedName("Player", alternate = ["player"])
+    val player: PlayerDto,
+    @SerializedName("Team", alternate = ["team"])
+    val team: TeamDto,
+    @SerializedName("RequestDate", alternate = ["requestDate"])
     val dateSend: LocalDateTime,
+    @SerializedName("IsPlayerSender", alternate = ["isPlayerSender"])
     val isPlayerSender: Boolean
 ) {
     companion object {
@@ -37,14 +44,14 @@ data class MembershipRequestInfoDto(
                 list.add(
                     MembershipRequestInfoDto(
                         id = "r${i + 1}",
-                        receiver = ReceiverInfo(
+                        player = PlayerDto(
                             id = "t${i + 1}",
                             name = teamName
                         ),
-                        sender = SenderInfo(
+                        team = TeamDto(
                             id = "p${i + 1}",
                             name = playerNames[i],
-                            image = Uri.EMPTY
+                            image = ""
                         ),
                         dateSend = LocalDateTime.now().plusDays(i.toLong()),
                         isPlayerSender = false,
@@ -70,14 +77,14 @@ data class MembershipRequestInfoDto(
                 list.add(
                     MembershipRequestInfoDto(
                         id = "r${i + 1}",
-                        receiver = ReceiverInfo(
+                        player = PlayerDto(
                             id = "t${i + 1}",
                             name = teamNames[i]
                         ),
-                        sender = SenderInfo(
+                        team = TeamDto(
                             id = "p${i + 1}",
                             name = playerName,
-                            image = Uri.EMPTY
+                            image = ""
                         ),
                         dateSend = LocalDateTime.now().plusDays(i.toLong()),
                         isPlayerSender = true,
