@@ -5,5 +5,6 @@
     <string name="email_field">Mail</string>
     <string name="email_label">Enter your email</string>
     <string name="password_label">Enter your password</string>
+    <string name="password_confirm">Confirm your Password</string>
     <string name="login_button">Login</string>
 </resources>

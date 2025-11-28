@@ -221,13 +221,13 @@ private fun FieldsSignUp(
     Spacer(Modifier.height(8.dp))
 
     PasswordTextField(
-        label = stringResource(id = R.string.password_field),
+        label = stringResource(id = R.string.password_label),
         value = password,
         onValueChange = { password = it }
     )
 
     PasswordTextField(
-        label = stringResource(id = R.string.password_field),
+        label = stringResource(id = R.string.password_confirm),
         value = passwordVerification,
         onValueChange = { passwordVerification = it },
     )

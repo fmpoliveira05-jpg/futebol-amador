@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Warning
@@ -15,76 +14,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
 import androidx.navigation.NavController
 import com.example.amfootball.R
+import com.example.amfootball.ui.viewModel.SettingsViewModel
 
 // Adicionado LIGHT_MODE para suportar as 3 opções pedidas
 enum class AppTheme {
     LIGHT_MODE, DARK_MODE, SYSTEM_DEFAULT
 }
 
-enum class AppLanguage(string: String) {
-    ENGLISH("en"), PORTUGUESE("pt-rPT")
+enum class AppLanguage(val code: String) {
+    ENGLISH("en"),
+    PORTUGUESE("pt-PT");
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
-    currentTheme: AppTheme,
-    onThemeChanged: (AppTheme) -> Unit,
-    currentLanguage: AppLanguage,
-    onLanguageChanged: (AppLanguage) -> Unit,
-    //onDeleteAccount: () -> Unit,
+    settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    // Estados locais (que não afetam o app global) mantêm-se aqui (ex: notificações apenas UI por enquanto)
+    val showDeleteDialog =  settingsViewModel.deleteProfileState.collectAsState()
+    val currentTheme = settingsViewModel.theme.collectAsState()
+    val currentLanguage = settingsViewModel.language.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
 
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            icon = { Icon(Icons.Default.Warning, contentDescription = null) },
-            title = {
-                Text(text = stringResource(id = R.string.profile_delete)) // Ou "Tem a certeza?"
-            },
-            text = {
-                Text(text = stringResource(id = R.string.delete_profile_confirmation))
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteDialog = false
-                        //onDeleteAccount() // Chama a função que vai ao endpoint
-                    },
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text(text = stringResource(id = R.string.delete_profile_action))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showDeleteDialog = false }
-                ) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            }
-        )
-    }
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.item_settings)) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.button_back))
-                    }
-                }
-            )
-        }
-    ) { innerPadding ->
+    DeleteProfileDialog(showDeleteDialog, settingsViewModel)
+
+    Scaffold() { innerPadding ->
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
@@ -92,23 +50,21 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Seção de Tema
             item {
                 SettingsSectionTitle(title = stringResource(id = R.string.app_theme))
                 ThemeSection(
-                    selectedTheme = currentTheme,
-                    onThemeSelected = onThemeChanged
+                    selectedTheme = currentTheme.value,
+                    settingsViewModel = settingsViewModel
                 )
             }
-
-            // Seção de Linguagem
             item {
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(16.dp))
                 SettingsSectionTitle(title = stringResource(id = R.string.app_language))
                 LanguageSection(
-                    selectedLanguage = currentLanguage, // Usa o estado recebido
-                    onLanguageSelected = onLanguageChanged // Chama a função recebida
+                    selectedLanguage = currentLanguage.value,
+                    settingsViewModel = settingsViewModel
+
                 )
             }
 
@@ -133,8 +89,8 @@ fun SettingsScreen(
                         //TODO: ir para pagina de editar perfil
                     },
                     onDeleteClick = {
-                        showDeleteDialog = true
-                        //TODO: ir para pagina de eliminar perfil
+                        settingsViewModel.showDeleteProfile()
+                    //TODO: ir para pagina de eliminar perfil
                     }
                 )
             }
@@ -156,19 +112,21 @@ fun SettingsSectionTitle(title: String) {
 
 @Composable
 private fun ThemeSection(
-    selectedTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit
+    selectedTheme: String,
+    settingsViewModel: SettingsViewModel
 ) {
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onThemeSelected(AppTheme.LIGHT_MODE) }
+                .clickable { AppTheme.LIGHT_MODE }
         ) {
             RadioButton(
-                selected = (selectedTheme == AppTheme.LIGHT_MODE),
-                onClick = { onThemeSelected(AppTheme.LIGHT_MODE) }
+                selected = (selectedTheme == AppTheme.LIGHT_MODE.name),
+                onClick = {
+                    settingsViewModel.changeTheme(AppTheme.LIGHT_MODE)
+                }
             )
             Text(
                 text = stringResource(R.string.light_mode),
@@ -176,16 +134,16 @@ private fun ThemeSection(
             )
         }
 
-        // Opção: Dark Mode (Escuro)
+        // Dark Mode
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onThemeSelected(AppTheme.DARK_MODE) }
+                .clickable { AppTheme.DARK_MODE }
         ) {
             RadioButton(
-                selected = (selectedTheme == AppTheme.DARK_MODE),
-                onClick = { onThemeSelected(AppTheme.DARK_MODE) }
+                selected = (selectedTheme == AppTheme.DARK_MODE.name),
+                onClick = {settingsViewModel.changeTheme(AppTheme.DARK_MODE)}
             )
             Text(
                 text = stringResource(id = R.string.darkMode),
@@ -193,15 +151,20 @@ private fun ThemeSection(
             )
         }
 
+        // Same then system
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onThemeSelected(AppTheme.SYSTEM_DEFAULT) }
+                .clickable {
+                    AppTheme.SYSTEM_DEFAULT
+                }
         ) {
             RadioButton(
-                selected = (selectedTheme == AppTheme.SYSTEM_DEFAULT),
-                onClick = { onThemeSelected(AppTheme.SYSTEM_DEFAULT) }
+                selected = (selectedTheme == AppTheme.SYSTEM_DEFAULT.name),
+                onClick = {
+                    settingsViewModel.changeTheme(AppTheme.SYSTEM_DEFAULT)
+                }
             )
             Text(
                 text = stringResource(id = R.string.theme_same_then_system),
@@ -213,29 +176,30 @@ private fun ThemeSection(
 
 @Composable
 private fun LanguageSection(
-    selectedLanguage: AppLanguage,
-    onLanguageSelected: (AppLanguage) -> Unit
+    selectedLanguage: String?,
+    settingsViewModel: SettingsViewModel
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
+        val currentCode = selectedLanguage ?: AppLanguage.ENGLISH.code
+
         // Chip para Inglês
         FilterChip(
-            selected = selectedLanguage == AppLanguage.ENGLISH,
-            onClick = { onLanguageSelected(AppLanguage.ENGLISH) },
+            selected = currentCode == AppLanguage.ENGLISH.code,
+            onClick = { settingsViewModel.changeLanguage(AppLanguage.ENGLISH) },
             label = { Text(stringResource(id = R.string.language_english)) }
         )
 
         // Chip para Português
         FilterChip(
-            selected = selectedLanguage == AppLanguage.PORTUGUESE,
-            onClick = { onLanguageSelected(AppLanguage.PORTUGUESE) },
+            selected = currentCode == AppLanguage.PORTUGUESE.code,
+            onClick = { settingsViewModel.changeLanguage(AppLanguage.PORTUGUESE) },
             label = { Text(stringResource(id = R.string.language_portuguese)) }
         )
     }
 }
-
 @Composable
 private fun NotificationSection(
     isEnabled: Boolean,
@@ -280,5 +244,38 @@ private fun ProfileSection(
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(id = R.string.profile_delete))
         }
+    }
+}
+
+@Composable
+private fun DeleteProfileDialog(showDeleteDialog: State<Boolean>, settingsViewModel: SettingsViewModel){
+    if (showDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = { settingsViewModel.hideDeleteProfile() },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null) },
+            title = {
+                Text(text = stringResource(id = R.string.profile_delete))
+            },
+            text = {
+                Text(text = stringResource(id = R.string.delete_profile_confirmation))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        settingsViewModel.hideDeleteProfile()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(text = stringResource(id = R.string.delete_profile_action))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { settingsViewModel.hideDeleteProfile() }
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 }

@@ -1,61 +1,35 @@
 package com.example.amfootball.data
 
-// --- IMPORTANTE: ADICIONE ESTA DEPENDÊNCIA NO SEU build.gradle.kts (Module: app) ---
-// implementation("androidx.datastore:datastore-preferences:1.0.0")
-// Depois clique em "Sync Now" no topo direito do Android Studio.
-
 import android.content.Context
 import android.content.SharedPreferences
 
 
-import com.google.gson.Gson // Importe o Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import com.example.amfootball.ui.screens.settings.AppLanguage
 import com.example.amfootball.ui.screens.settings.AppTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import javax.inject.Singleton
 
-// Criação da instância do DataStore (Singleton)
-// O nome "settings" será o nome do ficheiro guardado internamente
-
+@Singleton
 class SettingsStore @Inject constructor(
     @ApplicationContext context: Context) {
 
-    private val prefs: SharedPreferences
+    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
 
-    private val gson = Gson()
     companion object {
         private const val PREFS_FILENAME = "com.example.amfootball.settings_prefs"
-        val THEME_KEY = "app_theme"
-        val LANG_KEY = "app_language"
-        val NOTIFICATIONS_KEY = "app_notifications"
-    }
-
-    init {
-        prefs = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
+        const val THEME_KEY = "app_theme"
+        const val LANG_KEY = "app_language"
+        const val NOTIFICATIONS_KEY = "app_notifications"
     }
 
     // --- Getters ---
-    fun getLanguage(): String? {
-        val langName = prefs.getString(LANG_KEY, AppTheme.SYSTEM_DEFAULT.name)
-        try {
-            AppLanguage.valueOf(langName!!)
-        } catch (e: IllegalArgumentException) {
-            AppLanguage.ENGLISH
-        }
-        return langName
-
+    fun getLanguage(): String {
+        return prefs.getString(LANG_KEY, AppLanguage.ENGLISH.name) ?: AppLanguage.ENGLISH.name
     }
 
-    fun getTheme(): String? {
-        val themeName = prefs.getString(THEME_KEY, AppLanguage.PORTUGUESE.name)
-        try {
-            AppTheme.valueOf(themeName!!)
-        } catch (e: IllegalArgumentException) {
-            AppTheme.SYSTEM_DEFAULT
-        }
-        return themeName
+    fun getTheme(): String {
+        return prefs.getString(THEME_KEY, AppTheme.SYSTEM_DEFAULT.name) ?: AppTheme.SYSTEM_DEFAULT.name
     }
 
     fun getNotifications(): Boolean {
@@ -69,7 +43,7 @@ class SettingsStore @Inject constructor(
         prefs.edit().putString(THEME_KEY, theme.name).apply()
     }
     fun saveLanguage(language: AppLanguage) {
-        prefs.edit().putString(LANG_KEY, language.name).apply()
+        prefs.edit().putString(LANG_KEY, language.code).apply()
     }
     fun saveNotifications(notifications: Boolean) {
         prefs.edit().putBoolean(NOTIFICATIONS_KEY, notifications).apply()

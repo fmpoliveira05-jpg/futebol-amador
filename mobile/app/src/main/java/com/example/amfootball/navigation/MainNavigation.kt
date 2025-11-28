@@ -1,18 +1,15 @@
 package com.example.amfootball.navigation
 
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -23,7 +20,6 @@ import com.example.amfootball.ui.screens.user.SignUpScreen
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.amfootball.data.SettingsStore
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Arguments
@@ -43,7 +39,6 @@ import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
-import com.example.amfootball.ui.screens.settings.AppLanguage
 import com.example.amfootball.ui.screens.settings.AppTheme
 import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
@@ -56,11 +51,8 @@ import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.AuthViewModel
+import com.example.amfootball.ui.viewModel.SettingsViewModel
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
-import com.example.amfootball.ui.viewModel.chat.ChatViewModel
-import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
-import java.util.Locale
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
@@ -72,37 +64,22 @@ fun MainNavigation() {
     val globalNavController = rememberNavController()
 
     val authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
-    val isLoggedIn by authViewModel.isUserLoggedIn.collectAsState()
 
     val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
-    val settingsStore by remember { mutableStateOf(SettingsStore(context = globalNavController.context)) }
-    var savedLanguage by remember { mutableStateOf(settingsStore.getLanguage()) }
+    val settingsViewModel: SettingsViewModel = hiltViewModel()
+
     var showBottomSheet by remember { mutableStateOf(false) }
     var selectedBottomNavRoute by remember { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
 
-    var currentAppTheme by remember { mutableStateOf(AppTheme.SYSTEM_DEFAULT) }
-
-    val useDarkTheme = when (currentAppTheme) {
-        AppTheme.LIGHT_MODE -> false
-        AppTheme.DARK_MODE -> true
-        AppTheme.SYSTEM_DEFAULT -> isSystemInDarkTheme()
-    }
-    LaunchedEffect (savedLanguage) {
-        val tag = if (savedLanguage == AppLanguage.PORTUGUESE.name) "pt" else "en"
-        AppCompatDelegate.setApplicationLocales(
-            LocaleListCompat.forLanguageTags(tag)
-        )
-    }
-    //val currentUserId by remember { mutableStateOf(sessionManager.getUserProfile()) }
     AMFootballTheme (
-        darkTheme = useDarkTheme,
+        darkTheme = isDarkMode(settingsViewModel.theme.collectAsState().value),
         dynamicColor = false
     ) {
         Scaffold(
             topBar = {
                 MainTopAppBar(
                     navController = globalNavController,
-                    isLoggedIn = isLoggedIn,
+                    isLoggedIn = authViewModel.isUserLoggedIn.collectAsState().value,
                 )
             },
             bottomBar = {
@@ -117,9 +94,9 @@ fun MainNavigation() {
             NavHost(
                 navController = globalNavController,
                 startDestination = Routes.GeralRoutes.HOMEPAGE.route,
-                modifier = Modifier.padding(innerPadding) // Aplica o padding do Scaffold!
+                modifier = Modifier.padding(innerPadding)
             ) {
-                homePages(globalNavController = globalNavController)
+                homePages(globalNavController = globalNavController, sessionManager = sessionManager)
 
                 pages(
                     globalNavController = globalNavController,
@@ -130,18 +107,8 @@ fun MainNavigation() {
                 composable(Routes.GeralRoutes.SETTINGS.route){
                     SettingsScreen(
                         navController = globalNavController,
-                        currentTheme = currentAppTheme,
-                        onThemeChanged = { newTheme -> currentAppTheme = newTheme },
-                        currentLanguage = if (Locale.getDefault().language == "pt-rPT") AppLanguage.PORTUGUESE else AppLanguage.ENGLISH,
-                        onLanguageChanged = { newLanguage ->
-                            settingsStore.saveLanguage(newLanguage)
-                            savedLanguage = newLanguage.name
-
-                            val tag = if (newLanguage == AppLanguage.PORTUGUESE) "pt-rPT" else "en"
-                            AppCompatDelegate.setApplicationLocales(
-                                LocaleListCompat.forLanguageTags(tag)
-                            )
-                        })
+                        settingsViewModel = settingsViewModel
+                    )
                 }
             }
 
@@ -534,12 +501,18 @@ private fun NavGraphBuilder.chatPages(globalNavController: NavHostController, se
             ChatScreen()
         }
     )
+}
 
+@Composable
+private fun isDarkMode(currentAppTheme: String): Boolean{
+    return when (currentAppTheme) {
+        AppTheme.LIGHT_MODE.name -> false
+        AppTheme.DARK_MODE.name -> true
+        else -> isSystemInDarkTheme()
+    }
 }
 
 private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
-
-
     composable(Routes.GeralRoutes.PREFERENCE.route){
         PreferenceScreen()
     }
