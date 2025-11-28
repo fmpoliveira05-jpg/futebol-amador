@@ -1,41 +1,53 @@
 package com.example.amfootball.data.dtos.team
 
 import android.net.Uri
+import com.example.amfootball.data.dtos.rank.RankNameDto
+import com.google.gson.annotations.SerializedName
 
 /**
- * Data Transfer Object (DTO) que representa as informações detalhadas e resumidas de uma Equipa
- * para exibição em listas de alto nível.
+ * Data Transfer Object (DTO) que representa as informações detalhadas e resumidas de uma Equipa.
  *
- * Este objeto combina informações de identificação, estatísticas de ranking e detalhes demográficos.
+ * Este objeto é utilizado para mapear a resposta JSON da API para o modelo da aplicação,
+ * lidando com diferenças de nomes de campos através de [@SerializedName] e fornecendo
+ * propriedades computadas para facilitar a exibição na UI.
  *
- * @property id O identificador único da equipa.
+ * @property id O identificador único da equipa (UUID).
  * @property name O nome da equipa.
- * @property logoTeam A URI do logótipo da equipa. Padrão é [Uri.EMPTY].
- * @property description Uma breve descrição da equipa.
- * @property city A cidade de origem da equipa.
- * @property rank O nível ou nome do rank atual da equipa.
- * @property points A pontuação atual da equipa no ranking.
- * @property averageAge A idade média dos membros da equipa.
- * @property numberMembers O número atual de membros na equipa.
+ * @property logoTeam A URI do logótipo da equipa. Padrão é [Uri.EMPTY] se não fornecido.
+ * @property description Uma breve descrição ou lema da equipa.
+ * @property fullAddress O endereço completo recebido da API (campo JSON "address"). Ex: "Rua das Flores, Porto".
+ * @property rank O objeto contendo o ID e o nome do rank atual (ex: Ouro, Prata).
+ * @property points A pontuação atual da equipa (campo JSON "currentPoints").
+ * @property averageAge A idade média dos membros da equipa (em formato decimal).
+ * @property numberMembers O número total de jogadores na equipa (campo JSON "playerCount").
  */
 data class ItemTeamInfoDto(
     val id: String,
     val name: String,
     val logoTeam: Uri = Uri.EMPTY,
     val description: String,
-    val city: String,
-    val rank: String,
+    @SerializedName("address")
+    val fullAddress: String,
+    val rank: RankNameDto,
+    @SerializedName("currentPoints")
     val points: Int,
-    val averageAge: Int,
+    val averageAge: Double,
+    @SerializedName("playerCount")
     val numberMembers: Int
 ) {
-    companion object {
-        fun generateExampleTeams(): List<ItemTeamInfoDto> {
-            val list = ArrayList<ItemTeamInfoDto>()
-            list.add(ItemTeamInfoDto("EX1", "Vitoria SC", Uri.EMPTY, "Melhor equipa de Portugal", "Guimarães","Platium", 1000, 25, 32))
-            list.add(ItemTeamInfoDto("EX2", "Moreira", Uri.EMPTY, "2º melhor equipa de Guimarães", "Guimarães", "Silver", 100, 27, 10))
-            list.add(ItemTeamInfoDto("EX3", "Gil Vicente", Uri.EMPTY, "Barcelos","Barcelos", "UnRanked", 10, 24, 20))
-            return list
+    /**
+     * Propriedade computada que extrai o nome da cidade a partir do [fullAddress].
+     *
+     * Lógica de extração:
+     * Assume que a cidade é a última parte do endereço após a última vírgula.
+     * Exemplo: "Av. da Liberdade, Lisboa" -> Retorna "Lisboa".
+     *
+     * @return O nome da cidade ou "Sem Localização" se o endereço estiver vazio.
+     */
+    val city: String
+        get() {
+            if (fullAddress.isNullOrBlank()) return "Sem Localização"
+
+            return fullAddress.substringAfterLast(",").trim()
         }
-    }
 }

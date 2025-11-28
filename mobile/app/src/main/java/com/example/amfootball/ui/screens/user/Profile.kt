@@ -17,6 +17,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
+import com.example.amfootball.data.dtos.player.FireBaseLoginResponseDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
@@ -124,7 +125,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.email_field),
-        value = profileData.email,
+        value = profileData.loginResponseDto.email,
         minLenght = UserConst.MIN_EMAIL_LENGTH,
         maxLenght = UserConst.MAX_EMAIL_LENGTH,
         isReadOnly = true
@@ -132,7 +133,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.phone_number),
-        value = profileData.phoneNumber,
+        value = profileData.loginResponseDto.phoneNumber.toString(),
         minLenght = UserConst.SIZE_PHONE_NUMBER,
         maxLenght = UserConst.SIZE_PHONE_NUMBER,
         isReadOnly = true
@@ -182,16 +183,26 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 )
 @Composable
 fun ProfileScreenPreview() {
+    val dummyLoginResponse = FireBaseLoginResponseDto(
+        idToken = "token_mock",
+        refreshToken = "refresh_mock",
+        expiresIn = "3600",
+        localId = "1",
+        phoneNumber = 934567890,
+        email = "lm10@email.com"
+    )
+
     val dummyProfile = PlayerProfileDto(
-        icon = "",
+        loginResponseDto = dummyLoginResponse,
         name = "Lionel Messi",
         dateOfBirth = "24/06/1987",
-        email = "lm10@email.com",
-        phoneNumber = "934567890",
+        icon = null,
         address = "Rosario, Argentina",
         position = "Avançado",
         height = 170,
-        team = "Inter Miami CF"
+        team = "Inter Miami CF",
+        idTeam = "2",
+        isAdmin = false
     )
 
     AMFootballTheme {

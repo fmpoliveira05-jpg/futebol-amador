@@ -3,11 +3,14 @@ package com.example.amfootball.ui.viewModel
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.UiState
+import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,6 +40,8 @@ class AuthViewModel @Inject constructor(
      */
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
+    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = false))
+    val uiState: StateFlow<UiState> = _uiState
     /**
      * Executa o processo de login de forma assíncrona.
      *
@@ -49,12 +54,15 @@ class AuthViewModel @Inject constructor(
      */
     fun loginUser(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading =  true) }
+
             val success = repository.loginUser(email, password)
 
             if (success) {
                 _isUserLoggedIn.value = true
             }
 
+            _uiState.update { it.copy(isLoading = false, errorMessage = null) }
             onResult(success)
         }
     }
@@ -92,14 +100,18 @@ class AuthViewModel @Inject constructor(
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
             try {
                 repository.registerUser(profile, password)
 
                 _isUserLoggedIn.value = true
 
                 onSuccess()
+                _uiState.update { it.copy(isLoading = false, errorMessage = null) }
             } catch (e: Exception) {
                 onError(e.message ?: "Erro desconhecido no registo")
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
     }

@@ -8,6 +8,9 @@
     <string name="navbar_create_tean">Criar Equipa</string>
     <string name="description_navbar_crate_team">Página que permite criar uma nova Equipa</string>
 
+    <string name="navbar_update_team">Atualizar Equipa</string>
+    <string name="description_navbar_update_team">Página que permite-lhe atualizar os dados da sua equipa</string>
+
     <string name="navbar_calendar">Calendario</string>
     <string name="description_navbar_calendar">Calendario de jogos da equipa</string>
 

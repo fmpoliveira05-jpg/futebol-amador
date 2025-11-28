@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="toast_offline">Sem conexão à internet. Verifique a sua rede.</string>
+</resources>

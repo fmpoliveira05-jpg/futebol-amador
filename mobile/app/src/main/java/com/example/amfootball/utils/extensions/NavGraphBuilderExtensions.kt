@@ -45,7 +45,22 @@ fun NavGraphBuilder.composableProtected(
     }
 }
 
-//Depois meter isto no login e no signUp para so user não autenticados possam aceder a esta rota
+/**
+ * Extensão do [NavGraphBuilder] que define uma rota de navegação acessível apenas a utilizadores **não** autenticados (Visitantes).
+ *
+ * Esta função é ideal para ecrãs como Login ou Registo, onde não faz sentido um utilizador já logado aceder.
+ *
+ * Comportamento:
+ * - **Não Autenticado:** O ecrã definido em [content] é renderizado (ex: Mostra o formulário de Login).
+ * - **Autenticado:** Se o utilizador já possuir um token válido, é redirecionado automaticamente para a Homepage ([Routes.GeralRoutes.HOMEPAGE]),
+ * impedindo o acesso desnecessário ao ecrã de autenticação.
+ *
+ * @param route A string única que identifica a rota (URL) no grafo de navegação.
+ * @param navController O controlador de navegação usado para redirecionar o utilizador para a Home se já estiver logado.
+ * @param sessionManager O gestor de sessão responsável por verificar se já existe um token ativo.
+ * @param arguments Lista de argumentos opcionais para a rota. O padrão é uma lista vazia.
+ * @param content O conteúdo Composable (Ecrã) a ser exibido apenas se o utilizador for um visitante (não logado).
+ */
 fun NavGraphBuilder.composableNotProtectedRoute(
     route: String,
     navController: NavHostController,

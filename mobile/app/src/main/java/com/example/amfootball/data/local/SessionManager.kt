@@ -2,21 +2,21 @@ package com.example.amfootball.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.preference.PreferenceManager
-import com.example.amfootball.data.dtos.CreateProfileDto
-import com.google.gson.Gson // Importe o Gson
+import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Gere a sessão do utilizador, guardando e lendo o token de autenticação.
  *
  * @param context O contexto da aplicação, usado para obter SharedPreferences.
  */
-// TODO: deixar de guardar o user nas preferences e guardar na room
+@Singleton
 class SessionManager @Inject constructor(
-    @ApplicationContext context: Context) {
-
+    @ApplicationContext context: Context
+) {
     private val prefs: SharedPreferences
     private val gson = Gson()
 
@@ -51,7 +51,7 @@ class SessionManager @Inject constructor(
     /**
      * Guarda o objeto UserProfile como uma string JSON.
      */
-    fun saveUserProfile(profile: CreateProfileDto) {
+    fun saveUserProfile(profile: PlayerProfileDto) {
         val jsonString = gson.toJson(profile) // Converte objeto para JSON
         prefs.edit().putString(KEY_USER_PROFILE, jsonString).apply()
     }
@@ -61,13 +61,21 @@ class SessionManager @Inject constructor(
      *
      * @return O objeto UserProfileDto, ou 'null' se não existir.
      */
-    fun getUserProfile(): CreateProfileDto? {
+    fun getUserProfile(): PlayerProfileDto? {
         val jsonString = prefs.getString(KEY_USER_PROFILE, null)
         return if (jsonString != null) {
-            gson.fromJson(jsonString, CreateProfileDto::class.java)
+            gson.fromJson(jsonString, PlayerProfileDto::class.java)
         } else {
             null
         }
+    }
+
+    /**
+     * Helper rápido para obter apenas o ID do utilizador logado.
+     * Útil para o ViewModel decidir se carrega o perfil ou não.
+     */
+    fun fetchUserId(): String? {
+        return getUserProfile()?.loginResponseDto?.localId
     }
 
     fun clearSession() {

@@ -55,7 +55,8 @@ fun MainBottomNavBar(
 fun BottomSheetContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
-    currentScreenRoute: String?
+    currentScreenRoute: String?,
+    teamId: String? = null
 ){
     val buttonsToShow = mutableListOf<AppRouteInfo>()
 
@@ -106,11 +107,27 @@ fun BottomSheetContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        /*
+
+        * */
         items(buttonsToShow) { routeInfo ->
             NavigateButton(
                 icon = routeInfo.icon,
                 label = stringResource(id = routeInfo.labelResId),
-                onClick = { navController.navigate(routeInfo.route) }
+                onClick = {
+                    when (routeInfo) {
+                        Routes.TeamRoutes.CALENDAR -> {
+                            if (teamId != null) {
+                                navController.navigate("${routeInfo.route}/{${teamId}}")
+                            } else {
+                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
+                            }
+                        }
+                        else -> {
+                            navController.navigate(routeInfo.route)
+                        }
+                    }
+                }
             )
         }
     }

@@ -226,22 +226,10 @@ class ListPlayerViewModel @Inject constructor(
             inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
 
             try {
-                val response = repository.getListPlayer(filterState.value)
+                val players = repository.getListPlayer(filterState.value)
 
-                if (response.isSuccessful && response.body() != null) {
-                    val players = response.body()!!
-
-                    listState.value = players
-                    _uiState.update { it.copy(isLoading = false) }
-                } else {
-                    val errorRaw = response.errorBody()?.string()
-                    val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-                        ?: "Erro desconhecido: ${response.code()}"
-
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = errorMsg)
-                    }
-                }
+                listState.value = players
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 e.printStackTrace()
                 _uiState.update {

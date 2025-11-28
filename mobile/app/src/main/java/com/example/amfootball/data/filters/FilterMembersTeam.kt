@@ -22,3 +22,19 @@ data class FilterMembersTeam(
     val maxAge: Int? = null,
     val position: Position? = null,
 )
+
+fun FilterMembersTeam.toQueryMap(): Map<String, String> {
+    val map = mutableMapOf<String, String>()
+
+    if (typeMember != null) {
+        val isAdmin = (typeMember == TypeMember.ADMIN_TEAM)
+        map["IsAdmin"] = isAdmin.toString()
+    }
+
+    name?.let { map["Name"] = it }
+    minAge?.let { map["MinAge"] = it.toString() }
+    maxAge?.let { map["MaxAge"] = it.toString() }
+    position?.let { map["Position"] = it.name }
+
+    return map
+}

@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -42,6 +45,44 @@ fun SubmitFormButton(onClick: () -> Unit,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
+    ) {
+        Icon(
+            imageVector = imageButton,
+            contentDescription = contentDescription
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(text = text)
+    }
+}
+
+/**
+ * Um botão de ação destrutiva/negativa estilizado com as cores de erro do tema.
+ *
+ * Este componente é ideal para ações como "Cancelar", "Apagar" ou "Rejeitar".
+ * Ocupa a largura total ([Modifier.fillMaxWidth]) e usa [MaterialTheme.colorScheme.error]
+ * para o fundo.
+ *
+ * @param onClick Lambda executado quando o botão é clicado.
+ * @param imageButton Ícone a ser exibido (padrão: [Icons.Default.Cancel]).
+ * @param text O texto a ser exibido no botão.
+ * @param contentDescription Descrição para acessibilidade (TalkBack).
+ */
+@Composable
+fun SubmitCancelButton(
+    onClick: () -> Unit,
+    imageButton: ImageVector = Icons.Default.Cancel,
+    text: String,
+    contentDescription: String
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.error, // Fundo Vermelho
+            contentColor = MaterialTheme.colorScheme.onError  // Texto Branco/Legível
+        )
     ) {
         Icon(
             imageVector = imageButton,

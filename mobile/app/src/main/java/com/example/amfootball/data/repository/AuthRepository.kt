@@ -1,22 +1,28 @@
 package com.example.amfootball.data.repository
 
 import android.util.Log
-import com.example.amfootball.data.dtos.CreateProfileDto
+import com.example.amfootball.data.dtos.player.CreateProfileDto
+import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.ApiBackend
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AuthRepository @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
     private val apiService: ApiBackend,
     private val sessionManager: SessionManager
 ) {
     suspend fun loginUser(email: String, password: String): Boolean {
-        return try {
+        try {
+/*
             val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
+
+
             val firebaseUser = authResult.user
 
             if (firebaseUser == null) {
@@ -32,31 +38,48 @@ class AuthRepository @Inject constructor(
 
             Log.d("TOKEN_TEST", "Bearer $token")
 
-            sessionManager.saveAuthToken(token)
 
-            /*
-                    _isUserLoggedIn.value = true
-        //val profile = apiService.getMyProfile("Bearer $token")
-        // sessionManager.saveUserProfile(profile)
-            * */
-            true
+*/
+            val login  = LoginDto(
+                email = email,
+                password = password
+            )
+            val response = apiService.loginUser(login)
+
+            if (response.isSuccessful && response.body() != null) {
+                val userProfile = response.body()!!
+
+                sessionManager.saveUserProfile(userProfile)
+                sessionManager.saveAuthToken(userProfile.loginResponseDto.idToken)
+                Log.d("AuthRepository", "Login completo e dados guardados.")
+
+                return true
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
+
+                sessionManager.clearSession()
+                throw Exception(errorMsg)
+            }
         } catch (e: Exception) {
             Log.e("AuthRepository", "Erro no login: ${e.message}")
             e.printStackTrace()
-            false
+            return false
         }
     }
 
     suspend fun registerUser(profile: CreateProfileDto, password: String) {
-        var createdFirebaseUser: FirebaseUser? = null
+        val createdFirebaseUser: FirebaseUser? = null
 
         try {
+            /*
             val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
             createdFirebaseUser = authResult.user
 
             if (createdFirebaseUser == null) {
                 throw Exception("Utilizador Firebase não foi criado.")
             }
+
 
             val idTokenResult = createdFirebaseUser.getIdToken(true).await()
             val token = idTokenResult.token
@@ -68,6 +91,7 @@ class AuthRepository @Inject constructor(
             Log.d("TOKEN_TEST", "Bearer $token")
 
             sessionManager.saveAuthToken(token)
+*/
 
             val response = apiService.createProfile(profile)
 

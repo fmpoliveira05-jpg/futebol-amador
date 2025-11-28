@@ -1,5 +1,6 @@
 package com.example.amfootball.data.network
 
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,14 +18,6 @@ object RetrofitInstance {
     //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
     private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 
-    //Cria o cliente aqui
-    /*
-    * private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AuthInterceptor())
-        // é possivel adicionar outros interceptors aqui
-        .build()
-
-    * */
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {

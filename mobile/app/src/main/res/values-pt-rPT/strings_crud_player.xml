@@ -22,10 +22,4 @@
 
     <string name="player_team">Equipa</string>
     <string name="player_team_description">Equipa do jogador</string>
-
-    <string name="password_field">Palavra passe</string>
-    <string name="password_field_validation">Confirme a sua Palavra passe</string>
-
-
-
 </resources>

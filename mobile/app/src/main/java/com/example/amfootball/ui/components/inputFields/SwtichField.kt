@@ -33,11 +33,14 @@ import androidx.compose.ui.unit.dp
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Switcher(value: Boolean = true,
-             onCheckedChange: (Boolean) -> Unit,
-             text: String,
-             textChecked: String,
-             textUnChecked: String) {
+fun Switcher(
+    value: Boolean = true,
+    onCheckedChange: (Boolean) -> Unit,
+    text: String,
+    textChecked: String,
+    textUnChecked: String,
+    enabled: Boolean = true
+) {
     Column {
         Row (
             verticalAlignment = Alignment.CenterVertically

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.repository.PlayerRepository
 import com.example.amfootball.utils.NetworkUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfilePlayerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: PlayerRepository
+    private val repository: PlayerRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     /**
@@ -59,14 +61,34 @@ class ProfilePlayerViewModel @Inject constructor(
             loadPlayerProfile(playerId = playerId)
         } else {
             // Carrega o perfil do próprio utilizador (Sessão)
-            // TODO: AQUI NÃO CHAMA ISTO DEPOIS, CHAMA É O SESSION_MANAGER
-            loadPlayerProfile(playerId = "iIbMFBATjAYjPWu5dC8ezoEyzw12")
+            // TODO: Quando sessionManager funcionar apagar esta linha
+            //loadPlayerProfile(playerId = "iIbMFBATjAYjPWu5dC8ezoEyzw12")
+
+            val myCachedProfile = sessionManager.getUserProfile()
+            if (myCachedProfile != null) {
+                profilePlayer.value = myCachedProfile
+                _uiState.update { it.copy(isLoading = false) }
+            } else {
+                val myId = sessionManager.fetchUserId()
+                if (myId != null) {
+                    loadPlayerProfile(myId)
+                } else {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Sessão inválida") }
+                }
+            }
         }
     }
 
     fun retry() {
-        val id = playerId ?: "iIbMFBATjAYjPWu5dC8ezoEyzw12"
-        loadPlayerProfile(playerId = id)
+        val id = playerId ?: sessionManager.fetchUserId()
+
+        if (id != null) {
+            loadPlayerProfile(playerId = id)
+        } else {
+            _uiState.update {
+                it.copy(isLoading = false, errorMessage = "Não foi possível recarregar.")
+            }
+        }
     }
 
     /**
@@ -84,21 +106,10 @@ class ProfilePlayerViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val response = repository.getPlayerProfile(playerId = playerId)
+                val player = repository.getPlayerProfile(playerId = playerId)
 
-                if (response.isSuccessful && response.body() != null) {
-                    profilePlayer.value = response.body()
-
-                    _uiState.update { it.copy(isLoading = false) }
-                } else {
-                    val errorRaw = response.errorBody()?.string()
-                    val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-                        ?: "Erro desconhecido: ${response.code()}"
-
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = errorMsg)
-                    }
-                }
+                profilePlayer.value = player
+                _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")
@@ -106,29 +117,4 @@ class ProfilePlayerViewModel @Inject constructor(
             }
         }
     }
-
-    /*
-    fun fetchLatestProfile() {
-        viewModelScope.launch {
-            try {
-                val response = repository.getMyProfile()
-
-                if (response.isSuccessful) {
-                    val freshProfile = response.body()
-                    if (freshProfile != null) {
-                        // 4. Atualizar o 'Flow' (o ecrã atualiza-se)
-                        _profileState.value = freshProfile
-
-                        // 5. Guardar o perfil fresco no cache
-                        sessionManager.saveUserProfile(freshProfile)
-                    }
-                }
-            } catch (e: Exception) {
-                // Falha de rede, não há problema, o utilizador
-                // continua a ver os dados do cache.
-                println("Erro ao buscar perfil: ${e.message}")
-            }
-        }
-    }
-    */
 }

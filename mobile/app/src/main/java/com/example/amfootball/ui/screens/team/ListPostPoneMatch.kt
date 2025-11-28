@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.team
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -37,9 +36,9 @@ import com.example.amfootball.ui.components.lists.FilterNameTeamTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -211,8 +210,8 @@ private fun ItemListPosPoneMatch(
             }
         },
         leading = {
-            ImageList(
-                image = postPoneMatch.opponent.image ?: Uri.EMPTY
+            StringImageList(
+                image = postPoneMatch.opponent.image
             )
         },
         trailing = {

@@ -40,7 +40,7 @@ import com.example.amfootball.utils.TeamConst
 fun ProfileTeamScreen(
     viewModel: ProfileTeamViewModel = hiltViewModel()
 ) {
-    val profileTeam = viewModel.uiInfoTeam.observeAsState(initial = ProfileTeamDto.profileExempleTeam())
+    val profileTeam = viewModel.uiInfoTeam.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ContentProfileTeam(

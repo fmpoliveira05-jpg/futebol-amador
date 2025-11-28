@@ -1,8 +1,10 @@
 package com.example.amfootball.ui.screens.lists
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -27,17 +30,20 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterTeamActions
 import com.example.amfootball.data.actions.itemsList.ItemsListTeamAction
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.NumberTextField
 import com.example.amfootball.ui.components.lists.AddressRow
+import com.example.amfootball.ui.components.lists.AverageAgeRow
 import com.example.amfootball.ui.components.lists.FilterNameTeamTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
@@ -45,44 +51,32 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.NumMembersTeamRow
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.TeamConst
 
 /**
- * TODO: Quando carregar da API os dados ter em atenção e quando for um tipo de players carregar as teams de uma forma e outro tipo de player de outra
- * TODO: Meter botão de filtragem (ver se filtra localmente ou no servidor)
- * TODO: Meter para quando consultar a team aparecer no profile os dados reais da Team
- * TODO: Meter os botões de send MatchInvite caso seja uma Team a aceder há lista
- * TODO: Meter os botões de send MemberShipRequest caso seja um player sem equipa a consultar a lista
- * */
-
-/**
- * Ecrã principal para a listagem de equipas de Futebol Americano.
+ * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful).
  *
- * Este Composable é responsável por:
- * 1. Coletar o estado da UI do ViewModel (filtros, lista de equipas e ranks).
- * 2. Configurar as ações de filtragem e interação com os itens da lista.
- * 3. Gerir a exibição da secção de filtros (expandido/colapsado).
- * 4. Renderizar a lista utilizando o componente genérico [ListSurface].
+ * Este Composable atua como o contentor de estado:
+ * 1. Instancia e coleta os fluxos (Flows) do [ListTeamViewModel].
+ * 2. Define as ações (callbacks) que ligam a UI à lógica de negócio.
+ * 3. Passa os dados puros para o [ListTeamContent] renderizar.
  *
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
- * @param viewModel O ViewModel responsável pela lógica de negócio e estado da lista.
+ * @param viewModel O ViewModel injetado via Hilt.
  */
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
-    viewModel: ListTeamViewModel = viewModel()
-){
+    viewModel: ListTeamViewModel = hiltViewModel()
+) {
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
     val listTeams by viewModel.listTeams.collectAsStateWithLifecycle()
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
-    /*
-    Isto vou meter uma variavel no viewModel para guardar offline os filtros da pessoa
-    val filteredList = remember(listTeams, filters) {
-        filterTeamList(listTeams, filters)
-    }
-    * */
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Definição das ações de atualização dos filtros
     val filtersActions = FilterTeamActions(
@@ -101,39 +95,87 @@ fun ListTeamScreen(
         )
     )
 
-    // Definição das ações para cada item da lista (equipa)
     val itemListActions = ItemsListTeamAction(
         onSendMemberShipRequest = viewModel::sendMemberShipRequest,
         onSendMatchInvite = viewModel::sendMatchInvite,
         onShowMore = viewModel::showMore
     )
 
-    var filtersExpanded by remember { mutableStateOf(false) }
+    ListTeamContent(
+        isOnline = isOnline,
+        listTeams = listTeams,
+        filters = filters,
+        filtersActions = filtersActions,
+        listRanks = listRanks,
+        itemListActions = itemListActions,
+        uiState = uiState,
+        onRetry = { viewModel.retry() },
+        navHostController = navHostController
+    )
+}
 
-    ListSurface(
-        list = listTeams,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                content = {
-                    FiltersListTeamContent(
-                        filters = filters,
-                        filtersActions = filtersActions,
-                        listRanks = listRanks,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                    )
-                }
-            )
-        },
-        listItems = { team ->
-            ListTeam(
-                team = team,
-                itemActions = itemListActions,
-                navHostController = navHostController
-            )
-        },
-        messageEmptyList = stringResource(id = R.string.list_teams_empty)
+/**
+ * Conteúdo Visual da Lista de Equipas (Stateless).
+ *
+ * Responsável apenas pela renderização da UI. Não possui lógica de negócio ou dependência direta do ViewModel.
+ * Ideal para testes e Previews.
+ *
+ * @param isOnline Estado da conectividade (controla o [OfflineBanner]).
+ * @param listTeams Lista de equipas a exibir.
+ * @param filters Estado atual dos filtros.
+ * @param filtersActions Ações de manipulação dos filtros.
+ * @param listRanks Lista de Ranks para o dropdown.
+ * @param itemListActions Ações de interação com os itens da lista.
+ * @param uiState Estado de loading e erro.
+ */
+@Composable
+private fun ListTeamContent(
+    isOnline: Boolean,
+    listTeams: List<ItemTeamInfoDto>,
+    filters: FiltersListTeam,
+    filtersActions: FilterTeamActions,
+    listRanks: List<RankNameDto>,
+    itemListActions: ItemsListTeamAction,
+    uiState: UiState,
+    onRetry: () -> Unit,
+    navHostController: NavHostController
+) {
+    var filtersExpanded by remember { mutableStateOf(false) }
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = onRetry,
+        content = {
+            Column(modifier = Modifier.fillMaxSize()) {
+                OfflineBanner(isVisible = !isOnline)
+
+                ListSurface(
+                    list = listTeams,
+                    filterSection = {
+                        FilterSection(
+                            isExpanded = filtersExpanded,
+                            onToggleExpand = { filtersExpanded = !filtersExpanded },
+                            content = {
+                                FiltersListTeamContent(
+                                    filters = filters,
+                                    filtersActions = filtersActions,
+                                    listRanks = listRanks,
+                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                )
+                            }
+                        )
+                    },
+                    listItems = { team ->
+                        ListTeam(
+                            team = team,
+                            itemActions = itemListActions,
+                            navHostController = navHostController
+                        )
+                    },
+                    messageEmptyList = stringResource(id = R.string.list_teams_empty)
+                )
+            }
+        }
     )
 }
 
@@ -188,7 +230,12 @@ private fun FiltersListTeamContent(
                     list = listRanks,
                     selectedValue = selectedRankDto ?: listRanks.first(),
                     itemToString = { it.name },
-                    onSelectItem = { filtersActions.onRankChange(it.name)},
+                    onSelectItem = { rankDto ->
+                        if (rankDto.id == "0") {
+                            filtersActions.onRankChange("")
+                        } else {
+                            filtersActions.onRankChange(rankDto.name)
+                        }},
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -295,6 +342,7 @@ private fun ListTeam(
         },
         supporting = {
             AddressRow(address = team.city)
+            AverageAgeRow(age = team.averageAge)
             NumMembersTeamRow(numMembers = team.numberMembers)
         },
         leading = {
@@ -322,7 +370,7 @@ private fun ListTeamOverline(team: ItemTeamInfoDto) {
     Text(
         text = buildAnnotatedString {
             pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-            append("Rank: ${team.rank}")
+            append("Rank: ${team.rank.name}")
             pop()
 
             append("\n")
@@ -379,55 +427,105 @@ private fun ListTeamTrailing(
 }
 
 /**
- * Criterios de Filtragem
- *
-private fun filterTeamList(
-teams: List<ItemTeamInfoDto>,
-filters: FiltersListTeam
-): List<ItemTeamInfoDto> {
-val minPoints = filters.minPoint
-val maxPoints = filters.maxPoint
-val minAge = filters.minAge
-val maxAge = filters.maxAge
-val minNumberMembers = filters.minNumberMembers
-val maxNumberMembers = filters.maxNumberMembers
-
-return teams.filter { team ->
-val nameFilterPassed = filters.name.isNullOrEmpty() ||
-team.name.contains(filters.name, ignoreCase = true)
-
-val rankFilterPassed = filters.rank.isNullOrEmpty() ||
-team.name.contains(filters.rank, ignoreCase = true)
-
-val cityFilterPassed = filters.city.isNullOrEmpty() ||
-team.city.contains(filters.city, ignoreCase = true)
-
-val minPointFilterPassed = (minPoints == null) || (team.points >= minPoints)
-val maxPointFilterPassed = (maxPoints == null) || (team.points <= maxPoints)
-
-val minAgeFilterPassed = (minAge == null) || (team.averageAge >= minAge)
-val maxAgeFilterPassed = (maxAge == null) || (team.averageAge <= maxAge)
-
-val minNumberMembersFilterPassed = (minNumberMembers == null) || (team.numberMembers >= minNumberMembers)
-val maxNumberMembersFilterPassed = (maxNumberMembers == null) || (team.numberMembers <= maxNumberMembers)
-
-nameFilterPassed && rankFilterPassed && cityFilterPassed && minPointFilterPassed
-&& maxPointFilterPassed && minAgeFilterPassed && maxAgeFilterPassed &&
-minNumberMembersFilterPassed && maxNumberMembersFilterPassed
-}
-}
+ * Mock Data para os Previews
  */
+private val mockRanks = listOf(
+    RankNameDto(id = "1", name = "Bronze"),
+    RankNameDto(id = "2", name = "Prata"),
+    RankNameDto(id = "3", name = "Ouro")
+)
 
+private val mockTeams = listOf(
+    ItemTeamInfoDto(
+        id = "1",
+        name = "Lisboa Lions",
+        fullAddress = "Rua Principal, Lisboa",
+        rank = RankNameDto(id = "3", name = "Ouro"),
+        points = 1500,
+        numberMembers = 30,
+        averageAge = 25.3, // Double correto
+        description = "Equipa focada em competição de alto nível.",
+        logoTeam = Uri.EMPTY
+    ),
+    ItemTeamInfoDto(
+        id = "2",
+        name = "Porto Pirates",
+        fullAddress = "Avenida dos Aliados, Porto",
+        rank = RankNameDto(id = "2", name = "Prata"),
+        points = 1200,
+        numberMembers = 25,
+        averageAge = 24.1,
+        description = "Equipa universitária do Porto.",
+        logoTeam = Uri.EMPTY
+    ),
+    ItemTeamInfoDto(
+        id = "3",
+        name = "Braga Warriors",
+        fullAddress = "Estádio Municipal, Braga",
+        rank = RankNameDto(id = "1", name = "Bronze"),
+        points = 800,
+        numberMembers = 20,
+        averageAge = 22.2,
+        description = "Formação de novos talentos.",
+        logoTeam = Uri.EMPTY
+    )
+)
 
-@Preview(
-    name = "Lista de Equipa - PT",
-    locale = "pt-rPT",
-    showBackground = true)
-@Preview(
-    name = "List Team Screen - EN",
-    locale = "en",
-    showBackground = true)
+private val mockFiltersActions = FilterTeamActions(
+    {}, {}, {}, {}, {}, {}, {}, {}, {}, ButtonFilterActions({}, {})
+)
+
+private val mockItemActions = ItemsListTeamAction(
+    { _, _ -> }, { _, _ -> }, { _, _ -> }
+)
+
+@Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListTeamScreen() {
-    ListTeamScreen(rememberNavController())
+fun PreviewListTeamContent_Normal() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = mockTeams,
+        filters = FiltersListTeam(),
+        filtersActions = mockFiltersActions,
+        listRanks = mockRanks,
+        itemListActions = mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "2. Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContent_Empty() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = emptyList(), // Lista vazia
+        filters = FiltersListTeam(),
+        filtersActions = mockFiltersActions,
+        listRanks = mockRanks,
+        itemListActions = mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "3. Offline - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Offline - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContent_Offline() {
+    ListTeamContent(
+        isOnline = false,
+        listTeams = mockTeams,
+        filters = FiltersListTeam(),
+        filtersActions = mockFiltersActions,
+        listRanks = mockRanks,
+        itemListActions = mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController()
+    )
 }

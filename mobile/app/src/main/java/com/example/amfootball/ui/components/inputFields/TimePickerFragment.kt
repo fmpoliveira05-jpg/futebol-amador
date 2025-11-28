@@ -59,6 +59,7 @@ fun FieldTimePicker(
     contentDescription: String,
     isError: Boolean = false,
     errorMessage: String? = stringResource(id = R.string.mandatory_field),
+    enabled: Boolean = true
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -66,7 +67,6 @@ fun FieldTimePicker(
         value = value,
         onValueChange = {},
         label = { Text(text = label) },
-        readOnly = true,
         trailingIcon = {
             IconButton(onClick = { showTimePicker = true }) {
                 Icon(
@@ -83,10 +83,12 @@ fun FieldTimePicker(
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        readOnly = true,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth(),
     )
 
-    if (showTimePicker) {
+    if (showTimePicker && enabled) {
         TimePickerApp(
             onDismiss = {
                 showTimePicker = false
@@ -101,7 +103,7 @@ fun FieldTimePicker(
                 onValueChange(newTimeValue)
 
                 showTimePicker = false
-            }
+            },
         )
     }
 }
@@ -150,7 +152,7 @@ private fun TimePickerApp(
                     contentDescription = "Time picker type toggle",
                 )
             }
-        },
+        }
     ) {
         if (showDial) {
             TimePicker(
@@ -193,7 +195,7 @@ private fun TimePickerDialog(
             onDismiss = onDismiss,
             onConfirm = onConfirm,
             toggle = toggle,
-            content = content
+            content = content,
         )
     }
 }
@@ -210,11 +212,13 @@ private fun TimePickerDialog(
  * @param content O conteúdo principal do diálogo (o seletor de tempo).
  */
 @Composable
-private fun SurfaceTimePickerDialog(title: String,
-                                    onDismiss: () -> Unit,
-                                    onConfirm: () -> Unit,
-                                    toggle: @Composable () -> Unit = {},
-                                    content: @Composable () -> Unit) {
+private fun SurfaceTimePickerDialog(
+    title: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    toggle: @Composable () -> Unit = {},
+    content: @Composable () -> Unit
+) {
     Surface(
         shape = MaterialTheme.shapes.extraLarge,
         tonalElevation = 6.dp,

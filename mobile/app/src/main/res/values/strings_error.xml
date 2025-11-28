@@ -41,8 +41,20 @@
     <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
     <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
 
+    <string name="error_min_number_points">Minimum points must be greater than %1$d</string>
+    <string name="error_max_number_points">Maximum points must be less than %1$d</string>
+    <string name="error_min_number_points_greater_max">Minimum number must be less than maximum number</string>
+    <string name="error_max_number_points_minor_min">Maximum number must be greater than minimum number</string>
+
+    <string name="error_min_number_members">Minimum number of members must be greater than %1$d</string>
+    <string name="error_max_number_members">Maximum number of members must be less than %1$d</string>
+    <string name="error_min_number_members_greater_max">Minimum members must be less than maximum members</string>
+    <string name="error_max_number_members_minor_min">Maximum members must be greater than minimum members</string>
+
     <string name="error_min_goals_team">The minimum number of goals scored by a team is %1$d</string>
     <string name="error_max_goals_team">The maximum number of goals scored by a team is %1$d</string>
 
     <string name="error_login">An error occurred during login. Verify email and password.</string>
+    <string name="error_min_length_cancel_match_reason">The reason must be at least %1$d characters long</string>
+    <string name="error_max_length_cancel_match_reason">The reason cannot exceed %1$d characters</string>
 </resources>
