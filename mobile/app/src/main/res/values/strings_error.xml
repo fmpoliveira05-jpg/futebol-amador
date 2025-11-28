@@ -54,6 +54,7 @@
     <string name="error_min_goals_team">The minimum number of goals scored by a team is %1$d</string>
     <string name="error_max_goals_team">The maximum number of goals scored by a team is %1$d</string>
 
+    <string name="error_login">An error occurred during login. Verify email and password.</string>
     <string name="error_min_length_cancel_match_reason">The reason must be at least %1$d characters long</string>
     <string name="error_max_length_cancel_match_reason">The reason cannot exceed %1$d characters</string>
 </resources>
