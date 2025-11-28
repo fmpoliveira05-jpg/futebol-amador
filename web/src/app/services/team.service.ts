@@ -1,10 +1,10 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
 import { TeamDetailsDto } from '../shared/Dtos/Team/TeamDetailsDto';
-import { UpdateTeamDto } from '../shared/Dtos/Team/UpdateTeamDto';
 import { CreateTeamDto } from '../shared/Dtos/Team/CreateTeamDto';
+import { FilterListTeamDto } from '../shared/Dtos/Filters/FilterListTeamDto';
 
 @Injectable({
   providedIn: 'root',
@@ -21,11 +21,25 @@ export class TeamService {
     return this.http.post<void>(`${this.baseUrl}`, data);
   }
 
-  updateTeam(teamId: string, data: UpdateTeamDto): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${teamId}`, data);
+  updateTeam(teamId: string, data: CreateTeamDto): Observable<void> {
+    return this.http.put<void>(`${this.baseUrl}/${teamId}`, data, {responseType: 'text' as 'json'});
   }
 
   deleteTeam(teamId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${teamId}`);
+  }
+
+  searchTeams(teamId: string, filter?: FilterListTeamDto): Observable<any> {
+    let params = new HttpParams();
+
+    if (filter) {
+      Object.entries(filter).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.append(key, value);
+        }
+      });
+    }
+
+    return this.http.get(`${this.baseUrl}/${teamId}/search`, { params });
   }
 }

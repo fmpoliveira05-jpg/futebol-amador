@@ -233,6 +233,10 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     alert('Aqui, no futuro, vais enviar um pedido de adesão a uma equipa.');
   }
 
+  goToTeamProfile(): void{
+    this.router.navigate(['/team/details', this.player()?.idTeam]);
+  }
+  
   /**
    * Carrega os dados de um jogador a partir do ID ou carrega o perfil do jogador autenticado.
    */

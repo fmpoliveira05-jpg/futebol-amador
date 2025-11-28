@@ -6,11 +6,13 @@ import { TeamDetailsDto } from '../../../shared/Dtos/Team/TeamDetailsDto';
 import { PlayerService } from '../../../services/player.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UpdateTeamDto } from '../../../shared/Dtos/Team/UpdateTeamDto';
+import { MembershipRequestService } from '../../../services/membership-request.service';
+import { CreateTeamDto } from '../../../shared/Dtos/Team/CreateTeamDto';
+import { PitchDto } from '../../../shared/Dtos/Pitch/PitchDto';
 
 @Component({
   selector: 'app-team-profile',
-  imports: [CommonModule, NgFor, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './team-profile.html',
   styleUrl: './team-profile.css',
 })
@@ -31,7 +33,8 @@ export class TeamProfile {
     private route: ActivatedRoute,
     private router: Router,
     private playerService: PlayerService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private membershipRequestService: MembershipRequestService
   ) {}
 
   ngOnInit() {
@@ -58,25 +61,31 @@ export class TeamProfile {
 
     if (!team || !user) return false;
 
-    const player = team.players.find((p) => p.playerId === user.playerId);
+    // const player = team.players.find((p) => p.playerId === user.playerId);
 
-    console.log(user.playerId + ' = ' + player?.playerId);
+    // console.log(user.playerId + ' = ' + player?.playerId);
 
     return team.players.some((p) => p.playerId === user.playerId);
   });
 
   isAdmin = computed(() => {
-    const team = this.team();
+    // const team = this.team();
     const user = this.currentUser();
 
-    if (!team || !user) return false;
+    // if (!team || !user) return false;
 
-    const member = team.players.find((p) => p.playerId === user.playerId);
-    return member?.isAdmin === true;
+    // const member = team.players.find((p) => p.playerId === user.playerId);
+    return user?.isAdmin === true;
   });
+
+  // sentMembershipRequest = computed(() => this.membershipRequests().length > 0);
 
   protected goToTeamMembers(): void {
     this.router.navigate(['/team/members']);
+  }
+
+  protected goToMatchInvites(): void {
+    this.router.navigate(['/team/matchInvites']);
   }
 
   protected toggleEdit(): void {
@@ -102,7 +111,6 @@ export class TeamProfile {
       next: (data) => {
         this.team.set(data);
         this.isLoading.set(false);
-        console.log(data);
       },
       error: (err) => {
         console.error(err);
@@ -118,11 +126,17 @@ export class TeamProfile {
       return;
     }
 
-    const payload: UpdateTeamDto = {
+    const homePitch: PitchDto = {
+      name: this.form.value['pitchName'],
+      address: this.form.value['pitchLocation'],
+    };
+
+    const payload: CreateTeamDto = {
       name: this.form.value['name'],
       description: this.form.value['description'],
-      pitchName: this.form.value['pitchName'],
-      pitchLocation: this.form.value['pitchAddress'],
+      iconName: '',
+      iconPath: '',
+      homePitch: homePitch,
     };
 
     this.isSaving.set(true);
@@ -143,6 +157,31 @@ export class TeamProfile {
       },
     });
   }
+
+  protected sendMembershipRequest(): void {
+    const t = this.team();
+    if (!t) return;
+
+    if (!confirm('Confirma envio de pedido de adesão à equipa?')) {
+      return;
+    }
+
+    this.isSaving.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+
+    this.membershipRequestService.sendMembershipRequestPlayer(this.team()?.id!).subscribe({
+      next: () => {
+        alert('Pedido de adesão enviado com sucesso.');
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Não foi possível enviar pedido de adesão.');
+      },
+    });
+  }
+
+  protected sendMatchRequest(): void {}
 
   protected deleteTeam(): void {
     const t = this.team();

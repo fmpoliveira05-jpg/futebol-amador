@@ -35,10 +35,10 @@ export class TeamMembersService {
   }
 
   promoteMember(teamId: string, playerId: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${teamId}/members/promote/${playerId}`, {});
+    return this.http.put<void>(`${this.baseUrl}/${teamId}/members/promote/${playerId}`, {}, {responseType: 'text' as 'json'});
   }
 
   demoteAdmin(teamId: string, adminId: string): Observable<void> {
-    return this.http.put<void>(`${this.baseUrl}/${teamId}/members/demote/${adminId}`, {});
+    return this.http.put<void>(`${this.baseUrl}/${teamId}/members/demote/${adminId}`, {}, {responseType: 'text' as 'json'});
   }
 }

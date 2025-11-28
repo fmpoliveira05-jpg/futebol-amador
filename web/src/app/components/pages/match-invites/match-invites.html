@@ -1,0 +1,65 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Convites de Partida</h1>
+    </div>
+
+    <!-- <div class="page-header__actions">
+      <input
+        type="search"
+        class="search-input"
+        placeholder="Procurar por equipa"
+        [value]="searchTerm()"
+        (input)="onSearchTermChange($any($event.target).value)"
+      />
+    </div> -->
+  </header>
+
+  <div class="card">
+    <div *ngIf="isLoading()" class="state state--loading">
+      A carregar convites de partida…
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error">
+      {{ errorMessage() }}
+    </div>
+
+    <div *ngIf="!isLoading() && !errorMessage()">
+      <table class="invites-table" *ngIf="matchInvites().length; else noInvites">
+        <thead>
+          <tr>
+            <th>Equipa</th>
+            <th>Game Date</th>
+            <th>Location</th>
+            <th class="invites-table__actions-col"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let invite of matchInvites()">
+            <td>{{ invite.idSender }}</td>
+            <td>{{ invite.gameDate }}</td>
+            <td>{{ invite.homePitch }}</td>
+
+            <td class="members-table__actions">
+              <button type="button" class="btn btn-secondary" (click)="accept(invite)">
+                Aceitar
+              </button>
+
+              <button type="button" class="btn btn-secondary" (click)="refuse(invite)">
+                Negociar
+              </button>
+
+              <button type="button" class="btn btn-danger" (click)="negotiate(invite)">
+                Recusar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <ng-template #noInvites>
+        <div class="state">Não há convites para apresentar.</div>
+      </ng-template>
+    </div>
+  </div>
+</section>
