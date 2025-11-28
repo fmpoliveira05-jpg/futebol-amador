@@ -96,33 +96,6 @@ export class Teams {
     this.loadTeams();
   }
 
-  sendMembershipRequest(teamId: string): void {
-    this.membershipRequestService.sendMembershipRequestPlayer(teamId).subscribe({
-      next: () => {
-        this.successMessage.set('Pedido de adesão enviado para a equipe com sucesso!');
-        this.errorMessage.set(null);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível enviar o pedido de adesão.');
-      },
-    });
-  }
-
-  // loadPlayer(): void {
-  //   this.playerService.getMyProfile().subscribe({
-  //     next: (player) => {
-  //       this.player.set(player);
-  //       this.isLoading.set(false);
-  //     },
-  //     error: (err) => {
-  //       console.error(err);
-  //       this.errorMessage.set('Não foi possível carregar as informações do jogador.');
-  //       this.isLoading.set(false);
-  //     },
-  //   });
-  // }
-
   goToCreateTeam() {
     this.router.navigate(['/createTeam']);
   }

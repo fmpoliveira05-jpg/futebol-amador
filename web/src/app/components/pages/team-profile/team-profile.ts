@@ -6,10 +6,9 @@ import { TeamDetailsDto } from '../../../shared/Dtos/Team/TeamDetailsDto';
 import { PlayerService } from '../../../services/player.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UpdateTeamDto } from '../../../shared/Dtos/Team/UpdateTeamDto';
 import { MembershipRequestService } from '../../../services/membership-request.service';
-import { FilterMembershipRequestsPlayer } from '../../../shared/Dtos/Filters/FilterMembershipRequestPlayer';
-import { MembershipRequest } from '../../../shared/Dtos/membership-request.model';
+import { CreateTeamDto } from '../../../shared/Dtos/Team/CreateTeamDto';
+import { PitchDto } from '../../../shared/Dtos/Pitch/PitchDto';
 
 @Component({
   selector: 'app-team-profile',
@@ -62,9 +61,9 @@ export class TeamProfile {
 
     if (!team || !user) return false;
 
-    const player = team.players.find((p) => p.playerId === user.playerId);
+    // const player = team.players.find((p) => p.playerId === user.playerId);
 
-    console.log(user.playerId + ' = ' + player?.playerId);
+    // console.log(user.playerId + ' = ' + player?.playerId);
 
     return team.players.some((p) => p.playerId === user.playerId);
   });
@@ -79,30 +78,7 @@ export class TeamProfile {
     return user?.isAdmin === true;
   });
 
-  sentMembershipRequest = computed(() => {
-    let filter = new FilterMembershipRequestsPlayer;
-    
-    filter.senderName = this.team()?.name;
-
-    let result: boolean = false;
-
-    this.membershipRequestService.getMembershipRequestsForCurrentPlayer().subscribe({
-      next: (data) =>{
-        if (data.length < 1){
-          result =  false;
-          console.log(data);
-          console.log(result);
-        }else{
-          result = true
-        }
-      },
-      error: (err) => {
-        console.error(err);
-      }
-    })
-
-    return result;
-  });
+  // sentMembershipRequest = computed(() => this.membershipRequests().length > 0);
 
   protected goToTeamMembers(): void {
     this.router.navigate(['/team/members']);
@@ -135,7 +111,6 @@ export class TeamProfile {
       next: (data) => {
         this.team.set(data);
         this.isLoading.set(false);
-        console.log(data);
       },
       error: (err) => {
         console.error(err);
@@ -151,11 +126,17 @@ export class TeamProfile {
       return;
     }
 
-    const payload: UpdateTeamDto = {
+    const homePitch: PitchDto = {
+      name: this.form.value['pitchName'],
+      address: this.form.value['pitchLocation'],
+    };
+
+    const payload: CreateTeamDto = {
       name: this.form.value['name'],
       description: this.form.value['description'],
-      pitchName: this.form.value['pitchName'],
-      pitchLocation: this.form.value['pitchAddress'],
+      iconName: '',
+      iconPath: '',
+      homePitch: homePitch,
     };
 
     this.isSaving.set(true);
@@ -195,7 +176,7 @@ export class TeamProfile {
       },
       error: (err) => {
         console.error(err);
-        this.errorMessage.set('Não foi possível apagar a equipa.');
+        alert('Não foi possível enviar pedido de adesão.');
       },
     });
   }

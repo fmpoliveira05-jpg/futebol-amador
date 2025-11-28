@@ -38,9 +38,17 @@ export class MembershipRequestService {
     let params = new HttpParams();
 
     if (filters) {
-      if (filters.senderName) params = params.set('SenderName', filters.senderName!);
-      if (filters.minDate) params = params.set('MinDate', filters.minDate.toString());
-      if (filters.maxDate) params = params.set('MaxDate', filters.maxDate.toString());
+      if (filters.SenderName) params = params.set('SenderName', filters.SenderName!);
+      if (filters.MinDate)
+        params = params.set('MinDate', filters.MinDate.toISOString().split('T')[0]);
+      if (filters.MaxDate)
+        params = params.set('MaxDate', filters.MaxDate.toISOString().split('T')[0]);
+    
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.append(key, value);
+        }
+      });
     }
 
     return this.http.get<MembershipRequest[]>(

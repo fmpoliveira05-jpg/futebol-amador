@@ -1,5 +1,5 @@
 export class FilterMembershipRequestsPlayer {
-    senderName?: string;
-    minDate?: Date;
-    maxDate?: Date;
+    SenderName?: string;
+    MinDate?: Date;
+    MaxDate?: Date;
 }
