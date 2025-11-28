@@ -20,11 +20,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
@@ -65,14 +67,17 @@ fun FormMatchInviteScreen(
         onCancelForm = viewModel::onCancelForm
     )
 
-    val mode = viewModel.mode
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    val mode = viewModel.mode
     ContentSendMatchInviteScreen(
         navHostController = navHostController,
         fields = fields,
         actions = actions,
         errors = errors,
         mode = mode,
+        uiState = uiState,
+        retry = viewModel::loadData,
         modifier = Modifier.padding(16.dp),
     )
 }
@@ -96,21 +101,30 @@ private fun ContentSendMatchInviteScreen(
     actions: FormMatchInviteActions,
     errors: MatchInviteFormErros,
     mode: MatchFormMode,
+    uiState: UiState,
+    retry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        FieldsSendMatchInvite(
-            fields = fields,
-            errors = errors,
-            actions = actions,
-            mode = mode,
-            navHostController = navHostController
-        )
-    }
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = retry,
+        content = {
+            Column(
+                modifier = modifier,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                FieldsSendMatchInvite(
+                    fields = fields,
+                    errors = errors,
+                    actions = actions,
+                    mode = mode,
+                    navHostController = navHostController
+                )
+            }
+        }
+    )
 }
 
 /**
@@ -207,7 +221,11 @@ private fun FieldsSendMatchInvite(
         SubmitCancelButton(
             text = stringResource(id = R.string.button_cancel_match),
             contentDescription = stringResource(id = R.string.button_cancel_match_description),
-            onClick = { actions.onCancelForm(navHostController, cancelReason) }
+            onClick = {
+                actions.onCancelForm(
+                    navHostController,
+                    cancelReason)
+            }
         )
     }
 }
@@ -246,6 +264,7 @@ val dummyActions = FormMatchInviteActions(
 // =============================================================================
 // PREVIEWS
 // =============================================================================
+
 /**
  * Preview do modo [MatchFormMode.SEND].
  * Apresenta o formulário vazio para iniciar um convite.
@@ -260,7 +279,10 @@ fun PreviewMatchInviteSend() {
             fields = emptyFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
-            mode = MatchFormMode.SEND
+            mode = MatchFormMode.SEND,
+            // Adicionado uiState com loading=false
+            uiState = UiState(isLoading = false, errorMessage = null),
+            retry = {}
         )
     }
 }
@@ -279,7 +301,9 @@ fun PreviewMatchInviteNegotiate() {
             fields = filledFields.copy(isHomeGame = false),
             actions = dummyActions,
             errors = MatchInviteFormErros(),
-            mode = MatchFormMode.NEGOCIATE
+            mode = MatchFormMode.NEGOCIATE,
+            uiState = UiState(isLoading = false, errorMessage = null),
+            retry = {}
         )
     }
 }
@@ -298,7 +322,9 @@ fun PreviewMatchInvitePostpone() {
             fields = filledFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
-            mode = MatchFormMode.POSTPONE
+            mode = MatchFormMode.POSTPONE,
+            uiState = UiState(isLoading = false, errorMessage = null),
+            retry = {}
         )
     }
 }
@@ -317,7 +343,49 @@ fun PreviewMatchInviteCancel() {
             fields = filledFields,
             actions = dummyActions,
             errors = MatchInviteFormErros(),
-            mode = MatchFormMode.CANCEL
+            mode = MatchFormMode.CANCEL,
+            uiState = UiState(isLoading = false, errorMessage = null),
+            retry = {}
+        )
+    }
+}
+
+/**
+ * Preview do estado de Loading.
+ * Útil para visualizar o spinner a rodar.
+ */
+@Preview(name = "5. Loading State", group = "States", showBackground = true)
+@Composable
+fun PreviewMatchInviteLoading() {
+    AMFootballTheme {
+        ContentSendMatchInviteScreen(
+            navHostController = rememberNavController(),
+            fields = emptyFields,
+            actions = dummyActions,
+            errors = MatchInviteFormErros(),
+            mode = MatchFormMode.SEND,
+            uiState = UiState(isLoading = true, errorMessage = null),
+            retry = {}
+        )
+    }
+}
+
+/**
+ * Preview do estado de Erro.
+ * Simula uma falha de rede para mostrar a mensagem de erro e o botão de retry.
+ */
+@Preview(name = "6. Error State", group = "States", showBackground = true)
+@Composable
+fun PreviewMatchInviteError() {
+    AMFootballTheme {
+        ContentSendMatchInviteScreen(
+            navHostController = rememberNavController(),
+            fields = emptyFields,
+            actions = dummyActions,
+            errors = MatchInviteFormErros(),
+            mode = MatchFormMode.SEND,
+            uiState = UiState(isLoading = false, errorMessage = "Falha ao conectar ao servidor."),
+            retry = {}
         )
     }
 }

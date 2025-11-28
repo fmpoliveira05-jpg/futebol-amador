@@ -33,8 +33,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.TextFieldDefaults
 import java.util.Calendar
 import androidx.compose.material3.TimePicker
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import java.util.Locale
 import com.example.amfootball.R
@@ -68,10 +70,20 @@ fun FieldTimePicker(
         onValueChange = {},
         label = { Text(text = label) },
         trailingIcon = {
-            IconButton(onClick = { showTimePicker = true }) {
+            IconButton(
+                onClick = { if (enabled) showTimePicker = true },
+                enabled = enabled
+            ) {
                 Icon(
                     imageVector = Icons.Default.AccessTime,
-                    contentDescription = contentDescription)
+                    contentDescription = contentDescription,
+                    tint = if (enabled) {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                    else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
             }
         },
         supportingText = {
@@ -86,6 +98,41 @@ fun FieldTimePicker(
         readOnly = true,
         enabled = enabled,
         modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            // --- TEXTO ---
+            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+
+            // --- LABEL ---
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+            // --- BORDAS (OUTLINE) ---
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.outline,
+            disabledIndicatorColor = MaterialTheme.colorScheme.outline,
+
+            // --- CONTAINER (FUNDO) ---
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            disabledContainerColor = Color.Transparent,
+
+            // --- ÍCONES (Leading / Trailing) ---
+            focusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledLeadingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+            // --- SUPPORTING TEXT (Mensagens de erro/ajuda) ---
+            focusedSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            unfocusedSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            disabledSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+
+            // --- PLACEHOLDER ---
+            disabledPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     )
 
     if (showTimePicker && enabled) {
@@ -94,14 +141,10 @@ fun FieldTimePicker(
                 showTimePicker = false
             },
             onConfirm = { timePickerState ->
-                //Ao clicar vamos tranformar a string em data
                 val hour = timePickerState.hour
                 val minute = timePickerState.minute
                 val newTimeValue = String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
-
-                //Vamos atualizar o valor
                 onValueChange(newTimeValue)
-
                 showTimePicker = false
             },
         )

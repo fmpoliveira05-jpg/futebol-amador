@@ -21,13 +21,16 @@ import com.google.gson.annotations.SerializedName
  * @property positionId O identificador numérico da posição vindo da API (Mapeado de "Position").
  */
 data class MemberTeamDto(
-    @SerializedName("PlayerId")
+    @SerializedName("PlayerId", alternate = ["playerId"])
     val id: String = "",
+    @SerializedName("Name", alternate = ["name"])
     val name: String = "",
-    @SerializedName("IsAdmin")
+    @SerializedName("IsAdmin", alternate = ["isAdmin"])
     val isAdmin: Boolean = false,
     val image: Uri = Uri.EMPTY,
+    @SerializedName("Age", alternate = ["age"])
     val age: Int = 0,
+    @SerializedName("Height", alternate = ["height"])
     val height: Int = 0,
     @SerializedName("Position")
     val positionId: Int = 0,

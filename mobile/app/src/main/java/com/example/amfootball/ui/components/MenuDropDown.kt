@@ -14,6 +14,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
+import com.example.amfootball.data.enums.MatchStatus
+import com.example.amfootball.utils.MatchConsts
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 /**
  * O menu flutuante ([DropdownMenu]) com todas as ações
@@ -23,6 +27,7 @@ import com.example.amfootball.R
  * Após qualquer ação ser selecionada, o menu é automaticamente fechado ([onDismissRequest]).
  *
  * @param expanded Booleano que controla a visibilidade do menu.
+ * @param matchStatus Estado atual da partida (iniciado, terminado, etc.).
  * @param onDismissRequest Callback para fechar o menu (acionado ao clicar fora ou selecionar um item).
  * @param onStartMatch Callback a ser executado para iniciar a partida.
  * @param onFinishMatch Callback a ser executado para finalizar a partida.
@@ -32,53 +37,67 @@ import com.example.amfootball.R
 @Composable
 fun MatchActionsMenu(
     expanded: Boolean,
+    matchStatus: MatchStatus,
+    gameDate: LocalDateTime,
     onDismissRequest: () -> Unit,
     onStartMatch: () -> Unit,
     onFinishMatch: () -> Unit,
     onPostPoneMatch: () -> Unit,
-    onCancelMatch: () -> Unit
+    onCancelMatch: () -> Unit,
 ) {
+    val now = LocalDateTime.now()
+    val hoursUntilGame = ChronoUnit.HOURS.between(now, gameDate)
+
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        DropdownItem(
-            text = stringResource(id = R.string.button_start_match),
-            onClick = {
-                onStartMatch()
-                onDismissRequest()
-            },
-            leadingIcon = Icons.Default.PlayArrow,
-            color = MaterialTheme.colorScheme.primary
-        )
+        if (matchStatus == MatchStatus.SCHEDULED || matchStatus == MatchStatus.POST_PONED) {
+            if (gameDate >= now) {
+                DropdownItem(
+                    text = stringResource(id = R.string.button_start_match),
+                    onClick = {
+                        onStartMatch()
+                        onDismissRequest()
+                    },
+                    leadingIcon = Icons.Default.PlayArrow,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
 
-        DropdownItem(
-            text = stringResource(id = R.string.button_finish_match),
-            onClick = {
-                onFinishMatch()
-                onDismissRequest()
-            },
-            leadingIcon = Icons.Default.Flag
-        )
+            if (hoursUntilGame >= MatchConsts.MAX_HOURS_TO_POST_PONE) {
+                DropdownItem(
+                    text = stringResource(id = R.string.button_post_pone_match),
+                    onClick = {
+                        onPostPoneMatch()
+                        onDismissRequest()
+                    },
+                    leadingIcon = Icons.Default.EditCalendar
+                )
+            }
 
-        DropdownItem(
-            text = stringResource(id = R.string.button_post_pone_match),
-            onClick = {
-                onPostPoneMatch()
-                onDismissRequest()
-            },
-            leadingIcon = Icons.Default.EditCalendar
-        )
-
-        DropdownItem(
-            text = stringResource(id = R.string.button_cancel_match),
-            onClick = {
-                onCancelMatch()
-                onDismissRequest()
-            },
-            color = MaterialTheme.colorScheme.error,
-            leadingIcon = Icons.Default.Flag
-        )
+            if (hoursUntilGame >= MatchConsts.MAX_HOURS_TO_CANCEL) {
+                DropdownItem(
+                    text = stringResource(id = R.string.button_cancel_match),
+                    onClick = {
+                        onCancelMatch()
+                        onDismissRequest()
+                    },
+                    color = MaterialTheme.colorScheme.error,
+                    leadingIcon = Icons.Default.Flag
+                )
+            }
+        } else if(matchStatus == MatchStatus.IN_PROGRESS) {
+            DropdownItem(
+                text = stringResource(id = R.string.button_finish_match),
+                onClick = {
+                    onFinishMatch()
+                    onDismissRequest()
+                },
+                color = MaterialTheme.colorScheme.primary,
+                leadingIcon = Icons.Default.Flag
+            )
+        }
     }
 }
 

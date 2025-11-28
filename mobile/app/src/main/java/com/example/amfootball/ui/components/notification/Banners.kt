@@ -21,8 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.amfootball.R
 
 @Composable
 fun OfflineBanner(
@@ -36,7 +38,6 @@ fun OfflineBanner(
         modifier = modifier
     ) {
         Surface(
-            // O 'errorContainer' dá aquele tom avermelhado suave padrão do Material 3
             color = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
             modifier = Modifier.fillMaxWidth()
@@ -57,7 +58,7 @@ fun OfflineBanner(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Sem internet. A mostrar dados guardados.",
+                    text = stringResource(id = R.string.without_internet),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium
                 )

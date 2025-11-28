@@ -50,7 +50,7 @@ class AuthRepository @Inject constructor(
                 val userProfile = response.body()!!
 
                 sessionManager.saveUserProfile(userProfile)
-                sessionManager.saveAuthToken(userProfile.loginResponseDto.idToken)
+                sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
                 Log.d("AuthRepository", "Login completo e dados guardados.")
 
                 return true

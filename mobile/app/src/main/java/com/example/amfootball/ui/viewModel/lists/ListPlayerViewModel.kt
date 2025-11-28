@@ -12,10 +12,10 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
+import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.PlayerRepository
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
-import com.example.amfootball.utils.NetworkUtils
 import com.example.amfootball.utils.PlayerConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,6 +42,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ListPlayerViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver,
     private val repository: PlayerRepository
 ): ViewModel() {
     /**
@@ -63,6 +64,12 @@ class ListPlayerViewModel @Inject constructor(
      * Mantém todos os dados recuperados, independentemente de quantos estão visíveis.
      */
     private val listState: MutableStateFlow<List<InfoPlayerDto>> = MutableStateFlow(emptyList())
+
+    /**
+     * Cache da lista original carregada da API.
+     * Usada para permitir a limpeza de filtros e filtragem offline sem novos pedidos à rede.
+     */
+    private var originalList: List<InfoPlayerDto> = emptyList()
 
     /**
      * Controlo de quantos itens devem ser exibidos inicialmente ou após clicar em "Mostrar Mais".
@@ -113,7 +120,11 @@ class ListPlayerViewModel @Inject constructor(
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
     val uiState: StateFlow<UiState> = _uiState
 
+    private val isConnected: MutableStateFlow<Boolean> = MutableStateFlow(networkObserver.isOnlineOneShot())
+    val isOnline: StateFlow<Boolean> = isConnected
+
     init {
+        observeNetworkChanges()
         loadingListPlayer()
 
         listPositions.value = listOf(
@@ -173,7 +184,16 @@ class ListPlayerViewModel @Inject constructor(
             return
         }
 
-        loadingListPlayer()
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadingListPlayer()
+        } else {
+            filterOffline(
+                originalList = originalList,
+                filter = filterState.value
+            )
+        }
     }
 
     /**
@@ -181,7 +201,14 @@ class ListPlayerViewModel @Inject constructor(
      */
     fun cleanFilters() {
         filterState.value = FilterListPlayer()
-        loadingListPlayer()
+        filterErrorState.value = FilterPlayersErrors()
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if(networkObserver.isOnlineOneShot()) {
+            loadingListPlayer()
+        } else {
+            listState.value = originalList
+        }
     }
 
     /**
@@ -215,6 +242,19 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
+     * Inicia a observação contínua do estado da conectividade de rede.
+     * Atualiza [isConnected] em tempo real.
+     */
+    private fun observeNetworkChanges() {
+        viewModelScope.launch {
+            networkObserver.observeConnectivity()
+                .collect { isOnline ->
+                    isConnected.value = isOnline
+                }
+        }
+    }
+
+    /**
      * Executa a chamada assíncrona à API para obter a lista de jogadores filtrada.
      * Gere os estados de Loading e Erro no [_uiState].
      *
@@ -226,17 +266,52 @@ class ListPlayerViewModel @Inject constructor(
             inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
 
             try {
+                if (!networkObserver.isOnlineOneShot()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sem conexão há internet"
+                        )
+                    }
+
+                    return@launch
+                }
+
                 val players = repository.getListPlayer(filterState.value)
 
                 listState.value = players
-                _uiState.update { it.copy(isLoading = false) }
+                if (filterState.value == FilterListPlayer()) {
+                    originalList = players
+                }
+
+                _uiState.update { it.copy(isLoading = false)}
             } catch (e: Exception) {
-                e.printStackTrace()
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")
+                    e.printStackTrace()
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sem conexão: ${e.localizedMessage}"
+                        )
                 }
             }
         }
+    }
+
+
+    //TODO: Melhorar filtro da cidade
+    private fun filterOffline(originalList: List<InfoPlayerDto>, filter: FilterListPlayer): List<InfoPlayerDto> {
+        return originalList.filter { item ->
+            val name = filter.name.isNullOrBlank() || item.name.contains(filter.name, ignoreCase = true)
+            val city = filter.city.isNullOrBlank() || item.address.contains(filter.city, ignoreCase = true)
+            val minAge = filter.minAge == null || item.age >= filter.minAge
+            val maxAge = filter.maxAge == null || item.age <= filter.maxAge
+            val minSize = filter.minSize == null || item.heigth >= filter.minSize
+            val maxSize = filter.maxSize == null || item.heigth <= filter.maxSize
+            val position = filter.position == null || item.position == filter.position
+
+            name && city && minAge && maxAge && minSize && maxSize && position
+        }
+
     }
 
     /**

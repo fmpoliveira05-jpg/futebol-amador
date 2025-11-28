@@ -268,9 +268,7 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController, se
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {
-            val viewModel = hiltViewModel<ListPlayerViewModel>()
-
-            ListPlayersScreen(navHostController = globalNavController, viewModel = viewModel)
+            ListPlayersScreen(navHostController = globalNavController)
         }
     )
 
@@ -311,7 +309,7 @@ private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController, se
 
 private fun NavGraphBuilder.managementMatch(globalNavController: NavHostController, sessionManager: SessionManager) {
     composableProtected(
-        route = "${Routes.TeamRoutes.POST_PONE_MATCH.route}/${Arguments.MATCH_ID}",
+        route = "${Routes.TeamRoutes.POST_PONE_MATCH.route}/{${Arguments.MATCH_ID}}",
         arguments = listOf(
             navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
             navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.POSTPONE.name }
@@ -380,8 +378,9 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         }
     )
 
+    //TODO: Ver esta rota, kkkk
     composableProtected(
-        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/${Arguments.TEAM_ID}/CancelMatch/${Arguments.MATCH_INVITE_ID}",
+        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/CancelMatch/{${Arguments.MATCH_INVITE_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
             navArgument(Arguments.MATCH_INVITE_ID) { type = NavType.StringType },

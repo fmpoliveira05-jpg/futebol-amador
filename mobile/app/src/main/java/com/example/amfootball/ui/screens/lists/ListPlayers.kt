@@ -21,12 +21,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
 import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.data.mocks.Lists.ListPlayers
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -46,15 +48,26 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.utils.PlayerConst
 
+/**
+ * Ecrã principal de Listagem de Jogadores.
+ *
+ * É um contentor "Stateful" que interage com o [ListPlayerViewModel] para obter dados,
+ * gerir o estado da UI e processar eventos de navegação.
+ *
+ * @param navHostController Controlador de navegação para transitar para o perfil do jogador.
+ * @param viewModel ViewModel injetada via Hilt que contém toda a lógica de negócio e estados.
+ */
 @Composable
 fun ListPlayersScreen(
     navHostController: NavHostController,
     viewModel: ListPlayerViewModel = hiltViewModel()
 ) {
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val filters by viewModel.uiFilters.collectAsStateWithLifecycle()
     val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
@@ -77,8 +90,8 @@ fun ListPlayersScreen(
     )
 
     ListPlayersContent(
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.errorMessage,
+        isOnline = isOnline,
+        uiState = uiState,
         list = list,
         filters = filters,
         filtersError = filtersError,
@@ -94,10 +107,32 @@ fun ListPlayersScreen(
     )
 }
 
+/**
+ * Conteúdo visual da lista de jogadores ("Stateless").
+ *
+ * Responsável por desenhar a estrutura da página:
+ * - Banner de estado Offline.
+ * - Secção de Filtros expansível.
+ * - Lista de cartões de jogadores.
+ * - Botão "Mostrar Mais".
+ *
+ * @param isOnline Indica se o dispositivo tem conexão à rede.
+ * @param uiState Estado global da UI (Loading, Error, etc).
+ * @param list Lista de jogadores a exibir.
+ * @param filters Estado atual dos campos de filtro.
+ * @param filtersError Estado dos erros de validação dos filtros.
+ * @param listPosition Lista de posições disponíveis para o dropdown.
+ * @param onRetry Callback para tentar recarregar os dados em caso de erro.
+ * @param isValidShowMore Se true, mostra o botão para carregar mais jogadores.
+ * @param showMoreItems Callback acionado ao clicar em "Mostrar Mais".
+ * @param filterActions Ações de alteração dos inputs de filtro.
+ * @param onSendMembership Callback para enviar pedido de adesão a um jogador.
+ * @param onShowMore Callback para navegar para o detalhe do jogador.
+ */
 @Composable
 fun ListPlayersContent(
-    isLoading: Boolean,
-    errorMessage: String?,
+    isOnline: Boolean,
+    uiState: UiState,
     list: List<InfoPlayerDto>,
     filters: FilterListPlayer,
     filtersError: FilterPlayersErrors,
@@ -112,10 +147,12 @@ fun ListPlayersContent(
     var filtersExpanded by remember { mutableStateOf(false) }
 
     LoadingPage(
-        isLoading = isLoading,
-        errorMsg = errorMessage,
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
         retry = onRetry,
         content = {
+            OfflineBanner(isVisible = !isOnline)
+
             ListSurface(
                 list = list,
                 filterSection = {
@@ -149,6 +186,9 @@ fun ListPlayersContent(
     )
 }
 
+/**
+ * Formulário com os campos de filtro para a pesquisa de jogadores.
+ */
 @Composable
 private fun FilterListPlayerContent(
     filters: FilterListPlayer,
@@ -257,6 +297,9 @@ private fun FilterListPlayerContent(
     }
 }
 
+/**
+ * Item individual da lista (Cartão do Jogador).
+ */
 @Composable
 private fun ItemListPlayer(
     player: InfoPlayerDto,
@@ -297,65 +340,27 @@ private fun ItemListPlayer(
     )
 }
 
-@Preview(
-    name = "Lista de Jogadores - PT",
-    locale = "pt",
-    showBackground = true
-)
-@Preview(
-    name = "List Players - En",
-    locale = "en",
-    showBackground = true
-)
+// ----------------------------------------------------------------
+// PREVIEWS
+// ----------------------------------------------------------------
+/**
+ * Preview 1: Lista Normal com dados.
+ * Mostra como a lista aparece quando tudo corre bem (Online).
+ */
+@Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
+@Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersPreview() {
-    val dummyList = listOf(
-        InfoPlayerDto(
-            id = "1",
-            name = "Lionel Messi",
-            age = 36,
-            address = "Miami, USA",
-            heigth = 170,
-            position = Position.FORWARD,
-            haveTeam = true,
-            image = ""
-        ),
-        InfoPlayerDto(
-            id = "2",
-            name = "Bernardo Silva",
-            age = 29,
-            address = "Manchester, UK",
-            heigth = 173,
-            position = Position.MIDFIELDER,
-            haveTeam = false,
-            image = ""
-        )
-    )
-
-    val dummyActions = FilterListPlayersActions(
-        onNameChange = {},
-        onCityChange = {},
-        onMinAgeChange = {},
-        onMaxAgeChange = {},
-        onPositionChange = {},
-        onMinSizeChange = {},
-        onMaxSizeChange = {},
-        buttonActions = ButtonFilterActions(
-            onFilterApply = {},
-            onFilterClean = {}
-        )
-    )
-
     AMFootballTheme {
         ListPlayersContent(
-            isLoading = false,
-            errorMessage = null,
-            list = dummyList,
+            isOnline = true,
+            uiState = UiState(isLoading = false),
+            list = ListPlayers.list,
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = Position.values().toList(),
+            listPosition = ListPlayers.Positions,
             onRetry = {},
-            filterActions = dummyActions,
+            filterActions = ListPlayers.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = true,
@@ -364,42 +369,102 @@ fun ListPlayersPreview() {
     }
 }
 
-@Preview(
-    name = "Lista Vazia - PT",
-    locale = "pt",
-    showBackground = true
-)
-@Preview(
-    name = "Empty List - En",
-    locale = "en",
-    showBackground = true
-)
+/**
+ * Preview 2: Lista Vazia.
+ * Testa a mensagem de "sem jogadores" (stringResource(R.string.list_player_empty)).
+ */
+@Preview(name = "2. Vazia - EN", locale = "en", showBackground = true)
+@Preview(name = "2. Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersEmptyPreview() {
-    val dummyActions = FilterListPlayersActions(
-        onNameChange = {},
-        onCityChange = {},
-        onMinAgeChange = {},
-        onMaxAgeChange = {},
-        onPositionChange = {},
-        onMinSizeChange = {},
-        onMaxSizeChange = {},
-        buttonActions = ButtonFilterActions(
-            onFilterApply = {},
-            onFilterClean = {}
-        )
-    )
-
     AMFootballTheme {
         ListPlayersContent(
-            isLoading = false,
-            errorMessage = null,
+            isOnline = true,
+            uiState = UiState(isLoading = false),
             list = emptyList(),
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = Position.values().toList(),
+            listPosition = ListPlayers.Positions,
             onRetry = {},
-            filterActions = dummyActions,
+            filterActions = ListPlayers.Actions,
+            onSendMembership = {},
+            onShowMore = {},
+            isValidShowMore = false,
+            showMoreItems = {}
+        )
+    }
+}
+
+/**
+ * Preview 3: Modo Offline.
+ * Testa o banner de "Sem conexão" no topo da lista.
+ */
+@Preview(name = "3. Offline - EN", locale = "en", showBackground = true)
+@Preview(name = "3. Offline - PT", locale = "pt-rPT", showBackground = true)
+@Composable
+fun ListPlayersOfflinePreview() {
+    AMFootballTheme {
+        ListPlayersContent(
+            isOnline = false,
+            uiState = UiState(isLoading = false),
+            list = ListPlayers.list,
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = ListPlayers.Positions,
+            onRetry = {},
+            filterActions = ListPlayers.Actions,
+            onSendMembership = {},
+            onShowMore = {},
+            isValidShowMore = true,
+            showMoreItems = {}
+        )
+    }
+}
+
+/**
+ * Preview 4: Estado de Carregamento.
+ * Mostra o indicador de progresso (LoadingPage).
+ */
+@Preview(name = "4. Loading - EN", locale = "en", showBackground = true)
+@Preview(name = "4. Loading - PT", locale = "pt-rPT", showBackground = true)
+@Composable
+fun ListPlayersLoadingPreview() {
+    AMFootballTheme {
+        ListPlayersContent(
+            isOnline = true,
+            uiState = UiState(isLoading = true),
+            list = emptyList(),
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = ListPlayers.Positions,
+            onRetry = {},
+            filterActions = ListPlayers.Actions,
+            onSendMembership = {},
+            onShowMore = {},
+            isValidShowMore = false,
+            showMoreItems = {}
+        )
+    }
+}
+
+/**
+ * Preview 5: Estado de Erro.
+ * Testa o ecrã de erro com o botão de Retry.
+ */
+@Preview(name = "5. Erro - EN", locale = "en", showBackground = true)
+@Preview(name = "5. Erro - PT", locale = "pt-rPT", showBackground = true)
+@Composable
+fun ListPlayersErrorPreview() {
+    AMFootballTheme {
+        ListPlayersContent(
+            isOnline = true,
+            uiState = UiState(isLoading = false, errorMessage = "Erro de conexão ao servidor"),
+            list = emptyList(),
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = ListPlayers.Positions,
+            onRetry = {},
+            filterActions = ListPlayers.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = false,

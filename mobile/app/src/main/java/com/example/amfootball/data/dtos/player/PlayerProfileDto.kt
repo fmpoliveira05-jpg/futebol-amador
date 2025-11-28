@@ -25,9 +25,13 @@ import com.google.gson.annotations.SerializedName
  */
 data class PlayerProfileDto(
     @SerializedName("FirebaseLoginResponseDto", alternate = ["firebaseLoginResponseDto"])
-    val loginResponseDto: FireBaseLoginResponseDto,
+    val loginResponseDto: FireBaseLoginResponseDto? = null,
     @SerializedName("Name", alternate = ["name"])
     val name: String,
+    @SerializedName("Email", alternate = ["email"])
+    val email: String?,
+    @SerializedName("PhoneNumber", alternate = ["phoneNumber"])
+    val phoneNumber: String?,
     @SerializedName("DateOfBirth", alternate = ["dateOfBirth"])
     val dateOfBirth: String?,
     @SerializedName("Icon", alternate = ["icon", "image", "Image"]) // Adicionado

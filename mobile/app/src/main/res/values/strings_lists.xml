@@ -4,6 +4,7 @@
     <string name="list_teams_members">Members</string>
     <string name="list_teams_view_team">View Team</string>
 
+    <string name="list_calendar_empty">No matches found in the team\'s calendar</string>
     <string name="list_player_empty">There are no players yet</string>
     <string name="list_membership_request_empty">You haven\'t received any membership requests yet</string>
     <string name="list_teams_empty">No teams were found</string>

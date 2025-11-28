@@ -74,8 +74,7 @@ object Routes {
         override val contentDescription: Int,
         override val haveBackButton: Boolean = true
     ) : AppRouteInfo {
-        PROFILE(
-            "profile_user", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page, haveBackButton = true),
+        PROFILE("ProfileUser", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page, haveBackButton = true),
         LOGIN("Login", R.string.login_title, Icons.AutoMirrored.Filled.Login, R.string.login_title),
         SIGNUP("Signup", R.string.signup, Icons.Default.PersonAdd, R.string.signup_description),
         LOGOUT(

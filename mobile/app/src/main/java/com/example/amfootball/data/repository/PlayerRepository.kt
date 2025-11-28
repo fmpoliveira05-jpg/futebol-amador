@@ -19,11 +19,11 @@ class PlayerRepository @Inject constructor(
     }
 
     suspend fun getPlayerProfile(playerId: String): PlayerProfileDto {
-        return try {
+        try {
             val response = api.getPlayerProfile(playerId = playerId)
 
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!
+                return response.body()!!
             } else {
                 handleApiError(response)
             }
@@ -34,12 +34,12 @@ class PlayerRepository @Inject constructor(
     }
 
     suspend fun getListPlayer(filter: FilterListPlayer?): List<InfoPlayerDto> {
-        return try {
+        try {
             val filterMap = filter?.toQueryMap() ?: emptyMap()
             val response = api.getPlayersList(filters = filterMap)
 
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!
+                return response.body()!!
             } else {
                 handleApiError(response)
             }

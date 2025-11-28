@@ -15,15 +15,21 @@ import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.CalendarRepository
 import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+//TODO: Falta o StartMatch
+//TODO: Talvez falte meter verificações de tempo
 /**
  * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.
  *
@@ -43,7 +49,6 @@ class CalendarTeamViewModel @Inject constructor(
     private val calendarRepository: CalendarRepository,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
     private val teamId = savedStateHandle.get<String>("teamId")
 
@@ -56,13 +61,48 @@ class CalendarTeamViewModel @Inject constructor(
      * Pode ser o resultado direto da API ou uma versão filtrada localmente.
      */
     private val listState: MutableStateFlow<List<InfoMatchCalendar>> = MutableStateFlow(emptyList())
-    val list: StateFlow<List<InfoMatchCalendar>> = listState
+
+    /**
+     * Controlo de quantos itens devem ser exibidos inicialmente ou após clicar em "Mostrar Mais".
+     */
+    private val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
+
+    /**
+     * Lista fatiada para exibição na UI.
+     *
+     * Combina a [listState] (lista total) com o [inicialSizeList] (limite atual)
+     * para retornar apenas o número de jogadores permitido pela paginação atual.
+     */
+    val uiList: StateFlow<List<InfoMatchCalendar>> =
+        combine(listState, inicialSizeList) { lista, numero ->
+            lista.take(numero)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
 
     /**
      * Cache da lista original carregada da API.
      * Usada para permitir a limpeza de filtros e filtragem offline sem novos pedidos à rede.
      */
     private var originalList: List<InfoMatchCalendar> = emptyList()
+
+    /**
+     * Controla a visibilidade do botão "Mostrar Mais".
+     *
+     * Verifica dinamicamente se o número de itens exibidos atualmente ([inicialSizeList])
+     * é menor que o total de itens disponíveis na lista ([listState]).
+     * Retorna `true` se houver mais itens para mostrar.
+     */
+    val showMoreButtonVisible: StateFlow<Boolean> =
+        combine(listState, inicialSizeList) { listaCompleta, tamanhoAtual ->
+            tamanhoAtual < listaCompleta.size
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Lazily,
+            initialValue = false
+        )
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
     private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
@@ -151,10 +191,15 @@ class CalendarTeamViewModel @Inject constructor(
     fun onClearFilter() {
         filterState.value = FilterCalendar()
         listErrors.value = FilterCalendarError()
-        listState.value = originalList
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if(networkObserver.isOnlineOneShot()) {
+            loadCalendar()
+        } else {
+            listState.value = originalList
+        }
     }
 
-    //TODO: Faltam validações
     /**
      * Navega para o ecrã de cancelamento de partida.
      *
@@ -162,7 +207,7 @@ class CalendarTeamViewModel @Inject constructor(
      */
     fun onCancelMatch(idMatch: String, navHostController: NavHostController) {
         if(networkObserver.isOnlineOneShot()) {
-            navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/{${idMatch}}") {
+            navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/${idMatch}") {
                 launchSingleTop = true
             }
         } else {
@@ -172,7 +217,6 @@ class CalendarTeamViewModel @Inject constructor(
         }
     }
 
-    //TODO: Faltam validações
     /**
      * Navega para o ecrã de adiamento de partida.
      * Requer conexão à internet.
@@ -189,7 +233,6 @@ class CalendarTeamViewModel @Inject constructor(
         }
     }
 
-    //TODO: Faltam validações
     /**
      * Inicia a partida.
      * Requer conexão à internet.
@@ -205,14 +248,13 @@ class CalendarTeamViewModel @Inject constructor(
         }
     }
 
-    //TODO: Meter Validações
     /**
      * Navega para o ecrã de finalização de partida (inserção de resultados).
      * Requer conexão à internet.
      */
     fun onFinishMatch(idMatch: String, navHostController: NavHostController) {
         if(networkObserver.isOnlineOneShot()) {
-            navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/{${idMatch}}") {
+            navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/${idMatch}") {
                 launchSingleTop = true
             }
         } else {
@@ -220,15 +262,18 @@ class CalendarTeamViewModel @Inject constructor(
                 it.copy(toastMessage = "Para finalizar a partida é necessária conexão à internet.")
             }
         }
-
     }
 
-    /*
+    /**
     * Callback chamado pela UI quando um Toast é exibido.
     * Limpa a mensagem do estado para evitar que o Toast apareça repetidamente.
     */
     fun onToastShown() {
         _uiState.update { it.copy(toastMessage = null) }
+    }
+
+    fun onShowMore() {
+        inicialSizeList.value += ListsSizesConst.INCREMENT_SIZE
     }
 
     /**
@@ -239,7 +284,6 @@ class CalendarTeamViewModel @Inject constructor(
      * - Atualiza [listState] e [originalList] com os dados recebidos.
      * - Gere o estado de Loading.
      */
-    //TODO: Falta fazer pedido há API
     fun loadCalendar() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
@@ -264,7 +308,9 @@ class CalendarTeamViewModel @Inject constructor(
                 val calendar = calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
 
                 listState.value = calendar
-                originalList = calendar
+                if (filterState.value == FilterCalendar()) {
+                    originalList = calendar
+                }
 
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
@@ -332,18 +378,16 @@ class CalendarTeamViewModel @Inject constructor(
             )
         }
 
-        if (minDateGame != null && maxDateGame != null) {
-            if (minDateGame > maxDateGame) {
-                minDateGameError = ErrorMessage(
-                    messageId = R.string.error_min_date_after,
-                    args = listOf(R.string.error_date_game)
-                )
+        if (minDateGame != null && maxDateGame != null && minDateGame > maxDateGame) {
+            minDateGameError = ErrorMessage(
+                messageId = R.string.error_min_date_after,
+                args = listOf(R.string.error_date_game)
+            )
 
-                maxDateGameError = ErrorMessage(
-                    messageId = R.string.error_max_date_before,
-                    args = listOf(R.string.error_date_game)
-                )
-            }
+            maxDateGameError = ErrorMessage(
+                messageId = R.string.error_max_date_before,
+                args = listOf(R.string.error_date_game)
+            )
         }
 
         listErrors.value = FilterCalendarError(

@@ -125,7 +125,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.email_field),
-        value = profileData.loginResponseDto.email,
+        value = profileData.email,
         minLenght = UserConst.MIN_EMAIL_LENGTH,
         maxLenght = UserConst.MAX_EMAIL_LENGTH,
         isReadOnly = true
@@ -133,7 +133,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.phone_number),
-        value = profileData.loginResponseDto.phoneNumber.toString(),
+        value = profileData.phoneNumber.toString(),
         minLenght = UserConst.SIZE_PHONE_NUMBER,
         maxLenght = UserConst.SIZE_PHONE_NUMBER,
         isReadOnly = true
@@ -202,7 +202,9 @@ fun ProfileScreenPreview() {
         height = 170,
         team = "Inter Miami CF",
         idTeam = "2",
-        isAdmin = false
+        isAdmin = false,
+        email = dummyLoginResponse.email,
+        phoneNumber = dummyLoginResponse.phoneNumber.toString()
     )
 
     AMFootballTheme {

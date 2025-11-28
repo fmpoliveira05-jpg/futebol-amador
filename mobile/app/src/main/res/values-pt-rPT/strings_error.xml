@@ -2,7 +2,7 @@
 <resources>
     <string name="unknown_error">Erro desconhecido</string>
     <string name="connection_error">Sem conexão</string>
-
+    <string name="without_internet">Sem internet. A mostrar dados guardados</string>
     <string name="mandatory_field">Campo obrigatório</string>
 
     <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>

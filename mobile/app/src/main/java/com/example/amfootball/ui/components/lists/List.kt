@@ -59,7 +59,7 @@ fun<T> ListSurface(
     isValidShowMore: Boolean = false,
     showMoreItems: () -> Unit = {},
     itemSpacing: Int = 12,
-    messageEmptyList: String = "asd"
+    messageEmptyList: String
 ) {
     Surface {
         LazyColumn(

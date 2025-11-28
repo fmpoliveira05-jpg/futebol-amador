@@ -24,7 +24,8 @@ import javax.inject.Inject
  * e expõe esses dados e o estado da interface (Loading/Erro) para a UI.
  *
  * @property savedStateHandle O manipulador de estado para recuperar argumentos de navegação (ex: teamId).
- * @property repository O repositório responsável pela comunicação com a API de equipas.
+ * @property teamRepository O repositório responsável pela comunicação com a API de equipas.
+ * @property sessionManager para obter o id da team quando se entra atraves do login
  */
 @HiltViewModel
 class ProfileTeamViewModel @Inject constructor(
@@ -43,7 +44,7 @@ class ProfileTeamViewModel @Inject constructor(
      * O ID da equipa recuperado dos argumentos da navegação.
      * Pode ser nulo se a navegação não fornecer um ID (caso em que se usa um fallback).
      */
-    val teamId: String? = savedStateHandle["teamId"]
+    private var teamId: String? = savedStateHandle["teamId"]
 
     /**
      * StateFlow que gere os estados visuais da UI:
@@ -56,12 +57,14 @@ class ProfileTeamViewModel @Inject constructor(
     init {
         val teamIdSessionManager = sessionManager.getUserProfile()?.idTeam
 
-        if (teamId != null) {
-            loadTeamProfile(teamId = teamId)
-        } else if (teamId == null && teamIdSessionManager != null) {
-            loadTeamProfile(teamId = teamIdSessionManager)
+        if (teamId.isNullOrBlank() && !teamIdSessionManager.isNullOrBlank()) {
+            teamId = teamIdSessionManager
+        }
+
+        if (!teamId.isNullOrBlank()) {
+            loadTeamProfile()
         } else {
-            //TODO: Exceção
+            _uiState.update { it.copy(isLoading = false, errorMessage = "ID da equipa não encontrado.") }
         }
     }
 
@@ -69,8 +72,7 @@ class ProfileTeamViewModel @Inject constructor(
      * Ação pública para tentar recarregar os dados.
      */
     fun retry() {
-        val id = teamId ?: "B5225BE4-8336-4CC3-BB7A-E695A39A4FD0"
-        loadTeamProfile(teamId = id)
+        loadTeamProfile()
     }
 
     /**
@@ -84,14 +86,19 @@ class ProfileTeamViewModel @Inject constructor(
      *
      * @param teamId O identificador único (GUID/String) da equipa a carregar.
      */
-    private fun loadTeamProfile(teamId: String) {
+    private fun loadTeamProfile() {
+        val idToLoad = teamId
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                val profile = teamRepository.getTeamProfile(teamId = teamId)
+                if(!idToLoad.isNullOrBlank()) {
+                    val profile = teamRepository.getTeamProfile(teamId = idToLoad)
 
-                infoTeam.value = profile
-                _uiState.update { it.copy(isLoading = false) }
+                    infoTeam.value = profile
+                    _uiState.update { it.copy(isLoading = false) }
+                } else {
+                    _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+                }
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")

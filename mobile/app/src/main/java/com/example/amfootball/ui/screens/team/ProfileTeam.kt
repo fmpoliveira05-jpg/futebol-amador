@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -17,7 +16,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.PitchFormDto
 import com.example.amfootball.data.dtos.support.PitchInfo
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import com.example.amfootball.ui.components.LoadingPage

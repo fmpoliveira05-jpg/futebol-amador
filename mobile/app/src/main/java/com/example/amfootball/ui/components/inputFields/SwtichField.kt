@@ -9,11 +9,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
@@ -30,8 +33,8 @@ import androidx.compose.ui.unit.dp
  * @param text O rótulo de texto principal exibido ao lado do Switch.
  * @param textChecked A descrição de conteúdo (acessibilidade) usada quando o Switch está LIGADO (Check).
  * @param textUnChecked A descrição de conteúdo (acessibilidade) usada quando o Switch está DESLIGADO (Close).
+ * @param enabled Define se o Switch está habilitado ou desabilitado.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Switcher(
     value: Boolean = true,
@@ -45,15 +48,15 @@ fun Switcher(
         Row (
             verticalAlignment = Alignment.CenterVertically
         ){
-            Text(text = text)
-
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.onSurface
+            )
             Spacer(modifier = Modifier.width(8.dp))
 
             Switch(
                 checked = value,
-                onCheckedChange = { novoValor ->
-                    onCheckedChange(novoValor)
-                },
+                onCheckedChange = onCheckedChange,
                 thumbContent = {
                     Icon(
                         imageVector = if(value) {
@@ -65,10 +68,28 @@ fun Switcher(
                             textChecked
                         } else {
                             textUnChecked
+                        },
+                        tint = if (value) {
+                            MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
                         }
-
                     )
-                }
+                },
+                enabled = enabled,
+                colors = SwitchDefaults.colors(
+                    //CHECKED
+                    disabledCheckedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledCheckedTrackColor = MaterialTheme.colorScheme.primary,
+                    disabledCheckedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    disabledCheckedBorderColor = Color.Transparent,
+
+                    //UNCHECKED
+                    disabledUncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                    disabledUncheckedTrackColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    disabledUncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                    disabledUncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant
+                )
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.viewModel.team
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
@@ -24,19 +23,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-//TODO: Falta validar se o utilizador tem autorização para aceder a cada um dos recursos
 /**
  * ViewModel responsável pela gestão de estado e lógica de negócio do ecrã de Lista de Membros da Equipa.
  *
- * Este ViewModel gere:
- * - O carregamento da lista de membros a partir da API.
- * - A filtragem da lista (suportando modo Online e Offline).
- * - A gestão de ações administrativas (Promover, Despromover, Expulsar).
- * - A monitorização do estado da rede para feedback em tempo real.
+ * Utiliza a arquitetura MVVM com Hilt para injeção de dependências.
  *
- * @property networkObserver Observador de conectividade para detetar mudanças no estado da rede.
- * @property savedStateHandle Manipulador de estado para recuperar argumentos de navegação (ex: teamId).
- * @property teamRepository Repositório para acesso aos dados da equipa (API).
+ * Funcionalidades principais:
+ * - **Carregamento de Dados:** Obtém a lista de membros da API.
+ * - **Filtragem Híbrida:** Suporta filtragem via API (Online) e filtragem em memória (Offline).
+ * - **Gestão de Membros:** Ações de promover, despromover e remover jogadores.
+ * - **Gestão de Estado:** Controla Loading, Erros e Conectividade.
+ *
+ * @property networkObserver Observador para detetar alterações na conexão à internet.
+ * @property sessionManager Gestor de sessão para acesso ao perfil do utilizador logado.
+ * @property teamRepository Repositório para comunicação com a API de equipas.
  */
 @HiltViewModel
 class ListMembersViewModel @Inject constructor(
@@ -46,9 +46,10 @@ class ListMembersViewModel @Inject constructor(
 ): ViewModel() {
 
     /**
-     * ID da equipa obtido através dos argumentos de navegação.
-     * É fundamental para todas as operações deste ecrã.
-     * @throws IllegalStateException Se o argumento "teamId" não for fornecido.
+     * ID da equipa do utilizador autenticado.
+     *
+     * Obtido diretamente do perfil armazenado no [SessionManager].
+     * Caso o perfil não esteja disponível, retorna uma string vazia.
      */
     private val teamId: String = sessionManager.getUserProfile()?.idTeam ?: ""
 
@@ -176,7 +177,8 @@ class ListMembersViewModel @Inject constructor(
             }
 
             try {
-                val teams = teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
+                teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
+
 
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {
@@ -252,7 +254,7 @@ class ListMembersViewModel @Inject constructor(
      * @param navHostController O controlador de navegação.
      */
     fun onShowMoreInfo(playerId: String, navHostController: NavHostController) {
-        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/{${playerId}}") {
+        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${playerId}") {
             launchSingleTop = true
         }
     }

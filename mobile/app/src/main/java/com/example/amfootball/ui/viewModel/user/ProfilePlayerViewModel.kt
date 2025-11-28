@@ -46,7 +46,7 @@ class ProfilePlayerViewModel @Inject constructor(
      * O ID do jogador recuperado dos argumentos da rota de navegação.
      * Se for nulo, assume-se que é o perfil do utilizador autenticado (sessão atual).
      */
-    val playerId: String? = savedStateHandle["playerId"]
+    val playerId: String? = savedStateHandle.get<String>("playerId")
 
     /**
      * Fluxo de estado da UI que encapsula o estado de carregamento (loading) e mensagens de erro.
@@ -56,14 +56,10 @@ class ProfilePlayerViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState
 
     init {
-        if (playerId != null) {
-            // Carrega o perfil de outro jogador (ID vindo da navegação)
+        if (!playerId.isNullOrBlank()) {
             loadPlayerProfile(playerId = playerId)
         } else {
             // Carrega o perfil do próprio utilizador (Sessão)
-            // TODO: Quando sessionManager funcionar apagar esta linha
-            //loadPlayerProfile(playerId = "iIbMFBATjAYjPWu5dC8ezoEyzw12")
-
             val myCachedProfile = sessionManager.getUserProfile()
             if (myCachedProfile != null) {
                 profilePlayer.value = myCachedProfile

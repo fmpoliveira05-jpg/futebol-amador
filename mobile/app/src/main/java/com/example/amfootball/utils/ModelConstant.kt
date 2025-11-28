@@ -175,10 +175,14 @@ object FinishMatchConst {
  * */
 object MatchConsts {
     /** Tamanho Mínimo da mensagem do Motivo de Cancelamento da Partida*/
-    const val MIN_CANCEL_REASON_LENGTH = 50
+    const val MIN_CANCEL_REASON_LENGTH = 5
 
     /** Tamanho Máximo da mensagem do Motivo de Cancelamento da Partida*/
-    const val MAX_CANCEL_REASON_LENGTH = 5
+    const val MAX_CANCEL_REASON_LENGTH = 50
 
+    /** Tempo máximo em dias que o jogador tem antes da partida para poder cancela-la*/
+    const val MAX_HOURS_TO_CANCEL = 48
 
+    /** Tempo máximo em dias que o jogador tem antes da partida para poder adia-la*/
+    const val MAX_HOURS_TO_POST_PONE = 48
 }

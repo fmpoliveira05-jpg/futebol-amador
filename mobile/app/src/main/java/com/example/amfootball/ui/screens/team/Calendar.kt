@@ -38,10 +38,11 @@ import com.example.amfootball.data.actions.filters.FilterCalendarActions
 import com.example.amfootball.data.actions.itemsList.ItemsCalendarActions
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.dtos.support.PitchInfo
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
+import com.example.amfootball.data.enums.MatchStatus
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
+import com.example.amfootball.data.mocks.Lists.CalendarMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -60,7 +61,6 @@ import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.Patterns
 import com.example.amfootball.utils.TeamConst
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 /**
@@ -78,7 +78,7 @@ fun CalendarScreen(
     viewModel: CalendarTeamViewModel = hiltViewModel()
 ) {
     val filters by viewModel.filter.collectAsStateWithLifecycle()
-    val list by viewModel.list.collectAsStateWithLifecycle()
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val filterError by viewModel.uiErrors.collectAsStateWithLifecycle()
     val filterActions = FilterCalendarActions(
         onNameChange = viewModel::onNameChange,
@@ -171,6 +171,7 @@ private fun CalendarContent(
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
+                messageEmptyList = stringResource(id = R.string.list_calendar_empty)
             )
         }
     )
@@ -286,14 +287,14 @@ private fun ListMatchCalendarItem(
             ) {
                 ColumnTeams(
                     match = match,
-                    modifier = Modifier.weight(2.5f) // Mais espaço para nomes longos
+                    modifier = Modifier.weight(2.5f)
                 )
 
-                Spacer(modifier = Modifier.width(8.dp)) // Espaço entre colunas
+                Spacer(modifier = Modifier.width(8.dp))
 
                 ColumnDataMatch(
                     match = match,
-                    modifier = Modifier.weight(1.3f) // Espaço suficiente para a data não quebrar
+                    modifier = Modifier.weight(1.3f)
                 )
             }
         }
@@ -346,31 +347,35 @@ private fun OptionsMatch(
             )
         }
 
-        MatchActionsMenu(
-            expanded = isMenuExpanded,
-            onDismissRequest = { isMenuExpanded = false },
-            onStartMatch = {
-                itensListAction.onStartMatch(match.idMatch)
-            },
-            onFinishMatch = {
-                itensListAction.onFinishMatch(
-                    match.idMatch,
-                    navHostController
-                )
-            },
-            onPostPoneMatch = {
-                itensListAction.onPostPoneMatch(
-                    match.idMatch,
-                    navHostController
-                )
-            },
-            onCancelMatch = {
-                itensListAction.onCancelMatch(
-                    match.idMatch,
-                    navHostController
-                )
-            }
-        )
+        if (match.matchStatus != MatchStatus.DONE) {
+            MatchActionsMenu(
+                expanded = isMenuExpanded,
+                matchStatus = match.matchStatus,
+                gameDate = match.gameDate,
+                onDismissRequest = { isMenuExpanded = false },
+                onStartMatch = {
+                    itensListAction.onStartMatch(match.idMatch)
+                },
+                onFinishMatch = {
+                    itensListAction.onFinishMatch(
+                        match.idMatch,
+                        navHostController
+                    )
+                },
+                onPostPoneMatch = {
+                    itensListAction.onPostPoneMatch(
+                        match.idMatch,
+                        navHostController
+                    )
+                },
+                onCancelMatch = {
+                    itensListAction.onCancelMatch(
+                        match.idMatch,
+                        navHostController
+                    )
+                },
+            )
+        }
     }
 }
 
@@ -460,126 +465,56 @@ private fun TeamInfoRow(
 }
 
 // ----------------------------------------------------------------
-// MOCK DATA & PREVIEWS
+// PREVIEWS
 // ----------------------------------------------------------------
 
-private val mockFilterActions = FilterCalendarActions(
-    onNameChange = {},
-    onMinDateGameChange = {},
-    onMaxDateGameChange = {},
-    onGameLocalChange = {},
-    onTypeMatchChange = {},
-    onFinishMatch = {},
-    onButtonFilterActions = ButtonFilterActions(
-        onFilterApply = {},
-        onFilterClean = {}
-    )
-)
-
-private val mockItemActions = ItemsCalendarActions(
-    onCancelMatch = { _, _ -> },
-    onPostPoneMatch = { _, _ -> },
-    onStartMatch = {},
-    onFinishMatch = { _, _ -> }
-)
-
-private val mockCalendarList: List<InfoMatchCalendar>
-    get() = listOf(
-        InfoMatchCalendar(
-            idMatch = "1",
-            matchStatusId = 2, // 2 = DONE
-            rawGameDate = LocalDateTime.now().minusDays(3).toString(), // String
-            typeMatchBool = true, // Competitivo
-            matchResultId = 0, // Vitória
-            pitchGame = PitchInfo(
-                name = "Estádio Municipal",
-                address = "Rua Principal",
-            ),
-            team = TeamStatisticsDto(
-                idTeam = "t1",
-                name = "Minha Equipa",
-                image = "",
-                numGoals = 3,
-            ),
-            opponent = TeamStatisticsDto(
-                idTeam = "t2",
-                name = "Dragões FC",
-                image = "",
-                numGoals = 1,
-            ),
-            isHome = false
-        ),
-
-        InfoMatchCalendar(
-            idMatch = "2",
-            matchStatusId = 0, // 0 = SCHEDULED
-            rawGameDate = LocalDateTime.now().plusDays(5).toString(), // String
-            typeMatchBool = false,
-            matchResultId = -1, // Undefined
-            pitchGame = PitchInfo(
-                name = "Campo de Treinos",
-                address = "Avenida Secundária",
-            ),
-            team = TeamStatisticsDto(
-                idTeam = "t1",
-                name = "Minha Equipa",
-                image = "",
-                numGoals = 0,
-            ),
-            opponent = TeamStatisticsDto(
-                idTeam = "t3",
-                name = "Leões da Serra",
-                image = "",
-                numGoals = 0,
-            ),
-            isHome = true
-        )
-    )
-
+@Preview(name = "1. Lista Normal - EN", locale = "en", showBackground = true)
 @Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun PreviewCalendarContentNormal() {
     CalendarContent(
-        list = mockCalendarList,
+        list = CalendarMocks.listNormal,
         filters = FilterCalendar(),
-        filterActions = mockFilterActions,
+        filterActions = CalendarMocks.filterActions,
         filterError = FilterCalendarError(),
         uiState = UiState(isLoading = false),
         isOnline = true,
         retry = {},
-        itemsListAction = mockItemActions,
+        itemsListAction = CalendarMocks.itemActions,
         navHostController = rememberNavController()
     )
 }
 
+@Preview(name = "2. Lista Vazia - EN", locale = "en", showBackground = true)
 @Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun PreviewCalendarContentEmpty() {
     CalendarContent(
         list = emptyList(),
         filters = FilterCalendar(),
-        filterActions = mockFilterActions,
+        filterActions = CalendarMocks.filterActions,
         filterError = FilterCalendarError(),
         uiState = UiState(isLoading = false),
         isOnline = true,
         retry = {},
-        itemsListAction = mockItemActions,
+        itemsListAction = CalendarMocks.itemActions,
         navHostController = rememberNavController()
     )
 }
 
+@Preview(name = "3. Offline Mode - EN", locale = "en", showBackground = true)
 @Preview(name = "3. Offline Mode - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun PreviewCalendarContentOffline() {
     CalendarContent(
-        list = mockCalendarList,
+        list = CalendarMocks.listNormal,
         filters = FilterCalendar(),
-        filterActions = mockFilterActions,
+        filterActions = CalendarMocks.filterActions,
         filterError = FilterCalendarError(),
         uiState = UiState(isLoading = false),
         isOnline = false,
         retry = {},
-        itemsListAction = mockItemActions,
+        itemsListAction = CalendarMocks.itemActions,
         navHostController = rememberNavController()
     )
 }
