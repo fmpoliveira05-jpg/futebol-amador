@@ -105,25 +105,6 @@ private fun ContentListMemberShipRequest(
                 }
             )
         },
-        /*
-        Arranjar forma de distinguir quem é o sender e o receiver
-          acceptMemberShipRequest = { itemsActions.acceptMemberShipRequest(
-                    request.receiver.id,
-                    request.id,
-                    request.isPlayerSender,
-                    navHostController,
-                ) },
-                rejectMemberShipRequest = { itemsActions.rejectMemberShipRequest(
-                    request.receiver.id,
-                    request.id,
-                    request.isPlayerSender,
-                ) },
-                showMore = { itemsActions.showMore(
-                    request.sender.id,
-                    request.isPlayerSender,
-                    navHostController,
-                ) }
-        * */
         listItems = { request ->
             ListMemberShipRequestContent(
                 membershipRequest = request,
