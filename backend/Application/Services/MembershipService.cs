@@ -1,5 +1,7 @@
 ﻿using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -7,8 +9,8 @@ using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Exceptions;
-using System.Globalization;
-using System.Security.Claims;
+using System.ComponentModel;
+using System.Xml.Linq;
 
 namespace Application.Services
 {
@@ -72,10 +74,15 @@ namespace Application.Services
             return new MemberShipRequestDto
             {
                 RequestId = invite.Id,
-                PlayerId = invite.IdPlayer,
-                PlayerName = playerToInvite.Name,
-                TeamId = invite.IdTeam,
-                TeamName = team.Name,
+                Player = new PlayerDto
+                {
+                    Id = invite.IdPlayer,
+                    Name = playerToInvite.Name
+                },
+                Team = new TeamDto {
+                    IdTeam = invite.IdTeam,
+                    Name = team.Name,
+                },
                 RequestDate = invite.InviteDate,
                 IsPlayerSender = invite.IsPlayerSender
             };
@@ -206,10 +213,16 @@ namespace Application.Services
             return new MemberShipRequestDto
             {
                 RequestId = membershipRequest.Id,
-                PlayerId = fullPlayer.Id,
-                PlayerName = fullPlayer.Name,
-                TeamId = fullTeam.Id,
-                TeamName = fullTeam.Name,
+                Player = new PlayerDto
+                {
+                    Id = fullPlayer.Id,
+                    Name = fullPlayer.Name
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = fullTeam.Id,
+                    Name = fullTeam.Name,
+                },
                 RequestDate = membershipRequest.InviteDate,
                 IsPlayerSender = membershipRequest.IsPlayerSender
             };
@@ -248,10 +261,16 @@ namespace Application.Services
                 return new MemberShipRequestDto
                 {
                     RequestId = request.Id,
-                    PlayerId = fullPlayer.Id,
-                    PlayerName = fullPlayer.Name,
-                    TeamId = fullTeam.Id,
-                    TeamName = fullTeam.Name,
+                    Player = new PlayerDto
+                    {
+                        Id = fullPlayer.Id,
+                        Name = fullPlayer.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = fullTeam.Id,
+                        Name = fullTeam.Name,
+                    },
                     RequestDate = request.InviteDate,
                     IsPlayerSender = request.IsPlayerSender
                 };
@@ -297,10 +316,16 @@ namespace Application.Services
             return new MemberShipRequestDto
             {
                 RequestId = newRequest.Id,
-                PlayerId = newRequest.IdPlayer,
-                PlayerName = newRequest.Player.Name,
-                TeamId = newRequest.IdTeam,
-                TeamName = newRequest.Team.Name,
+                Player = new PlayerDto
+                {
+                    Id = newRequest.IdPlayer,
+                    Name = newRequest.Player.Name
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = newRequest.IdTeam,
+                    Name = newRequest.Team.Name,
+                },
                 RequestDate = newRequest.InviteDate,
                 IsPlayerSender = newRequest.IsPlayerSender
             };

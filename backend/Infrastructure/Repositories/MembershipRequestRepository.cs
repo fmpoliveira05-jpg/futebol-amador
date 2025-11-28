@@ -1,9 +1,12 @@
 ﻿using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace Infrastructure.Repositories
 {
@@ -49,10 +52,16 @@ namespace Infrastructure.Repositories
                 .Select(mr => new MemberShipRequestDto
                 {
                     RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    TeamId = mr.IdTeam,
+                    Player = new PlayerDto
+                    {
+                        Id = mr.IdPlayer,
+                        Name = mr.Player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = mr.IdTeam,
+                        Name = mr.Team.Name,
+                    },
                     RequestDate = mr.InviteDate,
                     IsPlayerSender = mr.IsPlayerSender
                 })
@@ -80,10 +89,16 @@ namespace Infrastructure.Repositories
                 .Select(mr => new MemberShipRequestDto
                 {
                     RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    TeamId = mr.IdTeam,
+                    Player = new PlayerDto
+                    {
+                        Id = mr.IdPlayer,
+                        Name = mr.Player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = mr.IdTeam,
+                        Name = mr.Team.Name,
+                    },
                     RequestDate = mr.InviteDate,
                     IsPlayerSender = mr.IsPlayerSender
                 })
@@ -97,10 +112,16 @@ namespace Infrastructure.Repositories
                 .Select(mr => new MemberShipRequestDto
                 {
                     RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    TeamId = mr.IdTeam,
+                    Player = new PlayerDto
+                    {
+                        Id = mr.IdPlayer,
+                        Name = mr.Player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = mr.IdTeam,
+                        Name = mr.Team.Name,
+                    },
                     RequestDate = mr.InviteDate,
                     IsPlayerSender = mr.IsPlayerSender
                 })
@@ -128,10 +149,16 @@ namespace Infrastructure.Repositories
                 .Select(mr => new MemberShipRequestDto
                 {
                     RequestId = mr.Id,
-                    PlayerName = mr.Player.Name,
-                    PlayerId = mr.IdPlayer,
-                    TeamName = mr.Team.Name,
-                    TeamId = mr.IdTeam,
+                    Player = new PlayerDto
+                    {
+                        Id = mr.IdPlayer,
+                        Name = mr.Player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = mr.IdTeam,
+                        Name = mr.Team.Name,
+                    },
                     RequestDate = mr.InviteDate,
                     IsPlayerSender = mr.IsPlayerSender
                 })
