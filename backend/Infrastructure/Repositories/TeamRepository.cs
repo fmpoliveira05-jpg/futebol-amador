@@ -402,7 +402,7 @@ namespace Infrastructure.Repositories
                          join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
                          join rank in DbContext.Rank on t.IdRank equals rank.Id
 
-                         where t.Members.Count > 11
+                         where t.Members.Count >= 11
                             && t.Id != idTeam
 
 
