@@ -1,4 +1,6 @@
-﻿using Application.DTOs.MemberShip;
+﻿using Application.DTOs.Membership;
+using Application.DTOs.MemberShip;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
@@ -11,6 +13,7 @@ using Domain.Exceptions;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
+using System.Numerics;
 
 namespace Unit.ApplicationTests.ServicesTests
 {
@@ -128,20 +131,32 @@ namespace Unit.ApplicationTests.ServicesTests
                 new MemberShipRequestDto
                 {
                     RequestId = Guid.NewGuid(),
-                    PlayerName = player.Name,
-                    PlayerId = player.Id,
-                    TeamId = Guid.NewGuid(),
-                    TeamName = "Botafogo",
+                    Player = new PlayerDto
+                    {
+                        Id = player.Id,
+                        Name = player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Botafogo",
+                    },  
                     RequestDate = DateTime.Now,
                     IsPlayerSender = false
                 },
                 new MemberShipRequestDto
                 {
                     RequestId = Guid.NewGuid(),
-                    PlayerName = player.Name,
-                    PlayerId = player.Id,
-                    TeamId = Guid.NewGuid(),
-                    TeamName = "Fluminense",
+                    Player = new PlayerDto
+                    {
+                        Id = player.Id,
+                        Name = player.Name
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Fluminense",
+                    },
                     RequestDate = DateTime.Now,
                     IsPlayerSender = false
                 }
@@ -380,30 +395,47 @@ namespace Unit.ApplicationTests.ServicesTests
             // ARRANGE
             var teamId = Guid.NewGuid();
             var adminId = "player-id-abc";
-            var rank = new TestRank();
+
+            // Configuração das Entidades de Domínio (usadas para simular o estado da equipa/admin)
+            var rank = new TestRank(); // Assumindo que TestRank existe no teu contexto de testes
             var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team };
-            team.Members.Add(admin);
-            var request1 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p1", IdTeam = teamId };
-            var request2 = new MembershipRequest { Id = Guid.NewGuid(), IdPlayer = "p2", IdTeam = teamId };
-            team.MembershipRequests.Add(request1);
-            team.MembershipRequests.Add(request2);
+
+            // Configuração dos DTOs de Retorno (Aqui estava o erro principal)
+            // Precisamos instanciar o PlayerDto e o TeamDto dentro do MemberShipRequestDto
             var requests = new List<MemberShipRequestDto>
             {
-                new MemberShipRequestDto { PlayerName = "Jogador 1" },
-                new MemberShipRequestDto { PlayerName = "Jogador 2" }
+                new MemberShipRequestDto
+                {
+                    RequestId = Guid.NewGuid(),
+                    Player = new PlayerDto { Id = "p1", Name = "Jogador 1" },
+                    Team = new TeamDto { IdTeam = teamId, Name = "FC Requests" },
+                    RequestDate = DateTime.UtcNow,
+                    IsPlayerSender = true
+                },
+                new MemberShipRequestDto
+                {
+                    RequestId = Guid.NewGuid(),
+                    Player = new PlayerDto { Id = "p2", Name = "Jogador 2" },
+                    Team = new TeamDto { IdTeam = teamId, Name = "FC Requests" },
+                    RequestDate = DateTime.UtcNow,
+                    IsPlayerSender = true
+                }
             };
+
+            // Mocks
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminId)).ReturnsAsync(admin);
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByTeam(teamId)).ReturnsAsync(requests);
 
             // ACT
-            // CORREÇÃO: Passar admin.Id em vez do objeto admin
             var result = await _sut.GetMembershipRequestsByTeam(teamId, admin.Id);
 
             // ASSERT
             result.Should().HaveCount(2);
-            result.Select(r => r.PlayerName).Should().Contain(new[] { "Jogador 1", "Jogador 2" });
+
+            // CORREÇÃO: Aceder a r.Player.Name em vez de r.PlayerName
+            result.Select(r => r.Player.Name).Should().Contain(new[] { "Jogador 1", "Jogador 2" });
         }
 
         [Test(Description = "Validação: GetMembershipRequestsAsync_Should_Throw_ValidationException_When_Not_Admin")]
@@ -496,10 +528,16 @@ namespace Unit.ApplicationTests.ServicesTests
             var existingRequest = (MembershipRequest)null;
             var requestDto = new MemberShipRequestDto
             {
-                PlayerId = playerToInvite.Id,
-                PlayerName = playerToInvite.Name,
-                TeamId = team.Id,
-                TeamName = team.Name
+                Player = new PlayerDto
+                {
+                    Id = playerToInvite.Id,
+                    Name = playerToInvite.Name
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = team.Id,
+                    Name = team.Name,
+                },
             };
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestByPlayerAndTeam(playerIdToInvite, teamId)).ReturnsAsync(existingRequest);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId)).ReturnsAsync(team);
@@ -710,7 +748,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
-            Assert.That(result[0].TeamName, Is.EqualTo("Botafogo"));
+            Assert.That(result[0].Team.Name, Is.EqualTo("Botafogo"));
         }
 
         [Test(Description = "Validação: GetMembershipRequests_ShouldThrow_WhilePlayerHasTeam")]
@@ -771,8 +809,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var result = await _sut.SendMembershipRequestAsyncPlayer(player.Id, team.Id);
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.PlayerId, Is.EqualTo(player.Id));
-            Assert.That(result.TeamId, Is.EqualTo(team.Id));
+            Assert.That(result.Player.Id, Is.EqualTo(player.Id));
+            Assert.That(result.Team.IdTeam, Is.EqualTo(team.Id));
             Assert.That(result.IsPlayerSender, Is.True);
 
             _membershipRequestRepoMock.Verify(r => r.AddMembershipRequest(It.IsAny<MembershipRequest>()), Times.Once);
@@ -912,8 +950,7 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             Assert.That(result, Is.Not.Null);
             Assert.That(result.RequestId, Is.EqualTo(requestId));
-            Assert.That(result.TeamName, Is.EqualTo("Team A"));
-            // O seu serviço (linha 226) remove o pedido da lista em memória
+            Assert.That(result.Team.Name, Is.EqualTo("Team A"));
             Assert.That(player.MembershipRequests, Is.Empty, "The membership request should be removed from the player's list.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
