@@ -15,7 +15,7 @@ import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.TeamRepository
 import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.ui.viewModel.FormsViewModel
+import com.example.amfootball.ui.viewModel.generics.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 //TODO: Testar tudo, quando tiver a rota com a autentificação e autorização funcional
