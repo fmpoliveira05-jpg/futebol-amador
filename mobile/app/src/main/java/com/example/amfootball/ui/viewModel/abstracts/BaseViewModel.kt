@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.viewModel.generics
+package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +23,6 @@ import kotlinx.coroutines.launch
 abstract class BaseViewModel(
     private val networkObserver: NetworkConnectivityObserver
 ): ViewModel() {
-
     /**
      * Estado global da UI.
      * Contém informações sobre se o ecrã está a carregar ([com.example.amfootball.data.UiState.isLoading]),
@@ -56,9 +55,9 @@ abstract class BaseViewModel(
      * 5. Se erro (Exception): Captura a exceção, imprime o stacktrace e define a mensagem de erro na UI.
      *
      * @param checkOnline Se `true` (padrão), impede a execução se o dispositivo estiver offline.
-     * @param block A função suspensa (lambda) que contém a lógica de negócio ou chamada à API.
+     * @param callApi A função suspensa (lambda) que contém a lógica de negócio ou chamada à API.
      */
-    protected fun launchDataLoad(checkOnline: Boolean = true, block: suspend () -> Unit) {
+    protected fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -70,7 +69,7 @@ abstract class BaseViewModel(
             }
 
             try {
-                block()
+                callApi()
 
                 _uiState.update { it.copy(isLoading = false) }
             } catch (e: Exception) {

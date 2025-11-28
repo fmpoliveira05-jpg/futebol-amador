@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.viewModel.generics
+package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.network.NetworkConnectivityObserver

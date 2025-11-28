@@ -9,9 +9,10 @@ import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.PlayerRepository
-import com.example.amfootball.ui.viewModel.generics.ListsViewModels
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.PlayerConst
@@ -27,15 +28,16 @@ import javax.inject.Inject
  * cache, estado de loading), focando-se exclusivamente nas regras específicas de jogadores:
  * - Gestão de Filtros (Nome, Cidade, Idade, Posição, Altura).
  * - Validação de dados do formulário de pesquisa.
- * - Comunicação com o [PlayerRepository].
+ * - Comunicação com o [PlayerplayerRepository].
  * - Navegação para detalhes do jogador.
  *
- * @property repository Repositório para acesso aos dados dos jogadores via API.
+ * @property playerRepository Repositório para acesso aos dados dos jogadores via API.
  */
 @HiltViewModel
 class ListPlayerViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val repository: PlayerRepository
+    private val playerRepository: PlayerRepository,
+    private val sessionManager: SessionManager?
 ): ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
     /**
      * Estado atual dos filtros aplicados pelo utilizador.
@@ -153,12 +155,29 @@ class ListPlayerViewModel @Inject constructor(
         }
     }
 
+    //TODO: Falta validar se o gajo é um admin, aqui e na lista
     /**
      * Envia um pedido de adesão (convite) para um jogador se juntar à equipa do utilizador.
      * @param idPlayer O ID do jogador a convidar.
      */
     fun sendMembershipRequest(idPlayer: String) {
-        //TODO: Fazer pedido há API, para a Team mandar o pedido de adesão
+        if(sessionManager == null) {
+            return
+        }
+        val dataUser = sessionManager.getUserProfile()
+
+        if (dataUser == null) {
+            return
+        }
+        val teamId = dataUser.idTeam
+        //val role = dataUser.
+        if(teamId == null) {
+            return
+        }
+
+        launchDataLoad {
+            playerRepository.sendMemberShipRequestToPlayer(teamId = teamId, idPlayer = idPlayer)
+        }
     }
 
     /**
@@ -180,7 +199,7 @@ class ListPlayerViewModel @Inject constructor(
      */
     private fun loadingListPlayer() {
         launchDataLoad {
-            val players = repository.getListPlayer(filterState.value)
+            val players = playerRepository.getListPlayer(filterState.value)
 
             listState.value = players
             if (filterState.value == FilterListPlayer()) {

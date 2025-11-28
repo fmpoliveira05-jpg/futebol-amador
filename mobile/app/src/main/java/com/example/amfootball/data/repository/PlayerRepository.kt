@@ -14,10 +14,6 @@ import javax.inject.Singleton
 class PlayerRepository @Inject constructor(
     private val api: ApiBackend
 ) {
-    suspend fun getMyProfile(): Response<PlayerProfileDto> {
-        return api.getMyProfile()
-    }
-
     suspend fun getPlayerProfile(playerId: String): PlayerProfileDto {
         try {
             val response = api.getPlayerProfile(playerId = playerId)
@@ -41,6 +37,22 @@ class PlayerRepository @Inject constructor(
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
             } else {
+                handleApiError(response)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Exception("Sem conexão: ${e.localizedMessage}")
+        }
+    }
+
+    /*
+    * Permite enviar um pedido de adesão a uma jogador
+    * */
+    suspend fun sendMemberShipRequestToPlayer(teamId: String, idPlayer: String) {
+        try {
+            val response = api.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
+
+            if (!response.isSuccessful || response.body() == null) {
                 handleApiError(response)
             }
         } catch (e: Exception) {
