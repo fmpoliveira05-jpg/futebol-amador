@@ -398,7 +398,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock.Setup(r => r.GetMembershipRequestsByTeam(teamId)).ReturnsAsync(requests);
 
             // ACT
-            var result = await _sut.GetMembershipRequestsByTeam(teamId, admin);
+            // CORREÇÃO: Passar admin.Id em vez do objeto admin
+            var result = await _sut.GetMembershipRequestsByTeam(teamId, admin.Id);
 
             // ASSERT
             result.Should().HaveCount(2);
@@ -423,12 +424,16 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId))
                 .ReturnsAsync(team);
 
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
+                .ReturnsAsync(playerNaoAdmin);
+
             _membershipValidatorMock
                 .Setup(v => v.ValidateGetRequestsByTeam(team, playerNaoAdmin))
                 .Throws(new ValidationException("O jogador não é administrador."));
 
             // ACT
-            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, playerNaoAdmin);
+            // CORREÇÃO: Passar playerNaoAdmin.Id
+            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, playerNaoAdmin.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
@@ -454,12 +459,16 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(teamId))
                 .ReturnsAsync(team);
 
+            _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
+                .ReturnsAsync(outsiderPlayer);
+
             _membershipValidatorMock
                 .Setup(v => v.ValidateGetRequestsByTeam(team, outsiderPlayer))
                 .Throws(new ValidationException("O jogador não pertence a esta equipa."));
 
             // ACT
-            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, outsiderPlayer);
+            // CORREÇÃO: Passar outsiderPlayer.Id
+            Func<Task> act = async () => await _sut.GetMembershipRequestsByTeam(teamId, outsiderPlayer.Id);
 
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()

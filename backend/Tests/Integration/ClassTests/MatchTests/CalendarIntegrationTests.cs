@@ -1,16 +1,18 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
+using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub.ClienteService;
+using Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
 using NUnit.Framework;
 using System.Net;
 using System.Net.Http.Json;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Tests.Integration.Calendar
 {
@@ -38,14 +40,35 @@ namespace Tests.Integration.Calendar
             // Arrange
             var teamId = Guid.NewGuid();
 
-            var opponent = new TeamDto
-            {
-                Name = "Team B"
-            };
-
+            // Criar um objeto de retorno completo e válido segundo o DTO InfoMatchCalendar
             var expected = new List<InfoMatchCalendar>
             {
-                new InfoMatchCalendar { IdMatch = Guid.NewGuid(), Opponent = opponent }
+                new InfoMatchCalendar
+                {
+                    IdMatch = Guid.NewGuid(),
+                    MatchStatus = MatchStatus.SCHEDULED,
+                    GameDate = DateTime.UtcNow.AddDays(2),
+                    MatchResult = MatchResult.UNPLAYED,
+                    IsCompetitive = true,
+                    IsHome = true,
+                    Team = new TeamStatisticsDto
+                    {
+                        IdTeam = teamId,
+                        Name = "My Team",
+                        NumGoals = 0
+                    },
+                    Opponent = new TeamStatisticsDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Team B",
+                        NumGoals = 0
+                    },
+                    PitchGame = new PitchDto
+                    {
+                        Name = "Pitch A",
+                        Address = "Address A"
+                    }
+                }
             };
 
             var mockMatch = new Mock<IMatchService>();
@@ -78,6 +101,7 @@ namespace Tests.Integration.Calendar
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(1));
             Assert.That(result[0].Opponent.Name, Is.EqualTo("Team B"));
+            Assert.That(result[0].IdMatch, Is.EqualTo(expected[0].IdMatch));
 
             mockMatch.Verify(m => m.GetCalendar(teamId), Times.Once);
             mockMatch.Verify(m => m.GetCalendarWithFilters(It.IsAny<Guid>(), It.IsAny<FilterCalendarDto>()), Times.Never);
@@ -88,19 +112,26 @@ namespace Tests.Integration.Calendar
         {
             var teamId = Guid.NewGuid();
 
-            var opponent = new TeamDto
-            {
-                Name = "Team C"
-            };
-
             var expected = new List<InfoMatchCalendar>
             {
-                new InfoMatchCalendar { IdMatch = Guid.NewGuid(), Opponent = opponent }
+                new InfoMatchCalendar
+                {
+                    IdMatch = Guid.NewGuid(),
+                    MatchStatus = MatchStatus.DONE,
+                    GameDate = DateTime.UtcNow.AddDays(-2),
+                    MatchResult = MatchResult.WIN,
+                    IsCompetitive = true,
+                    IsHome = false,
+                    Team = new TeamStatisticsDto { IdTeam = teamId, Name = "My Team", NumGoals = 2 },
+                    Opponent = new TeamStatisticsDto { IdTeam = Guid.NewGuid(), Name = "Team C", NumGoals = 1 },
+                    PitchGame = new PitchDto { Name = "Pitch B", Address = "Address B" }
+                }
             };
 
             var mockMatch = new Mock<IMatchService>();
             var mockAuth = new Mock<IPlayerAuthorizationService>();
 
+            // Setup para aceitar qualquer filtro que chegue
             mockMatch.Setup(m => m.GetCalendarWithFilters(teamId, It.IsAny<FilterCalendarDto>()))
                      .ReturnsAsync(expected);
 
@@ -122,6 +153,7 @@ namespace Tests.Integration.Calendar
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
+            // Enviamos filtros na query string
             var result = await _client.GetFromJsonAsync<List<InfoMatchCalendar>>($"/api/Calendar/{teamId}?IsRealized=true");
 
             // Assert
@@ -144,12 +176,14 @@ namespace Tests.Integration.Calendar
                 PostPoneDate = DateTime.UtcNow.AddDays(1)
             };
 
+            // Criar um objeto de retorno válido (Preenchendo Team e Opponent que são Required)
             var expected = new InfoPostPoneMatch
             {
                 IdMatch = dto.IdMatch,
-                IdTeam = teamId,
-                IdOpponent = dto.IdOpponent,
-                PostPoneDate = dto.PostPoneDate
+                GameDate = DateTime.UtcNow, // Data original
+                PostPoneDate = dto.PostPoneDate, // Nova data
+                Team = new TeamDto { IdTeam = teamId, Name = "My Team" },
+                Opponent = new TeamDto { IdTeam = dto.IdOpponent, Name = "Opponent Team" }
             };
 
             var mockMatch = new Mock<IMatchService>();
@@ -177,11 +211,15 @@ namespace Tests.Integration.Calendar
 
             // Act
             var response = await _client.PutAsJsonAsync($"/api/Calendar/{teamId}/PostponeMatch", dto);
-            var result = await response.Content.ReadFromJsonAsync<InfoPostPoneMatch>();
 
             // Assert
+            if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
+
+            var result = await response.Content.ReadFromJsonAsync<InfoPostPoneMatch>();
+
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(result.IdMatch, Is.EqualTo(expected.IdMatch));
+            Assert.That(result.PostPoneDate, Is.EqualTo(expected.PostPoneDate));
 
             mockMatch.Verify(m => m.PostPoneMatch(teamId, It.IsAny<PostPoneMatchDto>()), Times.Once);
         }

@@ -178,7 +178,7 @@ namespace Application.Validators
 
             if (match.MatchStatus != MatchStatus.SCHEDULED)
             {
-                throw new ArgumentException("O estado da partida tem de ser SCHEDULED.");
+                throw new ArgumentException($"ERRO! O estado é {match.MatchStatus}, mas devia ser SCHEDULED.");
             }
 
             var diffDaysToCancel = (match.MatchDate - DateTime.UtcNow).TotalDays;

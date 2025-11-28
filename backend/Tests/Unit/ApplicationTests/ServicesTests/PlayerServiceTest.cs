@@ -26,10 +26,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<IPlayerValidator> validatorMock;
         private Mock<ITeamRepository> teamRepoMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
-        private Mock<IPlayerAuthorizationValidator> authorizationValidatorMock;
         private Mock<IUserDataValidator> userDataValidator;
         private Mock<IAuthService> authService;
-
+        private Mock<ITeamValidator> teamValidatorMock;
         private PlayerService service;
 
         #endregion
@@ -45,21 +44,21 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock = new Mock<IPlayerValidator>();
             teamRepoMock = new Mock<ITeamRepository>();
             membershipReqRepoMock = new Mock<IMembershipRequestRepository>();
-            authorizationValidatorMock = new Mock<IPlayerAuthorizationValidator>();
             userDataValidator = new Mock<IUserDataValidator>();
             authService = new Mock<IAuthService>();
+            teamValidatorMock = new Mock<ITeamValidator>(); 
 
             service = new PlayerService(
-                playerRepoMock.Object,
-                teamRepoMock.Object,
-                uowMock.Object,
-                membershipReqRepoMock.Object,
-                validatorMock.Object,
-                userRepoMock.Object,
-                authorizationValidatorMock.Object,
-                teamServiceMock.Object,
-                userDataValidator.Object,
-                authService.Object
+                playerRepoMock.Object,       
+                teamRepoMock.Object,          
+                uowMock.Object,               
+                membershipReqRepoMock.Object,  
+                validatorMock.Object,          
+                userRepoMock.Object,          
+                teamServiceMock.Object,     
+                userDataValidator.Object,  
+                authService.Object,         
+                teamValidatorMock.Object     
             );
         }
         #endregion

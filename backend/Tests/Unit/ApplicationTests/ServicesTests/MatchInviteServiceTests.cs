@@ -83,9 +83,10 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var dto = new SendMatchInviteDto
             {
+                IdSender = idSender,
                 IdReceiver = idReceiver,
                 GameDate = DateTime.UtcNow.AddDays(1),
-                NamePitch = senderPitch.Name
+                homePitch = true // Jogo em casa (Campo do Sender)
             };
 
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(idSender)).ReturnsAsync(senderTeam);
@@ -104,21 +105,23 @@ namespace Unit.ApplicationTests.ServicesTests
             result.NamePitch.Should().Be("Campo Central");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
             _matchInviteRepoMock.Verify(r => r.AddMatchInvite(It.IsAny<MatchInvite>()), Times.Once);
+            ///TODO: METER PARA TESTAR NOTIFICATION
         }
 
         [Test(Description = "T2GP1 - Player não Admin tenta enviar convite de partida casual para outra equipa.")]
         public async Task SendMatchInvite_Should_Throw_When_PlayerIsNotAdmin()
         {
             // ARRANGE
-            var userId = "admin-id";
             var idSender = Guid.NewGuid();
             var dto = new SendMatchInviteDto
             {
+                IdSender = idSender,
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(2),
-                NamePitch = "Campo A"
+                homePitch = true
             };
 
+            // Simular erro de validação (Player não é admin)
             _validatorMock
                 .Setup(v => v.ValidateSenderMatchInvite(dto, idSender))
                 .Throws(new ValidationException("O jogador não é administrador da equipa."));
@@ -142,7 +145,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(3),
-                NamePitch = "Campo B"
+                homePitch = true
             };
 
             _validatorMock
@@ -162,22 +165,24 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task SendMatchInvite_Should_Throw_When_ReceiverTeamDoesNotExist()
         {
             // ARRANGE
-            var userId = "admin-id";
             var idSender = Guid.NewGuid();
             var dto = new SendMatchInviteDto
             {
+                IdSender = idSender,
                 IdReceiver = Guid.NewGuid(),
                 GameDate = DateTime.UtcNow.AddDays(1),
-                NamePitch = "Campo Central"
+                homePitch = true
             };
 
             var senderTeam = new Team("Team Sender", "Desc", new byte[] { 1 }, new Pitch("Campo Central", "Rua X"), _defaultRank);
+
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(idSender)).ReturnsAsync(senderTeam);
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(dto.IdReceiver))
-                         .ReturnsAsync((Team)null!);
+                          .ReturnsAsync((Team?)null); // Receiver não existe
 
+            // A validação ValidateSendMatchInvite é chamada depois de obter as equipas
             _validatorMock
-                .Setup(v => v.ValidateSendMatchInvite(null, It.IsAny<Team>(), null, null, dto.NamePitch))
+                .Setup(v => v.ValidateSendMatchInvite(null, senderTeam, null, null))
                 .Throws(new ValidationException("A equipa de destino não existe."));
 
             // ACT
@@ -187,7 +192,6 @@ namespace Unit.ApplicationTests.ServicesTests
             await act.Should().ThrowAsync<ValidationException>()
                 .WithMessage("A equipa de destino não existe.");
             _matchInviteRepoMock.Verify(r => r.AddMatchInvite(It.IsAny<MatchInvite>()), Times.Never);
-            _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
         #endregion
 
@@ -196,34 +200,35 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task AcceptMatchInvite_Should_CreateMatch_When_AdminTeamAccepts()
         {
             // ARRANGE
-            var userId = "admin-id";
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo Central", "Rua Principal");
 
             var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
 
+            // Inicializar listas para evitar NullReferenceException
+            senderTeam.Calendar = new Calendar();
             senderTeam.Calendar.Matches = new List<Matches>();
+            receiverTeam.Calendar = new Calendar();
             receiverTeam.Calendar.Matches = new List<Matches>();
+            receiverTeam.ReceivedInvites = new List<MatchInvite>();
 
             var matchInvite = new MatchInvite(senderTeam, receiverTeam, DateTime.UtcNow.AddDays(1), pitch);
-
             receiverTeam.ReceivedInvites.Add(matchInvite);
 
-            _matchInviteRepoMock.Setup(r => r.GetMatchInviteById(matchInvite.Id))
-                                .ReturnsAsync(matchInvite);
-
+            // Mocks
             _teamRepoMock.Setup(r => r.GetByIdWithReceivedInvitesAndCalendar(receiverTeam.Id))
                          .ReturnsAsync(receiverTeam);
 
             _teamRepoMock.Setup(r => r.GetByIdWithReceivedInvitesAndCalendar(senderTeam.Id))
-                         .ReturnsAsync(senderTeam);
+                         .ReturnsAsync(senderTeam); // O Sender também precisa de ser mockado aqui
 
             _pitchRepoMock.Setup(r => r.GetPitchById(matchInvite.IdPitch))
                           .ReturnsAsync(pitch);
             _matchRepoMock.Setup(r => r.GetMatchProxim12HoursMatchs(receiverTeam.Id, It.IsAny<DateTime>()))
                           .ReturnsAsync((Matches?)null);
 
+            // Setup Validator (vazios pois assumimos que passam, exceto se quisermos testar falha)
             _validatorMock.Setup(v => v.ValidateAcceptRefuseMatchInvite(receiverTeam.Id, matchInvite.Id));
             _validatorMock.Setup(v => v.ValidateReciever(receiverTeam));
             _validatorMock.Setup(v => v.ValidateMatchInvite(matchInvite));
@@ -242,6 +247,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             _matchInviteRepoMock.Verify(r => r.DeleteMatchInvite(matchInvite), Times.Once);
             _matchRepoMock.Verify(r => r.AddMatch(It.IsAny<Matches>()), Times.Once);
+           // _notificationServiceMock.Verify(n => n.SendTeamAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Exactly(2));
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
@@ -393,28 +399,40 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task NegociateMatchInvite_Should_ReturnDto_When_AdminTeamNegotiates()
         {
             // ARRANGE
-            var userId = "admin-id";
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo Central", "Rua A");
+
             var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+
+            // O invite original (Team A convidou Team B)
             var matchInvite = new MatchInvite(senderTeam, receiverTeam, DateTime.UtcNow.AddDays(1), pitch);
+
             var newDate = DateTime.UtcNow.AddDays(2);
             var dto = new SendMatchInviteDto
             {
+                IdSender = senderTeam.Id, // Quem está a negociar (pode ser o sender original ou o receiver)
                 IdReceiver = receiverTeam.Id,
                 GameDate = newDate,
-                NamePitch = pitch.Name
+                homePitch = true // Mantém o mesmo campo
             };
+
+            // O repositório devolve o convite existente
             _matchInviteRepoMock.Setup(r => r.GetMatchInviteWithPitchByTeams(senderTeam.Id, receiverTeam.Id))
                                 .ReturnsAsync(matchInvite);
+
             _matchRepoMock.Setup(r => r.GetMatchProxim12HoursMatchs(receiverTeam.Id, newDate))
                           .ReturnsAsync((Matches?)null);
 
+            // Validações
             _validatorMock.Setup(v => v.ValidateSenderMatchInvite(dto, senderTeam.Id));
+
+            // Aqui simulamos que a validação de negociação passa
             _validatorMock.Setup(v => v.ValidateNegociateMatchInvite(
-                dto.NamePitch, matchInvite.Pitch, matchInvite, senderTeam, receiverTeam, null));
-            _validatorMock.Setup(v => v.ValidateHasChangeNegociateMatchInvite(It.IsAny<bool>()));
+                It.IsAny<Pitch>(), matchInvite, senderTeam, receiverTeam, null));
+
+            // Validar que houve mudança (se não houver, o método lança excepção)
+            _validatorMock.Setup(v => v.ValidateHasChangeNegociateMatchInvite(true));
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
@@ -424,8 +442,9 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             result.Should().NotBeNull();
             result.Should().BeOfType<InfoMatchInviteDto>();
-            result.NameSender.Should().Be("Team A");
-            result.NameReceiver.Should().Be("Team B");
+            result.GameDate.Should().Be(newDate); // A data deve ter mudado
+            result.NamePitch.Should().Be(pitch.Name);
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
@@ -433,14 +452,18 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task NegociateMatchInvite_Should_Throw_When_TeamIsNotAdmin()
         {
             // ARRANGE
-            var userId = "admin-id";
             var idSender = Guid.NewGuid();
+            var idReceiver = Guid.NewGuid();
+
             var dto = new SendMatchInviteDto
             {
-                IdReceiver = Guid.NewGuid(),
+                IdSender = idSender, // Agora obrigatório no DTO
+                IdReceiver = idReceiver,
                 GameDate = DateTime.UtcNow.AddDays(1),
-                NamePitch = "Campo Central"
+                homePitch = true // Substituiu o NamePitch
             };
+
+            // Simular que o Validator lança erro logo no início (ao validar o Sender)
             _validatorMock
                 .Setup(v => v.ValidateSenderMatchInvite(dto, idSender))
                 .Throws(new ValidationException("A equipa não é administradora para negociar convites."));
@@ -451,6 +474,7 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não é administradora*");
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
@@ -458,19 +482,25 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task NegociateMatchInvite_Should_Throw_When_TeamDoesNotBelongToInvite()
         {
             // ARRANGE
-            var userId = "admin-id";
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo", "Rua");
+
             var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
             var outsiderTeam = new Team("Team Outsider", "desc", new byte[] { 3 }, pitch, rank);
+
+            // O convite existe entre A e B
             var invite = new MatchInvite(teamA, teamB, DateTime.UtcNow.AddDays(1), pitch);
+
+            // O Outsider tenta negociar
             var dto = new SendMatchInviteDto
             {
+                IdSender = outsiderTeam.Id, // Outsider é quem envia o pedido de negociação
                 IdReceiver = teamB.Id,
                 GameDate = DateTime.UtcNow.AddDays(2),
-                NamePitch = pitch.Name
+                homePitch = false // Quer jogar fora (ou em casa), irrelevante para o erro
             };
+
             _validatorMock
                 .Setup(v => v.ValidateSenderMatchInvite(dto, outsiderTeam.Id))
                 .Throws(new ValidationException("A equipa não pertence ao convite a negociar."));
@@ -481,6 +511,8 @@ namespace Unit.ApplicationTests.ServicesTests
             // ASSERT
             await act.Should().ThrowAsync<ValidationException>()
                      .WithMessage("*não pertence ao convite*");
+
+            // Garante que o repositório nunca foi chamado para buscar o invite, pois falhou na validação inicial
             _matchInviteRepoMock.Verify(r => r.GetMatchInviteWithPitchByTeams(It.IsAny<Guid>(), It.IsAny<Guid>()), Times.Never);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }

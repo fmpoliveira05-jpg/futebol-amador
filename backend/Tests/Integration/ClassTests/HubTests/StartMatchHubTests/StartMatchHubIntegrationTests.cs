@@ -59,7 +59,6 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             {
                 builder.ConfigureServices(services =>
                 {
-                    // substitui o serviço real pelo mock
                     services.AddSingleton(mockManager.Object);
                 });
             });
@@ -69,8 +68,8 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             var firstConnection = new HubConnectionBuilder()
                 .WithUrl(new Uri(baseAddress, HubPath), options =>
                 {
-                    // necessário para usar o TestServer internamente
                     options.HttpMessageHandlerFactory = _ => clientFactory.Server.CreateHandler();
+                    options.AccessTokenProvider = () => Task.FromResult<string?>("TestToken"); // Token fictício para passar a Auth
                 })
                 .Build();
 
@@ -78,12 +77,14 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
                 .WithUrl(new Uri(baseAddress, HubPath), options =>
                 {
                     options.HttpMessageHandlerFactory = _ => clientFactory.Server.CreateHandler();
+                    options.AccessTokenProvider = () => Task.FromResult<string?>("TestToken"); // Token fictício para passar a Auth
                 })
                 .Build();
 
             string? receivedMessage = null;
             var tcs = new TaskCompletionSource<string>();
 
+            // Configurar listeners antes de iniciar a conexão
             firstConnection.On<string>("ReceiveStartMatch", (msg) =>
             {
                 receivedMessage = msg;
@@ -100,23 +101,30 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             await secondConnection.StartAsync();
 
             // Act
+            // Simular o primeiro admin a entrar
             await firstConnection.InvokeAsync("JoinStartMatch", matchId, firstTeamId);
+
+            // Simular o segundo admin a entrar (que deve disparar o início do jogo)
             await secondConnection.InvokeAsync("JoinStartMatch", matchId, secondTeamId);
 
             // Wait for message (timeout safety)
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
 
-            // Asserts (usando Assert.That)
-            Assert.That(tcs.Task.IsCompleted, Is.True, "Não foi recebido ReceiveStartMatch dentro do timeout.");
+            // Esperar que a TaskCompletionSource seja completada ou que o timeout ocorra
+            // Usamos Task.WhenAny para não bloquear indefinidamente se a mensagem nunca chegar
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
+
+            // Asserts
+            Assert.That(completedTask, Is.EqualTo(tcs.Task), "Não foi recebido ReceiveStartMatch dentro do timeout.");
             Assert.That(receivedMessage, Is.Not.Null.And.Not.Empty);
 
-            // cleanup
+            // Cleanup
             await firstConnection.StopAsync();
             await secondConnection.StopAsync();
             await firstConnection.DisposeAsync();
             await secondConnection.DisposeAsync();
 
+            // Verificar se o serviço foi chamado duas vezes
             mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), firstTeamId, It.IsAny<string>()), Times.Once);
             mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), secondTeamId, It.IsAny<string>()), Times.Once);
         }

@@ -4,6 +4,7 @@ using Application.DTOs.Pitch;
 using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
+using Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -29,25 +30,30 @@ namespace Tests.Unit.ApplicationTests.BackGroundServiceTests
             var info = new InfoMatchCalendar
             {
                 IdMatch = Guid.NewGuid(),
-                MatchStatus = Domain.Enums.MatchStatus.SCHEDULED,
+                MatchStatus = MatchStatus.SCHEDULED,
                 GameDate = DateTime.UtcNow,
-                Team = new TeamDto
+                MatchResult = MatchResult.UNPLAYED,
+                IsCompetitive = true,
+                IsHome = true,
+                // --- CORREÇÃO AQUI: Usar TeamStatisticsDto e nomes corretos ---
+                Team = new TeamStatisticsDto
                 {
                     IdTeam = teamAId,
-                    Name = "Team A"
+                    Name = "Team A",
+                    NumGoals = 0,
                 },
-                Opponent = new TeamDto
+                Opponent = new TeamStatisticsDto
                 {
                     IdTeam = teamBId,
-                    Name = "Team B"
+                    Name = "Team B",
+                    NumGoals = 0,
                 },
-                pitchGame = new PitchDto
+                PitchGame = new PitchDto // Nome correto da propriedade é PascalCase
                 {
                     Name = "Pitch X",
                     Address = "Rua Y"
                 }
             };
-
             var matchesList = new List<InfoMatchCalendar> { info };
 
             mockMatchRepo

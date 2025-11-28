@@ -196,7 +196,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdTeam = team.Id
             };
             team.Members.Add(player);
-            var dto = new UpdateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
+            var dto = new CreateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(team.Id)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Team)null);
@@ -228,7 +228,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdTeam = team.Id
             };
             team.Members.Add(nonAdmin);
-            var dto = new UpdateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
+            var dto = new CreateTeamDto { Name = "Novo Nome", Description = "Nova desc" };
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(team.Id)).ReturnsAsync(team);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(nonAdmin.Id)).ReturnsAsync(nonAdmin);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Team)null);
@@ -263,7 +263,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IsAdmin = true
             };
             teamA.Members.Add(adminOfTeamA);
-            var dto = new UpdateTeamDto { Name = "Novo Nome" };
+            var dto = new CreateTeamDto { Name = "Novo Nome" };
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(teamB.Id)).ReturnsAsync(teamB);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminOfTeamA.Id)).ReturnsAsync(adminOfTeamA);
 
@@ -281,7 +281,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var dto = new UpdateTeamDto { Name = "Novo Nome" };
+            var dto = new CreateTeamDto { Name = "Novo Nome" };
             var admin = new Player { Id = "admin-id-123", IdTeam = Guid.NewGuid(), IsAdmin = true };
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(It.IsAny<Guid>())).ReturnsAsync((Team)null!);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(admin.Id)).ReturnsAsync(admin);
@@ -316,7 +316,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 IsAdmin = true
             };
             teamA.Members.Add(admin);
-            var dto = new UpdateTeamDto { Name = "FC Existente" };
+            var dto = new CreateTeamDto { Name = "FC Existente" };
             _teamRepoMock.Setup(r => r.GetTeamForUpdateAsync(teamA.Id)).ReturnsAsync(teamA);
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(admin.Id)).ReturnsAsync(admin);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync(teamB);
