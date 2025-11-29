@@ -22,7 +22,8 @@ import kotlinx.coroutines.launch
  * @property networkObserver Dependência para monitorizar o estado da internet.
  */
 abstract class BaseViewModel(
-    private val networkObserver: NetworkConnectivityObserver
+    private val networkObserver: NetworkConnectivityObserver,
+    private val needObserverNetwork: Boolean = true,
 ): ViewModel() {
     /**
      * Estado global da UI.
@@ -41,8 +42,9 @@ abstract class BaseViewModel(
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
     init {
-        // Inicia a observação da rede assim que qualquer ViewModel filho é instanciado.
-        observeNetworkChanges()
+        if(needObserverNetwork) {
+            observeNetworkChanges()
+        }
     }
 
     /**
@@ -83,6 +85,17 @@ abstract class BaseViewModel(
     }
 
     /**
+     * Força a interrupção do estado de carregamento (Loading).
+     *
+     * Este método é utilizado para definir manualmente `isLoading = false` no estado da UI.
+     *
+     * Sem chamar este método (ou o [launchDataLoad]), o spinner de loading ficaria a rodar infinitamente.
+     */
+    protected fun stopLoading() {
+        _uiState.update { it.copy(isLoading = false) }
+    }
+
+    /**
      * Define uma mensagem temporária (Toast) para ser exibida na UI.
      * Útil para feedbacks rápidos que não bloqueiam o ecrã.
      *
@@ -105,9 +118,7 @@ abstract class BaseViewModel(
         if(networkObserver.isOnlineOneShot()) {
             action()
         } else {
-            _uiState.update {
-                it.copy(toastMessage = toastMessage)
-            }
+            updateToast(message = toastMessage)
         }
     }
 

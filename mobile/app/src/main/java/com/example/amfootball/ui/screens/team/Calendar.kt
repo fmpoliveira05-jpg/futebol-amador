@@ -42,7 +42,7 @@ import com.example.amfootball.data.dtos.support.TeamStatisticsDto
 import com.example.amfootball.data.enums.MatchResult
 import com.example.amfootball.data.enums.MatchStatus
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
-import com.example.amfootball.data.mocks.Lists.CalendarMocks
+import com.example.amfootball.data.mocks.lists.CalendarMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -394,13 +394,11 @@ private fun ColumnTeams(
         TeamInfoRow(
             team = match.team,
             matchResult = match.matchResult,
-            image = match.team.image
         )
 
         TeamInfoRow(
             team = match.opponent,
             matchResult = match.matchResult,
-            image = match.opponent.image
         )
     }
 }
@@ -435,14 +433,18 @@ private fun ColumnDataMatch(
 private fun TeamInfoRow(
     team: TeamStatisticsDto,
     matchResult: MatchResult,
-    image: String? = ""
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         StringImageList(
-            image = image,
+            image = team.image,
+            contentDescription = stringResource(
+                id = R.string.logo_team_name,
+                R.string.logo_team,
+                team.name
+            )
         )
 
         Text(

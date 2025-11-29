@@ -55,12 +55,15 @@ class TeamFormViewModel @Inject constructor(
      * Propriedade computada que indica se o ViewModel está em modo de edição.
      * Útil para decidir entre chamar `createTeam` ou `updateTeam`.
      */
-    val isEditMode = teamId != null
+    val isEditMode: Boolean = !teamId.isNullOrBlank() && teamId != "null" && teamId != "{teamId}"
 
     init {
         if (isEditMode) {
             Log.d("TeamFormViewModel", "Modo Edição detetado: A carregar dados da equipa...")
             loadDataTeam()
+        } else {
+            stopLoading()
+            Log.d("TeamFormViewModel", "Modo Criação: Formulário limpo")
         }
     }
 

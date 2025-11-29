@@ -83,27 +83,31 @@ fun ProfilesImageString(
 }
 
 /**
- * Exibe uma imagem pequena, adequada para itens de lista (tamanho fixo: 40.dp).
+ * Componente visual que exibe uma imagem pequena (Avatar), ideal para itens de lista.
+ * Possui um tamanho fixo de **40.dp**.
  *
- * Se o [image] for null ou [Uri.EMPTY], exibe um ícone [Icons.Default.AccountCircle]
- * como placeholder em vez de carregar a imagem.
+ * Lógica de Exibição (Fallback):
+ * - **Sucesso:** Se o [image] for um URI válido, renderiza o componente [ImageIcon].
+ * - **Fallback:** Se o [image] for `null` ou [Uri.EMPTY], exibe um ícone padrão [Icons.Default.AccountCircle].
  *
- * @param image URI da imagem a ser exibida.
+ * @param image O objeto [Uri] da imagem a ser carregada.
+ * @param contentDescription Descrição textual da imagem para fins de acessibilidade.
  */
 @Composable
 fun ImageList(
-    image: Uri?
+    image: Uri?,
+    contentDescription: String
 ) {
     if (image != null && image != Uri.EMPTY) {
         ImageIcon(
             image = image,
-            contentDescription = "Foto do jogador",
+            contentDescription = contentDescription,
             sizeIamge = 40.dp
         )
     } else {
         Icon(
             imageVector = Icons.Default.AccountCircle,
-            contentDescription = "Foto do jogador",
+            contentDescription = contentDescription,
             modifier = Modifier.size(40.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -111,16 +115,24 @@ fun ImageList(
 }
 
 /**
- * Wrapper para [ImageList] que lida com o input de uma String (URL/caminho).
+ * Versão utilitária do [ImageList] que aceita uma URL em formato String.
  *
- * Tenta parsear a String para [Uri]. Se o parsing falhar, usa [Uri.EMPTY]
- * e aciona o ícone de placeholder do [ImageList].
+ * Este componente atua como um wrapper seguro que:
+ * 1. Verifica se a string é nula ou vazia.
+ * 2. Tenta converter a String para um [Uri] android.
+ * 3. Captura exceções de parsing (evitando crashes se a URL for inválida).
+ * 4. Memoriza ([remember]) o resultado da conversão para otimizar a performance durante recomposições.
  *
- * @param image A URL ou caminho da imagem como String (pode ser null).
+ * Se a conversão falhar ou a string for vazia, passa [Uri.EMPTY] para o componente visual,
+ * ativando o placeholder padrão.
+ *
+ * @param image A URL da imagem em formato String (ex: vindo de uma API/DTO). Pode ser null.
+ * @param contentDescription Descrição para acessibilidade (leitores de ecrã).
  */
 @Composable
 fun StringImageList(
-    image: String?
+    image: String?,
+    contentDescription: String,
 ) {
     val imageUri = remember(image) {
         if (image.isNullOrEmpty()) {
@@ -134,7 +146,10 @@ fun StringImageList(
         }
     }
 
-    ImageList(image = imageUri)
+    ImageList(
+        image = imageUri,
+        contentDescription = contentDescription
+    )
 }
 
 /**

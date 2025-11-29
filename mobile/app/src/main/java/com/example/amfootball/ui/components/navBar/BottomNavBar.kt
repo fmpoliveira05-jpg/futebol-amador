@@ -72,7 +72,7 @@ fun BottomSheetContent(
                 )
             )
         }
-        Routes.BottomNavBarRoutes.TEAM_LIST.route -> {
+        Routes.BottomNavBarRoutes.HOMEPAGE_TEAM.route -> {
             buttonsToShow.addAll(
                 listOf(
                     Routes.TeamRoutes.HOMEPAGE,

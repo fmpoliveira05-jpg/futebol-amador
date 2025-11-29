@@ -15,8 +15,8 @@ import com.google.gson.annotations.SerializedName
  */
 data class TeamDto(
     @SerializedName("IdTeam", alternate = ["idTeam"])
-    val id: String,
+    val id: String = "",
     @SerializedName("Name", alternate = ["name"])
-    val name: String,
+    val name: String = "",
     val image: String? = null
 )

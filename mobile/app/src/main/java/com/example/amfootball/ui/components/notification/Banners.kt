@@ -26,7 +26,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
-
 /**
  * Um componente de UI reativo que exibe um banner de aviso quando a aplicação perde a conexão à internet.
  *
@@ -43,6 +42,7 @@ import com.example.amfootball.R
 @Composable
 fun OfflineBanner(
     isVisible: Boolean,
+    text: String = stringResource(id = R.string.without_internet_save_data),
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -65,14 +65,14 @@ fun OfflineBanner(
             ) {
                 Icon(
                     imageVector = Icons.Rounded.WifiOff,
-                    contentDescription = "Sem internet",
+                    contentDescription = stringResource(id = R.string.without_internet),
                     modifier = Modifier.size(16.dp)
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = stringResource(id = R.string.without_internet),
+                    text = text,
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Medium
                 )

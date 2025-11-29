@@ -1,6 +1,5 @@
-package com.example.amfootball.data.mocks.Lists
+package com.example.amfootball.data.mocks.lists
 
-import android.net.Uri
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.data.actions.itemsList.ItemsListMemberAction
@@ -20,7 +19,7 @@ object ListMembersMocks {
             age = 25,
             positionId = 0,
             isAdmin = true,
-            image = Uri.EMPTY,
+            image = "",
             height = 185
         ),
         MemberTeamDto(
@@ -29,7 +28,7 @@ object ListMembersMocks {
             age = 22,
             positionId = 2,
             isAdmin = false,
-            image = Uri.EMPTY,
+            image = "",
             height = 178
         ),
         MemberTeamDto(
@@ -38,7 +37,7 @@ object ListMembersMocks {
             age = 28,
             positionId = 1,
             isAdmin = false,
-            image = Uri.EMPTY,
+            image = "",
             height = 192
         )
     )

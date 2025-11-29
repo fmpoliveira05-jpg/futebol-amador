@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,8 +29,8 @@ import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.navBar.BottomSheetContent
 import com.example.amfootball.ui.components.navBar.MainBottomNavBar
 import com.example.amfootball.ui.components.navBar.MainTopAppBar
-import com.example.amfootball.ui.screens.HomePageScreen
-import com.example.amfootball.ui.screens.LeaderboardScreen
+import com.example.amfootball.ui.screens.homePages.HomePageScreen
+import com.example.amfootball.ui.screens.lists.LeaderboardScreen
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -44,7 +45,7 @@ import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
-import com.example.amfootball.ui.screens.team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.homePages.HomePageTeamScreen
 import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
@@ -56,14 +57,13 @@ import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
 import com.example.amfootball.utils.extensions.composableProtected
 
-//TODO: Colocar autorização nas rotas, até agora só temos autorização
+//TODO: Colocar autorização nas rotas, até agora só temos autentificação
 @Composable
 fun MainNavigation() {
     val globalNavController = rememberNavController()
-
     val authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
-
-    val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
+    val context = LocalContext.current
+    val sessionManager by remember { mutableStateOf(SessionManager(context = context)) }
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -94,7 +94,10 @@ fun MainNavigation() {
                 startDestination = Routes.GeralRoutes.HOMEPAGE.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                homePages(globalNavController = globalNavController, sessionManager = sessionManager)
+                homePages(
+                    globalNavController = globalNavController,
+                    sessionManager = sessionManager
+                )
 
                 pages(
                     globalNavController = globalNavController,
@@ -128,7 +131,9 @@ fun MainNavigation() {
 
 private fun NavGraphBuilder.homePages(globalNavController: NavHostController, sessionManager: SessionManager) {
     composable(Routes.GeralRoutes.HOMEPAGE.route) {
-        HomePageScreen(globalNavController = globalNavController)
+        HomePageScreen(
+            globalNavController = globalNavController,
+        )
     }
 
     composableProtected(

@@ -2,7 +2,9 @@
 <resources>
     <string name="unknown_error">Unknown error</string>
     <string name="connection_error">No connection</string>
-    <string name="without_internet">No internet. Showing saved data</string>
+    <string name="without_internet">No internet</string>
+    <string name="without_internet_save_data">No internet. Showing saved data</string>
+
     <string name="mandatory_field">Mandatory field</string>
 
     <string name="error_min_address">Address must have at least %1$d characters</string>

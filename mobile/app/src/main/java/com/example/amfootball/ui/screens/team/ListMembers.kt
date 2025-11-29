@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.team
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,7 +37,7 @@ import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
-import com.example.amfootball.data.mocks.Lists.ListMembersMocks
+import com.example.amfootball.data.mocks.lists.ListMembersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -52,10 +51,10 @@ import com.example.amfootball.ui.components.lists.FilterNamePlayerTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
@@ -254,8 +253,13 @@ private fun ListMemberItem(
         item = member,
         title = { it.name },
         leading = {
-            ImageList(
+            StringImageList(
                 image = member.image,
+                contentDescription = stringResource(
+                    id = R.string.proflie_image_name,
+                    R.string.proflie_image,
+                    member.name
+                )
             )
         },
         supporting = {

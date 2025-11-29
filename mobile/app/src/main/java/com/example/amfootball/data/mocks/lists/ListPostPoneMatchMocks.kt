@@ -1,4 +1,4 @@
-package com.example.amfootball.data.mocks.Lists
+package com.example.amfootball.data.mocks.lists
 
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPostPoneMatchActions

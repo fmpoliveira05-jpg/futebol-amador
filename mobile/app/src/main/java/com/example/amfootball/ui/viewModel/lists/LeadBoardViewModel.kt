@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.viewModel
+package com.example.amfootball.ui.viewModel.lists
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
@@ -26,7 +26,7 @@ class LeadBoardViewModel: ViewModel() {
     //Inicializer
     init {
         //TODO: Depois adaptar para ir buscar ao FireBase
-        listTeam.value = LeadboardDto.generateLeadboardExample()
+        listTeam.value = LeadboardDto.Companion.generateLeadboardExample()
     }
 
     //Metodo
@@ -35,10 +35,7 @@ class LeadBoardViewModel: ViewModel() {
     }
 
     //TODO: Mandar o ID da Team como Parametro
-    fun showInfoTeam(
-        idTeam: String,
-        navHostController: NavHostController
-    ) {
+    fun showInfoTeam(idTeam: String, navHostController: NavHostController) {
         navHostController.navigate(route = Routes.UserRoutes.PROFILE.route) {
             launchSingleTop = true
         }

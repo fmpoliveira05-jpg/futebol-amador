@@ -25,7 +25,7 @@ import com.example.amfootball.data.actions.itemsList.ItemsListPostPoneMatchActio
 import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
-import com.example.amfootball.data.mocks.Lists.ListPostPoneMatchMocks
+import com.example.amfootball.data.mocks.lists.ListPostPoneMatchMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -248,7 +248,12 @@ private fun ItemListPosPoneMatch(
         },
         leading = {
             StringImageList(
-                image = postPoneMatch.opponent.image
+                image = postPoneMatch.opponent.image,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    R.string.logo_team,
+                    postPoneMatch.opponent.name
+                )
             )
         },
         trailing = {

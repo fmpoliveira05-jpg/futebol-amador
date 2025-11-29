@@ -27,7 +27,7 @@ data class MemberTeamDto(
     val name: String = "",
     @SerializedName("IsAdmin", alternate = ["isAdmin"])
     val isAdmin: Boolean = false,
-    val image: Uri = Uri.EMPTY,
+    val image: String? = null,
     @SerializedName("Age", alternate = ["age"])
     val age: Int = 0,
     @SerializedName("Height", alternate = ["height"])
@@ -49,7 +49,7 @@ data class MemberTeamDto(
             0 -> Position.FORWARD
             1 -> Position.MIDFIELDER
             2 -> Position.DEFENDER
-            else -> Position.GOALKEEPER // 3 ou fallback
+            else -> Position.GOALKEEPER
         }
 
     /**

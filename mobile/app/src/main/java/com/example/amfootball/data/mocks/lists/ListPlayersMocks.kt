@@ -1,11 +1,11 @@
-package com.example.amfootball.data.mocks.Lists
+package com.example.amfootball.data.mocks.lists
 
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 
-object ListPlayers {
+object ListPlayersMocks {
     val list = listOf(
         InfoPlayerDto(
             id = "1",

@@ -206,6 +206,11 @@ private fun ItemListMatchInivite(
         leading = {
             StringImageList(
                 image = matchInvite.opponent.image,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    R.string.logo_team,
+                    matchInvite.opponent.name
+                )
             )
         },
         supporting = {

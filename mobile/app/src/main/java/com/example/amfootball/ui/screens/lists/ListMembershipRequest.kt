@@ -225,6 +225,11 @@ private fun ListMemberShipRequestContent(
         leading = {
             StringImageList(
                 image = membershipRequest.team.image,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    stringResource(R.string.logo_team),
+                    membershipRequest.team.name
+                )
             )
         },
         supporting = {

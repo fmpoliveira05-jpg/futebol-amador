@@ -1,9 +1,9 @@
-package com.example.amfootball.ui.screens
+package com.example.amfootball.ui.screens.lists
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.amfootball.ui.viewModel.LeadBoardViewModel
+import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,6 +23,7 @@ import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
+import com.example.amfootball.ui.components.lists.StringImageList
 
 /**
  * Ecrã principal da Tabela de Classificação (Leaderboard).
@@ -133,8 +134,13 @@ private fun LeaderBoardItems(
             )
         },
         leadingContent = {
-            ImageList(
-                image = team.team.logoTeam
+            StringImageList(
+                image = team.team.logoTeam,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    stringResource(R.string.logo_team),
+                    team.team.name
+                )
             )
         },
         trailingContent = {

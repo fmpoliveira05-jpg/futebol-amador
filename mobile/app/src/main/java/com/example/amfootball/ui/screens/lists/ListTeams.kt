@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.lists
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,7 +23,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.filters.FiltersListTeam
@@ -36,6 +34,7 @@ import com.example.amfootball.data.actions.filters.FilterTeamActions
 import com.example.amfootball.data.actions.itemsList.ItemsListTeamAction
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.data.mocks.lists.ListTeamMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -48,9 +47,9 @@ import com.example.amfootball.ui.components.lists.FilterNameTeamTextField
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.NumMembersTeamRow
+import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
 import com.example.amfootball.utils.GeneralConst
@@ -347,7 +346,14 @@ private fun ListTeam(
             NumMembersTeamRow(numMembers = team.numberMembers)
         },
         leading = {
-            ImageList(image = team.logoTeam)
+            StringImageList(
+                image = team.logoTeam,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    R.string.logo_team,
+                    team.name
+                )
+            )
         },
         trailing = {
             ListTeamTrailing(
@@ -427,70 +433,17 @@ private fun ListTeamTrailing(
     }
 }
 
-/**
- * Mock Data para os Previews
- */
-private val mockRanks = listOf(
-    RankNameDto(id = "1", name = "Bronze"),
-    RankNameDto(id = "2", name = "Prata"),
-    RankNameDto(id = "3", name = "Ouro")
-)
-
-private val mockTeams = listOf(
-    ItemTeamInfoDto(
-        id = "1",
-        name = "Lisboa Lions",
-        fullAddress = "Rua Principal, Lisboa",
-        rank = RankNameDto(id = "3", name = "Ouro"),
-        points = 1500,
-        numberMembers = 30,
-        averageAge = 25.3, // Double correto
-        description = "Equipa focada em competição de alto nível.",
-        logoTeam = Uri.EMPTY
-    ),
-    ItemTeamInfoDto(
-        id = "2",
-        name = "Porto Pirates",
-        fullAddress = "Avenida dos Aliados, Porto",
-        rank = RankNameDto(id = "2", name = "Prata"),
-        points = 1200,
-        numberMembers = 25,
-        averageAge = 24.1,
-        description = "Equipa universitária do Porto.",
-        logoTeam = Uri.EMPTY
-    ),
-    ItemTeamInfoDto(
-        id = "3",
-        name = "Braga Warriors",
-        fullAddress = "Estádio Municipal, Braga",
-        rank = RankNameDto(id = "1", name = "Bronze"),
-        points = 800,
-        numberMembers = 20,
-        averageAge = 22.2,
-        description = "Formação de novos talentos.",
-        logoTeam = Uri.EMPTY
-    )
-)
-
-private val mockFiltersActions = FilterTeamActions(
-    {}, {}, {}, {}, {}, {}, {}, {}, {}, ButtonFilterActions({}, {})
-)
-
-private val mockItemActions = ItemsListTeamAction(
-    { _, _ -> }, { _, _ -> }, { _, _ -> }
-)
-
 @Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
 @Composable
 fun PreviewListTeamContent_Normal() {
     ListTeamContent(
         isOnline = true,
-        listTeams = mockTeams,
+        listTeams = ListTeamMocks.mockTeams,
         filters = FiltersListTeam(),
-        filtersActions = mockFiltersActions,
-        listRanks = mockRanks,
-        itemListActions = mockItemActions,
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController()
@@ -503,11 +456,11 @@ fun PreviewListTeamContent_Normal() {
 fun PreviewListTeamContent_Empty() {
     ListTeamContent(
         isOnline = true,
-        listTeams = emptyList(), // Lista vazia
+        listTeams = emptyList(),
         filters = FiltersListTeam(),
-        filtersActions = mockFiltersActions,
-        listRanks = mockRanks,
-        itemListActions = mockItemActions,
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController()
@@ -520,11 +473,11 @@ fun PreviewListTeamContent_Empty() {
 fun PreviewListTeamContent_Offline() {
     ListTeamContent(
         isOnline = false,
-        listTeams = mockTeams,
+        listTeams = ListTeamMocks.mockTeams,
         filters = FiltersListTeam(),
-        filtersActions = mockFiltersActions,
-        listRanks = mockRanks,
-        itemListActions = mockItemActions,
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController()
