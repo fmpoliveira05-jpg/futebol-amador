@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
@@ -175,10 +176,16 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
                 new MemberShipRequestDto
                 {
                     RequestId = Guid.NewGuid(),
-                    PlayerId = playerId,
-                    PlayerName = "Test Player",
-                    TeamId = Guid.NewGuid(),
-                    TeamName = "Team A",
+                    Player = new PlayerDto
+                    {
+                        Id = playerId,
+                        Name =  "Test Player"
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Team A",
+                    },
                     RequestDate = DateTime.UtcNow.AddDays(-1),
                     IsPlayerSender = true
                 }
@@ -235,10 +242,16 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
                 new MemberShipRequestDto
                 {
                     RequestId = Guid.NewGuid(),
-                    PlayerId = playerId,
-                    PlayerName = "Test Player",
-                    TeamId = Guid.NewGuid(),
-                    TeamName = "Team B",
+                    Player = new PlayerDto
+                    {
+                        Id = playerId,
+                        Name =  "Test Player"
+                    },
+                    Team = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Team B",
+                    },
                     RequestDate = DateTime.UtcNow.AddDays(-2),
                     IsPlayerSender = false
                 }
@@ -331,10 +344,16 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             var expectedResponse = new MemberShipRequestDto
             {
                 RequestId = requestId,
-                PlayerId = playerId,
-                PlayerName = "Test Player",
-                TeamId = Guid.NewGuid(),
-                TeamName = "Accepted Team",
+                Player = new PlayerDto
+                {
+                    Id = playerId,
+                    Name = "Test Player"
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = Guid.NewGuid(),
+                    Name = "Accepted Team",
+                },
                 RequestDate = DateTime.UtcNow,
                 IsPlayerSender = true
             };
@@ -377,8 +396,8 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             Assert.Multiple(() =>
             {
                 Assert.That(result.RequestId, Is.EqualTo(expectedResponse.RequestId));
-                Assert.That(result.PlayerId, Is.EqualTo(expectedResponse.PlayerId));
-                Assert.That(result.TeamName, Is.EqualTo(expectedResponse.TeamName));
+                Assert.That(result.Player.Id, Is.EqualTo(expectedResponse.Player.Id));
+                Assert.That(result.Team.Name, Is.EqualTo(expectedResponse.Team.Name));
                 Assert.That(result.IsPlayerSender, Is.EqualTo(expectedResponse.IsPlayerSender));
             });
 
@@ -428,10 +447,16 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             var expectedResponse = new MemberShipRequestDto
             {
                 RequestId = requestId,
-                PlayerId = playerId,
-                PlayerName = "Test Player",
-                TeamId = Guid.NewGuid(),
-                TeamName = "Rejected Team",
+                Player = new PlayerDto
+                {
+                    Id = playerId,
+                    Name = "Test Player"
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = Guid.NewGuid(),
+                    Name = "Rejected Team",
+                },
                 RequestDate = DateTime.UtcNow.AddDays(-1),
                 IsPlayerSender = false
             };
@@ -472,8 +497,8 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             Assert.Multiple(() =>
             {
                 Assert.That(result.RequestId, Is.EqualTo(expectedResponse.RequestId));
-                Assert.That(result.PlayerId, Is.EqualTo(expectedResponse.PlayerId));
-                Assert.That(result.TeamName, Is.EqualTo(expectedResponse.TeamName));
+                Assert.That(result.Player.Id, Is.EqualTo(expectedResponse.Player.Id));
+                Assert.That(result.Team.Name, Is.EqualTo(expectedResponse.Team.Name));
                 Assert.That(result.IsPlayerSender, Is.EqualTo(expectedResponse.IsPlayerSender));
             });
 
@@ -528,10 +553,16 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             var expectedResponse = new MemberShipRequestDto
             {
                 RequestId = Guid.NewGuid(),
-                PlayerId = playerId,
-                PlayerName = "Test Player",
-                TeamId = teamId,
-                TeamName = "Target Team",
+                Player = new PlayerDto
+                {
+                    Id = playerId,
+                    Name = "Test Player"
+                },
+                Team = new TeamDto
+                {
+                    IdTeam = teamId,
+                    Name = "Target Team",
+                },
                 RequestDate = DateTime.UtcNow,
                 IsPlayerSender = true
             };
@@ -573,9 +604,9 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             Assert.That(result, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(result.PlayerId, Is.EqualTo(expectedResponse.PlayerId));
-                Assert.That(result.TeamId, Is.EqualTo(expectedResponse.TeamId));
-                Assert.That(result.TeamName, Is.EqualTo(expectedResponse.TeamName));
+                Assert.That(result.Player.Id, Is.EqualTo(expectedResponse.Player.Id));
+                Assert.That(result.Team.IdTeam, Is.EqualTo(expectedResponse.Team.IdTeam));
+                Assert.That(result.Team.Name, Is.EqualTo(expectedResponse.Team.Name));
                 Assert.That(result.IsPlayerSender, Is.EqualTo(expectedResponse.IsPlayerSender));
             });
 
