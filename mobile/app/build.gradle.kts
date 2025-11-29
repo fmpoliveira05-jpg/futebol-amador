@@ -163,4 +163,8 @@ dependencies {
 
     // A biblioteca para usar hiltViewModel() no Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    //Espresso Ui Testing
+    androidTestImplementation("andoridx.test.espresso:espresso-core:3.5.1")
+
 }
