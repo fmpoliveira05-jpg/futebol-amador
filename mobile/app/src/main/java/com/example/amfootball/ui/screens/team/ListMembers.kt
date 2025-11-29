@@ -38,6 +38,7 @@ import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
+import com.example.amfootball.data.mocks.Lists.ListMembersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -56,6 +57,7 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.TypeMemberRow
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
 //TODO: Corrigir previews + toast de network + retry
@@ -89,6 +91,7 @@ fun ListMembersScreen(
     )
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
     ListMemberContent(
         filters = filters,
@@ -98,6 +101,7 @@ fun ListMembersScreen(
         listTypeMember = listTypeMember,
         listPosition = listPosition,
         uiState = uiState,
+        isOnline = isOnline,
         itemsListActions = itemsListActions,
         navHostController = navHostController,
     )
@@ -105,13 +109,14 @@ fun ListMembersScreen(
 
 @Composable
 private fun ListMemberContent(
+    uiState: UiState,
+    isOnline: Boolean,
     filters: FilterMembersTeam,
     filterActions: FilterMemberTeamAction,
     filtersErrors: FilterMembersFilterError,
     list: List<MemberTeamDto>,
     listTypeMember: List<TypeMember?>,
     listPosition: List<Position?>,
-    uiState: UiState,
     itemsListActions: ItemsListMemberAction,
     navHostController: NavHostController
 ) {
@@ -122,6 +127,8 @@ private fun ListMemberContent(
         errorMsg = uiState.errorMessage,
         retry = {},
         content = {
+            OfflineBanner(isVisible = !isOnline)
+
             ListSurface(
                 list = list,
                 filterSection = {
@@ -325,63 +332,20 @@ private fun MemberTrailingButtons(
     }
 }
 
-private val mockListTypes = listOf(null) + TypeMember.values().toList()
-private val mockListPositions = listOf(null) + Position.values().toList()
-
-private val mockMembers = listOf(
-    MemberTeamDto(
-        id = "1",
-        name = "João Silva",
-        age = 25,
-        positionId = 0,
-        isAdmin = true,
-        image = Uri.EMPTY,
-        height = 185
-    ),
-    MemberTeamDto(
-        id = "2",
-        name = "Pedro Santos",
-        age = 22,
-        positionId = 2,
-        isAdmin = false,
-        image = Uri.EMPTY,
-        height = 178
-    ),
-    MemberTeamDto(
-        id = "3",
-        name = "Miguel Costa",
-        age = 28,
-        positionId = 1,
-        isAdmin = false,
-        image = Uri.EMPTY,
-        height = 192
-    )
-)
-
-private val mockFilterActions = FilterMemberTeamAction(
-    {}, {}, {}, {}, {}, ButtonFilterActions({}, {})
-)
-
-private val mockItemActions = ItemsListMemberAction(
-    onPromoteMember = {},
-    onDemoteMember = {},
-    onRemovePlayer = {},
-    onShowMoreInfo = { _, _ -> }
-)
-
 @Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
 fun PreviewListMemberContent_Normal() {
     ListMemberContent(
         filters = FilterMembersTeam(),
-        filterActions = mockFilterActions,
+        filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
-        list = mockMembers,
-        listTypeMember = mockListTypes,
-        listPosition = mockListPositions,
+        list = ListMembersMocks.mockMembers,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
         uiState = UiState(isLoading = false),
-        itemsListActions = mockItemActions,
+        isOnline = true,
+        itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController()
     )
 }
@@ -392,13 +356,14 @@ fun PreviewListMemberContent_Normal() {
 fun PreviewListMemberContent_Empty() {
     ListMemberContent(
         filters = FilterMembersTeam(),
-        filterActions = mockFilterActions,
+        filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = emptyList(),
-        listTypeMember = mockListTypes,
-        listPosition = mockListPositions,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
         uiState = UiState(isLoading = false),
-        itemsListActions = mockItemActions,
+        isOnline = true,
+        itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController()
     )
 }
@@ -409,13 +374,14 @@ fun PreviewListMemberContent_Empty() {
 fun PreviewListMemberContent_Loading() {
     ListMemberContent(
         filters = FilterMembersTeam(),
-        filterActions = mockFilterActions,
+        filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = emptyList(),
-        listTypeMember = mockListTypes,
-        listPosition = mockListPositions,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
         uiState = UiState(isLoading = true),
-        itemsListActions = mockItemActions,
+        isOnline = true,
+        itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController()
     )
 }
@@ -426,13 +392,31 @@ fun PreviewListMemberContent_Loading() {
 fun PreviewListMemberContent_Error() {
     ListMemberContent(
         filters = FilterMembersTeam(),
-        filterActions = mockFilterActions,
+        filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = emptyList(),
-        listTypeMember = mockListTypes,
-        listPosition = mockListPositions,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
         uiState = UiState(isLoading = false, errorMessage = "Falha ao conectar ao servidor."),
-        itemsListActions = mockItemActions,
+        isOnline = true,
+        itemsListActions = ListMembersMocks.mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "5. Offline Banner - PT", locale = "pt-rPT", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Offline() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = ListMembersMocks.mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = ListMembersMocks.mockMembers,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
+        uiState = UiState(isLoading = false),
+        isOnline = false,
+        itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController()
     )
 }

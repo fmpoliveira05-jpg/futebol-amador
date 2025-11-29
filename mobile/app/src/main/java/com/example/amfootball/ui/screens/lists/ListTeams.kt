@@ -67,13 +67,14 @@ import com.example.amfootball.utils.TeamConst
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
  * @param viewModel O ViewModel injetado via Hilt.
  */
+//TODO: Falta filterErros
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
     viewModel: ListTeamViewModel = hiltViewModel()
 ) {
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
-    val listTeams by viewModel.listTeams.collectAsStateWithLifecycle()
+    val listTeams by viewModel.uiList.collectAsStateWithLifecycle()
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()

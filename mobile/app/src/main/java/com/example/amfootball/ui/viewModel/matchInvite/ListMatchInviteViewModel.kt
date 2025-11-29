@@ -1,8 +1,5 @@
 package com.example.amfootball.ui.viewModel.matchInvite
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
@@ -12,19 +9,23 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
 import com.example.amfootball.R
+import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class ListMatchInviteViewModel(): ViewModel() {
+@HiltViewModel
+class ListMatchInviteViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver
+): ListsViewModels<InfoMatchInviteDto>(networkObserver = networkObserver) {
 
-    private val filtersState: MutableLiveData<FilterMatchInvite> = MutableLiveData(FilterMatchInvite())
-    val uiFilters: LiveData<FilterMatchInvite> = filtersState
+    private val filtersState: MutableStateFlow<FilterMatchInvite> = MutableStateFlow(FilterMatchInvite())
+    val uiFilters: StateFlow<FilterMatchInvite> = filtersState
 
-    private val filtersErrorState: MutableLiveData<FilterMatchInviteError> = MutableLiveData(FilterMatchInviteError())
-    val filterError: LiveData<FilterMatchInviteError> = filtersErrorState
-
-    private val listState:MutableLiveData<List<InfoMatchInviteDto>> = MutableLiveData(emptyList<InfoMatchInviteDto>())
-    val uiList = listState
-    private var originalList: List<InfoMatchInviteDto> = emptyList()
-
+    private val filtersErrorState: MutableStateFlow<FilterMatchInviteError> = MutableStateFlow(FilterMatchInviteError())
+    val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState
 
     //Initializor
     init {
@@ -34,15 +35,15 @@ class ListMatchInviteViewModel(): ViewModel() {
     }
 
     fun onNameSenderChange(newSenderName: String) {
-        filtersState.value = filtersState.value!!.copy(senderName = newSenderName)
+        filtersState.value = filtersState.value.copy(senderName = newSenderName)
     }
 
     fun onMinDateChange(newMinDate: Long) {
-        filtersState.value = filtersState.value!!.copy(minDate = newMinDate.toLocalDateTime())
+        filtersState.value = filtersState.value.copy(minDate = newMinDate.toLocalDateTime())
     }
 
     fun onMaxDateChange(newMaxDate: Long) {
-        filtersState.value = filtersState.value!!.copy(maxDate = newMaxDate.toLocalDateTime())
+        filtersState.value = filtersState.value.copy(maxDate = newMaxDate.toLocalDateTime())
     }
 
     fun onApplyFilter() {
@@ -64,10 +65,7 @@ class ListMatchInviteViewModel(): ViewModel() {
     }
 
     //TODO: Passar o idMatch por parametro
-    fun negociateMatchInvite (
-        idMatchInvite: String,
-        navHostController: NavHostController
-    ) {
+    fun negociateMatchInvite (idMatchInvite: String, navHostController: NavHostController) {
         navHostController.navigate(route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
             launchSingleTop = true
         }
@@ -78,19 +76,16 @@ class ListMatchInviteViewModel(): ViewModel() {
     }
 
     //TODO: Passar o id na rota
-    fun showMoreDetails(
-        idMatchInvite: String,
-        navHostController: NavHostController
-    ) {
+    fun showMoreDetails(idMatchInvite: String, navHostController: NavHostController) {
         navHostController.navigate(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
             launchSingleTop = true
         }
     }
 
     private fun validateFitler(): Boolean {
-        val nameSender = filtersState.value?.senderName
-        val minDate = filtersState.value?.minDate
-        val maxDate = filtersState.value?.maxDate
+        val nameSender = filtersState.value.senderName
+        val minDate = filtersState.value.minDate
+        val maxDate = filtersState.value.maxDate
 
         var nameSenderError: ErrorMessage? = null
         var minDateError: ErrorMessage? = null

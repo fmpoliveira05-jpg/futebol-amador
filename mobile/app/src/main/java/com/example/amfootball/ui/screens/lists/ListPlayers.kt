@@ -160,7 +160,6 @@ fun ListPlayersContent(
                         isExpanded = filtersExpanded,
                         onToggleExpand = { filtersExpanded = !filtersExpanded },
                         content = { paddingModifier ->
-                            // Nota: A função FilterListPlayerContent precisa ser pública ou estar neste ficheiro
                             FilterListPlayerContent(
                                 filters = filters,
                                 filtersError = filtersError,

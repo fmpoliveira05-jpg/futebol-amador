@@ -39,33 +39,42 @@ class NetworkConnectivityObserver @Inject constructor(
      * @return Um Flow<Boolean> que representa o estado da internet.
      */
     fun observeConnectivity(): Flow<Boolean> = callbackFlow {
+
+        val sendCurrentState = {
+            launch { send(isOnlineOneShot()) }
+        }
+
         // Callback que recebe os eventos do sistema Android
         val callback = object : ConnectivityManager.NetworkCallback() {
 
             // Chamado quando uma nova rede é encontrada e está pronta para uso
             override fun onAvailable(network: Network) {
                 super.onAvailable(network)
-                launch { send(true) }
+                sendCurrentState()
+            }
+
+            //Deteta quando desligas os dados móveis (a rede existe, mas perde Internet).
+            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+                super.onCapabilitiesChanged(network, networkCapabilities)
+                sendCurrentState()
             }
 
             // Chamado quando a conexão com a rede é perdida
             override fun onLost(network: Network) {
                 super.onLost(network)
-                launch { send(false) } // Avisa: "Caímos"
+                sendCurrentState()
             }
 
             // Chamado quando a rede não satisfaz os requisitos (sem internet)
             override fun onUnavailable() {
                 super.onUnavailable()
-                launch { send(false) }
+                sendCurrentState()
             }
         }
 
         // Define os critérios para a rede que queremos (Internet + Wifi ou Celular)
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build()
 
         // Regista o callback no sistema Android para começar a escutar
@@ -90,5 +99,7 @@ class NetworkConnectivityObserver @Inject constructor(
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+
     }
 }

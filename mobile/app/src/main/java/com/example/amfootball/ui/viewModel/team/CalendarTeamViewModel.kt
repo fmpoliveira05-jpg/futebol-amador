@@ -1,8 +1,6 @@
 package com.example.amfootball.ui.viewModel.team
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
@@ -15,17 +13,13 @@ import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.repository.CalendarRepository
 import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 //TODO: Falta o StartMatch
@@ -48,7 +42,7 @@ class CalendarTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val calendarRepository: CalendarRepository,
     private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+): ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
     private val teamId = savedStateHandle.get<String>("teamId")
 
@@ -56,69 +50,12 @@ class CalendarTeamViewModel @Inject constructor(
     private val filterState: MutableStateFlow<FilterCalendar> = MutableStateFlow(FilterCalendar())
     val filter: StateFlow<FilterCalendar> = filterState
 
-    /**
-     * Lista de jogos visível na UI.
-     * Pode ser o resultado direto da API ou uma versão filtrada localmente.
-     */
-    private val listState: MutableStateFlow<List<InfoMatchCalendar>> = MutableStateFlow(emptyList())
-
-    /**
-     * Controlo de quantos itens devem ser exibidos inicialmente ou após clicar em "Mostrar Mais".
-     */
-    private val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
-
-    /**
-     * Lista fatiada para exibição na UI.
-     *
-     * Combina a [listState] (lista total) com o [inicialSizeList] (limite atual)
-     * para retornar apenas o número de jogadores permitido pela paginação atual.
-     */
-    val uiList: StateFlow<List<InfoMatchCalendar>> =
-        combine(listState, inicialSizeList) { lista, numero ->
-            lista.take(numero)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = emptyList()
-        )
-
-    /**
-     * Cache da lista original carregada da API.
-     * Usada para permitir a limpeza de filtros e filtragem offline sem novos pedidos à rede.
-     */
-    private var originalList: List<InfoMatchCalendar> = emptyList()
-
-    /**
-     * Controla a visibilidade do botão "Mostrar Mais".
-     *
-     * Verifica dinamicamente se o número de itens exibidos atualmente ([inicialSizeList])
-     * é menor que o total de itens disponíveis na lista ([listState]).
-     * Retorna `true` se houver mais itens para mostrar.
-     */
-    val showMoreButtonVisible: StateFlow<Boolean> =
-        combine(listState, inicialSizeList) { listaCompleta, tamanhoAtual ->
-            tamanhoAtual < listaCompleta.size
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = false
-        )
-
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
     private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
     val uiErrors: StateFlow<FilterCalendarError> = listErrors
 
-    /** Estado global da UI (Loading, Erros de API, Toasts). */
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(true))
-    val uiState: StateFlow<UiState> = _uiState
-
-    /** Estado de conectividade (True = Online, False = Offline). */
-    private val isConnected: MutableStateFlow<Boolean> = MutableStateFlow(networkObserver.isOnlineOneShot())
-    val isOnline: StateFlow<Boolean> = isConnected
-
     //Inicializer
     init {
-        observeNetworkChanges()
         loadCalendar()
     }
 
@@ -206,15 +143,14 @@ class CalendarTeamViewModel @Inject constructor(
      * Requer conexão à internet. Se offline, exibe um Toast de erro via [UiState].
      */
     fun onCancelMatch(idMatch: String, navHostController: NavHostController) {
-        if(networkObserver.isOnlineOneShot()) {
-            navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/${idMatch}") {
-                launchSingleTop = true
-            }
-        } else {
-            _uiState.update {
-                it.copy(toastMessage = "Para cancelar o jogo é necessária conexão à internet.")
-            }
-        }
+        onlineFunctionality(
+            action = {
+                navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/${idMatch}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = "Para cancelar o jogo é necessária conexão à internet."
+        )
     }
 
     /**
@@ -222,15 +158,14 @@ class CalendarTeamViewModel @Inject constructor(
      * Requer conexão à internet.
      */
     fun onPostPoneMatch(idMatch: String, navHostController: NavHostController) {
-        if(networkObserver.isOnlineOneShot()) {
-            navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/${idMatch}") {
-                launchSingleTop = true
-            }
-        } else {
-            _uiState.update {
-                it.copy(toastMessage = "Para adiar o jogo é necessária conexão à internet.")
-            }
-        }
+        onlineFunctionality(
+            action = {
+                navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/${idMatch}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = "Para adiar o jogo é necessária conexão à internet."
+        )
     }
 
     /**
@@ -238,14 +173,13 @@ class CalendarTeamViewModel @Inject constructor(
      * Requer conexão à internet.
      */
     fun onStartMatch(idMatch: String) {
-        if(networkObserver.isOnlineOneShot()) {
-            //TODO: Chamar endPoint da API para iniciar a partida (E meter o user em loading ate algum adversario se conectar ao Hub com ele)
-            //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
-        } else {
-            _uiState.update {
-                it.copy(toastMessage = "Para iniciar o jogo é necessária conexão à internet.")
-            }
-        }
+        onlineFunctionality(
+            action = {
+                //TODO: Chamar endPoint da API para iniciar a partida (E meter o user em loading ate algum adversario se conectar ao Hub com ele)
+                //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
+            },
+            toastMessage = "Para iniciar o jogo é necessária conexão à internet."
+        )
     }
 
     /**
@@ -253,27 +187,14 @@ class CalendarTeamViewModel @Inject constructor(
      * Requer conexão à internet.
      */
     fun onFinishMatch(idMatch: String, navHostController: NavHostController) {
-        if(networkObserver.isOnlineOneShot()) {
-            navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/${idMatch}") {
-                launchSingleTop = true
-            }
-        } else {
-            _uiState.update {
-                it.copy(toastMessage = "Para finalizar a partida é necessária conexão à internet.")
-            }
-        }
-    }
-
-    /**
-    * Callback chamado pela UI quando um Toast é exibido.
-    * Limpa a mensagem do estado para evitar que o Toast apareça repetidamente.
-    */
-    fun onToastShown() {
-        _uiState.update { it.copy(toastMessage = null) }
-    }
-
-    fun onShowMore() {
-        inicialSizeList.value += ListsSizesConst.INCREMENT_SIZE
+        onlineFunctionality(
+            action = {
+                navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/${idMatch}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = "Para finalizar a partida é necessária conexão à internet."
+        )
     }
 
     /**
@@ -285,56 +206,19 @@ class CalendarTeamViewModel @Inject constructor(
      * - Gere o estado de Loading.
      */
     fun loadCalendar() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-
-                return@launch
-            }
-
-            try {
-                if (teamId == null) {
-                    _uiState.update {
-                        it.copy(isLoading = false, errorMessage = "O id da equipa é obrigatório")
-                    }
-
-                    return@launch
-                }
-
+        launchDataLoad {
+            if(teamId != null) {
                 val calendar = calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
 
                 listState.value = calendar
                 if (filterState.value == FilterCalendar()) {
                     originalList = calendar
                 }
-
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
             }
         }
     }
 
     // --- MÉTODOS PRIVADOS ---
-    /**
-     * Inicia a observação contínua do estado da conectividade de rede.
-     * Atualiza [isConnected] em tempo real.
-     */
-    private fun observeNetworkChanges() {
-        viewModelScope.launch {
-            networkObserver.observeConnectivity()
-                .collect { isOnline ->
-                    isConnected.value = isOnline
-                }
-        }
-    }
-
     /**
      * Filtra a lista de jogos em memória (offline).
      * Utiliza lógica "AND" (todos os critérios devem ser verdadeiros).

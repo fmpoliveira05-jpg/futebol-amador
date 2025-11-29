@@ -43,7 +43,6 @@ class SettingsViewModel @Inject constructor(
     private var _notifications = MutableStateFlow(settingsStore.getNotifications())
     val notifications = _notifications.asStateFlow()
 
-
     fun showDeleteProfile() {
         deleteProfile.value = true
     }

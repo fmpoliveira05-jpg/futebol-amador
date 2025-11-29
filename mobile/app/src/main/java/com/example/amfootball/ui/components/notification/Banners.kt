@@ -26,6 +26,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
 
+
+/**
+ * Um componente de UI reativo que exibe um banner de aviso quando a aplicação perde a conexão à internet.
+ *
+ * Este banner utiliza animações de entrada e saída ([AnimatedVisibility]) para garantir uma transição
+ * suave na interface, expandindo verticalmente quando se torna visível e colapsando quando oculto.
+ * Visualmente, utiliza as cores de erro do tema ([MaterialTheme.colorScheme.errorContainer]) para
+ * chamar a atenção do utilizador.
+ *
+ *
+ * @param isVisible Controla a visibilidade do banner. Se `true`, o banner é animado para aparecer no ecrã.
+ * Geralmente, deve ser passado o inverso do estado de conectividade (ex: `!isOnline`).
+ * @param modifier Modificador opcional para ajustar o layout ou estilo do componente container.
+ */
 @Composable
 fun OfflineBanner(
     isVisible: Boolean,

@@ -16,17 +16,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.data.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.lists.FilterMaxDatePicker
@@ -38,20 +41,24 @@ import com.example.amfootball.ui.components.lists.InfoRow
 import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import com.example.amfootball.utils.Patterns
 import com.example.amfootball.utils.UserConst
 import java.time.format.DateTimeFormatter
 
+//TODO: Meter uiState e Network
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
 @Composable
 fun ListMemberShipRequest(
     navHostController: NavHostController,
-    viewModel: ListMemberShipRequestViewModel = viewModel(),
+    viewModel: ListMemberShipRequestViewModel = hiltViewModel(),
 ){
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
     val filterError by viewModel.uiFilterErrorState.collectAsStateWithLifecycle()
-    val list by viewModel.uiListState.collectAsStateWithLifecycle()
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val filterActions = FilterMemberShipRequestActions(
         onSenderNameChange = viewModel::onSenderNameChanged,
         onMinDateSelected = viewModel::onMinDateSelected,
@@ -69,6 +76,8 @@ fun ListMemberShipRequest(
     )
 
     ContentListMemberShipRequest(
+        uiState = uiState,
+        isOnline = isOnline,
         filters = filters,
         filterError = filterError,
         filterActions = filterActions,
@@ -80,6 +89,8 @@ fun ListMemberShipRequest(
 
 @Composable
 private fun ContentListMemberShipRequest(
+    uiState: UiState,
+    isOnline: Boolean,
     filters: FilterMemberShipRequest,
     filterError: FilterMemberShipRequestError,
     filterActions: FilterMemberShipRequestActions,
@@ -89,31 +100,41 @@ private fun ContentListMemberShipRequest(
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    ListSurface(
-        list = list,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                content = {
-                    FilterListMemberShipRequestContent(
-                        filters = filters,
-                        filterError = filterError,
-                        filterActions = filterActions,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = {},
+        content = {
+            OfflineBanner(isVisible = !isOnline)
+
+            ListSurface(
+                list = list,
+                filterSection = {
+                    FilterSection(
+                        isExpanded = filtersExpanded,
+                        onToggleExpand = { filtersExpanded = !filtersExpanded },
+                        content = {
+                            FilterListMemberShipRequestContent(
+                                filters = filters,
+                                filterError = filterError,
+                                filterActions = filterActions,
+                                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            )
+                        }
                     )
-                }
+                },
+                listItems = { request ->
+                    ListMemberShipRequestContent(
+                        membershipRequest = request,
+                        itemsActions = itemsActions,
+                        navHostController = navHostController
+                    )
+                },
+                messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
             )
-        },
-        listItems = { request ->
-            ListMemberShipRequestContent(
-                membershipRequest = request,
-                itemsActions = itemsActions,
-                navHostController = navHostController
-            )
-        },
-        messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
+        }
     )
+
 }
 
 @Composable

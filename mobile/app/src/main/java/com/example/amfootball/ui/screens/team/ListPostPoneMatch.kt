@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -14,15 +13,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPostPoneMatchActions
+import com.example.amfootball.data.actions.itemsList.ItemsListPostPoneMatchActions
 import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
+import com.example.amfootball.data.mocks.Lists.ListPostPoneMatchMocks
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.RejectButton
@@ -39,6 +43,7 @@ import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -46,12 +51,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ListPostPoneMatchScreen(
     navHostController: NavHostController,
-    viewModel: ListPostPoneMatchViewModel = viewModel()
+    viewModel: ListPostPoneMatchViewModel = hiltViewModel()
 ) {
-    val filters by viewModel.filter.observeAsState(initial = FilterPostPoneMatch())
-    val filtersError by viewModel.filterErros.observeAsState(initial = ListPostPoneMatchFiltersError())
-    val list by viewModel.list.observeAsState(initial = emptyList())
-
+    val filters by viewModel.filter.collectAsStateWithLifecycle()
+    val filtersError by viewModel.filterErros.collectAsStateWithLifecycle()
     val filterActions = FilterListPostPoneMatchActions(
         onOpponentNameChange = viewModel::onOpponentNameChange,
         onIsHomeChange = viewModel::onIsHomeChange,
@@ -65,39 +68,74 @@ fun ListPostPoneMatchScreen(
         )
     )
 
-    var filtersExpanded by remember { mutableStateOf(false) }
-    ListSurface(
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val itemsListActions = ItemsListPostPoneMatchActions(
+        acceptPostPoneMatch = viewModel::acceptPostPoneMatch,
+        rejectPostPoneMatch = viewModel::rejectPostPoneMatch,
+        showMoreInfo = viewModel::showMoreInfo
+    )
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+
+    ListPostPoneMatchContent(
+        uiState = uiState,
+        isOnline = isOnline,
+        filters = filters,
+        filtersError = filtersError,
+        filterActions = filterActions,
         list = list,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                content = { paddingModifier ->
-                    FilterListPostPoneMatchContent(
-                        filters = filters,
-                        filterActions = filterActions,
-                        filtersError = filtersError,
-                        modifier = paddingModifier
+        itemsListActions = itemsListActions,
+        navHostController = navHostController
+    )
+}
+
+@Composable
+private fun ListPostPoneMatchContent(
+    uiState: UiState,
+    isOnline: Boolean,
+    filters: FilterPostPoneMatch,
+    filtersError: ListPostPoneMatchFiltersError,
+    filterActions: FilterListPostPoneMatchActions,
+    list: List<PostPoneMatchDto>,
+    itemsListActions: ItemsListPostPoneMatchActions,
+    navHostController: NavHostController
+) {
+    var filtersExpanded by remember { mutableStateOf(false) }
+
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = {},
+        content = {
+            OfflineBanner(isVisible = !isOnline)
+
+            ListSurface(
+                list = list,
+                filterSection = {
+                    FilterSection(
+                        isExpanded = filtersExpanded,
+                        onToggleExpand = { filtersExpanded = !filtersExpanded },
+                        content = { paddingModifier ->
+                            FilterListPostPoneMatchContent(
+                                filters = filters,
+                                filterActions = filterActions,
+                                filtersError = filtersError,
+                                modifier = paddingModifier
+                            )
+                        }
                     )
-                }
+                },
+                listItems = { postPoneMatch ->
+                    ItemListPosPoneMatch(
+                        postPoneMatch = postPoneMatch,
+                        itemsListActions = itemsListActions,
+                        navHostController = navHostController
+                    )
+                },
+                messageEmptyList = stringResource(id = R.string.list_post_pone_match_empty)
             )
-        },
-        listItems = { postPoneMatch ->
-            ItemListPosPoneMatch(
-                postPoneMatch = postPoneMatch,
-                acceptPostPoneMatch = { viewModel.acceptPostPoneMatch(
-                    idPostPoneMatch = postPoneMatch.id,
-                )},
-                rejectPostPoneMatch = { viewModel.rejectPostPoneMatch(
-                    idPostPoneMatch = postPoneMatch.id,
-                )},
-                showMore = { viewModel.showMoreInfo(
-                    idOpponent = postPoneMatch.opponent.id,
-                    navHostController = navHostController)
-                }
-            )
-        },
-        messageEmptyList = stringResource(id = R.string.list_post_pone_match_empty)
+        }
     )
 }
 
@@ -194,9 +232,8 @@ private fun FilterListPostPoneMatchContent(
 @Composable
 private fun ItemListPosPoneMatch(
     postPoneMatch: PostPoneMatchDto,
-    acceptPostPoneMatch: () -> Unit,
-    rejectPostPoneMatch: () -> Unit,
-    showMore: () -> Unit
+    itemsListActions: ItemsListPostPoneMatchActions,
+    navHostController: NavHostController
 ) {
     GenericListItem(
         item = postPoneMatch,
@@ -216,10 +253,10 @@ private fun ItemListPosPoneMatch(
         },
         trailing = {
             Row {
-                AcceptButton(accept = acceptPostPoneMatch)
-                RejectButton(reject = rejectPostPoneMatch)
+                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.id)})
+                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.id)})
                 ShowMoreInfoButton(
-                    showMoreDetails = showMore,
+                    showMoreDetails = { itemsListActions.showMoreInfo(postPoneMatch.opponent.id, navHostController)},
                     contentDescription = stringResource(id = R.string.list_teams_view_team)
                 )
             }
@@ -227,19 +264,82 @@ private fun ItemListPosPoneMatch(
     )
 }
 
-@Preview(
-    name = "Lista de adiamentos - PT",
-    locale = "pt",
-    showBackground = true
-)
-@Preview(
-    name = "List PostPone Match- EN",
-    locale = "en",
-    showBackground = true
-)
+@Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListPostPoneMatch() {
-    ListPostPoneMatchScreen(
+fun PreviewListPostPoneMatch_Normal() {
+    ListPostPoneMatchContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        filters = FilterPostPoneMatch(),
+        filtersError = ListPostPoneMatchFiltersError(),
+        filterActions = ListPostPoneMatchMocks.mockFilterActions,
+        list = ListPostPoneMatchMocks.mockPostPoneMatches,
+        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. List Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListPostPoneMatch_Empty() {
+    ListPostPoneMatchContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        filters = FilterPostPoneMatch(),
+        filtersError = ListPostPoneMatchFiltersError(),
+        filterActions = ListPostPoneMatchMocks.mockFilterActions,
+        list = emptyList(),
+        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "3. Loading - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Loading - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListPostPoneMatch_Loading() {
+    ListPostPoneMatchContent(
+        uiState = UiState(isLoading = true),
+        isOnline = true,
+        filters = FilterPostPoneMatch(),
+        filtersError = ListPostPoneMatchFiltersError(),
+        filterActions = ListPostPoneMatchMocks.mockFilterActions,
+        list = emptyList(),
+        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "4. Erro - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "4. Error - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListPostPoneMatch_Error() {
+    ListPostPoneMatchContent(
+        uiState = UiState(isLoading = false, errorMessage = "Falha ao carregar adiamentos."),
+        isOnline = true,
+        filters = FilterPostPoneMatch(),
+        filtersError = ListPostPoneMatchFiltersError(),
+        filterActions = ListPostPoneMatchMocks.mockFilterActions,
+        list = emptyList(),
+        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        navHostController = rememberNavController()
+    )
+}
+
+@Preview(name = "5. Offline Banner - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "5. Offline Banner - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListPostPoneMatch_Offline() {
+    ListPostPoneMatchContent(
+        uiState = UiState(isLoading = false),
+        isOnline = false,
+        filters = FilterPostPoneMatch(),
+        filtersError = ListPostPoneMatchFiltersError(),
+        filterActions = ListPostPoneMatchMocks.mockFilterActions,
+        list = ListPostPoneMatchMocks.mockPostPoneMatches,
+        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
         navHostController = rememberNavController()
     )
 }

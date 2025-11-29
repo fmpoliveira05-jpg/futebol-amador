@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.navigation.objects.Routes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,7 +37,7 @@ abstract class BaseViewModel(
      * True se houver internet, False caso contrário.
      * Este fluxo é atualizado automaticamente pelo [observeNetworkChanges].
      */
-    private val _isOnline = MutableStateFlow(networkObserver.isOnlineOneShot())
+    private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
     init {
@@ -98,6 +99,16 @@ abstract class BaseViewModel(
      */
     fun onToastShown() {
         _uiState.update { it.copy(toastMessage = null) }
+    }
+
+    protected fun onlineFunctionality(action: () -> Unit, toastMessage: String) {
+        if(networkObserver.isOnlineOneShot()) {
+            action()
+        } else {
+            _uiState.update {
+                it.copy(toastMessage = toastMessage)
+            }
+        }
     }
 
     /**
