@@ -203,12 +203,19 @@ namespace Application.Services
             {
                 PlayerId = player.Id,
                 Name = player.Name,
+                Email = player.Email,
+                PhoneNumber = player.Phone,
                 IsAdmin = player.IsAdmin,
                 Height = player.Height,
                 Position = player.Position,
                 DateOfBirth = player.DateOfBirth,
                 Age = today.Year - player.DateOfBirth.Year,
-                IdTeam = player.IdTeam,
+                Team = player.IdTeam.HasValue ? new TeamDto
+                {
+                    IdTeam = player.IdTeam.Value,
+                    Name = player.Team?.Name
+                } : null,
+                Address = player.Address,
             }).ToList();
 
             return playerDtos;

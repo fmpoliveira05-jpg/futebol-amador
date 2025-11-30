@@ -10,6 +10,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 namespace Infrastructure.Repositories
 {
@@ -94,6 +95,7 @@ namespace Infrastructure.Repositories
         
         public async Task<TeamDetailsDto?> GetTeamDetailsDtoAsync(Guid teamId)
         {
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
             return await DbContext.Team
                 .Where(t => t.Id == teamId)
                 .Include(t=> t.Pitch)
@@ -114,8 +116,17 @@ namespace Infrastructure.Repositories
                     {
                         PlayerId = player.Id,
                         Name = player.Name,
+                        Email = player.Email,
+                        PhoneNumber = player.Phone,
+                        Address = player.Address,
+                        Age = EF.Functions.DateDiffDay(player.DateOfBirth, dateNow),
+                        DateOfBirth = player.DateOfBirth,
+                        Team = new TeamDto
+                        {
+                            IdTeam = t.Id,
+                            Name = t.Name,
+                        },
                         Height = player.Height,
-                        IdTeam = player.IdTeam,
                         Position = player.Position,
                         IsAdmin = player.IsAdmin
                     }).ToList()
@@ -210,6 +221,8 @@ namespace Infrastructure.Repositories
                 }
             }
 
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+
             return playersQuery
                 .Select(player => new PlayerDetailsDto
                 {
@@ -219,7 +232,13 @@ namespace Infrastructure.Repositories
                     Address = player.Address,
                     Position = player.Position,
                     Height = player.Height,
-                    IdTeam = player.IdTeam,
+                    Email = player.Email,
+                    PhoneNumber = player.Phone,
+                    Team = new TeamDto {
+                        IdTeam = team.Id,
+                        Name = team.Name
+                    },
+                    Age = EF.Functions.DateDiffDay(player.DateOfBirth, dateNow),
                     IsAdmin = player.IsAdmin
                 })
                 .ToList();

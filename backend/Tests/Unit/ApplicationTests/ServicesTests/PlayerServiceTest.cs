@@ -318,7 +318,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(resultDto, Is.Not.Null);
             Assert.That(resultDto, Is.TypeOf<PlayerDetailsDto>());
             Assert.That(resultDto.Name, Is.EqualTo(mockPlayer.Name));
-            Assert.That(resultDto.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
+            Assert.That(resultDto.Team.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             validatorMock.Verify(v => v.GetPlayerByIdValidator(mockPlayer), Times.Once);

@@ -134,8 +134,9 @@ namespace Application.Services
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
             playerValidator.GetPlayerByIdValidator(player);
-
-            PlayerDetailsDto playerDetails = new PlayerDetailsDto
+            
+            var today = DateTime.Today;
+            var playerDetails = new PlayerDetailsDto
             {
                 PlayerId = playerId,
                 Name = player.Name,
@@ -145,9 +146,13 @@ namespace Application.Services
                 Address = player.Address,
                 Position = player.Position,
                 Height = player.Height,
-                IdTeam = player.IdTeam,
+                Age = today.Year - player.DateOfBirth.Year,
+                Team = player.IdTeam.HasValue ? new TeamDto
+                {
+                    IdTeam = player.IdTeam.Value,
+                    Name = player.Team?.Name
+                } : null,
                 IsAdmin = player.IsAdmin,
-                TeamName = player.Team?.Name
             };
 
             return playerDetails;

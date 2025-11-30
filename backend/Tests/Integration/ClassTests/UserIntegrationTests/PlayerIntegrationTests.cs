@@ -1,6 +1,7 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
@@ -61,7 +62,11 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 Address = "Test Address",
                 Position = 0,
                 Height = 180,
-                IdTeam = Guid.NewGuid()
+                Team = new TeamDto
+                {
+                    IdTeam = Guid.NewGuid(),
+                    Name = "Test team"
+                }
             };
 
             var mockPlayerService = new Mock<IPlayerService>();
@@ -146,7 +151,11 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 Address = "User Address",
                 Position = 0,
                 Height = 175,
-                IdTeam = Guid.NewGuid()
+                Team = new TeamDto
+                {
+                    IdTeam = Guid.NewGuid(),
+                    Name = "Test Team"
+                }
             };
 
             var mockPlayerService = new Mock<IPlayerService>();

@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.DTOs.Team;
+using Domain.Constants;
 using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 
@@ -39,10 +40,7 @@ namespace Application.DTOs.PlayerDTOs
         [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight)]
         public int Height { get; set; }
 
-        public Guid? IdTeam { get; set; }
-
-        [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
-        public string? TeamName { get; set; }
+        public TeamDto? Team { get; set; }
 
         public bool? IsAdmin { get; set; }
     }
