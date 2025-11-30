@@ -74,7 +74,7 @@ export class TeamMembershipRequestsPageComponent {
   protected accept(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres aceitar o pedido de adesão do jogador "${request.playerName}"?`
+        `Tens a certeza que queres aceitar o pedido de adesão do jogador "${request.player.name}"?`
       )
     ) {
       return;
@@ -106,7 +106,7 @@ export class TeamMembershipRequestsPageComponent {
   protected reject(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres rejeitar o pedido de adesão do jogador "${request.playerName}"?`
+        `Tens a certeza que queres rejeitar o pedido de adesão do jogador "${request.player.name}"?`
       )
     ) {
       return;

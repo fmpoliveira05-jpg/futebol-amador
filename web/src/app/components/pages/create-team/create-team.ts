@@ -71,8 +71,7 @@ export class CreateTeam {
     const payload: CreateTeamDto = {
       name: this.form.value['name'],
       description: this.form.value['description'],
-      iconName: '',
-      iconPath: '',
+      icon: '',
       homePitch: homePitch,
     };
 

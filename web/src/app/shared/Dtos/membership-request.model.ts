@@ -1,3 +1,6 @@
+import { PlayerDto } from "./Player/PlayerDto";
+import { TeamDto } from "./Team/TeamDto";
+
 /**
  * Interface que representa um pedido de adesão de um jogador a uma equipa (ou vice-versa).
  * Utilizada para transferir as informações do pedido de adesão entre o cliente e o servidor.
@@ -12,22 +15,12 @@ export interface MembershipRequest {
   /**
    * Nome do jogador que fez o pedido de adesão.
    */
-  playerName: string;
+  player: PlayerDto;
 
   /**
-   * ID do jogador que fez o pedido de adesão.
+   * Equipa que fez o pedido de adesão.
    */
-  playerId: string;
-
-  /**
-   * ID da equipa para a qual o jogador está a pedir adesão.
-   */
-  teamId: string;
-
-  /**
-   * Nome da equipa para a qual o jogador está a pedir adesão.
-   */
-  teamName: string;
+  team: TeamDto;
 
   /**
    * Data em que o pedido de adesão foi feito (formato de string).

@@ -98,8 +98,25 @@
             </form>
         </div>
 
-        <aside class="card img-card">
-            <img height="250" width="250" src="../../../../assets/placeholder.png" />
+        <aside class="card img-card" [class.editable-image]="isEditMode()">
+                        <img 
+                height="250" 
+                width="250" 
+                [src]="isEditMode() && tempIcon() ? tempIcon() : '../../../../assets/placeholder.png'" 
+            />
+
+                        <div class="image-overlay" *ngIf="isMember() && isAdmin() && isEditMode()">
+                <label for="teamIconUpload" class="file-label">
+                    <span>{{ tempIcon() ? 'Alterar Imagem' : 'Carregar Imagem' }}</span>
+                </label>
+                <input 
+                    id="teamIconUpload" 
+                    type="file" 
+                    accept="image/*" 
+                    style="display: none;" 
+                    (change)="onFileSelected($event)" 
+                />
+            </div>
         </aside>
     </div>
 </section>

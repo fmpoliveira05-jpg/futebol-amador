@@ -18,10 +18,7 @@
     </div>
 
     <div *ngIf="!isLoading() && !errorMessage()">
-      <table
-        class="requests-table"
-        *ngIf="visibleRequests().length; else noRequests"
-      >
+      <table class="requests-table" *ngIf="visibleRequests().length; else noRequests">
         <thead>
           <tr>
             <th>Jogador</th>
@@ -30,25 +27,14 @@
           </tr>
         </thead>
         <tbody>
-          <tr
-            *ngFor="let request of visibleRequests()"
-            class="requests-table__row"
-          >
-            <td>{{ request.playerName }}</td>
+          <tr *ngFor="let request of visibleRequests()" class="requests-table__row">
+            <td>{{ request.player.name }}</td>
             <td>{{ request.requestDate | date: 'short' }}</td>
             <td class="requests-table__actions">
-              <button
-                type="button"
-                class="btn btn-primary"
-                (click)="accept(request)"
-              >
+              <button type="button" class="btn btn-primary" (click)="accept(request)">
                 Aceitar
               </button>
-              <button
-                type="button"
-                class="btn btn-secondary"
-                (click)="reject(request)"
-              >
+              <button type="button" class="btn btn-secondary" (click)="reject(request)">
                 Rejeitar
               </button>
             </td>
@@ -56,10 +42,7 @@
         </tbody>
       </table>
 
-      <div
-        class="load-more-container"
-        *ngIf="visibleRequests().length < filteredRequests().length"
-      >
+      <div class="load-more-container" *ngIf="visibleRequests().length < filteredRequests().length">
         <button class="load-more-btn" (click)="loadMore()">
           Carregar mais
         </button>

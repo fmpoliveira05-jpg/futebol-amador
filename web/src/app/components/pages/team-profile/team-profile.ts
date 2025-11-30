@@ -19,6 +19,7 @@ import { PitchDto } from '../../../shared/Dtos/Pitch/PitchDto';
 export class TeamProfile {
   team = signal<TeamDetailsDto | null>(null);
   currentUser = signal<PlayerDetails | null>(null);
+  tempIcon = signal<string | null>(null);
 
   protected form!: FormGroup;
 
@@ -101,6 +102,9 @@ export class TeamProfile {
         pitchName: t.pitchDto.name,
         pitchLocation: t.pitchDto.address,
       });
+      this.tempIcon.set(null);
+    } else {
+      this.tempIcon.set(null);
     }
   }
 
@@ -118,6 +122,25 @@ export class TeamProfile {
     });
   }
 
+  protected onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        this.tempIcon.set(reader.result as string);
+      };
+
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        this.errorMessage.set('Erro ao carregar a imagem.');
+      };
+
+      reader.readAsDataURL(file);
+    }
+  }
+
   protected save(): void {
     const team = this.team();
 
@@ -131,11 +154,14 @@ export class TeamProfile {
       address: this.form.value['pitchLocation'],
     };
 
+    const base64Icon = this.tempIcon()
+      ? this.tempIcon()?.split(',')[1]
+      : null;
+
     const payload: CreateTeamDto = {
       name: this.form.value['name'],
       description: this.form.value['description'],
-      iconName: '',
-      iconPath: '',
+      icon: base64Icon,
       homePitch: homePitch,
     };
 
@@ -148,6 +174,7 @@ export class TeamProfile {
         this.successMessage.set('Equipa atualizada com sucesso.');
         this.isSaving.set(false);
         this.isEditMode.set(false);
+        this.tempIcon.set(null);
         this.loadTeam(team.id); // reload updated team data
       },
       error: (err) => {
@@ -181,7 +208,9 @@ export class TeamProfile {
     });
   }
 
-  protected sendMatchRequest(): void {}
+  protected sendMatchRequest(): void {
+    
+  }
 
   protected deleteTeam(): void {
     const t = this.team();

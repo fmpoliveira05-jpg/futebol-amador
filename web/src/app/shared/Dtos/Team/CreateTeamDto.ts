@@ -1,9 +1,8 @@
-import { PitchDto } from "../Pitch/PitchDto";
+import { PitchDto } from '../Pitch/PitchDto';
 
-export class CreateTeamDto{
-    name!: string;
-    description!: string;
-    iconName!:string | null | undefined;
-    iconPath?: string;
-    homePitch!: PitchDto;
+export class CreateTeamDto {
+  name!: string;
+  description!: string;
+  icon!: string | null | undefined;
+  homePitch!: PitchDto;
 }
