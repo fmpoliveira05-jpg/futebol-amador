@@ -1,4 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace Api.Extensions
 {
@@ -41,6 +42,15 @@ namespace Api.Extensions
                         new string[] {}
                     }
                 });
+                
+                // 3. Configuração dos Comentários XML 
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                if (File.Exists(xmlPath))
+                {
+                    options.IncludeXmlComments(xmlPath);
+                }
             });
 
             return services;

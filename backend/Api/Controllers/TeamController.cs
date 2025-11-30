@@ -10,15 +10,26 @@ using System.Security.Claims;
 
 namespace Api.Controllers
 {
+    /// <summary>
+    /// Controlador responsável pela gestão completa de equipas: criação, edição, gestão de membros, pesquisas e visualização de perfis de equipa.
+    /// </summary>
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
+    [Produces("application/json")]
     public class TeamController : ControllerBase
     {
         #region Initialization
         private readonly ITeamService TeamService;
         private readonly IMembershipRequestService MemberShipRequestService;
         private readonly IPlayerAuthorizationService PlayerAuthorizationService;
+
+        /// <summary>
+        /// Construtor do TeamController.
+        /// </summary>
+        /// <param name="TeamService">Serviço com a lógica de negócio das equipas.</param>
+        /// <param name="MemberShipRequestService">Serviço para gerir pedidos de adesão.</param>
+        /// <param name="PlayerAuthorizationService">Serviço para validar permissões dos jogadores.</param>
         public TeamController(ITeamService TeamService, IMembershipRequestService MemberShipRequestService, IPlayerAuthorizationService PlayerAuthorizationService)
         {
             this.TeamService = TeamService;
@@ -31,7 +42,22 @@ namespace Api.Controllers
         #region EndPoints
 
         #region CRUD Team
+        /// <summary>
+        /// Cria uma nova equipa.
+        /// </summary>
+        /// <remarks>
+        /// O jogador que cria a equipa torna-se automaticamente o Administrador da mesma.
+        /// Requer que o jogador ainda não pertença a nenhuma outra equipa.
+        /// </remarks>
+        /// <param name="teamDto">Dados da nova equipa (Nome, Campo, etc.).</param>
+        /// <returns>Dados da equipa criada e localização do recurso.</returns>
+        /// <response code="201">Equipa criada com sucesso.</response>
+        /// <response code="400">Dados inválidos ou jogador já tem equipa.</response>
+        /// <response code="401">Utilizador não autenticado.</response>
         [HttpPost]
+        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
         {            
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -40,8 +66,17 @@ namespace Api.Controllers
             return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
         }
 
+        /// <summary>
+        /// Obtém os detalhes públicos de uma equipa pelo seu ID.
+        /// </summary>
+        /// <param name="id">ID da equipa.</param>
+        /// <returns>Detalhes da equipa.</returns>
+        /// <response code="200">Detalhes da equipa retornados com sucesso.</response>
+        /// <response code="404">Equipa não encontrada.</response>
         [HttpGet("{id}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(TeamDetailsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTeamById(Guid id)
         {
             var team = await TeamService.GetTeamByIdAsync(id);
@@ -49,7 +84,21 @@ namespace Api.Controllers
             return Ok(team);
         }
 
+        /// <summary>
+        /// Atualiza as informações de uma equipa.
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores da equipa podem realizar esta ação.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa a atualizar.</param>
+        /// <param name="dto">Novos dados da equipa.</param>
+        /// <response code="200">Equipa atualizada com sucesso.</response>
+        /// <response code="400">Dados inválidos.</response>
+        /// <response code="403">Utilizador não é administrador da equipa.</response>
         [HttpPut("{teamId}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] CreateTeamDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -57,8 +106,21 @@ namespace Api.Controllers
             return Ok("Equipa atualizada com sucesso.");
         }
 
-
+        /// <summary>
+        /// Elimina uma equipa.
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores da equipa podem realizar esta ação. 
+        /// A equipa não pode ter jogos agendados ou em progresso.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa a eliminar.</param>
+        /// <response code="204">Equipa eliminada com sucesso.</response>
+        /// <response code="400">Equipa tem jogos pendentes.</response>
+        /// <response code="403">Utilizador não é administrador.</response>
         [HttpDelete("{teamId}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DeleteTeam(Guid teamId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -66,8 +128,17 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// Obtém o nome e informações básicas de uma equipa adversária.
+        /// </summary>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <returns>Informações básicas da equipa.</returns>
+        /// <response code="200">Informações retornadas com sucesso.</response>
+        /// <response code="404">Equipa não encontrada.</response>
         [HttpGet("opponent/{teamId}")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(TeamDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> TeamName(Guid teamId)
         {
             var team = await TeamService.getOpponent(teamId);
@@ -77,9 +148,18 @@ namespace Api.Controllers
 
         #region Search Teams 
 
-
+        /// <summary>
+        /// Lista equipas com base em filtros gerais.
+        /// </summary>
+        /// <remarks>
+        /// Endpoint público para pesquisa de equipas.
+        /// </remarks>
+        /// <param name="filter">Filtros de pesquisa (Nome, Rank, Cidade, etc.).</param>
+        /// <returns>Lista de equipas encontradas.</returns>
+        /// <response code="200">Lista retornada com sucesso.</response>
         [HttpGet("listTeams")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListTeam([FromQuery] FilterListTeamDto? filter)
         {
             var list = await TeamService.GetListTeams(filter);
@@ -87,8 +167,16 @@ namespace Api.Controllers
             return Ok(list);
         }
 
+        /// <summary>
+        /// Pesquisa equipas para fins de Matchmaking ou consulta específica.
+        /// </summary>
+        /// <param name="teamId">ID da equipa que está a realizar a pesquisa (opcional para contexto).</param>
+        /// <param name="filter">Filtros de pesquisa.</param>
+        /// <returns>Lista de equipas.</returns>
+        /// <response code="200">Resultados da pesquisa.</response>
         [HttpGet("{teamId}/search")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -120,8 +208,18 @@ namespace Api.Controllers
 
         #region Team Members Management
 
+        /// <summary>
+        /// Obtém a lista de membros de uma equipa, com filtros opcionais.
+        /// </summary>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="filters">Filtros (ex: mostrar apenas Admins, filtrar por posição).</param>
+        /// <returns>Lista de jogadores da equipa.</returns>
+        /// <response code="200">Lista de membros retornada com sucesso.</response>
+        /// <response code="404">Equipa não encontrada.</response>
         [HttpGet("{teamId}/members")]
         [AllowAnonymous]
+        [ProducesResponseType(typeof(IEnumerable<PlayerDetailsDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
         {
             IEnumerable<PlayerDetailsDto> players;
@@ -143,7 +241,20 @@ namespace Api.Controllers
             return Ok(players);
         }
 
+        /// <summary>
+        /// Remove (expulsa) um jogador da equipa.
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores podem remover membros. 
+        /// Um admin só pode remover outro admin se tiver mais antiguidade no cargo.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="playerIdToRemove">ID do jogador a remover.</param>
+        /// <response code="204">Jogador removido com sucesso.</response>
+        /// <response code="403">Permissão negada (não é admin ou hierarquia insuficiente).</response>
         [HttpDelete("{teamId}/members/{playerIdToRemove}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, string playerIdToRemove)
         {
             var playerRemovingId = GetCurrentUserId();
@@ -153,7 +264,19 @@ namespace Api.Controllers
 
         #region Manage Admins
 
+        /// <summary>
+        /// Promove um membro da equipa a Administrador.
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores podem promover outros membros.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="playerIdToPromote">ID do jogador a promover.</param>
+        /// <response code="200">Jogador promovido com sucesso.</response>
+        /// <response code="403">Permissão negada.</response>
         [HttpPut("{teamId}/members/promote/{playerIdToPromote}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> PromotePlayerToAdmin(Guid teamId, string playerIdToPromote)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -161,7 +284,19 @@ namespace Api.Controllers
             return Ok("Jogador promovido a admin.");
         }
 
+        /// <summary>
+        /// Rebaixa um Administrador a membro normal.
+        /// </summary>
+        /// <remarks>
+        /// Requer permissões de administrador e hierarquia superior (antiguidade).
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="adminIdToDemote">ID do administrador a rebaixar.</param>
+        /// <response code="200">Admin rebaixado com sucesso.</response>
+        /// <response code="403">Permissão negada.</response>
         [HttpPut("{teamId}/members/demote/{adminIdToDemote}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> DemoteAdminToPlayer(Guid teamId, string adminIdToDemote)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -175,10 +310,21 @@ namespace Api.Controllers
 
         #region Membership Requests Management
 
-        //Falta também validar se a team existe mas isso a principio a Aut faz
-        //Falta fazer validação de autentificação e autorização aqui ou se for no service, no proprio service
+        /// <summary>
+        /// Obtém a lista de jogadores sem equipa (Free Agents), com filtros opcionais.
+        /// </summary>
+        /// <remarks>
+        /// Útil para encontrar jogadores para recrutar.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa (contexto).</param>
+        /// <param name="filter">Filtros de pesquisa (Posição, Idade, etc.).</param>
+        /// <returns>Lista de jogadores disponíveis.</returns>
+        /// <response code="200">Lista retornada com sucesso.</response>
+        /// <response code="400">Filtros inválidos.</response>
         [HttpGet("{teamId}/playersWithoutTeam")]
         [Authorize]
+        [ProducesResponseType(typeof(IEnumerable<PlayerWithoutTeamInfoDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterTeamDto filter)
         {
             IEnumerable<PlayerWithoutTeamInfoDto> players;
@@ -213,7 +359,20 @@ namespace Api.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtém os pedidos de adesão recebidos pela equipa (candidaturas de jogadores).
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores podem ver os pedidos.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="filters">Filtros opcionais.</param>
+        /// <returns>Lista de pedidos de adesão.</returns>
+        /// <response code="200">Lista retornada com sucesso.</response>
+        /// <response code="403">Utilizador não é administrador.</response>
         [HttpGet("{teamId}/membership-request")]
+        [ProducesResponseType(typeof(IEnumerable<MemberShipRequestDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> MembershipRequests(Guid teamId, [FromQuery] FilterMembershipRequestsTeam filters)
         {
             await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
@@ -236,7 +395,19 @@ namespace Api.Controllers
             return Ok(membershipRequests);
         }
 
+        /// <summary>
+        /// Aceita a candidatura de um jogador à equipa.
+        /// </summary>
+        /// <remarks>
+        /// O jogador é adicionado à lista de membros. Requer permissão de administrador.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="requestId">ID do pedido a aceitar.</param>
+        /// <response code="200">Pedido aceite com sucesso.</response>
+        /// <response code="403">Permissão negada.</response>
         [HttpPost("{teamId}/membership-request/accept")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
         {
             var userId = GetCurrentUserId();
@@ -245,7 +416,16 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Rejeita a candidatura de um jogador.
+        /// </summary>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="requestId">ID do pedido a rejeitar.</param>
+        /// <response code="200">Pedido rejeitado com sucesso.</response>
+        /// <response code="403">Permissão negada.</response>
         [HttpDelete("{teamId}/membership-request/{requestId}/reject")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
             var userId = GetCurrentUserId();
@@ -254,7 +434,22 @@ namespace Api.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Envia um convite da equipa para um jogador se juntar a ela.
+        /// </summary>
+        /// <remarks>
+        /// Apenas administradores podem enviar convites.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="playerId">ID do jogador a convidar.</param>
+        /// <returns>Detalhes do convite criado.</returns>
+        /// <response code="200">Convite enviado com sucesso.</response>
+        /// <response code="400">Jogador já tem equipa ou convite duplicado.</response>
+        /// <response code="403">Permissão negada.</response>
         [HttpPost("{teamId}/membership-requests/send")]
+        [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
         {
             var senderId = GetCurrentUserId();

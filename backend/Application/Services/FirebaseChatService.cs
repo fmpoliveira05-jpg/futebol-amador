@@ -1,8 +1,6 @@
 ﻿using Application.DTOs.Chat;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Interfaces.Validators;
-using Application.Validators;
 using Google.Cloud.Firestore;
 
 namespace Application.Services
@@ -13,7 +11,6 @@ namespace Application.Services
 
         private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
-        private readonly IPlayerValidator PlayerValidator;
 
 
         public FirebaseChatService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository)
@@ -21,7 +18,6 @@ namespace Application.Services
             DbContext = firestoreDb;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            PlayerValidator = new PlayerValidator();
         }
 
         public async Task<string> CreateMatchRoomAsync(CreateChatRoomRequestDto request, string createdByUserId)
