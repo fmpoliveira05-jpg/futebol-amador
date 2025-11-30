@@ -258,19 +258,25 @@ private fun isValueValid(
 
             return true
         }
-
         KeyboardType.Email -> {
-            //TODO: Validações de email
+            if (newValue.any { it.isWhitespace() }) {
+                return false
+            }
+
             return true
         }
-
-        KeyboardType.Password -> {
-            //TODO: Meter validações de password
-            return true
-        }
-
         KeyboardType.Phone -> {
-            //TODO: Meter validações de telefone
+            if (!newValue.all { it.isDigit() }) {
+                return false
+            }
+
+            if (newValue.length > 9) {
+                return false
+            }
+
+            return true
+        }
+        KeyboardType.Password -> {
             return true
         }
         else -> {

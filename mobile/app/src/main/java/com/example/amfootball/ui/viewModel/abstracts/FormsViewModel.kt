@@ -26,7 +26,7 @@ abstract class FormsViewModel<F, E>(
     private val networkObserver: NetworkConnectivityObserver,
     initialData: F,
     initialError: E,
-): BaseViewModel(networkObserver = networkObserver) {
+): BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
     /**
      * Propriedade mutável interna que guarda os dados atuais do formulário.
      * É [protected] para que as classes filhas possam atualizar os campos (via Setters).
@@ -76,7 +76,7 @@ abstract class FormsViewModel<F, E>(
      * @param onSuccess Lambda executado após a API retornar sucesso (ex: Navegar para Home).
      * @param apiCall Lambda suspenso que contém a chamada ao Repositório (Create ou Update).
      */
-    protected fun submitForm(onSuccess: () -> Unit, apiCall: suspend () -> Unit) {
+    protected fun submitForm(onSuccess: () -> Unit = {}, apiCall: suspend () -> Unit) {
         if (!validateForm()) return
 
         launchDataLoad {

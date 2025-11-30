@@ -41,7 +41,6 @@ import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.settings.AppTheme
-import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
@@ -51,7 +50,7 @@ import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.ui.viewModel.AuthViewModel
+import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
@@ -168,8 +167,6 @@ private fun NavGraphBuilder.pages(
     teamPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
     chatPages(globalNavController = globalNavController, sessionManager = sessionManager)
-
-    systemPages(globalNavController = globalNavController)
 }
 
 /**
@@ -181,9 +178,16 @@ private fun NavGraphBuilder.autPages(
     authViewModel: AuthViewModel
 ) {
     composableNotProtectedRoute(
-        route = Routes.UserRoutes.LOGIN.route,
+        route = "${Routes.UserRoutes.LOGIN.route}?redirect={redirect}",
         navController = globalNavController,
         sessionManager = sessionManager,
+        arguments = listOf(
+            navArgument("redirect") {
+                defaultValue = null
+                nullable = true
+                type = NavType.StringType
+            }
+        ),
         content = {
             LoginScreen(
                 navHostController = globalNavController,
@@ -506,11 +510,5 @@ private fun isDarkMode(currentAppTheme: String): Boolean{
         AppTheme.LIGHT_MODE.name -> false
         AppTheme.DARK_MODE.name -> true
         else -> isSystemInDarkTheme()
-    }
-}
-
-private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
-    composable(Routes.GeralRoutes.PREFERENCE.route){
-        PreferenceScreen()
     }
 }

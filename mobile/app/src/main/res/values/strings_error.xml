@@ -4,8 +4,16 @@
     <string name="connection_error">No connection</string>
     <string name="without_internet">No internet</string>
     <string name="without_internet_save_data">No internet. Showing saved data</string>
-
     <string name="mandatory_field">Mandatory field</string>
+
+    <string name="error_min_email_length">Email must be at least %1$d characters long</string>
+    <string name="error_max_email_length">Email must not exceed %1$d characters</string>
+
+    <string name="error_min_password_length">Password must be at least %1$d characters long</string>
+    <string name="error_max_password_length">Password must not exceed %1$d characters</string>
+    <string name="error_password_requires_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="error_password_requires_digit">Password must contain at least one number</string>
+    <string name="error_password_requires_special_char">Password must contain at least one special character</string>
 
     <string name="error_min_address">Address must have at least %1$d characters</string>
     <string name="error_max_address">Address must have at most %1$d characters</string>

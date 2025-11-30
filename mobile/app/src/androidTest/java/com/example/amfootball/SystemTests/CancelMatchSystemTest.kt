@@ -1,16 +1,15 @@
 package com.example.amfootball.SystemTests
 
-import androidx.activity.compose.setContent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.amfootball.MainActivity
-import com.example.amfootball.navigation.MainNavigation
 import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.ui.theme.AMFootballTheme
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -20,17 +19,30 @@ class CancelMatchSystemTest {
     //Permite definir regras
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
-    @get:Rule
+    @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
-    //Executa antes de cada teste
+    private lateinit var mockWebServer: MockWebServer
+
     @Before
     fun setUp() {
+        hiltRule.inject()
+
+        mockWebServer = MockWebServer()
+        mockWebServer.start(8080)
+        /*
         composeRule.activity.setContent {
             AMFootballTheme {
                 MainNavigation()
             }
         }
+        */
+    }
+
+    @After
+    fun tearDown() {
+        //Fecha o servidor no final de cada teste
+        mockWebServer.shutdown()
     }
 
     //Testa a navegação entre páginas

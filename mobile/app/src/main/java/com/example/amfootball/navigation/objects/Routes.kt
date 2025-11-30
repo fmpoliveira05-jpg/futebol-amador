@@ -78,12 +78,7 @@ object Routes {
         PROFILE("ProfileUser", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page, haveBackButton = true),
         LOGIN("Login", R.string.login_title, Icons.AutoMirrored.Filled.Login, R.string.login_title),
         SIGNUP("Signup", R.string.signup, Icons.Default.PersonAdd, R.string.signup_description),
-        LOGOUT(
-            "Logout",
-            R.string.logout,
-            Icons.AutoMirrored.Filled.Logout,
-            R.string.logout_description,
-            haveBackButton = false),
+        LOGOUT("Logout", R.string.logout, Icons.AutoMirrored.Filled.Logout, R.string.logout_description, haveBackButton = false),
     }
 
     enum class TeamRoutes(

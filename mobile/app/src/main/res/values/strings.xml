@@ -2,4 +2,6 @@
     <string name="app_name">AMFootball</string>
     <string name="age">age</string>
     <string name="average_age">average age</string>
+
+    <string name="title_login">Login Content</string>
 </resources>

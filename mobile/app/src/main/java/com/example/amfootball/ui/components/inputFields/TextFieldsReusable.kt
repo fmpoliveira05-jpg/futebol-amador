@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
+import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
@@ -23,6 +24,8 @@ import com.example.amfootball.utils.UserConst
 @Composable
 fun EmailTextField(
     value: String,
+    isError: Boolean,
+    errorMessage: String?,
     onValueChange: (String) -> Unit,
     isRequired: Boolean = true
 ) {
@@ -32,6 +35,8 @@ fun EmailTextField(
         onValueChange = onValueChange,
         isRequired = isRequired,
         maxLenght = UserConst.MAX_EMAIL_LENGTH,
+        isError = isError,
+        errorMessage = errorMessage,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
     )
 }
@@ -52,6 +57,8 @@ fun EmailTextField(
 fun PasswordTextField(
     label: String = "Password",
     value: String,
+    isError: Boolean,
+    errorMessage: String?,
     onValueChange: (String) -> Unit,
     isRequired: Boolean = true
 ) {
@@ -60,6 +67,8 @@ fun PasswordTextField(
         value = value,
         onValueChange = onValueChange,
         isRequired = isRequired,
+        isError = isError,
+        errorMessage = errorMessage,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
     )
 }

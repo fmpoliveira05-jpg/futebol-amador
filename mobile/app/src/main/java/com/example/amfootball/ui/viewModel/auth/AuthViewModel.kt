@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.viewModel
+package com.example.amfootball.ui.viewModel.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +16,7 @@ import javax.inject.Inject
 /**
  * ViewModel responsável pela gestão da lógica de Autenticação (Login, Registo e Logout).
  *
- * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([AuthService]).
+ * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([com.example.amfootball.data.services.AuthService]).
  * Gere o estado de sessão do utilizador e executa operações assíncronas, notificando a UI através de callbacks e StateFlows.
  *
  * @property repository O repositório injetado que contém a lógica de negócio (Firebase + API + Sessão Local).
@@ -39,31 +39,8 @@ class AuthViewModel @Inject constructor(
      */
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = false))
-    val uiState: StateFlow<UiState> = _uiState
-    /**
-     * Executa o processo de login de forma assíncrona.
-     *
-     * Chama o repositório para autenticar no Firebase e guardar o token.
-     * Se o login for bem-sucedido, atualiza o estado [_isUserLoggedIn] para `true`.
-     *
-     * @param email O email do utilizador.
-     * @param password A palavra-passe do utilizador.
-     * @param onResult Callback executado quando a operação termina. Recebe `true` se o login foi bem-sucedido, `false` caso contrário.
-     */
-    fun loginUser(email: String, password: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading =  true) }
-
-            val success = repository.loginUser(email, password)
-
-            if (success) {
-                _isUserLoggedIn.value = true
-            }
-
-            _uiState.update { it.copy(isLoading = false, errorMessage = null) }
-            onResult(success)
-        }
+    fun onIsUserLoggedInChange(isUserLoggedIn: Boolean) {
+        _isUserLoggedIn.value = isUserLoggedIn
     }
 
     /**
@@ -82,7 +59,7 @@ class AuthViewModel @Inject constructor(
      *
      * Coordena o processo de criação de conta, que envolve:
      * 1. Criar o utilizador no sistema de autenticação (Firebase).
-     * 2. Enviar os detalhes do perfil ([CreateProfileDto]) para a API Backend.
+     * 2. Enviar os detalhes do perfil ([com.example.amfootball.data.dtos.player.CreateProfileDto]) para a API Backend.
      *
      * Se o registo for bem-sucedido, o utilizador é automaticamente considerado "logado".
      * Em caso de erro, a mensagem de exceção é passada para o callback [onError].
@@ -99,7 +76,6 @@ class AuthViewModel @Inject constructor(
         onError: (String) -> Unit
     ) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
 
             try {
                 repository.registerUser(profile, password)
@@ -107,10 +83,8 @@ class AuthViewModel @Inject constructor(
                 _isUserLoggedIn.value = true
 
                 onSuccess()
-                _uiState.update { it.copy(isLoading = false, errorMessage = null) }
             } catch (e: Exception) {
                 onError(e.message ?: "Erro desconhecido no registo")
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }
         }
     }
