@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Chat; // Ou onde quer que o seu DTO esteja
+﻿using Application.DTOs.Chat; 
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

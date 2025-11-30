@@ -155,7 +155,7 @@ namespace Application.Services
                     IdTeam = team.Id,
                     Name = team.Name,
                 },
-                Opponent =
+                Opponent = new TeamDto
                 {
                     IdTeam = idOpponnent,
                     Name = opponentStatistics.Team.Name

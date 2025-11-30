@@ -1,6 +1,4 @@
-﻿//Classe responsavel pelo envio instantâneo de notificações (convites, alterações de partida)
-using Application.Interfaces.Services.Hub;
-using Application.Interfaces.Validators.Hub;
+﻿using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
 using Microsoft.AspNetCore.SignalR;
 

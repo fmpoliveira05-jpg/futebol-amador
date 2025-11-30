@@ -77,7 +77,7 @@ namespace Application.Services
                     IdTeam = sender.Id,
                     Name = sender.Name
                 },
-                Receiver =
+                Receiver = new TeamDto
                 {
                     IdTeam = receiver.Id,
                     Name = receiver.Name,
@@ -192,12 +192,12 @@ namespace Application.Services
             var sendMatchInviteDto = new InfoMatchInviteDto
             {
                 Id = matchInvite.Id,
-                Sender =
+                Sender = new TeamDto
                 {
                     IdTeam = senderTeam.Id,
                     Name = senderTeam.Name
                 },
-                Receiver =
+                Receiver = new TeamDto
                 {
                     IdTeam = receiverTeam.Id,
                     Name = receiverTeam.Name

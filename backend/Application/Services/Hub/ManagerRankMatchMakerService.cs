@@ -10,8 +10,6 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 using System.Text.RegularExpressions;
 
-
-//Criar configuração do cache para apagar o gajo em 30 minutos
 namespace Application.Services.Hub
 {
     public class ManagerRankMatchMakerService: IManagerRankMatchMakerService

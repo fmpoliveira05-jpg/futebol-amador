@@ -6,7 +6,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
 using System.Data;
 
 namespace Application.Services

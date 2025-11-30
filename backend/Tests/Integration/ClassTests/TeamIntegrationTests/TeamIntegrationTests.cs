@@ -234,7 +234,7 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             {
                 Name = "Updated Team Name",
                 Description = "Updated Description",
-                HomePitch =
+                HomePitch = new PitchDto
                 {
                     Name = "Updated Pitch",
                     Address = "Updated Address"
