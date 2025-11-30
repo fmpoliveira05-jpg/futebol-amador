@@ -11,7 +11,7 @@ import com.example.amfootball.data.enums.TypeMatch
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.CalendarRepository
+import com.example.amfootball.data.services.CalendarService
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.ListsSizesConst
@@ -40,7 +40,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CalendarTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val calendarRepository: CalendarRepository,
+    private val calendarRepository: CalendarService,
     private val savedStateHandle: SavedStateHandle
 ): ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */

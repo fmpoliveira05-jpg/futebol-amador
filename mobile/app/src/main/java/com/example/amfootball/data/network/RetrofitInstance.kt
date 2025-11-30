@@ -1,5 +1,12 @@
 package com.example.amfootball.data.network
 
+import com.example.amfootball.data.network.interfaces.AuthApi
+import com.example.amfootball.data.network.interfaces.CalendarApi
+import com.example.amfootball.data.network.interfaces.ChatApi
+import com.example.amfootball.data.network.interfaces.LeadBoardApi
+import com.example.amfootball.data.network.interfaces.MatchInviteApi
+import com.example.amfootball.data.network.interfaces.PlayerApi
+import com.example.amfootball.data.network.interfaces.TeamApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -45,89 +52,43 @@ object RetrofitInstance {
 
     @Provides
     @Singleton
-    fun provideApiBackend(retrofit: Retrofit): ApiBackend {
-        return retrofit.create(ApiBackend::class.java)
+    fun provideAuthApi(retrofit: Retrofit): AuthApi {
+        return retrofit.create(AuthApi::class.java)
     }
 
-    /*
     @Provides
     @Singleton
-    fun provideLeadBoardService(retrofit: Retrofit): LeadBoardServices {
-        return retrofit.create(LeadBoardServices::class.java)
+    fun provideCalendarApi(retrofit: Retrofit): CalendarApi {
+        return retrofit.create(CalendarApi::class.java)
     }
-    */
+
+    @Provides
+    @Singleton
+    fun provideChatApi(retrofit: Retrofit): ChatApi {
+        return retrofit.create(ChatApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLeadBoardApi(retrofit: Retrofit): LeadBoardApi {
+        return retrofit.create(LeadBoardApi::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideMatchInviteApi(retrofit: Retrofit): MatchInviteApi {
+        return retrofit.create(MatchInviteApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlayerApi(retrofit: Retrofit): PlayerApi {
+        return retrofit.create(PlayerApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTeamApi(retrofit: Retrofit): TeamApi {
+        return retrofit.create(TeamApi::class.java)
+    }
 }
-
-/*
-package com.example.amfootball.data.network
-
-import com.example.amfootball.data.network.interfaces.LeadBoardServices
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import javax.inject.Singleton
-
-object RetrofitInstance {
-
-    // MUDE ISTO para o URL base da sua API .NET
-    //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev " // link com ngrok
-
-    //Cria o cliente aqui
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AuthInterceptor())
-        // é possivel adicionar outros interceptors aqui
-        .build()
-
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient) // <-- 2. Dizer ao Retrofit para usar o nosso cliente
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api: ApiBackend by lazy {
-        retrofit.create(ApiBackend::class.java)
-    }
-
-    /*
-    Atual mas com cenas do Hitl
-
-    private val okHttpClient = OkHttpClient.Builder()
-        .addInterceptor(AuthInterceptor()) // Mantém o seu AuthInterceptor
-        .addInterceptor { chain ->
-            val original = chain.request()
-            val request = original.newBuilder()
-                .header("ngrok-skip-browser-warning", "true")
-                .method(original.method, original.body)
-                .build()
-            chain.proceed(request)
-        }
-        .build()
-
-    @Singleton
-    private val retrofit by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-
-    val api: ApiBackend by lazy {
-        retrofit.create(ApiBackend::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideLeadBoardService(retrofit: Retrofit): LeadBoardServices {
-        return retrofit.create(LeadBoardServices::class.java)
-    }
-    */
-
-} */

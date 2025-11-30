@@ -4,7 +4,7 @@ import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
 import retrofit2.Response
 import retrofit2.http.GET
 
-interface LeadBoardServices {
-    @GET("api/")
+interface LeadBoardApi {
+    @GET(BaseEndpoints.leadBoardApi)
     suspend fun getLeadBoard(): Response<InfoTeamLeadboard>
 }

@@ -6,8 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.repository.PlayerRepository
-import com.example.amfootball.utils.NetworkUtils
+import com.example.amfootball.data.services.PlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +21,7 @@ import javax.inject.Inject
  * Esta classe gere o ciclo de vida dos dados do perfil, incluindo:
  * - Obtenção do ID do jogador através dos argumentos de navegação.
  * - Gestão dos estados de UI (Loading, Sucesso, Erro) através de [UiState].
- * - Comunicação com o [PlayerRepository] para obter dados da API.
+ * - Comunicação com o [PlayerService] para obter dados da API.
  *
  * @property savedStateHandle O manipulador de estado guardado para recuperar argumentos de navegação (ex: playerId).
  * @property repository O repositório responsável por fornecer os dados do jogador.
@@ -30,7 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfilePlayerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: PlayerRepository,
+    private val repository: PlayerService,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 

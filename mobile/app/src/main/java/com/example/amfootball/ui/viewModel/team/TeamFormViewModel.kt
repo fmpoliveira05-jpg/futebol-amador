@@ -13,7 +13,7 @@ import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.R
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,7 +36,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 @HiltViewModel
 class TeamFormViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamRepository: TeamRepository,
+    private val teamRepository: TeamService,
     private val savedStateHandle: SavedStateHandle
 ) : FormsViewModel<FormTeamDto, TeamFormErros>(
     networkObserver = networkObserver,

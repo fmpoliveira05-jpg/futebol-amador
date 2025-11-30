@@ -1,22 +1,21 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.filters.toQueryMap
-import com.example.amfootball.data.network.ApiBackend
+import com.example.amfootball.data.network.interfaces.PlayerApi
 import com.example.amfootball.utils.handleApiError
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PlayerRepository @Inject constructor(
-    private val api: ApiBackend
+class PlayerService @Inject constructor(
+    private val playerApi: PlayerApi
 ) {
     suspend fun getPlayerProfile(playerId: String): PlayerProfileDto {
         try {
-            val response = api.getPlayerProfile(playerId = playerId)
+            val response = playerApi.getPlayerProfile(playerId = playerId)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
@@ -32,7 +31,7 @@ class PlayerRepository @Inject constructor(
     suspend fun getListPlayer(filter: FilterListPlayer?): List<InfoPlayerDto> {
         try {
             val filterMap = filter?.toQueryMap() ?: emptyMap()
-            val response = api.getPlayersList(filters = filterMap)
+            val response = playerApi.getPlayersList(filters = filterMap)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
@@ -46,11 +45,11 @@ class PlayerRepository @Inject constructor(
     }
 
     /*
-    * Permite enviar um pedido de adesão a uma jogador
+    * Permite enviar um pedido de adesão a uma jogador (Isto devia de ir para a equipa, se calhar)
     * */
     suspend fun sendMemberShipRequestToPlayer(teamId: String, idPlayer: String) {
         try {
-            val response = api.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
+            val response = playerApi.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
 
             if (!response.isSuccessful || response.body() == null) {
                 handleApiError(response)

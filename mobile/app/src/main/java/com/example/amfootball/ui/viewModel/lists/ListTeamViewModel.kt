@@ -6,7 +6,7 @@ import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +34,7 @@ import com.example.amfootball.utils.TeamConst
 @HiltViewModel
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamRepository: TeamRepository,
+    private val teamRepository: TeamService,
 ): ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())

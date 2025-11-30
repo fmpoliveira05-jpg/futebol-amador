@@ -25,7 +25,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //Runner do Dagger-Hilt
+        testInstrumentationRunner = "${applicationId}.CustomTestRunner"
     }
 
     buildTypes {
@@ -166,4 +168,12 @@ dependencies {
 
     //Espresso Ui Testing
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Hilt Testing
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.57.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
+
+    // MockWebServer
+    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 }

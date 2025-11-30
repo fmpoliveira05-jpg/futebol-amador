@@ -1,15 +1,12 @@
 package com.example.amfootball.ui.viewModel.team
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.team.ProfileTeamDto
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.repository.TeamRepository
-import com.example.amfootball.utils.NetworkUtils
+import com.example.amfootball.data.services.TeamService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +17,7 @@ import javax.inject.Inject
 /**
  * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Perfil de Equipa.
  *
- * Este ViewModel coordena a obtenção de dados detalhados de uma equipa através do [TeamRepository]
+ * Este ViewModel coordena a obtenção de dados detalhados de uma equipa através do [TeamService]
  * e expõe esses dados e o estado da interface (Loading/Erro) para a UI.
  *
  * @property savedStateHandle O manipulador de estado para recuperar argumentos de navegação (ex: teamId).
@@ -30,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileTeamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val teamRepository: TeamRepository,
+    private val teamRepository: TeamService,
     private val sessionManager: SessionManager
 ): ViewModel() {
     /**

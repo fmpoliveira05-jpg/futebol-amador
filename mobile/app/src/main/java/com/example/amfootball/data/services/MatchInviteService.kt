@@ -1,19 +1,19 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
-import com.example.amfootball.data.network.ApiBackend
+import com.example.amfootball.data.network.interfaces.MatchInviteApi
 import com.example.amfootball.utils.handleApiError
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class MatchInviteRepository @Inject constructor(
-    private val api: ApiBackend
+class MatchInviteService @Inject constructor(
+    private val matchInviteApi: MatchInviteApi
 ) {
     suspend fun sendMatchInvite(teamId: String, matchInvite: SendMatchInviteDto): InfoMatchInviteDto {
         try {
-            val response = api.sendMatchInvite(idTeam = teamId, matchInivite = matchInvite)
+            val response = matchInviteApi.sendMatchInvite(idTeam = teamId, matchInivite = matchInvite)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
@@ -28,7 +28,7 @@ class MatchInviteRepository @Inject constructor(
 
     suspend fun negociateMatchInvite(teamId: String, matchInvite: SendMatchInviteDto): InfoMatchInviteDto {
         try {
-            val response = api.negotiateMatch(idTeam = teamId, matchInivite = matchInvite)
+            val response = matchInviteApi.negotiateMatch(idTeam = teamId, matchInivite = matchInvite)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!

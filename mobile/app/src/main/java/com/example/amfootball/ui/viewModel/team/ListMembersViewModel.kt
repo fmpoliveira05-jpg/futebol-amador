@@ -5,23 +5,18 @@ import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -43,7 +38,7 @@ import javax.inject.Inject
 class ListMembersViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
-    private val teamRepository: TeamRepository
+    private val teamRepository: TeamService
 ): ListsViewModels<MemberTeamDto>(networkObserver = networkObserver) {
 
     /**

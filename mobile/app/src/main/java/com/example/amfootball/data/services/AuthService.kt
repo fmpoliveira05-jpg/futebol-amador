@@ -1,10 +1,10 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import android.util.Log
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.ApiBackend
+import com.example.amfootball.data.network.interfaces.AuthApi
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
@@ -12,9 +12,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AuthRepository @Inject constructor(
+class AuthService @Inject constructor(
     private val firebaseAuth: FirebaseAuth,
-    private val apiService: ApiBackend,
+    private val authApiService: AuthApi,
     private val sessionManager: SessionManager
 ) {
     suspend fun loginUser(email: String, password: String): Boolean {
@@ -44,7 +44,7 @@ class AuthRepository @Inject constructor(
                 email = email,
                 password = password
             )
-            val response = apiService.loginUser(login)
+            val response = authApiService.loginUser(login)
 
             if (response.isSuccessful && response.body() != null) {
                 val userProfile = response.body()!!
@@ -93,7 +93,7 @@ class AuthRepository @Inject constructor(
             sessionManager.saveAuthToken(token)
 */
 
-            val response = apiService.createProfile(profile)
+            val response = authApiService.createProfile(profile)
 
             if (!response.isSuccessful) {
                 throw Exception("Falha ao criar perfil: ${response.code()}")

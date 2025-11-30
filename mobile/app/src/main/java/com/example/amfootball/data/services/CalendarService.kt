@@ -1,25 +1,24 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
-import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.toQueryMap
-import com.example.amfootball.data.network.ApiBackend
+import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.utils.handleApiError
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class CalendarRepository @Inject constructor(
-    private val api: ApiBackend
+class CalendarService @Inject constructor(
+    private val calendarApi: CalendarApi
 ) {
     suspend fun getCalendar(teamId: String, filter: FilterCalendar?): List<InfoMatchCalendar> {
         try {
             val filters = filter?.toQueryMap() ?: emptyMap()
 
-            val response = api.getCalendar(idTeam = teamId, filters = filters)
+            val response = calendarApi.getCalendar(idTeam = teamId, filters = filters)
 
             if (response.isSuccessful) {
                 return response.body()!!
@@ -34,7 +33,7 @@ class CalendarRepository @Inject constructor(
 
     suspend fun getMatchTeam(teamId: String, matchId: String): MatchInviteDto {
         try {
-            val response = api.getMatchTeam(idTeam = teamId, idMatch = matchId)
+            val response = calendarApi.getMatchTeam(idTeam = teamId, idMatch = matchId)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
@@ -49,7 +48,7 @@ class CalendarRepository @Inject constructor(
 
     suspend fun postPoneMatch(teamId: String, postponeMatch: PostPoneMatchDto) {
         try {
-            val response = api.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
+            val response = calendarApi.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
 
             if (response.isSuccessful) {
                 return response.body()!!
@@ -65,7 +64,7 @@ class CalendarRepository @Inject constructor(
     //TODO: Implementar
     suspend fun cancelMatch(teamId: String, matchId: String, description: String) {
         try {
-            val response = api.cancelMatch(idTeam = teamId, idMatch = matchId, description = description)
+            val response = calendarApi.cancelMatch(idTeam = teamId, idMatch = matchId, description = description)
 
             if (response.isSuccessful) {
                 return response.body()!!

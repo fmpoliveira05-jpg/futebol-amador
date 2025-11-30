@@ -11,7 +11,7 @@ import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.PlayerRepository
+import com.example.amfootball.data.services.PlayerService
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
@@ -36,7 +36,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ListPlayerViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val playerRepository: PlayerRepository,
+    private val playerRepository: PlayerService,
     private val sessionManager: SessionManager?
 ): ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
     /**

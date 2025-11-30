@@ -1,11 +1,10 @@
 package com.example.amfootball.ui.viewModel
 
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.CreateProfileDto
-import com.example.amfootball.data.repository.AuthRepository
+import com.example.amfootball.data.services.AuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,14 +16,14 @@ import javax.inject.Inject
 /**
  * ViewModel responsável pela gestão da lógica de Autenticação (Login, Registo e Logout).
  *
- * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([AuthRepository]).
+ * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([AuthService]).
  * Gere o estado de sessão do utilizador e executa operações assíncronas, notificando a UI através de callbacks e StateFlows.
  *
  * @property repository O repositório injetado que contém a lógica de negócio (Firebase + API + Sessão Local).
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthRepository
+    private val repository: AuthService
 ) : ViewModel() {
 
     /**

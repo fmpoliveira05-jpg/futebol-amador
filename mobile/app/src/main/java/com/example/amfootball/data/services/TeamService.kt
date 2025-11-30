@@ -1,4 +1,4 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.dtos.support.TeamDto
@@ -9,7 +9,7 @@ import com.example.amfootball.data.dtos.team.toFormTeamDto
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.filters.toQueryMap
-import com.example.amfootball.data.network.ApiBackend
+import com.example.amfootball.data.network.interfaces.TeamApi
 import com.example.amfootball.utils.handleApiError
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,8 +21,8 @@ import javax.inject.Singleton
  * Gere as chamadas à API, tratamento de erros HTTP e transformação de dados (DTOs).
  */
 @Singleton
-class TeamRepository @Inject constructor(
-    private val api: ApiBackend
+class TeamService @Inject constructor(
+    private val teamApi: TeamApi
 ) {
     /**
      * Obtém o perfil completo de uma equipa para visualização.
@@ -33,7 +33,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun getTeamProfile(teamId: String): ProfileTeamDto {
         return try {
-            val response = api.getTeamProfile(teamId = teamId)
+            val response = teamApi.getTeamProfile(teamId = teamId)
 
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
@@ -56,7 +56,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun getTeamToUpdate(teamId: String): FormTeamDto {
         return try {
-            val response = api.getTeamProfile(teamId = teamId)
+            val response = teamApi.getTeamProfile(teamId = teamId)
 
             if (response.isSuccessful && response.body() != null) {
                 val fullProfile = response.body()!!
@@ -73,7 +73,7 @@ class TeamRepository @Inject constructor(
 
     suspend fun getNameTeam(teamId: String): TeamDto {
         try {
-            val response = api.getOpponentTeam(teamId = teamId)
+            val response = teamApi.getOpponentTeam(teamId = teamId)
 
             if (response.isSuccessful && response.body() != null) {
                 return response.body()!!
@@ -96,7 +96,7 @@ class TeamRepository @Inject constructor(
         val filterMap = filter?.toQueryMap() ?: emptyMap()
 
         return try {
-            val response = api.getListTeam(filters = filterMap)
+            val response = teamApi.getListTeam(filters = filterMap)
 
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
@@ -117,7 +117,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun createTeam(team: FormTeamDto): String {
         return try {
-            val response = api.createTeam(team = team)
+            val response = teamApi.createTeam(team = team)
 
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
@@ -139,7 +139,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun updateTeam(teamId: String, team: FormTeamDto): FormTeamDto {
         return try {
-            val response = api.updateTeam(teamId = teamId, team = team)
+            val response = teamApi.updateTeam(teamId = teamId, team = team)
 
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
@@ -169,7 +169,7 @@ class TeamRepository @Inject constructor(
         return try {
             val filters = filter?.toQueryMap() ?: emptyMap()
 
-            val response = api.getListMembers(teamId = teamId, filters = filters)
+            val response = teamApi.getListMembers(teamId = teamId, filters = filters)
 
             if (response.isSuccessful && response.body() != null) {
                 response.body()!!
@@ -195,7 +195,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun promotePlayer(teamId: String, playerPromoteId: String) {
         try {
-            val response = api.promotePlayer(teamId = teamId, playerId = playerPromoteId)
+            val response = teamApi.promotePlayer(teamId = teamId, playerId = playerPromoteId)
 
             if (!response.isSuccessful) {
                 handleApiError(response)
@@ -218,7 +218,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun demoteAdmin(teamId: String, adminDemoteId: String) {
         try {
-            val response = api.desmoteAdmin(teamId = teamId, playerId = adminDemoteId)
+            val response = teamApi.desmoteAdmin(teamId = teamId, playerId = adminDemoteId)
 
             if (!response.isSuccessful) {
                 handleApiError(response)
@@ -241,7 +241,7 @@ class TeamRepository @Inject constructor(
      */
     suspend fun removePlayerTeam(teamId: String, playerId: String) {
         try {
-            val response = api.removePlayerforTeam(teamId = teamId, playerId = playerId)
+            val response = teamApi.removePlayerforTeam(teamId = teamId, playerId = playerId)
 
             if (!response.isSuccessful) {
                 handleApiError(response)
