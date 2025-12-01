@@ -136,6 +136,10 @@
         </button>
       </div>
     </aside>
+
+    <button *ngIf="isOwnProfile()" class="btn btn-secondary" (click)="goToCalendar()">
+      Ver calendário
+    </button>
   </div>
 </section>
 

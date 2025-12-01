@@ -1,0 +1,21 @@
+<div *ngFor="let match of matches">
+  <div class="match-card">
+    <p>{{ match.gameDate | date: 'short' }} - {{ match.team.name }} vs {{ match.opponent.name }}</p>
+    <p>Status: 
+
+      {{ match.matchStatus === MatchStatus.SCHEDULED ? 'Agendada' : 
+         match.matchStatus === MatchStatus.IN_PROGRESS ? 'Em Andamento' : 
+         match.matchStatus === MatchStatus.DONE ? 'Finalizada' : 
+         match.matchStatus === MatchStatus.POST_PONED ? 'Adiada' : 
+         match.matchStatus === MatchStatus.CANCELLED ? 'Cancelada' : 'Desconhecido' }}
+    </p>
+    <p>Estádio: {{ match.pitchGame.name }} - {{ match.pitchGame.address }}</p>
+
+    <div *ngIf="match.matchStatus === MatchStatus.SCHEDULED || match.matchStatus === MatchStatus.IN_PROGRESS">
+      <input type="datetime-local" [(ngModel)]="newDate" name="newDate" required *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" />
+      
+      <button *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" (click)="postponeMatch(match)">Adiar</button>
+      <button *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" (click)="confirmCancel(match)">Cancelar</button>
+    </div>
+  </div>
+</div>

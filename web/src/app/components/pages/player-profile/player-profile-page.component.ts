@@ -264,4 +264,12 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
       },
     });
   }
+
+  goToCalendar(): void {
+    this.auth.getCurrentTeamId().subscribe((idTeam) => {
+      if (idTeam) {
+        this.router.navigate([`/players/calendar/${idTeam}`]);
+      }
+    });
+  }
 }
