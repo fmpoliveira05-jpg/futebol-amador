@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,6 +19,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.example.amfootball.R
 import kotlin.text.isNullOrEmpty
 
 /**
@@ -96,19 +100,24 @@ fun ProfilesImageString(
 @Composable
 fun ImageList(
     image: Uri?,
-    contentDescription: String
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     if (image != null && image != Uri.EMPTY) {
         ImageIcon(
             image = image,
             contentDescription = contentDescription,
-            sizeIamge = 40.dp
+            sizeIamge = 40.dp,
+            textFieldModifier = textFieldModifier,
         )
     } else {
         Icon(
             imageVector = Icons.Default.AccountCircle,
             contentDescription = contentDescription,
-            modifier = Modifier.size(40.dp),
+            modifier = modifier
+                .size(40.dp)
+                .then(textFieldModifier),
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
@@ -133,6 +142,8 @@ fun ImageList(
 fun StringImageList(
     image: String?,
     contentDescription: String,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     val imageUri = remember(image) {
         if (image.isNullOrEmpty()) {
@@ -148,7 +159,9 @@ fun StringImageList(
 
     ImageList(
         image = imageUri,
-        contentDescription = contentDescription
+        contentDescription = contentDescription,
+        modifier = modifier,
+        textFieldModifier = textFieldModifier,
     )
 }
 
@@ -166,7 +179,9 @@ fun StringImageList(
 fun ImageIcon(
     contentDescription: String? = "",
     image: Uri,
-    sizeIamge: Dp
+    sizeIamge: Dp,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     val fallbackPainter = rememberVectorPainter(Icons.Default.AccountCircle)
 
@@ -176,8 +191,9 @@ fun ImageIcon(
         contentScale = ContentScale.Crop,
         fallback = fallbackPainter,
         error = fallbackPainter,
-        modifier = Modifier
+        modifier = modifier
             .size(sizeIamge)
-            .clip(CircleShape),
+            .clip(CircleShape)
+            .then(textFieldModifier),
     )
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -149,7 +150,8 @@ private fun FieldsSignUp(
         value = email,
         onValueChange = { email = it },
         isError = false,
-        errorMessage = ""
+        errorMessage = "",
+        textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_email_input))
     )
 
     PhoneInputWithDynamicCountries(

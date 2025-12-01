@@ -19,27 +19,6 @@ class AuthService @Inject constructor(
 ) {
     suspend fun loginUser(login: LoginDto): Boolean {
         try {
-/*
-            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-
-
-            val firebaseUser = authResult.user
-
-            if (firebaseUser == null) {
-                throw Exception("Utilizador Firebase não encontrado após login.")
-            }
-
-            val idTokenResult = firebaseUser.getIdToken(true).await()
-            val token = idTokenResult.token
-
-            if (token.isNullOrEmpty()) {
-                throw Exception("Não foi possível obter o token do Firebase.")
-            }
-
-            Log.d("TOKEN_TEST", "Bearer $token")
-
-
-*/
             val response = authApiService.loginUser(login)
 
             if (response.isSuccessful && response.body() != null) {

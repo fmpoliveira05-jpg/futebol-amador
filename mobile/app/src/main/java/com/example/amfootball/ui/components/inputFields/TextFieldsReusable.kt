@@ -3,12 +3,10 @@ package com.example.amfootball.ui.components.inputFields
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.UserConst
 
 /**
@@ -27,17 +25,21 @@ fun EmailTextField(
     isError: Boolean,
     errorMessage: String?,
     onValueChange: (String) -> Unit,
-    isRequired: Boolean = true
+    isRequired: Boolean = true,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     TextFieldOutline(
-        label = "Email",
+        label = stringResource(id = R.string.email_field),
         value = value,
         onValueChange = onValueChange,
         isRequired = isRequired,
         maxLenght = UserConst.MAX_EMAIL_LENGTH,
         isError = isError,
         errorMessage = errorMessage,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -55,12 +57,13 @@ fun EmailTextField(
  */
 @Composable
 fun PasswordTextField(
-    label: String = "Password",
+    label: String,
     value: String,
     isError: Boolean,
     errorMessage: String?,
     onValueChange: (String) -> Unit,
-    isRequired: Boolean = true
+    isRequired: Boolean = true,
+    textFieldModifier: Modifier = Modifier
 ) {
     TextFieldOutline(
         label = label,
@@ -69,6 +72,7 @@ fun PasswordTextField(
         isRequired = isRequired,
         isError = isError,
         errorMessage = errorMessage,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        textFieldModifier = textFieldModifier
     )
 }

@@ -1,6 +1,6 @@
-package com.example.amfootball
+package com.example.amfootball.mockWebServer
 
-import com.example.amfootball.data.network.RetrofitInstance
+import com.example.amfootball.data.network.instances.RetrofitInstance
 import com.example.amfootball.data.network.interfaces.AuthApi
 import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.data.network.interfaces.ChatApi

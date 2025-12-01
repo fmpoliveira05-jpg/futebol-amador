@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -275,6 +276,7 @@ private fun HeaderHomePageTeam(team: TeamDto) {
                 stringResource(R.string.logo_team),
                 team.name
             ),
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_logo_team))
         )
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -283,6 +285,7 @@ private fun HeaderHomePageTeam(team: TeamDto) {
             text = team.name,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
+            modifier = Modifier.testTag(stringResource(id = R.string.tag_name_team))
         )
     }
 }
@@ -353,14 +356,15 @@ private fun HomePageManagerTeam(
             title = stringResource(id = R.string.action_card_calendar),
             subtitle = stringResource(id = R.string.action_card_calendar_description),
             icon = Icons.Default.CalendarMonth,
-            onClick = onNavigateCalendar
+            onClick = onNavigateCalendar,
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_action_card_calendar))
         )
 
         ActionCard(
             title = stringResource(id = R.string.action_card_members),
             subtitle = stringResource(id = R.string.action_card_members_description),
             icon = Icons.Default.Groups,
-            onClick = onNavigateMembers
+            onClick = onNavigateMembers,
         )
     }
 }

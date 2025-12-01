@@ -134,7 +134,6 @@ fun LabelTextField(
 fun TextFieldOutline(
     label: String,
     value: String?,
-    modifier: Modifier = Modifier,
     isSingleLine: Boolean = true,
     onValueChange: (String) -> Unit = {},
     isReadOnly: Boolean = false,
@@ -144,6 +143,8 @@ fun TextFieldOutline(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     minLenght: Int = 0,
     maxLenght: Int = Int.MAX_VALUE,
+    textFieldModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
 ) {
 
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
@@ -180,7 +181,6 @@ fun TextFieldOutline(
             isError = isError,
             label = { Text(text = labelText) },
             placeholder = { Text(text = labelText) },
-            modifier = Modifier.fillMaxWidth(),
             keyboardOptions = keyboardOptions,
             supportingText = {
                 if (isError && errorMessage != null) {
@@ -205,7 +205,10 @@ fun TextFieldOutline(
                         Icon(imageVector = image, contentDescription = description)
                     }
                 }
-            }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(textFieldModifier)
         )
     }
 }

@@ -1,4 +1,4 @@
-package com.example.amfootball.data.network
+package com.example.amfootball.data.network.instances
 
 import com.google.firebase.auth.FirebaseAuth
 import dagger.Module

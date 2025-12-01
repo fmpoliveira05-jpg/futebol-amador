@@ -1,5 +1,6 @@
-package com.example.amfootball.data.network
+package com.example.amfootball.data.network.instances
 
+import com.example.amfootball.data.network.AuthInterceptor
 import com.example.amfootball.data.network.interfaces.AuthApi
 import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.data.network.interfaces.ChatApi

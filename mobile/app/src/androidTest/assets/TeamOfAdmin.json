@@ -1,0 +1,366 @@
+{
+  "id": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+  "name": "fc proto",
+  "description": "pior do que nos so mesmo o vitoria de guimaraes",
+  "foundationDate": "2025-11-16",
+  "totalPoints": 0,
+  "rankName": "Unranked",
+  "pitchDto": {
+    "name": "campo de batatas",
+    "address": "rua da arbitragem, olimpo"
+  },
+  "players": [
+    {
+      "playerId": "EZ9gF4xswyc1WFTwQwCC99mhWcD3",
+      "name": "adversario do xico",
+      "email": "admin.equipa.b@exemplo.pt",
+      "phoneNumber": "+351919111000",
+      "dateOfBirth": "2003-11-16",
+      "age": 8050,
+      "address": "nao interessa, Coimbra",
+      "position": 2,
+      "height": 200,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": true
+    },
+    {
+      "playerId": "Qx1gF4xswyc1WFTwQwCC99mhWcD4",
+      "name": "Ricardo Silva",
+      "email": "ricardo.s@fcproto.com",
+      "phoneNumber": "+351932345670",
+      "dateOfBirth": "1995-03-15",
+      "age": 30,
+      "address": "Rua Principal 10, Porto",
+      "position": 1,
+      "height": 192,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": true
+    },
+    {
+      "playerId": "Ax2gF4xswyc1WFTwQwCC99mhWcD5",
+      "name": "João Santos",
+      "email": "joao.santos@fcproto.com",
+      "phoneNumber": "+351967890123",
+      "dateOfBirth": "1998-07-22",
+      "age": 27,
+      "address": "Av. dos Heróis, 44",
+      "position": 3,
+      "height": 178,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": true
+    },
+    {
+      "playerId": "Bx3gF4xswyc1WFTwQwCC99mhWcD6",
+      "name": "Pedro Alves",
+      "email": "pedro.alves@fcproto.com",
+      "phoneNumber": "+351910001001",
+      "dateOfBirth": "1990-11-05",
+      "age": 35,
+      "address": "Rua da Escola, 12",
+      "position": 1,
+      "height": 185,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Cx4gF4xswyc1WFTwQwCC99mhWcD7",
+      "name": "Miguel Costa",
+      "email": "miguel.costa@fcproto.com",
+      "phoneNumber": "+351961234567",
+      "dateOfBirth": "2000-01-20",
+      "age": 25,
+      "address": "Travessa da Sé, 3",
+      "position": 2,
+      "height": 182,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Dx5gF4xswyc1WFTwQwCC99mhWcD8",
+      "name": "Tiago Ferreira",
+      "email": "tiago.f@fcproto.com",
+      "phoneNumber": "+351912223334",
+      "dateOfBirth": "2002-04-10",
+      "age": 23,
+      "address": "Largo da Feira, 55",
+      "position": 2,
+      "height": 175,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Ex6gF4xswyc1WFTwQwCC99mhWcD9",
+      "name": "Rui Martins",
+      "email": "rui.martins@fcproto.com",
+      "phoneNumber": "+351933445566",
+      "dateOfBirth": "1993-08-28",
+      "age": 32,
+      "address": "Rua da Praia, 88",
+      "position": 2,
+      "height": 190,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Fx7gF4xswyc1WFTwQwCC99mhWcE0",
+      "name": "Francisco Lima",
+      "email": "francisco.l@fcproto.com",
+      "phoneNumber": "+351965432109",
+      "dateOfBirth": "2001-05-18",
+      "age": 24,
+      "address": "Rua da Igreja, 1",
+      "position": 3,
+      "height": 172,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Gx8gF4xswyc1WFTwQwCC99mhWcE1",
+      "name": "Nuno Mendes",
+      "email": "nuno.mendes@fcproto.com",
+      "phoneNumber": "+351918765432",
+      "dateOfBirth": "1997-12-10",
+      "age": 27,
+      "address": "Avenida Central, 5",
+      "position": 3,
+      "height": 180,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Hx9gF4xswyc1WFTwQwCC99mhWcE2",
+      "name": "Daniel Sousa",
+      "email": "daniel.sousa@fcproto.com",
+      "phoneNumber": "+351934567890",
+      "dateOfBirth": "1996-02-29",
+      "age": 29,
+      "address": "Rua do Mar, 20",
+      "position": 4,
+      "height": 184,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Ix0gF4xswyc1WFTwQwCC99mhWcE3",
+      "name": "Gabriel Pinheiro",
+      "email": "gabriel.p@fcproto.com",
+      "phoneNumber": "+351960123456",
+      "dateOfBirth": "2004-10-01",
+      "age": 21,
+      "address": "Largo da Estação, 1",
+      "position": 3,
+      "height": 179,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Jx1gF4xswyc1WFTwQwCC99mhWcE4",
+      "name": "Gonçalo Castro",
+      "email": "goncalo.c@fcproto.com",
+      "phoneNumber": "+351914567890",
+      "dateOfBirth": "1992-06-12",
+      "age": 33,
+      "address": "Rua Nova, 50",
+      "position": 2,
+      "height": 188,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Kx2gF4xswyc1WFTwQwCC99mhWcE5",
+      "name": "André Gomes",
+      "email": "andre.gomes@fcproto.com",
+      "phoneNumber": "+351930009998",
+      "dateOfBirth": "1999-03-08",
+      "age": 26,
+      "address": "Av. do Sol, 7",
+      "position": 4,
+      "height": 175,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Lx3gF4xswyc1WFTwQwCC99mhWcE6",
+      "name": "Luís Vaz",
+      "email": "luis.vaz@fcproto.com",
+      "phoneNumber": "+351968887776",
+      "dateOfBirth": "1994-10-25",
+      "age": 31,
+      "address": "Rua do Castelo, 2",
+      "position": 3,
+      "height": 183,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Mx4gF4xswyc1WFTwQwCC99mhWcE7",
+      "name": "Rafael Teixeira",
+      "email": "rafael.t@fcproto.com",
+      "phoneNumber": "+351917778889",
+      "dateOfBirth": "2005-01-05",
+      "age": 20,
+      "address": "Largo da Câmara, 9",
+      "position": 3,
+      "height": 177,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Nx5gF4xswyc1WFTwQwCC99mhWcE8",
+      "name": "António Rebelo",
+      "email": "antonio.r@fcproto.com",
+      "phoneNumber": "+351935554443",
+      "dateOfBirth": "1991-09-17",
+      "age": 34,
+      "address": "Rua dos Pinheiros, 15",
+      "position": 2,
+      "height": 189,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Ox6gF4xswyc1WFTwQwCC99mhWcE9",
+      "name": "Vasco Pereira",
+      "email": "vasco.p@fcproto.com",
+      "phoneNumber": "+351962221110",
+      "dateOfBirth": "1988-12-03",
+      "age": 36,
+      "address": "Travessa do Ouro, 6",
+      "position": 4,
+      "height": 181,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Px7gF4xswyc1WFTwQwCC99mhWcF0",
+      "name": "Fábio Gomes",
+      "email": "fabio.g@fcproto.com",
+      "phoneNumber": "+351913332221",
+      "dateOfBirth": "2003-02-14",
+      "age": 22,
+      "address": "Rua do Tejo, 9",
+      "position": 3,
+      "height": 176,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Qx8gF4xswyc1WFTwQwCC99mhWcF1",
+      "name": "Bruno Rocha",
+      "email": "bruno.r@fcproto.com",
+      "phoneNumber": "+351939876543",
+      "dateOfBirth": "1996-05-20",
+      "age": 29,
+      "address": "Largo da Sé, 4",
+      "position": 2,
+      "height": 187,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Rx9gF4xswyc1WFTwQwCC99mhWcF2",
+      "name": "Xavier Silva",
+      "email": "xavier.s@fcproto.com",
+      "phoneNumber": "+351964321098",
+      "dateOfBirth": "2001-07-07",
+      "age": 24,
+      "address": "Rua do Mercado, 11",
+      "position": 3,
+      "height": 174,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Sx0gF4xswyc1WFTwQwCC99mhWcF3",
+      "name": "Eduardo Ribeiro",
+      "email": "eduardo.r@fcproto.com",
+      "phoneNumber": "+351911112223",
+      "dateOfBirth": "1997-04-19",
+      "age": 28,
+      "address": "Av. da Liberdade, 100",
+      "position": 4,
+      "height": 179,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    },
+    {
+      "playerId": "Tx1gF4xswyc1WFTwQwCC99mhWcF4",
+      "name": "David Mesquita",
+      "email": "david.m@fcproto.com",
+      "phoneNumber": "+351937776665",
+      "dateOfBirth": "1993-01-30",
+      "age": 32,
+      "address": "Rua das Flores, 40",
+      "position": 3,
+      "height": 185,
+      "team": {
+        "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+        "name": "fc proto"
+      },
+      "isAdmin": false
+    }
+  ]
+}

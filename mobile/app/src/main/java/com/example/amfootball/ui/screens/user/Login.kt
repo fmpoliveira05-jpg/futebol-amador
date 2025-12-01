@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.screens.user
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -115,16 +117,19 @@ private fun FieldsLogin(
                 errorMessage = errors.emailErrorMessage?.let {
                     stringResource(id = it.messageId, *it.args.toTypedArray())
                 },
-                onValueChange = { loginActions.onEmailChange(it) }
+                onValueChange = { loginActions.onEmailChange(it) },
+                textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_email_input))
             )
 
             PasswordTextField(
+                label = stringResource(id = R.string.password_label),
                 value = formLogin.password,
                 isError = errors.passwordError != null,
                 errorMessage = errors.passwordError?.let {
                     stringResource(id = it.messageId, *it.args.toTypedArray())
                 },
-                onValueChange = { loginActions.onPasswordChange(it) }
+                onValueChange = { loginActions.onPasswordChange(it) },
+                textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_password_input))
             )
         }
 
@@ -133,6 +138,7 @@ private fun FieldsLogin(
                 loginActions.onLoginUser(
                     formLogin,
                     { loginComSucesso ->
+                        Log.d("TESTE_UI", "Resultado do Login: $loginComSucesso")
                         if (loginComSucesso) {
                             loginActions.onIsUserLoggedInChange(true)
                             val redirectRoute = navHostController.currentBackStackEntry
@@ -156,7 +162,8 @@ private fun FieldsLogin(
                         }
                     }
                 )
-            }
+            },
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_login_button)),
         )
     }
 }

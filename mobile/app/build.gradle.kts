@@ -27,7 +27,7 @@ android {
 
         //testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         //Runner do Dagger-Hilt
-        testInstrumentationRunner = "${applicationId}.CustomTestRunner"
+        testInstrumentationRunner = "com.example.amfootball.mockWebServer.CustomTestRunner"
     }
 
     buildTypes {
@@ -177,4 +177,8 @@ dependencies {
     // MockWebServer
     androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
+
+    // Mockito para Testes Android (Instrumentados)
+    androidTestImplementation("org.mockito:mockito-android:5.7.0")
+    androidTestImplementation("org.mockito:mockito-core:5.7.0")
 }
