@@ -1,21 +1,35 @@
-<div *ngFor="let match of matches">
-  <div class="match-card">
-    <p>{{ match.gameDate | date: 'short' }} - {{ match.team.name }} vs {{ match.opponent.name }}</p>
-    <p>Status: 
+<section class="calendar-page">
+  <header class="calendar-header">
+    <div>
+      <h1>Calendário</h1>
+      <div class="filters">
+        <button class="filter-button">Filtros</button>
+        <button class="add-button">+</button>
+      </div>
+    </div>
+  </header>
 
-      {{ match.matchStatus === MatchStatus.SCHEDULED ? 'Agendada' : 
-         match.matchStatus === MatchStatus.IN_PROGRESS ? 'Em Andamento' : 
-         match.matchStatus === MatchStatus.DONE ? 'Finalizada' : 
-         match.matchStatus === MatchStatus.POST_PONED ? 'Adiada' : 
-         match.matchStatus === MatchStatus.CANCELLED ? 'Cancelada' : 'Desconhecido' }}
-    </p>
-    <p>Estádio: {{ match.pitchGame.name }} - {{ match.pitchGame.address }}</p>
-
-    <div *ngIf="match.matchStatus === MatchStatus.SCHEDULED || match.matchStatus === MatchStatus.IN_PROGRESS">
-      <input type="datetime-local" [(ngModel)]="newDate" name="newDate" required *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" />
+  <div class="match-list">
+    <div *ngFor="let match of matches" class="match-card">
+      <div class="match-info">
+        <div class="team-info">
+          <p class="team-name">{{ match.team.name }} - {{ match.team.numGoals }}</p>
+          <p class="team-name">{{ match.opponent.name }} - {{ match.opponent.numGoals }}</p>
+        </div>
+        <p class="match-status">
+          <span class="status">
+            {{ match.isCompetitive ? 'Competitiva' : 'Casual' }}
+          </span>
+        </p>
+        <p class="match-end">{{ match.gameDate | date: 'yyyy-MM-dd' }}</p>
+      </div>
       
-      <button *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" (click)="postponeMatch(match)">Adiar</button>
-      <button *ngIf="match.matchStatus !== MatchStatus.DONE && match.matchStatus !== MatchStatus.CANCELLED" (click)="confirmCancel(match)">Cancelar</button>
+      <!--
+      <div *ngIf="match.matchStatus !== 'DONE' && match.matchStatus !== 'CANCELLED'" class="match-actions">
+        <button class="btn postpone-btn" (click)="postponeMatch(match)">Adiar</button>
+        <button class="btn cancel-btn" (click)="confirmCancel(match)">Cancelar</button>
+      </div>
+      -->
     </div>
   </div>
-</div>
+</section>

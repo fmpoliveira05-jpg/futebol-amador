@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { MatchService } from '../../../../services/match.service';
+import { CalendarService } from '../../../../services/calendar.service';
 import { ActivatedRoute } from '@angular/router';
-import { MatchDto } from '../../../../shared/Dtos/Match/Match';
+import { MatchDto } from '../../../../shared/Dtos/Match/MatchDto';
 import { PostponeMatchDto } from '../../../../shared/Dtos/Match/PostponeMatchDto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,14 +17,14 @@ export class PostponeMatchComponent implements OnInit {
   newDate: string = '';
   idTeam: string = '';
 
-  constructor(private matchService: MatchService, private route: ActivatedRoute) {}
+  constructor(private calendarService: CalendarService, private route: ActivatedRoute) {}
 
   ngOnInit() {
     const matchId = this.route.snapshot.paramMap.get('id');
     if (matchId) {
       this.idTeam = this.route.snapshot.paramMap.get('idTeam') || '';
 
-      this.matchService.getMatchById(this.idTeam, matchId).subscribe((data: MatchDto) => {
+      this.calendarService.getMatchById(this.idTeam, matchId).subscribe((data: MatchDto) => {
         this.match = data;
       });
     }
@@ -39,7 +39,7 @@ export class PostponeMatchComponent implements OnInit {
         idOpponent: this.match.opponent.idTeam
       };
 
-      this.matchService.postponeMatch(this.idTeam, postponedMatch).subscribe(() => {
+      this.calendarService.postponeMatch(this.idTeam, postponedMatch).subscribe(() => {
         alert('Partida adiada com sucesso!');
       }, error => {
         console.error('Erro ao adiar a partida', error);

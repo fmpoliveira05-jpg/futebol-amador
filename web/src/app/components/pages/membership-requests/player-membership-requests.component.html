@@ -34,7 +34,7 @@
             *ngFor="let request of visibleRequests()"
             class="requests-table__row"
           >
-            <td>{{ request.teamName }}</td>
+            <td>{{ request.team.name }}</td>
             <td>{{ request.requestDate | date: 'short' }}</td>
             <td class="requests-table__actions">
               <button

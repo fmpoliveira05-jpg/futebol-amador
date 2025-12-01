@@ -3,7 +3,7 @@
     <div>
       <h1 class="page-title">Pedidos de adesão</h1>
       <p class="page-subtitle">
-        Aqui vês os pedidos de adesão que os jogadores te enviaram.
+        Aqui vês os pedidos de adesão que os jogadores enviaram à tua equipa.
       </p>
     </div>
   </header>
@@ -34,7 +34,7 @@
             *ngFor="let request of visibleRequests()"
             class="requests-table__row"
           >
-            <td>{{ request.playerName }}</td>
+            <td>{{ request.player.name }}</td>
             <td>{{ request.requestDate | date: 'short' }}</td>
             <td class="requests-table__actions">
               <button

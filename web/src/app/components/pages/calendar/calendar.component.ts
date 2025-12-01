@@ -1,25 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { MatchService } from '../../../services/match.service';
+import { CalendarService } from '../../../services/calendar.service';
 import { Router } from '@angular/router';
-import { MatchDto } from '../../../shared/Dtos/Match/Match';
-import { MatchStatus } from '../../../shared/Dtos/Match/MatchStatus';
+import { CalendarDto } from '../../../shared/Dtos/Calendar/CalendarDto';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
+import { MatchStatus } from '../../../shared/Dtos/Match/MatchStatus';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './calendar.component.html'
+  templateUrl: './calendar.component.html',
 })
 export class CalendarComponent implements OnInit {
-  matches: MatchDto[] = [];
+  matches: CalendarDto[] = [];
   newDate: string = '';
   idTeam: string = '';
 
   constructor(
-    private matchService: MatchService,
+    private calendarService: CalendarService,
     private router: Router,
     private authService: AuthService
   ) {}
@@ -28,37 +28,37 @@ export class CalendarComponent implements OnInit {
     this.authService.getCurrentTeamId().subscribe(idTeam => {
       this.idTeam = idTeam || '';
       if (this.idTeam) {
-        this.matchService.getMatchesForTeam(this.idTeam).subscribe((data: MatchDto[]) => {
+        this.calendarService.getMatchesForTeam(this.idTeam).subscribe((data: CalendarDto[]) => {
           this.matches = data;
         });
       } else {
-        alert('Você não está associado a nenhuma equipe.');
+        alert('Não estás associado a nenhuma equipa.');
       }
     });
   }
 
-  postponeMatch(match: MatchDto) {
+  postponeMatch(match: CalendarDto) {
     const postponedMatch = {
       idMatch: match.idMatch,
       postPoneDate: this.newDate,
       idTeam: this.idTeam,
-      idOpponent: match.opponent.idTeam
+      idOpponent: match.opponent.idTeam,
     };
 
-    this.matchService.postponeMatch(this.idTeam, postponedMatch).subscribe(() => {
+    this.calendarService.postponeMatch(this.idTeam, postponedMatch).subscribe(() => {
       alert('Partida adiada com sucesso!');
       this.ngOnInit();
     });
   }
 
-  confirmCancel(match: MatchDto) {
-    if (confirm('Tem a certeza de que deseja cancelar esta partida? Esta ação é irreversível.')) {
+  confirmCancel(match: CalendarDto) {
+    if (confirm('Tens a certeza de que queres cancelar esta partida? Esta ação é irreversível.')) {
       this.cancelMatch(match);
     }
   }
 
-  cancelMatch(match: MatchDto) {
-    this.matchService.cancelMatch(this.idTeam, match.idMatch).subscribe(() => {
+  cancelMatch(match: CalendarDto) {
+    this.calendarService.cancelMatch(this.idTeam, match.idMatch).subscribe(() => {
       alert('Partida cancelada com sucesso!');
       this.ngOnInit();
     });

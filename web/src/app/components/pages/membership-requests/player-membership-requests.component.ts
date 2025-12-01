@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MembershipRequestService } from '../../../services/membership-request.service';
-import { MembershipRequest } from '../../..//shared/Dtos/membership-request.model';
+import { MembershipRequest } from '../../../shared/Dtos/membership-request.model';
 
 /**
  * Componente responsável pela gestão de pedidos de adesão de jogadores.
@@ -74,7 +74,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected accept(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres aceitar o pedido de adesão da equipa "${request.teamName}"?`
+        `Tens a certeza que queres aceitar o pedido de adesão da equipa "${request.team.name}"?`
       )
     ) {
       return;
@@ -106,7 +106,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected reject(request: MembershipRequest): void {
     if (
       !confirm(
-        `Tens a certeza que queres rejeitar o pedido de adesão da equipa "${request.teamName}"?`
+        `Tens a certeza que queres rejeitar o pedido de adesão da equipa "${request.team.name}"?`
       )
     ) {
       return;

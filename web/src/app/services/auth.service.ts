@@ -156,7 +156,7 @@ export class AuthService {
     }
 
     return this.getPlayerData(playerId).pipe(
-      map(playerData => playerData?.idTeam ?? null)
+      map(playerData => playerData?.team?.idTeam ?? null)
     );
   }
 }
