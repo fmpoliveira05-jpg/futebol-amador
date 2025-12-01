@@ -7,7 +7,10 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "compodoc": "npx compodoc -p tsconfig.app.json -d ./documentation --disableGraph --theme readthedocs"
+    "compodoc": "npx compodoc -p tsconfig.app.json -d ./documentation --disableGraph --theme readthedocs",
+    "e2e": "ng e2e",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run"
   },
   "prettier": {
     "printWidth": 100,
@@ -41,6 +44,7 @@
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
     "@compodoc/compodoc": "^1.1.32",
+    "@cypress/schematic": "^4.1.4",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
@@ -48,6 +52,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "cypress": "15.7.0"
   }
 }
