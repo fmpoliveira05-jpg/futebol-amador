@@ -146,17 +146,21 @@ export class AuthService {
   }
 
   /**
-   * Obtém o ID da equipa do jogador atual.
-   * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
-   */
+  * Obtém o ID da equipa do jogador atual.
+  * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
+  */
   getCurrentTeamId(): Observable<string | null> {
     const playerId = this.getCurrentPlayerId();
     if (!playerId) {
-      return of(null);
+      return of(null); 
     }
 
     return this.getPlayerData(playerId).pipe(
-      map(playerData => playerData?.team?.idTeam ?? null)
+      map(playerData => playerData?.team?.idTeam ?? null), 
+      catchError((error) => {
+        console.error('Erro ao buscar dados do jogador:', error);
+        return of(null); 
+      })
     );
   }
 }

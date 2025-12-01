@@ -1,25 +1,48 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CalendarDto } from '../shared/Dtos/Calendar/CalendarDto';
-import { MatchDto } from '../shared/Dtos/Match/MatchDto';
 import { environment } from '../environments/environment';
+import { FilterCalendarDto } from '../shared/Dtos/Filters/FilterCalendarDto';
+import { MatchDto } from '../shared/Dtos/Match/MatchDto';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CalendarService {
   private readonly baseUrl = `${environment.apiBaseUrl}/Calendar`;
 
   constructor(private http: HttpClient) {}
 
-   /**
-   * Obtém os jogos para a equipa atual.
+  /**
+   * Obtém os jogos para a equipa atual com filtros aplicados.
    * @param idTeam ID da equipa.
+   * @param filterDto DTO com os filtros aplicados.
    * @returns Um Observable com a lista de partidas formatada.
    */
-  getMatchesForTeam(idTeam: string): Observable<CalendarDto[]> {
-    return this.http.get<CalendarDto[]>(`${this.baseUrl}/${idTeam}`);
+  getMatchesForTeam(idTeam: string, filterDto: FilterCalendarDto): Observable<CalendarDto[]> {
+    let params = new HttpParams();
+
+    if (filterDto.isRealized !== undefined) {
+      params = params.set('IsRealized', filterDto.isRealized.toString());
+    }
+    if (filterDto.isRanked !== undefined) {
+      params = params.set('IsRanked', filterDto.isRanked.toString());
+    }
+    if (filterDto.isHome !== undefined) {
+      params = params.set('IsHome', filterDto.isHome.toString());
+    }
+    if (filterDto.minDate) {
+      params = params.set('MinDate', filterDto.minDate);
+    }
+    if (filterDto.maxDate) {
+      params = params.set('MaxDate', filterDto.maxDate);
+    }
+    if (filterDto.nameOpponent) {
+      params = params.set('NameOpponent', filterDto.nameOpponent);
+    }
+
+    return this.http.get<CalendarDto[]>(`${this.baseUrl}/${idTeam}`, { params });
   }
 
   /**
@@ -48,7 +71,13 @@ export class CalendarService {
    * @param idMatch ID da partida.
    * @returns Um Observable com a resposta da operação.
    */
-  cancelMatch(idTeam: string, idMatch: string): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/${idTeam}/CancelMatch/${idMatch}`);
+  cancelMatch(idTeam: string, idMatch: string, motivo: string): Observable<any> {
+    const body = JSON.stringify(motivo);
+    return this.http.delete<any>(`${this.baseUrl}/${idTeam}/CancelMatch/${idMatch}`, {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+      }),
+      body: body
+    });
   }
 }
