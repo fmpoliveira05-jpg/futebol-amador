@@ -4,6 +4,11 @@ import { TeamService } from './services/team.service';
 import { SidebarComponent } from './components/partials/nav/sidebar/sidebar.component';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
+
+registerLocaleData(localePt);
 
 /**
  * Componente principal da aplicação.
@@ -21,6 +26,7 @@ import { authInterceptor } from './core/interceptors/auth.interceptor';
      * O `multi: true` permite que múltiplos interceptadores sejam usados ao mesmo tempo.
      */
     { provide: HTTP_INTERCEPTORS, useValue: authInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'pt-PT' }
   ]
 })
 export class App {

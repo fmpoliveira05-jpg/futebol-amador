@@ -7,31 +7,31 @@
   </div>
 
   <nav class="sidebar__nav">
-    <a *ngIf="isAuthenticated && isAdmin" routerLink="/players" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="isAuthenticated && isAdmin" routerLink="/players" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Jogadores
     </a>
 
-    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Equipas
     </a>
 
-    <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       O meu perfil
     </a>
 
-    <a routerLink="/settings" routerLinkActive="active" class="sidebar__link">
+    <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Definições
     </a>
 
-    <a *ngIf="!isAuthenticated" routerLink="/signup" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="!isAuthenticated" routerLink="/signup" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Criar Conta
     </a>
 
-    <a *ngIf="!isAuthenticated" routerLink="/login" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="!isAuthenticated" routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Login
     </a>
 
-    <a *ngIf="isAuthenticated" routerLink="/logout" routerLinkActive="active" class="sidebar__link">
+    <a *ngIf="isAuthenticated" routerLink="/logout" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
       Logout
     </a>
   </nav>

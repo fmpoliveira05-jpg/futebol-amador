@@ -84,7 +84,9 @@
 
           <label class="form-field">
             <span>Posição</span>
-            <input type="text" formControlName="position" />
+            <select formControlName="position">
+              <option *ngFor="let position of positions" [value]="position.value">{{ position.label }}</option>
+            </select>
           </label>
 
           <label class="form-field">

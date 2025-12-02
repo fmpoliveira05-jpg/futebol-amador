@@ -50,6 +50,13 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
   protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam); // Verifica se o jogador pertence a uma equipa
   protected readonly isOwnProfile = computed(() => this.player()?.playerId === this.auth.getCurrentPlayerId()); // Verifica se o perfil é do próprio jogador
 
+  positions = [
+    { label: 'Avançado', value: 0 },
+    { label: 'Médio', value: 1 },
+    { label: 'Defesa', value: 2 },
+    { label: 'Guarda-redes', value: 3 }
+  ];
+
   ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required]],
@@ -109,25 +116,26 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
     const current = this.player()!;
     const position = this.form.value['position'];
-    const positionEnumValue = this.POSITION_MAP_TONUMBER[position];
 
-    if (positionEnumValue === undefined) {
+    if (position === undefined) {
       this.errorMessage.set('Valor de posição inválido.');
       return;
     }
 
     const payload = {
-      playerId: current.playerId,
-      Name: this.form.value['name'] || current.name,
-      DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
-      Address: this.form.value['address'] || current.address,
-      Email: this.form.value['email'] || current.email,
-      Phone: this.form.value['phone'] || current.phoneNumber,
-      Position: positionEnumValue,
-      Height: Number(this.form.value['height']) || current.heigth,
+      dto: {
+        playerId: current.playerId,
+        Name: this.form.value['name'] || current.name,
+        DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
+        Address: this.form.value['address'] || current.address,
+        Email: this.form.value['email'] || current.email,
+        Phone: this.form.value['phone'] || current.phoneNumber,
+        Position: Number(position) || current.position,
+        Height: Number(this.form.value['height']) || current.heigth,
+      }
     };
 
-    if (!payload.Name || !payload.Email || !payload.Phone || !payload.Address || !payload.Height) {
+    if (!payload.dto.Name || !payload.dto.Email || !payload.dto.Phone || !payload.dto.Address || !payload.dto.Height) {
       this.errorMessage.set('Campos obrigatórios não preenchidos.');
       return;
     }
@@ -136,7 +144,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    this.playerService.updatePlayer(payload.playerId, payload).subscribe({
+    this.playerService.updatePlayer(payload.dto.playerId, payload.dto).subscribe({
       next: () => {
         this.successMessage.set('Perfil atualizado com sucesso.');
         this.isSaving.set(false);

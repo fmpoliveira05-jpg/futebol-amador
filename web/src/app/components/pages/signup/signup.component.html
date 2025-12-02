@@ -76,12 +76,11 @@
 
       <div class="form-field">
         <label for="position">Posição</label>
-        <input id="position" formControlName="position" type="number" placeholder="Introduz a tua posição" />
+        <select id="position" formControlName="position">
+          <option *ngFor="let position of positions" [value]="position.value">{{ position.label }}</option>
+        </select>
         <div *ngIf="signupForm.controls['position'].hasError('required') && signupForm.controls['position'].touched">
           <small style="color: red;">Posição é obrigatória.</small>
-        </div>
-        <div *ngIf="signupForm.controls['position'].hasError('pattern') && signupForm.controls['position'].touched">
-          <small style="color: red;">Posição deve ser um número inteiro entre 0 e 3.</small>
         </div>
       </div>
 

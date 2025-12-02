@@ -38,6 +38,13 @@ export class SignupComponent {
    */
   private fb = inject(FormBuilder);
 
+  positions = [
+    { label: 'Avançado', value: 0 },
+    { label: 'Médio', value: 1 },
+    { label: 'Defesa', value: 2 },
+    { label: 'Guarda-redes', value: 3 }
+  ];
+
   /**
    * Formulário reativo para registo do jogador, que contém campos como nome, email, senha, etc.
    * Cada campo possui validações específicas.

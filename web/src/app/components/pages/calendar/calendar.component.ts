@@ -5,7 +5,7 @@ import { CalendarDto } from '../../../shared/Dtos/Calendar/CalendarDto';
 import { FilterCalendarDto } from '../../../shared/Dtos/Filters/FilterCalendarDto';
 import { AuthService } from '../../../services/auth.service';
 import { Router } from '@angular/router';
-import { MatchStatus } from '../../../shared/Dtos/Match/MatchStatus';
+import { MATCH_STATUS_MAP_TONUMBER } from '../../../shared/constants/match-status-map-to-number';
 import { FormsModule } from '@angular/forms';
 
 /**
@@ -30,12 +30,17 @@ export class CalendarComponent {
   protected readonly showFilters = signal<boolean>(false);
 
   protected readonly filterDto = signal<FilterCalendarDto>(new FilterCalendarDto());
-
   protected readonly matchesToShow = signal<number>(10);
+  protected readonly currentPage = signal<number>(1);
+
+  protected readonly MATCH_STATUS_MAP_TONUMBER = MATCH_STATUS_MAP_TONUMBER;
 
   // Lista de partidas visíveis com base nos filtros e na quantidade de partidas a mostrar
   protected readonly visibleMatches = computed(() =>
-    this.filteredMatches().slice(0, this.matchesToShow())
+    this.filteredMatches().slice(
+      (this.currentPage() - 1) * this.matchesToShow(),
+      this.currentPage() * this.matchesToShow()
+    )
   );
 
   // Lista de partidas filtradas
@@ -43,7 +48,7 @@ export class CalendarComponent {
     this.matches().filter((match) => {
       const { isRealized, isRanked, isHome, minDate, maxDate, nameOpponent } = this.filterDto();
       return (
-        (isRealized !== undefined ? match.matchStatus === (isRealized ? MatchStatus.DONE : MatchStatus.SCHEDULED) : true) &&
+        (isRealized !== undefined ? match.matchStatus === (isRealized ? MATCH_STATUS_MAP_TONUMBER['Done'] : MATCH_STATUS_MAP_TONUMBER['Scheduled']) : true) &&
         (isRanked !== undefined ? match.isCompetitive === isRanked : true) &&
         (isHome !== undefined ? match.isHome === isHome : true) &&
         (minDate ? new Date(match.gameDate) >= new Date(minDate) : true) &&
@@ -61,6 +66,7 @@ export class CalendarComponent {
     });
   }
 
+  // Carregar jogos
   private loadMatches(idTeam: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -79,7 +85,12 @@ export class CalendarComponent {
 
   // Carregar mais jogos ao clicar em "Carregar mais"
   protected loadMoreMatches(): void {
-    this.matchesToShow.update((value) => value + 10);
+    this.currentPage.set(this.currentPage() + 1);
+    this.authService.getCurrentTeamId().subscribe(idTeam => {
+      if (idTeam) {
+        this.loadMatches(idTeam);
+      }
+    });
   }
 
   // Alternar visibilidade dos filtros
@@ -89,18 +100,19 @@ export class CalendarComponent {
 
   // Aplicar filtros aos jogos
   protected applyFilters(): void {
-    this.matchesToShow.set(10);
+    this.currentPage.set(1); // Reseta a página ao aplicar os filtros
     this.authService.getCurrentTeamId().subscribe(idTeam => {
       if (idTeam) {
-        this.loadMatches(idTeam);
+        this.loadMatches(idTeam); // Recarrega os jogos com os filtros aplicados
       }
     });
   }
 
   // Limpar resultados da pesquisa
   protected clearSearchResults(): void {
-    this.matches.set([]);
-    this.matchesToShow.set(10);
+    this.filterDto.set(new FilterCalendarDto()); 
+    this.matches.set([]); 
+    this.currentPage.set(1);
     this.applyFilters();
   }
 

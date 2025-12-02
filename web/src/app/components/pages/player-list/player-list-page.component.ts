@@ -85,7 +85,9 @@ export class PlayerListPageComponent {
     return filtered;
   });
 
-  constructor() {}
+  ngOnInit() {
+    this.loadPlayers();
+  }
 
   // Abre a página de detalhes do jogador
   protected openPlayer(player: PlayerDetails): void {

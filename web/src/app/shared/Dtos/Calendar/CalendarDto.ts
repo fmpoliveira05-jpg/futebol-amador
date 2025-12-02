@@ -1,11 +1,12 @@
-import { MatchStatus } from '../Match/MatchStatus';
+import { MATCH_STATUS } from '../../constants/match-status-map';
 
 /**
  * DTO para representar os jogos no calendário.
  */
 export class CalendarDto {
   idMatch!: string;
-  matchStatus!: MatchStatus;
+  matchStatus!: number;
+  matchResult!: string;
   gameDate!: string;
   team!: {
     idTeam: string;
