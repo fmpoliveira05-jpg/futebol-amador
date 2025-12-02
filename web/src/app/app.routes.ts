@@ -17,6 +17,7 @@ import { MatchInvites } from './components/pages/match-invites/match-invites';
 import { TeamMembersPageComponent } from './components/pages/team-members/team-members.component';
 import { CalendarComponent } from './components/pages/calendar/calendar.component';
 import { CreateMatchInvite } from './components/pages/create-match-invite/create-match-invite';
+import { CancelMatchComponent } from './components/pages/calendar/cancel-match/cancel-match.component';
 
 /**
  * Configuração de rotas da aplicação.
@@ -43,6 +44,7 @@ export const routes: Routes = [
   { path: 'players/me', component: PlayerProfileRedirectComponent, canActivate: [AuthGuard] },
   { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard]},
   { path: 'players/calendar/:idTeam', component: CalendarComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'players/calendar/:idTeam/cancel-match/:idMatch', component: CancelMatchComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
 
   // Página de pedidos de adesão de jogadores
   { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard] },

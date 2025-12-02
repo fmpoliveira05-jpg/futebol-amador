@@ -169,4 +169,13 @@ export class CalendarComponent {
   get isAdmin(): boolean {
     return this.authService.isAdmin();
   }
+
+  protected goToCancelPage(match: CalendarDto): void {
+    this.router.navigate([
+      '/players/calendar',
+      match.team.idTeam, 
+      'cancel-match',
+      match.idMatch       
+    ]);
+  }
 }

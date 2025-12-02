@@ -80,7 +80,7 @@
 
       <div *ngIf="match.matchStatus !== MATCH_STATUS_MAP_TONUMBER['Done'] && match.matchStatus !== MATCH_STATUS_MAP_TONUMBER['Cancelled']" class="match-actions">
         <button *ngIf="isAdmin" class="btn postpone-btn" (click)="postponeMatch(match)">Adiar partida</button>
-        <button *ngIf="isAdmin" class="btn cancel-btn" (click)="confirmCancel(match)">Cancelar partida</button>
+        <button *ngIf="isAdmin" class="btn cancel-btn" (click)="goToCancelPage(match)">Cancelar partida</button>
       </div>
     </div>
 

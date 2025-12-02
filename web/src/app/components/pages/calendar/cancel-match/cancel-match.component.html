@@ -1,0 +1,10 @@
+<section class="cancel-match-page">
+  <header>
+    <h1>Cancelar Partida</h1>
+  </header>
+
+  <div class="cancel-info">
+    <textarea name="motivo-cancelamento" [(ngModel)]="cancelMatchDto.description" placeholder="Introduz o motivo do cancelamento..."></textarea>
+    <button (click)="confirmCancel()">Confirmar Cancelamento</button>
+  </div>
+</section>
