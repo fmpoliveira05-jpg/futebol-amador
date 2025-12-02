@@ -149,4 +149,12 @@ export class CalendarComponent {
       });
     });
   }
+
+  /**
+   * Verifica se o utilizador tem permissões de administrador.
+   * Retorna um valor booleano que indica se o utilizador é um administrador.
+   */
+  get isAdmin(): boolean {
+    return this.authService.isAdmin();
+  }
 }

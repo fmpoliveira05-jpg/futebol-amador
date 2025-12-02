@@ -69,8 +69,7 @@ export class AuthService {
    * @returns `true` se o utilizador for administrador, caso contrário `false`.
    */
   isAdmin(): boolean {
-    const decodedToken = this.decodeToken();
-    return decodedToken?.isAdmin || false;
+    return this.cookieService.get('is_admin') === 'true';
   }
 
   /**
@@ -92,9 +91,14 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/User/login`, { email, password }).pipe(
       map((response: any) => {
-        this.cookieService.set('access_token', response?.firebaseLoginResponseDto?.idToken, 7, '/');
-        this.cookieService.set('user_id', response?.firebaseLoginResponseDto?.localId, 7, '/');
-        
+        const idToken = response?.firebaseLoginResponseDto?.idToken;
+        const localId = response?.firebaseLoginResponseDto?.localId;
+        const isAdmin = response?.isAdmin; 
+
+        this.cookieService.set('access_token', idToken, 7, '/');
+        this.cookieService.set('user_id', localId, 7, '/');
+        this.cookieService.set('is_admin', isAdmin, 7, '/');  
+
         return response;
       })
     );
