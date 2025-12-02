@@ -103,7 +103,7 @@ class AuthViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true) }
 
             try {
-                repository.registerUser(profile, password)
+                repository.registerUser(profile)
 
                 _isUserLoggedIn.value = true
 

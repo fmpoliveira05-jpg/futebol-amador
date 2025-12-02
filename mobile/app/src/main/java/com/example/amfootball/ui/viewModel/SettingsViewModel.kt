@@ -26,6 +26,9 @@ class SettingsViewModel @Inject constructor(
     private val deleteProfile = MutableStateFlow(false)
     val deleteProfileState = deleteProfile.asStateFlow()
 
+    private var _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+
     private var _language = MutableStateFlow(settingsStore.getLanguage())
     val language = _language.asStateFlow()
 
@@ -57,18 +60,8 @@ class SettingsViewModel @Inject constructor(
         deleteProfile.value = false
     }
 
-    fun updateResources(context: Context, language: String): Context {
-        val locale = Locale(language)
-        Locale.setDefault(locale)
-
-        val config = context.resources.configuration
-        config.setLocale(locale)
-        config.setLayoutDirection(locale)
-
-        return context.createConfigurationContext(config)
-    }
-
     fun changeLanguage(languageEnum: AppLanguage) {
+        this.startLoading()
         val code = languageEnum.code
 
         settingsStore.saveLanguage(languageEnum)
@@ -77,13 +70,23 @@ class SettingsViewModel @Inject constructor(
 
         val localeList = LocaleListCompat.forLanguageTags(code)
         AppCompatDelegate.setApplicationLocales(localeList)
+        _isLoading.value = false
     }
 
     fun changeTheme(theme: AppTheme) {
+        this.startLoading()
         _theme.value = theme.name
 
         settingsStore.saveTheme(theme)
+        _isLoading.value = false
+    }
 
+    private fun startLoading(){
+        _isLoading.value = true
+    }
+
+    fun stopLoading(){
+        _isLoading.value = false
     }
 
     //TODO: Acabar!!!

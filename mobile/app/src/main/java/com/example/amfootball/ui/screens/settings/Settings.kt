@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.amfootball.R
+import com.example.amfootball.ui.components.Loading
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 
 // Adicionado LIGHT_MODE para suportar as 3 opções pedidas
@@ -36,13 +38,30 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     val showDeleteDialog =  settingsViewModel.deleteProfileState.collectAsState()
+    val isLoading = settingsViewModel.isLoading.collectAsState()
+
+
+    DeleteProfileDialog(showDeleteDialog, settingsViewModel)
+    LoadingPage(
+        isLoading = isLoading.value,
+        content = {
+            SettingsPageContent(modifier, settingsViewModel)
+        },
+        errorMsg = null,
+        retry = {}
+    )
+
+}
+
+@Composable
+private fun SettingsPageContent(modifier: Modifier,settingsViewModel: SettingsViewModel){
     val currentTheme = settingsViewModel.theme.collectAsState()
     val currentLanguage = settingsViewModel.language.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
 
-    DeleteProfileDialog(showDeleteDialog, settingsViewModel)
+    Scaffold(
 
-    Scaffold() { innerPadding ->
+    ) { innerPadding ->
         LazyColumn(
             modifier = modifier
                 .fillMaxSize()
@@ -90,14 +109,14 @@ fun SettingsScreen(
                     },
                     onDeleteClick = {
                         settingsViewModel.showDeleteProfile()
-                    //TODO: ir para pagina de eliminar perfil
+                        //TODO: ir para pagina de eliminar perfil
                     }
                 )
             }
         }
+
     }
 }
-
 
 @Composable
 fun SettingsSectionTitle(title: String) {
@@ -120,7 +139,7 @@ private fun ThemeSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { AppTheme.LIGHT_MODE }
+                .clickable { settingsViewModel.changeTheme(AppTheme.LIGHT_MODE) }
         ) {
             RadioButton(
                 selected = (selectedTheme == AppTheme.LIGHT_MODE.name),
@@ -139,7 +158,7 @@ private fun ThemeSection(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { AppTheme.DARK_MODE }
+                .clickable { settingsViewModel.changeTheme(AppTheme.DARK_MODE) }
         ) {
             RadioButton(
                 selected = (selectedTheme == AppTheme.DARK_MODE.name),
@@ -157,7 +176,7 @@ private fun ThemeSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    AppTheme.SYSTEM_DEFAULT
+                    settingsViewModel.changeTheme(AppTheme.SYSTEM_DEFAULT)
                 }
         ) {
             RadioButton(
@@ -188,7 +207,10 @@ private fun LanguageSection(
         // Chip para Inglês
         FilterChip(
             selected = currentCode == AppLanguage.ENGLISH.code,
-            onClick = { settingsViewModel.changeLanguage(AppLanguage.ENGLISH) },
+            onClick = {
+                settingsViewModel.changeLanguage(AppLanguage.ENGLISH)
+
+                      },
             label = { Text(stringResource(id = R.string.language_english)) }
         )
 

@@ -19,27 +19,6 @@ class AuthRepository @Inject constructor(
 ) {
     suspend fun loginUser(email: String, password: String): Boolean {
         try {
-/*
-            val authResult = firebaseAuth.signInWithEmailAndPassword(email, password).await()
-
-
-            val firebaseUser = authResult.user
-
-            if (firebaseUser == null) {
-                throw Exception("Utilizador Firebase não encontrado após login.")
-            }
-
-            val idTokenResult = firebaseUser.getIdToken(true).await()
-            val token = idTokenResult.token
-
-            if (token.isNullOrEmpty()) {
-                throw Exception("Não foi possível obter o token do Firebase.")
-            }
-
-            Log.d("TOKEN_TEST", "Bearer $token")
-
-
-*/
             val login  = LoginDto(
                 email = email,
                 password = password
@@ -68,31 +47,8 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun registerUser(profile: CreateProfileDto, password: String) {
-        val createdFirebaseUser: FirebaseUser? = null
-
+    suspend fun registerUser(profile: CreateProfileDto) {
         try {
-            /*
-            val authResult = firebaseAuth.createUserWithEmailAndPassword(profile.email, password).await()
-            createdFirebaseUser = authResult.user
-
-            if (createdFirebaseUser == null) {
-                throw Exception("Utilizador Firebase não foi criado.")
-            }
-
-
-            val idTokenResult = createdFirebaseUser.getIdToken(true).await()
-            val token = idTokenResult.token
-
-            if (token.isNullOrEmpty()) {
-                throw Exception("Não foi possível obter o token do Firebase.")
-            }
-
-            Log.d("TOKEN_TEST", "Bearer $token")
-
-            sessionManager.saveAuthToken(token)
-*/
-
             val response = apiService.createProfile(profile)
 
             if (!response.isSuccessful) {
@@ -102,15 +58,6 @@ class AuthRepository @Inject constructor(
             println("Erro no registo: ${e.message}")
             sessionManager.clearSession()
 
-            if (createdFirebaseUser != null) {
-                try {
-                    createdFirebaseUser.delete().await()
-                    Log.d("AuthViewModel", "Rollback: Utilizador ${createdFirebaseUser.uid} apagado do Firebase.")
-                } catch (deleteEx: Exception) {
-                    Log.e("AuthViewModel", "CRÍTICO: Falha ao apagar user do Firebase durante o rollback. Erro: ${deleteEx.message}")
-                }
-                throw Exception("Erro no registo: ${e.message}")
-            }
         }
     }
 

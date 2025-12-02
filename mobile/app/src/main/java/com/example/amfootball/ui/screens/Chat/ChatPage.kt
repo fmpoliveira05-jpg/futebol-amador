@@ -51,7 +51,6 @@ fun ChatScreen(
 ) {
     var messageText by remember { mutableStateOf("") }
     val roomName by chatViewModel.roomName.collectAsState()
-    //val listChat = MessageDto.generateExempleChat()
     Scaffold(
         topBar = {
             ChatTopBar(contactName = roomName) { }
