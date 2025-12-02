@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs.Chat;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.DTOs.Team;
@@ -23,6 +24,7 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly ITeamPostPoneGameRepository _teamPostPoneRepository;
         private readonly INotificationService notificationService;
+        private readonly IChatRoomService ChatService;
 
         public MatchInviteService(
             IMatchInviteRepository matchInviteRepository,
@@ -34,7 +36,9 @@ namespace Application.Services
             IUnityOfWork unityOfWork,
             ITeamPostPoneGameRepository teamPostPoneRepository,
             IPlayerAuthorizationService authorizationService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IChatRoomService chatRoomService)
+
         {
             MatchInviteRepository = matchInviteRepository;
             TeamRepository = teamRepository;
@@ -46,6 +50,7 @@ namespace Application.Services
             _teamPostPoneRepository = teamPostPoneRepository;
             AuthorizationService = authorizationService;
             this.notificationService = notificationService;
+            ChatService = chatRoomService;
         }
         #endregion
 
@@ -94,6 +99,7 @@ namespace Application.Services
             {
                 await notificationService.SendUserAsync(receiver.Id.ToString(), "New Match Invite", $"{sender.Name} wants to play a match against your team!");
             }
+            await ChatService.CreateMatchRoomAsync(new CreateChatRoomRequestDto {RoomName = sender.Name + ".V.S." + receiver.Name, TeamIds ={receiver.Id, sender.Id } },idSender.ToString());
 
             await UnityOfWork.SaveChangesAsync();
 
@@ -223,8 +229,19 @@ namespace Application.Services
         public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
         {
             MatchInviteValidator.ValidateFilterMatchInvite(idTeam, filter);
+            var teamSearching = await TeamRepository.GetTeamByIdAsync(idTeam);
+            if (teamSearching == null) {
+                return null;
+            }
 
             var listMatchInvite = await MatchInviteRepository.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
+            foreach (InfoMatchInviteDto matchInvite in listMatchInvite)
+            {
+                if (teamSearching.Pitch.Name.Equals(matchInvite.NamePitch))
+                {
+                    matchInvite.isHome = true;
+                }
+            }
             return listMatchInvite;
         }
         #endregion

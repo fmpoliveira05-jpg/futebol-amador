@@ -21,5 +21,7 @@ namespace Application.DTOs.MatchInvites
         [Required(ErrorMessage = "O nome do campo é obrigatório")]
         [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string NamePitch { get; set; } = null!;
+
+        public bool? isHome { get; set; }
     }
 }

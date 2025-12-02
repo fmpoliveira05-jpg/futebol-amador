@@ -124,11 +124,14 @@ namespace Application.Validators
         {
             const string msgNullPitch = "O campo da partida não pode estar a nulo";
             ValidateNullPitch(pitch, msgNullPitch);
-
             if (matchInvite == null)
             {
                 throw new ArgumentNullException("O convite de partida a negociar não existe!");
             }
+            if (matchInvite.IdSender.Equals(senderTeam.Id)) {
+                throw new ArgumentNullException("Deve aguardar a resposta da outra equipa antes de negociar novamente!");
+            }
+
 
             const string msgError = "Não foi possível negociar o convite para essa data, pois já tem um jogo marcado com uma diferença horaria de 12 horas para a data que inseriou";
             ValidateTwentyHoursMatch(findMatchWith12hour, msgError);

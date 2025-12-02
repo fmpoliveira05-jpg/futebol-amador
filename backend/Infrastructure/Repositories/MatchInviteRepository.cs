@@ -82,6 +82,8 @@ namespace Infrastructure.Repositories
             var senderName = filter.SenderName;
             var minDate = filter.MinDate;
             var maxDate = filter.MaxDate;
+            var senderId = filter.SenderId;
+            var matchInviteId = filter.MatchInviteId;
 
             var query = context.MatchInvite.AsQueryable();
 
@@ -100,6 +102,15 @@ namespace Infrastructure.Repositories
             if (maxDate != null)
             {
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) <= maxDate);
+            }
+
+            if (senderId != null)
+            {
+                query = query.Where(mi => mi.Sender.Id.Equals(senderId));
+            }
+            if (matchInviteId != null)
+            {
+                query = query.Where(mi => mi.Id.Equals(matchInviteId));
             }
 
             var list = await query
