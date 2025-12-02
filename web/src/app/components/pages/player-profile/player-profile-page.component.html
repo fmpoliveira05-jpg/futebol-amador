@@ -109,7 +109,7 @@
       <h2 class="card-title">Gestão de equipa</h2>
 
       <p class="side-card__text" *ngIf="hasTeam(); else noTeamSide">
-        Estás atualmente na equipa <strong>{{ p.teamName }}</strong>.
+        Estás atualmente na equipa <strong>{{ p.team?.name }}</strong>.
       </p>
 
       <ng-template #noTeamSide>
@@ -117,7 +117,7 @@
       </ng-template>
 
       <button *ngIf="hasTeam()" type="button" class="btn btn-secondary" (click)="goToTeamProfile()">
-        Ver sua Equipa.
+        Vê a tua equipa
       </button>
 
       <button type="button" class="btn btn-warning" (click)="leaveTeam()" [disabled]="!hasTeam() || isSaving()">
@@ -136,6 +136,10 @@
         </button>
       </div>
     </aside>
+
+    <button *ngIf="isOwnProfile()" class="btn btn-secondary" (click)="goToCalendar()">
+      Ver calendário
+    </button>
   </div>
 </section>
 

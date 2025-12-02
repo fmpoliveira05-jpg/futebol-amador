@@ -50,19 +50,12 @@ export interface PlayerDetails {
   height?: number;
 
   /**
-   * Indica se o jogador está associado a uma equipa ou não.
+   * A equipa do jogador (opcional).
    */
-  haveTeam: boolean;
-
-  /**
-   * ID da equipa à qual o jogador pertence (opcional, pode ser `null` ou `undefined`).
-   */
-  idTeam?: string | null;
-
-  /**
-   * Nome da equipa à qual o jogador pertence (opcional, pode ser `null` ou `undefined`).
-   */
-  teamName?: string | null;
+  team?: {
+    idTeam: string;
+    name: string;
+  } | null;
 
   /**
    * Indica se o jogador tem permissões de administrador (opcional).

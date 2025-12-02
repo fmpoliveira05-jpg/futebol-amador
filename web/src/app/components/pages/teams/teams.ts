@@ -35,7 +35,7 @@ export class Teams {
     private membershipRequestService: MembershipRequestService
   ) {}
 
-  protected readonly hasTeam = computed(() => !!this.player()?.idTeam);
+  protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam);
 
   ngOnInit() {
     this.playerService.getMyProfile().subscribe({
@@ -63,7 +63,7 @@ export class Teams {
     this.successMessage.set(null);
 
     if (this.hasTeam()) {
-      this.teamService.searchTeams(this.player()?.idTeam!).subscribe({
+      this.teamService.searchTeams(this.player()?.team?.idTeam!).subscribe({
         next: (data) => {
           this.teams.set(data);
           this.isLoading.set(false);

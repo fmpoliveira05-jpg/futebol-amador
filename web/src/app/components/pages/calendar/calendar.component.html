@@ -1,0 +1,87 @@
+<section class="calendar-page">
+  <header class="calendar-header">
+    <div>
+      <h1>Calendário</h1>
+      <div class="filters">
+        <button class="filter-button" (click)="toggleFilters()">
+          {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div *ngIf="showFilters()" class="filters-container">
+    <div>
+      <label for="nameOpponent">Nome do adversário:</label>
+      <input id="nameOpponent" [(ngModel)]="filterDto().nameOpponent" placeholder="Nome do adversário">
+    </div>
+
+    <div>
+      <label for="minDate">Data Mínima:</label>
+      <input id="minDate" type="date" [(ngModel)]="filterDto().minDate">
+    </div>
+
+    <div>
+      <label for="maxDate">Data Máxima:</label>
+      <input id="maxDate" type="date" [(ngModel)]="filterDto().maxDate">
+    </div>
+
+    <div>
+      <label for="isRealized">A partida já foi realizada?</label>
+      <select id="isRealized" [(ngModel)]="filterDto().isRealized">
+        <option [ngValue]="true">Sim</option>
+        <option [ngValue]="false">Não</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="isHome">A partida é em casa?</label>
+      <select id="isHome" [(ngModel)]="filterDto().isHome">
+        <option [ngValue]="true">Sim</option>
+        <option [ngValue]="false">Não</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="isRanked">A partida é ranqueada?</label>
+      <select id="isRanked" [(ngModel)]="filterDto().isRanked">
+        <option [ngValue]="true">Sim</option>
+        <option [ngValue]="false">Não</option>
+      </select>
+    </div>
+
+    <button (click)="applyFilters()">Aplicar Filtros</button>
+    <button (click)="clearSearchResults()">Limpar Resultados</button>
+  </div>
+
+  <div *ngIf="isLoading()">Carregando...</div>
+  <div *ngIf="errorMessage()">{{ errorMessage() }}</div>
+
+  <div *ngIf="matches.length === 0 && !isLoading()">Nenhum jogo encontrado.</div>
+
+  <div *ngIf="!isLoading()">
+    <div *ngFor="let match of visibleMatches()" class="match-card">
+      <div class="match-info">
+        <div class="team-info">
+          <p class="match-status">
+            <span class="status">
+              {{ match.isCompetitive ? 'Competitiva' : 'Casual' }}
+            </span>
+          </p>
+          <p class="team-name">{{ match.team.name }} - {{ match.team.numGoals }}</p>
+          <p class="team-name">{{ match.opponent.name }} - {{ match.opponent.numGoals }}</p>
+        </div>
+        <p class="match-end">{{ match.gameDate | date: 'yyyy-MM-dd' }}</p>
+      </div>
+
+      <div *ngIf="match.matchStatus !== 'Done' && match.matchStatus !== 'Cancelled'" class="match-actions">
+        <button *ngIf="isAdmin" class="btn postpone-btn" (click)="postponeMatch(match)">Adiar partida</button>
+        <button *ngIf="isAdmin" class="btn cancel-btn" (click)="confirmCancel(match)">Cancelar partida</button>
+      </div>
+    </div>
+
+    <div class="load-more-container">
+      <button *ngIf="visibleMatches().length < filteredMatches().length" (click)="loadMoreMatches()" class="load-more-btn">Carregar mais</button>
+    </div>
+  </div>
+</section>
