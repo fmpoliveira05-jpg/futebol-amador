@@ -82,7 +82,7 @@ export class TeamMembersPageComponent {
   }
 
   protected canDemote(member: PlayerTeamDto): boolean {
-    return member.isAdmin;
+    return member.playerId !== this.authService.getCurrentPlayerId() && member.isAdmin;
   }
 
   protected canRemove(member: PlayerTeamDto): boolean {
