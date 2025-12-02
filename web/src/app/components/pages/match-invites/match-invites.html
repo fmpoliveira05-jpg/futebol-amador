@@ -36,9 +36,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let invite of matchInvites()">
-            <td>{{ invite.idSender }}</td>
+            <td>{{ invite.sender.name }}</td>
+            <td>{{ invite.receiver.name }}</td>
             <td>{{ invite.gameDate }}</td>
-            <td>{{ invite.homePitch }}</td>
+            <td>{{ invite.namePitch }}</td>
 
             <td class="members-table__actions">
               <button type="button" class="btn btn-secondary" (click)="accept(invite)">

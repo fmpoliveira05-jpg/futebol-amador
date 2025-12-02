@@ -3,6 +3,7 @@ import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { SendMatchInviteDto } from '../../../shared/Dtos/Match/SendMatchInviteDto';
 import { MatchInviteService } from '../../../services/match-invite.service';
+import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDto';
 
 @Component({
   selector: 'app-match-invites',
@@ -15,7 +16,7 @@ export class MatchInvites {
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly searchTerm = signal<string>('');
 
-  matchInvites = signal<SendMatchInviteDto[]>([]);
+  matchInvites = signal<InfoMatchInviteDto[]>([]);
 
   constructor(private auth: AuthService, private matchInviteService: MatchInviteService) {}
 
@@ -46,9 +47,9 @@ export class MatchInvites {
     });
   }
 
-  accept(invite: SendMatchInviteDto) {}
+  accept(invite: InfoMatchInviteDto) {}
 
-  refuse(invite: SendMatchInviteDto) {}
+  refuse(invite: InfoMatchInviteDto) {}
   
-  negotiate(invite: SendMatchInviteDto) {}
+  negotiate(invite: InfoMatchInviteDto) {}
 }
