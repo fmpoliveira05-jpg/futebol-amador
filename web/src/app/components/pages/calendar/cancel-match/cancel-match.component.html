@@ -7,4 +7,8 @@
     <textarea name="motivo-cancelamento" [(ngModel)]="cancelMatchDto.description" placeholder="Introduz o motivo do cancelamento..."></textarea>
     <button (click)="confirmCancel()">Confirmar Cancelamento</button>
   </div>
+
+  <div *ngIf="successMessage()" class="mensagem-confirmacao">
+    {{ successMessage() }}
+  </div>
 </section>
