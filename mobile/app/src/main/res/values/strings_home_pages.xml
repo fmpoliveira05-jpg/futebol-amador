@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="user">User</string>
+    <string name="welcome_app">Welcome %1$s</string>
+    <string name="quick_actions">Quick actions</string>
+
+    <string name="schedule_match">Schedule Match</string>
+    <string name="manager_team">Manager Team</string>
+</resources>

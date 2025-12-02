@@ -18,6 +18,12 @@
     <string name="button_try_again">Tentar Novamente</string>
     <string name="button_try_again_description">Botão que permite voltar a recarregar os dados</string>
 
+    <string name="button_login">Entrar</string>
+    <string name="button_login_description">Botão para entrar na aplicação</string>
+
+    <string name="button_signup">Registar</string>
+    <string name="button_signup_description">Botão para criar uma nova conta</string>
+
     <string name="accept_button">Aceitar</string>
     <string name="accept_button_description">Botão que permite aceitar algo</string>
 
@@ -29,6 +35,9 @@
 
     <string name="button_send_match_invite">Enviar Convite de Partida</string>
     <string name="button_description_send_match_invite">Botão que permite apos preencher o formulário para enviar convite de partida</string>
+
+    <string name="button_membership_request">Pedidos de Adesão</string>
+    <string name="button_description_membership_request">Botão que lhe permite enviar pedidos de adesão</string>
 
     <string name="button_send_membership_request">Enviar Pedido de Adesão</string>
     <string name="button_send_membership_request_description">Botão que lhe permite mandar um pedido de adesão a uma equipa ou jogador</string>
@@ -45,11 +54,16 @@
     <string name="button_cancel_match">Cancelar Partida</string>
     <string name="button_cancel_match_description">Botão que permite ao utilizador cancelar uma partida</string>
 
+    <string name="button_list_teams">Lista de equipas</string>
+    <string name="button_description_list_teams">Botão que lhe permite visualizar todas as equipas, que ainda têm vagas para novos jogadores</string>
     <string name="button_view_more">Ver Mais</string>
     <string name="button_view_more_description">Botão que permite carregar mais itens da lista</string>
 
     <string name="button_create_team">Criar Equipa</string>
     <string name="button_description_create_team">Botão que permite após preencher o formulário criar uma equipa</string>
+
+    <string name="button_edit_team">Editar Equipa</string>
+    <string name="button_description_edit_team">Editar detalhes da equipa</string>
 
     <string name="app_theme">Tema</string>
     <string name="darkMode">Modo escuro</string>

@@ -1,9 +1,5 @@
 package com.example.amfootball.ui.viewModel.memberShipRequest
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
@@ -13,39 +9,21 @@ import com.example.amfootball.utils.extensions.toLocalDateTime
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
+import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
-class ListMemberShipRequestViewModel: ViewModel() {
-
+@HiltViewModel
+class ListMemberShipRequestViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver
+): ListsViewModels<MembershipRequestInfoDto>(networkObserver = networkObserver) {
     private val filterState: MutableStateFlow<FilterMemberShipRequest> = MutableStateFlow(FilterMemberShipRequest())
     val uiFilterState: StateFlow<FilterMemberShipRequest> = filterState
     private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> = MutableStateFlow(FilterMemberShipRequestError())
     val uiFilterErrorState: StateFlow<FilterMemberShipRequestError> = filterErrorState
-    private val listState: MutableStateFlow<List<MembershipRequestInfoDto>> = MutableStateFlow(emptyList<MembershipRequestInfoDto>())
-    private val inicialSizeList = MutableStateFlow(value = 10)
-
-    val uiListState: StateFlow<List<MembershipRequestInfoDto>> =
-        combine(listState, inicialSizeList) { lista, numero ->
-            lista.take(numero)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = emptyList()
-        )
-
-
-    /*
-    * val inicialList: State<List<LeadboardDto>> = derivedStateOf {
-        listState.value.take(inicialSizeList.value)
-    }
-    * */
-    val showMoreButton: State<Boolean> = derivedStateOf {
-        inicialSizeList.value < listState.value.size
-    }
 
     //Inicializador
     init {
@@ -53,7 +31,6 @@ class ListMemberShipRequestViewModel: ViewModel() {
         val initialValue = MembershipRequestInfoDto.generateMemberShipRequestTeam()
 
         listState.value = initialValue
-        //originalList = initialValue
     }
 
     //Metodos
@@ -132,11 +109,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
      * se foi o player a aceitar ou a Team
      * TODO: Depois dependendo do valor do if ou manda o pedido à API como se fosse a team ou o pedido como se fosse o player
      * */
-    fun acceptMemberShipRequest(
-        idReceiver: String,
-        idRequest: String,
-        isPlayerSender: Boolean,
-        navHostController: NavHostController,
+    fun acceptMemberShipRequest(idReceiver: String, idRequest: String, isPlayerSender: Boolean, navHostController: NavHostController,
     ) {
         if (isPlayerSender) {
             //TODO: Fazer pedido ao endpoint do Player accept da API
@@ -150,11 +123,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
     /**
      * TODO: Igual ao Accept mas para reject memberShipRequest
      * */
-    fun rejectMemberShipRequest(
-        idReceiver: String,
-        idRequest: String,
-        isPlayerSender: Boolean,
-    ) {
+    fun rejectMemberShipRequest(idReceiver: String, idRequest: String, isPlayerSender: Boolean) {
         if (isPlayerSender) {
             //TODO: Fazer pedido há API, ao endpoint do player
         } else {
@@ -170,11 +139,7 @@ class ListMemberShipRequestViewModel: ViewModel() {
     /**
      * TODO: Falta apenas nas paginas de perfil carregar os dados e de seguida enviar esse dados aqui
      * */
-    fun showMore(
-        isPlayerSender: Boolean,
-        idSender: String,
-        navHostController: NavHostController,
-    ) {
+    fun showMore(idSender: String, isPlayerSender: Boolean, navHostController: NavHostController) {
         var route = Routes.UserRoutes.PROFILE.route
 
         if (isPlayerSender) {

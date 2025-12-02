@@ -5,22 +5,18 @@ import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.UserConst
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.TeamService
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -42,8 +38,8 @@ import javax.inject.Inject
 class ListMembersViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
-    private val teamRepository: TeamRepository
-): ViewModel() {
+    private val teamRepository: TeamService
+): ListsViewModels<MemberTeamDto>(networkObserver = networkObserver) {
 
     /**
      * ID da equipa do utilizador autenticado.
@@ -61,19 +57,6 @@ class ListMembersViewModel @Inject constructor(
     private val errorFilters: MutableStateFlow<FilterMembersFilterError> = MutableStateFlow(FilterMembersFilterError())
     val uiErrorFilters: StateFlow<FilterMembersFilterError> = errorFilters
 
-    /**
-     * Estado da lista de membros a ser exibida na UI.
-     * Esta lista pode ser o resultado direto da API ou uma versão filtrada localmente.
-     */
-    private val listMemberState: MutableStateFlow<List<MemberTeamDto>> = MutableStateFlow(emptyList<MemberTeamDto>())
-    val uiList: StateFlow<List<MemberTeamDto>> = listMemberState
-
-    /**
-     * Cópia local da lista completa de membros obtida da API.
-     * Usada como base para a filtragem offline para evitar perdas de dados ao aplicar filtros.
-     */
-    private var allMembersOriginal: List<MemberTeamDto> = emptyList()
-
     /** Lista de opções para o filtro de Tipo de Membro (ex: Jogador, Admin). */
     private val listTypeMember: MutableStateFlow<List<TypeMember?>> = MutableStateFlow(emptyList())
     val uiListTypeMember: StateFlow<List<TypeMember?>> = listTypeMember
@@ -82,17 +65,8 @@ class ListMembersViewModel @Inject constructor(
     private val listPositions: MutableStateFlow<List<Position?>> = MutableStateFlow(emptyList())
     val uiListPositions: StateFlow<List<Position?>> = listPositions
 
-    /** Estado global da UI, incluindo indicadores de carregamento (Loading) e mensagens de erro gerais. */
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
-    val uiState: StateFlow<UiState> = _uiState
-
-    /** Estado de conectividade da rede (True = Online, False = Offline). */
-    private val isConnected: MutableStateFlow<Boolean> = MutableStateFlow(networkObserver.isOnlineOneShot())
-    val uiIsConnected: StateFlow<Boolean> = isConnected
-
     //Init
     init {
-        observeNetworkChanges()
         loadListMember()
         loadListTypeMember()
         loadListPosition()
@@ -145,9 +119,10 @@ class ListMembersViewModel @Inject constructor(
             return
         }
 
-        if (!isConnected.value) {
-            listMemberState.value = filterListOffline(
-                originalList = allMembersOriginal,
+
+        if (!isOnline.value) {
+            listState.value = filterListOffline(
+                originalList = originalList,
                 filters = filterState.value
             )
         } else {
@@ -166,26 +141,8 @@ class ListMembersViewModel @Inject constructor(
      * @param playerId O ID do jogador a promover.
      */
     fun onPromoteMember(playerId: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-                return@launch
-            }
-
-            try {
-                teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
-
-
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
-            }
+        launchDataLoad {
+            teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
         }
     }
 
@@ -196,25 +153,8 @@ class ListMembersViewModel @Inject constructor(
      * @param adminId O ID do administrador a despromover.
      */
     fun onDemoteMember(adminId: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-                return@launch
-            }
-
-            try {
-                val teams = teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
-
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
-            }
+        launchDataLoad {
+            val teams = teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
         }
     }
 
@@ -225,25 +165,8 @@ class ListMembersViewModel @Inject constructor(
      * @param playerId O ID do membro a remover.
      */
     fun onRemovePlayer(playerId: String) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-                return@launch
-            }
-
-            try {
-                val teams = teamRepository.removePlayerTeam(teamId = teamId, playerId = playerId)
-
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
-            }
+        launchDataLoad {
+            teamRepository.removePlayerTeam(teamId = teamId, playerId = playerId)
         }
     }
 
@@ -267,27 +190,12 @@ class ListMembersViewModel @Inject constructor(
      * Gere os estados de Loading e erros de rede/API.
      */
     private fun loadListMember() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+        launchDataLoad {
+            val teams = teamRepository.getListMembers(teamId = teamId, filterState.value)
 
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-                return@launch
-            }
-
-            try {
-                val teams = teamRepository.getListMembers(teamId = teamId, filterState.value)
-
-                listMemberState.value = teams
-                allMembersOriginal = teams
-
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
+            listState.value = teams
+            if(filterState.value == FilterMembersTeam()) {
+                originalList = teams
             }
         }
     }
@@ -332,19 +240,6 @@ class ListMembersViewModel @Inject constructor(
             val position = filters.position == null || item.position == filters.position
 
             name && typeMember && minAge && maxAge && position
-        }
-    }
-
-    /**
-     * Monitoriza as alterações de conectividade de rede em tempo real.
-     * Atualiza o estado [isConnected] automaticamente.
-     */
-    private fun observeNetworkChanges() {
-        viewModelScope.launch {
-            networkObserver.observeConnectivity()
-                .collect { isOnline ->
-                    isConnected.value= isOnline
-                }
         }
     }
 

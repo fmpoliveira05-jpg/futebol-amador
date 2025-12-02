@@ -45,6 +45,7 @@ import com.example.amfootball.ui.components.Loading
 import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.viewModel.match.MatchMakerViewModel
 import com.example.amfootball.R
+import com.example.amfootball.ui.components.lists.StringImageList
 
 @Composable
 fun MatchMakerScreen(
@@ -241,9 +242,15 @@ private fun InfoTeam(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ImageList(
-            image = team.logoTeam
+        StringImageList(
+            image = team.logoTeam,
+            contentDescription = stringResource(
+                id = R.string.logo_team_name,
+                R.string.logo_team,
+                team.name
+            )
         )
+
         Surface(
             shape = RoundedCornerShape(8.dp),
             color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)

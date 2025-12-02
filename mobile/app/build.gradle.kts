@@ -25,7 +25,9 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        //Runner do Dagger-Hilt
+        testInstrumentationRunner = "com.example.amfootball.mockWebServer.CustomTestRunner"
     }
 
     buildTypes {
@@ -53,7 +55,6 @@ android {
         compose = true
     }
 }
-//teste 2
 // Configuração da tarefa Jacoco para gerar o relatório XML
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest")
@@ -133,12 +134,6 @@ dependencies {
 
     implementation("com.google.firebase:firebase-firestore")
 
-    // Dependência para o Login com Google
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-    // Analytics
-    implementation("com.google.firebase:firebase-analytics")
-
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
     implementation("androidx.navigation:navigation-compose:2.7.0")
@@ -157,10 +152,26 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-compiler:2.51.1") // Para KSP
 
     // A biblioteca para usar hiltViewModel() no Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+
+    //Espresso Ui Testing
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Hilt Testing
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.57.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
+
+    // MockWebServer
+    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
+    androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
+
+    // Mockito para Testes Android (Instrumentados)
+    androidTestImplementation("org.mockito:mockito-android:5.7.0")
+    androidTestImplementation("org.mockito:mockito-core:5.7.0")
 }

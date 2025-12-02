@@ -18,5 +18,5 @@ data class InfoTeamLeadboard(
     val name: String,
     val currentPoints: Int,
     val nameRank: String,
-    val logoTeam: Uri? = Uri.EMPTY
+    val logoTeam: String? = null
 )

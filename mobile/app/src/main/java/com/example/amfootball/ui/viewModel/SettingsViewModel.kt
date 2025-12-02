@@ -1,15 +1,11 @@
 package com.example.amfootball.ui.viewModel
 
 import android.content.Context
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.SettingsStore
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.repository.AuthRepository
 import com.example.amfootball.ui.screens.settings.AppLanguage
 import com.example.amfootball.ui.screens.settings.AppTheme
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,12 +41,10 @@ class SettingsViewModel @Inject constructor(
      */
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
-
     private var _theme = MutableStateFlow(settingsStore.getTheme())
     val theme = _theme.asStateFlow()
     private var _notifications = MutableStateFlow(settingsStore.getNotifications())
     val notifications = _notifications.asStateFlow()
-
 
     fun showDeleteProfile() {
         deleteProfile.value = true

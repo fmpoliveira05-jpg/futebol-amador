@@ -1,10 +1,13 @@
 package com.example.amfootball.ui.components.buttons
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
@@ -15,9 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
+import com.example.amfootball.navigation.objects.Routes
 
 /**
  * Um componente Composable que renderiza um botão de envio (submit) para formulários.
@@ -80,8 +85,8 @@ fun SubmitCancelButton(
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error, // Fundo Vermelho
-            contentColor = MaterialTheme.colorScheme.onError  // Texto Branco/Legível
+            containerColor = MaterialTheme.colorScheme.error,
+            contentColor = MaterialTheme.colorScheme.onError
         )
     ) {
         Icon(
@@ -90,5 +95,39 @@ fun SubmitCancelButton(
         )
         Spacer(Modifier.width(8.dp))
         Text(text = text)
+    }
+}
+
+@Composable
+fun LoginButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(54.dp)
+            .then(textFieldModifier),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        elevation = ButtonDefaults.buttonElevation(
+            defaultElevation = 6.dp,
+            pressedElevation = 2.dp
+        )
+    ) {
+        Text(text = stringResource(R.string.button_login))
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.Login,
+            contentDescription = null,
+            modifier = Modifier.height(20.dp)
+        )
     }
 }

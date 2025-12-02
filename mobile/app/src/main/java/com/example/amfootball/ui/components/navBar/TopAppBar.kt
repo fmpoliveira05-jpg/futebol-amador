@@ -15,7 +15,7 @@ import com.example.amfootball.navigation.objects.Routes
 import kotlin.collections.find
 import com.example.amfootball.navigation.objects.AppRouteInfo
 import com.example.amfootball.ui.components.buttons.BackButton
-import com.example.amfootball.ui.viewModel.AuthViewModel
+import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

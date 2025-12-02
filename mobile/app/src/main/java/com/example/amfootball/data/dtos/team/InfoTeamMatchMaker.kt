@@ -16,6 +16,6 @@ import android.net.Uri
 data class InfoTeamMatchMaker(
     val id: String,
     val name: String,
-    val logoTeam: Uri = Uri.EMPTY,
+    val logoTeam: String? = null,
     val rank: String
 )

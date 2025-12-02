@@ -12,8 +12,8 @@ import javax.inject.Singleton
 
 @Singleton
 class SettingsStore @Inject constructor(
-    @ApplicationContext context: Context) {
-
+    @ApplicationContext context: Context
+) {
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
 
     companion object {
@@ -45,6 +45,7 @@ class SettingsStore @Inject constructor(
     fun saveLanguage(language: AppLanguage) {
         prefs.edit().putString(LANG_KEY, language.code).apply()
     }
+
     fun saveNotifications(notifications: Boolean) {
         prefs.edit().putBoolean(NOTIFICATIONS_KEY, notifications).apply()
     }

@@ -17,8 +17,8 @@ import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.CalendarRepository
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.CalendarService
+import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Arguments
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.MatchConsts
@@ -50,8 +50,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class FormMatchInviteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val calendarRepository: CalendarRepository,
-    private val teamRepository: TeamRepository,
+    private val calendarRepository: CalendarService,
+    private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
 ) : ViewModel() {

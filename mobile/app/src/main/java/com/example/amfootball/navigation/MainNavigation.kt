@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,8 +29,8 @@ import com.example.amfootball.ui.components.AppModalBottomSheet
 import com.example.amfootball.ui.components.navBar.BottomSheetContent
 import com.example.amfootball.ui.components.navBar.MainBottomNavBar
 import com.example.amfootball.ui.components.navBar.MainTopAppBar
-import com.example.amfootball.ui.screens.HomePageScreen
-import com.example.amfootball.ui.screens.LeaderboardScreen
+import com.example.amfootball.ui.screens.homePages.HomePageScreen
+import com.example.amfootball.ui.screens.lists.LeaderboardScreen
 import com.example.amfootball.ui.screens.Chat.ChatListScreen
 import com.example.amfootball.ui.screens.Chat.ChatScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
@@ -40,32 +41,28 @@ import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.settings.AppTheme
-import com.example.amfootball.ui.screens.settings.PreferenceScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
 import com.example.amfootball.ui.screens.team.CalendarScreen
 import com.example.amfootball.ui.screens.team.FormTeamScreen
-import com.example.amfootball.ui.screens.team.HomePageTeamScreen
+import com.example.amfootball.ui.screens.homePages.HomePageTeamScreen
 import com.example.amfootball.ui.screens.team.ListMembersScreen
 import com.example.amfootball.ui.screens.team.ListPostPoneMatchScreen
 import com.example.amfootball.ui.screens.team.ProfileTeamScreen
 import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.ui.viewModel.AuthViewModel
+import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.ui.viewModel.SettingsViewModel
-import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
 import com.example.amfootball.utils.extensions.composableProtected
 
-//TODO: Colocar autorização nas rotas, até agora só temos autorização
+//TODO: Colocar autorização nas rotas, até agora só temos autentificação
 @Composable
 fun MainNavigation() {
     val globalNavController = rememberNavController()
-
     val authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
-
-    val sessionManager by remember { mutableStateOf(SessionManager(context = globalNavController.context)) }
+    val context = LocalContext.current
+    val sessionManager by remember { mutableStateOf(SessionManager(context = context)) }
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     var showBottomSheet by remember { mutableStateOf(false) }
@@ -96,7 +93,10 @@ fun MainNavigation() {
                 startDestination = Routes.GeralRoutes.HOMEPAGE.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                homePages(globalNavController = globalNavController, sessionManager = sessionManager)
+                homePages(
+                    globalNavController = globalNavController,
+                    sessionManager = sessionManager
+                )
 
                 pages(
                     globalNavController = globalNavController,
@@ -130,7 +130,9 @@ fun MainNavigation() {
 
 private fun NavGraphBuilder.homePages(globalNavController: NavHostController, sessionManager: SessionManager) {
     composable(Routes.GeralRoutes.HOMEPAGE.route) {
-        HomePageScreen(globalNavController = globalNavController)
+        HomePageScreen(
+            globalNavController = globalNavController,
+        )
     }
 
     composableProtected(
@@ -165,8 +167,6 @@ private fun NavGraphBuilder.pages(
     teamPages(globalNavController = globalNavController, sessionManager = sessionManager)
 
     chatPages(globalNavController = globalNavController, sessionManager = sessionManager)
-
-    systemPages(globalNavController = globalNavController)
 }
 
 /**
@@ -178,9 +178,16 @@ private fun NavGraphBuilder.autPages(
     authViewModel: AuthViewModel
 ) {
     composableNotProtectedRoute(
-        route = Routes.UserRoutes.LOGIN.route,
+        route = "${Routes.UserRoutes.LOGIN.route}?redirect={redirect}",
         navController = globalNavController,
         sessionManager = sessionManager,
+        arguments = listOf(
+            navArgument("redirect") {
+                defaultValue = null
+                nullable = true
+                type = NavType.StringType
+            }
+        ),
         content = {
             LoginScreen(
                 navHostController = globalNavController,
@@ -388,15 +395,12 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 
-    //TODO: Ver esta rota, kkkk
     composableProtected(
-        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/CancelMatch/{${Arguments.MATCH_INVITE_ID}}",
+        route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.MATCH_INVITE_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
             navArgument(Arguments.MATCH_INVITE_ID) { type = NavType.StringType },
@@ -405,9 +409,7 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
-            val viewModel = hiltViewModel<FormMatchInviteViewModel>()
-
-            FormMatchInviteScreen(navHostController = globalNavController, viewModel = viewModel)
+            FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
 
@@ -508,11 +510,5 @@ private fun isDarkMode(currentAppTheme: String): Boolean{
         AppTheme.LIGHT_MODE.name -> false
         AppTheme.DARK_MODE.name -> true
         else -> isSystemInDarkTheme()
-    }
-}
-
-private fun NavGraphBuilder.systemPages(globalNavController: NavHostController) {
-    composable(Routes.GeralRoutes.PREFERENCE.route){
-        PreferenceScreen()
     }
 }

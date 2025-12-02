@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="user">Utilizador</string>
+    <string name="welcome_app">Bem-vindo %1$s</string>
+    <string name="quick_actions">Ações rápidas</string>
+
+    <string name="schedule_match">Agendar Partida</string>
+    <string name="manager_team">Gestão da Equipa</string>
+</resources>

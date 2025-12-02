@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tag_email_input" translatable="false">emailInput</string>
+    <string name="tag_password_input" translatable="false">passwordInput</string>
+    <string name="tag_login_button" translatable="false">loginButton</string>
+    <string name="tag_logo_team" translatable="false">LogoTeam</string>
+    <string name="tag_name_team" translatable="false">nameTeam</string>
+    <string name="tag_action_card_calendar" translatable="false">actionCardCalendar</string>
+</resources>

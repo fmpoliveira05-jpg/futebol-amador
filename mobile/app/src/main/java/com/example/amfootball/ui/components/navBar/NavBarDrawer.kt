@@ -33,6 +33,7 @@ import com.example.amfootball.data.NavigationItem
 import kotlinx.coroutines.launch
 import com.example.amfootball.R
 
+//Nota: Não utilizada
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(itens: List<NavigationItem>,

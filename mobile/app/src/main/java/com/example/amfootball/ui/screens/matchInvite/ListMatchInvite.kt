@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -14,15 +13,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
+import com.example.amfootball.data.actions.itemsList.ItemListMatchIniviteActions
 import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -35,10 +38,10 @@ import com.example.amfootball.ui.components.lists.FilterMinDatePicker
 import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
@@ -46,11 +49,10 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun ListMatchInviteScreen(
     navHostController: NavHostController,
-    viewModel: ListMatchInviteViewModel = viewModel()
+    viewModel: ListMatchInviteViewModel = hiltViewModel()
 ) {
-    val list by viewModel.uiList.observeAsState(initial = emptyList())
-    val filters by viewModel.uiFilters.observeAsState(initial = FilterMatchInvite())
-    val filterError by viewModel.filterError.observeAsState(initial = FilterMatchInviteError())
+    val filters by viewModel.uiFilters.collectAsStateWithLifecycle()
+    val filterError by viewModel.filterError.collectAsStateWithLifecycle()
 
     val filterActions = FilterMatchInviteActions(
         onSenderNameChange = viewModel::onNameSenderChange,
@@ -61,53 +63,78 @@ fun ListMatchInviteScreen(
             onFilterClean = viewModel::onFilterClear
         )
     )
+
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val itemsListActions = ItemListMatchIniviteActions(
+        acceptMatchInvite = viewModel::acceptMatchInvite,
+        rejectMatchInvite = viewModel::rejectMatchInvite,
+        negociateMatchInvite = viewModel::negociateMatchInvite,
+        showMoreDetails = viewModel::showMoreDetails
+    )
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+
+    ListMatchInviteContent(
+        uiState = uiState,
+        isOnline = isOnline,
+        filters = filters,
+        filterActions = filterActions,
+        filterError = filterError,
+        list = list,
+        itemsListActions = itemsListActions,
+        navHostController = navHostController
+    )
+}
+
+@Composable
+private fun ListMatchInviteContent(
+    uiState: UiState,
+    isOnline: Boolean,
+    filters: FilterMatchInvite,
+    filterActions: FilterMatchInviteActions,
+    filterError: FilterMatchInviteError,
+    list: List<InfoMatchInviteDto>,
+    itemsListActions: ItemListMatchIniviteActions,
+    navHostController: NavHostController
+) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
-    ListSurface(
-        list = list,
-        filterSection = {
-            FilterSection(
-                isExpanded = filtersExpanded,
-                onToggleExpand = { filtersExpanded = !filtersExpanded },
-                content = {
-                    FilterListMatchInvite(
-                        filters = filters,
-                        filterActions = filterActions,
-                        filterError = filterError,
-                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    )
-                }
-            )
-        },
-        listItems = { invite ->
-            ItemListMatchInivite(
-                matchInvite = invite,
-                acceptMatchInvite = {
-                    viewModel.acceptMatchInvite(
-                        idMatchInvite = invite.id
-                    )
-                },
-                rejectMatchInvite = {
-                    viewModel.rejectMatchInvite(
-                        idMatchInvite = invite.id
+    LoadingPage(
+        isLoading = uiState.isLoading,
+        errorMsg = uiState.errorMessage,
+        retry = {},
+        content = {
+            OfflineBanner(isVisible = !isOnline)
+
+            ListSurface(
+                list = list,
+                filterSection = {
+                    FilterSection(
+                        isExpanded = filtersExpanded,
+                        onToggleExpand = { filtersExpanded = !filtersExpanded },
+                        content = {
+                            FilterListMatchInvite(
+                                filters = filters,
+                                filterActions = filterActions,
+                                filterError = filterError,
+                                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                            )
+                        }
                     )
                 },
-                negociateMatchInvite = {
-                    viewModel.negociateMatchInvite(
-                        idMatchInvite = invite.id,
+                listItems = { invite ->
+                    ItemListMatchInivite(
+                        matchInvite = invite,
+                        itemsListActions = itemsListActions,
                         navHostController = navHostController
                     )
                 },
-                showMore = {
-                    viewModel.showMoreDetails(
-                        idMatchInvite = invite.id,
-                        navHostController = navHostController
-                    )
-                }
+                messageEmptyList = stringResource(R.string.list_match_invite_empty)
             )
-        },
-        messageEmptyList = stringResource(R.string.list_match_invite_empty)
+        }
     )
+
 }
 
 @Composable
@@ -170,10 +197,8 @@ private fun FilterListMatchInvite(
 @Composable
 private fun ItemListMatchInivite(
     matchInvite: InfoMatchInviteDto,
-    acceptMatchInvite: () -> Unit,
-    negociateMatchInvite: () -> Unit,
-    rejectMatchInvite: () -> Unit,
-    showMore: () -> Unit
+    itemsListActions: ItemListMatchIniviteActions,
+    navHostController: NavHostController
 ) {
     GenericListItem(
         item = matchInvite,
@@ -181,6 +206,11 @@ private fun ItemListMatchInivite(
         leading = {
             StringImageList(
                 image = matchInvite.opponent.image,
+                contentDescription = stringResource(
+                    id = R.string.logo_team_name,
+                    R.string.logo_team,
+                    matchInvite.opponent.name
+                )
             )
         },
         supporting = {
@@ -196,14 +226,17 @@ private fun ItemListMatchInivite(
         },
         trailing = {
             ShowMoreInfoButton(
-                showMoreDetails = showMore,
+                showMoreDetails = { itemsListActions.showMoreDetails(matchInvite.id, navHostController) },
                 contentDescription = stringResource(id = R.string.list_teams_view_team)
             )
         },
         underneathItems = {
-            AcceptButton(accept = acceptMatchInvite)
-            EditButton(edit = negociateMatchInvite, contentDescription = stringResource(id = R.string.negotiate_button_description))
-            RejectButton(reject = rejectMatchInvite)
+            AcceptButton(accept = {itemsListActions.acceptMatchInvite(matchInvite.id) })
+            EditButton(
+                edit = { itemsListActions.negociateMatchInvite(matchInvite.id, navHostController) },
+                contentDescription = stringResource(id = R.string.negotiate_button_description)
+            )
+            RejectButton(reject = { itemsListActions.rejectMatchInvite(matchInvite.id)})
         }
     )
 }

@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,7 +34,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.ui.viewModel.AuthViewModel
+import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.Loading
@@ -148,6 +149,9 @@ private fun FieldsSignUp(
     EmailTextField(
         value = email,
         onValueChange = { email = it },
+        isError = false,
+        errorMessage = "",
+        textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_email_input))
     )
 
     PhoneInputWithDynamicCountries(
@@ -223,13 +227,17 @@ private fun FieldsSignUp(
     PasswordTextField(
         label = stringResource(id = R.string.password_label),
         value = password,
-        onValueChange = { password = it }
+        onValueChange = { password = it },
+        isError = false,
+        errorMessage = ""
     )
 
     PasswordTextField(
         label = stringResource(id = R.string.password_confirm),
         value = passwordVerification,
         onValueChange = { passwordVerification = it },
+        isError = false,
+        errorMessage = ""
     )
 
     Spacer(Modifier.height(16.dp))

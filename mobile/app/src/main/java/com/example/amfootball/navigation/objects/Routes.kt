@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.SportsBaseball
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.amfootball.R
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.GroupAdd
@@ -77,12 +78,7 @@ object Routes {
         PROFILE("ProfileUser", R.string.page_profile_user, Icons.Default.Person, R.string.profile_user_title_page, haveBackButton = true),
         LOGIN("Login", R.string.login_title, Icons.AutoMirrored.Filled.Login, R.string.login_title),
         SIGNUP("Signup", R.string.signup, Icons.Default.PersonAdd, R.string.signup_description),
-        LOGOUT(
-            "Logout",
-            R.string.logout,
-            Icons.AutoMirrored.Filled.Logout,
-            R.string.logout_description,
-            haveBackButton = false),
+        LOGOUT("Logout", R.string.logout, Icons.AutoMirrored.Filled.Logout, R.string.logout_description, haveBackButton = false),
     }
 
     enum class TeamRoutes(
@@ -95,7 +91,7 @@ object Routes {
         //Trocar a description
         CREATE_TEAM("CreateTeam",R.string.navbar_create_tean,Icons.Default.GroupAdd,R.string.button_create_team,haveBackButton = true,),
         UPDATE_TEAM("UpdateTeam", R.string.navbar_update_team, Icons.Default.Sync, R.string.description_navbar_update_team, haveBackButton = true),
-        HOMEPAGE("HomePageTeam",R.string.team_homepage,Icons.Default.Home,R.string.team_homepage_description),
+        HOMEPAGE("HomePageTeam",R.string.team_homepage,Icons.Default.Dashboard,R.string.team_homepage_description),
         TEAM_PROFILE("teamprofile",R.string.team_profile,Icons.Default.Person4,R.string.team_profile_description,haveBackButton = true),
         SETTINGS("teamsettings",R.string.team_settings,Icons.Default.RoomPreferences,R.string.team_settings_description),
         MEMBERLIST("ListMembersTeam",R.string.navbar_members_list,Icons.Default.Group,R.string.navbar_members_list),
@@ -127,12 +123,12 @@ object Routes {
             GeralRoutes.HOMEPAGE.contentDescription,
             GeralRoutes.HOMEPAGE.haveBackButton
         ),
-        TEAM_LIST(
-            PlayerRoutes.TEAM_LIST.route,
-            PlayerRoutes.TEAM_LIST.labelResId,
-            PlayerRoutes.TEAM_LIST.icon,
-            PlayerRoutes.TEAM_LIST.contentDescription,
-            PlayerRoutes.TEAM_LIST.haveBackButton
+        HOMEPAGE_TEAM(
+            TeamRoutes.HOMEPAGE.route,
+            TeamRoutes.HOMEPAGE.labelResId,
+            TeamRoutes.HOMEPAGE.icon,
+            TeamRoutes.HOMEPAGE.contentDescription,
+            TeamRoutes.HOMEPAGE.haveBackButton
         ),
         PAGE_OPTIONS(
             "pageoptions",

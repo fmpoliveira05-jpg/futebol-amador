@@ -28,7 +28,7 @@ import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
-import com.example.amfootball.data.mocks.Lists.ListPlayers
+import com.example.amfootball.data.mocks.lists.ListPlayersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -160,7 +160,6 @@ fun ListPlayersContent(
                         isExpanded = filtersExpanded,
                         onToggleExpand = { filtersExpanded = !filtersExpanded },
                         content = { paddingModifier ->
-                            // Nota: A função FilterListPlayerContent precisa ser pública ou estar neste ficheiro
                             FilterListPlayerContent(
                                 filters = filters,
                                 filtersError = filtersError,
@@ -312,6 +311,11 @@ private fun ItemListPlayer(
         leading = {
             StringImageList(
                 image = player.image,
+                contentDescription = stringResource(
+                    id = R.string.proflie_image_name,
+                    R.string.proflie_image,
+                    player.name
+                )
             )
         },
         supporting = {
@@ -355,12 +359,12 @@ fun ListPlayersPreview() {
         ListPlayersContent(
             isOnline = true,
             uiState = UiState(isLoading = false),
-            list = ListPlayers.list,
+            list = ListPlayersMocks.list,
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayers.Positions,
+            listPosition = ListPlayersMocks.Positions,
             onRetry = {},
-            filterActions = ListPlayers.Actions,
+            filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = true,
@@ -384,9 +388,9 @@ fun ListPlayersEmptyPreview() {
             list = emptyList(),
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayers.Positions,
+            listPosition = ListPlayersMocks.Positions,
             onRetry = {},
-            filterActions = ListPlayers.Actions,
+            filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = false,
@@ -407,12 +411,12 @@ fun ListPlayersOfflinePreview() {
         ListPlayersContent(
             isOnline = false,
             uiState = UiState(isLoading = false),
-            list = ListPlayers.list,
+            list = ListPlayersMocks.list,
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayers.Positions,
+            listPosition = ListPlayersMocks.Positions,
             onRetry = {},
-            filterActions = ListPlayers.Actions,
+            filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = true,
@@ -436,9 +440,9 @@ fun ListPlayersLoadingPreview() {
             list = emptyList(),
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayers.Positions,
+            listPosition = ListPlayersMocks.Positions,
             onRetry = {},
-            filterActions = ListPlayers.Actions,
+            filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = false,
@@ -462,9 +466,9 @@ fun ListPlayersErrorPreview() {
             list = emptyList(),
             filters = FilterListPlayer(),
             filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayers.Positions,
+            listPosition = ListPlayersMocks.Positions,
             onRetry = {},
-            filterActions = ListPlayers.Actions,
+            filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = false,

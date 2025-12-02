@@ -1,25 +1,21 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.UiState
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.repository.TeamRepository
+import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Routes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.text.ifEmpty
 import com.example.amfootball.R
 import com.example.amfootball.data.errors.filtersError.FilterTeamError
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.TeamConst
 
@@ -38,16 +34,8 @@ import com.example.amfootball.utils.TeamConst
 @HiltViewModel
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamRepository: TeamRepository,
-): ViewModel() {
-
-    /** Estado atual da lista de equipas visível na UI (pode estar filtrada). */
-    private val listState: MutableStateFlow<List<ItemTeamInfoDto>> = MutableStateFlow(emptyList())
-    val listTeams: StateFlow<List<ItemTeamInfoDto>> = listState
-
-    /** Cache local da lista completa original vinda da API. Usada para filtrar sem novas chamadas de rede. */
-    private var allTeamOriginal: List<ItemTeamInfoDto> = emptyList()
-
+    private val teamRepository: TeamService,
+): ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
     val uiFilterState: StateFlow<FiltersListTeam> = filterState
@@ -60,16 +48,7 @@ class ListTeamViewModel @Inject constructor(
     private val listRanks: MutableStateFlow<List<RankNameDto>> = MutableStateFlow(emptyList())
     var listRank: StateFlow<List<RankNameDto>> = listRanks
 
-    /** Monitoriza o estado da conexão à internet. */
-    private val _isOnline = MutableStateFlow(networkObserver.isOnlineOneShot())
-    val isOnline: StateFlow<Boolean> = _isOnline
-
-    /** Estado geral da UI (Loading e Erros genéricos de Rede/API). */
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
-    val uiState: StateFlow<UiState> = _uiState
-
     init {
-        observeNetworkChanges()
         loadListTeam()
 
         //Por enquanto esta lista vai ser estatica
@@ -128,7 +107,7 @@ class ListTeamViewModel @Inject constructor(
 
         if(!networkObserver.isOnlineOneShot()) {
             listState.value = offlineFilterList(
-                originalList = allTeamOriginal,
+                originalList = originalList,
                 filters = filterState.value
             )
         } else {
@@ -143,7 +122,7 @@ class ListTeamViewModel @Inject constructor(
         filterState.value = FiltersListTeam()
 
         if(!networkObserver.isOnlineOneShot()) {
-           listState.value = allTeamOriginal
+           listState.value = originalList
         } else {
             loadListTeam()
         }
@@ -153,9 +132,15 @@ class ListTeamViewModel @Inject constructor(
      * Navega para o ecrã de envio de convite de jogo.
      */
     fun sendMatchInvite(idTeam: String, navHostController: NavHostController) {
-        navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}") {
-            launchSingleTop = true
-        }
+        onlineFunctionality(
+            action = {
+                navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = "Não pode mandar um pedido de partida sem estar conectado há intern"
+        )
+
     }
 
     /**
@@ -187,43 +172,11 @@ class ListTeamViewModel @Inject constructor(
      * - Se Online: Tenta obter os dados do repositório, atualiza a lista visível e guarda uma cópia em [allTeamOriginal].
      */
     private fun loadListTeam() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
+        launchDataLoad {
+            val teams = teamRepository.getListTeam(filterState.value)
 
-            if (!networkObserver.isOnlineOneShot()) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
-                }
-                return@launch
-            }
-
-            try {
-                val teams = teamRepository.getListTeam(filterState.value)
-
-                listState.value = teams
-                allTeamOriginal = teams
-                _uiState.update { it.copy(isLoading = false) }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = e.message)
-                }
-            }
-        }
-    }
-
-    /**
-     * Inicia a observação contínua do estado da conectividade de rede.
-     *
-     * Lança uma corrotina no [viewModelScope] que subscreve o fluxo (Flow) do [networkObserver].
-     * Sempre que o estado da rede altera (Online <-> Offline), a variável [_isOnline] é atualizada
-     * automaticamente, permitindo que a UI reaja em tempo real (ex: exibir/ocultar banner de "Sem Internet").
-     */
-    private fun observeNetworkChanges() {
-        viewModelScope.launch {
-            networkObserver.observeConnectivity()
-                .collect { isConnected ->
-                    _isOnline.value = isConnected
-                }
+            listState.value = teams
+            originalList = teams
         }
     }
 

@@ -1,8 +1,5 @@
 package com.example.amfootball.ui.viewModel.team
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
@@ -12,17 +9,23 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.utils.extensions.toLocalDateTime
 import com.example.amfootball.R
+import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
-class ListPostPoneMatchViewModel: ViewModel() {
-    private val filterState: MutableLiveData<FilterPostPoneMatch> = MutableLiveData<FilterPostPoneMatch>(FilterPostPoneMatch())
-    val filter: LiveData<FilterPostPoneMatch> = filterState
+@HiltViewModel
+class ListPostPoneMatchViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver
+) : ListsViewModels<PostPoneMatchDto>(networkObserver = networkObserver) {
+    private val filterState: MutableStateFlow<FilterPostPoneMatch> = MutableStateFlow<FilterPostPoneMatch>(FilterPostPoneMatch())
+    val filter: StateFlow<FilterPostPoneMatch> = filterState
 
-    private val filtersErrorsState: MutableLiveData<ListPostPoneMatchFiltersError> = MutableLiveData<ListPostPoneMatchFiltersError>(ListPostPoneMatchFiltersError())
-    val filterErros: LiveData<ListPostPoneMatchFiltersError> = filtersErrorsState
-
-    private val listState: MutableLiveData<List<PostPoneMatchDto>> = MutableLiveData<List<PostPoneMatchDto>>(emptyList())
-    val list: LiveData<List<PostPoneMatchDto>> = listState
+    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> = MutableStateFlow<ListPostPoneMatchFiltersError>(ListPostPoneMatchFiltersError())
+    val filterErros: StateFlow<ListPostPoneMatchFiltersError> = filtersErrorsState
 
     init {
         //TODO: Carregar a lista da API
@@ -30,27 +33,27 @@ class ListPostPoneMatchViewModel: ViewModel() {
     }
 
     fun onOpponentNameChange(newName: String) {
-        filterState.value = filterState.value!!.copy(nameOpponent = newName)
+        filterState.value = filterState.value.copy(nameOpponent = newName)
     }
 
     fun onIsHomeChange(isHome: Boolean?) {
-        filterState.value = filterState.value!!.copy(isHome = isHome)
+        filterState.value = filterState.value.copy(isHome = isHome)
     }
 
     fun onMinDateGameChange(newMinDate: Long) {
-        filterState.value = filterState.value!!.copy(minDataGame = newMinDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(minDataGame = newMinDate.toLocalDateTime())
     }
 
     fun onMaxDateChange(newMaxDate: Long) {
-        filterState.value = filterState.value!!.copy(maxDateGame = newMaxDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(maxDateGame = newMaxDate.toLocalDateTime())
     }
 
     fun onMinDatePostPoneDateChange(newMinDate: Long) {
-        filterState.value = filterState.value!!.copy(minDatePostPone = newMinDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(minDatePostPone = newMinDate.toLocalDateTime())
     }
 
     fun onMaxDatePostPoneDateChange(newMaxDate: Long) {
-        filterState.value = filterState.value!!.copy(maxDatePostPone = newMaxDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(maxDatePostPone = newMaxDate.toLocalDateTime())
     }
 
     fun onApplyFilter() {
@@ -73,24 +76,23 @@ class ListPostPoneMatchViewModel: ViewModel() {
     }
 
     //TODO: Passar o id da equipa na rota
-    fun showMoreInfo(
-        idOpponent: String,
-        navHostController: NavHostController
-    ) {
-        navHostController.navigate(Routes.TeamRoutes.TEAM_PROFILE.route) {
-            launchSingleTop = true
-        }
+    fun showMoreInfo(idOpponent: String, navHostController: NavHostController) {
+        onlineFunctionality(
+            action = {
+                navHostController.navigate("${Routes.TeamRoutes.TEAM_PROFILE.route}/${idOpponent}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = "Só pode ver mais informações da equipa se estiver online."
+        )
     }
 
-    /*
-
-    * */
     private fun validateFilters(): Boolean {
-        val nameOpponent = filterState.value?.nameOpponent
-        val minDateGame = filterState.value?.minDataGame
-        val maxDateGame = filterState.value?.maxDateGame
-        val minDatePostPone = filterState.value?.minDatePostPone
-        val maxDatePostPone = filterState.value?.maxDatePostPone
+        val nameOpponent = filterState.value.nameOpponent
+        val minDateGame = filterState.value.minDataGame
+        val maxDateGame = filterState.value.maxDateGame
+        val minDatePostPone = filterState.value.minDatePostPone
+        val maxDatePostPone = filterState.value.maxDatePostPone
 
         var nameOpponentError: ErrorMessage? = null
         var minDateGameError: ErrorMessage? = null

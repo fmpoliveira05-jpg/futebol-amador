@@ -24,7 +24,7 @@ import com.google.gson.annotations.SerializedName
 data class ItemTeamInfoDto(
     val id: String,
     val name: String,
-    val logoTeam: Uri = Uri.EMPTY,
+    val logoTeam: String? = null,
     val description: String,
     @SerializedName("address")
     val fullAddress: String,
