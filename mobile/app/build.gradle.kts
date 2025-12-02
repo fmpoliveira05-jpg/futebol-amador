@@ -55,7 +55,6 @@ android {
         compose = true
     }
 }
-//teste 2
 // Configuração da tarefa Jacoco para gerar o relatório XML
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest")
@@ -134,12 +133,6 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:24.0.1")
 
     implementation("com.google.firebase:firebase-firestore")
-
-    // Dependência para o Login com Google
-    implementation("com.google.android.gms:play-services-auth:21.2.0")
-
-    // Analytics
-    implementation("com.google.firebase:firebase-analytics")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
