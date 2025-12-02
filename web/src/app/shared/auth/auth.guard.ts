@@ -39,7 +39,7 @@ export class AuthGuard implements CanActivate {
     }
 
     if (route.data['isAdmin'] && !this.authService.isAdmin()) {
-      this.router.navigate(['/players']);
+      this.router.navigate(['/']);
       return false;
     }
 
