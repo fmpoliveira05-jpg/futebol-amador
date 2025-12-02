@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.MatchInvites;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Infrastructure.Data;
@@ -56,16 +57,19 @@ namespace Infrastructure.Repositories
                 .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
-                    Sender =
+
+                    Sender = new TeamDto
                     {
                         IdTeam = mi.IdSender,
                         Name = mi.Sender.Name
                     },
-                    Receiver =
+
+                    Receiver = new TeamDto
                     {
                         IdTeam = mi.IdReceiver,
                         Name = mi.Receiver.Name
                     },
+
                     GameDate = mi.GameDate,
                     NamePitch = mi.Pitch.Name
                 }).ToListAsync();
@@ -79,16 +83,13 @@ namespace Infrastructure.Repositories
             var minDate = filter.MinDate;
             var maxDate = filter.MaxDate;
 
-            var query = context.MatchInvite
-                .Include(mi => mi.Sender)
-                .Include(mi => mi.Pitch)
-                .Include(mi => mi.Receiver)
-                .Where(mi => mi.IdReceiver == idReceiver);
+            var query = context.MatchInvite.AsQueryable();
+
+            query = query.Where(mi => mi.IdReceiver == idReceiver);
 
             if (!string.IsNullOrEmpty(senderName))
             {
-                query = query.Include(mi => mi.Sender)
-                    .Where(mi => mi.Sender.Name.ToUpper().Contains(senderName.ToUpper()));
+                query = query.Where(mi => mi.Sender.Name.ToUpper().Contains(senderName.ToUpper()));
             }
 
             if (minDate != null)
@@ -105,23 +106,24 @@ namespace Infrastructure.Repositories
                 .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
-                    Sender =
+
+                    Sender = new TeamDto
                     {
                         IdTeam = mi.IdSender,
                         Name = mi.Sender.Name
                     },
-                    Receiver =
+
+                    Receiver = new TeamDto
                     {
                         IdTeam = mi.IdReceiver,
                         Name = mi.Receiver.Name
                     },
+
                     GameDate = mi.GameDate,
                     NamePitch = mi.Pitch.Name
                 }).ToListAsync();
 
             return list;
         }
-
-
     }
 }
