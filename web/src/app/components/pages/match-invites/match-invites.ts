@@ -40,7 +40,7 @@ export class MatchInvites {
         this.matchInvites.set(data);
         this.isLoading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.errorMessage.set('Não foi possível carregar os convites de partida da equipa.');
         this.isLoading.set(false);
       },
