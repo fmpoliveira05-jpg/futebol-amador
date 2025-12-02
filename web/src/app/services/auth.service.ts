@@ -73,12 +73,19 @@ export class AuthService {
   }
 
   /**
+   * Verifica se o utilizador tem permissões de administrador.
+   * @returns `true` se o utilizador for administrador, caso contrário `false`.
+   */
+  isMember(): boolean {
+    return this.hasTeam() && this.cookieService.get('is_admin') === 'false';
+  }
+
+  /**
    * Verifica se o utilizador está associado a uma equipa.
    * @returns `true` se o utilizador tiver uma equipa associada, caso contrário `false`.
    */
   hasTeam(): boolean {
-    const decodedToken = this.decodeToken();
-    return decodedToken?.idTeam != null;
+    return this.getCurrentTeamId != null
   }
 
   /**

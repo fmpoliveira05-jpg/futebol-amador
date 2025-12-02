@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { CommonModule } from '@angular/common';
@@ -8,6 +8,7 @@ import { CreateTeamDto } from '../../../shared/Dtos/Team/CreateTeamDto';
 import { PitchDto } from '../../../shared/Dtos/Pitch/PitchDto';
 import { Router } from '@angular/router';
 import { PlayerService } from '../../../services/player.service';
+import { CookieService } from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-create-team',
@@ -22,6 +23,11 @@ export class CreateTeam {
   successMessage = signal<string | null>(null);
   isLoading = signal<boolean>(false);
   isSaving = signal<boolean>(false);
+
+  /**
+   * Serviço para manipulação de cookies.
+   */
+  private cookieService = inject(CookieService);
 
   constructor(
     private auth: AuthService,
@@ -88,6 +94,7 @@ export class CreateTeam {
           return;
         }
         this.loadPlayer();
+        this.cookieService.set('is_admin', 'true');
         this.successMessage.set('Equipa criada com sucesso.');
         this.router.navigate(['/team', newTeamId]);
       },

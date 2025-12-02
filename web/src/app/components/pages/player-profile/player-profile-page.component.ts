@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
 import { POSITION_MAP_TONUMBER } from '../../../shared/constants/position-map-to-number';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
+import { CookieService } from 'ngx-cookie-service';
 
 /**
  * Componente responsável pela gestão do perfil do jogador.
@@ -40,6 +41,11 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
   protected form!: FormGroup; // Formulário de edição de perfil
 
   private sub?: Subscription; // Assinatura do parâmetro da rota
+
+  /**
+   * Serviço para manipulação de cookies.
+   */
+  private cookieService = inject(CookieService);
 
   protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam); // Verifica se o jogador pertence a uma equipa
   protected readonly isOwnProfile = computed(() => this.player()?.playerId === this.auth.getCurrentPlayerId()); // Verifica se o perfil é do próprio jogador
@@ -164,6 +170,9 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
     this.playerService.leaveTeam(p.playerId).subscribe({
       next: () => {
+        if (this.player()?.isAdmin) {
+          this.cookieService.set('is_admin', 'false');
+        }
         this.successMessage.set('Saíste da equipa com sucesso.');
         this.isSaving.set(false);
         this.loadPlayer(p.playerId, false);
@@ -279,5 +288,13 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
    */
   get isAdmin(): boolean {
     return this.auth.isAdmin();
+  }
+
+  /**
+   * Verifica se o utilizador é membro da equipa.
+   * Retorna um valor booleano que indica se o utilizador é um membro da equipa (jogador comum).
+   */
+  get isTeamMember(): boolean {
+    return this.auth.isMember();
   }
 }

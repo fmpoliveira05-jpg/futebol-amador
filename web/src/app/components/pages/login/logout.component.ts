@@ -24,6 +24,7 @@ export class LogoutComponent {
   logout(): void {
     this.cookieService.delete('access_token', '/');
     this.cookieService.delete('user_id', '/');
+    this.cookieService.delete('is_admin', '/');
     this.router.navigate(['/login']);
   }
 }

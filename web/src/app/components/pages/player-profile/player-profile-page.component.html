@@ -131,7 +131,7 @@
         Aqui vais conseguir ver e gerir os pedidos de adesão.
       </p>
       <div class="side-card__actions">
-        <button *ngIf="isAdmin" type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
+        <button *ngIf="isAdmin || !isTeamMember" type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
           Ver pedidos de adesão
         </button>
       </div>

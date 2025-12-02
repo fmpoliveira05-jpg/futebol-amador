@@ -26,7 +26,7 @@ export const routes: Routes = [
   { path: 'teams', component: Teams, canActivate: [AuthGuard]},
   { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard]},
   { path: 'team/details/:teamId', component: TeamProfile, canActivate: [AuthGuard]},
-  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard]},
   { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
   { path: 'team/matchInvites', component: MatchInvites, canActivate: [AuthGuard], data: { isAdmin: true }},
   { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard], data: { requiresTeam: false }},
@@ -43,7 +43,7 @@ export const routes: Routes = [
   { path: 'players/calendar/:idTeam', component: CalendarComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
 
   // Página de pedidos de adesão de jogadores
-  { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { requiresTeam: false } },
+  { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard] },
 
   // Página de definições do utilizador
   { path: 'settings', component: SettingsPageComponent },
