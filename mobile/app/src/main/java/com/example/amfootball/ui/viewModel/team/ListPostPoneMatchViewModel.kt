@@ -30,6 +30,7 @@ class ListPostPoneMatchViewModel @Inject constructor(
     init {
         //TODO: Carregar a lista da API
         listState.value = PostPoneMatchDto.createExamplePostPoneMatchList()
+        stopLoading()
     }
 
     fun onOpponentNameChange(newName: String) {

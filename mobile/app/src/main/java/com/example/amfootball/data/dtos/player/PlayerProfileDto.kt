@@ -1,5 +1,6 @@
 package com.example.amfootball.data.dtos.player
 
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -42,10 +43,8 @@ data class PlayerProfileDto(
     val position: String,
     @SerializedName("Height", alternate = ["height"])
     val height: Int,
-    @SerializedName("TeamName", alternate = ["teamName"])
-    val team: String,
-    @SerializedName("IdTeam", alternate = ["idTeam"])
-    val idTeam: String?,
+    @SerializedName("Team", alternate = ["team"])
+    val team: TeamDto?,
     @SerializedName("IsAdmin", alternate = ["isAdmin"])
     val isAdmin: Boolean
 )

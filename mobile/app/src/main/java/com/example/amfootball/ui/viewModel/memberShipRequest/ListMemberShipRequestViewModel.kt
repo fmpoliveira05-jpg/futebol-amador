@@ -31,6 +31,7 @@ class ListMemberShipRequestViewModel @Inject constructor(
         val initialValue = MembershipRequestInfoDto.generateMemberShipRequestTeam()
 
         listState.value = initialValue
+        stopLoading()
     }
 
     //Metodos

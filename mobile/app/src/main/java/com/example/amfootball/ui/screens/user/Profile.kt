@@ -19,6 +19,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.FireBaseLoginResponseDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImageString
@@ -133,7 +134,11 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.phone_number),
-        value = profileData.phoneNumber.toString(),
+        value = if(profileData.phoneNumber != null) {
+            profileData.phoneNumber
+        } else {
+            profileData.loginResponseDto?.phoneNumber.toString()
+        },
         minLenght = UserConst.SIZE_PHONE_NUMBER,
         maxLenght = UserConst.SIZE_PHONE_NUMBER,
         isReadOnly = true
@@ -162,9 +167,10 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
         isReadOnly = true
     )
 
+    //TODO: Não aparece pois não se guarda no login, fazer pedido hhá API só para isto
     TextFieldOutline(
         label = stringResource(id = R.string.player_team),
-        value = profileData.team,
+        value = profileData.team?.name,
         minLenght = TeamConst.MIN_NAME_LENGTH,
         maxLenght = TeamConst.MAX_NAME_LENGTH,
         isReadOnly = true
@@ -200,8 +206,10 @@ fun ProfileScreenPreview() {
         address = "Rosario, Argentina",
         position = "Avançado",
         height = 170,
-        team = "Inter Miami CF",
-        idTeam = "2",
+        team = TeamDto(
+            id = "2",
+            name = "Inter Miami CF",
+        ),
         isAdmin = false,
         email = dummyLoginResponse.email,
         phoneNumber = dummyLoginResponse.phoneNumber.toString()

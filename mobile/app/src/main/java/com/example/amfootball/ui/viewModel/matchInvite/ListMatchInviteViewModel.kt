@@ -29,6 +29,7 @@ class ListMatchInviteViewModel @Inject constructor(
 
     //Initializor
     init {
+        //TODO: Carregar dados do Backend
         val initList = InfoMatchInviteDto.generatePreviewList()
         listState.value = initList
         originalList = initList
@@ -46,10 +47,12 @@ class ListMatchInviteViewModel @Inject constructor(
         filtersState.value = filtersState.value.copy(maxDate = newMaxDate.toLocalDateTime())
     }
 
+    //TOOD: Para teste de Sistema
     fun onApplyFilter() {
         if (!validateFitler()) {
             return
         }
+
         //TODO: Fazer pedido há API para carregar os novos dados
 
     }
@@ -64,7 +67,7 @@ class ListMatchInviteViewModel @Inject constructor(
         //TODO: Remover da lista e fazer pedido há API para aceitar
     }
 
-    //TODO: Passar o idMatch por parametro
+    //TODO: Passar o idMatch por parametro (Importante para teste de sistema)
     fun negociateMatchInvite (idMatchInvite: String, navHostController: NavHostController) {
         navHostController.navigate(route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
             launchSingleTop = true
@@ -75,9 +78,9 @@ class ListMatchInviteViewModel @Inject constructor(
         //TODO: Mandar pedido há API para rejeitar
     }
 
-    //TODO: Passar o id na rota
+    //TODO: COrrijir
     fun showMoreDetails(idMatchInvite: String, navHostController: NavHostController) {
-        navHostController.navigate(route = Routes.TeamRoutes.TEAM_PROFILE.route) {
+        navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/$idMatchInvite") {
             launchSingleTop = true
         }
     }

@@ -22,8 +22,11 @@ data class ProfileTeamDto(
     val id: String = "",
     val name: String = "",
     val description: String = "",
+    @SerializedName("FoundationDate", alternate = ["foundationDate"])
     val foundationDate: String? = null,
+    @SerializedName("TotalPoints", alternate = ["totalPoints"])
     val totalPoints: Int = 0,
+    @SerializedName("RankName", alternate = ["rankName"])
     val rank: String = "",
     val logo: String? = null,
     @SerializedName("PitchDto", alternate = ["pitchDto"])

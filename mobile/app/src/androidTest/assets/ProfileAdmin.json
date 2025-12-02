@@ -8,7 +8,10 @@
   "isAdminLastChanged": "2025-11-16T22:28:44.4130712",
   "position": 2,
   "height": 200,
-  "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+  "team": {
+    "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+    "name": ""
+  },
   "isAdmin": true,
   "firebaseLoginResponseDto": {
     "idToken": "REMOVIDO",

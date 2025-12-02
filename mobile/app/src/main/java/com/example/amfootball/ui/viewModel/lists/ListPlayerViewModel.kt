@@ -169,9 +169,9 @@ class ListPlayerViewModel @Inject constructor(
         if (dataUser == null) {
             return
         }
-        val teamId = dataUser.idTeam
+        val teamId = dataUser.team?.id ?: ""
         //val role = dataUser.
-        if(teamId == null) {
+        if(teamId.isEmpty()) {
             return
         }
 
