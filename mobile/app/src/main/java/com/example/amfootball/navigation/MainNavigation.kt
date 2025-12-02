@@ -114,7 +114,7 @@ fun MainNavigation() {
 
             if (showBottomSheet) {
                 val currentUser = sessionManager.getUserProfile()
-                val currentTeamId = currentUser?.idTeam ?: ""
+                val currentTeamId = currentUser?.team?.id ?: ""
 
                 AppModalBottomSheet(onDismiss = { showBottomSheet = false }) {
                     BottomSheetContent(

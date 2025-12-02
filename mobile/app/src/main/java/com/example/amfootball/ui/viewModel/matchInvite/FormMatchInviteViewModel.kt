@@ -66,7 +66,7 @@ class FormMatchInviteViewModel @Inject constructor(
     private val modeStr = savedStateHandle.get<String>(Arguments.FORM_MODE)
 
     /** ID da equipa do utilizador atual. */
-    private val idMyTeam = sessionManager.getUserProfile()?.idTeam ?: ""
+    private val idMyTeam = sessionManager.getUserProfile()?.team?.id ?: ""
 
     /**
      * O modo de operação atual do formulário ([MatchFormMode]).
@@ -257,6 +257,7 @@ class FormMatchInviteViewModel @Inject constructor(
 
     //TODO: Implementar e arranjar forma de receber o id do oponnet
     private fun loadDataSend() {
+
     }
 
     /**

@@ -55,7 +55,10 @@
     <string name="button_cancel_match_description">Botão que permite ao utilizador cancelar uma partida</string>
 
     <string name="button_list_teams">Lista de equipas</string>
-    <string name="button_description_list_teams">Botão que lhe permite visualizar todas as equipas, que ainda têm vagas para novos jogadores</string>
+    <string name="button_description_list_teams_membership">Botão que lhe permite visualizar todas as equipas, que ainda têm vagas para novos jogadores</string>
+    <string name="button_description_list_teams_match">Botão que lhe permite visualizar todas as equipas disponiveis para uma partida casual</string>
+    <string name="button_description_list_team">Botão que lhe permite consultar todas as equipas da app</string>
+
     <string name="button_view_more">Ver Mais</string>
     <string name="button_view_more_description">Botão que permite carregar mais itens da lista</string>
 

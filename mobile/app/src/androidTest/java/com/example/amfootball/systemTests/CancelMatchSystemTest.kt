@@ -58,7 +58,7 @@ class CancelMatchSystemTest {
         val originalMatchJson = JsonReader.readJsonFromAsserts("MatchToCancel.json")
         val matchJsonObject = JSONObject(originalMatchJson)
 
-        val futureDate = LocalDate.now().plusDays(100)
+        val futureDate = LocalDate.now().plusDays(5)
         dynamicExpectedDate = futureDate.toString()
 
         matchJsonObject.put("gameDate", "${dynamicExpectedDate}T19:30:00")

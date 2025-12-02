@@ -64,7 +64,9 @@
     <string name="button_description_edit_team">Edit team details</string>
 
     <string name="button_list_teams">Team List</string>
-    <string name="button_description_list_teams">Button to view all teams with open spots for new players</string>
+    <string name="button_description_list_teams_membership">Button that allows you to view all teams that still have openings for new players</string>
+    <string name="button_description_list_teams_match">Button that allows you to view all teams available for a casual match</string>
+    <string name="button_description_list_team">Button that allows you to view all teams in the app</string>
 
     <string name="app_theme">Theme</string>
     <string name="darkMode">Dark Mode</string>

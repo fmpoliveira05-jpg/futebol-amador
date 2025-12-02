@@ -47,7 +47,7 @@ class ListMembersViewModel @Inject constructor(
      * Obtido diretamente do perfil armazenado no [SessionManager].
      * Caso o perfil não esteja disponível, retorna uma string vazia.
      */
-    private val teamId: String = sessionManager.getUserProfile()?.idTeam ?: ""
+    private val teamId: String = sessionManager.getUserProfile()?.team?.id ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
     private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())

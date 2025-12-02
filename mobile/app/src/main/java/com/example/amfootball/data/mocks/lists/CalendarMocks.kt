@@ -38,7 +38,7 @@ object CalendarMocks {
                 typeMatchBool = true,
                 matchResultId = 0,
                 pitchGame = PitchInfo("Estádio Municipal", "Rua Principal"),
-                team = TeamStatisticsDto("t1", "Minha Equipa", 3, ""),
+                team = TeamStatisticsDto("t1", "Vitória SC", 3, ""),
                 opponent = TeamStatisticsDto("t2", "Dragões FC", 1, ""),
                 isHome = false
             ),
@@ -49,8 +49,8 @@ object CalendarMocks {
                 typeMatchBool = false,
                 matchResultId = -1,
                 pitchGame = PitchInfo("Campo de Treinos", "Avenida Secundária"),
-                team = TeamStatisticsDto("t1", "Minha Equipa", 0, ""),
-                opponent = TeamStatisticsDto("t3", "Leões da Serra", 0, ""),
+                team = TeamStatisticsDto("t1", "Vitória SC", 0, ""),
+                opponent = TeamStatisticsDto("t3", "Sporting CP", 0, ""),
                 isHome = true
             )
         )

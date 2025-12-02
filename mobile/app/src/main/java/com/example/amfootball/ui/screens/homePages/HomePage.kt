@@ -37,7 +37,6 @@ import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.homePages.HomePageViewModel
 
-//TODO: Falta validar autorização do user
 /**
  * Ecrã Principal (Home Page) da aplicação AmFootball.
  *
@@ -171,7 +170,7 @@ private fun HomePageDrawer(
         )
 
         if(user != null) {
-            if (user.idTeam == null) {
+            if (user.team?.id.isNullOrEmpty()) {
                 ActionCardPlayerWithoutTeam(
                     onNavigateCreateTeam = onNavigateCreateTeam,
                     onNavigationToRequests = onNavigationToRequests,
@@ -198,7 +197,10 @@ private fun ActionCardUnauthorizedUser(
 ) {
     ActionCardSection(
         content = {
-            ActionCardListTeam(onNavigateToListTeams = onNavigateToListTeams)
+            ActionCardListTeam(
+                onNavigateToListTeams = onNavigateToListTeams,
+                subTitle = stringResource(id = R.string.button_description_list_team)
+            )
         }
     )
 }
@@ -220,7 +222,10 @@ private fun ActionCardPlayerWithoutTeam(
     ActionCardSection(
         content = {
             ActionCardCreateTeam(onNavigateCreateTeam = onNavigateCreateTeam)
-            ActionCardListTeam(onNavigateToListTeams = onNavigateToListTeams)
+            ActionCardListTeam(
+                onNavigateToListTeams = onNavigateToListTeams,
+                subTitle = stringResource(id = R.string.button_description_list_teams_membership)
+            )
             ActionCardListMembershipRequests(onNavigationToRequests = onNavigationToRequests)        }
     )
 }
@@ -237,7 +242,10 @@ private fun ActionCardMemberTeam(
 )  {
     ActionCardSection(
         content = {
-            ActionCardListTeam(onNavigateToListTeams = onNavigateToListTeams)
+            ActionCardListTeam(
+                onNavigateToListTeams = onNavigateToListTeams,
+                subTitle = stringResource(id = R.string.button_description_list_teams_match)
+            )
         }
     )
 }
@@ -278,10 +286,13 @@ private fun ActionCardCreateTeam(onNavigateCreateTeam: () -> Unit) {
  * @param onNavigateToListTeams Callback a executar no clique.
  */
 @Composable
-private fun ActionCardListTeam(onNavigateToListTeams: () -> Unit) {
+private fun ActionCardListTeam(
+    onNavigateToListTeams: () -> Unit,
+    subTitle: String
+) {
     ActionCard(
         title = stringResource(id = R.string.button_list_teams),
-        subtitle = stringResource(id = R.string.button_description_list_teams),
+        subtitle = subTitle,
         icon = Icons.Default.Edit,
         onClick = onNavigateToListTeams
     )
