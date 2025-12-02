@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environments/environment';
-import { TeamMember } from '../shared/Dtos/team-member.model';
+import { PlayerTeamDto } from '../shared/Dtos/Player/PlayerTeamDto';
 
 export interface TeamMembersFilters {
   isAdmin?: boolean;
@@ -16,7 +16,7 @@ export class TeamMembersService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiBaseUrl}/Team`;
 
-  getTeamMembers(teamId: string, filters: TeamMembersFilters = {}): Observable<TeamMember[]> {
+  getTeamMembers(teamId: string, filters: TeamMembersFilters = {}): Observable<PlayerTeamDto[]> {
     let params = new HttpParams();
 
     if (filters.isAdmin !== undefined) {
@@ -27,7 +27,7 @@ export class TeamMembersService {
       params = params.set('Name', filters.name.trim());
     }
 
-    return this.http.get<TeamMember[]>(`${this.baseUrl}/${teamId}/members`, { params });
+    return this.http.get<PlayerTeamDto[]>(`${this.baseUrl}/${teamId}/members`, { params });
   }
 
   removeMember(teamId: string, playerId: string): Observable<void> {
