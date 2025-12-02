@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { TeamMembersService } from '../../../services/team-members.service';
-import { TeamMember } from '../../../shared/Dtos/team-member.model';
+import { PlayerTeamDto } from '../../../shared/Dtos/Player/PlayerTeamDto';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 
 @Component({
@@ -17,7 +17,7 @@ export class TeamMembersPageComponent {
   private readonly teamMembersService = inject(TeamMembersService);
   protected readonly POSITION_MAP = POSITION_MAP;
 
-  protected readonly members = signal<TeamMember[]>([]);
+  protected readonly members = signal<PlayerTeamDto[]>([]);
   protected readonly isLoading = signal<boolean>(false);
   protected readonly errorMessage = signal<string | null>(null);
 
@@ -77,20 +77,22 @@ export class TeamMembersPageComponent {
     this.searchTerm.set(value);
   }
 
-  protected canPromote(member: TeamMember): boolean {
+  protected canPromote(member: PlayerTeamDto): boolean {
     return !member.isAdmin;
   }
 
-  protected canDemote(member: TeamMember): boolean {
+  protected canDemote(member: PlayerTeamDto): boolean {
     return member.isAdmin;
   }
 
-  protected canRemove(member: TeamMember): boolean {
+  protected canRemove(member: PlayerTeamDto): boolean {
     return !member.isAdmin;
   }
 
-  protected promote(member: TeamMember): void {
-    const teamId = member.idTeam;
+  protected promote(member: PlayerTeamDto): void {
+    const teamId = member.team.idTeam;
+
+    console.log(member);
 
     if (!teamId || !member.playerId) return;
 
@@ -110,8 +112,8 @@ export class TeamMembersPageComponent {
     });
   }
 
-  protected demote(member: TeamMember): void {
-    const teamId = member.idTeam;
+  protected demote(member: PlayerTeamDto): void {
+    const teamId = member.team.idTeam;
 
     if (!teamId || !member.playerId) return;
 
@@ -131,8 +133,8 @@ export class TeamMembersPageComponent {
     });
   }
 
-  protected remove(member: TeamMember): void {
-    const teamId = member.idTeam;
+  protected remove(member: PlayerTeamDto): void {
+    const teamId = member.team.idTeam;
 
     if (!teamId || !member.playerId) return;
 

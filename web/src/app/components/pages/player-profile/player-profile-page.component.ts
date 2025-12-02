@@ -150,7 +150,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
    */
   protected leaveTeam(): void {
     const p = this.player();
-    if (!p || !p.team?.idTeam) {
+    if (!p || !this.hasTeam) {
       return;
     }
 
@@ -271,5 +271,13 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
         this.router.navigate([`/players/calendar/${idTeam}`]);
       }
     });
+  }
+
+  /**
+   * Verifica se o utilizador tem permissões de administrador.
+   * Retorna um valor booleano que indica se o utilizador é um administrador.
+   */
+  get isAdmin(): boolean {
+    return this.auth.isAdmin();
   }
 }

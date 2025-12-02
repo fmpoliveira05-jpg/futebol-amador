@@ -25,11 +25,11 @@ export const routes: Routes = [
   { path: '', component: Home},
   { path: 'teams', component: Teams, canActivate: [AuthGuard]},
   { path: 'teams/:searchTerm', component: Teams, canActivate: [AuthGuard]},
-  { path: 'team/details/:teamId', component: TeamProfile, canActivate: [AuthGuard]}, /* cena de is admin aq tb */
-  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], /*data: { requiresTeam: true },*/},
-  { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard]},
-  { path: 'team/matchInvites', component: MatchInvites, canActivate: [AuthGuard]},
-  { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard]},
+  { path: 'team/details/:teamId', component: TeamProfile, canActivate: [AuthGuard]},
+  { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'team/matchInvites', component: MatchInvites, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard], data: { requiresTeam: false }},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },
   
@@ -37,10 +37,10 @@ export const routes: Routes = [
   { path: 'logout', component: LogoutComponent, canActivate: [AuthGuard] },
 
   // Páginas relacionadas aos jogadores
-  { path: 'players', component: PlayerListPageComponent, canActivate: [AuthGuard] },
+  { path: 'players', component: PlayerListPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
   { path: 'players/me', component: PlayerProfileRedirectComponent, canActivate: [AuthGuard] },
-  { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard] },
-  { path: 'players/calendar/:idTeam', component: CalendarComponent, canActivate: [AuthGuard] },
+  { path: 'players/details/:playerId', component: PlayerProfilePageComponent, canActivate: [AuthGuard]},
+  { path: 'players/calendar/:idTeam', component: CalendarComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
 
   // Página de pedidos de adesão de jogadores
   { path: 'players/membership-requests', component: PlayerMembershipRequestsPageComponent, canActivate: [AuthGuard], data: { requiresTeam: false } },
@@ -48,6 +48,6 @@ export const routes: Routes = [
   // Página de definições do utilizador
   { path: 'settings', component: SettingsPageComponent },
 
-  // Redirecionamento para a página de jogadores em caso de rota inválida
-  { path: '**', redirectTo: 'players' },
+  // Redirecionamento para a home page em caso de rota inválida
+  { path: '**', redirectTo: '' },
 ];

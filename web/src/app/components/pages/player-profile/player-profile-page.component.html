@@ -131,13 +131,13 @@
         Aqui vais conseguir ver e gerir os pedidos de adesão.
       </p>
       <div class="side-card__actions">
-        <button type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
+        <button *ngIf="isAdmin" type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
           Ver pedidos de adesão
         </button>
       </div>
     </aside>
 
-    <button *ngIf="isOwnProfile()" class="btn btn-secondary" (click)="goToCalendar()">
+    <button *ngIf="isOwnProfile() && isAdmin" class="btn btn-secondary" (click)="goToCalendar()">
       Ver calendário
     </button>
   </div>
