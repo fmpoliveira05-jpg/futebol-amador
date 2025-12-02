@@ -16,6 +16,7 @@ import { CreateTeam } from './components/pages/create-team/create-team';
 import { MatchInvites } from './components/pages/match-invites/match-invites';
 import { TeamMembersPageComponent } from './components/pages/team-members/team-members.component';
 import { CalendarComponent } from './components/pages/calendar/calendar.component';
+import { CreateMatchInvite } from './components/pages/create-match-invite/create-match-invite';
 
 /**
  * Configuração de rotas da aplicação.
@@ -29,6 +30,7 @@ export const routes: Routes = [
   { path: 'team/membership-requests', component: TeamMembershipRequestsPageComponent, canActivate: [AuthGuard]},
   { path: 'team/members', component: TeamMembersPageComponent, canActivate: [AuthGuard], data: { isAdmin: true }},
   { path: 'team/matchInvites', component: MatchInvites, canActivate: [AuthGuard], data: { isAdmin: true }},
+  { path: 'team/createMatchInvite', component: CreateMatchInvite, canActivate: [AuthGuard], data: { isAdmin: true }},
   { path: 'createTeam', component: CreateTeam, canActivate: [AuthGuard], data: { requiresTeam: false }},
   { path: 'signup', component: SignupComponent },
   { path: 'login', component: LoginComponent },

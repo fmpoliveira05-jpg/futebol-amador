@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { AuthService } from './auth.service';
 import { environment } from '../environments/environment';
@@ -16,10 +16,10 @@ export class MatchInviteService {
 
   private readonly baseUrl = `${environment.apiBaseUrl}/MatchInvite`;
 
-  private readonly headers = { 'Content-Type': 'application/json' };
-
-  getTeamMatchInvites(teamId: string, filters?: FilterMatchInviteDto): Observable<InfoMatchInviteDto[]> {
-    
+  getTeamMatchInvites(
+    teamId: string,
+    filters?: FilterMatchInviteDto
+  ): Observable<InfoMatchInviteDto[]> {
     let params = new HttpParams();
 
     if (filters) {
@@ -28,24 +28,36 @@ export class MatchInviteService {
         params = params.set('MinDate', filters.MinDate.toISOString().split('T')[0]);
       if (filters.MaxDate)
         params = params.set('MaxDate', filters.MaxDate.toISOString().split('T')[0]);
-    
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value !== null && value !== undefined && value !== '') {
           params = params.append(key, value);
         }
       });
     }
-    
-    return this.http.get<InfoMatchInviteDto[]>(`${this.baseUrl}/${teamId}`, {params});
+
+    return this.http.get<InfoMatchInviteDto[]>(`${this.baseUrl}/${teamId}`, { params });
   }
 
   sendMatchInvites(teamId: string, data: SendMatchInviteDto): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/match-invites`, data);
   }
 
-  acceptMatchInvite() {}
+  acceptMatchInvite(teamId: string, idMatchInvite: string): Observable<void> {
+    const body = JSON.stringify(idMatchInvite);
 
-  refuseMatchInvite() {}
+    const params = new HttpParams().set('idTeam', teamId);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.post<void>(`${this.baseUrl}/${teamId}/AcceptMatchInvite`, body, {
+      headers,
+      params,
+    });
+  }
+
+  refuseMatchInvite(teamId: string, idMatchInvite: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${teamId}/RefuseMatchInvite/${idMatchInvite}`);
+  }
 
   negotiateMatchInvite() {}
 }

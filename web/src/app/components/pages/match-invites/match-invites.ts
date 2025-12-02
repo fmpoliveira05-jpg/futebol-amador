@@ -12,6 +12,8 @@ import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDt
   styleUrl: './match-invites.css',
 })
 export class MatchInvites {
+  teamId = signal<string | null>('');
+
   protected readonly isLoading = signal<boolean>(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly searchTerm = signal<string>('');
@@ -26,6 +28,7 @@ export class MatchInvites {
         this.errorMessage.set('Não foi possível identificar a tua equipa.');
         this.isLoading.set(false);
       } else {
+        this.teamId.set(teamId);
         this.loadMatchInvites(teamId);
       }
     });
@@ -47,9 +50,36 @@ export class MatchInvites {
     });
   }
 
-  accept(invite: InfoMatchInviteDto) {}
+  accept(invite: InfoMatchInviteDto) {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-  refuse(invite: InfoMatchInviteDto) {}
-  
+    if (this.teamId()) {
+      this.matchInviteService.acceptMatchInvite(this.teamId()!, invite.id).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.errorMessage.set('Não foi possível aceitar convite de partida.');
+          this.isLoading.set(false);
+        },
+      });
+    }
+  }
+
+  refuse(invite: InfoMatchInviteDto) {
+    if (this.teamId()) {
+      this.matchInviteService.refuseMatchInvite(this.teamId()!, invite.id).subscribe({
+        next: () => {
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.errorMessage.set('Não foi possível recusar convite de partida.');
+          this.isLoading.set(false);
+        },
+      });
+    }
+  }
+
   negotiate(invite: InfoMatchInviteDto) {}
 }

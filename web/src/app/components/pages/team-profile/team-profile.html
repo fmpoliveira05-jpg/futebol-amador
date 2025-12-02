@@ -58,7 +58,7 @@
                 <button *ngIf="!isMember() && !isAdmin() && !hasTeam()" type="button" class="btn btn-secondary" (click)="sendMembershipRequest()">
                     Enviar pedido de adesão
                 </button>
-                <button *ngIf="!isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="sendMatchRequest()">
+                <button *ngIf="!isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="sendMatchInvite()">
                     Enviar pedido de partida
                 </button>
             </dl>
