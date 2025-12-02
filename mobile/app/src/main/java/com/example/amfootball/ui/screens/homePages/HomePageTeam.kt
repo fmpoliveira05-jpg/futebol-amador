@@ -105,7 +105,7 @@ fun HomePageTeamScreen(
         onNavigateCalendar = {
             viewModel.onNavigateCalendar(
                 onSucess = {
-                    globalNavController.navigate(Routes.TeamRoutes.MEMBERLIST.route) {
+                    globalNavController.navigate("${Routes.TeamRoutes.CALENDAR.route}/${team.id}") {
                         launchSingleTop = true
                     }
                 }

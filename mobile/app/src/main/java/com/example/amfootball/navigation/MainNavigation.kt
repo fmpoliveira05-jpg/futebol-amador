@@ -308,9 +308,7 @@ private fun NavGraphBuilder.teamMatch(globalNavController: NavHostController, se
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         ),
         content = {
-            val viewModel = hiltViewModel<CalendarTeamViewModel>()
-
-            CalendarScreen(navHostController = globalNavController, viewModel = viewModel)
+            CalendarScreen(navHostController = globalNavController)
         }
     )
 

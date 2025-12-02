@@ -79,6 +79,7 @@ fun LabelTextField(
     label: String,
     value: String?,
     modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
     isSingleLine: Boolean = true,
     onValueChange: (String) -> Unit = {},
     isReadOnly: Boolean = false,
@@ -104,7 +105,8 @@ fun LabelTextField(
             errorMessage = errorMessage,
             keyboardOptions = keyboardOptions,
             minLenght = minLenght,
-            maxLenght = maxLenght
+            maxLenght = maxLenght,
+            textFieldModifier = textFieldModifier
         )
     }
 }

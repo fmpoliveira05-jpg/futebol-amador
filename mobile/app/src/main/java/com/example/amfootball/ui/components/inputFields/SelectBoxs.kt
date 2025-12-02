@@ -43,7 +43,8 @@ fun<T> SelectBox(
     selectedValue: T,
     onSelectItem: (T) -> Unit,
     itemToString: @Composable (T) -> String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
 
@@ -62,7 +63,8 @@ fun<T> SelectBox(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(),
+                .menuAnchor()
+                .then(textFieldModifier),
             colors = OutlinedTextFieldDefaults.colors(
                 disabledTextColor = MaterialTheme.colorScheme.onSurface,
                 disabledContainerColor = Color.Transparent, // Outlined é transparente
@@ -119,6 +121,7 @@ fun <T> LabelSelectBox(
     onSelectItem: (T) -> Unit,
     itemToString: @Composable (T) -> String,
     modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
     isRequired: Boolean = false,
     isError: Boolean = false,
     errorMessage: String = stringResource(id = R.string.mandatory_field)
@@ -131,6 +134,7 @@ fun <T> LabelSelectBox(
             selectedValue = selectedValue,
             onSelectItem = onSelectItem,
             itemToString = itemToString,
+            textFieldModifier = textFieldModifier
         )
 
         if (isError) {

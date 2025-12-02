@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.components
 
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditCalendar
@@ -48,6 +49,13 @@ fun MatchActionsMenu(
     val now = LocalDateTime.now()
     val hoursUntilGame = ChronoUnit.HOURS.between(now, gameDate)
 
+    Log.d("MATCH_DEBUG", "--- Horas para o Jogo ---")
+    Log.d("MATCH_DEBUG", "1. NOW (Local): $now")
+    Log.d("MATCH_DEBUG", "2. GAME DATE (Recebida): $gameDate")
+    Log.d("MATCH_DEBUG", "3. HORAS RESTANTES: $hoursUntilGame")
+    Log.d("MATCH_DEBUG", "4. REQUERIDO: ${MatchConsts.MAX_HOURS_TO_CANCEL}")
+    Log.d("MATCH_DEBUG", "5. CONDIÇÃO CANCELAR: ${hoursUntilGame >= MatchConsts.MAX_HOURS_TO_CANCEL}")
+    Log.d("MATCH_DEBUG", "----------------------------")
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
@@ -84,7 +92,7 @@ fun MatchActionsMenu(
                         onDismissRequest()
                     },
                     color = MaterialTheme.colorScheme.error,
-                    leadingIcon = Icons.Default.Flag
+                    leadingIcon = Icons.Default.Flag,
                 )
             }
         } else if(matchStatus == MatchStatus.IN_PROGRESS) {

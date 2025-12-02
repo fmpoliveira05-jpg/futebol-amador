@@ -77,13 +77,16 @@ fun SubmitCancelButton(
     onClick: () -> Unit,
     imageButton: ImageVector = Icons.Default.Cancel,
     text: String,
-    contentDescription: String
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(56.dp),
+            .height(56.dp)
+            .then(textFieldModifier),
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error,
             contentColor = MaterialTheme.colorScheme.onError

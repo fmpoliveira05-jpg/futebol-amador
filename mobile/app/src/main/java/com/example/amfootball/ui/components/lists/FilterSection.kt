@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -50,7 +51,9 @@ fun FilterSection(
     },
     content: @Composable (modifier: Modifier) -> Unit = {}
 ) {
-    ElevatedCard(modifier = modifier.fillMaxWidth()) {
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth()
+    ) {
         Column {
             header()
 
@@ -79,11 +82,13 @@ fun FilterHeader(
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
 ) {
-    Row(
+    Row (
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggleExpand() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .testTag(stringResource(id = R.string.tag_filter_section))
+        ,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

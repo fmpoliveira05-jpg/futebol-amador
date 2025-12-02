@@ -50,9 +50,7 @@ class CalendarService @Inject constructor(
         try {
             val response = calendarApi.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
 
-            if (response.isSuccessful) {
-                return response.body()!!
-            } else {
+            if (!response.isSuccessful) {
                 handleApiError(response)
             }
         } catch (e: Exception) {
@@ -61,14 +59,11 @@ class CalendarService @Inject constructor(
         }
     }
 
-    //TODO: Implementar
     suspend fun cancelMatch(teamId: String, matchId: String, description: String) {
         try {
             val response = calendarApi.cancelMatch(idTeam = teamId, idMatch = matchId, description = description)
 
-            if (response.isSuccessful) {
-                return response.body()!!
-            } else {
+            if (!response.isSuccessful) {
                 handleApiError(response)
             }
         } catch (e: Exception) {
