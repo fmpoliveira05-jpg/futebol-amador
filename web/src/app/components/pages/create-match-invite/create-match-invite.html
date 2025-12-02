@@ -1,39 +1,27 @@
 <section class="page">
     <div class="card">
-        <h2 class="card-title">Criar nova equipa:</h2>
+        <h2 class="card-title">Enviar convite de partida:</h2>
         <form class="form">
             <div class="form-grid">
                 <label class="form-field">
-                    <span>Nome</span>
-                    <input type="text" formControlName="name" />
+                    <span>Data da partida: </span>
+                    <input type="text" formControlName="data" />
                 </label>
 
                 <label class="form-field">
-                    <span>Descrição</span>
-                    <input type="text" formControlName="description" />
-                </label>
-
-                <!-- cena pra upload de icone -->
-
-                <label class="form-field">
-                    <span>Nome da Localização</span>
-                    <input type="text" formControlName="pitchName" />
-                </label>
-
-                <label class="form-field">
-                    <span>Endereço</span>
-                    <input type="text" formControlName="pitchLocation" />
+                    <span>Localização: </span>
+                    <select formControlName="location">
+                        <option [ngValue]="true">Casa</option>
+                        <option [ngValue]="false">Adversário</option>
+                    </select>
                 </label>
             </div>
 
             <div class="form-actions">
                 <button type="button" class="btn btn-primary">
-                    {{ 'Criar Equipa' }}
+                    {{ 'Enviar' }}
                 </button>
             </div>
         </form>
-    </div>
-    <div class=" card">
-        <h2 class="card-title">Você já pertence à uma equipa.</h2>
     </div>
 </section>

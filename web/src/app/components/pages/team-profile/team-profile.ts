@@ -214,8 +214,8 @@ export class TeamProfile {
     });
   }
 
-  protected sendMatchRequest(): void {
-    
+  protected sendMatchInvite(): void {
+    this.router.navigate(['/team/createMatchInvite']);
   }
 
   protected deleteTeam(): void {
