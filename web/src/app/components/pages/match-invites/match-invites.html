@@ -28,7 +28,8 @@
       <table class="invites-table" *ngIf="matchInvites().length; else noInvites">
         <thead>
           <tr>
-            <th>Equipa</th>
+            <th>Equipa 1</th>
+            <th>Equipa 2</th>
             <th>Game Date</th>
             <th>Location</th>
             <th class="invites-table__actions-col"></th>
@@ -36,9 +37,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let invite of matchInvites()">
-            <td>{{ invite.idSender }}</td>
+            <td>{{ invite.sender.name }}</td>
+            <td>{{ invite.receiver.name }}</td>
             <td>{{ invite.gameDate }}</td>
-            <td>{{ invite.homePitch }}</td>
+            <td>{{ invite.namePitch }}</td>
 
             <td class="members-table__actions">
               <button type="button" class="btn btn-secondary" (click)="accept(invite)">

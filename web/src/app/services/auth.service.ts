@@ -69,8 +69,7 @@ export class AuthService {
    * @returns `true` se o utilizador for administrador, caso contrário `false`.
    */
   isAdmin(): boolean {
-    const decodedToken = this.decodeToken();
-    return decodedToken?.isAdmin || false;
+    return this.cookieService.get('is_admin') === 'true';
   }
 
   /**
@@ -92,9 +91,14 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.baseUrl}/User/login`, { email, password }).pipe(
       map((response: any) => {
-        this.cookieService.set('access_token', response?.firebaseLoginResponseDto?.idToken, 7, '/');
-        this.cookieService.set('user_id', response?.firebaseLoginResponseDto?.localId, 7, '/');
-        
+        const idToken = response?.firebaseLoginResponseDto?.idToken;
+        const localId = response?.firebaseLoginResponseDto?.localId;
+        const isAdmin = response?.isAdmin; 
+
+        this.cookieService.set('access_token', idToken, 7, '/');
+        this.cookieService.set('user_id', localId, 7, '/');
+        this.cookieService.set('is_admin', isAdmin, 7, '/');  
+
         return response;
       })
     );
@@ -146,17 +150,21 @@ export class AuthService {
   }
 
   /**
-   * Obtém o ID da equipa do jogador atual.
-   * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
-   */
+  * Obtém o ID da equipa do jogador atual.
+  * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
+  */
   getCurrentTeamId(): Observable<string | null> {
     const playerId = this.getCurrentPlayerId();
     if (!playerId) {
-      return of(null);
+      return of(null); 
     }
 
     return this.getPlayerData(playerId).pipe(
-      map(playerData => playerData?.idTeam ?? null)
+      map(playerData => playerData?.team?.idTeam ?? null), 
+      catchError((error) => {
+        console.error('Erro ao buscar dados do jogador:', error);
+        return of(null); 
+      })
     );
   }
 }

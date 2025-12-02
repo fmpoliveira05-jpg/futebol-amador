@@ -41,7 +41,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
 
   private sub?: Subscription; // Assinatura do parâmetro da rota
 
-  protected readonly hasTeam = computed(() => !!this.player()?.idTeam); // Verifica se o jogador pertence a uma equipa
+  protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam); // Verifica se o jogador pertence a uma equipa
   protected readonly isOwnProfile = computed(() => this.player()?.playerId === this.auth.getCurrentPlayerId()); // Verifica se o perfil é do próprio jogador
 
   ngOnInit(): void {
@@ -150,7 +150,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
    */
   protected leaveTeam(): void {
     const p = this.player();
-    if (!p || !p.idTeam) {
+    if (!p || !this.hasTeam) {
       return;
     }
 
@@ -219,7 +219,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (player.idTeam == null) {
+    if (player.team?.idTeam == null) {
       this.router.navigate(['/players/membership-requests']);
     } else {
       this.router.navigate(['/team/membership-requests']);
@@ -234,7 +234,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
   }
 
   goToTeamProfile(): void{
-    this.router.navigate(['/team/details', this.player()?.idTeam]);
+    this.router.navigate(['/team/details', this.player()?.team?.idTeam]);
   }
   
   /**
@@ -263,5 +263,21 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
       },
     });
+  }
+
+  goToCalendar(): void {
+    this.auth.getCurrentTeamId().subscribe((idTeam) => {
+      if (idTeam) {
+        this.router.navigate([`/players/calendar/${idTeam}`]);
+      }
+    });
+  }
+
+  /**
+   * Verifica se o utilizador tem permissões de administrador.
+   * Retorna um valor booleano que indica se o utilizador é um administrador.
+   */
+  get isAdmin(): boolean {
+    return this.auth.isAdmin();
   }
 }

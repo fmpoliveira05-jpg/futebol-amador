@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { MembershipRequestService } from '../../../services/membership-request.service';
-import { MembershipRequest } from '../../..//shared/Dtos/membership-request.model';
+import { MembershipRequest } from '../../../shared/Dtos/membership-request.model';
 
 /**
  * Componente responsável pela gestão de pedidos de adesão de jogadores.

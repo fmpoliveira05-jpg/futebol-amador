@@ -34,7 +34,7 @@ export class CreateTeam {
   form!: FormGroup;
 
   protected readonly hasTeam = computed(() =>
-    !!this.player()?.idTeam
+    !!this.player()?.team?.idTeam
   );
 
   ngOnInit(): void {
