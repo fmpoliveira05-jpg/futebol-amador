@@ -193,7 +193,7 @@ class FormMatchInviteViewModel @Inject constructor(
             }
         }
 
-        navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
+        navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
             popUpTo(0)
         }
     }
@@ -239,7 +239,14 @@ class FormMatchInviteViewModel @Inject constructor(
                 )
 
                 _uiState.update { it.copy(isLoading = false) }
-                navHostController.popBackStack()
+                val rota = "${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam"
+
+                navHostController.navigate(rota) {
+                    popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
             }

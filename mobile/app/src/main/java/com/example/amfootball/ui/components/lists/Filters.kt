@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.components.lists
 
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -30,7 +31,8 @@ import com.example.amfootball.utils.UserConst
 fun FilterIsHomeMatch(
     selectedValue: Boolean?,
     onSelectItem: (Boolean?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     val locationOptions: List<Boolean?> = listOf(null, true, false)
     LabelSelectBox(
@@ -51,7 +53,8 @@ fun FilterIsHomeMatch(
                 }
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -69,7 +72,8 @@ fun FilterIsHomeMatch(
 fun FilterIsCompetiveMatch(
     selectedValue: TypeMatch?,
     onSelectItem: (TypeMatch?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
 
     val competitiveOptions: List<TypeMatch?> = listOf(
@@ -95,7 +99,8 @@ fun FilterIsCompetiveMatch(
                 }
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -112,9 +117,9 @@ fun FilterIsCompetiveMatch(
 fun FilterIsFinishMatch(
     selectedValue: Boolean?,
     onSelectItem: (Boolean?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
-    // A lista tem de ser de Boolean?, pois é o que o teu filtro espera
     val finishMatchOptions: List<Boolean?> = listOf(null, true, false)
 
     LabelSelectBox(
@@ -124,12 +129,13 @@ fun FilterIsFinishMatch(
         onSelectItem = onSelectItem,
         itemToString = { isFinished ->
             when (isFinished) {
-                true -> stringResource(id = R.string.match_status_done) // "Finalizado" (ou usa R.string.filter_yes)
-                false -> stringResource(id = R.string.match_status_scheduled) // "Agendado" (ou usa R.string.filter_no)
+                true -> stringResource(id = R.string.match_status_done)
+                false -> stringResource(id = R.string.match_status_scheduled)
                 null -> stringResource(id = R.string.filter_indifferente)
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 /**
@@ -396,7 +402,8 @@ fun FilterMinDateGamePicker(
     onDateSelected: (newMinDate: Long) -> Unit,
     isError: Boolean,
     errorMessage: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     DatePickerDocked(
         label = stringResource(id = R.string.filter_min_date_game),
@@ -405,7 +412,8 @@ fun FilterMinDateGamePicker(
         onDateSelected = onDateSelected,
         isError = isError,
         errorMessage = errorMessage,
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -426,7 +434,8 @@ fun FilterMaxDateGamePicker(
     onDateSelected: (newMinDate: Long) -> Unit,
     isError: Boolean,
     errorMessage: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     DatePickerDocked(
         label = stringResource(id = R.string.filter_max_date_game),
@@ -435,6 +444,7 @@ fun FilterMaxDateGamePicker(
         onDateSelected = onDateSelected,
         isError = isError,
         errorMessage = errorMessage,
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }

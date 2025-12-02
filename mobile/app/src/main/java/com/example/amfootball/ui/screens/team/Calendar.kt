@@ -23,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -201,13 +202,15 @@ private fun FiltersCalendarContent(
                     isError = filterError.opponentNameError != null,
                     errorMessage = filterError.opponentNameError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
-                    }
+                    },
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_name_team))
                 )
 
                 FilterIsHomeMatch(
                     selectedValue = filters.isHome,
                     onSelectItem = { filterActions.onGameLocalChange(it) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_home_match))
                 )
             }
         )
@@ -221,7 +224,8 @@ private fun FiltersCalendarContent(
                     errorMessage = filterError.minGameDateError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_min_date_game))
                 )
 
                 FilterMaxDateGamePicker(
@@ -231,7 +235,8 @@ private fun FiltersCalendarContent(
                     errorMessage = filterError.maxGameDateError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_max_date_game))
                 )
             }
         )
@@ -241,20 +246,24 @@ private fun FiltersCalendarContent(
                 FilterIsCompetiveMatch(
                     selectedValue = filters.typeMatch,
                     onSelectItem = { filterActions.onTypeMatchChange(it) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_type_match))
                 )
 
                 FilterIsFinishMatch(
                     selectedValue = filters.isFinish,
                     onSelectItem = { filterActions.onFinishMatch(it) },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_filter_finish_match))
                 )
             }
         )
 
         LineClearFilterButtons(
             buttonsActions = filterActions.onButtonFilterActions,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            modifierFilter = Modifier.testTag(stringResource(id = R.string.tag_apply_filter)),
+            modifierClear = Modifier.testTag(stringResource(id = R.string.tag_clear_filter))
         )
     }
 }
@@ -340,7 +349,10 @@ private fun OptionsMatch(
 ) {
     var isMenuExpanded by remember { mutableStateOf(false) }
     Box {
-        IconButton(onClick = { isMenuExpanded = !isMenuExpanded }) {
+        IconButton(
+            onClick = { isMenuExpanded = !isMenuExpanded },
+            modifier = Modifier.testTag(stringResource(id = R.string.tag_options_match))
+        ) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
                 contentDescription = "Opções"

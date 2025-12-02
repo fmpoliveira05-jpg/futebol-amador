@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,8 +69,8 @@ fun FormMatchInviteScreen(
     )
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
     val mode = viewModel.mode
+
     ContentSendMatchInviteScreen(
         navHostController = navHostController,
         fields = fields,
@@ -205,7 +206,8 @@ private fun FieldsSendMatchInvite(
             isError = errors.cancelReasonError != null,
             errorMessage = errors.cancelReasonError?.let {
                 stringResource(id = it.messageId, *it.args.toTypedArray())
-            }
+            },
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_description_cancel))
         )
 
     }
@@ -225,7 +227,8 @@ private fun FieldsSendMatchInvite(
                 actions.onCancelForm(
                     navHostController,
                     cancelReason)
-            }
+            },
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_button_cancel_match))
         )
     }
 }
