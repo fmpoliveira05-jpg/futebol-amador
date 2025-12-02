@@ -89,7 +89,7 @@ export class CreateTeam {
         }
         this.loadPlayer();
         this.successMessage.set('Equipa criada com sucesso.');
-        this.router.navigate(['/team', newTeamId]);
+        this.router.navigate(['/team/details', newTeamId]);
       },
       error: (err) => {
         console.error(err);
