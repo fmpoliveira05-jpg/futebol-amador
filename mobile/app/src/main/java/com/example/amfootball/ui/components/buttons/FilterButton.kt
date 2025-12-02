@@ -34,7 +34,9 @@ import com.example.amfootball.data.actions.filters.ButtonFilterActions
 @Composable
 fun LineClearFilterButtons(
     buttonsActions: ButtonFilterActions,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    modifierFilter: Modifier = Modifier,
+    modifierClear: Modifier = Modifier,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -42,12 +44,14 @@ fun LineClearFilterButtons(
     ) {
         FilterApplyButton(
             onClick = buttonsActions.onFilterApply,
-            modifier = modifier
+            modifier = modifier,
+            modifierFilter = modifierFilter
         )
 
         ClearFilterButton(
             onClick = buttonsActions.onFilterClean,
-            modifier = modifier
+            modifier = modifier,
+            modifierClear = modifierClear
         )
     }
 }
@@ -68,17 +72,18 @@ fun FilterApplyButton(
     text: String = stringResource(id = R.string.filter_button),
     contentDescription: String = stringResource(id = R.string.filter_button_description),
     modifier: Modifier = Modifier,
+    modifierFilter: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier
+        modifier = modifier.then(modifierFilter)
     ) {
         Icon(
             imageVector = Icons.Default.FilterAlt,
-            contentDescription = contentDescription // Acessibilidade
+            contentDescription = contentDescription
         )
 
-        Spacer(Modifier.width(ButtonDefaults.IconSpacing)) // Espaço padrão
+        Spacer(Modifier.width(ButtonDefaults.IconSpacing))
 
         Text(
             text = text,
@@ -98,14 +103,16 @@ fun FilterApplyButton(
  * @param modifier Um [Modifier] opcional para configurar o botão.
  */
 @Composable
-fun ClearFilterButton(onClick: () -> Unit,
-                      text: String = stringResource(id = R.string.clear_button),
-                      contentDescription: String = stringResource(id = R.string.clear_button_description),
-                      modifier: Modifier = Modifier,
+fun ClearFilterButton(
+    onClick: () -> Unit,
+    text: String = stringResource(id = R.string.clear_button),
+    contentDescription: String = stringResource(id = R.string.clear_button_description),
+    modifier: Modifier = Modifier,
+    modifierClear: Modifier = Modifier
 ) {
     OutlinedButton(
         onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.then(modifierClear),
     ) {
         Icon(
             imageVector = Icons.Default.Clear,

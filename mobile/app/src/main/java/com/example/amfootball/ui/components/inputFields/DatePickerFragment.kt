@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -58,7 +59,8 @@ fun DatePickerDockedFutureLimitedDate(
     isError: Boolean = false,
     enabled: Boolean = true,
     errorMessage: String? = stringResource(id = R.string.mandatory_field),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ) {
     LimitedDatePickerBase(
         value = value,
@@ -70,7 +72,8 @@ fun DatePickerDockedFutureLimitedDate(
         errorMessage = errorMessage,
         enabled = enabled,
         modifier = modifier,
-        validator = { dateMillis, todayMillis -> dateMillis >= todayMillis }
+        validator = { dateMillis, todayMillis -> dateMillis >= todayMillis },
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -130,14 +133,16 @@ fun DatePickerDockedPastLimitedDate(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDocked(value: String,
-                     onDateSelected: (millis: Long) -> Unit,
-                     label: String,
-                     modifier: Modifier = Modifier,
-                     contentDescription: String,
-                     isError: Boolean = false,
-                     enabled: Boolean = false,
-                     errorMessage: String? = null
+fun DatePickerDocked(
+    value: String,
+    onDateSelected: (millis: Long) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    contentDescription: String,
+    isError: Boolean = false,
+    enabled: Boolean = false,
+    errorMessage: String? = null,
+    textFieldModifier: Modifier = Modifier
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
     val datePickerState = rememberDatePickerState()
@@ -154,7 +159,8 @@ fun DatePickerDocked(value: String,
         isError = isError,
         errorMessage = errorMessage,
         enabled = enabled,
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -178,7 +184,8 @@ private fun LimitedDatePickerBase(
     errorMessage: String?,
     enabled: Boolean = false,
     modifier: Modifier,
-    validator: (dateMillis: Long, todayMillis: Long) -> Boolean
+    textFieldModifier: Modifier = Modifier,
+    validator: (dateMillis: Long, todayMillis: Long) -> Boolean,
 ) {
     var showDatePicker by remember { mutableStateOf(value = false) }
 
@@ -220,7 +227,8 @@ private fun LimitedDatePickerBase(
         isError = isError,
         enabled = enabled,
         errorMessage = errorMessage,
-        modifier = modifier
+        modifier = modifier,
+        textFieldModifier = textFieldModifier
     )
 }
 
@@ -250,7 +258,8 @@ private fun DatePickerImpl(
     isError: Boolean = false,
     errorMessage: String? = null,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier
 ){
     LaunchedEffectDatePicker(
         datePickerState = datePickerState,
@@ -269,7 +278,8 @@ private fun DatePickerImpl(
             isSingleLine = isSingleLine,
             isError = isError,
             enabled = enabled,
-            errorMessage = errorMessage
+            errorMessage = errorMessage,
+            textFieldModifier = textFieldModifier
         )
 
         if (showDatePicker) {
@@ -319,6 +329,7 @@ private fun DateOutlineOutlinedTextField(
     isError: Boolean = false,
     enabled: Boolean,
     errorMessage: String? = null,
+    textFieldModifier: Modifier = Modifier
 ) {
     OutlinedTextField(
         value = value,
@@ -327,7 +338,8 @@ private fun DateOutlineOutlinedTextField(
         readOnly = true,
         trailingIcon = {
             IconButton(
-                onClick = onIconClick
+                onClick = onIconClick,
+                modifier = Modifier.then(textFieldModifier)
             ) {
                 Icon(
                     imageVector = Icons.Default.DateRange,
@@ -349,6 +361,7 @@ private fun DateOutlineOutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 64.dp)
+            .then(textFieldModifier)
     )
 }
 
@@ -374,6 +387,7 @@ private fun PopUpDatePicker(
                 .shadow(elevation = 4.dp)
                 .background(color = MaterialTheme.colorScheme.surface)
                 .padding(all = 16.dp)
+                .testTag("date_picker_popup")
         ) {
             DatePicker(
                 state = datePickerState,
