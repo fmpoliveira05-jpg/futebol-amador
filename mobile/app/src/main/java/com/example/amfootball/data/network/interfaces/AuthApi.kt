@@ -32,7 +32,7 @@ interface AuthApi {
     @POST("${BaseEndpoints.playerApi}/create-profile")
     suspend fun createProfile(
         @Body request: CreateProfileDto
-    ): Response<Unit>
+    ): Response<PlayerProfileDto>
 
     /**
      * Obtém o perfil do utilizador atualmente autenticado.

@@ -16,6 +16,9 @@ import kotlin.collections.find
 import com.example.amfootball.navigation.objects.AppRouteInfo
 import com.example.amfootball.ui.components.buttons.BackButton
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,20 +49,20 @@ fun MainTopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = { navController.navigate(Routes.GeralRoutes.SETTINGS.route) }) {
+            IconButton(onClick = { navController.navigate(Routes.GeralRoutes.SETTINGS.route) }, modifier = Modifier.testTag("settingsButton")) {
                 Icon(
                     imageVector = Routes.GeralRoutes.SETTINGS.icon,
                     contentDescription = stringResource(id = R.string.item_settings_description)
                 )
             }
             if (!isLoggedIn) {
-                IconButton(onClick = { navController.navigate(Routes.UserRoutes.LOGIN.route) }) {
+                IconButton(onClick = { navController.navigate(Routes.UserRoutes.LOGIN.route) }, modifier = Modifier.testTag("loginButton")) {
                     Icon(
                         imageVector = Routes.UserRoutes.LOGIN.icon,
                         contentDescription = stringResource(Routes.UserRoutes.LOGIN.labelResId)
                     )
                 }
-                IconButton(onClick = { navController.navigate(Routes.UserRoutes.SIGNUP.route) }) {
+                IconButton(onClick = { navController.navigate(Routes.UserRoutes.SIGNUP.route) }, modifier = Modifier.testTag("signupButton")) {
                     Icon(
                         imageVector = Routes.UserRoutes.SIGNUP.icon,
                         contentDescription = stringResource(Routes.UserRoutes.SIGNUP.labelResId)
@@ -70,7 +73,7 @@ fun MainTopAppBar(
                 IconButton(onClick = {
                     authViewModel.logoutUser()
                     navController.navigate(currentRoute!!)
-                }) {
+                }, modifier = Modifier.testTag("logoutButton")) {
                     Icon(
                         imageVector = Routes.UserRoutes.LOGOUT.icon,
                         contentDescription = stringResource(Routes.UserRoutes.LOGOUT.labelResId)

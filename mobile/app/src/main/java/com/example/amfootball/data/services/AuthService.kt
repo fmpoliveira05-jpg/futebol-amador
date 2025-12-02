@@ -45,10 +45,21 @@ class AuthService @Inject constructor(
 
     suspend fun registerUser(profile: CreateProfileDto) {
         try {
-            val response = apiService.createProfile(profile)
+            val response = authApiService.createProfile(profile)
 
-            if (!response.isSuccessful) {
-                throw Exception("Falha ao criar perfil: ${response.code()}")
+            if (response.isSuccessful && response.body() != null) {
+                val userProfile = response.body()!!
+
+                sessionManager.saveUserProfile(userProfile)
+                sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
+                Log.d("AuthRepository", "Login completo e dados guardados.")
+
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
+
+                sessionManager.clearSession()
+                throw Exception(errorMsg)
             }
         } catch (e: Exception) {
             println("Erro no registo: ${e.message}")
