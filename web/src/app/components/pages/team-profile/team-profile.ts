@@ -56,6 +56,12 @@ export class TeamProfile {
     });
   }
 
+  hasTeam = computed(() => {
+    const user = this.currentUser();
+
+    return user?.team;
+  })
+
   isMember = computed(() => {
     const team = this.team();
     const user = this.currentUser();

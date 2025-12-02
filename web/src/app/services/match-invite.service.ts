@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { environment } from '../environments/environment';
 import { SendMatchInviteDto } from '../shared/Dtos/Match/SendMatchInviteDto';
 import { Observable } from 'rxjs';
+import { InfoMatchInviteDto } from '../shared/Dtos/Match/InfoMatchInviteDto';
 
 @Injectable({
   providedIn: 'root',
@@ -16,8 +17,8 @@ export class MatchInviteService {
 
   private readonly headers = { 'Content-Type': 'application/json' };
 
-  getTeamMatchInvites(teamId: string): Observable<SendMatchInviteDto[]> {
-    return this.http.get<SendMatchInviteDto[]>(`${this.baseUrl}/${teamId}`);
+  getTeamMatchInvites(teamId: string): Observable<InfoMatchInviteDto[]> {
+    return this.http.get<InfoMatchInviteDto[]>(`${this.baseUrl}/${teamId}/match-invites`);
   }
 
   sendMatchInvites(teamId: string, data: SendMatchInviteDto): Observable<void> {
