@@ -99,7 +99,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
         address: p.address,
         email: p.email,
         phone: p.phoneNumber,
-        position: POSITION_MAP[p.position],
+        position: p.position,
         height: p.height,
       });
     }
@@ -130,7 +130,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
         Address: this.form.value['address'] || current.address,
         Email: this.form.value['email'] || current.email,
         Phone: this.form.value['phone'] || current.phoneNumber,
-        Position: Number(position) || current.position,
+        Position: Number(position) || Number(current.position),
         Height: Number(this.form.value['height']) || current.heigth,
       }
     };
@@ -179,7 +179,7 @@ export class PlayerProfilePageComponent implements OnInit, OnDestroy {
     this.playerService.leaveTeam(p.playerId).subscribe({
       next: () => {
         if (this.player()?.isAdmin) {
-          this.cookieService.set('is_admin', 'false');
+          this.cookieService.set('is_admin', 'false', 7, '/players/details');
         }
         this.successMessage.set('Saíste da equipa com sucesso.');
         this.isSaving.set(false);

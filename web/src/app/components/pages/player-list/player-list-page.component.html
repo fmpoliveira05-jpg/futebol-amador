@@ -51,7 +51,12 @@
       <h3>{{ player.name }}</h3>
       <p>{{ player.address }}</p>
       <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
-      <button (click)="sendMembershipRequest(player.id)">Convidar para o clube</button>
+      
+      <button *ngIf="isPlayerWithoutTeam(player)" (click)="sendMembershipRequest(player.id)">Convidar para o clube</button>
+
+      <button (click)="openPlayer(player)" class="btn btn-info">
+        Ver Detalhes
+      </button>
     </div>
   </div>
 

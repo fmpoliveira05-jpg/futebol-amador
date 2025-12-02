@@ -90,8 +90,15 @@ export class PlayerListPageComponent {
   }
 
   // Abre a página de detalhes do jogador
-  protected openPlayer(player: PlayerDetails): void {
-    this.router.navigate(['/players', player.playerId]);
+  protected openPlayer(player: PlayerListItem): void {
+    this.playerService.getPlayerById(player.id).subscribe({
+      next: (playerDetails) => {
+        this.router.navigate(['/players/details', playerDetails.playerId]);
+      },
+      error: (err) => {
+        console.error('Erro ao carregar detalhes do jogador', err);
+      }
+    });
   }
 
   // Carrega a lista de jogadores
@@ -153,11 +160,17 @@ export class PlayerListPageComponent {
       .subscribe({
         next: () => {
           this.successMessage.set('Pedido de adesão enviado com sucesso!');
+          alert(this.successMessage);
         },
         error: (err) => {
-          console.error(err);
           this.errorMessage.set('Não foi possível enviar o pedido de adesão.');
+          alert(this.errorMessage);
         },
       });
+  }
+
+  // Verifica se o jogador não pertence a nenhuma equipa
+  protected isPlayerWithoutTeam(player: PlayerListItem): boolean {
+    return !player.haveTeam;
   }
 }

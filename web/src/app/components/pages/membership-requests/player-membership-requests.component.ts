@@ -20,6 +20,7 @@ export class PlayerMembershipRequestsPageComponent {
   protected readonly requests = signal<MembershipRequest[]>([]); // Lista de pedidos de adesão
   protected readonly isLoading = signal<boolean>(false); // Estado de carregamento
   protected readonly errorMessage = signal<string | null>(null); // Mensagem de erro
+  protected readonly successMessage = signal<string | null>(null); // Mensagem de sucesso
   protected readonly requestsToShow = signal<number>(10); // Número de pedidos a mostrar por vez
 
   // Filtra os pedidos de adesão que não são enviados pelo jogador
@@ -87,6 +88,8 @@ export class PlayerMembershipRequestsPageComponent {
       .acceptMembershipRequestPlayer(request.requestId)
       .subscribe({
         next: () => {
+          this.successMessage.set("O pedido de adesão foi aceite com sucesso.");
+          alert(this.successMessage);
           this.requests.update((list) =>
             list.filter((r) => r.requestId !== request.requestId)
           );
@@ -94,6 +97,7 @@ export class PlayerMembershipRequestsPageComponent {
         },
         error: () => {
           this.errorMessage.set('Não foi possível aceitar o pedido de adesão.');
+          alert(this.errorMessage);
           this.isLoading.set(false);
         },
       });
@@ -119,6 +123,8 @@ export class PlayerMembershipRequestsPageComponent {
       .rejectMembershipRequestPlayer(request.requestId)
       .subscribe({
         next: () => {
+          this.successMessage.set("O pedido de adesão foi rejeitado com sucesso.");
+          alert(this.successMessage);
           this.requests.update((list) =>
             list.filter((r) => r.requestId !== request.requestId)
           );
@@ -126,6 +132,7 @@ export class PlayerMembershipRequestsPageComponent {
         },
         error: () => {
           this.errorMessage.set('Não foi possível rejeitar o pedido de adesão.');
+          alert(this.errorMessage);
           this.isLoading.set(false);
         },
       });

@@ -94,7 +94,7 @@ export class CreateTeam {
           return;
         }
         this.loadPlayer();
-        this.cookieService.set('is_admin', 'true');
+        this.cookieService.set('is_admin', 'true', 7, '/players/details');
         this.successMessage.set('Equipa criada com sucesso.');
         this.router.navigate(['/team/details', newTeamId]);
       },

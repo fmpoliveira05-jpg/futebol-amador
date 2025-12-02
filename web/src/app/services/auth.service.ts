@@ -104,7 +104,7 @@ export class AuthService {
 
         this.cookieService.set('access_token', idToken, 7, '/');
         this.cookieService.set('user_id', localId, 7, '/');
-        this.cookieService.set('is_admin', isAdmin, 7, '/');  
+        this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');  
 
         return response;
       })
