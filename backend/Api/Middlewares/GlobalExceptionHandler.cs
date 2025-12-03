@@ -5,20 +5,39 @@ using System.Net;
 
 namespace Api.Middlewares
 {
-
+    /// <summary>
+    /// Middleware global de tratamento de exceções.
+    /// 
+    /// Esta classe implementa a interface [IExceptionHandler] e é responsável por interceptar
+    /// qualquer exceção não tratada que ocorra durante o processamento de um pedido HTTP.
+    /// Converte a exceção numa resposta JSON padronizada (RFC 7807 - ProblemDetails),
+    /// mapeando tipos de exceção específicos para códigos de estado HTTP apropriados.
+    /// </summary>
     public class GlobalExceptionHandler : IExceptionHandler
     {
         private readonly ILogger<GlobalExceptionHandler> Logger;
 
+        /// <summary>
+        /// Construtor do GlobalExceptionHandler.
+        /// </summary>
+        /// <param name="logger">O serviço de logging para registar erros não tratados.</param>
         public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
         {
             Logger = logger;
         }
 
-        public async ValueTask<bool> TryHandleAsync(
-            HttpContext httpContext,
-            Exception exception,
-            CancellationToken cancellationToken)
+        /// <summary>
+        /// Tenta tratar a exceção ocorrida durante o pipeline do pedido.
+        /// </summary>
+        /// <remarks>
+        /// Mapeia exceções de domínio ([ValidationException], [NotFoundException], etc.) para
+        /// códigos HTTP 4xx (erros do cliente) e exceções genéricas para 500 (erro do servidor).
+        /// </remarks>
+        /// <param name="httpContext">O contexto HTTP atual.</param>
+        /// <param name="exception">A exceção que foi lançada.</param>
+        /// <param name="cancellationToken">Token de cancelamento.</param>
+        /// <returns><c>true</c> se a exceção foi tratada com sucesso (o que é sempre o caso aqui), <c>false</c> caso contrário.</returns>
+        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
             // Usa ProblemDetails para um formato de erro padrão (RFC 7807)
             var problemDetails = new ProblemDetails
