@@ -1,12 +1,9 @@
 package com.example.amfootball.ui.screens.lists
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
@@ -14,16 +11,18 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.data.actions.lists.LeadBoardActions
+import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.dtos.leadboard.LeadboardDto
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
-import com.example.amfootball.ui.components.lists.ImageList
 import com.example.amfootball.ui.components.lists.ListSurface
-import com.example.amfootball.R
-import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 
 /**
  * Ecrã principal da Tabela de Classificação (Leaderboard).
@@ -74,13 +73,15 @@ private fun LeadBoardContent(
         listItems = { team ->
             LeaderBoardItems(
                 team = team,
-                showInfoTeam = { leadBoardActions.onShowMore(
-                    team.team.id,
-                    navHostController)
+                showInfoTeam = {
+                    leadBoardActions.onShowMore(
+                        team.team.id,
+                        navHostController
+                    )
                 }
             )
         },
-        isValidShowMore = leadBoardActions.isValidShowMoreTeams().value ,
+        isValidShowMore = leadBoardActions.isValidShowMoreTeams().value,
         showMoreItems = { leadBoardActions.onLoadMoreTeams() },
         messageEmptyList = stringResource(id = R.string.leadboard_empty)
     )

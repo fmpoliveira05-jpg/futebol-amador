@@ -45,7 +45,7 @@ data class MemberTeamDto(
      * - Outro -> [Position.GOALKEEPER]
      */
     val position: Position
-        get() = when(positionId) {
+        get() = when (positionId) {
             0 -> Position.FORWARD
             1 -> Position.MIDFIELDER
             2 -> Position.DEFENDER
@@ -59,7 +59,7 @@ data class MemberTeamDto(
      * - false -> [TypeMember.PLAYER]
      */
     val typeMember: TypeMember
-        get() = when(isAdmin) {
+        get() = when (isAdmin) {
             true -> TypeMember.ADMIN_TEAM
             else -> TypeMember.PLAYER
         }

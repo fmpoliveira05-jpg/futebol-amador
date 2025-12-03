@@ -10,62 +10,77 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
+/**
+ * Interface de definição dos endpoints da API Retrofit relacionados com a gestão de Jogadores.
+ *
+ * Esta interface cobre operações de leitura de perfil, pesquisa de mercado (listagem filtrada)
+ * e gestão de pedidos de adesão (Membership Requests) bidirecionais (Jogador -> Equipa e Equipa -> Jogador).
+ */
 interface PlayerApi {
+
     /**
      * Obtém os detalhes públicos completos de um jogador específico.
      *
-     * Endpoint: GET api/Player/details/{playerId}
+     * Permite visualizar a ficha técnica, histórico e informações de contacto de um jogador.
      *
-     * @param playerId O identificador único (UUID) do jogador.
-     * @return [Response] contendo o perfil detalhado do jogador [PlayerProfileDto].
+     * **Endpoint:** `GET api/Player/details/{playerId}`
+     *
+     * @param playerId O identificador único (UUID) do jogador a consultar.
+     * @return [Response] contendo o objeto detalhado [PlayerProfileDto].
      */
-    @GET("${BaseEndpoints.playerApi}/details/{playerId}")
+    @GET("${BaseEndpoints.PLAYER_API}/details/{playerId}")
     suspend fun getPlayerProfile(
         @Path("playerId") playerId: String
     ): Response<PlayerProfileDto>
 
     /**
-     * Pesquisa e lista jogadores com base em filtros.
+     * Pesquisa e lista jogadores com base em critérios de filtragem dinâmicos.
      *
-     * Endpoint: GET api/Player/listPlayers
+     * Utilizado na funcionalidade de "Mercado de Jogadores" para encontrar atletas livres,
+     * por posição, idade, localização, etc.
      *
-     * @param filters Um mapa de parâmetros de consulta (Query Params).
-     * Ex: ["name" -> "Joao", "city" -> "Porto"].
-     * @return [Response] com uma lista resumida de jogadores [InfoPlayerDto].
+     * **Endpoint:** `GET api/Player/listPlayers`
+     *
+     * @param filters Um mapa chave-valor contendo os parâmetros de consulta (Query Params).
+     * Os filtros nulos no DTO de origem devem ser omitidos deste mapa.
+     * Exemplo: `{"Name": "Silva", "Position": "GOALKEEPER"}`.
+     *
+     * @return [Response] contendo uma lista resumida de [InfoPlayerDto], otimizada para visualização em listas.
      */
-    @GET("${BaseEndpoints.playerApi}/listPlayers")
+    @GET("${BaseEndpoints.PLAYER_API}/listPlayers")
     suspend fun getPlayersList(
         @QueryMap filters: Map<String, String>
     ): Response<List<InfoPlayerDto>>
 
 
-    //TODO: Validar se a Response é Unit ou se é um DTO
     /**
-     * Envia um pedido de adesão de um jogador para uma equipa específica.
+     * Envia um pedido de adesão (Join Request) de um Jogador para uma Equipa.
      *
-     * Endpoint: POST api/Player/{playerId}/membership-requests/send
+     * Representa a ação em que o **Jogador toma a iniciativa** de se candidatar a uma equipa.
      *
-     * @param playerId O identificador único (UUID) do jogador que envia o pedido.
-     * @param teamId O identificador único (UUID) da equipa alvo (enviado no corpo da requisição).
-     * @return [Response] contendo a informação do pedido de adesão criado [MembershipRequestInfoDto].
+     * **Endpoint:** `POST api/Player/{playerId}/membership-requests/send`
+     *
+     * @param playerId O ID do jogador que está a enviar o pedido (extraído da sessão atual).
+     * @param teamId O ID da equipa destinatária, enviado no corpo (Body) da requisição.
+     * @return [Response] com os detalhes do pedido criado [MembershipRequestInfoDto].
      */
-    @POST("${BaseEndpoints.playerApi}/{playerId}/membership-requests/send")
+    @POST("${BaseEndpoints.PLAYER_API}/{playerId}/membership-requests/send")
     suspend fun sendMemberShipRequestToTeam(
         @Path("playerId") playerId: String,
         @Body teamId: String
     ): Response<MembershipRequestInfoDto>
 
     /**
-     * Envia um convite de recrutamento (Membership Request) de uma Equipa para um Jogador.
+     * Envia um convite de recrutamento (Recruitment Invite) de uma Equipa para um Jogador.
      *
-     * Diferente do jogador pedir para entrar (Join Request), aqui é a equipa (Capitão/Admin)
-     * que toma a iniciativa de convidar um jogador específico para se juntar ao plantel.
+     * Representa a ação em que a **Equipa (Capitão/Admin) toma a iniciativa** de convidar um jogador
+     * para se juntar ao plantel.
      *
-     * Endpoint: POST api/Team/{teamId}/membership-requests/send
+     * **Endpoint:** `POST api/Team/{teamId}/membership-requests/send`
      *
-     * @param teamId O identificador único (UUID) da equipa que está a recrutar.
-     * @param playerId O identificador único (UUID) do jogador alvo do convite (enviado no corpo da requisição).
-     * @return [Response] contendo a informação do pedido de adesão gerado [MembershipRequestInfoDto].
+     * @param teamId O ID da equipa que está a fazer o convite.
+     * @param playerId O ID do jogador convidado, enviado no corpo (Body) da requisição.
+     * @return [Response] com os detalhes do convite criado [MembershipRequestInfoDto].
      */
     @POST("api/Team/{teamId}/membership-requests/send")
     suspend fun sendMemberShipRequestToPlayer(

@@ -1,7 +1,7 @@
 package com.example.amfootball.data.actions.filters
 
-import com.example.amfootball.data.enums.MatchStatus
-import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.data.enums.match.MatchStatus
+import com.example.amfootball.data.enums.match.TypeMatch
 
 /**
  * Data class que agrupa todas as funções de callback (ações) necessárias para manipular

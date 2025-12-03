@@ -18,26 +18,58 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+/**
+ * ViewModel responsável pela lógica de negócio e gestão de estado do Chat (Listagem de Salas e Conversa Individual).
+ *
+ * Este componente gere a comunicação em tempo real com o Firebase Firestore para:
+ * 1. Obter a lista de salas que o utilizador pertence.
+ * 2. Abrir uma "escuta" contínua (`SnapshotListener`) para o histórico de mensagens de uma sala específica.
+ * 3. Enviar novas mensagens.
+ *
+ * @property savedStateHandle Fornecido pelo Hilt, usado para extrair o ID dinâmico da sala (chatRoomId) da rota de navegação.
+ */
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-
-    ): ViewModel() {
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
     private val db = Firebase.firestore
     private val myUserId = Firebase.auth.currentUser?.uid
 
+    /**
+     * ID da sala de chat atual (extraído dos argumentos de navegação).
+     */
     val chatRoomId: String? = savedStateHandle[Routes.chatRoomId]
 
+    /**
+     * Estado interno mutável da lista de salas de chat do utilizador.
+     */
     private val _rooms = MutableStateFlow<List<ChatRoom>>(emptyList())
-    val rooms = _rooms.asStateFlow() // A UI vai observar isto
 
-    private val _roomName = MutableStateFlow<String>("")
+    /**
+     * Fluxo público de leitura das salas de chat. Observado pelo [ChatListScreen].
+     */
+    val rooms = _rooms.asStateFlow()
+
+    /**
+     * Nome da sala atual (ex: "Equipa A vs Equipa B").
+     */
+    private val _roomName = MutableStateFlow("")
 
     val roomName = _roomName.asStateFlow()
 
+    /**
+     * Estado interno mutável da lista de mensagens da sala atual.
+     */
     private val _messages = MutableStateFlow<List<MessageDto>>(emptyList())
-    val messages = _messages.asStateFlow() // A UI vai observar isto
 
+    /**
+     * Fluxo público de leitura das mensagens. Observado pelo [ChatScreen] para renderização em tempo real.
+     */
+    val messages = _messages.asStateFlow()
+
+    /**
+     * Registo do listener em tempo real para permitir a remoção ([remove]) no [onCleared] (evitar Memory Leaks).
+     */
     private var messagesListener: ListenerRegistration? = null
 
     init {
@@ -46,6 +78,12 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Carrega todas as salas de chat em que o utilizador autenticado participa.
+     *
+     * Utiliza uma query pontual (`.get()`) com `whereArrayContains` para encontrar os documentos
+     * da coleção "chatRooms" que contêm o ID do utilizador no campo "members".
+     */
     fun fetchMyChatRooms() {
         if (myUserId == null) return
 
@@ -60,8 +98,17 @@ class ChatViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Abre uma conexão em tempo real (`SnapshotListener`) para ouvir as mensagens da sala atual.
+     *
+     * **Fluxo:**
+     * 1. Remove qualquer listener ativo anteriormente.
+     * 2. Faz uma leitura pontual para obter o nome da sala (para a TopBar).
+     * 3. Regista o [messagesListener] com ordenação por timestamp (ascendente) e limite de 50 mensagens.
+     * 4. Sempre que houver uma nova mensagem no Firestore, o listener atualiza o StateFlow [_messages].
+     */
     fun listenForMessages() {
-        if (chatRoomId == null){
+        if (chatRoomId == null) {
             return
         }
         messagesListener?.remove()
@@ -92,7 +139,15 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
-    fun sendMessage( messageText: String) {
+
+    /**
+     * Envia uma nova mensagem para o Firestore.
+     *
+     * Cria um mapa de dados, anexa o [FieldValue.serverTimestamp()] e adiciona-o à subcoleção "messages".
+     *
+     * @param messageText O conteúdo da mensagem a ser enviado.
+     */
+    fun sendMessage(messageText: String) {
         if (myUserId == null) return
         if (chatRoomId == null) return
 
@@ -113,11 +168,23 @@ class ChatViewModel @Inject constructor(
             }
     }
 
+    /**
+     * Verifica se uma mensagem específica foi enviada pelo utilizador autenticado.
+     *
+     * Usado pela UI para determinar o estilo do balão de mensagem (enviada vs recebida).
+     *
+     * @param message O DTO da mensagem.
+     * @return `true` se o [message.senderId] for igual ao ID do utilizador logado.
+     */
     fun isSentByMe(message: MessageDto): Boolean {
         return message.senderId == myUserId
     }
 
-
+    /**
+     * Chamado quando o ViewModel é destruído.
+     *
+     * Essencial para remover o listener de tempo real do Firestore, evitando fugas de memória ([ListenerRegistration.remove]).
+     */
     override fun onCleared() {
         super.onCleared()
         Log.d("ChatViewModel", "Limpando listener de mensagens.")

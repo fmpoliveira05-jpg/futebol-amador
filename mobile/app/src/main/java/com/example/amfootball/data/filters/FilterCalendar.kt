@@ -1,7 +1,7 @@
 package com.example.amfootball.data.filters
 
-import com.example.amfootball.data.enums.MatchStatus
-import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.data.enums.match.MatchStatus
+import com.example.amfootball.data.enums.match.TypeMatch
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
 

@@ -50,7 +50,7 @@ fun NumberTextField(
         value = value?.toString() ?: "",
         minLenght = min,
         maxLenght = max,
-        onValueChange = { onValueChange(it.toIntOrNull())},
+        onValueChange = { onValueChange(it.toIntOrNull()) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier
     )
@@ -201,7 +201,8 @@ fun TextFieldOutline(
                     } else {
                         Icons.Filled.Visibility
                     }
-                    val description = if (passwordVisible) "Esconder password" else "Mostrar password"
+                    val description =
+                        if (passwordVisible) "Esconder password" else "Mostrar password"
 
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(imageVector = image, contentDescription = description)
@@ -253,16 +254,17 @@ private fun isValueValid(
             }
 
             val number = newValue.toInt()
-            if(newValueLength >= minLenght.toString().length && number < minLenght){
+            if (newValueLength >= minLenght.toString().length && number < minLenght) {
                 return false
             }
 
-            if(number > maxLenght){
+            if (number > maxLenght) {
                 return false
             }
 
             return true
         }
+
         KeyboardType.Email -> {
             if (newValue.any { it.isWhitespace() }) {
                 return false
@@ -270,6 +272,7 @@ private fun isValueValid(
 
             return true
         }
+
         KeyboardType.Phone -> {
             if (!newValue.all { it.isDigit() }) {
                 return false
@@ -281,9 +284,11 @@ private fun isValueValid(
 
             return true
         }
+
         KeyboardType.Password -> {
             return true
         }
+
         else -> {
             return true
         }

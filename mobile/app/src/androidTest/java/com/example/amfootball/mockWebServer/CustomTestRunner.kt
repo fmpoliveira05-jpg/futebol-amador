@@ -6,9 +6,13 @@ import androidx.test.runner.AndroidJUnitRunner
 import dagger.hilt.android.testing.HiltTestApplication
 
 // A custom runner to set up the instrumented application class for tests.
-class CustomTestRunner: AndroidJUnitRunner() {
+class CustomTestRunner : AndroidJUnitRunner() {
 
-    override fun newApplication(cl: ClassLoader?, className: String?, context: Context?): Application {
+    override fun newApplication(
+        cl: ClassLoader?,
+        className: String?,
+        context: Context?
+    ): Application {
         return super.newApplication(cl, HiltTestApplication::class.java.name, context)
     }
 }

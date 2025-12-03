@@ -21,6 +21,18 @@ import com.example.amfootball.navigation.objects.AppRouteInfo
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.buttons.NavigateButton
 
+/**
+ * Barra de navegação inferior principal da aplicação.
+ *
+ * Implementa o padrão de navegação com 5 destinos, onde o item central ([Routes.BottomNavBarRoutes.PAGE_OPTIONS])
+ * atua como um botão de ação flutuante (FAB) integrado, que abre um menu modal (BottomSheet) em vez
+ * de navegar diretamente para um ecrã.
+ *
+ * @param navController O controlador de navegação para alternar entre os ecrãs principais.
+ * @param onShowBottomSheet Callback disparado ao clicar no botão central de "Opções".
+ * @param currentSelectedRoute A rota atual (string) para destacar o ícone correto.
+ * @param onRouteSelected Callback para atualizar o estado da rota selecionada no pai.
+ */
 @Composable
 fun MainBottomNavBar(
     navController: NavHostController,
@@ -44,20 +56,46 @@ fun MainBottomNavBar(
                         }
                     }
                 },
-                icon = { Icon(destination.icon, contentDescription = stringResource(destination.contentDescription)) },
-                label = { Text(stringResource(destination.labelResId), maxLines = 1, overflow = TextOverflow.Ellipsis) }
+                icon = {
+                    Icon(
+                        destination.icon,
+                        contentDescription = stringResource(destination.contentDescription)
+                    )
+                },
+                label = {
+                    Text(
+                        stringResource(destination.labelResId),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             )
         }
     }
 }
 
+/**
+ * Conteúdo dinâmico do Modal Bottom Sheet (Menu de Opções).
+ *
+ * Este componente decide quais os atalhos de navegação a mostrar com base no contexto atual
+ * ([currentScreenRoute]). Permite acesso rápido a funcionalidades secundárias que não cabem na Bottom Bar.
+ *
+ * **Lógica de Exibição:**
+ * - Se estiver na **Home Geral**: Mostra atalhos para procurar equipas, jogadores e leaderboard.
+ * - Se estiver na **Home de Equipa**: Mostra atalhos de gestão (Calendário, Pedidos, Membros).
+ *
+ * @param modifier Modificador de layout.
+ * @param navController Controlador para navegar ao clicar nos botões do grid.
+ * @param currentScreenRoute A rota onde o utilizador estava quando abriu o menu.
+ * @param teamId O ID da equipa (opcional), necessário para navegar para rotas que exigem parâmetros (ex: Calendário).
+ */
 @Composable
 fun BottomSheetContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     currentScreenRoute: String?,
     teamId: String? = null
-){
+) {
     val buttonsToShow = mutableListOf<AppRouteInfo>()
 
     when (currentScreenRoute) {
@@ -72,6 +110,7 @@ fun BottomSheetContent(
                 )
             )
         }
+
         Routes.BottomNavBarRoutes.HOMEPAGE_TEAM.route -> {
             buttonsToShow.addAll(
                 listOf(
@@ -91,9 +130,11 @@ fun BottomSheetContent(
                 )
             )
         }
+
         Routes.BottomNavBarRoutes.CHAT_LIST.route -> {
 
         }
+
         Routes.BottomNavBarRoutes.USER_PROFILE.route -> {
 
         }
@@ -107,9 +148,6 @@ fun BottomSheetContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        /*
-
-        * */
         items(buttonsToShow) { routeInfo ->
             NavigateButton(
                 icon = routeInfo.icon,
@@ -123,6 +161,7 @@ fun BottomSheetContent(
                                 println("Erro: Tentativa de abrir calendário sem ID de equipa")
                             }
                         }
+
                         else -> {
                             navController.navigate(routeInfo.route)
                         }
@@ -131,118 +170,4 @@ fun BottomSheetContent(
             )
         }
     }
-}
-
-
-@Composable
-private fun HomePageContentBottonSheet(modifier: Modifier,navController: NavHostController) {
-    //NavigateButton()
-}
-@Composable
-private fun TeamListContentBottomSheet(modifier: Modifier,navController: NavHostController){
-    /*
-    NavigateButton(
-        icon = Routes.TeamRoutes.TEAM_LIST.icon,
-        label = stringResource(Routes.TeamRoutes.TEAM_LIST.contentDescription),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.TEAM_LIST.route)
-        }
-    )
-    * */
-    NavigateButton(
-        icon = Routes.TeamRoutes.HOMEPAGE.icon,
-        label = stringResource(id = Routes.TeamRoutes.HOMEPAGE.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.HOMEPAGE.route)
-        }
-    )
-    NavigateButton(
-        icon = Routes.TeamRoutes.CALENDAR.icon,
-        label = stringResource(id = Routes.TeamRoutes.CALENDAR.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.CALENDAR.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.icon,
-        label = stringResource(id = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.CALENDAR.icon,
-        label = stringResource(id = Routes.TeamRoutes.CALENDAR.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.CALENDAR.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.icon,
-        label = stringResource(id = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.icon,
-        label = stringResource(id = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.LIST_MATCH_INVITES.icon,
-        label = stringResource(id = Routes.TeamRoutes.LIST_MATCH_INVITES.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.LIST_MATCH_INVITES.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.SEND_MATCH_INVITE.icon,
-        label = stringResource(id = Routes.TeamRoutes.SEND_MATCH_INVITE.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.SEND_MATCH_INVITE.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.MEMBERLIST.icon,
-        label = stringResource(id = Routes.TeamRoutes.MEMBERLIST.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.MEMBERLIST.route)
-        }
-    )
-
-    NavigateButton(
-        icon = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.icon,
-        label = stringResource(id = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.labelResId),
-        onClick = {
-            navController.navigate(Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route)
-        }
-    )
-}
-
-
-
-@Composable
-private fun ChatContentBottomSheet(modifier: Modifier,navController: NavHostController){
-
-}
-
-@Composable
-fun PlayerProfileContentBottomSheet(modifier: Modifier,navController: NavHostController){
-
-}
-
-@Composable
-fun CommonContentBottomSheet(modifier: Modifier,navController: NavHostController){
-    NavigateButton(modifier ,Routes.PlayerRoutes.PLAYER_LIST.icon, stringResource(Routes.PlayerRoutes.PLAYER_LIST.contentDescription), onClick = {navController.navigate(Routes.PlayerRoutes.PLAYER_LIST.route)})
-
 }

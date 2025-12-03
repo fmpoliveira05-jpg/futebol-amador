@@ -39,14 +39,25 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.match.MatchMakerInfo
 import com.example.amfootball.data.dtos.team.InfoTeamMatchMaker
 import com.example.amfootball.ui.components.Loading
-import com.example.amfootball.ui.components.lists.ImageList
-import com.example.amfootball.ui.viewModel.match.MatchMakerViewModel
-import com.example.amfootball.R
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.viewModel.match.MatchMakerViewModel
 
+/**
+ * Ecrã de "Matchmaking" (Procura de Jogo Automática).
+ *
+ * Este ecrã exibe o estado atual do processo de encontrar um adversário.
+ * Mostra visualmente:
+ * 1. O campo/local do jogo (se definido).
+ * 2. As duas equipas envolvidas (A minha equipa vs Adversário).
+ * 3. Se o adversário ainda não foi encontrado, mostra um placeholder animado ou estático.
+ *
+ * @param navHostController Controlador de navegação para redirecionar o utilizador (ex: Cancelar procura).
+ * @param viewModel ViewModel que gere o estado do matchmaking e a conexão ao serviço de emparelhamento.
+ */
 @Composable
 fun MatchMakerScreen(
     navHostController: NavHostController,
@@ -70,6 +81,16 @@ fun MatchMakerScreen(
     )
 }
 
+/**
+ * Conteúdo visual do ecrã de matchmaking.
+ *
+ * Estrutura vertical que organiza o cabeçalho do campo, a secção de confronto (VS)
+ * e o botão de cancelamento.
+ *
+ * @param matchMakerInfo Objeto contendo os dados do jogo em formação (Campo, Equipas).
+ * @param cancelAction Callback para abortar o processo de procura.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun MatchMakerContent(
     matchMakerInfo: MatchMakerInfo,
@@ -115,6 +136,12 @@ private fun MatchMakerContent(
     }
 }
 
+/**
+ * Cartão que exibe informações sobre o local do jogo.
+ *
+ * @param pitch Nome do campo ou estádio.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun PichInfo(
     pitch: String = "Campo Desconhecido",
@@ -152,10 +179,13 @@ private fun PichInfo(
     }
 }
 
+/**
+ * Placeholder exibido quando o campo de jogo ainda não foi definido ou encontrado.
+ *
+ * @param modifier Modificador de layout.
+ */
 @Composable
-private fun PichInfoPlaceholder(
-    modifier: Modifier = Modifier
-) {
+private fun PichInfoPlaceholder(modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant),
         contentAlignment = Alignment.Center
@@ -179,6 +209,15 @@ private fun PichInfoPlaceholder(
     }
 }
 
+/**
+ * Secção de confronto ("Versus").
+ *
+ * Exibe as duas equipas lado a lado. Se uma equipa ainda não tiver sido encontrada,
+ * exibe o [InfoTeamPlaceholder] no lugar dela.
+ *
+ * @param teams Lista das equipas envolvidas (pode ter 1 ou 2 elementos).
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun Teams(
     teams: List<InfoTeamMatchMaker>,
@@ -215,13 +254,19 @@ private fun Teams(
     }
 }
 
+/**
+ * Botão destrutivo para cancelar a procura.
+ *
+ * @param onClick Callback executado ao clicar.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun CancelButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Button(
-        onClick = onClick ,
+        onClick = onClick,
         modifier = modifier,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.error
@@ -232,6 +277,13 @@ private fun CancelButton(
     }
 }
 
+/**
+ * Componente que exibe os detalhes de uma equipa confirmada.
+ * Inclui Logo, Nome e Rank.
+ *
+ * @param team DTO com os dados da equipa.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun InfoTeam(
     team: InfoTeamMatchMaker,
@@ -277,7 +329,11 @@ private fun InfoTeam(
     }
 }
 
-
+/**
+ * Placeholder visual para uma equipa que ainda está a ser procurada ("Searching...").
+ *
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun InfoTeamPlaceholder(
     modifier: Modifier = Modifier

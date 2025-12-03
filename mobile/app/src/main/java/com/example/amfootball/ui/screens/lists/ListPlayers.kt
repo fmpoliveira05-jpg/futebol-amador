@@ -24,10 +24,10 @@ import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
-import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.mocks.lists.ListPlayersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -249,7 +249,8 @@ private fun FilterListPlayerContent(
                     onMinAgeChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     isError = filtersError.minAgeError != null,
                     errorMessage = filtersError.minAgeError?.let {
-                        stringResource(it.messageId, *it.args.toTypedArray())},
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }

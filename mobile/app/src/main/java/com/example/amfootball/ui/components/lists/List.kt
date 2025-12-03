@@ -52,7 +52,7 @@ import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
  * @param messageEmptyList A mensagem a ser exibida quando a lista estiver vazia.
  */
 @Composable
-fun<T> ListSurface(
+fun <T> ListSurface(
     list: List<T>,
     filterSection: @Composable () -> Unit = {},
     listItems: @Composable (T) -> Unit,
@@ -68,7 +68,7 @@ fun<T> ListSurface(
             filterSection(filterSection = filterSection)
 
             if (list.isEmpty()) {
-               emptyListState(message = messageEmptyList)
+                emptyListState(message = messageEmptyList)
             } else {
                 populatedListContent(
                     list = list,
@@ -91,7 +91,7 @@ fun<T> ListSurface(
 private fun LazyListScope.filterSection(
     filterSection: @Composable () -> Unit
 ) {
-    if(filterSection != {}) {
+    if (filterSection != {}) {
         item {
             filterSection()
             Spacer(Modifier.height(16.dp))
@@ -191,7 +191,7 @@ private fun <T> LazyListScope.populatedListContent(
  * @param underneathItems Slot Composable opcional para exibir conteúdo abaixo do [ListItem] (ex: uma linha de botões).
  */
 @Composable
-fun<T> GenericListItem(
+fun <T> GenericListItem(
     item: T,
     title: (T) -> String,
     overline: @Composable () -> Unit = {},

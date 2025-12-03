@@ -28,8 +28,8 @@ import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.errors.formErrors.TeamFormErros
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
-import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.ImagePicker
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.showOfflineToast
 import com.example.amfootball.ui.theme.AMFootballTheme
@@ -82,7 +82,7 @@ fun FormTeamScreen(
             }
         },
         onRetry = {
-            if(viewModel.isEditMode) {
+            if (viewModel.isEditMode) {
                 viewModel.loadDataTeam()
             }
         },
@@ -164,8 +164,10 @@ private fun FieldsCreateTeam(
         maxLenght = TeamConst.MAX_NAME_LENGTH,
         isError = fieldsErrors.nameError != null,
         errorMessage = fieldsErrors.nameError?.let {
-            stringResource(id = it.messageId,
-                *it.args.toTypedArray())
+            stringResource(
+                id = it.messageId,
+                *it.args.toTypedArray()
+            )
         }
     )
 

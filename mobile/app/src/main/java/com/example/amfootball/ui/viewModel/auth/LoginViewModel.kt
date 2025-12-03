@@ -1,21 +1,15 @@
 package com.example.amfootball.ui.viewModel.auth
 
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.formErrors.LoginError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.AuthService
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
-import com.example.amfootball.R
-import com.example.amfootball.data.dtos.team.FormTeamDto
-import com.example.amfootball.data.errors.formErrors.LoginError
-import com.example.amfootball.data.errors.formErrors.TeamFormErros
-import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import com.example.amfootball.utils.UserConst
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
@@ -91,6 +85,14 @@ class LoginViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Validação Síncrona do formulário de Login.
+     *
+     * Verifica se os campos Email e Password cumprem os requisitos mínimos (obrigatório e comprimento)
+     * e atualiza o estado [formErrors] com as mensagens correspondentes.
+     *
+     * @return `true` se ambos os campos forem válidos, `false` caso contrário.
+     */
     override fun validateForm(): Boolean {
         val email = formState.value.email
         val emailLength = email.length
@@ -110,7 +112,7 @@ class LoginViewModel @Inject constructor(
                     messageId = R.string.error_min_email_length,
                     args = listOf(UserConst.MIN_EMAIL_LENGTH)
                 )
-            } else if(emailLength > UserConst.MAX_EMAIL_LENGTH) {
+            } else if (emailLength > UserConst.MAX_EMAIL_LENGTH) {
                 emailError = ErrorMessage(
                     messageId = R.string.error_max_email_length,
                     args = listOf(UserConst.MAX_EMAIL_LENGTH)

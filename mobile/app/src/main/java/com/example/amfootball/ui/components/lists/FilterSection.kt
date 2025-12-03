@@ -82,13 +82,12 @@ fun FilterHeader(
     isExpanded: Boolean,
     onToggleExpand: () -> Unit,
 ) {
-    Row (
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onToggleExpand() }
             .padding(horizontal = 16.dp, vertical = 12.dp)
-            .testTag(stringResource(id = R.string.tag_filter_section))
-        ,
+            .testTag(stringResource(id = R.string.tag_filter_section)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -100,7 +99,7 @@ fun FilterHeader(
             imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
             contentDescription = if (isExpanded) {
                 stringResource(id = R.string.hide_filter)
-            }  else {
+            } else {
                 stringResource(id = R.string.open_filters)
             }
         )
@@ -123,7 +122,8 @@ fun FilterRow(
     content: @Composable RowScope.() -> Unit,
     horizontalSpacing: Dp = 8.dp,
 ) {
-    Row(modifier = modifier,
+    Row(
+        modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(horizontalSpacing),
         verticalAlignment = Alignment.CenterVertically
     ) {

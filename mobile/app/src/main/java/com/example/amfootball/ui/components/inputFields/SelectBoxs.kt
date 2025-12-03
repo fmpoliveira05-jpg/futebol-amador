@@ -3,8 +3,8 @@ package com.example.amfootball.ui.components.inputFields
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
@@ -38,7 +38,7 @@ import com.example.amfootball.R
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun<T> SelectBox(
+fun <T> SelectBox(
     list: List<T>,
     selectedValue: T,
     onSelectItem: (T) -> Unit,
@@ -76,7 +76,7 @@ fun<T> SelectBox(
 
         ExposedDropdownMenu(
             expanded = isExpanded,
-            onDismissRequest = { isExpanded = false}
+            onDismissRequest = { isExpanded = false }
         ) {
             list.forEach { item ->
                 val textToShow = itemToString(item)

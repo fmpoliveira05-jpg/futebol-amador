@@ -5,16 +5,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import javax.inject.Inject
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
+import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.CalendarService
@@ -28,6 +24,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import javax.inject.Inject
 
 //TODO: Terminar de implementar os metodos que faltam
 /**
@@ -76,8 +76,7 @@ class FormMatchInviteViewModel @Inject constructor(
     val mode: MatchFormMode = try {
         if (modeStr != null) {
             MatchFormMode.valueOf(modeStr)
-        }
-        else {
+        } else {
             MatchFormMode.SEND
         }
     } catch (e: Exception) {
@@ -89,7 +88,8 @@ class FormMatchInviteViewModel @Inject constructor(
     val uiFormState: StateFlow<MatchInviteDto> = formState
 
     /** Estado dos erros de validação dos campos do formulário. */
-    private val errors: MutableStateFlow<MatchInviteFormErros> = MutableStateFlow(MatchInviteFormErros())
+    private val errors: MutableStateFlow<MatchInviteFormErros> =
+        MutableStateFlow(MatchInviteFormErros())
     val uiErrorsForm: StateFlow<MatchInviteFormErros> = errors
 
     /** Estado global da UI (Loading, Erros de Rede, Sucesso). */
@@ -147,24 +147,29 @@ class FormMatchInviteViewModel @Inject constructor(
      * - **SEND:** Prepara um formulário vazio ou com dados do oponente pré-selecionado.
      */
     fun loadData() {
-        when(modeStr) {
+        when (modeStr) {
             MatchFormMode.NEGOCIATE.name -> {
                 //TODO: Fazer o pedido ao endPoint de negociate
             }
+
             MatchFormMode.SEND.name -> {
                 loadDataSend()
             }
+
             MatchFormMode.CANCEL.name -> {
                 loadDataMatch()
             }
+
             MatchFormMode.POSTPONE.name -> {
                 loadDataMatch()
             }
+
             else -> {
                 _uiState.update { it.copy(isLoading = false, errorMessage = "Página invalida") }
             }
         }
     }
+
     /**
      * Submete o formulário principal (Criar, Negociar ou Adiar).
      *
@@ -174,20 +179,23 @@ class FormMatchInviteViewModel @Inject constructor(
      * @param navHostController Controlador para navegação após sucesso.
      */
     fun onSubmitForm(navHostController: NavHostController) {
-        if(!isFormValid()) {
+        if (!isFormValid()) {
             return
         }
 
-        when(modeStr) {
+        when (modeStr) {
             MatchFormMode.NEGOCIATE.name -> {
                 //TODO: Fazer o pedido ao endPoint de negociate
             }
+
             MatchFormMode.SEND.name -> {
                 //TODO: Mandar pedido há API para ir buscar apenas o nome do Opponente
             }
+
             MatchFormMode.POSTPONE.name -> {
                 //TODO: Fazer o pedido ao endPoint de postponeMatch
             }
+
             else -> {
                 //Lançar exceção
             }
@@ -227,8 +235,13 @@ class FormMatchInviteViewModel @Inject constructor(
                 }
 
                 Log.d("FormMatchInviteViewModel", "onCancelForm: $matchId")
-                if(matchId == null) {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Não foi encontrada nenhuma equipa com esse Id") }
+                if (matchId == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Não foi encontrada nenhuma equipa com esse Id"
+                        )
+                    }
                     return@launch
                 }
 
@@ -272,15 +285,23 @@ class FormMatchInviteViewModel @Inject constructor(
 
             if (!networkObserver.isOnlineOneShot()) {
                 _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Sem internet. Verifique a sua conexão."
+                    )
                 }
 
                 return@launch
             }
 
             try {
-                if(matchId == null) {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Não foi encontrada nenhuma equipa com esse Id") }
+                if (matchId == null) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Não foi encontrada nenhuma equipa com esse Id"
+                        )
+                    }
                     return@launch
                 }
 

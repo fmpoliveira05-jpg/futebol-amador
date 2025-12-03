@@ -88,7 +88,10 @@ sonarqube {
         property("sonar.projectKey", "LDS-Frontend-Mobile")
 
         property("sonar.junit.reportsPath", "build/test-results/testDebugUnitTest")
-        property("sonar.coverage.jacoco.xmlReportPath", "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml")
+        property(
+            "sonar.coverage.jacoco.xmlReportPath",
+            "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
+        )
 
         property("sonar.sources", "src/main/kotlin")
         property("sonar.tests", "src/test/kotlin")

@@ -37,12 +37,12 @@ import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterCalendarActions
 import com.example.amfootball.data.actions.itemsList.ItemsCalendarActions
-import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
-import com.example.amfootball.data.enums.MatchResult
-import com.example.amfootball.data.enums.MatchStatus
+import com.example.amfootball.data.enums.match.MatchResult
+import com.example.amfootball.data.enums.match.MatchStatus
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
+import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.mocks.lists.CalendarMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
@@ -230,7 +230,7 @@ private fun FiltersCalendarContent(
 
                 FilterMaxDateGamePicker(
                     maxDateGame = filters.maxGameDate?.format(displayFormatter) ?: "",
-                    onDateSelected = { filterActions.onMaxDateGameChange(it)},
+                    onDateSelected = { filterActions.onMaxDateGameChange(it) },
                     isError = filterError.minGameDateError != null,
                     errorMessage = filterError.maxGameDateError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
@@ -434,7 +434,8 @@ private fun ColumnDataMatch(
 
         Text(
             text = match.formattedDate,
-            style = MaterialTheme.typography.bodyMedium)
+            style = MaterialTheme.typography.bodyMedium
+        )
     }
 }
 

@@ -72,7 +72,7 @@ private fun ContentProfileTeam(
     LoadingPage(
         isLoading = uiState.isLoading,
         errorMsg = uiState.errorMessage,
-        retry= { retry() },
+        retry = { retry() },
         content = {
             Column(
                 modifier = modifier.verticalScroll(rememberScrollState()),
@@ -100,7 +100,7 @@ private fun FieldProfileTeam(
 ) {
     ProfilesImageString(
         image = profileInfo.logo,
-        contentDescription =  stringResource(id= R.string.description_logo_team, profileInfo.name),
+        contentDescription = stringResource(id = R.string.description_logo_team, profileInfo.name),
         modifier = Modifier.fillMaxWidth()
     )
 

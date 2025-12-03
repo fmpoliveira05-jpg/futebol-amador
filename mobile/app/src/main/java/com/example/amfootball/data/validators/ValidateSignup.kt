@@ -1,6 +1,5 @@
 package com.example.amfootball.data.validators
 
-
 import android.util.Patterns
 import com.example.amfootball.data.enums.Position
 
@@ -68,7 +67,11 @@ private fun validateName(name: String): ValidationResult {
         return ValidationResult(false, SignUpField.NAME.name, "O nome não pode estar vazio.")
     }
     if (name.length < 3) {
-        return ValidationResult(false, SignUpField.NAME.name, "O nome deve ter pelo menos 3 caracteres.")
+        return ValidationResult(
+            false,
+            SignUpField.NAME.name,
+            "O nome deve ter pelo menos 3 caracteres."
+        )
     }
     return ValidationResult(true)
 }
@@ -102,22 +105,46 @@ private fun validateEmail(email: String): ValidationResult {
  */
 private fun validatePassword(password: String): ValidationResult {
     if (password.isBlank()) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password não pode estar vazia.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password não pode estar vazia."
+        )
     }
     if (password.length < 8) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password deve ter pelo menos 6 caracteres.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password deve ter pelo menos 6 caracteres."
+        )
     }
     if (!password.any { it.isUpperCase() }) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password deve conter pelo menos uma letra maiúscula.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password deve conter pelo menos uma letra maiúscula."
+        )
     }
     if (!password.any { it.isLowerCase() }) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password deve conter pelo menos uma letra minúscula.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password deve conter pelo menos uma letra minúscula."
+        )
     }
     if (!password.any { it.isDigit() }) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password deve conter pelo menos um número.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password deve conter pelo menos um número."
+        )
     }
     if (!password.any { !it.isLetterOrDigit() }) {
-        return ValidationResult(false, SignUpField.PASSWORD.name, "A password deve conter pelo menos um caractere especial.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD.name,
+            "A password deve conter pelo menos um caractere especial."
+        )
     }
     if (password.any { it.isWhitespace() }) {
         return ValidationResult(
@@ -148,10 +175,18 @@ private fun validatePassword(password: String): ValidationResult {
  */
 private fun validatePasswordConfirmation(password: String, confirmation: String): ValidationResult {
     if (confirmation.isBlank()) {
-        return ValidationResult(false, SignUpField.PASSWORD_VERIFICATION.name, "Por favor, confirme a password.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD_VERIFICATION.name,
+            "Por favor, confirme a password."
+        )
     }
     if (password != confirmation) {
-        return ValidationResult(false, SignUpField.PASSWORD_VERIFICATION.name, "As passwords não coincidem.")
+        return ValidationResult(
+            false,
+            SignUpField.PASSWORD_VERIFICATION.name,
+            "As passwords não coincidem."
+        )
     }
     return ValidationResult(true)
 }
@@ -189,7 +224,11 @@ private fun validateHeight(height: String): ValidationResult {
     }
     val heightInt = height.toIntOrNull()
     if (heightInt == null || heightInt !in 100..250) {
-        return ValidationResult(false, SignUpField.HEIGHT.name, "Altura inválida (deve ser entre 100 e 250 cm).")
+        return ValidationResult(
+            false,
+            SignUpField.HEIGHT.name,
+            "Altura inválida (deve ser entre 100 e 250 cm)."
+        )
     }
     return ValidationResult(true)
 }
@@ -204,7 +243,11 @@ private fun validateHeight(height: String): ValidationResult {
  */
 private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
     if (dateInMillis == null) {
-        return ValidationResult(false, SignUpField.DATE_OF_BIRTH.name, "Por favor, selecione a data de nascimento.")
+        return ValidationResult(
+            false,
+            SignUpField.DATE_OF_BIRTH.name,
+            "Por favor, selecione a data de nascimento."
+        )
     }
     // TODO: Validar se o user é maior que a idade definida como idade minima (acho que foram 18 anos)
     return ValidationResult(true)
@@ -221,7 +264,11 @@ private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
  */
 private fun validatePosition(position: Int?): ValidationResult {
     if (position == null) {
-        return ValidationResult(false, SignUpField.POSITION.name, "Por favor, selecione a sua posição.")
+        return ValidationResult(
+            false,
+            SignUpField.POSITION.name,
+            "Por favor, selecione a sua posição."
+        )
     }
     // Verifica se o Int é um ordinal válido no nosso enum
     val isValidPosition = position in Position.values().indices

@@ -44,6 +44,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.amfootball.data.dtos.chat.MessageDto
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
+/**
+ * Ecrã de conversa individual (Single Chat Screen).
+ *
+ * Responsável por exibir o histórico de mensagens e permitir o envio de novas mensagens
+ * em tempo real.
+ *
+ * **Fluxo de Dados:**
+ * 1. O `viewModel` carrega as mensagens (`listenForMessages`) assim que o `chatRoomId` é definido.
+ * 2. As mensagens são observadas via `collectAsState` e renderizadas numa `LazyColumn`.
+ * 3. Novas mensagens digitadas no `MessageInput` são enviadas através do `viewModel.sendMessage`.
+ *
+ * @param chatViewModel O ViewModel que gere a lógica de chat e conexão ao Firebase.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -51,10 +64,10 @@ fun ChatScreen(
 ) {
     var messageText by remember { mutableStateOf("") }
     val roomName by chatViewModel.roomName.collectAsState()
-    //val listChat = MessageDto.generateExempleChat()
+
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = roomName) { }
+            ChatTopBar(contactName = roomName)
         },
         content = { paddingValues ->
             Column(
@@ -75,7 +88,10 @@ fun ChatScreen(
                     reverseLayout = false
                 ) {
                     items(messages) { message ->
-                        MessageBubble(message = message, isSentByMe = chatViewModel.isSentByMe(message))
+                        MessageBubble(
+                            message = message,
+                            isSentByMe = chatViewModel.isSentByMe(message)
+                        )
                     }
                 }
 
@@ -95,13 +111,15 @@ fun ChatScreen(
 }
 
 /**
- * Barra superior com nome, foto (placeholder) e ações.
+ * Barra superior específica do Chat.
+ *
+ * Exibe o avatar, nome do contacto/sala e estado (Online).
+ *
+ * @param contactName O nome a exibir no título.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopBar(contactName: String,
-               onBackClick: () -> Unit
-) {
+fun ChatTopBar(contactName: String) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -148,13 +166,21 @@ fun ChatTopBar(contactName: String,
 }
 
 /**
- * Balão de mensagem individual (distingue enviadas e recebidas).
+ * Componente visual que representa um balão de mensagem.
+ *
+ * Ajusta automaticamente o alinhamento, cor e forma (cantos arredondados) com base
+ * em quem enviou a mensagem (Eu vs Outro).
+ *
+ * @param message O DTO contendo o texto da mensagem.
+ * @param isSentByMe Booleano que indica se a mensagem pertence ao utilizador atual.
  */
 @Composable
 fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
     val alignment = if (isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
-    val bubbleColor = if (isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val bubbleColor =
+        if (isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val textColor =
+        if (isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
     val bubbleShape = if (isSentByMe) {
         RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
     } else {
@@ -182,7 +208,13 @@ fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
 }
 
 /**
- * Campo de texto e botão de enviar na parte inferior.
+ * Componente de entrada de texto para novas mensagens.
+ *
+ * Inclui um campo de texto arredondado e um botão de envio que só fica ativo se houver texto.
+ *
+ * @param message O texto atual no campo.
+ * @param onMessageChange Callback para atualizar o estado do texto.
+ * @param onSendClick Callback disparado ao carregar no botão de envio.
  */
 @Composable
 fun MessageInput(
@@ -226,9 +258,43 @@ fun MessageInput(
     }
 }
 
-
-@Preview(showBackground = true)
+/*
+@Preview(name = "Chat Screen - English", locale = "en", showBackground = true)
+@Preview(name = "Chat Screen - Portuguese", locale = "pt", showBackground = true)
 @Composable
 fun ChatScreenPreview() {
-    //ChatScreen()
+    // Mock de dados para visualizar o layout sem ViewModel
+    val mockMessages = listOf(
+        MessageDto(text = "Olá! Tudo bem?", senderId = "other"),
+        MessageDto(text = "Tudo ótimo! E contigo?", senderId = "me"),
+        MessageDto(text = "Vamos treinar amanhã?", senderId = "other"),
+        MessageDto(text = "Claro, às 19h no campo principal.", senderId = "me")
+    )
+
+    MaterialTheme {
+        Scaffold(
+            topBar = { ChatTopBar(contactName = "Treinador João", onBackClick = {}) }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    items(mockMessages) { msg ->
+                        MessageBubble(
+                            message = msg,
+                            isSentByMe = (msg.senderId == "me")
+                        )
+                    }
+                }
+                MessageInput(message = "", onMessageChange = {}, onSendClick = {})
+            }
+        }
+    }
 }
+*/

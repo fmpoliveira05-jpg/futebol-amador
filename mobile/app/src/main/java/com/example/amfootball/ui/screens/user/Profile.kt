@@ -77,14 +77,14 @@ private fun ProfileScreenContent(
 ) {
     LoadingPage(
         isLoading = uiState.isLoading,
-        errorMsg= uiState.errorMessage,
-        retry= { retry() },
+        errorMsg = uiState.errorMessage,
+        retry = { retry() },
         content = {
             if (profileData != null) {
                 Column(
                     modifier = modifier
                         .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()), // Habilita o scroll numa Column normal
+                        .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
@@ -134,7 +134,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.phone_number),
-        value = if(profileData.phoneNumber != null) {
+        value = if (profileData.phoneNumber != null) {
             profileData.phoneNumber
         } else {
             profileData.loginResponseDto?.phoneNumber.toString()
@@ -155,7 +155,7 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
 
     TextFieldOutline(
         label = stringResource(id = R.string.player_position),
-        value = profileData.position,
+        value = profileData.position.name,
         isReadOnly = true
     )
 
@@ -167,7 +167,6 @@ private fun TextFieldProfile(profileData: PlayerProfileDto) {
         isReadOnly = true
     )
 
-    //TODO: Não aparece pois não se guarda no login, fazer pedido hhá API só para isto
     TextFieldOutline(
         label = stringResource(id = R.string.player_team),
         value = profileData.team?.name,
@@ -204,11 +203,12 @@ fun ProfileScreenPreview() {
         dateOfBirth = "24/06/1987",
         icon = null,
         address = "Rosario, Argentina",
-        position = "Avançado",
+        positionRaw = 3,
         height = 170,
         team = TeamDto(
             id = "2",
             name = "Inter Miami CF",
+            image = ""
         ),
         isAdmin = false,
         email = dummyLoginResponse.email,

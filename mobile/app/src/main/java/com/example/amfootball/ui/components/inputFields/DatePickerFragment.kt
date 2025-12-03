@@ -214,7 +214,7 @@ private fun LimitedDatePickerBase(
         label = label,
         value = value,
         onIconClick = {
-            if(enabled) {
+            if (enabled) {
                 showDatePicker = !showDatePicker
             }
         },
@@ -260,7 +260,7 @@ private fun DatePickerImpl(
     enabled: Boolean,
     modifier: Modifier = Modifier,
     textFieldModifier: Modifier = Modifier
-){
+) {
     LaunchedEffectDatePicker(
         datePickerState = datePickerState,
         onDateSelected = onDateSelected,
@@ -292,11 +292,15 @@ private fun DatePickerImpl(
 }
 
 /**
- * Helper que observa alterações no estado do DatePicker.
+ * Efeito colateral (Side-effect) que monitoriza a seleção de datas no estado do calendário.
  *
- * Quando o usuário seleciona uma data no calendário, este efeito é disparado para:
- * 1. Notificar o pai via [onDateSelected].
- * 2. Fechar o popup via [onDismiss].
+ * Este componente não renderiza UI, mas atua como um observador. Assim que o [datePickerState]
+ * regista uma nova data selecionada (`selectedDateMillis` deixa de ser null ou muda),
+ * este efeito é disparado para propagar o valor e fechar o popup.
+ *
+ * @param datePickerState O estado do Material3 DatePicker que contém a data selecionada.
+ * @param onDateSelected Callback executado com o valor da data em milissegundos (Long).
+ * @param onDismiss Callback para fechar o popup/diálogo após a seleção.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -314,10 +318,23 @@ private fun LaunchedEffectDatePicker(
 }
 
 /**
- * O campo de texto "fake" que exibe a data selecionada.
+ * Componente visual de campo de texto configurado especificamente para seleção de datas.
  *
- * É configurado como `readOnly = true` para impedir digitação manual, forçando o uso do calendário.
- * Inclui um ícone de calendário no final (trailingIcon) que serve de gatilho para o popup.
+ * Funciona como um "Trigger" para o calendário. Embora pareça um campo de texto normal,
+ * está configurado como `readOnly` (quando habilitado) para impedir a inserção manual de texto,
+ * garantindo que o formato da data é sempre consistente através da seleção no calendário.
+ *
+ * Inclui suporte para estados de erro e mensagens de validação.
+ *
+ * @param value O texto da data formatada a ser exibido.
+ * @param label O rótulo (hint) do campo.
+ * @param contentDescription Descrição para acessibilidade do ícone de calendário.
+ * @param onIconClick Ação a executar ao clicar no ícone (geralmente abrir o DatePicker).
+ * @param isSingleLine Se o texto deve ser mantido numa única linha (Padrão: false).
+ * @param isError Indica se o campo deve ser pintado com a cor de erro.
+ * @param enabled Controla se o campo está ativo. Se `true`, define `readOnly = true`.
+ * @param errorMessage Mensagem de texto a exibir abaixo do campo em caso de erro.
+ * @param textFieldModifier Modificadores de layout adicionais.
  */
 @Composable
 private fun DateOutlineOutlinedTextField(
@@ -335,7 +352,7 @@ private fun DateOutlineOutlinedTextField(
         value = value,
         onValueChange = { },
         label = { Text(text = label) },
-        readOnly = true,
+        readOnly = enabled,
         trailingIcon = {
             IconButton(
                 onClick = onIconClick,
@@ -356,7 +373,7 @@ private fun DateOutlineOutlinedTextField(
                 )
             }
         },
-        enabled = true,
+        enabled = enabled,
         singleLine = isSingleLine,
         modifier = Modifier
             .fillMaxWidth()
@@ -366,10 +383,16 @@ private fun DateOutlineOutlinedTextField(
 }
 
 /**
- * O container flutuante (Popup) que abriga o calendário.
+ * Contentor flutuante (Popup) que encapsula o componente de calendário.
  *
- * Utiliza um [Popup] do Compose para sobrepor o conteúdo na tela, alinhado abaixo do campo de texto.
- * Possui sombra e fundo de superfície para aderir ao Material Design.
+ * Utiliza a primitiva [Popup] do Jetpack Compose para renderizar o calendário numa camada superior (Z-index),
+ * posicionando-o estrategicamente abaixo do campo de texto.
+ *
+ * O design inclui um fundo de superfície (`Surface`) e sombra (`Shadow`) para destacar o calendário
+ * do resto do conteúdo do formulário.
+ *
+ * @param onDismiss Callback invocado quando o utilizador clica fora da área do popup (dismiss request).
+ * @param datePickerState O estado que controla a data selecionada e a visualização do calendário interno.
  */
 @Composable
 private fun PopUpDatePicker(

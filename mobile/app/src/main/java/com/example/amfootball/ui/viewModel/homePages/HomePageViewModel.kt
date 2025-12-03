@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.viewModel.homePages
 
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-//TODO: Falta validações de autorização
 /**
  * ViewModel responsável pela lógica da Home Page Principal (Dashboard do Utilizador).
  *
@@ -29,7 +29,7 @@ import javax.inject.Inject
 class HomePageViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
-): BaseViewModel(networkObserver = networkObserver, needObserverNetwork = true) {
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = true) {
     /**
      * Estado interno mutável que armazena os dados do perfil do jogador.
      * Inicializado como `null` até que os dados sejam carregados da sessão.
@@ -58,6 +58,18 @@ class HomePageViewModel @Inject constructor(
      * @param onSuccessNavigation Callback de navegação a ser executada se as validações passarem.
      */
     fun onNavigateCreateTeam(onSuccessNavigation: () -> Unit) {
+        val user = sessionManager.getUserProfile()
+
+        if (user == null) {
+            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+            return
+        }
+
+        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast("Apenas utilizadores sem equipa podem criar uma equipa")
+            return
+        }
+
         if (sessionManager.getAuthToken() == null) {
             updateToast(message = "Precisa de estar autenticado para aceder a esta funcionalidade")
             return
@@ -79,8 +91,15 @@ class HomePageViewModel @Inject constructor(
      * @param onSuccessNavigation Callback de navegação a ser executada se tudo estiver válido.
      */
     fun onNavigationToRequests(idPlayer: String?, onSuccessNavigation: () -> Unit) {
-        if (idPlayer.isNullOrBlank() || sessionManager.getAuthToken() == null){
-            updateToast(message = "Precisa de estar autenticado para aceder a esta funcionalidade")
+        val user = sessionManager.getUserProfile()
+
+        if (user == null || idPlayer.isNullOrBlank()) {
+            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+            return
+        }
+
+        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast("Apenas utilizadores sem equipa podem ver os seus pedidos de adesão")
             return
         }
 
@@ -119,7 +138,7 @@ class HomePageViewModel @Inject constructor(
      * estritamente local (SharedPreferences/DataStore) e deve funcionar mesmo offline.
      */
     private fun loadUserData() {
-        launchDataLoad (
+        launchDataLoad(
             checkOnline = false,
             callApi = { userData.value = sessionManager.getUserProfile() }
         )

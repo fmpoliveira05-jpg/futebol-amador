@@ -45,10 +45,13 @@ private val LightColorScheme = lightColorScheme(
 
 /** Cor Primária do Google (Azul). */
 val GoogleBlue = Color(0xFF4285F4)
+
 /** Cor Secundária do Google (Branco). */
 val GoogleWhite = Color(0xFFFFFFFF)
+
 /** Cor Primária do Facebook (Azul). */
 val FacebookBlue = Color(0xFF1877F2)
+
 /** Cor Secundária do Facebook (Branco). */
 val FacebookWhite = Color(0xFFFFFFFF)
 

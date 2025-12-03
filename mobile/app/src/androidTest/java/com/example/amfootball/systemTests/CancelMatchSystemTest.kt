@@ -12,6 +12,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import com.example.amfootball.MainActivity
+import com.example.amfootball.R
+import com.example.amfootball.data.enums.match.TypeMatch
 import com.example.amfootball.data.network.interfaces.BaseEndpoints
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.JsonReader
@@ -21,20 +23,19 @@ import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.example.amfootball.R
-import com.example.amfootball.data.enums.TypeMatch
-import org.json.JSONArray
 import java.time.LocalDate
 
 @HiltAndroidTest
 class CancelMatchSystemTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
+
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
 
@@ -76,28 +77,28 @@ class CancelMatchSystemTest {
 
                 return when {
                     //Pedido do login
-                    path.contains("${BaseEndpoints.authApi}/login") && request.method == "POST" -> {
+                    path.contains("${BaseEndpoints.AUTH_API}/login") && request.method == "POST" -> {
                         MockResponse().setResponseCode(200).setBody(loginResponseJson)
                     }
 
                     //Dados da HomePage
-                    path.contains("${BaseEndpoints.teamApi}/opponent/") && request.method == "GET" -> {
+                    path.contains("${BaseEndpoints.TEAM_API}/opponent/") && request.method == "GET" -> {
                         MockResponse().setResponseCode(200).setBody(detailsTeamJson)
                     }
 
                     // Cancelar Partida
-                    path.contains("${BaseEndpoints.calendarApi}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
-                        isMatchCancelled = true // Marcar como cancelado
+                    path.contains("${BaseEndpoints.CALENDAR_API}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
+                        isMatchCancelled = true
                         MockResponse().setResponseCode(204)
                     }
 
                     // Detalhes da Partida, antes de cancelar
-                    path.contains("${BaseEndpoints.calendarApi}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
+                    path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
                         MockResponse().setResponseCode(200).setBody(matchToCancelJson)
                     }
 
                     //Get Calendario
-                    path.contains("${BaseEndpoints.calendarApi}/") && request.method == "GET" -> {
+                    path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" -> {
                         val idMatchCancelled = "2b2b2b2b-0000-1111-3333-000000000008"
 
                         val listaBase: String = if (isMatchCancelled) {
@@ -173,7 +174,12 @@ class CancelMatchSystemTest {
             .assertIsDisplayed()
 
         composeRule
-            .onNodeWithText(context.getString(R.string.welcome_app, context.getString(R.string.user)))
+            .onNodeWithText(
+                context.getString(
+                    R.string.welcome_app,
+                    context.getString(R.string.user)
+                )
+            )
             .assertIsDisplayed()
 
         composeRule

@@ -88,7 +88,10 @@ class NetworkConnectivityObserver @Inject constructor(
              * Crítico para detetar situações onde o utilizador desliga os dados móveis manualmente,
              * ou entra numa rede Wi-Fi que requer login (Captive Portal), perdendo a validação de internet.
              */
-            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
+            override fun onCapabilitiesChanged(
+                network: Network,
+                networkCapabilities: NetworkCapabilities
+            ) {
                 super.onCapabilitiesChanged(network, networkCapabilities)
                 sendCurrentState()
             }

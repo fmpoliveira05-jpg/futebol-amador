@@ -26,7 +26,7 @@ abstract class FormsViewModel<F, E>(
     private val networkObserver: NetworkConnectivityObserver,
     initialData: F,
     initialError: E,
-): BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
     /**
      * Propriedade mutável interna que guarda os dados atuais do formulário.
      * É [protected] para que as classes filhas possam atualizar os campos (via Setters).

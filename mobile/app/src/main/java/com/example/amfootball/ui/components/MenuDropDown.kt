@@ -1,7 +1,5 @@
 package com.example.amfootball.ui.components
 
-import android.util.Log
-import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Flag
@@ -12,10 +10,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.MatchStatus
+import com.example.amfootball.data.enums.match.MatchStatus
 import com.example.amfootball.utils.MatchConsts
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -49,13 +48,6 @@ fun MatchActionsMenu(
     val now = LocalDateTime.now()
     val hoursUntilGame = ChronoUnit.HOURS.between(now, gameDate)
 
-    Log.d("MATCH_DEBUG", "--- Horas para o Jogo ---")
-    Log.d("MATCH_DEBUG", "1. NOW (Local): $now")
-    Log.d("MATCH_DEBUG", "2. GAME DATE (Recebida): $gameDate")
-    Log.d("MATCH_DEBUG", "3. HORAS RESTANTES: $hoursUntilGame")
-    Log.d("MATCH_DEBUG", "4. REQUERIDO: ${MatchConsts.MAX_HOURS_TO_CANCEL}")
-    Log.d("MATCH_DEBUG", "5. CONDIÇÃO CANCELAR: ${hoursUntilGame >= MatchConsts.MAX_HOURS_TO_CANCEL}")
-    Log.d("MATCH_DEBUG", "----------------------------")
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
@@ -95,7 +87,7 @@ fun MatchActionsMenu(
                     leadingIcon = Icons.Default.Flag,
                 )
             }
-        } else if(matchStatus == MatchStatus.IN_PROGRESS) {
+        } else if (matchStatus == MatchStatus.IN_PROGRESS) {
             DropdownItem(
                 text = stringResource(id = R.string.button_finish_match),
                 onClick = {

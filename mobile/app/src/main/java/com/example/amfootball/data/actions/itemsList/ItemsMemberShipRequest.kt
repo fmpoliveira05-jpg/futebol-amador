@@ -12,9 +12,11 @@ import androidx.navigation.NavHostController
  * @property rejectMemberShipRequest Ação para rejeitar o pedido de adesão.
  * @property showMore Ação para visualizar o perfil ou detalhes de quem enviou o pedido.
  */
-data class ItemsMemberShipRequest (
-    val acceptMemberShipRequest: (idReceiver: String, idRequest: String,
-                                  isPlayerSender: Boolean, navHostController: NavHostController) -> Unit,
+data class ItemsMemberShipRequest(
+    val acceptMemberShipRequest: (
+        idReceiver: String, idRequest: String,
+        isPlayerSender: Boolean, navHostController: NavHostController
+    ) -> Unit,
     val rejectMemberShipRequest: (idReceiver: String, idRequest: String, isPlayerSender: Boolean) -> Unit,
     val showMore: (idSender: String, isPlayerSender: Boolean, navHostController: NavHostController) -> Unit
 )

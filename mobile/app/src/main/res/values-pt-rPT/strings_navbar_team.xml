@@ -31,7 +31,7 @@
 
     <string name="navbar_find_competitive_match">Procurar partida competitiva</string>
     <string name="description_navbar_find_competitive_match">Funcionalidade que lhe permite pesquisar por outra equipa disponivel para outra partida competitiva</string>
-    
+
     <string name="navbar_list_post_pone_match">Lista de Adiamentos</string>
     <string name="description_navbar_list_post_pone_match">Lista com todos os adiamentos de partida mandados há equipa</string>
 </resources>

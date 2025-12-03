@@ -17,13 +17,13 @@ package com.example.amfootball.data.filters
  * @property maxNumberMembers Número máximo de membros da equipa.
  */
 data class FiltersListTeam(
-    val name: String? = null, 
+    val name: String? = null,
     val rank: String? = null,
     val city: String? = null,
-    val minPoint: Int? = null, 
-    val maxPoint: Int? = null, 
-    val minAge: Int? = null,   
-    val maxAge: Int? = null,   
+    val minPoint: Int? = null,
+    val maxPoint: Int? = null,
+    val minAge: Int? = null,
+    val maxAge: Int? = null,
     val minNumberMembers: Int? = null,
     val maxNumberMembers: Int? = null
 )
@@ -51,9 +51,9 @@ data class FiltersListTeam(
 fun FiltersListTeam.toQueryMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()
     name?.let { map["NameTeam"] = it }
-    rank?.let { map["NameRank"] = it}
+    rank?.let { map["NameRank"] = it }
     city?.let { map["City"] = it }
-    minPoint?.let { map["MinNumberPoints"] = it.toString()}
+    minPoint?.let { map["MinNumberPoints"] = it.toString() }
     maxPoint?.let { map["MaxNumberPoints"] = it.toString() }
     minAge?.let { map["MinAge"] = it.toString() }
     maxAge?.let { map["MaxAge"] = it.toString() }

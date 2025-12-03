@@ -1,4 +1,4 @@
-package com.example.amfootball.data.enums
+package com.example.amfootball.data.enums.match
 
 import androidx.annotation.StringRes
 import com.example.amfootball.R
@@ -10,7 +10,7 @@ import com.example.amfootball.R
  * ao seu recurso de texto correspondente, facilitando a exibição na Interface do Utilizador (UI)
  * de forma localizada.
  *
- * @property stringId O identificador do recurso de string ([R.string]) que contém a descrição legível deste estado.
+ * @property stringId O identificador do recurso de string ([com.example.amfootball.R.string]) que contém a descrição legível deste estado.
  * A anotação [@StringRes] garante, em tempo de compilação, que o valor passado é uma referência válida de string.
  */
 enum class MatchStatus(@StringRes val stringId: Int) {

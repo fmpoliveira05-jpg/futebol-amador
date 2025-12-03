@@ -21,7 +21,7 @@ interface ChatApi {
      * @param request O corpo do pedido contendo os IDs dos participantes.
      * @return [Response] contendo o ID da sala criada ou recuperada.
      */
-    @POST("${BaseEndpoints.chatApi}/create-room")
+    @POST("${BaseEndpoints.CHAT_API}/create-room")
     suspend fun createChatRoom(
         @Body request: CreateRoomRequest
     ): Response<CreateRoomResponse>

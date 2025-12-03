@@ -26,7 +26,7 @@ import kotlinx.coroutines.flow.update
  */
 abstract class ListsViewModels<T>(
     private val networkObserver: NetworkConnectivityObserver,
-): BaseViewModel(networkObserver = networkObserver) {
+) : BaseViewModel(networkObserver = networkObserver) {
 
     /**
      * Lista completa de dados carregados (da API ou filtrados).

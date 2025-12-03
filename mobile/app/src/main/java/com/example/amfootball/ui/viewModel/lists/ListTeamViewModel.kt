@@ -1,25 +1,25 @@
 package com.example.amfootball.ui.viewModel.lists
 
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.rank.RankNameDto
+import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.filtersError.FilterTeamError
+import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.TeamConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import kotlin.text.ifEmpty
-import com.example.amfootball.R
-import com.example.amfootball.data.errors.filtersError.FilterTeamError
-import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
 
-// TODO: Falta implementar a chamada à API no método memberShipRequest
+// TODO: Falta implementar a chamada à API no método memberShipRequest (e também para a página variar para ser a lista de teams para matchInvite, geral ou pedidos de adesão)
+//TODO: Falta a parte dos erros de filtragem
 /**
  * ViewModel responsável pela gestão do ecrã de listagem de equipas.
  *
@@ -35,13 +35,14 @@ import com.example.amfootball.utils.TeamConst
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val teamRepository: TeamService,
-): ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
+) : ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
     val uiFilterState: StateFlow<FiltersListTeam> = filterState
 
     /** Estado dos erros de validação dos filtros (ex: mensagens vermelhas nos inputs). */
-    private val filterErrorState: MutableStateFlow<FilterTeamError> = MutableStateFlow(FilterTeamError())
+    private val filterErrorState: MutableStateFlow<FilterTeamError> =
+        MutableStateFlow(FilterTeamError())
     val filterError: StateFlow<FilterTeamError> = filterErrorState
 
     /** Lista de Ranks disponíveis para seleção no filtro. */
@@ -57,15 +58,15 @@ class ListTeamViewModel @Inject constructor(
 
     // --- SETTERS (Atualizam o estado dos filtros) ---
     fun onNameChange(name: String) {
-        filterState.value = filterState.value.copy(name = name.ifEmpty {null})
+        filterState.value = filterState.value.copy(name = name.ifEmpty { null })
     }
 
     fun onCityChange(city: String) {
-        filterState.value = filterState.value.copy(city = city.ifEmpty {null})
+        filterState.value = filterState.value.copy(city = city.ifEmpty { null })
     }
 
     fun onRankChange(rank: String) {
-        filterState.value = filterState.value.copy(rank = rank.ifEmpty {null})
+        filterState.value = filterState.value.copy(rank = rank.ifEmpty { null })
     }
 
     fun onMinPointChange(minPoint: Int?) {
@@ -101,11 +102,11 @@ class ListTeamViewModel @Inject constructor(
      * 3. Se estiver Online, recarrega a lista da API (opção atual).
      */
     fun applyFilters() {
-        if(!validateForm()) {
+        if (!validateForm()) {
             return
         }
 
-        if(!networkObserver.isOnlineOneShot()) {
+        if (!networkObserver.isOnlineOneShot()) {
             listState.value = offlineFilterList(
                 originalList = originalList,
                 filters = filterState.value
@@ -121,8 +122,8 @@ class ListTeamViewModel @Inject constructor(
     fun clearFilters() {
         filterState.value = FiltersListTeam()
 
-        if(!networkObserver.isOnlineOneShot()) {
-           listState.value = originalList
+        if (!networkObserver.isOnlineOneShot()) {
+            listState.value = originalList
         } else {
             loadListTeam()
         }
@@ -189,9 +190,14 @@ class ListTeamViewModel @Inject constructor(
         filters: FiltersListTeam
     ): List<ItemTeamInfoDto> {
         return originalList.filter { item ->
-            val matchesName = filters.name.isNullOrBlank() || item.name.contains(filters.name, ignoreCase = true)
-            val matchesCity = filters.city.isNullOrBlank() || item.city.contains(filters.city, ignoreCase = true)
-            val matchesRank = filters.rank.isNullOrBlank() || item.rank.name.contains(filters.rank, ignoreCase = true)
+            val matchesName =
+                filters.name.isNullOrBlank() || item.name.contains(filters.name, ignoreCase = true)
+            val matchesCity =
+                filters.city.isNullOrBlank() || item.city.contains(filters.city, ignoreCase = true)
+            val matchesRank = filters.rank.isNullOrBlank() || item.rank.name.contains(
+                filters.rank,
+                ignoreCase = true
+            )
 
             val matchesMinPoint = filters.minPoint == null || item.points >= filters.minPoint
             val matchesMaxPoint = filters.maxPoint == null || item.points <= filters.maxPoint
@@ -199,8 +205,10 @@ class ListTeamViewModel @Inject constructor(
             val matchesMinAge = filters.minAge == null || item.averageAge >= filters.minAge
             val matchesMaxAge = filters.maxAge == null || item.averageAge <= filters.maxAge
 
-            val matchesMinMembers = filters.minNumberMembers == null || item.numberMembers >= filters.minNumberMembers
-            val matchesMaxMembers = filters.maxNumberMembers == null || item.numberMembers <= filters.maxNumberMembers
+            val matchesMinMembers =
+                filters.minNumberMembers == null || item.numberMembers >= filters.minNumberMembers
+            val matchesMaxMembers =
+                filters.maxNumberMembers == null || item.numberMembers <= filters.maxNumberMembers
 
             matchesName && matchesCity && matchesRank &&
                     matchesMinPoint && matchesMaxPoint &&
@@ -255,7 +263,7 @@ class ListTeamViewModel @Inject constructor(
 
         var isValidMinPoint = true
         if (minPoint != null) {
-            if(minPoint < TeamConst.MIN_NUMBER_POINTS) {
+            if (minPoint < TeamConst.MIN_NUMBER_POINTS) {
                 minPointError = ErrorMessage(
                     messageId = R.string.error_min_number_points,
                     args = listOf(TeamConst.MIN_NUMBER_POINTS)
@@ -366,7 +374,8 @@ class ListTeamViewModel @Inject constructor(
         }
 
         if (isValidMinMembers && isValidMaxMembers && minMembers != null && maxMembers != null && minMembers > maxMembers) {
-            minMembersError = ErrorMessage(messageId = R.string.error_min_number_members_greater_max)
+            minMembersError =
+                ErrorMessage(messageId = R.string.error_min_number_members_greater_max)
             maxMembersError = ErrorMessage(messageId = R.string.error_max_number_members_minor_min)
         }
 
@@ -381,8 +390,10 @@ class ListTeamViewModel @Inject constructor(
             maxNumberMembersError = maxMembersError
         )
 
-        val isValid = listOf(nameError, cityError, minPointError, maxPointError, minAgeError,
-            maxAgeError, minMembersError, maxMembersError).all { it == null }
+        val isValid = listOf(
+            nameError, cityError, minPointError, maxPointError, minAgeError,
+            maxAgeError, minMembersError, maxMembersError
+        ).all { it == null }
 
         return isValid
     }

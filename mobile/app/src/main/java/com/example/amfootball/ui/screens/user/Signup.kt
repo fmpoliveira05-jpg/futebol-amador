@@ -11,7 +11,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,7 +33,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.Loading
@@ -45,6 +43,7 @@ import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
+import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.UserConst
@@ -54,15 +53,14 @@ import java.util.Locale
 import java.util.TimeZone
 
 /**
- * Ecrã de Registo de Novo Utilizador.
+ * Ecrã de Registo de Novo Utilizador (Sign Up).
  *
- * Este Composable é o ponto de entrada (Stateful) que conecta o [AuthViewModel] à UI.
- * Gere a navegação e delega a lógica de registo para o ViewModel.
+ * Este Composable é o ponto de entrada (Stateful) que liga o ViewModel à UI.
+ * A principal responsabilidade é iniciar o formulário e delegar a renderização do conteúdo.
  *
- * @param navHostController Controlador de navegação para transição entre ecrãs.
- * @param authViewModel ViewModel injetado pelo Hilt para gerir a autenticação.
+ * @param navHostController Controlador de navegação para transição entre ecrãs (após sucesso).
+ * @param authViewModel ViewModel injetado pelo Hilt para gerir a lógica de registo.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
     navHostController: NavHostController,
@@ -70,14 +68,23 @@ fun SignUpScreen(
 ) {
     ContentSignUp(
         modifier = Modifier
-        .fillMaxSize()
-        .padding(16.dp)
-        .verticalScroll(rememberScrollState()),
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         navController = navHostController,
         onRegister = authViewModel::registerUser
     )
 }
 
+/**
+ * Conteúdo visual do ecrã de Registo.
+ *
+ * Centraliza e alinha verticalmente o formulário de registo.
+ *
+ * @param navController Controlador de navegação.
+ * @param onRegister Callback assíncrona para iniciar o registo. Recebe (DTO, Password, onSuccess, onError).
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun ContentSignUp(
     navController: NavHostController,
@@ -97,10 +104,17 @@ private fun ContentSignUp(
 }
 
 /**
- * Formulário de Registo contendo todos os campos de entrada e validações.
+ * Formulário de Registo contendo todos os campos de entrada e a lógica de submissão.
+ *
+ * Este componente gere o estado local de todos os campos do formulário (Stateful Component).
+ *
+ * **Fluxo de Submissão:**
+ * 1. Validação síncrona ([validateSignUpForm]).
+ * 2. Se válida: Constrói o [CreateProfileDto] e chama a lógica de negócio ([onRegister]).
+ * 3. Após sucesso, navega para a Homepage ([Routes.GeralRoutes.HOMEPAGE]).
  *
  * @param navHostController Usado para navegação após sucesso.
- * @param onRegister Callback para executar a lógica de registo (recebe DTO, Password, Sucesso, Erro).
+ * @param onRegister Callback para executar a lógica de registo.
  */
 @Composable
 private fun FieldsSignUp(
@@ -120,12 +134,10 @@ private fun FieldsSignUp(
     var address by rememberSaveable { mutableStateOf("") }
 
     // --- Estados da UI ---
-    var showDatePicker by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     // --- ViewModels e Scopes ---
-    val scope = rememberCoroutineScope()
     val displayDateFormatter = remember {
         SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     }
@@ -309,8 +321,6 @@ private fun FieldsSignUp(
             Text(stringResource(id = R.string.signup))
         }
     }
-
-
 }
 
 @Preview(

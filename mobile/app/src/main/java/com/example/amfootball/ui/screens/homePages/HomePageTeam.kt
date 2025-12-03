@@ -40,6 +40,7 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.support.TeamDto
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.mocks.UiStateMock
 import com.example.amfootball.data.mocks.homePages.HomePageTeamMock
 import com.example.amfootball.navigation.objects.Routes
@@ -50,7 +51,6 @@ import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
 
-//TODO: Falta meter autorização
 /**
  * Ecrã Principal da Equipa (Team Dashboard).
  *
@@ -68,8 +68,8 @@ import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
 fun HomePageTeamScreen(
     globalNavController: NavHostController,
     viewModel: TeamHomePageViewModel = hiltViewModel()
-){
-    val isAdmin by viewModel.isAdmin.collectAsStateWithLifecycle()
+) {
+    val role by viewModel.role.collectAsStateWithLifecycle()
     val team by viewModel.team.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
@@ -83,7 +83,7 @@ fun HomePageTeamScreen(
         team = team,
         uiState = uiState,
         isOnline = isOnline,
-        isAdmin = isAdmin,
+        role = role,
         onNavigateCasualMatch = {
             viewModel.onNavigateCasualMatch(
                 onSucess = {
@@ -119,7 +119,7 @@ fun HomePageTeamScreen(
                     }
                 }
             )
-        }
+        },
     )
 }
 
@@ -134,7 +134,7 @@ fun HomePageTeamScreen(
  * @param team Objeto com os dados da equipa (Nome, Logo, ID, etc.).
  * @param uiState Estado atual da UI (Loading, Erros, Mensagens).
  * @param isOnline Booleano indicando se o dispositivo tem acesso à internet.
- * @param isAdmin Booleano indicando se o utilizador atual é administrador (afeta a visibilidade de botões).
+ * @param role O papel do utilizador ([UserRole]) que determina a visibilidade de botões de gestão.
  * @param onNavigateCasualMatch Callback executada ao clicar no botão "Casual".
  * @param onNavigateRankedMatch Callback executada ao clicar no botão "Rankeada".
  * @param onNavigateCalendar Callback executada ao clicar no botão "Calendário".
@@ -145,7 +145,7 @@ fun HomePageTeam(
     team: TeamDto,
     uiState: UiState,
     isOnline: Boolean,
-    isAdmin: Boolean,
+    role: UserRole,
     onNavigateCasualMatch: () -> Unit,
     onNavigateRankedMatch: () -> Unit,
     onNavigateCalendar: () -> Unit,
@@ -163,7 +163,7 @@ fun HomePageTeam(
 
             TeamHomePageDrawer(
                 team = team,
-                isAdmin = isAdmin,
+                role = role,
                 onNavigateCasualMatch = onNavigateCasualMatch,
                 onNavigateRankedMatch = onNavigateRankedMatch,
                 onNavigateCalendar = onNavigateCalendar,
@@ -181,7 +181,7 @@ fun HomePageTeam(
  * 2. Conteúdo Principal ([HomePageTeamContent]).
  *
  * @param team Objeto com os dados da equipa para exibir no cabeçalho.
- * @param isAdmin Booleano que determina se as opções de gestão de jogos são exibidas.
+ * @param role Papel do utilizador para controlo de acesso visual.
  * @param onNavigateCasualMatch Ação para navegação de jogo casual.
  * @param onNavigateRankedMatch Ação para navegação de jogo rankeado.
  * @param onNavigateCalendar Ação para navegação do calendário.
@@ -190,7 +190,7 @@ fun HomePageTeam(
 @Composable
 private fun TeamHomePageDrawer(
     team: TeamDto,
-    isAdmin: Boolean,
+    role: UserRole,
     onNavigateCasualMatch: () -> Unit,
     onNavigateRankedMatch: () -> Unit,
     onNavigateCalendar: () -> Unit,
@@ -206,7 +206,7 @@ private fun TeamHomePageDrawer(
         HeaderHomePageTeam(team = team)
 
         HomePageTeamContent(
-            isAdmin = isAdmin,
+            role = role,
             onNavigateCasualMatch = onNavigateCasualMatch,
             onNavigateRankedMatch = onNavigateRankedMatch,
             onNavigateCalendar = onNavigateCalendar,
@@ -221,7 +221,7 @@ private fun TeamHomePageDrawer(
  * Aplica um espaçamento vertical consistente (24.dp) entre cada secção filha
  * utilizando `verticalArrangement`.
  *
- * @param isAdmin Se `true`, exibe a secção "Match Center". Se `false`, esconde-a.
+ * @param role Se for [UserRole.ADMIN_TEAM], exibe a secção "Match Center".
  * @param onNavigateCasualMatch Callback para criar partida casual.
  * @param onNavigateRankedMatch Callback para criar partida rankeada.
  * @param onNavigateCalendar Callback para ver calendário.
@@ -229,7 +229,7 @@ private fun TeamHomePageDrawer(
  */
 @Composable
 private fun HomePageTeamContent(
-    isAdmin: Boolean,
+    role: UserRole,
     onNavigateCasualMatch: () -> Unit,
     onNavigateRankedMatch: () -> Unit,
     onNavigateCalendar: () -> Unit,
@@ -240,7 +240,7 @@ private fun HomePageTeamContent(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
 
-        if (isAdmin) {
+        if (role == UserRole.ADMIN_TEAM) {
             HomePageMatchCenter(
                 onNavigateCasualMatch = onNavigateCasualMatch,
                 onNavigateRankedMatch = onNavigateRankedMatch
@@ -394,7 +394,9 @@ private fun CompactActionCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -442,7 +444,7 @@ fun PreviewTeamHomePageAdmin() {
             team = HomePageTeamMock.mockTeam,
             uiState = UiStateMock.mockUiStateContent,
             isOnline = true,
-            isAdmin = true,
+            role = UserRole.ADMIN_TEAM,
             onNavigateCasualMatch = {},
             onNavigateRankedMatch = {},
             onNavigateMembers = {},
@@ -476,7 +478,7 @@ fun PreviewTeamHomePageMember() {
             team = HomePageTeamMock.mockTeam,
             uiState = UiStateMock.mockUiStateContent,
             isOnline = true,
-            isAdmin = false,
+            role = UserRole.MEMBER_TEAM,
             onNavigateCasualMatch = {},
             onNavigateRankedMatch = {},
             onNavigateMembers = {},

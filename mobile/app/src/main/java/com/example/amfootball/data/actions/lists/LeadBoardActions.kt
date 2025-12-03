@@ -1,7 +1,7 @@
 package com.example.amfootball.data.actions.lists
 
-import androidx.navigation.NavHostController
 import androidx.compose.runtime.State
+import androidx.navigation.NavHostController
 
 /**
  * Encapsula as ações de interação e controlo de paginação para o ecrã de Classificações (Leaderboard).

@@ -1,26 +1,27 @@
 package com.example.amfootball.ui.viewModel.lists
 
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FilterListPlayer
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
-import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.utils.UserConst
-import com.example.amfootball.R
+import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.PlayerService
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.ListsSizesConst
 import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.UserConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
+//TODO: Falta a parte para este viewModel permiteit com que a página deia para a lista geral e para o de mandar convites de adesão
 /**
  * ViewModel responsável pela lógica de negócio do ecrã de Listagem de Jogadores.
  *
@@ -38,19 +39,21 @@ class ListPlayerViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val playerRepository: PlayerService,
     private val sessionManager: SessionManager?
-): ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
+) : ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
     /**
      * Estado atual dos filtros aplicados pelo utilizador.
      * Observado pela UI para manter os campos de texto e seletores sincronizados.
      */
-    private val filterState: MutableStateFlow<FilterListPlayer> = MutableStateFlow(FilterListPlayer())
+    private val filterState: MutableStateFlow<FilterListPlayer> =
+        MutableStateFlow(FilterListPlayer())
     val uiFilters: StateFlow<FilterListPlayer> = filterState
 
     /**
      * Estado dos erros de validação dos filtros.
      * Se um filtro for inválido (ex: Idade Min > Max), este estado conterá a mensagem de erro.
      */
-    private val filterErrorState: MutableStateFlow<FilterPlayersErrors> = MutableStateFlow(FilterPlayersErrors())
+    private val filterErrorState: MutableStateFlow<FilterPlayersErrors> =
+        MutableStateFlow(FilterPlayersErrors())
     val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
 
     /**
@@ -113,7 +116,7 @@ class ListPlayerViewModel @Inject constructor(
      * 4. Se Offline: Filtra a [originalList] (cache) localmente via [filterOffline].
      */
     fun filterApply() {
-        if(!validateForm()) {
+        if (!validateForm()) {
             return
         }
 
@@ -161,7 +164,7 @@ class ListPlayerViewModel @Inject constructor(
      * @param idPlayer O ID do jogador a convidar.
      */
     fun sendMembershipRequest(idPlayer: String) {
-        if(sessionManager == null) {
+        if (sessionManager == null) {
             return
         }
         val dataUser = sessionManager.getUserProfile()
@@ -169,9 +172,9 @@ class ListPlayerViewModel @Inject constructor(
         if (dataUser == null) {
             return
         }
-        val teamId = dataUser.team?.id ?: ""
-        //val role = dataUser.
-        if(teamId.isEmpty()) {
+        val teamId = dataUser.effectiveTeamId
+
+        if (teamId.isEmpty()) {
             return
         }
 
@@ -213,10 +216,15 @@ class ListPlayerViewModel @Inject constructor(
      * Filtra a lista de jogadores localmente (Modo Offline).
      * Aplica lógica "AND" para todos os campos (Nome E Cidade E Idade...).
      */
-    private fun filterOffline(originalList: List<InfoPlayerDto>, filter: FilterListPlayer): List<InfoPlayerDto> {
+    private fun filterOffline(
+        originalList: List<InfoPlayerDto>,
+        filter: FilterListPlayer
+    ): List<InfoPlayerDto> {
         return originalList.filter { item ->
-            val name = filter.name.isNullOrBlank() || item.name.contains(filter.name, ignoreCase = true)
-            val city = filter.city.isNullOrBlank() || item.address.contains(filter.city, ignoreCase = true)
+            val name =
+                filter.name.isNullOrBlank() || item.name.contains(filter.name, ignoreCase = true)
+            val city =
+                filter.city.isNullOrBlank() || item.address.contains(filter.city, ignoreCase = true)
             val minAge = filter.minAge == null || item.age >= filter.minAge
             val maxAge = filter.maxAge == null || item.age <= filter.maxAge
             val minSize = filter.minSize == null || item.heigth >= filter.minSize
@@ -252,14 +260,14 @@ class ListPlayerViewModel @Inject constructor(
         var minSizeError: ErrorMessage? = null
         var maxSizeError: ErrorMessage? = null
 
-        if(name != null && name.length > UserConst.MAX_NAME_LENGTH) {
+        if (name != null && name.length > UserConst.MAX_NAME_LENGTH) {
             nameError = ErrorMessage(
                 messageId = R.string.error_max_name_player,
                 args = listOf(UserConst.MAX_NAME_LENGTH)
             )
         }
 
-        if(city != null && city.length > GeneralConst.MAX_CITY_LENGTH) {
+        if (city != null && city.length > GeneralConst.MAX_CITY_LENGTH) {
             cityError = ErrorMessage(
                 messageId = R.string.error_max_city,
                 args = listOf(GeneralConst.MAX_CITY_LENGTH)
@@ -267,7 +275,7 @@ class ListPlayerViewModel @Inject constructor(
         }
 
         var isValidMinAge = true
-        if(minAge != null) {
+        if (minAge != null) {
             if (minAge < UserConst.MIN_AGE) {
                 minAgeError = ErrorMessage(
                     messageId = R.string.error_min_age,
@@ -284,8 +292,8 @@ class ListPlayerViewModel @Inject constructor(
         }
 
         var isValidMaxAge = true
-        if(maxAge != null ) {
-            if(maxAge < UserConst.MIN_AGE) {
+        if (maxAge != null) {
+            if (maxAge < UserConst.MIN_AGE) {
                 maxAgeError = ErrorMessage(
                     messageId = R.string.error_min_age,
                     args = listOf(UserConst.MIN_AGE)
@@ -301,7 +309,7 @@ class ListPlayerViewModel @Inject constructor(
             }
         }
 
-        if(isValidMinAge && isValidMaxAge && minAge != null && maxAge != null && minAge > maxAge) {
+        if (isValidMinAge && isValidMaxAge && minAge != null && maxAge != null && minAge > maxAge) {
             minAgeError = ErrorMessage(
                 messageId = R.string.error_min_age_greater_max,
             )
@@ -312,7 +320,7 @@ class ListPlayerViewModel @Inject constructor(
         }
 
         var isValidMinSize = true
-        if(minSize != null) {
+        if (minSize != null) {
             if (minSize < PlayerConst.MIN_HEIGHT) {
                 minSizeError = ErrorMessage(
                     messageId = R.string.error_min_size,
@@ -359,9 +367,10 @@ class ListPlayerViewModel @Inject constructor(
             maxSizeError = maxSizeError
         )
 
-        val isValid = listOf(nameError, cityError, minAgeError, maxAgeError, minSizeError, maxSizeError).all {
-            it == null
-        }
+        val isValid =
+            listOf(nameError, cityError, minAgeError, maxAgeError, minSizeError, maxSizeError).all {
+                it == null
+            }
 
         return isValid
     }

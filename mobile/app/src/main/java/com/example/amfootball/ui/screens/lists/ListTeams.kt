@@ -25,8 +25,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
@@ -34,12 +32,14 @@ import com.example.amfootball.data.actions.filters.FilterTeamActions
 import com.example.amfootball.data.actions.itemsList.ItemsListTeamAction
 import com.example.amfootball.data.dtos.rank.RankNameDto
 import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.mocks.lists.ListTeamMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
+import com.example.amfootball.ui.components.inputFields.LabelTextField
 import com.example.amfootball.ui.components.inputFields.NumberTextField
 import com.example.amfootball.ui.components.lists.AddressRow
 import com.example.amfootball.ui.components.lists.AverageAgeRow
@@ -160,7 +160,11 @@ private fun ListTeamContent(
                                     filters = filters,
                                     filtersActions = filtersActions,
                                     listRanks = listRanks,
-                                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                    modifier = Modifier.padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        bottom = 16.dp
+                                    )
                                 )
                             }
                         )
@@ -235,7 +239,8 @@ private fun FiltersListTeamContent(
                             filtersActions.onRankChange("")
                         } else {
                             filtersActions.onRankChange(rankDto.name)
-                        }},
+                        }
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -262,7 +267,7 @@ private fun FiltersListTeamContent(
                 )
             }
         )
-        
+
         FilterRow(
             content = {
                 NumberTextField(
@@ -286,25 +291,25 @@ private fun FiltersListTeamContent(
         )
 
         FilterRow(
-           content = {
-               NumberTextField(
-                   label = stringResource(id = R.string.filter_min_members_team),
-                   value = filters.minNumberMembers,
-                   min = TeamConst.MIN_MEMBERS,
-                   max = TeamConst.MAX_MEMBERS,
-                   onValueChange = { filtersActions.onMinNumberMembersChange(it) },
-                   modifier = Modifier.weight(1f)
-               )
+            content = {
+                NumberTextField(
+                    label = stringResource(id = R.string.filter_min_members_team),
+                    value = filters.minNumberMembers,
+                    min = TeamConst.MIN_MEMBERS,
+                    max = TeamConst.MAX_MEMBERS,
+                    onValueChange = { filtersActions.onMinNumberMembersChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
 
-               NumberTextField(
-                   label = stringResource(id = R.string.filter_max_members_team),
-                   value = filters.maxNumberMembers,
-                   min = TeamConst.MIN_MEMBERS,
-                   max = TeamConst.MAX_MEMBERS,
-                   onValueChange = { filtersActions.onMaxNumberMembersChange(it) },
-                   modifier = Modifier.weight(1f)
-               )
-           }
+                NumberTextField(
+                    label = stringResource(id = R.string.filter_max_members_team),
+                    value = filters.maxNumberMembers,
+                    min = TeamConst.MIN_MEMBERS,
+                    max = TeamConst.MAX_MEMBERS,
+                    onValueChange = { filtersActions.onMaxNumberMembersChange(it) },
+                    modifier = Modifier.weight(1f)
+                )
+            }
         )
 
         LineClearFilterButtons(

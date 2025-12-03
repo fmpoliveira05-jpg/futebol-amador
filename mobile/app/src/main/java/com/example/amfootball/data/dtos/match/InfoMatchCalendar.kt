@@ -2,9 +2,9 @@ package com.example.amfootball.data.dtos.match
 
 import com.example.amfootball.data.dtos.support.PitchInfo
 import com.example.amfootball.data.dtos.support.TeamStatisticsDto
-import com.example.amfootball.data.enums.MatchStatus
-import com.example.amfootball.data.enums.MatchResult
-import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.data.enums.match.MatchResult
+import com.example.amfootball.data.enums.match.MatchStatus
+import com.example.amfootball.data.enums.match.TypeMatch
 import com.example.amfootball.utils.Patterns
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
@@ -80,7 +80,7 @@ data class InfoMatchCalendar(
      * Mapeamento: 0 -> WIN, 1 -> DRAW, 2 -> LOSE.
      */
     val matchResult: MatchResult
-        get() = when(matchResultId) {
+        get() = when (matchResultId) {
             0 -> MatchResult.WIN
             1 -> MatchResult.DRAW
             2 -> MatchResult.LOSE
@@ -92,7 +92,7 @@ data class InfoMatchCalendar(
      * Mapeamento: 0 -> SCHEDULED, 1 -> IN_PROGRESS, 2 -> DONE, etc.
      */
     val matchStatus: MatchStatus
-        get() = when(matchStatusId) {
+        get() = when (matchStatusId) {
             0 -> MatchStatus.SCHEDULED
             1 -> MatchStatus.IN_PROGRESS
             2 -> MatchStatus.DONE
@@ -105,7 +105,7 @@ data class InfoMatchCalendar(
      * Mapeamento: false -> CASUAL, true -> COMPETITIVE.
      */
     val typeMatch: TypeMatch
-        get() = when(typeMatchBool) {
+        get() = when (typeMatchBool) {
             false -> TypeMatch.CASUAL
             else -> TypeMatch.COMPETITIVE
         }

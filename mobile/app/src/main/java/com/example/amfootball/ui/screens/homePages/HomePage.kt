@@ -25,12 +25,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.mocks.UiStateMock
 import com.example.amfootball.data.mocks.homePages.HomePageMock
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.cards.ActionCard
 import com.example.amfootball.ui.components.notification.OfflineBanner
@@ -69,30 +70,35 @@ fun HomePageScreen(
         user = user,
         uiState = uiState,
         isOnline = isOnline,
-        onNavigateCreateTeam = { viewModel.onNavigateCreateTeam(onSuccessNavigation = {
-            globalNavController.navigate(Routes.TeamRoutes.CREATE_TEAM.route) {
-                launchSingleTop = true
-            }
-        }) },
-        onNavigationToRequests = { viewModel.onNavigationToRequests(
-            idPlayer = id,
-            onSuccessNavigation ={
-                globalNavController.navigate("${Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route}/${id}" ){
+        onNavigateCreateTeam = {
+            viewModel.onNavigateCreateTeam(onSuccessNavigation = {
+                globalNavController.navigate(Routes.TeamRoutes.CREATE_TEAM.route) {
                     launchSingleTop = true
                 }
-            }
-        ) },
-        onNavigateToListTeams = { viewModel.onNavigateToListTeams(
-            onSuccessNavigation = {
-                globalNavController.navigate(Routes.PlayerRoutes.TEAM_LIST.route){
-                    launchSingleTop = true
+            })
+        },
+        onNavigationToRequests = {
+            viewModel.onNavigationToRequests(
+                idPlayer = id,
+                onSuccessNavigation = {
+                    globalNavController.navigate("${Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route}/${id}") {
+                        launchSingleTop = true
+                    }
                 }
-            }
-        ) }
+            )
+        },
+        onNavigateToListTeams = {
+            viewModel.onNavigateToListTeams(
+                onSuccessNavigation = {
+                    globalNavController.navigate(Routes.PlayerRoutes.TEAM_LIST.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     )
 }
 
-//TODO: Meter restrições para visualizar e interajir com os botões
 /**
  * Conteúdo visual da Home Page (Stateless).
  *
@@ -158,7 +164,10 @@ private fun HomePageDrawer(
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = stringResource(id = R.string.welcome_app, user?.name ?: stringResource(R.string.user)),            style = MaterialTheme.typography.headlineMedium,
+            text = stringResource(
+                id = R.string.welcome_app,
+                user?.name ?: stringResource(R.string.user)
+            ), style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -169,15 +178,19 @@ private fun HomePageDrawer(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if(user != null) {
-            if (user.team?.id.isNullOrEmpty()) {
-                ActionCardPlayerWithoutTeam(
-                    onNavigateCreateTeam = onNavigateCreateTeam,
-                    onNavigationToRequests = onNavigationToRequests,
-                    onNavigateToListTeams = onNavigateToListTeams
-                )
-            } else  {
-                ActionCardMemberTeam(onNavigateToListTeams = onNavigateToListTeams)
+        if (user != null) {
+            when (user.role) {
+                UserRole.PLAYER_WITHOUT_TEAM -> {
+                    ActionCardPlayerWithoutTeam(
+                        onNavigateCreateTeam = onNavigateCreateTeam,
+                        onNavigationToRequests = onNavigationToRequests,
+                        onNavigateToListTeams = onNavigateToListTeams
+                    )
+                }
+
+                else -> {
+                    ActionCardMemberTeam(onNavigateToListTeams = onNavigateToListTeams)
+                }
             }
         } else {
             ActionCardUnauthorizedUser(onNavigateToListTeams = onNavigateToListTeams)
@@ -226,7 +239,8 @@ private fun ActionCardPlayerWithoutTeam(
                 onNavigateToListTeams = onNavigateToListTeams,
                 subTitle = stringResource(id = R.string.button_description_list_teams_membership)
             )
-            ActionCardListMembershipRequests(onNavigationToRequests = onNavigationToRequests)        }
+            ActionCardListMembershipRequests(onNavigationToRequests = onNavigationToRequests)
+        }
     )
 }
 
@@ -239,7 +253,7 @@ private fun ActionCardPlayerWithoutTeam(
 @Composable
 private fun ActionCardMemberTeam(
     onNavigateToListTeams: () -> Unit
-)  {
+) {
     ActionCardSection(
         content = {
             ActionCardListTeam(
@@ -296,7 +310,6 @@ private fun ActionCardListTeam(
         icon = Icons.Default.Edit,
         onClick = onNavigateToListTeams
     )
-
 }
 
 /**
@@ -316,7 +329,12 @@ private fun ActionCardListMembershipRequests(onNavigationToRequests: () -> Unit)
 
 @Preview(name = "1. Unauth - English", group = "Unauthorized", showBackground = true, locale = "en")
 @Preview(name = "1. Unauth - PT", group = "Unauthorized", showBackground = true, locale = "pt-rPT")
-@Preview(name = "1. Unauth - Dark", group = "Unauthorized", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    name = "1. Unauth - Dark",
+    group = "Unauthorized",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun PreviewHomePageUnauthorized() {
     MaterialTheme {
@@ -333,7 +351,12 @@ fun PreviewHomePageUnauthorized() {
 
 @Preview(name = "2. No Team - English", group = "No Team", showBackground = true, locale = "en")
 @Preview(name = "2. No Team - PT", group = "No Team", showBackground = true, locale = "pt-rPT")
-@Preview(name = "2. No Team - Dark", group = "No Team", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    name = "2. No Team - Dark",
+    group = "No Team",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun PreviewHomePagePlayerNoTeam() {
     MaterialTheme {

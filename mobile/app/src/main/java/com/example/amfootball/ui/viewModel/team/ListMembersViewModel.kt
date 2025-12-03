@@ -1,19 +1,19 @@
 package com.example.amfootball.ui.viewModel.team
 
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.filters.FilterMembersTeam
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
-import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.utils.UserConst
-import com.example.amfootball.R
+import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.TeamService
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import com.example.amfootball.utils.UserConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,7 +39,7 @@ class ListMembersViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
     private val teamRepository: TeamService
-): ListsViewModels<MemberTeamDto>(networkObserver = networkObserver) {
+) : ListsViewModels<MemberTeamDto>(networkObserver = networkObserver) {
 
     /**
      * ID da equipa do utilizador autenticado.
@@ -50,11 +50,13 @@ class ListMembersViewModel @Inject constructor(
     private val teamId: String = sessionManager.getUserProfile()?.team?.id ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
-    private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())
+    private val filterState: MutableStateFlow<FilterMembersTeam> =
+        MutableStateFlow(FilterMembersTeam())
     val uiFilter: StateFlow<FilterMembersTeam> = filterState
 
     /** Estado que contém os erros de validação dos filtros (ex: idade mínima maior que máxima). */
-    private val errorFilters: MutableStateFlow<FilterMembersFilterError> = MutableStateFlow(FilterMembersFilterError())
+    private val errorFilters: MutableStateFlow<FilterMembersFilterError> =
+        MutableStateFlow(FilterMembersFilterError())
     val uiErrorFilters: StateFlow<FilterMembersFilterError> = errorFilters
 
     /** Lista de opções para o filtro de Tipo de Membro (ex: Jogador, Admin). */
@@ -181,7 +183,7 @@ class ListMembersViewModel @Inject constructor(
             launchSingleTop = true
         }
     }
-    
+
     //Metodos privados
     /**
      * Carrega a lista de membros da API.
@@ -194,7 +196,7 @@ class ListMembersViewModel @Inject constructor(
             val teams = teamRepository.getListMembers(teamId = teamId, filterState.value)
 
             listState.value = teams
-            if(filterState.value == FilterMembersTeam()) {
+            if (filterState.value == FilterMembersTeam()) {
                 originalList = teams
             }
         }
@@ -206,7 +208,7 @@ class ListMembersViewModel @Inject constructor(
             null,
             TypeMember.PLAYER,
             TypeMember.ADMIN_TEAM
-        )    
+        )
     }
 
     /** Inicializa a lista estática de posições para o filtro (Inclui 'null' para a opção "Todas"). */
@@ -233,7 +235,8 @@ class ListMembersViewModel @Inject constructor(
         filters: FilterMembersTeam
     ): List<MemberTeamDto> {
         return originalList.filter { item ->
-            val name = filters.name.isNullOrBlank() || item.name.contains(filters.name, ignoreCase = true)
+            val name =
+                filters.name.isNullOrBlank() || item.name.contains(filters.name, ignoreCase = true)
             val typeMember = filters.typeMember == null || item.typeMember == filters.typeMember
             val minAge = filters.minAge == null || item.age >= filters.minAge
             val maxAge = filters.maxAge == null || item.age <= filters.maxAge
@@ -262,7 +265,7 @@ class ListMembersViewModel @Inject constructor(
         var errorMinAge: ErrorMessage? = null
         var errorMaxAge: ErrorMessage? = null
 
-        if(name != null && name.length > UserConst.MAX_NAME_LENGTH) {
+        if (name != null && name.length > UserConst.MAX_NAME_LENGTH) {
             errorName = ErrorMessage(
                 messageId = R.string.error_max_name_member,
                 args = listOf(UserConst.MAX_NAME_LENGTH)
@@ -270,7 +273,7 @@ class ListMembersViewModel @Inject constructor(
         }
 
         var minAgeValid = true
-        if(minAge != null && minAge < UserConst.MIN_AGE) {
+        if (minAge != null && minAge < UserConst.MIN_AGE) {
             errorMinAge = ErrorMessage(
                 messageId = R.string.error_min_age,
                 args = listOf(UserConst.MIN_AGE)
@@ -279,7 +282,7 @@ class ListMembersViewModel @Inject constructor(
         }
 
         var maxAgeValid = true
-        if(maxAge != null && maxAge > UserConst.MAX_AGE) {
+        if (maxAge != null && maxAge > UserConst.MAX_AGE) {
             errorMaxAge = ErrorMessage(
                 messageId = R.string.error_max_age,
                 args = listOf(UserConst.MAX_AGE)

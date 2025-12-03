@@ -18,7 +18,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
@@ -26,9 +25,9 @@ import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.data.actions.itemsList.ItemsMemberShipRequest
-import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -47,13 +46,31 @@ import com.example.amfootball.utils.Patterns
 import com.example.amfootball.utils.UserConst
 import java.time.format.DateTimeFormatter
 
-//TODO: Meter uiState e Network
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
+/**
+ * Ecrã de Listagem de Pedidos de Adesão (Membership Requests).
+ *
+ * Este componente "Stateful" (com estado) atua como o ponto de entrada para visualizar e gerir
+ * pedidos pendentes de entrada em equipas ou convites a jogadores.
+ *
+ * Responsabilidades:
+ * 1. Observar o estado do ViewModel (Lista, Filtros, Erros, UI State).
+ * 2. Construir as ações de filtro e de item (callbacks).
+ * 3. Delegar a renderização visual para [ContentListMemberShipRequest].
+ *
+ * **Nota de Implementação (TODO):**
+ * Atualmente exibe a mesma lista independentemente do papel do utilizador.
+ * Futuramente, deve adaptar-se para diferenciar entre "Pedidos recebidos pela Equipa" (Visão Admin)
+ * e "Convites recebidos pelo Jogador" (Visão Player).
+ *
+ * @param navHostController Controlador de navegação para transitar para detalhes ou aceitar pedidos.
+ * @param viewModel ViewModel injetado via Hilt que fornece os dados e lógica de negócio.
+ */
 @Composable
 fun ListMemberShipRequest(
     navHostController: NavHostController,
     viewModel: ListMemberShipRequestViewModel = hiltViewModel(),
-){
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
@@ -87,6 +104,24 @@ fun ListMemberShipRequest(
     )
 }
 
+/**
+ * Conteúdo visual da lista de pedidos (Stateless).
+ *
+ * Responsável por estruturar o layout do ecrã, incluindo:
+ * - Banner Offline.
+ * - Estado de Carregamento.
+ * - Secção de Filtros Expansível.
+ * - Lista de Itens.
+ *
+ * @param uiState Estado global da UI (Loading/Erro).
+ * @param isOnline Estado da conectividade.
+ * @param filters Estado atual dos filtros aplicados.
+ * @param filterError Erros de validação nos campos de filtro.
+ * @param filterActions Ações para atualizar filtros.
+ * @param list A lista de [MembershipRequestInfoDto] a exibir.
+ * @param itemsActions Ações para interagir com cada item da lista.
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun ContentListMemberShipRequest(
     uiState: UiState,
@@ -118,7 +153,11 @@ private fun ContentListMemberShipRequest(
                                 filters = filters,
                                 filterError = filterError,
                                 filterActions = filterActions,
-                                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                                modifier = Modifier.padding(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    bottom = 16.dp
+                                )
                             )
                         }
                     )
@@ -137,6 +176,16 @@ private fun ContentListMemberShipRequest(
 
 }
 
+/**
+ * Painel de conteúdo dos filtros de pesquisa.
+ *
+ * Agrupa os campos de filtro (Nome do remetente, Datas) em linhas organizadas.
+ *
+ * @param filters Valores atuais dos filtros.
+ * @param filterError Erros de validação associados.
+ * @param filterActions Callbacks para alteração de valores.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun FilterListMemberShipRequestContent(
     filters: FilterMemberShipRequest,
@@ -177,7 +226,7 @@ private fun FilterListMemberShipRequestContent(
 
                 FilterMaxDatePicker(
                     value = filters.maxDate?.format(displayFormatter) ?: "",
-                    onDateSelected = { filterActions.onMaxDateSelected(it)},
+                    onDateSelected = { filterActions.onMaxDateSelected(it) },
                     isError = filterError.maxDateError != null,
                     errorMessage = filterError.maxDateError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
@@ -196,6 +245,19 @@ private fun FilterListMemberShipRequestContent(
     }
 }
 
+/**
+ * Item individual da lista de pedidos de adesão.
+ *
+ * Renderiza um cartão com:
+ * - Título dinâmico (Nome do Jogador ou da Equipa, dependendo de quem enviou).
+ * - Imagem da Equipa.
+ * - Data de envio.
+ * - Botões de ação (Aceitar, Rejeitar, Ver Mais).
+ *
+ * @param membershipRequest O DTO com os dados do pedido.
+ * @param itemsActions Ações disponíveis para este item.
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun ListMemberShipRequestContent(
     membershipRequest: MembershipRequestInfoDto,
@@ -205,7 +267,7 @@ private fun ListMemberShipRequestContent(
     var receiver = ""
     var sender = ""
 
-    if(membershipRequest.isPlayerSender) {
+    if (membershipRequest.isPlayerSender) {
         sender = membershipRequest.player.id
         receiver = membershipRequest.team.id
     } else {
@@ -216,7 +278,7 @@ private fun ListMemberShipRequestContent(
     GenericListItem(
         item = membershipRequest,
         title = { entity ->
-            if(membershipRequest.isPlayerSender) {
+            if (membershipRequest.isPlayerSender) {
                 entity.player.name
             } else {
                 entity.team.name
@@ -255,16 +317,20 @@ private fun ListMemberShipRequestContent(
                         navHostController
                     )
                 },
-                reject = {itemsActions.rejectMemberShipRequest(
-                    receiver,
-                    membershipRequest.id,
-                    membershipRequest.isPlayerSender,
-                ) },
-                showMore =  { itemsActions.showMore(
-                    sender,
-                    membershipRequest.isPlayerSender,
-                    navHostController,
-                ) }
+                reject = {
+                    itemsActions.rejectMemberShipRequest(
+                        receiver,
+                        membershipRequest.id,
+                        membershipRequest.isPlayerSender,
+                    )
+                },
+                showMore = {
+                    itemsActions.showMore(
+                        sender,
+                        membershipRequest.isPlayerSender,
+                        navHostController,
+                    )
+                }
             )
         }
     )
@@ -273,11 +339,13 @@ private fun ListMemberShipRequestContent(
 @Preview(
     name = "Lista de pedidos de adesão Jogador - PT",
     locale = "pt-rPT",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
     name = "List MemberShip Request player - EN",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Composable
 fun PreviewListMemberShipRequestPlayerScreen() {
     ListMemberShipRequest(rememberNavController())
@@ -287,11 +355,13 @@ fun PreviewListMemberShipRequestPlayerScreen() {
 @Preview(
     name = "Lista de pedidos de adesão Jogador - PT",
     locale = "pt-rPT",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
     name = "List MemberShip Request player - EN",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Composable
 fun PreviewListMemberShipRequestTeamScreen() {
     ListMemberShipRequest(rememberNavController())

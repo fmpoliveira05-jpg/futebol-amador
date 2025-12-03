@@ -16,17 +16,26 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.R
 import com.example.amfootball.data.actions.forms.FormFinishMatchActions
 import com.example.amfootball.data.dtos.match.ResultMatchDto
 import com.example.amfootball.data.errors.formErrors.FinishMatchFormErrors
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 import com.example.amfootball.utils.GeneralConst
 
 //TODO: Mandar também o idMatch e depois com base disso fazer um pedido há API para carregar as teams da match
+/**
+ * Ecrã de finalização de partida (Reportar Resultado).
+ *
+ * Este ecrã permite ao utilizador (geralmente admin da equipa) introduzir o resultado final
+ * de um jogo realizado (número de golos marcados e sofridos).
+ *
+ * @param navHostController Controlador de navegação para redirecionamento após submissão bem-sucedida.
+ * @param viewModel ViewModel injetado (ou criado) que gere o estado do formulário e a submissão.
+ */
 @Composable
 fun FinishMatchScreen(
     navHostController: NavHostController,
@@ -46,10 +55,21 @@ fun FinishMatchScreen(
         formErrors = formErrors,
         navHostController = navHostController,
         modifier = Modifier
-        .padding(16.dp)
+            .padding(16.dp)
     )
 }
 
+/**
+ * Estrutura visual do formulário de resultado.
+ *
+ * Centraliza os campos de input no ecrã.
+ *
+ * @param result O estado atual dos dados do resultado (golos equipa vs adversário).
+ * @param formActions As ações disponíveis para interagir com o formulário.
+ * @param formErrors Os erros de validação atuais para cada campo.
+ * @param navHostController Controlador de navegação (passado para o botão de submit).
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun FormFinishMatch(
     result: ResultMatchDto?,
@@ -58,7 +78,8 @@ private fun FormFinishMatch(
     navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier,
+    Column(
+        modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -71,6 +92,17 @@ private fun FormFinishMatch(
     }
 }
 
+/**
+ * Campos de texto e botão de submissão.
+ *
+ * Renderiza dois inputs numéricos (Golos da Equipa e Golos do Adversário) e valida a entrada
+ * em tempo real (convertendo texto para inteiro).
+ *
+ * @param result Dados atuais do formulário.
+ * @param formActions Callbacks para alteração de valores.
+ * @param formErrors Erros de validação a exibir.
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun TextFieldForm(
     result: ResultMatchDto?,
@@ -78,7 +110,6 @@ private fun TextFieldForm(
     formErrors: FinishMatchFormErrors,
     navHostController: NavHostController
 ) {
-
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_team),
         value = result?.numGoals?.toString() ?: "",
@@ -113,16 +144,18 @@ private fun TextFieldForm(
 }
 
 @Preview(
-    name= "FinishMatch EN",
+    name = "FinishMatch EN",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
-    name= "Finalização de Partida - PT",
+    name = "Finalização de Partida - PT",
     locale = "pt",
-    showBackground = true)
+    showBackground = true
+)
 @Composable
-fun PreviewFinishMatch(){
-    AMFootballTheme{
+fun PreviewFinishMatch() {
+    AMFootballTheme {
         FinishMatchScreen(navHostController = rememberNavController())
     }
 }

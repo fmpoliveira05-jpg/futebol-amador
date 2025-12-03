@@ -24,20 +24,23 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 /**
- * Um componente Composable para selecionar uma imagem da galeria do dispositivo,
- * renderizado como um círculo.
+ * Componente de Interface (UI) para seleção de imagens da galeria utilizando o Photo Picker moderno.
  *
- * O componente exibe a imagem selecionada (se houver) ou um ícone de placeholder
- * (AddAPhoto). Ao ser clicado, ele lança o Photo Picker do sistema Android.
+ * Este componente apresenta uma área circular interativa que serve dois propósitos:
+ * 1. **Visualização:** Exibe a imagem selecionada (via Coil) ou um ícone de placeholder ("Adicionar Foto").
+ * 2. **Interação:** Ao ser clicado, lança o seletor de média nativo do Android (`PickVisualMedia`),
+ * garantindo privacidade e segurança (não requer permissão `READ_EXTERNAL_STORAGE` em versões recentes).
  *
- * @param modifier Modificador para estilizar o componente (tamanho, preenchimento, etc.).
- * @param imageSelectedUri A URI da imagem atualmente selecionada. Se for null, o placeholder é exibido.
- * @param onImageSelected Callback executado quando uma URI é retornada pelo Photo Picker.
- * A URI pode ser null se o usuário cancelar a seleção.
- * @param contentDescription Descrição de conteúdo para acessibilidade da imagem exibida.
- * Deve ser fornecida apenas quando [imageSelectedUri] não for null.
- * @param contentDescriptionWithoutImage Descrição de conteúdo para acessibilidade do ícone
- * [Icons.Default.AddAPhoto] (placeholder).
+ * **Características Visuais:**
+ * - Formato circular fixo ([CircleShape]).
+ * - Tamanho predefinido de 150.dp (ajustável via modifier).
+ * - Imagens são cortadas ([ContentScale.Crop]) para preencher o círculo uniformemente.
+ *
+ * @param modifier Modificador para estilizar o contentor externo (margens, tamanho, etc.).
+ * @param imageSelectedUri O [Uri] da imagem a ser exibida. Se for `null`, o componente mostra o ícone de placeholder.
+ * @param onImageSelected Callback executado quando o seletor retorna. Recebe o [Uri] da imagem escolhida ou `null` se o utilizador cancelar.
+ * @param contentDescription Texto de acessibilidade (TalkBack) para descrever a **imagem carregada** (ex: "Foto de perfil de João").
+ * @param contentDescriptionWithoutImage Texto de acessibilidade para o **estado vazio** (ex: "Toque para adicionar uma foto de perfil").
  */
 @Composable
 fun ImagePicker(

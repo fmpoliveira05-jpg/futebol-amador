@@ -2,7 +2,6 @@ package com.example.amfootball.data.network.interfaces
 
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
-import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST

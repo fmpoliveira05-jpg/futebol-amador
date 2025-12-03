@@ -1,4 +1,4 @@
-package com.example.amfootball.data.enums
+package com.example.amfootball.data.enums.match
 
 import androidx.annotation.StringRes
 import com.example.amfootball.R
@@ -19,5 +19,5 @@ enum class TypeMatch(@StringRes val stringId: Int) {
     /**
      * Indica que a partida é casual (amigável) e os resultados não são registados oficialmente no ranking.
      */
-    CASUAL(stringId =  R.string.type_match_casual)
+    CASUAL(stringId = R.string.type_match_casual)
 }

@@ -35,7 +35,7 @@ interface TeamApi {
      * @param team O DTO [FormTeamDto] contendo os dados essenciais para a criação (Nome, Sigla, Cidade, etc.).
      * @return [Response] contendo o Identificador Único (UUID) gerado para a nova equipa.
      */
-    @POST(BaseEndpoints.teamApi)
+    @POST(BaseEndpoints.TEAM_API)
     suspend fun createTeam(
         @Body team: FormTeamDto
     ): Response<String>
@@ -52,7 +52,7 @@ interface TeamApi {
      * @param team O objeto [FormTeamDto] com os novos dados a persistir.
      * @return [Response] contendo o objeto atualizado [FormTeamDto] conforme salvo no servidor.
      */
-    @PUT("${BaseEndpoints.teamApi}/{teamId}")
+    @PUT("${BaseEndpoints.TEAM_API}/{teamId}")
     suspend fun updateTeam(
         @Path("teamId") teamId: String,
         @Body team: FormTeamDto
@@ -69,7 +69,7 @@ interface TeamApi {
      * @param teamId O identificador único (UUID) da equipa alvo.
      * @return [Response] contendo os dados básicos da equipa [TeamDto].
      */
-    @GET("${BaseEndpoints.teamApi}/opponent/{teamId}")
+    @GET("${BaseEndpoints.TEAM_API}/opponent/{teamId}")
     suspend fun getOpponentTeam(
         @Path("teamId") teamId: String
     ): Response<TeamDto>
@@ -86,7 +86,7 @@ interface TeamApi {
      * @param teamId O identificador único (UUID) da equipa.
      * @return [Response] contendo o perfil detalhado da equipa [ProfileTeamDto].
      */
-    @GET("${BaseEndpoints.teamApi}/{id}")
+    @GET("${BaseEndpoints.TEAM_API}/{id}")
     suspend fun getTeamProfile(
         @Path("id") teamId: String
     ): Response<ProfileTeamDto>
@@ -102,7 +102,7 @@ interface TeamApi {
      * Ex: `mapOf("NameTeam" to "Lions", "City" to "Lisboa")`.
      * @return [Response] com uma lista resumida de equipas [ItemTeamInfoDto] correspondentes.
      */
-    @GET("${BaseEndpoints.teamApi}/listTeams")
+    @GET("${BaseEndpoints.TEAM_API}/listTeams")
     suspend fun getListTeam(
         @QueryMap filters: Map<String, String>
     ): Response<List<ItemTeamInfoDto>>
@@ -118,7 +118,7 @@ interface TeamApi {
      * @param filters Mapa de filtros convertidos de [FilterMembersTeam] (ex: nome, posição).
      * @return [Response] contendo a lista de membros [MemberTeamDto].
      */
-    @GET("${BaseEndpoints.teamApi}/{teamId}/members")
+    @GET("${BaseEndpoints.TEAM_API}/{teamId}/members")
     suspend fun getListMembers(
         @Path("teamId") teamId: String,
         @QueryMap filters: Map<String, String>
@@ -136,7 +136,7 @@ interface TeamApi {
      * @param playerId O identificador do jogador a ser removido.
      * @return [Response] vazia (Unit) em caso de sucesso.
      */
-    @DELETE("${BaseEndpoints.teamApi}/{teamId}/members/{playerIdToRemove}")
+    @DELETE("${BaseEndpoints.TEAM_API}/{teamId}/members/{playerIdToRemove}")
     suspend fun removePlayerforTeam(
         @Path("teamId") teamId: String,
         @Path("playerIdToRemove") playerId: String
@@ -154,7 +154,7 @@ interface TeamApi {
      * @param playerId O identificador do membro que receberá a promoção.
      * @return [Response] vazia (Unit) confirmando a promoção.
      */
-    @PUT("${BaseEndpoints.teamApi}/{teamId}/members/{playerId}/promote/{playerIdToPromote}")
+    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/{playerId}/promote/{playerIdToPromote}")
     suspend fun promotePlayer(
         @Path("teamId") teamId: String,
         @Path("playerIdToPromote") playerId: String
@@ -172,7 +172,7 @@ interface TeamApi {
      * @param playerId O identificador do administrador que será despromovido.
      * @return [Response] vazia (Unit) confirmando a despromoção.
      */
-    @PUT("${BaseEndpoints.teamApi}/{teamId}/members/{playerId}/demote/{adminIdToDemote}")
+    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/{playerId}/demote/{adminIdToDemote}")
     suspend fun desmoteAdmin(
         @Path("teamId") teamId: String,
         @Path("adminIdToDemote") playerId: String

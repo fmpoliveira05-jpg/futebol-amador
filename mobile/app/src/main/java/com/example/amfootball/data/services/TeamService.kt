@@ -10,123 +10,94 @@ import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.TeamApi
-import com.example.amfootball.utils.handleApiError
+import com.example.amfootball.utils.safeApiCallWithNotReturn
+import com.example.amfootball.utils.safeApiCallWithReturn
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repositório responsável por toda a lógica de dados relacionada com as Equipas.
- * Atua como a única fonte de verdade (Single Source of Truth) para o [ListTeamViewModel] e [TeamFormViewModel].
+ * Repositório responsável pela lógica de negócio e manipulação de dados de Equipas.
  *
- * Gere as chamadas à API, tratamento de erros HTTP e transformação de dados (DTOs).
+ * Esta classe centraliza todas as operações relacionadas com equipas, desde a visualização de perfil (CRUD),
+ * gestão de membros (promover, despromover, remover) até à pesquisa filtrada.
+ *
+ * A gestão de erros e validação de respostas HTTP é delegada nos utilitários [safeApiCallWithReturn]
+ * e [safeApiCallWithNotReturn], garantindo um código limpo e livre de tratamento de erros repetitivo.
+ *
+ * @property teamApi A interface Retrofit injetada para comunicação com o backend.
  */
 @Singleton
 class TeamService @Inject constructor(
     private val teamApi: TeamApi
 ) {
+
     /**
-     * Obtém o perfil completo de uma equipa para visualização.
+     * Obtém o perfil completo de uma equipa para visualização detalhada.
      *
      * @param teamId O ID da equipa.
-     * @return [ProfileTeamDto] com os dados detalhados.
-     * @throws Exception Se houver erro de rede ("Sem conexão") ou erro da API (404, 500).
+     * @return [ProfileTeamDto] contendo estatísticas, membros e informações gerais.
+     * @throws Exception Propagada automaticamente em caso de erro de API ou rede.
      */
     suspend fun getTeamProfile(teamId: String): ProfileTeamDto {
-        return try {
-            val response = teamApi.getTeamProfile(teamId = teamId)
-
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.getTeamProfile(teamId = teamId)
         }
     }
 
     /**
-     * Obtém os dados de uma equipa formatados especificamente para o formulário de edição.
+     * Obtém os dados de uma equipa formatados para o formulário de edição.
      *
-     * Reutiliza o endpoint de [getTeamProfile] mas converte o resultado para [FormTeamDto].
+     * Este método demonstra um padrão eficiente:
+     * 1. Obtém o perfil completo da API de forma segura.
+     * 2. Aplica a função de extensão `.toFormTeamDto()` no resultado bem-sucedido.
      *
      * @param teamId O ID da equipa a editar.
-     * @return [FormTeamDto] pronto para preencher os campos da UI.
+     * @return [FormTeamDto] pronto para preencher os campos do formulário.
      */
     suspend fun getTeamToUpdate(teamId: String): FormTeamDto {
-        return try {
-            val response = teamApi.getTeamProfile(teamId = teamId)
-
-            if (response.isSuccessful && response.body() != null) {
-                val fullProfile = response.body()!!
-
-                fullProfile.toFormTeamDto()
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
-        }
+        return safeApiCallWithReturn {
+            teamApi.getTeamProfile(teamId = teamId)
+        }.toFormTeamDto()
     }
 
+    /**
+     * Obtém o nome e dados básicos de uma equipa adversária.
+     * Útil para exibir cabeçalhos ou resumos em listas de jogos.
+     *
+     * @param teamId O ID da equipa adversária.
+     * @return [TeamDto] com informações essenciais (Nome, ID, Logo).
+     */
     suspend fun getNameTeam(teamId: String): TeamDto {
-        try {
-            val response = teamApi.getOpponentTeam(teamId = teamId)
-
-            if (response.isSuccessful && response.body() != null) {
-                return response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.getOpponentTeam(teamId = teamId)
         }
     }
 
     /**
-     * Obtém uma lista filtrada de equipas.
+     * Obtém uma lista de equipas com base em critérios de filtro (Pesquisa).
      *
-     * @param filter Objeto contendo os filtros aplicados (opcional).
-     * @return Uma lista de [ItemTeamInfoDto].
+     * Converte o objeto de filtros em Query Map antes de invocar a API.
+     *
+     * @param filter Objeto de filtros ou `null` para listar todas.
+     * @return Lista de [ItemTeamInfoDto] resumidos.
      */
     suspend fun getListTeam(filter: FiltersListTeam?): List<ItemTeamInfoDto> {
         val filterMap = filter?.toQueryMap() ?: emptyMap()
 
-        return try {
-            val response = teamApi.getListTeam(filters = filterMap)
-
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.getListTeam(filters = filterMap)
         }
     }
 
     /**
-     * Cria uma nova equipa.
+     * Cria uma nova equipa na plataforma.
      *
-     * @param team O DTO contendo os dados do formulário.
-     * @return O ID da nova equipa criada (String).
+     * @param team O DTO com os dados do formulário de criação.
+     * @return O ID da nova equipa gerada (String).
      */
     suspend fun createTeam(team: FormTeamDto): String {
-        return try {
-            val response = teamApi.createTeam(team = team)
-
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.createTeam(team = team)
         }
     }
 
@@ -135,120 +106,67 @@ class TeamService @Inject constructor(
      *
      * @param teamId O ID da equipa a atualizar.
      * @param team O DTO com os novos dados.
-     * @return O [FormTeamDto] atualizado retornado pelo servidor.
+     * @return O [FormTeamDto] atualizado (eco do servidor).
      */
     suspend fun updateTeam(teamId: String, team: FormTeamDto): FormTeamDto {
-        return try {
-            val response = teamApi.updateTeam(teamId = teamId, team = team)
-
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.updateTeam(teamId = teamId, team = team)
         }
     }
 
-    //TODO: Testar
     /**
-     * Obtém a lista de membros de uma equipa específica, aplicando filtros de pesquisa.
+     * Lista os membros (jogadores/staff) de uma equipa, com filtros opcionais.
      *
-     * Faz um pedido à API enviando os critérios definidos em [filter] (ex: nome, idade, posição).
-     * Se a resposta for bem-sucedida, retorna a lista de membros. Caso contrário, lança uma exceção
-     * com a mensagem de erro do backend.
-     *
-     * @param teamId O ID da equipa da qual se pretende listar os membros.
-     * @param filter O objeto [FilterMembersTeam] com os critérios de filtragem.
-     * @return Uma lista de [MemberTeamDto] correspondente aos filtros aplicados.
-     * @throws Exception Se ocorrer erro de rede ("Sem conexão") ou se a API retornar um erro (lançado via [handleApiError]).
+     * @param teamId O ID da equipa.
+     * @param filter Critérios de filtragem (cargo, nome, etc.).
+     * @return Lista de [MemberTeamDto].
      */
     suspend fun getListMembers(teamId: String, filter: FilterMembersTeam?): List<MemberTeamDto> {
-        return try {
-            val filters = filter?.toQueryMap() ?: emptyMap()
+        val filters = filter?.toQueryMap() ?: emptyMap()
 
-            val response = teamApi.getListMembers(teamId = teamId, filters = filters)
-
-            if (response.isSuccessful && response.body() != null) {
-                response.body()!!
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            teamApi.getListMembers(teamId = teamId, filters = filters)
         }
     }
 
     //TODO: Testar
     /**
-     * Promove um membro da equipa a Administrador.
+     * Promove um membro a Administrador da equipa.
      *
-     * Envia um pedido para alterar o tipo de membro do jogador alvo para 'ADMIN_TEAM'.
-     * Não retorna valor; o sucesso é indicado pela ausência de exceções.
+     * Utiliza [safeApiCallWithNotReturn] para uma operação sem retorno de dados.
      *
      * @param teamId O ID da equipa.
-     * @param playerPromoteId O ID do jogador que será promovido.
-     * @throws Exception Se o jogador não existir, se quem pede não tiver permissões, ou em caso de erro de rede.
+     * @param playerPromoteId O ID do jogador a promover.
      */
     suspend fun promotePlayer(teamId: String, playerPromoteId: String) {
-        try {
-            val response = teamApi.promotePlayer(teamId = teamId, playerId = playerPromoteId)
-
-            if (!response.isSuccessful) {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        safeApiCallWithNotReturn {
+            teamApi.promotePlayer(teamId = teamId, playerId = playerPromoteId)
         }
     }
 
     //TODO: Testar
     /**
-     * Despromove um Administrador da equipa a membro normal.
-     *
-     * Retira os privilégios de gestão do administrador alvo, alterando o seu tipo para 'PLAYER'.
+     * Despromove um Administrador para membro normal.
      *
      * @param teamId O ID da equipa.
-     * @param adminDemoteId O ID do administrador que será despromovido.
-     * @throws Exception Se ocorrer erro na API (ex: tentar despromover o dono da equipa) ou erro de conexão.
+     * @param adminDemoteId O ID do administrador a despromover.
      */
     suspend fun demoteAdmin(teamId: String, adminDemoteId: String) {
-        try {
-            val response = teamApi.desmoteAdmin(teamId = teamId, playerId = adminDemoteId)
-
-            if (!response.isSuccessful) {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        safeApiCallWithNotReturn {
+            teamApi.desmoteAdmin(teamId = teamId, playerId = adminDemoteId)
         }
     }
 
     //TODO: Testar
     /**
-     * Remove (expulsa) um jogador ou membro da equipa.
-     *
-     * Esta ação remove permanentemente o utilizador da lista de membros da equipa.
+     * Remove (expulsa) um jogador da equipa.
      *
      * @param teamId O ID da equipa.
      * @param playerId O ID do jogador a remover.
-     * @throws Exception Se o utilizador não puder ser removido ou em caso de falha de rede.
      */
     suspend fun removePlayerTeam(teamId: String, playerId: String) {
-        try {
-            val response = teamApi.removePlayerforTeam(teamId = teamId, playerId = playerId)
-
-            if (!response.isSuccessful) {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        safeApiCallWithNotReturn {
+            teamApi.removePlayerforTeam(teamId = teamId, playerId = playerId)
         }
     }
 }

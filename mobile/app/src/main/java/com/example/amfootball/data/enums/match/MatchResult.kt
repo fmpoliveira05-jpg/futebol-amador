@@ -1,4 +1,4 @@
-package com.example.amfootball.data.enums
+package com.example.amfootball.data.enums.match
 
 import androidx.annotation.StringRes
 import com.example.amfootball.R

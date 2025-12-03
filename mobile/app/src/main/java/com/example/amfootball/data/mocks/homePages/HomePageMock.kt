@@ -3,7 +3,6 @@ package com.example.amfootball.data.mocks.homePages
 import com.example.amfootball.data.dtos.player.FireBaseLoginResponseDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.Position
 
 /**
  * Objeto utilitário que fornece dados fictícios (Mock Data) estáticos para o ecrã Principal (Home Page).
@@ -37,8 +36,8 @@ object HomePageMock {
      * botões para "Criar Equipa" ou "Procurar Equipa".
      *
      * Características:
-     * - `team.id`: Vazio/Inválido.
-     * - `team.name`: Vazio.
+     * - `team`: Objeto vazio ou nulo.
+     * - `positionRaw`: "2" (Simula o ID de Médio vindo da API).
      */
     val mockUserNoTeam = PlayerProfileDto(
         loginResponseDto = mockLoginResponse,
@@ -48,11 +47,12 @@ object HomePageMock {
         dateOfBirth = "2000-01-01",
         icon = null,
         address = "Rua Principal, Porto",
-        position = Position.MIDFIELDER.name,
+        positionRaw = 2,
         height = 180,
         team = TeamDto(
             id = "",
-            name = ""
+            name = "",
+            image = "" // Adicionado campo de imagem vazio
         ),
         isAdmin = false
     )
@@ -65,6 +65,7 @@ object HomePageMock {
      *
      * Características:
      * - `team.id`: "TEAM_ID_123" (Válido).
+     * - `positionRaw`: "3" (Simula o ID de Avançado/Forward).
      */
     val mockUserWithTeam = PlayerProfileDto(
         loginResponseDto = mockLoginResponse,
@@ -74,11 +75,12 @@ object HomePageMock {
         dateOfBirth = "2000-01-01",
         icon = null,
         address = "Rua Principal, Lisboa",
-        position = "Wide Receiver",
+        positionRaw = 3,
         height = 185,
         team = TeamDto(
             id = "TEAM_ID_123",
-            name = "Porto Renegades"
+            name = "Porto Renegades",
+            image = "" // Adicionado campo de imagem vazio
         ),
         isAdmin = false
     )

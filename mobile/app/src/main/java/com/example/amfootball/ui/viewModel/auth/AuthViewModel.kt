@@ -2,14 +2,11 @@ package com.example.amfootball.ui.viewModel.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.services.AuthService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +36,14 @@ class AuthViewModel @Inject constructor(
      */
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
+    /**
+     * Função utilitária para alterar o estado de autenticação de forma manual.
+     *
+     * Usada principalmente no fluxo pós-login, onde o `LoginViewModel` completa o processo
+     * e notifica o `AuthViewModel` de que o token foi guardado.
+     *
+     * @param isUserLoggedIn O novo estado de autenticação.
+     */
     fun onIsUserLoggedInChange(isUserLoggedIn: Boolean) {
         _isUserLoggedIn.value = isUserLoggedIn
     }
@@ -57,12 +62,7 @@ class AuthViewModel @Inject constructor(
     /**
      * Regista um novo utilizador na aplicação.
      *
-     * Coordena o processo de criação de conta, que envolve:
-     * 1. Criar o utilizador no sistema de autenticação (Firebase).
-     * 2. Enviar os detalhes do perfil ([com.example.amfootball.data.dtos.player.CreateProfileDto]) para a API Backend.
-     *
-     * Se o registo for bem-sucedido, o utilizador é automaticamente considerado "logado".
-     * Em caso de erro, a mensagem de exceção é passada para o callback [onError].
+     * Coordena o processo de criação de conta assíncrono.
      *
      * @param profile DTO contendo os dados pessoais do utilizador (nome, idade, posição, etc.).
      * @param password A palavra-passe escolhida para a conta.

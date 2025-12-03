@@ -29,7 +29,7 @@ class ProfileTeamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val teamRepository: TeamService,
     private val sessionManager: SessionManager
-): ViewModel() {
+) : ViewModel() {
     /**
      * LiveData que contém os dados da equipa ([ProfileTeamDto]) quando carregados com sucesso.
      * A UI observa esta variável para preencher os campos do perfil.
@@ -61,7 +61,12 @@ class ProfileTeamViewModel @Inject constructor(
         if (!teamId.isNullOrBlank()) {
             loadTeamProfile()
         } else {
-            _uiState.update { it.copy(isLoading = false, errorMessage = "ID da equipa não encontrado.") }
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    errorMessage = "ID da equipa não encontrado."
+                )
+            }
         }
     }
 
@@ -88,7 +93,7 @@ class ProfileTeamViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                if(!idToLoad.isNullOrBlank()) {
+                if (!idToLoad.isNullOrBlank()) {
                     val profile = teamRepository.getTeamProfile(teamId = idToLoad)
 
                     infoTeam.value = profile

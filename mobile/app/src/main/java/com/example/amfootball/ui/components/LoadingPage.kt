@@ -36,14 +36,12 @@ fun LoadingPage(
 ) {
     if (isLoading) {
         Loading()
-    }
-    else if (errorMsg != null) {
+    } else if (errorMsg != null) {
         RetryButton(
             errorMsg = errorMsg,
             retry = retry
         )
-    }
-    else {
+    } else {
         content()
     }
 }

@@ -5,7 +5,6 @@ import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 
 /**
@@ -29,22 +28,10 @@ interface AuthApi {
      * @param request O DTO contendo os dados iniciais do perfil do utilizador.
      * @return [Response] vazia (Unit) indicando sucesso (200 OK) ou falha.
      */
-    @POST("${BaseEndpoints.playerApi}/create-profile")
+    @POST("${BaseEndpoints.PLAYER_API}/create-profile")
     suspend fun createProfile(
         @Body request: CreateProfileDto
     ): Response<Unit>
-
-    /**
-     * Obtém o perfil do utilizador atualmente autenticado.
-     * O token de autenticação é enviado automaticamente no Header via Interceptor.
-     *
-     * Endpoint: GET api/Player/get-my-profile
-     *
-     * @return [Response] contendo os dados do perfil do próprio utilizador.
-     */
-    @GET("${BaseEndpoints.playerApi}/get-my-profile")
-    suspend fun getMyProfile(
-    ): Response<PlayerProfileDto>
 
     /**
      * Realiza a autenticação do utilizador no sistema (Login).
@@ -57,7 +44,7 @@ interface AuthApi {
      * @param request O DTO [LoginDto] contendo as credenciais de login (email e password/token).
      * @return [Response] contendo o perfil detalhado do utilizador [PlayerProfileDto] em caso de sucesso.
      */
-    @POST("${BaseEndpoints.authApi}/login")
+    @POST("${BaseEndpoints.AUTH_API}/login")
     suspend fun loginUser(
         @Body request: LoginDto
     ): Response<PlayerProfileDto>

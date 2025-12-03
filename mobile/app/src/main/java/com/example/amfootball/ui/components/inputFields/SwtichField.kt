@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
@@ -45,9 +44,9 @@ fun Switcher(
     enabled: Boolean = true
 ) {
     Column {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
                 text = text,
                 color = MaterialTheme.colorScheme.onSurface
@@ -59,12 +58,12 @@ fun Switcher(
                 onCheckedChange = onCheckedChange,
                 thumbContent = {
                     Icon(
-                        imageVector = if(value) {
+                        imageVector = if (value) {
                             Icons.Default.Check
                         } else {
                             Icons.Default.Close
                         },
-                        contentDescription = if(value) {
+                        contentDescription = if (value) {
                             textChecked
                         } else {
                             textUnChecked

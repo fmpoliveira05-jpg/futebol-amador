@@ -32,11 +32,11 @@ import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.data.actions.itemsList.ItemsListMemberAction
-import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
+import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.mocks.lists.ListMembersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -60,6 +60,17 @@ import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
 //TODO: Corrigir previews + toast de network + retry
+/**
+ * Ecrã de Gestão e Listagem de Membros da Equipa.
+ *
+ * Este é um componente Stateful (com estado) que exibe a lista completa de jogadores e staff da equipa,
+ * permitindo filtragem por nome, idade, posição e cargo.
+ *
+ * **Requisitos de Permissão:** Este ecrã é tipicamente acedido apenas por Administradores da Equipa.
+ *
+ * @param navHostController Controlador de navegação para detalhes do jogador.
+ * @param viewModel ViewModel injetado via Hilt para gerir o estado de filtros e a lista de membros.
+ */
 @Composable
 fun ListMembersScreen(
     navHostController: NavHostController,
@@ -106,6 +117,23 @@ fun ListMembersScreen(
     )
 }
 
+/**
+ * Conteúdo visual da lista de membros (Stateless).
+ *
+ * Responsável por estruturar o layout, incluindo o wrapper de [LoadingPage] e o componente
+ * principal [ListSurface] que renderiza a lista e a secção de filtros.
+ *
+ * @param uiState Estado da UI (Loading, Erros).
+ * @param isOnline Estado da conectividade.
+ * @param filters Valores atuais dos filtros.
+ * @param filterActions Callbacks para filtros.
+ * @param filtersErrors Erros de validação nos filtros.
+ * @param list A lista de membros [MemberTeamDto].
+ * @param listTypeMember Opções de filtro para Tipo de Membro.
+ * @param listPosition Opções de filtro para Posição.
+ * @param itemsListActions Callbacks de ação do item (promover, remover).
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun ListMemberContent(
     uiState: UiState,
@@ -135,7 +163,9 @@ private fun ListMemberContent(
                         isExpanded = filtersExpanded,
                         onToggleExpand = { filtersExpanded = !filtersExpanded },
                         header = {
-                            FilterHeader(isExpanded = filtersExpanded, onToggleExpand = { filtersExpanded = !filtersExpanded })
+                            FilterHeader(
+                                isExpanded = filtersExpanded,
+                                onToggleExpand = { filtersExpanded = !filtersExpanded })
                         },
                         content = { paddingModifier ->
                             FilterListMemberContent(
@@ -164,6 +194,16 @@ private fun ListMemberContent(
     )
 }
 
+/**
+ * Painel que contém todos os campos de filtro para a lista de membros.
+ *
+ * @param filters Valores atuais dos filtros.
+ * @param filterActions Callbacks para alteração de valores.
+ * @param filterErros Erros de validação associados.
+ * @param listTypeMember Opções para o filtro de Cargo (Admin/Player).
+ * @param listPosition Opções para o filtro de Posição.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun FilterListMemberContent(
     filters: FilterMembersTeam,
@@ -174,13 +214,18 @@ private fun FilterListMemberContent(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        FilterRow (
+        FilterRow(
             content = {
                 FilterNamePlayerTextField(
                     playerName = filters.name ?: "",
                     onPlayerNameChange = { filterActions.onNameChange(it) },
                     isError = filterErros.nameError != null,
-                    errorMessage = filterErros.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
+                    errorMessage = filterErros.nameError?.let {
+                        stringResource(
+                            id = it.messageId,
+                            *it.args.toTypedArray()
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -192,7 +237,12 @@ private fun FilterListMemberContent(
                     minAge = filters.minAge?.toString(),
                     onMinAgeChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     isError = filterErros.minAgeError != null,
-                    errorMessage = filterErros.minAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
+                    errorMessage = filterErros.minAgeError?.let {
+                        stringResource(
+                            id = it.messageId,
+                            *it.args.toTypedArray()
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -200,7 +250,12 @@ private fun FilterListMemberContent(
                     maxAge = filters.maxAge?.toString() ?: "",
                     onMaxAgeChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
                     isError = filterErros.maxAgeError != null,
-                    errorMessage = filterErros.maxAgeError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) },
+                    errorMessage = filterErros.maxAgeError?.let {
+                        stringResource(
+                            id = it.messageId,
+                            *it.args.toTypedArray()
+                        )
+                    },
                     modifier = Modifier.weight(1f)
                 )
             },
@@ -241,6 +296,18 @@ private fun FilterListMemberContent(
     }
 }
 
+/**
+ * Item individual da lista de membros.
+ *
+ * Renderiza o [GenericListItem] com todas as informações de perfil, e adiciona
+ * os botões de ação na seção "Trailing".
+ *
+ * @param member DTO do membro da equipa.
+ * @param promote Ação para promover o membro a Admin.
+ * @param despromote Ação para despromover o Admin a membro.
+ * @param remove Ação para remover/expulsar o membro da equipa.
+ * @param showMore Ação para ver mais informações sobre o membro.
+ */
 @Composable
 private fun ListMemberItem(
     member: MemberTeamDto,
@@ -277,6 +344,11 @@ private fun ListMemberItem(
     )
 }
 
+/**
+ * Coluna de informações secundárias exibidas abaixo do nome do membro.
+ *
+ * @param member DTO do membro.
+ */
 @Composable
 private fun MemberSupportingInfo(member: MemberTeamDto) {
     Column {
@@ -287,6 +359,20 @@ private fun MemberSupportingInfo(member: MemberTeamDto) {
     }
 }
 
+/**
+ * Botões de ação (trailing content) para gestão de membros.
+ *
+ * A visibilidade dos botões de promoção/despromoção é controlada pelo `typeMember` do item:
+ * - Se for [TypeMember.PLAYER]: Mostra o botão "Promover".
+ * - Se for [TypeMember.ADMIN_TEAM]: Mostra o botão "Despromover".
+ * O botão de "Remover" (Expulsar) e "Ver Mais" é sempre visível.
+ *
+ * @param typeMember O cargo atual do membro (para controlo visual).
+ * @param promote Ação para promover.
+ * @param despromote Ação para despromover.
+ * @param remove Ação para remover.
+ * @param showMore Ação para ver detalhes.
+ */
 @Composable
 private fun MemberTrailingButtons(
     typeMember: TypeMember,
@@ -310,7 +396,8 @@ private fun MemberTrailingButtons(
                     )
                 }
             }
-            TypeMember.ADMIN_TEAM ->  {
+
+            TypeMember.ADMIN_TEAM -> {
                 IconButton(onClick = despromote) {
                     Icon(
                         imageVector = Icons.Filled.ArrowDownward,

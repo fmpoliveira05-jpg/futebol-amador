@@ -7,7 +7,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.example.amfootball.R
 
-
 /**
  * Componente invisível responsável por observar uma mensagem e exibir um Toast.
  * Após exibir, chama a função [onToastShown] para limpar o estado.
@@ -29,6 +28,7 @@ fun ToastHandler(
         }
     }
 }
+
 /**
  * Exibe uma mensagem flutuante (Toast) para informar o utilizador.
  *

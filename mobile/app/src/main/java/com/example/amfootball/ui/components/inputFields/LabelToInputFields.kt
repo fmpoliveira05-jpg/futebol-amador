@@ -18,8 +18,10 @@ import androidx.compose.ui.unit.dp
  * @param isRequired Booleano que indica se o campo associado ao rótulo é obrigatório.
  */
 @Composable
-fun Label(label: String,
-          isRequired: Boolean) {
+fun Label(
+    label: String,
+    isRequired: Boolean
+) {
     val labelText = formatRequiredLabel(label = label, isRequired = isRequired)
 
     Text(

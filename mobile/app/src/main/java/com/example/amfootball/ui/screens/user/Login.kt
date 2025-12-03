@@ -9,12 +9,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -33,12 +33,26 @@ import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.ui.viewModel.auth.LoginViewModel
 
+/**
+ * Ecrã de Login (Autenticação).
+ *
+ * Este componente "Stateful" (com estado) atua como o controlador para o processo de autenticação.
+ *
+ * Responsabilidades:
+ * 1. Observar o estado do formulário, erros e UI (Loading/Erro).
+ * 2. Orquestrar a submissão do login via [LoginViewModel].
+ * 3. Gerir o complexo fluxo de navegação pós-login (incluindo o redirecionamento de rotas protegidas).
+ *
+ * @param navHostController Controlador de navegação.
+ * @param viewModel ViewModel que gere a lógica do formulário e chamada à API de Login.
+ * @param authViewModel ViewModel que gere o estado global de autenticação (usado para atualizar o token na app).
+ */
 @Composable
 fun LoginScreen(
     navHostController: NavHostController,
     viewModel: LoginViewModel = hiltViewModel(),
     authViewModel: AuthViewModel = hiltViewModel()
-){
+) {
     val login by viewModel.uiFormState.collectAsStateWithLifecycle()
     val errors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -64,6 +78,18 @@ fun LoginScreen(
     )
 }
 
+/**
+ * Conteúdo visual do ecrã de Login (Stateless).
+ *
+ * Responsável por estruturar a página e envolver o formulário no componente de [LoadingPage].
+ *
+ * @param uiState Estado da UI (Loading, Erros de conexão).
+ * @param login DTO com os valores atuais do formulário (email/password).
+ * @param errors DTO com as mensagens de erro de validação específicas de cada campo.
+ * @param loginActions Callbacks para interagir com o formulário e submeter.
+ * @param navHostController Controlador de navegação.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun ContentLogin(
     uiState: UiState,
@@ -94,6 +120,16 @@ private fun ContentLogin(
     )
 }
 
+/**
+ * Campos de input e Botão de Submissão do Login.
+ *
+ * Inclui a lógica de navegação complexa pós-login.
+ *
+ * @param formLogin Dados atuais.
+ * @param loginActions Ações para submissão e alteração de valores.
+ * @param errors Erros de validação.
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun FieldsLogin(
     formLogin: LoginDto,

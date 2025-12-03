@@ -34,7 +34,7 @@ interface CalendarApi {
      * @param filters Um mapa de filtros de consulta.
      * @return [Response] contendo uma lista de [InfoMatchCalendar] com os resumos dos jogos encontrados.
      */
-    @GET("${BaseEndpoints.calendarApi}/{idTeam}")
+    @GET("${BaseEndpoints.CALENDAR_API}/{idTeam}")
     suspend fun getCalendar(
         @Path("idTeam") idTeam: String,
         @QueryMap filters: Map<String, String>
@@ -52,7 +52,7 @@ interface CalendarApi {
      * @param idMatch O identificador único do jogo/partida.
      * @return [Response] contendo o objeto [MatchInviteDto] com os detalhes da partida e estado do convite.
      */
-    @GET("${BaseEndpoints.calendarApi}/{idTeam}/{idMatch}")
+    @GET("${BaseEndpoints.CALENDAR_API}/{idTeam}/{idMatch}")
     suspend fun getMatchTeam(
         @Path("idTeam") idTeam: String,
         @Path("idMatch") idMatch: String
@@ -73,7 +73,7 @@ interface CalendarApi {
      * - O motivo do adiamento (opcional).
      * @return [Response] vazia (Unit) indicando sucesso na operação.
      */
-    @PUT("${BaseEndpoints.calendarApi}/{idTeam}/PostponeMatch")
+    @PUT("${BaseEndpoints.CALENDAR_API}/{idTeam}/PostponeMatch")
     suspend fun postponeMatch(
         @Path("idTeam") idTeam: String,
         @Body postponeMatch: PostPoneMatchDto
@@ -94,7 +94,11 @@ interface CalendarApi {
      * @param description A string enviada no corpo (Body) contendo o motivo/justificação do cancelamento.
      * @return [Response] vazia (Unit) indicando que o jogo foi cancelado com sucesso.
      */
-    @HTTP(method = "DELETE", path = "${BaseEndpoints.calendarApi}/{idTeam}/CancelMatch/{idMatch}", hasBody = true)
+    @HTTP(
+        method = "DELETE",
+        path = "${BaseEndpoints.CALENDAR_API}/{idTeam}/CancelMatch/{idMatch}",
+        hasBody = true
+    )
     suspend fun cancelMatch(
         @Path("idTeam") idTeam: String,
         @Path("idMatch") idMatch: String,

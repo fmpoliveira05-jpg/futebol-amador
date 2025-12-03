@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.components.buttons
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,32 +17,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
-import com.example.amfootball.navigation.objects.Routes
 
 /**
- * Um componente Composable que renderiza um botão de envio (submit) para formulários.
+ * Um componente Composable que renderiza um botão de ação primária (submit) para formulários.
  *
- * Este botão segue o padrão de design Material 3, ocupa a largura máxima disponível
- * ([Modifier.fillMaxWidth]) e tem uma altura fixa de 56.dp. Por padrão, ele
- * exibe o ícone [Icons.Default.Save].
+ * Este botão segue as diretrizes do Material Design 3, ocupando a largura máxima disponível
+ * e apresentando uma altura standard de acessibilidade (56dp).
+ * Utiliza as cores primárias do tema (`MaterialTheme.colorScheme.primary`).
  *
- * @param onClick A função lambda a ser executada quando o botão for clicado, tipicamente
- * contendo a lógica de validação e envio do formulário.
- * @param imageButton O [ImageVector] opcional para customizar o ícone exibido no botão
- * (padrão: [Icons.Default.Save]).
- * @param text A string de texto a ser exibida no botão (padrão: [R.string.submit_button]).
- * @param contentDescription A descrição de conteúdo para acessibilidade do ícone (padrão:
- * [R.string.submit_button_description]).
+ * @param onClick A função lambda a ser executada no evento de clique (ex: validar e enviar dados).
+ * @param imageButton O ícone [ImageVector] a exibir à esquerda do texto. Padrão: [Icons.Default.Save].
+ * @param text O rótulo do botão. Padrão: Recurso de string `submit_button`.
+ * @param contentDescription Texto para leitores de ecrã descreverem o ícone.
  */
 @Composable
-fun SubmitFormButton(onClick: () -> Unit,
-                     imageButton: ImageVector = Icons.Default.Save,
-                     text: String = stringResource(id = R.string.submit_button),
-                     contentDescription: String = stringResource(id = R.string.submit_button_description)
+fun SubmitFormButton(
+    onClick: () -> Unit,
+    imageButton: ImageVector = Icons.Default.Save,
+    text: String = stringResource(id = R.string.submit_button),
+    contentDescription: String = stringResource(id = R.string.submit_button_description)
 ) {
     Button(
         onClick = onClick,
@@ -61,16 +56,18 @@ fun SubmitFormButton(onClick: () -> Unit,
 }
 
 /**
- * Um botão de ação destrutiva/negativa estilizado com as cores de erro do tema.
+ * Um botão de ação destrutiva ou negativa, estilizado com as cores de erro do tema.
  *
- * Este componente é ideal para ações como "Cancelar", "Apagar" ou "Rejeitar".
- * Ocupa a largura total ([Modifier.fillMaxWidth]) e usa [MaterialTheme.colorScheme.error]
- * para o fundo.
+ * Este componente é visualmente distinto para alertar o utilizador sobre ações sensíveis
+ * como "Cancelar", "Apagar" ou "Rejeitar". Utiliza [MaterialTheme.colorScheme.error] para o fundo
+ * e [MaterialTheme.colorScheme.onError] para o texto/ícone.
  *
  * @param onClick Lambda executado quando o botão é clicado.
  * @param imageButton Ícone a ser exibido (padrão: [Icons.Default.Cancel]).
  * @param text O texto a ser exibido no botão.
  * @param contentDescription Descrição para acessibilidade (TalkBack).
+ * @param modifier Modificador base para o botão.
+ * @param textFieldModifier Modificador adicional útil para alinhar o botão com campos de texto (ex: padding ou width específico).
  */
 @Composable
 fun SubmitCancelButton(
@@ -101,6 +98,17 @@ fun SubmitCancelButton(
     }
 }
 
+/**
+ * Botão especializado para o ecrã de Login/Autenticação.
+ *
+ * Apresenta um estilo visual distinto com cantos mais arredondados (12dp) e elevação (sombra),
+ * destacando-se como a ação principal ("Call to Action") na página de entrada.
+ * Inclui automaticamente o ícone de login espelhado (AutoMirrored) para suporte RTL.
+ *
+ * @param onClick Lambda disparado ao clicar em "Entrar".
+ * @param modifier Modificador base do layout.
+ * @param textFieldModifier Modificador extra para consistência de layout com os inputs de email/password.
+ */
 @Composable
 fun LoginButton(
     onClick: () -> Unit,

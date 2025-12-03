@@ -1,12 +1,25 @@
 package com.example.amfootball.ui.screens.Chat
 
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -14,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -22,7 +36,20 @@ import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
-
+/**
+ * Ecrã principal de listagem de conversas (Inbox de Chats).
+ *
+ * Este ecrã exibe todas as salas de chat ([ChatRoom]) em que o utilizador participa.
+ * Utiliza o [ChatViewModel] para observar em tempo real a lista de salas via `StateFlow`.
+ *
+ * **Estrutura:**
+ * - **Scaffold:** Fornece a estrutura base (suporta FloatingActionButton para criar novas conversas, atualmente comentado).
+ * - **LazyColumn:** Renderiza a lista de chats de forma eficiente.
+ * - **Empty State:** Exibe uma mensagem "Sem chats" caso a lista esteja vazia.
+ *
+ * @param navController Controlador de navegação para transitar para o ecrã de detalhe do chat (Single Chat).
+ * @param viewModel ViewModel injetado via Hilt que fornece os dados das salas (`rooms`).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
@@ -30,32 +57,16 @@ fun ChatListScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val rooms by viewModel.rooms.collectAsState()
-    Scaffold(
-        /*
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { /* Nova conversa */ },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Nova Conversa")
-            }
-        }
-
-         */
-    ) { paddingValues ->
-        // Lista de Chats
+    Scaffold{ paddingValues ->
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            if (rooms.isEmpty())
-            {
+            if (rooms.isEmpty()) {
                 item { Text("Sem chats") }
-            }
-            else {
+            } else {
                 items(rooms) { chat ->
                     ChatItem(chat, navController = navController)
                     HorizontalDivider(
@@ -69,14 +80,39 @@ fun ChatListScreen(
     }
 }
 
+/**
+ * Componente que representa um item individual na lista de conversas.
+ *
+ * Exibe o avatar (atualmente uma inicial gerada) e o nome da sala.
+ * Ao clicar, navega para a rota [Routes.PlayerRoutes.SINGLE_CHAT] passando o ID da sala.
+ *
+ * **Nota de Implementação Futura:**
+ * Existem secções de código comentadas preparadas para exibir:
+ * - Última mensagem e hora.
+ * - Indicador de "Online".
+ * - Contador de mensagens não lidas (Badge).
+ * Estes campos dependem da evolução do objeto [ChatRoom] ou da integração com [ItemListChatDto].
+ *
+ * @param chat O objeto de dados da sala de chat.
+ * @param modifier Modificador de layout.
+ * @param navController Controlador para navegar para a conversa específica.
+ */
 @Composable
-//incluir em chatroom futuramente alguns campos do ItemListChatDto
-fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHostController) {
+fun ChatItem(
+    chat: ChatRoom,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable {
-                navController.navigate(Routes.PlayerRoutes.SINGLE_CHAT.route.replaceAfter("/", chat.id ))
+                navController.navigate(
+                    Routes.PlayerRoutes.SINGLE_CHAT.route.replaceAfter(
+                        "/",
+                        chat.id
+                    )
+                )
             }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -97,21 +133,6 @@ fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHo
                     )
                 }
             }
-            /*
-            if (chat.isOnline) {
-                Box(
-                    modifier = Modifier
-                        .size(14.dp)
-                        .background(Color.Green, CircleShape)
-                        .align(Alignment.BottomEnd)
-                        .clip(CircleShape)
-                        .background(Color.White) // Borda branca falsa
-                        .padding(2.dp)
-                        .background(Color(0xFF4CAF50), CircleShape)
-                )
-            }
-
-             */
         }
 
         Spacer(modifier = Modifier.width(16.dp))
@@ -123,57 +144,48 @@ fun ChatItem(chat: ChatRoom, modifier: Modifier = Modifier, navController: NavHo
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            /*
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = chat.lastMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-             */
         }
-        /*
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = chat.time,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (chat.unreadCount > 0) MaterialTheme.colorScheme.primary else Color.Gray
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            if (chat.unreadCount > 0) {
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = CircleShape,
-                    modifier = Modifier.height(20.dp).defaultMinSize(minWidth = 20.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 6.dp)) {
-                        Text(
-                            text = chat.unreadCount.toString(),
-                            color = Color.White,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
-        }
-         */
     }
 }
+
 /*
-@Preview(showBackground = true, showSystemUi = true)
+@Preview(
+    name = "Chat List - English",
+    locale = "en",
+    showBackground = true,
+    showSystemUi = true
+)
+@Preview(
+    name = "Chat List - Portuguese",
+    locale = "pt",
+    showBackground = true,
+    showSystemUi = true
+)
 @Composable
 fun ChatListScreenPreview() {
+    // Dados fictícios para o Preview
+    val dummyRooms = listOf(
+        ChatRoom(id = "1", name = "Equipa A vs Equipa B"),
+        ChatRoom(id = "2", name = "Grupo de Treino"),
+        ChatRoom(id = "3", name = "João Silva")
+    )
+
     MaterialTheme {
-        ChatListScreen()
+        ChatListContent(
+            rooms = dummyRooms,
+            onChatClick = {}
+        )
+    }
+}
+
+@Preview(name = "Empty State", showBackground = true)
+@Composable
+fun ChatListEmptyPreview() {
+    MaterialTheme {
+        ChatListContent(
+            rooms = emptyList(),
+            onChatClick = {}
+        )
     }
 }
  */
-

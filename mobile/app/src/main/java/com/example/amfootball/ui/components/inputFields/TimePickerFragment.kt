@@ -20,7 +20,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -30,16 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.compose.material3.TextFieldDefaults
-import java.util.Calendar
-import androidx.compose.material3.TimePicker
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import java.util.Locale
 import com.example.amfootball.R
+import java.util.Calendar
+import java.util.Locale
 
 /**
  * Componente Composable que exibe um campo de texto de leitura, que, ao ser clicado,
@@ -79,8 +79,7 @@ fun FieldTimePicker(
                     contentDescription = contentDescription,
                     tint = if (enabled) {
                         MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                    else {
+                    } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
@@ -165,7 +164,7 @@ fun FieldTimePicker(
 private fun TimePickerApp(
     onConfirm: (TimePickerState) -> Unit,
     onDismiss: () -> Unit,
-)  {
+) {
     val currentTime = Calendar.getInstance()
 
     val timePickerState = rememberTimePickerState(
@@ -292,8 +291,8 @@ private fun SurfaceTimePickerDialog(
             ) {
                 toggle()
                 Spacer(modifier = Modifier.weight(1f))
-                TextButton(onClick = onDismiss) { Text(text ="Cancel")}
-                TextButton(onClick = onConfirm) { Text(text = "Ok")}
+                TextButton(onClick = onDismiss) { Text(text = "Cancel") }
+                TextButton(onClick = onConfirm) { Text(text = "Ok") }
             }
         }
     }

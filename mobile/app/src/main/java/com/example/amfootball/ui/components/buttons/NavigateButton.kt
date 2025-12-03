@@ -15,9 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 
 /**
  * Um componente Composable que cria um botão de navegação com ícone e rótulo dispostos verticalmente.
@@ -33,25 +33,26 @@ import androidx.compose.ui.text.style.TextAlign
  * @param onClick A função lambda a ser executada quando o botão circular for clicado.
  */
 @Composable
-fun NavigateButton (
+fun NavigateButton(
     modifier: Modifier = Modifier,
     icon: ImageVector,
     label: String,
     onClick: () -> Unit
 ) {
     Column(
-            modifier = modifier,
-            horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Button(
+            onClick = onClick,
+            shape = CircleShape,
+            modifier = Modifier.height(56.dp)
         ) {
-    Button (onClick = onClick,
-        shape = CircleShape,
-        modifier = Modifier.height(56.dp)
-    ){
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            modifier = Modifier.size(ButtonDefaults.IconSize * 1.5f) // Ícone um pouco maior
-        )
+            Icon(
+                imageVector = icon,
+                contentDescription = label,
+                modifier = Modifier.size(ButtonDefaults.IconSize * 1.5f) // Ícone um pouco maior
+            )
         }
         Spacer(Modifier.width(8.dp))
         Text(

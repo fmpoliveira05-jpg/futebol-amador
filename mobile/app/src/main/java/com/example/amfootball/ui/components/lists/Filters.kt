@@ -1,15 +1,13 @@
 package com.example.amfootball.ui.components.lists
 
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.MatchStatus
 import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.data.enums.match.TypeMatch
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -45,9 +43,11 @@ fun FilterIsHomeMatch(
                 true -> {
                     stringResource(id = R.string.filter_home)
                 }
+
                 false -> {
                     stringResource(id = R.string.filter_away)
                 }
+
                 null -> {
                     stringResource(id = R.string.filter_both)
                 }
@@ -91,9 +91,11 @@ fun FilterIsCompetiveMatch(
                 TypeMatch.COMPETITIVE -> {
                     stringResource(id = TypeMatch.COMPETITIVE.stringId)
                 }
+
                 TypeMatch.CASUAL -> {
                     stringResource(id = TypeMatch.CASUAL.stringId)
                 }
+
                 null -> {
                     stringResource(id = R.string.filter_both)
                 }
@@ -138,6 +140,7 @@ fun FilterIsFinishMatch(
         textFieldModifier = textFieldModifier
     )
 }
+
 /**
  * Campo de input para filtrar equipas pelo nome.
  *

@@ -1,6 +1,7 @@
 package com.example.amfootball.ui.viewModel.homePages
 
 import com.example.amfootball.data.dtos.support.TeamDto
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.TeamService
@@ -31,7 +32,7 @@ class TeamHomePageViewModel @Inject constructor(
     private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
-): BaseViewModel(
+) : BaseViewModel(
     networkObserver = networkObserver,
     needObserverNetwork = true
 ) {
@@ -48,28 +49,25 @@ class TeamHomePageViewModel @Inject constructor(
     val team: StateFlow<TeamDto> = teamInfo.asStateFlow()
 
     /**
-     * Estado interno mutável que armazena o estatuto de administrador do utilizador.
-     * * É mantido como **privado** (`private`) para garantir que apenas este ViewModel
-     * tem permissão para alterar o seu valor (Encapsulamento), prevenindo
-     * modificações acidentais vindas da UI.
+     * Estado interno mutável do Role do utilizador.
      */
-    private val _isAdmin: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.MEMBER_TEAM)
 
     /**
-     * Fluxo público imutável (Read-only) que indica se o utilizador atual é administrador da equipa.
-     * * A UI observa este fluxo para adaptar o layout dinamicamente:
-     * - `true`: Mostra funcionalidades de gestão (Match Center, Agendar jogos).
-     * - `false`: Mostra apenas funcionalidades de visualização (Membros, Calendário).
+     * Fluxo público imutável que indica o nível de permissão do utilizador na equipa.
+     *
+     * A UI deve observar este estado para decidir quais cartões mostrar:
+     * - [UserRole.ADMIN_TEAM]: Mostra tudo (Agendar, Gerir).
+     * - [UserRole.MEMBER_TEAM]: Mostra apenas visualização (Calendário, Lista).
+     *
+     * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
      */
-    val isAdmin: StateFlow<Boolean> = _isAdmin.asStateFlow()
+
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
 
     init {
         loadInfoTeam()
-
-        val isAdminValue = sessionManager.getUserProfile()?.isAdmin
-        if(isAdminValue != null) {
-            _isAdmin.value = isAdminValue
-        }
+        loadUserRole()
     }
 
     /**
@@ -79,9 +77,9 @@ class TeamHomePageViewModel @Inject constructor(
      * e capturar possíveis exceções de rede.
      */
     private fun loadInfoTeam() {
-        val teamId = sessionManager.getUserProfile()?.team?.id
+        val teamId = sessionManager.getUserProfile()?.effectiveTeamId
 
-        if (teamId == null) {
+        if (teamId.isNullOrEmpty()) {
             return
         }
 
@@ -92,7 +90,6 @@ class TeamHomePageViewModel @Inject constructor(
         }
     }
 
-    //TODO: Falta validar autorização
     /**
      * Tenta navegar para o ecrã de agendamento de partida Casual.
      *
@@ -101,6 +98,10 @@ class TeamHomePageViewModel @Inject constructor(
      * @param onSucess Callback executada se as condições (internet) forem cumpridas.
      */
     fun onNavigateCasualMatch(onSucess: () -> Unit) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            return
+        }
 
         onlineFunctionality(
             action = onSucess,
@@ -108,7 +109,6 @@ class TeamHomePageViewModel @Inject constructor(
         )
     }
 
-    //TODO: Falta validar autorização
     /**
      * Tenta navegar para o ecrã de agendamento de partida Rankeada (Competitiva).
      *
@@ -117,6 +117,10 @@ class TeamHomePageViewModel @Inject constructor(
      * @param onSucess Callback executada se as condições (internet) forem cumpridas.
      */
     fun onNavigateRankedMatch(onSucess: () -> Unit) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            return
+        }
 
         onlineFunctionality(
             action = onSucess,
@@ -146,5 +150,14 @@ class TeamHomePageViewModel @Inject constructor(
             action = onSucess,
             toastMessage = "Para visualizar o calendário de jogo precisa de ter internet"
         )
+    }
+
+    /**
+     * Carrega o Role do utilizador a partir da sessão local.
+     * Deve ser chamado na inicialização para configurar a UI imediatamente.
+     */
+    private fun loadUserRole() {
+        val profile = sessionManager.getUserProfile()
+        roleState.value = profile?.role ?: UserRole.MEMBER_TEAM
     }
 }

@@ -6,21 +6,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import com.example.amfootball.R
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.forms.FormMatchInviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
@@ -31,9 +31,9 @@ import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLimitedDate
-import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.utils.MatchConsts
@@ -155,8 +155,7 @@ private fun FieldsSendMatchInvite(
 
     TextFieldOutline(
         label = stringResource(id = R.string.filter_opponent),
-        value = fields.opponent?.name
-        ,
+        value = fields.opponent?.name,
         isReadOnly = true,
     )
 
@@ -169,18 +168,20 @@ private fun FieldsSendMatchInvite(
         isSingleLine = false,
         enabled = mode != MatchFormMode.CANCEL,
         errorMessage = errors.dateError?.let {
-            stringResource(id = it.messageId, *it.args.toTypedArray()) }
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        }
     )
 
     FieldTimePicker(
         value = fields.gameTimeString ?: "",
         onValueChange = actions.onTimeGameChange,
         label = stringResource(id = R.string.game_hours),
-        contentDescription = stringResource(id = R.string.description_game_date) ,
+        contentDescription = stringResource(id = R.string.description_game_date),
         isError = errors.dateError != null,
         enabled = mode != MatchFormMode.CANCEL,
         errorMessage = errors.timeError?.let {
-            stringResource(id = it.messageId, *it.args.toTypedArray()) },
+            stringResource(id = it.messageId, *it.args.toTypedArray())
+        },
     )
 
     Switcher(
@@ -212,7 +213,7 @@ private fun FieldsSendMatchInvite(
 
     }
 
-    if(mode != MatchFormMode.CANCEL) {
+    if (mode != MatchFormMode.CANCEL) {
         SubmitFormButton(
             onClick = { actions.onSubmitForm(navHostController) },
             imageButton = Icons.AutoMirrored.Filled.Send,
@@ -226,7 +227,8 @@ private fun FieldsSendMatchInvite(
             onClick = {
                 actions.onCancelForm(
                     navHostController,
-                    cancelReason)
+                    cancelReason
+                )
             },
             textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_button_cancel_match))
         )
@@ -249,7 +251,7 @@ val emptyFields = MatchInviteDto(
 val filledFields = MatchInviteDto(
     opponent = TeamDto(
         id = "2",
-        name="Lisboa Navigators"
+        name = "Lisboa Navigators"
     ),
     gameDateString = "2024-12-25",
     gameTimeString = "15:30",

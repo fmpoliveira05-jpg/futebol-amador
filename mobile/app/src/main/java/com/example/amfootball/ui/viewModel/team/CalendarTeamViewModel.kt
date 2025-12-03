@@ -4,12 +4,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
-import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.enums.MatchStatus
-import com.example.amfootball.data.enums.TypeMatch
+import com.example.amfootball.data.enums.match.MatchStatus
+import com.example.amfootball.data.enums.match.TypeMatch
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterCalendarError
+import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.CalendarService
 import com.example.amfootball.navigation.objects.Routes
@@ -42,7 +42,7 @@ class CalendarTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val calendarRepository: CalendarService,
     private val savedStateHandle: SavedStateHandle
-): ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
+) : ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
     private val teamId = savedStateHandle.get<String>("teamId")
 
@@ -51,7 +51,8 @@ class CalendarTeamViewModel @Inject constructor(
     val filter: StateFlow<FilterCalendar> = filterState
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
-    private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
+    private val listErrors: MutableStateFlow<FilterCalendarError> =
+        MutableStateFlow(FilterCalendarError())
     val uiErrors: StateFlow<FilterCalendarError> = listErrors
 
     //Inicializer
@@ -107,7 +108,7 @@ class CalendarTeamViewModel @Inject constructor(
      * 3. Se Offline: Filtra a lista localmente ([filterOffline]) usando a [originalList].
      */
     fun onApplyFilter() {
-        if(!validateFilters()) {
+        if (!validateFilters()) {
             return
         }
 
@@ -130,7 +131,7 @@ class CalendarTeamViewModel @Inject constructor(
         listErrors.value = FilterCalendarError()
         inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
 
-        if(networkObserver.isOnlineOneShot()) {
+        if (networkObserver.isOnlineOneShot()) {
             loadCalendar()
         } else {
             listState.value = originalList
@@ -207,8 +208,9 @@ class CalendarTeamViewModel @Inject constructor(
      */
     fun loadCalendar() {
         launchDataLoad {
-            if(teamId != null) {
-                val calendar = calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
+            if (teamId != null) {
+                val calendar =
+                    calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
 
                 listState.value = calendar
                 if (filterState.value == FilterCalendar()) {
@@ -223,13 +225,18 @@ class CalendarTeamViewModel @Inject constructor(
      * Filtra a lista de jogos em memória (offline).
      * Utiliza lógica "AND" (todos os critérios devem ser verdadeiros).
      */
-    private fun filterOffline(originalList: List<InfoMatchCalendar>, filter: FilterCalendar): List<InfoMatchCalendar> {
+    private fun filterOffline(
+        originalList: List<InfoMatchCalendar>,
+        filter: FilterCalendar
+    ): List<InfoMatchCalendar> {
         return originalList.filter { item ->
             val name = filter.opponentName.isNullOrBlank()
                     || item.opponent.name.contains(filter.opponentName, ignoreCase = true)
-            val minDate = filter.minGameDate == null || item.gameDate.toLocalDate() >= filter.minGameDate
-            val maxDate = filter.maxGameDate == null || item.gameDate.toLocalDate() <= filter.maxGameDate
-            val matchStatus = filter.isFinish == null || if(filter.isFinish) {
+            val minDate =
+                filter.minGameDate == null || item.gameDate.toLocalDate() >= filter.minGameDate
+            val maxDate =
+                filter.maxGameDate == null || item.gameDate.toLocalDate() <= filter.maxGameDate
+            val matchStatus = filter.isFinish == null || if (filter.isFinish) {
                 item.matchStatus == MatchStatus.DONE
             } else {
                 item.matchStatus != MatchStatus.SCHEDULED
@@ -276,7 +283,7 @@ class CalendarTeamViewModel @Inject constructor(
 
         listErrors.value = FilterCalendarError(
             opponentNameError = nameOpponentError,
-            minGameDateError =  minDateGameError,
+            minGameDateError = minDateGameError,
             maxGameDateError = maxDateGameError
         )
 

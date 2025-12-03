@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.navigation.objects.Routes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,7 +23,7 @@ import kotlinx.coroutines.launch
 abstract class BaseViewModel(
     private val networkObserver: NetworkConnectivityObserver,
     private val needObserverNetwork: Boolean = true,
-): ViewModel() {
+) : ViewModel() {
     /**
      * Estado global da UI.
      * Contém informações sobre se o ecrã está a carregar ([com.example.amfootball.data.UiState.isLoading]),
@@ -42,7 +41,7 @@ abstract class BaseViewModel(
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
     init {
-        if(needObserverNetwork) {
+        if (needObserverNetwork) {
             observeNetworkChanges()
         }
     }
@@ -66,7 +65,10 @@ abstract class BaseViewModel(
 
             if (checkOnline && !networkObserver.isOnlineOneShot()) {
                 _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = "Sem internet. Verifique a sua conexão."
+                    )
                 }
                 return@launch
             }
@@ -115,7 +117,7 @@ abstract class BaseViewModel(
     }
 
     protected fun onlineFunctionality(action: () -> Unit, toastMessage: String) {
-        if(networkObserver.isOnlineOneShot()) {
+        if (networkObserver.isOnlineOneShot()) {
             action()
         } else {
             updateToast(message = toastMessage)

@@ -1,22 +1,22 @@
 package com.example.amfootball.ui.viewModel.team
 
-import androidx.lifecycle.SavedStateHandle
-import com.example.amfootball.data.dtos.team.FormTeamDto
-import javax.inject.Inject
 import android.net.Uri
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.errors.formErrors.TeamFormErros
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.PitchConst
-import com.example.amfootball.utils.TeamConst
 import com.example.amfootball.R
+import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.errors.ErrorMessage
+import com.example.amfootball.data.errors.formErrors.TeamFormErros
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PitchConst
+import com.example.amfootball.utils.TeamConst
 import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
 //TODO: Testar tudo, quando tiver a rota com a autentificação e autorização funcional
 /**
@@ -113,7 +113,8 @@ class TeamFormViewModel @Inject constructor(
      * Também realiza uma atualização num objeto aninhado.
      */
     fun onAddressPitchChange(address: String) {
-        formState.value = formState.value.copy(pitch = formState.value.pitch.copy(address = address))
+        formState.value =
+            formState.value.copy(pitch = formState.value.pitch.copy(address = address))
     }
 
     // --- MÉTODOS PÚBLICOS (Ações) ---
@@ -123,7 +124,7 @@ class TeamFormViewModel @Inject constructor(
      * Usa o [loadFormData] do Pai para gerir o estado de loading e erros.
      */
     fun loadDataTeam() {
-        if (teamId == null)  {
+        if (teamId == null) {
             return
         }
 
@@ -197,7 +198,8 @@ class TeamFormViewModel @Inject constructor(
         } else if (nameLength < TeamConst.MIN_NAME_LENGTH) {
             nameErr = ErrorMessage(
                 messageId = R.string.error_min_name_team,
-                args = listOf(TeamConst.MIN_NAME_LENGTH))
+                args = listOf(TeamConst.MIN_NAME_LENGTH)
+            )
         } else if (nameLength > TeamConst.MAX_NAME_LENGTH) {
             nameErr = ErrorMessage(
                 messageId = R.string.error_max_name_team,

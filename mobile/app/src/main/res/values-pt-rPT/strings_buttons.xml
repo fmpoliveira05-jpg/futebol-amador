@@ -5,7 +5,7 @@
 
     <string name="submit_button">Submeter</string>
     <string name="submit_button_description">Botão que permite submeter um formulário</string>"
-    
+
     <string name="clear_button">Limpar</string>
     <string name="clear_button_description">Botão que permite apagar os filtros aplicados</string>
 

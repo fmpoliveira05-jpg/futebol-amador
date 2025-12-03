@@ -58,7 +58,6 @@ class ProfilePlayerViewModel @Inject constructor(
         if (!playerId.isNullOrBlank()) {
             loadPlayerProfile(playerId = playerId)
         } else {
-            // Carrega o perfil do próprio utilizador (Sessão)
             val myCachedProfile = sessionManager.getUserProfile()
             if (myCachedProfile != null) {
                 profilePlayer.value = myCachedProfile

@@ -22,9 +22,9 @@ import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPostPoneMatchActions
 import com.example.amfootball.data.actions.itemsList.ItemsListPostPoneMatchActions
-import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
+import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.mocks.lists.ListPostPoneMatchMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
@@ -48,6 +48,16 @@ import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
 
+//TODO: POR METER CONEXÃO COM O BACKEND
+/**
+ * Ecrã de Listagem de Pedidos de Adiamento (Postpone Match Requests).
+ *
+ * Este ecrã exibe todos os pedidos de remarcação de jogos que a equipa recebeu ou enviou.
+ * Permite filtrar a lista e tomar decisões sobre os pedidos pendentes.
+ *
+ * @param navHostController Controlador de navegação para detalhes (ex: Perfil do Adversário).
+ * @param viewModel ViewModel injetado via Hilt que gere o estado, filtros e ações da lista.
+ */
 @Composable
 fun ListPostPoneMatchScreen(
     navHostController: NavHostController,
@@ -90,6 +100,24 @@ fun ListPostPoneMatchScreen(
     )
 }
 
+/**
+ * Conteúdo visual da lista de pedidos de adiamento (Stateless).
+ *
+ * Responsável por estruturar a página com a lógica de:
+ * - Status de Carregamento e Erro.
+ * - Banner Offline.
+ * - Secção de Filtros Expansível.
+ * - Renderização da lista principal.
+ *
+ * @param uiState Estado da UI (Loading, Erros).
+ * @param isOnline Estado da conectividade.
+ * @param filters Valores atuais dos filtros.
+ * @param filtersError Erros de validação nos filtros.
+ * @param filterActions Callbacks para filtros.
+ * @param list A lista de pedidos [PostPoneMatchDto].
+ * @param itemsListActions Callbacks de ação do item (Aceitar/Rejeitar).
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun ListPostPoneMatchContent(
     uiState: UiState,
@@ -139,6 +167,16 @@ private fun ListPostPoneMatchContent(
     )
 }
 
+/**
+ * Painel que contém todos os campos de filtro para pedidos de adiamento.
+ *
+ * Este painel é complexo, pois permite filtrar por datas de jogo *original* e datas de jogo *proposto*.
+ *
+ * @param filters Valores atuais dos filtros.
+ * @param filtersError Erros de validação associados (ex: data mínima superior à máxima).
+ * @param filterActions Callbacks para alteração de valores.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 private fun FilterListPostPoneMatchContent(
     filters: FilterPostPoneMatch,
@@ -183,7 +221,7 @@ private fun FilterListPostPoneMatchContent(
 
                 FilterMaxDateGamePicker(
                     maxDateGame = filters.maxDateGame?.format(displayFormatter) ?: "",
-                    onDateSelected = { filterActions.onMaxDateGameChange(it)},
+                    onDateSelected = { filterActions.onMaxDateGameChange(it) },
                     isError = filtersError.maxDateGameError != null,
                     errorMessage = filtersError.maxDateGameError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
@@ -211,7 +249,7 @@ private fun FilterListPostPoneMatchContent(
                     label = stringResource(id = R.string.filter_max_date_post_pone),
                     contentDescription = stringResource(id = R.string.description_filter_max_date),
                     value = filters.maxDatePostPone?.format(displayFormatter) ?: "",
-                    onDateSelected = { filterActions.onMaxDatePostPoneChange(it)},
+                    onDateSelected = { filterActions.onMaxDatePostPoneChange(it) },
                     errorMessage = filtersError.maxDatePostPoneError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
                     },
@@ -229,6 +267,16 @@ private fun FilterListPostPoneMatchContent(
     }
 }
 
+/**
+ * Item individual da lista de pedidos de adiamento.
+ *
+ * Renderiza o cartão com os dados de comparação de datas (original vs. proposta) e os botões
+ * de decisão (Aceitar/Rejeitar) na área "trailing".
+ *
+ * @param postPoneMatch O DTO com os dados do pedido de adiamento.
+ * @param itemsListActions Callbacks de ação (Aceitar, Rejeitar, Ver Mais).
+ * @param navHostController Controlador de navegação.
+ */
 @Composable
 private fun ItemListPosPoneMatch(
     postPoneMatch: PostPoneMatchDto,
@@ -242,7 +290,15 @@ private fun ItemListPosPoneMatch(
         supporting = {
             Column {
                 DateRow(date = "Game: ${it.gameDate.format(DateTimeFormatter.ofPattern(Patterns.DATE_TIME))}")
-                DateRow(date = "Postpone: ${it.postPoneDate.format(DateTimeFormatter.ofPattern(Patterns.DATE_TIME))}")
+                DateRow(
+                    date = "Postpone: ${
+                        it.postPoneDate.format(
+                            DateTimeFormatter.ofPattern(
+                                Patterns.DATE_TIME
+                            )
+                        )
+                    }"
+                )
                 PitchAddressRow(ptichAdrress = it.pitchMatch)
             }
         },
@@ -258,10 +314,15 @@ private fun ItemListPosPoneMatch(
         },
         trailing = {
             Row {
-                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.id)})
-                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.id)})
+                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.id) })
+                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.id) })
                 ShowMoreInfoButton(
-                    showMoreDetails = { itemsListActions.showMoreInfo(postPoneMatch.opponent.id, navHostController)},
+                    showMoreDetails = {
+                        itemsListActions.showMoreInfo(
+                            postPoneMatch.opponent.id,
+                            navHostController
+                        )
+                    },
                     contentDescription = stringResource(id = R.string.list_teams_view_team)
                 )
             }
