@@ -88,7 +88,8 @@ namespace Application.Services
                     Name = receiver.Name,
                 },             
                 GameDate = gameDate,
-                NamePitch = pitch.Name
+                NamePitch = pitch.Name,
+                isHome = isHome
             };
 
             var teamAdmins = receiver.Members
