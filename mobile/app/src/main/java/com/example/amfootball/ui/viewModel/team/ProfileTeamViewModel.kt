@@ -52,7 +52,7 @@ class ProfileTeamViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState
 
     init {
-        val teamIdSessionManager = sessionManager.getUserProfile()?.team?.id
+        val teamIdSessionManager = sessionManager.getUserProfile()?.effectiveTeamId
 
         if (teamId.isNullOrBlank() && !teamIdSessionManager.isNullOrBlank()) {
             teamId = teamIdSessionManager

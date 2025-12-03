@@ -54,6 +54,9 @@ import com.example.amfootball.ui.viewModel.SettingsViewModel
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.utils.extensions.composableNotProtectedRoute
 import com.example.amfootball.utils.extensions.composableProtected
+import com.example.amfootball.utils.extensions.composableProtectedAdminTeam
+import com.example.amfootball.utils.extensions.composableProtectedMemberTeam
+import com.example.amfootball.utils.extensions.composableProtectedPlayerWithouTeam
 
 //TODO: Colocar autorização nas rotas, até agora só temos autentificação
 @Composable
@@ -138,7 +141,7 @@ private fun NavGraphBuilder.homePages(
         )
     }
 
-    composableProtected(
+    composableProtectedMemberTeam(
         route = Routes.TeamRoutes.HOMEPAGE.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -236,9 +239,14 @@ private fun NavGraphBuilder.userPages(
         LeaderboardScreen(navHostController = globalNavController)
     }
 
-    composable(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
-        ListMemberShipRequest(navHostController = globalNavController)
-    }
+    composableProtectedPlayerWithouTeam(
+        route = Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route,
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListMemberShipRequest(navHostController = globalNavController)
+        }
+    )
 }
 
 private fun NavGraphBuilder.profilePlayer(
@@ -275,7 +283,7 @@ private fun NavGraphBuilder.teamPages(
 
     teamMatch(sessionManager = sessionManager, globalNavController = globalNavController)
 
-    composableProtected(
+    composableProtectedMemberTeam(
         route = Routes.TeamRoutes.MEMBERLIST.route,
         sessionManager = sessionManager,
         navController = globalNavController,
@@ -284,7 +292,7 @@ private fun NavGraphBuilder.teamPages(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -293,7 +301,7 @@ private fun NavGraphBuilder.teamPages(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -301,15 +309,13 @@ private fun NavGraphBuilder.teamPages(
             ListPlayersScreen(navHostController = globalNavController)
         }
     )
-
-
 }
 
 private fun NavGraphBuilder.teamMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedMemberTeam(
         navController = globalNavController,
         route = "${Routes.TeamRoutes.CALENDAR.route}/{${Arguments.TEAM_ID}}",
         sessionManager = sessionManager,
@@ -327,7 +333,7 @@ private fun NavGraphBuilder.teamMatch(
 
     competitiveMatches(globalNavController = globalNavController, sessionManager = sessionManager)
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.LIST_POST_PONE_MATCH.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -341,7 +347,7 @@ private fun NavGraphBuilder.managementMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedAdminTeam(
         route = "${Routes.TeamRoutes.POST_PONE_MATCH.route}/{${Arguments.MATCH_ID}}",
         arguments = listOf(
             navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
@@ -354,7 +360,7 @@ private fun NavGraphBuilder.managementMatch(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.FINISH_MATCH.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -363,7 +369,7 @@ private fun NavGraphBuilder.managementMatch(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = "${Routes.TeamRoutes.CANCEL_MATCH.route}/{${Arguments.MATCH_ID}}",
         arguments = listOf(
             navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
@@ -382,7 +388,7 @@ private fun NavGraphBuilder.casualMatches(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -391,7 +397,7 @@ private fun NavGraphBuilder.casualMatches(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.LIST_MATCH_INVITES.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -400,7 +406,7 @@ private fun NavGraphBuilder.casualMatches(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEND_MATCH_INVITE.route,
         arguments = listOf(
             navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.SEND.name }
@@ -412,7 +418,7 @@ private fun NavGraphBuilder.casualMatches(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.MATCH_INVITE_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
@@ -425,22 +431,13 @@ private fun NavGraphBuilder.casualMatches(
             FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
-
-    composableProtected(
-        route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route,
-        navController = globalNavController,
-        sessionManager = sessionManager,
-        content = {
-            FormMatchInviteScreen(navHostController = globalNavController)
-        }
-    )
 }
 
 private fun NavGraphBuilder.competitiveMatches(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -457,7 +454,7 @@ private fun NavGraphBuilder.crudTeamPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedPlayerWithouTeam(
         route = Routes.TeamRoutes.CREATE_TEAM.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -466,7 +463,7 @@ private fun NavGraphBuilder.crudTeamPages(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = "${Routes.TeamRoutes.UPDATE_TEAM.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
@@ -485,7 +482,7 @@ private fun NavGraphBuilder.profileTeam(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedMemberTeam(
         route = Routes.TeamRoutes.TEAM_PROFILE.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -508,7 +505,7 @@ private fun NavGraphBuilder.chatPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.PlayerRoutes.CHAT_LIST.route,
         navController = globalNavController,
         sessionManager = sessionManager,
@@ -517,7 +514,7 @@ private fun NavGraphBuilder.chatPages(
         }
     )
 
-    composableProtected(
+    composableProtectedAdminTeam(
         route = Routes.PlayerRoutes.SINGLE_CHAT.route,
         arguments = listOf(
             navArgument(Routes.chatRoomId) { type = NavType.StringType }

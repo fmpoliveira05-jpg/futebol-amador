@@ -92,7 +92,6 @@ fun MainTopAppBar(
                         contentDescription = stringResource(Routes.UserRoutes.LOGOUT.labelResId)
                     )
                 }
-
             }
         }
     )

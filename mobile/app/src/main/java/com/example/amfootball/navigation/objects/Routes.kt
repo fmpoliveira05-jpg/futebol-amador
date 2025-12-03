@@ -66,31 +66,10 @@ object Routes {
         override val contentDescription: Int,
         override val haveBackButton: Boolean = false
     ) : AppRouteInfo {
-        SETTINGS(
-            "Settings",
-            R.string.item_settings,
-            Icons.Default.Settings,
-            R.string.item_settings_description,
-            true
-        ),
-        PREFERENCE(
-            "Preference",
-            R.string.item_preference,
-            Icons.Default.AccessibilityNew,
-            R.string.item_preference_description
-        ),
-        HOMEPAGE(
-            "homepage",
-            R.string.item_home,
-            Icons.Default.Home,
-            R.string.item_home_description
-        ),
-        LEADERBOARD(
-            "leaderboard",
-            R.string.item_leadboard,
-            Icons.Default.EmojiEvents,
-            R.string.item_leadboard_description
-        ),
+        SETTINGS("Settings", R.string.item_settings, Icons.Default.Settings, R.string.item_settings_description, true),
+        PREFERENCE("Preference", R.string.item_preference, Icons.Default.AccessibilityNew, R.string.item_preference_description),
+        HOMEPAGE("homepage", R.string.item_home, Icons.Default.Home, R.string.item_home_description),
+        LEADERBOARD("leaderboard", R.string.item_leadboard, Icons.Default.EmojiEvents, R.string.item_leadboard_description),
     }
 
     /**
