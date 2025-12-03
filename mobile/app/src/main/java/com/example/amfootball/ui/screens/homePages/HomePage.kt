@@ -29,8 +29,8 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.mocks.UiStateMock
 import com.example.amfootball.data.mocks.homePages.HomePageMock
-import com.example.amfootball.data.mocks.lists.UiStateMock
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.cards.ActionCard
 import com.example.amfootball.ui.components.notification.OfflineBanner

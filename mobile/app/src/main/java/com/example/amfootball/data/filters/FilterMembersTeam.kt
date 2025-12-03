@@ -23,6 +23,19 @@ data class FilterMembersTeam(
     val position: Position? = null,
 )
 
+/**
+ * Converte os critérios de filtro definidos neste objeto para um mapa de parâmetros de consulta (Query Map).
+ *
+ * Esta função de extensão prepara os dados para serem consumidos por clientes HTTP (como Retrofit),
+ * ignorando campos nulos e transformando tipos complexos em Strings compatíveis com a API.
+ *
+ * **Lógica de Transformação:**
+ * - Campos nulos são omitidos do mapa.
+ * - `typeMember`: É convertido para a chave `"IsAdmin"`. Se for [TypeMember.ADMIN_TEAM] o valor será "true", caso contrário "false".
+ * - `position`: Utiliza o nome do enum (ex: "GOALKEEPER").
+ *
+ * @return Um [Map] onde a chave é o nome do parâmetro esperado pela API e o valor é o dado filtrado em String.
+ */
 fun FilterMembersTeam.toQueryMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()
 

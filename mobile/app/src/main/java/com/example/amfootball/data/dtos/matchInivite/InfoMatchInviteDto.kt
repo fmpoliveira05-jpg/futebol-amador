@@ -1,6 +1,5 @@
 package com.example.amfootball.data.dtos.matchInivite
 
-import android.net.Uri
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.google.gson.annotations.SerializedName
 

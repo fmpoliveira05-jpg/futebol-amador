@@ -26,34 +26,4 @@ data class InfoPlayerDto(
     val position: Position,
     val heigth: Int = 0,
     val haveTeam: Boolean = false,
-) {
-    /*
-    * companion object {
-        fun createExamplePlayerList(): List<InfoPlayerDto> {
-            val firstNames = listOf(
-                "Diogo", "Bruno", "João", "Rui", "Cristiano", "Pedro",
-                "Miguel", "Nuno", "André", "Fábio"
-            )
-            val lastNames = listOf(
-                "Silva", "Costa", "Fernandes", "Santos", "Gomes",
-                "Lopes", "Alves", "Martins", "Dias", "Ribeiro"
-            )
-
-            val cities = listOf("Lisboa", "Porto", "Braga", "Faro", "Coimbra", "Aveiro")
-
-            val allPositions = Position.values()
-
-            return (1..20).map {
-                InfoPlayerDto(
-                    id = UUID.randomUUID().toString(),
-                    name = "${firstNames.random()} ${lastNames.random()}",
-                    address = cities.random(),
-                    age = (18..38).random(),
-                    position = allPositions.random(),
-                    size = (165..195).random()
-                )
-            }
-        }
-    }
-    * */
-}
+)

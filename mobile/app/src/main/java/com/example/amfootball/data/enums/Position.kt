@@ -16,7 +16,7 @@ enum class Position(@StringRes val stringId: Int) {
     /**
      * O Guarda-Redes. Aceita os valores "0", "Goalkeeper" ou "GoalKeeper" na desserialização JSON.
      */
-    @SerializedName("0", alternate = ["GoalKeeper", "Goalkeeper"]) // Aceita nº 0 ou String
+    @SerializedName("0", alternate = ["GoalKeeper", "Goalkeeper"])
     GOALKEEPER(stringId = R.string.position_goalkeeper),
 
     /**
