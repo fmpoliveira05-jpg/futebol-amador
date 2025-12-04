@@ -3,6 +3,7 @@ package com.example.amfootball.data.network.interfaces
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -76,7 +77,7 @@ interface CalendarApi {
     @PUT("${BaseEndpoints.CALENDAR_API}/{idTeam}/PostponeMatch")
     suspend fun postponeMatch(
         @Path("idTeam") idTeam: String,
-        @Body postponeMatch: PostPoneMatchDto
+        @Body postponeMatch: SendMatchInviteDto
     ): Response<Unit>
 
     /**

@@ -36,7 +36,7 @@ object RetrofitInstance {
      */
     // MUDE ISTO para o URL base da sua API .NET
     //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
 
     /**
      * Providencia e configura o cliente HTTP [OkHttpClient].

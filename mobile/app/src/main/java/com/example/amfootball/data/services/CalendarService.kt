@@ -1,8 +1,8 @@
 package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.CalendarApi
@@ -67,9 +67,16 @@ class CalendarService @Inject constructor(
      * @param postponeMatch O DTO com a proposta de nova data.
      * @throws Exception Se o servidor rejeitar o pedido (ex: 400 Bad Request).
      */
-    suspend fun postPoneMatch(teamId: String, postponeMatch: PostPoneMatchDto) {
-        safeApiCallWithNotReturn {
-            calendarApi.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
+    suspend fun postPoneMatch(teamId: String, postponeMatch: SendMatchInviteDto) {
+        try {
+            val response = calendarApi.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
+
+            if (!response.isSuccessful) {
+                handleApiError(response)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw e
         }
     }
 

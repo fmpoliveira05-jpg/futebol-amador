@@ -7,13 +7,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
+import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.CalendarService
+import com.example.amfootball.data.services.MatchInviteService
 import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.navigation.objects.Arguments
 import com.example.amfootball.navigation.objects.Routes
@@ -52,6 +54,7 @@ class FormMatchInviteViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val calendarRepository: CalendarService,
     private val teamRepository: TeamService,
+    private val matchInviteRepository: MatchInviteService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
 ) : ViewModel() {
@@ -67,6 +70,7 @@ class FormMatchInviteViewModel @Inject constructor(
 
     /** ID da equipa do utilizador atual. */
     private val idMyTeam = sessionManager.getUserProfile()?.team?.id ?: ""
+
 
     /**
      * O modo de operação atual do formulário ([MatchFormMode]).
@@ -98,6 +102,7 @@ class FormMatchInviteViewModel @Inject constructor(
 
     init {
         loadData()
+        _uiState.update { it.copy(isLoading = false) }
     }
 
     // --- MÉTODOS DE UI (Setters) ---
@@ -109,14 +114,24 @@ class FormMatchInviteViewModel @Inject constructor(
      * @param millis Data selecionada em milissegundos (Epoch).
      */
     fun onGameDateChange(millis: Long) {
-        val newDate = convertMillisToDate(millis)
+        val displayDate = convertMillisToDate(millis)
+        val apiDate = formatToApiDate(millis)
+
         val current = formState.value
 
         formState.value = current.copy(
-            gameDateString = newDate
+            gameDateString = displayDate,
+            gameDateRaw = apiDate // Guardamos aqui o formato correto
         )
     }
+    private fun formatToApiDate(millis: Long): String {
+        // "yyyy-MM-dd" corresponde ao ISO_LOCAL_DATE, mas podemos definir explicitamente
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
+        return Instant.ofEpochMilli(millis)
+            .atZone(ZoneId.of("UTC")) // Define o fuso horário como UTC, tal como tinhas no snippet
+            .format(formatter)
+    }
     /**
      * Atualiza a hora do jogo selecionada no formulário.
      *
@@ -149,7 +164,7 @@ class FormMatchInviteViewModel @Inject constructor(
     fun loadData() {
         when (modeStr) {
             MatchFormMode.NEGOCIATE.name -> {
-                //TODO: Fazer o pedido ao endPoint de negociate
+                loadDataNegociate()
             }
 
             MatchFormMode.SEND.name -> {
@@ -179,21 +194,25 @@ class FormMatchInviteViewModel @Inject constructor(
      * @param navHostController Controlador para navegação após sucesso.
      */
     fun onSubmitForm(navHostController: NavHostController) {
-        if (!isFormValid()) {
+        if(!isFormValid()) {
+            Log.d("FormMatchInviteViewModel", "onSubmitForm: FormInvalido")
+
             return
         }
 
         when (modeStr) {
             MatchFormMode.NEGOCIATE.name -> {
-                //TODO: Fazer o pedido ao endPoint de negociate
+                negotiateMatchInvite(navHostController)
             }
 
             MatchFormMode.SEND.name -> {
-                //TODO: Mandar pedido há API para ir buscar apenas o nome do Opponente
+                sendMatchInvite(navHostController)
+                Log.d("FormMatchInviteViewModel", "onSubmitForm: Entrou no send")
+
             }
 
             MatchFormMode.POSTPONE.name -> {
-                //TODO: Fazer o pedido ao endPoint de postponeMatch
+                postponeMatch(navHostController)
             }
 
             else -> {
@@ -203,6 +222,140 @@ class FormMatchInviteViewModel @Inject constructor(
 
         navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
             popUpTo(0)
+        }
+    }
+
+    private fun postponeMatch(navHostController: NavHostController){
+        val opponentId = formState.value.opponent?.id
+        Log.d("FormMatchInviteViewModel", "onSubmitForm opponentId: $opponentId")
+        val gameDate = formState.value.gameDateRaw
+        _uiState.update { it.copy(isLoading = true) }
+        if (!isMatchInviteValid(opponentId, gameDate)) {
+            _uiState.update { it.copy(isLoading = false) }
+            return
+        }
+        val matchInvite = getSendMatchInviteDto(opponentId!!, gameDate!!)
+        matchInvite.idMatch = matchId
+        Log.d("FormMatchInviteViewModel", "matchId: $matchId")
+
+        viewModelScope.launch {
+            try {
+                if (!networkObserver.isOnlineOneShot()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sem internet. Verifique a sua conexão."
+                        )
+                    }
+                    return@launch
+                }
+
+                Log.d("FormMatchInviteViewModel", "onCancelForm: $matchId")
+
+                calendarRepository.postPoneMatch(idMyTeam, matchInvite)
+
+
+                _uiState.update { it.copy(isLoading = false) }
+                val rota = "${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam"
+
+                navHostController.navigate(rota) {
+                    popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+            }
+        }
+    }
+    private fun negotiateMatchInvite(navHostController: NavHostController){
+        val opponentId = formState.value.opponent?.id
+        val gameDate = formState.value.gameDateRaw
+        _uiState.update { it.copy(isLoading = true) }
+        if (!isMatchInviteValid(opponentId, gameDate)) {
+            _uiState.update { it.copy(isLoading = false) }
+            return
+        }
+        val matchInvite = getSendMatchInviteDto(opponentId!!, gameDate!!)
+
+        viewModelScope.launch {
+            try {
+                if (!networkObserver.isOnlineOneShot()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sem internet. Verifique a sua conexão."
+                        )
+                    }
+                    return@launch
+                }
+                if(matchId == null) {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Não foi encontrada nenhuma equipa com esse Id") }
+                    return@launch
+                }
+                Log.d("FormMatchInviteViewModel", "onCancelForm: $matchId")
+
+                matchInviteRepository.negociateMatchInvite(idMyTeam, matchInvite)
+
+
+                _uiState.update { it.copy(isLoading = false) }
+                val rota = "${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam"
+
+                navHostController.navigate(rota) {
+                    popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+            }
+        }
+    }
+
+    private fun sendMatchInvite(navHostController: NavHostController) {
+        val opponentId = formState.value.opponent?.id
+        val gameDate = formState.value.gameDateRaw
+
+        _uiState.update { it.copy(isLoading = true) }
+        if (!isMatchInviteValid(opponentId, gameDate)) {
+            _uiState.update { it.copy(isLoading = false) }
+            return
+        }
+        Log.d("FormMatchInviteViewModel", "AT send match invite opponentteamId: ${opponentId}")
+        Log.d("FormMatchInviteViewModel", "AT send match invite formStateValue: ${formState.value}")
+        Log.d("FormMatchInviteViewModel", "AT send match invite gameDate: ${gameDate}")
+
+        val matchInvite = getSendMatchInviteDto(opponentId, gameDate)
+
+        viewModelScope.launch {
+            try {
+                if (!networkObserver.isOnlineOneShot()) {
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = "Sem internet. Verifique a sua conexão."
+                        )
+                    }
+                    return@launch
+                }
+
+                matchInviteRepository.sendMatchInvite(idMyTeam, matchInvite)
+
+
+                _uiState.update { it.copy(isLoading = false) }
+                val rota = "${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam"
+
+                navHostController.navigate(rota) {
+                    popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
+                        inclusive = false
+                    }
+                    launchSingleTop = true
+                }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+            }
         }
     }
 
@@ -271,6 +424,46 @@ class FormMatchInviteViewModel @Inject constructor(
     //TODO: Implementar e arranjar forma de receber o id do oponnet
     private fun loadDataSend() {
 
+        val opponentTeamId = savedStateHandle.get<String>(Arguments.TEAM_ID)
+        val opponentTeamName = savedStateHandle.get<String>(Arguments.TEAM_NAME)
+        Log.d("FormMatchInviteViewModel", "opponentTeamId: $opponentTeamId")
+        Log.d("FormMatchInviteViewModel", "opponentTeamId: $opponentTeamName")
+
+        if (opponentTeamName != null && opponentTeamId != null) {
+            val teamDto = TeamDto(id =opponentTeamId,opponentTeamName)
+            formState.value = formState.value.copy(opponent = teamDto)
+            Log.d("FormMatchInviteViewModel", "formStateValue: ${formState.value.opponent}")
+
+        }
+    }
+
+    private fun loadDataNegociate(){
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            if (!networkObserver.isOnlineOneShot()) {
+                _uiState.update {
+                    it.copy(isLoading = false, errorMessage = "Sem internet. Verifique a sua conexão.")
+                }
+
+                return@launch
+            }
+
+            try {
+                if(matchId == null) {
+                    _uiState.update { it.copy(isLoading = false, errorMessage = "Não foi encontrada nenhuma equipa com esse Id") }
+                    return@launch
+                }
+
+                val rawMatch = matchInviteRepository.getInviteMatch(teamId = idMyTeam, matchInviteId = matchId)
+                val processedMatch = MatchInviteDto.createFromBackend(rawMatch)
+
+                formState.value = processedMatch
+                _uiState.update { it.copy(isLoading = false) }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+            }
+        }
     }
 
     /**
@@ -391,6 +584,27 @@ class FormMatchInviteViewModel @Inject constructor(
         return errorReason == null
     }
 
+    private fun isMatchInviteValid(opponentId: String?, gameDate: String?): Boolean {
+        var errorReason: ErrorMessage? = null
+        var dateError: ErrorMessage? = null
+
+        if (gameDate.isNullOrBlank()) {
+            dateError = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
+        }
+        if (opponentId.isNullOrBlank()){
+            errorReason = ErrorMessage(
+                messageId = R.string.mandatory_field
+            )
+        }
+        errors.value = MatchInviteFormErros(
+            dateError = dateError,
+        )
+
+        return errorReason == null
+    }
+
     /**
      * Utilitário para converter milissegundos em String de data (dd/MM/yyyy).
      * Utiliza o fuso horário padrão do sistema.
@@ -401,5 +615,12 @@ class FormMatchInviteViewModel @Inject constructor(
             .atZone(ZoneId.systemDefault()) // Usa o fuso horário do sistema.
             .toLocalDate()
             .format(formatter)
+    }
+
+    private fun getSendMatchInviteDto(opponentId: String?, gameDate: String?) : SendMatchInviteDto {
+        val fullDateTime = "${gameDate}T${formState.value.gameTimeString}:00"
+        val matchInv = SendMatchInviteDto(idSender = idMyTeam, idReceiver =  opponentId!!, gameDate =  fullDateTime, homePitch = formState.value.isHomeGame)
+        Log.d("FormMatchInviteViewModel", "getSendMatchInviteDto: $matchInv")
+        return matchInv
     }
 }

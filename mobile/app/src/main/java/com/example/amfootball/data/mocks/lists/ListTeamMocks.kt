@@ -89,6 +89,6 @@ object ListTeamMocks {
      * Fornece callbacks vazios para eventos de clique (ver detalhes, desafiar, etc.).
      */
     val mockItemActions = ItemsListTeamAction(
-        { _, _ -> }, { _, _ -> }, { _, _ -> }
+        { _,_, _ -> }, { _, _ -> }, { _, _ -> }
     )
 }

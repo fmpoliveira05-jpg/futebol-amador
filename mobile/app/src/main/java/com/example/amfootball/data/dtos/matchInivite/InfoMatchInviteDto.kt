@@ -22,7 +22,9 @@ data class InfoMatchInviteDto(
     @SerializedName("GameDate", alternate = ["gameDate"])
     val gameDate: String = "",
     @SerializedName("PitchGame", alternate = ["pitchGame"])
-    val pitchGame: String = ""
+    val pitchGame: String = "",
+    @SerializedName("IsHome", alternate = ["isHome"])
+    val isHomeGame: Boolean = false
 ) {
     companion object {
         fun generatePreviewList(): List<InfoMatchInviteDto> {

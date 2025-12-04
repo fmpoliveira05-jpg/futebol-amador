@@ -17,12 +17,18 @@ import java.time.LocalDateTime
  * Se `false`, o jogo realiza-se no campo da equipa [idReceiver] (Fora).
  */
 data class SendMatchInviteDto(
-    @SerializedName("IdSender", alternate = ["idSender"])
+    @SerializedName("IdMatch", alternate = ["idMatch"])
+    var idMatch: String? = null,
+    @SerializedName("IdSender", alternate = ["idSender", "idTeam"])
     val idSender: String,
     @SerializedName("IdReceiver", alternate = ["idReceiver"])
     val idReceiver: String,
+    @SerializedName("IdOpponent", alternate = ["idOpponent"])
+    val idOpponent: String = idReceiver,
     @SerializedName("GameDate", alternate = ["gameDate"])
-    val gameDate: LocalDateTime,
+    val gameDate: String,
+    @SerializedName("PostPoneDate", alternate = ["postPoneDate"])
+    val postPoneDate: String = gameDate,
     @SerializedName("HomePitch", alternate = ["homePitch"])
     val homePitch: Boolean
 )

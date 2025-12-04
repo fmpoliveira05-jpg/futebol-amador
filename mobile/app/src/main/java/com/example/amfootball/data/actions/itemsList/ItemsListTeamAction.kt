@@ -13,7 +13,7 @@ import androidx.navigation.NavHostController
  * @property onShowMore Callback para navegar para a tela de detalhes da equipa. Recebe o ID da equipa-alvo (String) e o [NavHostController].
  */
 data class ItemsListTeamAction(
-    val onSendMatchInvite: (idTeam: String, navHostController: NavHostController) -> Unit,
+    val onSendMatchInvite: (idTeam: String, nameTeam: String, navHostController: NavHostController) -> Unit,
     val onSendMemberShipRequest: (idTeam: String, navHostController: NavHostController) -> Unit,
     val onShowMore: (idTeam: String, navHostController: NavHostController) -> Unit
 )

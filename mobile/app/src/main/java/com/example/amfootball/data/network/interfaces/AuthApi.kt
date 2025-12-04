@@ -31,7 +31,7 @@ interface AuthApi {
     @POST("${BaseEndpoints.PLAYER_API}/create-profile")
     suspend fun createProfile(
         @Body request: CreateProfileDto
-    ): Response<Unit>
+    ): Response<PlayerProfileDto>
 
     /**
      * Realiza a autenticação do utilizador no sistema (Login).

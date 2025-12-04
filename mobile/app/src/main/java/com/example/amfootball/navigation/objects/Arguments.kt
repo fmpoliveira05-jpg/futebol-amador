@@ -46,4 +46,5 @@ object Arguments {
      * permitindo reutilizar o mesmo ecrã (Composable) para criar ou editar entidades.
      */
     const val FORM_MODE = "formMode"
+    const val TEAM_NAME = "teamName"
 }

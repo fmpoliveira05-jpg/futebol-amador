@@ -8,6 +8,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
+
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
@@ -37,6 +39,10 @@ import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.utils.MatchConsts
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 /**
  * Ecrã principal (Stateful) para gestão de convites de partidas.
@@ -152,6 +158,12 @@ private fun FieldsSendMatchInvite(
     navHostController: NavHostController
 ) {
     var cancelReason by rememberSaveable { mutableStateOf("") }
+
+    val apiDateFormatter = remember {
+        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+    }
 
     TextFieldOutline(
         label = stringResource(id = R.string.filter_opponent),

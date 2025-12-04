@@ -43,9 +43,11 @@ class AuthService @Inject constructor(
     suspend fun loginUser(login: LoginDto): Boolean {
         try {
             val response = authApiService.loginUser(login)
-
             if (response.isSuccessful && response.body() != null) {
                 val userProfile = response.body()!!
+
+                firebaseAuth.signInWithEmailAndPassword(login.email, login.password).await()
+
 
                 sessionManager.saveUserProfile(userProfile)
                 sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
@@ -82,34 +84,28 @@ class AuthService @Inject constructor(
      * @param password A palavra-passe para criação da conta.
      * @throws Exception Se ocorrer erro na API ou no Firebase, propagando a mensagem para a UI.
      */
-    suspend fun registerUser(profile: CreateProfileDto, password: String) {
-        val createdFirebaseUser: FirebaseUser? = null
-
+    suspend fun registerUser(profile: CreateProfileDto) {
         try {
             val response = authApiService.createProfile(profile)
 
-            if (!response.isSuccessful) {
-                throw Exception("Falha ao criar perfil: ${response.code()}")
+            if (response.isSuccessful && response.body() != null) {
+                val userProfile = response.body()!!
+
+                sessionManager.saveUserProfile(userProfile)
+                sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
+                Log.d("AuthRepository", "Login completo e dados guardados.")
+
+            } else {
+                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
+
+                sessionManager.clearSession()
+                throw Exception(errorMsg)
             }
         } catch (e: Exception) {
             println("Erro no registo: ${e.message}")
             sessionManager.clearSession()
 
-            if (createdFirebaseUser != null) {
-                try {
-                    createdFirebaseUser.delete().await()
-                    Log.d(
-                        "AuthViewModel",
-                        "Rollback: Utilizador ${createdFirebaseUser.uid} apagado do Firebase."
-                    )
-                } catch (deleteEx: Exception) {
-                    Log.e(
-                        "AuthViewModel",
-                        "CRÍTICO: Falha ao apagar user do Firebase durante o rollback. Erro: ${deleteEx.message}"
-                    )
-                }
-                throw Exception("Erro no registo: ${e.message}")
-            }
         }
     }
 

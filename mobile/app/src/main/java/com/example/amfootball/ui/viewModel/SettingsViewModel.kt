@@ -48,6 +48,12 @@ class SettingsViewModel @Inject constructor(
     * Fluxo de estado do idioma atual da aplicação.
     * Inicializado lendo o valor persistido.
     */
+    private var _isLoading = MutableStateFlow(false)
+    val isLoading = _isLoading.asStateFlow()
+    /**
+    * Fluxo de estado do idioma atual da aplicação.
+    * Inicializado lendo o valor persistido.
+    */
     private var _language = MutableStateFlow(settingsStore.getLanguage())
     val language = _language.asStateFlow()
 
@@ -121,6 +127,7 @@ class SettingsViewModel @Inject constructor(
      * @param languageEnum O Enum [AppLanguage] da nova localidade.
      */
     fun changeLanguage(languageEnum: AppLanguage) {
+        this.startLoading()
         val code = languageEnum.code
 
         settingsStore.saveLanguage(languageEnum)
@@ -129,6 +136,7 @@ class SettingsViewModel @Inject constructor(
 
         val localeList = LocaleListCompat.forLanguageTags(code)
         AppCompatDelegate.setApplicationLocales(localeList)
+        _isLoading.value = false
     }
 
     /**
@@ -139,10 +147,19 @@ class SettingsViewModel @Inject constructor(
      * @param theme O Enum [AppTheme] do novo tema.
      */
     fun changeTheme(theme: AppTheme) {
+        this.startLoading()
         _theme.value = theme.name
 
         settingsStore.saveTheme(theme)
+        _isLoading.value = false
+    }
 
+    private fun startLoading(){
+        _isLoading.value = true
+    }
+
+    fun stopLoading(){
+        _isLoading.value = false
     }
 
     /**

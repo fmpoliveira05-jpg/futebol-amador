@@ -1,12 +1,15 @@
 package com.example.amfootball.data.network.interfaces
 
 import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+import retrofit2.http.QueryMap
 
 /**
  * Interface de API responsável pela gestão de Convites.
@@ -25,15 +28,26 @@ interface MatchInviteApi {
      * Endpoint: POST api/MatchInvite/{idTeam}/match-invites
      *
      * @param idTeam O identificador único (UUID) da equipa que está a enviar o desafio (Remetente).
-     * @param matchInivite O DTO [SendMatchInviteDto] contendo os detalhes do desafio (ID da equipa adversária, data, local).
+     * @param matchInvite O DTO [SendMatchInviteDto] contendo os detalhes do desafio (ID da equipa adversária, data, local).
      * @return [Response] contendo a informação do convite criado [InfoMatchInviteDto].
      */
     @POST("api/MatchInvite/{idTeam}/match-invites")
     suspend fun sendMatchInvite(
         @Path("idTeam") idTeam: String,
-        @Body matchInivite: SendMatchInviteDto
+        @Body dto: SendMatchInviteDto
     ): Response<InfoMatchInviteDto>
 
+    @POST("api/MatchInvite/{idTeam}/AcceptMatchInvite")
+    suspend fun acceptMatchInvite(
+        @Path("idTeam") idTeam: String,
+        @Body matchInviteId: String
+    ): Response<SendMatchInviteDto>
+
+    @GET("api/MatchInvite/{idTeam}")
+    suspend fun getMatchInvite(
+        @Path("idTeam") idTeam: String,
+        @Body matchInviteId: String
+    ): Response<List<MatchInviteDto>>
     /**
      * Negocia ou atualiza as condições de um convite de jogo existente.
      *
@@ -44,12 +58,13 @@ interface MatchInviteApi {
      * Endpoint: PUT api/MatchInvite/{idTeam}/Negociate
      *
      * @param idTeam O identificador da equipa que está a realizar a negociação.
-     * @param matchInivite O DTO [SendMatchInviteDto] com os novos termos propostos para o jogo.
+     * @param matchInvite O DTO [SendMatchInviteDto] com os novos termos propostos para o jogo.
      * @return [Response] contendo os detalhes do convite atualizado [InfoMatchInviteDto].
      */
     @PUT("api/MatchInvite/{idTeam}/Negociate")
     suspend fun negotiateMatch(
         @Path("idTeam") idTeam: String,
-        @Body matchInivite: SendMatchInviteDto
+        //se falhar voltar a por mal escrito por culpa do artur: matchInivite
+        @Body matchInvite: SendMatchInviteDto
     ): Response<InfoMatchInviteDto>
 }

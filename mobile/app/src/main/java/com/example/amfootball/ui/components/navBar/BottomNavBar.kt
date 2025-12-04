@@ -98,14 +98,17 @@ fun BottomSheetContent(
 ) {
     val buttonsToShow = mutableListOf<AppRouteInfo>()
 
+    buttonsToShow.addAll(
+        listOf(
+            Routes.GeralRoutes.LEADERBOARD,
+            )
+    )
     when (currentScreenRoute) {
         Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
             buttonsToShow.addAll(
                 listOf(
-                    Routes.GeralRoutes.HOMEPAGE,
                     Routes.PlayerRoutes.TEAM_LIST,
                     Routes.PlayerRoutes.PLAYER_LIST,
-                    Routes.GeralRoutes.LEADERBOARD,
                     Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST,
                 )
             )

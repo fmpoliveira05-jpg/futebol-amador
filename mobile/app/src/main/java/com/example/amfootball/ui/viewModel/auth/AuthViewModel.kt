@@ -78,7 +78,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
 
             try {
-                repository.registerUser(profile, password)
+                repository.registerUser(profile)
 
                 _isUserLoggedIn.value = true
 

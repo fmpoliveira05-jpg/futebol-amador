@@ -64,7 +64,6 @@ fun ChatScreen(
 ) {
     var messageText by remember { mutableStateOf("") }
     val roomName by chatViewModel.roomName.collectAsState()
-
     Scaffold(
         topBar = {
             ChatTopBar(contactName = roomName)
