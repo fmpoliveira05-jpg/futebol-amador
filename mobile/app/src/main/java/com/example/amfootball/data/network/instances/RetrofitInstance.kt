@@ -8,10 +8,12 @@ import com.example.amfootball.data.network.interfaces.LeadBoardApi
 import com.example.amfootball.data.network.interfaces.MatchInviteApi
 import com.example.amfootball.data.network.interfaces.PlayerApi
 import com.example.amfootball.data.network.interfaces.TeamApi
+import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.reactivex.rxjava3.core.Single
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,8 +36,6 @@ object RetrofitInstance {
      * Atualmente configurado para um túnel **Ngrok** (HTTPS), permitindo expor o localhost
      * da máquina de desenvolvimento para a internet pública e ser acessível pelo dispositivo Android.
      */
-    // MUDE ISTO para o URL base da sua API .NET
-    //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
     private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 
     /**
@@ -85,6 +85,33 @@ object RetrofitInstance {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSignalRManager(): SignalRManager {
+        return SignalRManager(
+            baseUrl = BASE_URL,
+            tokenProvider = {
+                Single.create { emitter ->
+                    val user = FirebaseAuth.getInstance().currentUser
+
+                    if (user != null) {
+                        user.getIdToken(false)
+                            .addOnSuccessListener { result ->
+                                // Sucesso: Enviamos APENAS o token (sem "Bearer")
+                                val token = result.token ?: ""
+                                emitter.onSuccess(token)
+                            }
+                            .addOnFailureListener { exception ->
+                                emitter.onError(exception)
+                            }
+                    } else {
+                        emitter.onError(Exception("Utilizador não autenticado no Firebase"))
+                    }
+                }
+            }
+        )
     }
 
     /**

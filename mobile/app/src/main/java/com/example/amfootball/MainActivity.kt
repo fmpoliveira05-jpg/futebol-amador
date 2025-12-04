@@ -2,12 +2,20 @@ package com.example.amfootball
 
 import android.Manifest
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.amfootball.navigation.MainNavigation
+import com.example.amfootball.ui.viewModel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 /**
  * A Atividade principal da aplicação, atuando como o ponto de entrada do sistema Android.
@@ -21,20 +29,39 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Solicita a permissão de localização no momento da criação da Atividade.
-        // Necessário para funcionalidades como MatchMaker e Pitch Info.
+        // Permissões
         requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)
 
-        // Configura a aplicação para usar toda a área do ecrã, incluindo a área do sistema (Edge-to-Edge).
         enableEdgeToEdge()
 
-        // Define o conteúdo da UI para ser o grafo de navegação principal do Compose.
         setContent {
             MainNavigation()
         }
+        observeNotifications()
+    }
+
+    private fun observeNotifications() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.notificationFlow.collect { (title, message) ->
+                    showUiNotification(title, message)
+                }
+            }
+        }
+    }
+
+
+    private fun showUiNotification(title: String, message: String) {
+        Log.d("SIGNALR_TEST", "6. UI a mostrar notificação agora!") // <--- LOG 6
+
+        Toast.makeText(this, "$title\n$message", Toast.LENGTH_LONG).show()
+
+        println("SIGNALR_DEBUG: Recebi: $title - $message")
     }
 
     /**

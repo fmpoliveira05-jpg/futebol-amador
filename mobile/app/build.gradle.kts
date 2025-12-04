@@ -180,4 +180,7 @@ dependencies {
     // Mockito para Testes Android (Instrumentados)
     androidTestImplementation("org.mockito:mockito-android:5.7.0")
     androidTestImplementation("org.mockito:mockito-core:5.7.0")
+
+    //Signal R
+    implementation("com.microsoft.signalr:signalr:7.0.0")
 }
