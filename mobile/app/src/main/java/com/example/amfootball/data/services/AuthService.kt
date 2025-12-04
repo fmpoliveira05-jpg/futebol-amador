@@ -5,6 +5,7 @@ import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.interfaces.AuthApi
+import com.example.amfootball.utils.safeApiCallWithReturn
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
@@ -42,24 +43,15 @@ class AuthService @Inject constructor(
      */
     suspend fun loginUser(login: LoginDto): Boolean {
         try {
-            val response = authApiService.loginUser(login)
-
-            if (response.isSuccessful && response.body() != null) {
-                val userProfile = response.body()!!
-
-                sessionManager.saveUserProfile(userProfile)
-                sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
-                Log.d("AuthRepository", "Login completo e dados guardados.")
-
-                return true
-            } else {
-                val errorMsg =
-                    response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
-                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
-
-                sessionManager.clearSession()
-                throw Exception(errorMsg)
+            val userProfile = safeApiCallWithReturn {
+                authApiService.loginUser(login)
             }
+
+            sessionManager.saveUserProfile(userProfile)
+            sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
+            Log.d("AuthRepository", "Login completo e dados guardados.")
+
+            return true
         } catch (e: Exception) {
             Log.e("AuthRepository", "Erro no login: ${e.message}")
             e.printStackTrace()
