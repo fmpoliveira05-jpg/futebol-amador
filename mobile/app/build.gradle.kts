@@ -125,8 +125,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation("androidx.activity:activity-compose:1.9.0")
-
     //Dependencia para ir buscar as dependências dos prefixos de numero telefonico
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.27")
 
@@ -148,7 +146,6 @@ dependencies {
 
     // Google Maps Compose & Play Services
     implementation("com.google.android.gms:play-services-maps:18.1.0")
-    implementation("com.google.android.gms:play-services-location:21.1.0")
     implementation("com.google.maps.android:maps-compose:2.12.0")
 
     // Coil for images
@@ -174,7 +171,6 @@ dependencies {
     kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
 
     // MockWebServer
-    androidTestImplementation("com.squareup.okhttp3:okhttp:4.12.0")
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 
     // Mockito para Testes Android (Instrumentados)
