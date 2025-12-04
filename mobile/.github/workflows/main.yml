@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
       # --------------------------------------
       # 1. Checkout
       # --------------------------------------
@@ -62,17 +64,21 @@ jobs:
       # --------------------------------------
       # 5. Build APKs
       # --------------------------------------
-      - name: Build APK and Test APK
-        run: ./gradlew assembleDebug assembleDebugAndroidTest --build-cache --parallel
+      - name: Build APKs
+        run: ./gradlew assembleDebug --no-daemon
 
+      # -------------------------
+      # Run emulator tests
+      # -------------------------
       - name: Run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 30
           target: google_apis
           arch: x86_64
-          profile: Pixel_5
+          device: pixel
           script: ./gradlew connectedDebugAndroidTest --stacktrace
+          disable-linux-hw-accel: true
 
       # --------------------------------------
       # 8. Export test reports
