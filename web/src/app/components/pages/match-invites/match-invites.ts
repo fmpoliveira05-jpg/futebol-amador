@@ -88,7 +88,7 @@ export class MatchInvites {
   }
 
   negotiate(invite: InfoMatchInviteDto) {
-    this.router.navigate(['/team/negotiateMatchInvite', this.teamId()!], {
+    this.router.navigate(['/team/negotiateMatchInvite', invite.sender.idTeam], {
       state: { invite: invite },
     });
   }

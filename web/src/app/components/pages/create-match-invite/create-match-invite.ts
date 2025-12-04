@@ -15,7 +15,7 @@ import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDt
 })
 export class CreateMatchInvite implements OnInit {
   currentTeamId = signal<string | null>(null);
-  
+
   targetTeamId: string | null = null;
   inviteToNegotiate: InfoMatchInviteDto | null = null;
   isNegotiating = false;
@@ -50,16 +50,16 @@ export class CreateMatchInvite implements OnInit {
     this.auth.getCurrentTeamId().subscribe({
       next: (data) => {
         this.currentTeamId.set(data);
-        this.setupForm();
+        // this.setupForm();
+        this.targetTeamId = this.route.snapshot.paramMap.get('teamId');
         console.log(data);
       },
       error: (err) => console.error(err),
     });
   }
 
- private setupForm() {
+  private setupForm() {
     if (this.isNegotiating && this.inviteToNegotiate) {
-      
       const myId = this.currentTeamId();
       const originalSenderId = this.inviteToNegotiate.sender.idTeam;
       const originalReceiverId = this.inviteToNegotiate.receiver.idTeam;
@@ -69,8 +69,8 @@ export class CreateMatchInvite implements OnInit {
       } else {
         this.targetTeamId = originalSenderId;
       }
-      
-      console.log('Negociando contra:', this.targetTeamId); 
+
+      console.log('Negociando contra:', this.targetTeamId);
 
       const existingDate = new Date(this.inviteToNegotiate.gameDate);
       existingDate.setMinutes(existingDate.getMinutes() - existingDate.getTimezoneOffset());
@@ -78,9 +78,8 @@ export class CreateMatchInvite implements OnInit {
 
       this.form.patchValue({
         gameDate: formattedDate,
-        homePitch: true 
+        homePitch: true,
       });
-
     } else {
       this.targetTeamId = this.route.snapshot.paramMap.get('teamId');
     }
@@ -107,11 +106,10 @@ export class CreateMatchInvite implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
+    console.log(payload);
+
     if (this.isNegotiating && this.inviteToNegotiate) {
-      this.matchInviteService.negotiateMatchInvite(
-        this.currentTeamId()!,
-        payload
-      ).subscribe({
+      this.matchInviteService.negotiateMatchInvite(this.currentTeamId()!, payload).subscribe({
         next: () => this.handleSuccess(),
         error: (err) => this.handleError(err),
       });

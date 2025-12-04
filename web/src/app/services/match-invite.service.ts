@@ -68,7 +68,8 @@ export class MatchInviteService {
     });
   }
 
-  negotiateMatchInvite(teamId: string, data: SendMatchInviteDto) {
+  negotiateMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<any> {
+    console.log(data);
     return this.http.put<void>(`${this.baseUrl}/${teamId}/Negociate/`, data);
   }
 }
