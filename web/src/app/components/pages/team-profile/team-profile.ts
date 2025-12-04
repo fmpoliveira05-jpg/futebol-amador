@@ -10,6 +10,10 @@ import { MembershipRequestService } from '../../../services/membership-request.s
 import { CreateTeamDto } from '../../../shared/Dtos/Team/CreateTeamDto';
 import { PitchDto } from '../../../shared/Dtos/Pitch/PitchDto';
 
+/**
+ * Componente responsável por exibir e gerir o perfil de uma equipa.
+ * Permite visualizar detalhes, editar informações (se admin), e gerir ações como pedidos de adesão ou exclusão da equipa.
+ */
 @Component({
   selector: 'app-team-profile',
   imports: [CommonModule, ReactiveFormsModule],
@@ -38,6 +42,9 @@ export class TeamProfile {
     private membershipRequestService: MembershipRequestService
   ) {}
 
+  /**
+   * Inicializa o componente, configurando o formulário de edição e carregando os dados do jogador e da equipa (via rota).
+   */
   ngOnInit() {
     this.form = this.fb.group({
       name: ['', [Validators.required]],
@@ -56,45 +63,51 @@ export class TeamProfile {
     });
   }
 
+  /**
+   * Computada: Verifica se o utilizador logado pertence a alguma equipa.
+   */
   hasTeam = computed(() => {
     const user = this.currentUser();
-
     return user?.team;
   })
 
+  /**
+   * Computada: Verifica se o utilizador logado é membro desta equipa específica.
+   */
   isMember = computed(() => {
     const team = this.team();
     const user = this.currentUser();
 
     if (!team || !user) return false;
-
-    // const player = team.players.find((p) => p.playerId === user.playerId);
-
-    // console.log(user.playerId + ' = ' + player?.playerId);
-
     return team.players.some((p) => p.playerId === user.playerId);
   });
 
+  /**
+   * Computada: Verifica se o utilizador logado é administrador.
+   */
   isAdmin = computed(() => {
-    // const team = this.team();
     const user = this.currentUser();
-
-    // if (!team || !user) return false;
-
-    // const member = team.players.find((p) => p.playerId === user.playerId);
     return user?.isAdmin === true;
   });
 
-  // sentMembershipRequest = computed(() => this.membershipRequests().length > 0);
-
+  /**
+   * Navega para a página de gestão de membros da equipa.
+   */
   protected goToTeamMembers(): void {
     this.router.navigate(['/team/members']);
   }
 
+  /**
+   * Navega para a página de convites de partida.
+   */
   protected goToMatchInvites(): void {
     this.router.navigate(['/team/matchInvites']);
   }
 
+  /**
+   * Alterna entre o modo de visualização e o modo de edição do perfil da equipa.
+   * Preenche o formulário com os dados atuais ao entrar no modo de edição.
+   */
   protected toggleEdit(): void {
     this.isEditMode.set(!this.isEditMode());
     this.successMessage.set(null);
@@ -114,6 +127,10 @@ export class TeamProfile {
     }
   }
 
+  /**
+   * Carrega os dados da equipa através do ID fornecido.
+   * @param teamId ID da equipa.
+   */
   loadTeam(teamId: string) {
     this.isLoading.set(true);
 
@@ -128,6 +145,11 @@ export class TeamProfile {
     });
   }
 
+  /**
+   * Processa a seleção de um ficheiro de imagem (ícone da equipa).
+   * Converte a imagem para Base64 para pré-visualização e envio.
+   * @param event Evento de input do ficheiro.
+   */
   protected onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
@@ -147,6 +169,10 @@ export class TeamProfile {
     }
   }
 
+  /**
+   * Guarda as alterações feitas no perfil da equipa.
+   * Envia os dados do formulário e a imagem (se alterada) para a API.
+   */
   protected save(): void {
     const team = this.team();
 
@@ -191,6 +217,9 @@ export class TeamProfile {
     });
   }
 
+  /**
+   * Envia um pedido para aderir a esta equipa.
+   */
   protected sendMembershipRequest(): void {
     const t = this.team();
     if (!t) return;
@@ -214,10 +243,17 @@ export class TeamProfile {
     });
   }
 
+  /**
+   * Navega para a página de criação de um novo convite de partida.
+   */
   protected sendMatchInvite(): void {
     this.router.navigate(['/team/createMatchInvite']);
   }
 
+  /**
+   * Elimina permanentemente a equipa atual.
+   * Requer confirmação do utilizador.
+   */
   protected deleteTeam(): void {
     const t = this.team();
     if (!t) return;

@@ -5,6 +5,10 @@ import { SendMatchInviteDto } from '../../../shared/Dtos/Match/SendMatchInviteDt
 import { MatchInviteService } from '../../../services/match-invite.service';
 import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDto';
 
+/**
+ * Componente responsável pela listagem e gestão de convites de partida recebidos pela equipa.
+ * Permite aceitar, recusar ou iniciar negociação de convites.
+ */
 @Component({
   selector: 'app-match-invites',
   imports: [CommonModule],
@@ -22,6 +26,9 @@ export class MatchInvites {
 
   constructor(private auth: AuthService, private matchInviteService: MatchInviteService) {}
 
+  /**
+   * Inicializa o componente, identificando a equipa do utilizador e carregando os seus convites.
+   */
   ngOnInit(): void {
     this.auth.getCurrentTeamId().subscribe((teamId) => {
       if (!teamId) {
@@ -34,6 +41,10 @@ export class MatchInvites {
     });
   }
 
+  /**
+   * Carrega a lista de convites de partida pendentes para a equipa.
+   * @param teamId ID da equipa.
+   */
   protected loadMatchInvites(teamId: string): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -50,6 +61,10 @@ export class MatchInvites {
     });
   }
 
+  /**
+   * Aceita um convite de partida recebido.
+   * @param invite Objeto contendo os dados do convite.
+   */
   accept(invite: InfoMatchInviteDto) {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -67,6 +82,10 @@ export class MatchInvites {
     }
   }
 
+  /**
+   * Recusa um convite de partida.
+   * @param invite Objeto contendo os dados do convite.
+   */
   refuse(invite: InfoMatchInviteDto) {
     if (this.teamId()) {
       this.matchInviteService.refuseMatchInvite(this.teamId()!, invite.id).subscribe({
@@ -81,5 +100,9 @@ export class MatchInvites {
     }
   }
 
+  /**
+   * Inicia o processo de negociação (contraproposta) para um convite.
+   * @param invite Objeto contendo os dados do convite.
+   */
   negotiate(invite: InfoMatchInviteDto) {}
 }

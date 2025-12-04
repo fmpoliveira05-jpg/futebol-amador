@@ -10,6 +10,10 @@ import { Router } from '@angular/router';
 import { PlayerService } from '../../../services/player.service';
 import { CookieService } from 'ngx-cookie-service';
 
+/**
+ * Componente responsável pela criação de uma nova equipa.
+ * Contém o formulário para definição dos dados da equipa e do seu campo (Pitch).
+ */
 @Component({
   selector: 'app-create-team',
   imports: [CommonModule, ReactiveFormsModule],
@@ -39,10 +43,16 @@ export class CreateTeam {
 
   form!: FormGroup;
 
+  /**
+   * Computada: Verifica se o jogador atual já possui uma equipa.
+   */
   protected readonly hasTeam = computed(() =>
     !!this.player()?.team?.idTeam
   );
 
+  /**
+   * Inicializa o componente, configurando o formulário e carregando os dados do jogador.
+   */
   ngOnInit(): void {
     this.form = this.fb.group({
       name: ['', [Validators.required]],
@@ -54,6 +64,9 @@ export class CreateTeam {
     this.loadPlayer();
   }
 
+  /**
+   * Carrega o perfil do jogador logado para verificar o estado atual.
+   */
   loadPlayer(): void {
     this.playerService.getMyProfile().subscribe({
       next: (player) => {
@@ -68,6 +81,11 @@ export class CreateTeam {
     })
   }
 
+  /**
+   * Submete os dados para criação da equipa.
+   * Cria o objeto DTO combinando informações da equipa e do campo, envia para a API,
+   * e atualiza as permissões locais (cookie is_admin) em caso de sucesso.
+   */
   protected createTeam(): void {
     const homePitch: PitchDto = {
       name: this.form.value['pitchName'],
@@ -94,7 +112,10 @@ export class CreateTeam {
           return;
         }
         this.loadPlayer();
+        
+        // Atualiza cookie localmente para refletir novo status de admin imediatamente
         this.cookieService.set('is_admin', 'true', 7, '/players/details');
+        
         this.successMessage.set('Equipa criada com sucesso.');
         this.router.navigate(['/team/details', newTeamId]);
       },

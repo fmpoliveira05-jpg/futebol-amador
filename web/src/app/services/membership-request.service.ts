@@ -54,6 +54,11 @@ export class MembershipRequestService {
     return Id.replace(/^(\w{8})(\w{4})(\w{4})(\w{4})(\w{12})$/, '$1-$2-$3-$4-$5');
   }
 
+  /**
+   * Adquire os pedidos de adesão do player atual.
+   * @param filters Filtros de pesquisa dos pedidos.
+   * @returns Lista de pedidos de adesão.
+   */
   getMembershipRequestsForCurrentPlayer(
     filters?: FilterMembershipRequestsPlayer
   ): Observable<MembershipRequest[]> {
