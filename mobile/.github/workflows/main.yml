@@ -67,9 +67,20 @@ jobs:
       - name: Build APKs
         run: ./gradlew assembleDebug --no-daemon
 
-      # -------------------------
+      # ----------------------------------------------------------
+      # Instalar SDK necessário antes do emulador
+      # ----------------------------------------------------------
+      - name: Install Android SDK dependencies
+        run: |
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "emulator" "platforms;android-30" "build-tools;34.0.0"
+
+      - name: Install required Android System Image
+        run: sdkmanager "system-images;android-30;google_apis;x86_64"
+
+      # ----------------------------------------------------------
       # Run emulator tests
-      # -------------------------
+      # ----------------------------------------------------------
       - name: Run instrumentation tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -77,8 +88,10 @@ jobs:
           target: google_apis
           arch: x86_64
           device: pixel
-          script: ./gradlew connectedDebugAndroidTest --stacktrace
           disable-linux-hw-accel: true
+          force-kill: true
+          script: ./gradlew connectedDebugAndroidTest --stacktrace
+
 
       # --------------------------------------
       # 8. Export test reports
