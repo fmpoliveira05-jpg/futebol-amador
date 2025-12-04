@@ -70,7 +70,7 @@ export class MatchInviteService {
    * @param data DTO contendo os dados do convite (adversário, data, local).
    * @returns Um Observable vazio (`void`) indicando a conclusão da operação.
    */
-  sendMatchInvites(teamId: string, data: SendMatchInviteDto): Observable<void> {
+  sendMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/match-invites`, data);
   }
 
@@ -100,12 +100,23 @@ export class MatchInviteService {
    * @returns Um Observable vazio (`void`) indicando a conclusão da operação.
    */
   refuseMatchInvite(teamId: string, idMatchInvite: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${teamId}/RefuseMatchInvite/${idMatchInvite}`);
+    const body = JSON.stringify(idMatchInvite);
+
+    const params = new HttpParams().set('idTeam', teamId);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.delete<void>(`${this.baseUrl}/${teamId}/RefuseMatchInvite/`, {
+      headers,
+      params,
+      body,
+    });
   }
 
   /**
    * Inicia ou processa a negociação de um convite existente (contraproposta).
-   * (Método placeholder aguardando implementação lógica).
    */
-  negotiateMatchInvite() {}
+  negotiateMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<any> {
+    console.log(data);
+    return this.http.put<void>(`${this.baseUrl}/${teamId}/Negociate/`, data);
+  }
 }

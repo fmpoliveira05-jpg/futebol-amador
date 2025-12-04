@@ -247,7 +247,7 @@ export class TeamProfile {
    * Navega para a página de criação de um novo convite de partida.
    */
   protected sendMatchInvite(): void {
-    this.router.navigate(['/team/createMatchInvite']);
+    this.router.navigate(['/team/createMatchInvite', this.team()?.id]);
   }
 
   /**
