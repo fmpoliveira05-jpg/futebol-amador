@@ -6,6 +6,7 @@ import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.CalendarApi
+import com.example.amfootball.utils.handleApiError
 import com.example.amfootball.utils.safeApiCallWithNotReturn
 import com.example.amfootball.utils.safeApiCallWithReturn
 import javax.inject.Inject

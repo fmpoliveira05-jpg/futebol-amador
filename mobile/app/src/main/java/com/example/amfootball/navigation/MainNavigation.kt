@@ -315,7 +315,8 @@ private fun NavGraphBuilder.teamMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtectedMemberTeam(
+    //composableProtectedMemberTeam
+    composableProtected(
         navController = globalNavController,
         route = "${Routes.TeamRoutes.CALENDAR.route}/{${Arguments.TEAM_ID}}",
         sessionManager = sessionManager,
