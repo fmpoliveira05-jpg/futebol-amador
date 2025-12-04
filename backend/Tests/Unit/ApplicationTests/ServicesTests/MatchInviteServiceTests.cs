@@ -20,12 +20,9 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ITeamRepository> _teamRepoMock;
         private Mock<IMatchInviteRepository> _matchInviteRepoMock;
         private Mock<IMatchRepository> _matchRepoMock;
-        private Mock<ITeamStatisticsRepository> _teamStatsRepoMock;
         private Mock<IPitchRepository> _pitchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<IMatchInviteValidator> _validatorMock;
-        private Mock<ITeamPostPoneGameRepository> _teamPostPoneRepoMock;
-        private Mock<IPlayerAuthorizationService> _authorizationService;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<IChatRoomService> _chatRoomServiceMock;
         private MatchInviteService _sut;
@@ -39,12 +36,9 @@ namespace Unit.ApplicationTests.ServicesTests
             _teamRepoMock = new Mock<ITeamRepository>();
             _matchInviteRepoMock = new Mock<IMatchInviteRepository>();
             _matchRepoMock = new Mock<IMatchRepository>();
-            _teamStatsRepoMock = new Mock<ITeamStatisticsRepository>();
             _pitchRepoMock = new Mock<IPitchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<IMatchInviteValidator>();
-            _teamPostPoneRepoMock = new Mock<ITeamPostPoneGameRepository>();
-            _authorizationService = new Mock<IPlayerAuthorizationService>();
             _notificationServiceMock = new Mock<INotificationService>();
             _chatRoomServiceMock = new Mock<IChatRoomService>();
 
@@ -52,12 +46,9 @@ namespace Unit.ApplicationTests.ServicesTests
                 _matchInviteRepoMock.Object, 
                 _teamRepoMock.Object,          
                 _matchRepoMock.Object,         
-                _teamStatsRepoMock.Object,    
                 _pitchRepoMock.Object,          
                 _validatorMock.Object,
                 _unitOfWorkMock.Object,
-                _teamPostPoneRepoMock.Object,
-                _authorizationService.Object,
                 _notificationServiceMock.Object,
                 _chatRoomServiceMock.Object
             );

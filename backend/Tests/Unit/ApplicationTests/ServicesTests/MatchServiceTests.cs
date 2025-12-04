@@ -25,7 +25,6 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<ICalendarValidator> _validatorMock;
-        private Mock<IPlayerAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
 
@@ -38,15 +37,13 @@ namespace Unit.ApplicationTests.ServicesTests
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<ICalendarValidator>();
-            _authorizarionService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchService(
                 _matchRepoMock.Object,
                 _teamPostPoneRepoMock.Object,
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _validatorMock.Object,
-                _authorizarionService.Object
+                _validatorMock.Object
             );
         }
         #endregion
