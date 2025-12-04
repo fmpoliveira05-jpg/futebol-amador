@@ -1,8 +1,8 @@
 package com.example.amfootball.data.services
 
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.CalendarApi
@@ -46,7 +46,7 @@ class CalendarService @Inject constructor(
         }
     }
 
-    suspend fun postPoneMatch(teamId: String, postponeMatch: PostPoneMatchDto) {
+    suspend fun postPoneMatch(teamId: String, postponeMatch: SendMatchInviteDto) {
         try {
             val response = calendarApi.postponeMatch(idTeam = teamId, postponeMatch = postponeMatch)
 

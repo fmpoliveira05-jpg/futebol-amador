@@ -6,4 +6,5 @@ object Arguments {
     const val MATCH_ID = "matchId"
     const val MATCH_INVITE_ID = "matchInviteId"
     const val FORM_MODE = "formMode"
+    const val TEAM_NAME = "teamName"
 }

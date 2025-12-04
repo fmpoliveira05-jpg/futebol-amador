@@ -286,6 +286,8 @@ private fun NavGraphBuilder.teamPages(globalNavController: NavHostController, se
         }
     )
 
+
+
     composableProtected(
         route = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route,
         navController = globalNavController,
@@ -386,8 +388,10 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
     )
 
     composableProtected(
-        route = Routes.TeamRoutes.SEND_MATCH_INVITE.route,
+        route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.TEAM_NAME}}",
         arguments = listOf(
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
+            navArgument(Arguments.TEAM_NAME) { type = NavType.StringType },
             navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.SEND.name }
         ),
         sessionManager = sessionManager,
@@ -396,6 +400,7 @@ private fun NavGraphBuilder.casualMatches(globalNavController: NavHostController
             FormMatchInviteScreen(navHostController = globalNavController)
         }
     )
+
 
     composableProtected(
         route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.MATCH_INVITE_ID}}",

@@ -1,5 +1,7 @@
 package com.example.amfootball.data.dtos.player
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * Data Transfer Object (DTO) que encapsula a resposta de uma autenticação via Firebase.
  *
@@ -14,10 +16,15 @@ package com.example.amfootball.data.dtos.player
  * @property email O endereço de email do utilizador autenticado.
  */
 data class FireBaseLoginResponseDto(
+    @SerializedName("idToken", alternate = ["IdToken"])
     val idToken: String,
+    @SerializedName("refreshToken", alternate = ["RefreshToken"])
     val refreshToken: String,
+    @SerializedName("expiresIn", alternate = ["ExpiresIn"])
     val expiresIn: String,
+    @SerializedName("localId", alternate = ["LocalId"])
     val localId: String,
     val phoneNumber: Int,
+    @SerializedName("email", alternate = ["Email"])
     val email: String,
 )

@@ -15,6 +15,7 @@ import javax.inject.Inject
 import kotlin.text.ifEmpty
 import com.example.amfootball.R
 import com.example.amfootball.data.errors.filtersError.FilterTeamError
+import com.example.amfootball.navigation.objects.Arguments
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.TeamConst
@@ -131,14 +132,14 @@ class ListTeamViewModel @Inject constructor(
     /**
      * Navega para o ecrã de envio de convite de jogo.
      */
-    fun sendMatchInvite(idTeam: String, navHostController: NavHostController) {
+    fun sendMatchInvite(idTeam: String, nameTeam: String, navHostController: NavHostController) {
         onlineFunctionality(
             action = {
-                navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}") {
+                navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}/${nameTeam}") {
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Não pode mandar um pedido de partida sem estar conectado há intern"
+            toastMessage = "Não pode mandar um pedido de partida sem estar conectado há internet"
         )
 
     }

@@ -5,10 +5,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.MessageDto
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Routes
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.firestore
@@ -20,11 +22,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-
+    savedStateHandle: SavedStateHandle,
+    sessionManager: SessionManager,
+    private val db: FirebaseFirestore
     ): ViewModel() {
-    private val db = Firebase.firestore
-    private val myUserId = Firebase.auth.currentUser?.uid
+    private val myUser = sessionManager.getUserProfile()
+    private val myUserId = myUser?.loginResponseDto?.localId
+
+    private val isAdmin = myUser?.isAdmin
+
 
     val chatRoomId: String? = savedStateHandle[Routes.chatRoomId]
 
@@ -47,17 +53,23 @@ class ChatViewModel @Inject constructor(
     }
 
     fun fetchMyChatRooms() {
-        if (myUserId == null) return
+        Log.d("ChatViewModel", "IsAdmin: $isAdmin")
+        Log.d("ChatViewModel", "Buscando salas do usuário $myUserId")
+        val firebaseAuthUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        Log.d("ChatDebug", "ID no FirebaseAuth Real: ${firebaseAuthUser?.uid}")
+        if (isAdmin == null || myUserId == null) return
 
         db.collection("chatRooms")
             .whereArrayContains("members", myUserId)
             .get()
             .addOnSuccessListener { querySnapshot ->
                 _rooms.value = querySnapshot.toObjects(ChatRoom::class.java)
+                Log.d("ChatViewModel", "Salas do usuário $myUserId: ${_rooms.value}")
             }
             .addOnFailureListener { e ->
                 Log.e("Chat", "Erro ao listar salas", e)
             }
+        Log.d("ChatViewModel", "Salas do usuário $myUserId: ${_rooms.value}")
     }
 
     fun listenForMessages() {
@@ -94,6 +106,7 @@ class ChatViewModel @Inject constructor(
     }
     fun sendMessage( messageText: String) {
         if (myUserId == null) return
+        if (isAdmin == null) return
         if (chatRoomId == null) return
 
         val message = hashMapOf(

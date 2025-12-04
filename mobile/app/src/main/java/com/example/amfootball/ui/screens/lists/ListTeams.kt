@@ -408,6 +408,7 @@ private fun ListTeamTrailing(
     itemActions: ItemsListTeamAction,
     navHostController: NavHostController
 ) {
+    //TODO: Acrescentar o tipo de player no token e trocar ca
     val typeUser by remember { mutableStateOf(false) }
 
     Row(
@@ -420,7 +421,7 @@ private fun ListTeamTrailing(
                 if (typeUser) {
                     itemActions.onSendMemberShipRequest(team.id, navHostController)
                 } else {
-                    itemActions.onSendMatchInvite(team.id, navHostController)
+                    itemActions.onSendMatchInvite(team.id, team.name, navHostController)
                 }
             }
         )

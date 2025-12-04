@@ -85,7 +85,6 @@ class LoginViewModel @Inject constructor(
         submitForm(
             apiCall = {
                 val success = repository.loginUser(login)
-
                 onResult(success)
             }
         )

@@ -37,6 +37,9 @@ data class MessageDto(
 data class ChatRoom(
     @DocumentId val id: String = "",
     val name: String = "",
-    val members: List<String> = emptyList()
-)
+    val members: List<String> = emptyList(),
+    val createdBy: String = ""
+){
+    constructor() : this("", "", emptyList(), "")
+}
 

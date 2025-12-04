@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter
 data class MatchInviteDto(
     @SerializedName("", alternate = ["idMatch"])
     val id: String? = null,
-    @SerializedName("Opponent", alternate = ["opponent"])
+    @SerializedName("Opponent", alternate = ["opponent", "sender", "Sender"])
     val opponent: TeamDto? = null,
     @SerializedName("IsHome", alternate = ["isHome"])
     val isHomeGame: Boolean = true,

@@ -20,9 +20,11 @@ class AuthService @Inject constructor(
     suspend fun loginUser(login: LoginDto): Boolean {
         try {
             val response = authApiService.loginUser(login)
-
             if (response.isSuccessful && response.body() != null) {
                 val userProfile = response.body()!!
+
+                firebaseAuth.signInWithEmailAndPassword(login.email, login.password).await()
+
 
                 sessionManager.saveUserProfile(userProfile)
                 sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)

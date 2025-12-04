@@ -54,7 +54,7 @@ object ListTeamMocks {
     )
 
     val mockItemActions = ItemsListTeamAction(
-        { _, _ -> }, { _, _ -> }, { _, _ -> }
+        { _,_, _ -> }, { _, _ -> }, { _, _ -> }
     )
 
 }
