@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun showUiNotification(title: String, message: String) {
         Log.d("SIGNALR_TEST", "6. UI a mostrar notificação agora!") // <--- LOG 6
 

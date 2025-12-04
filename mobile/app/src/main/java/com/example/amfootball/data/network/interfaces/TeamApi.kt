@@ -148,13 +148,13 @@ interface TeamApi {
      * O membro passará a ter permissões de gestão (editar equipa, aceitar pedidos, gerir jogos).
      * O status muda de 'PLAYER' para 'ADMIN_TEAM'.
      *
-     * Endpoint: PUT api/Team/{teamId}/members/{playerId}/promote/{playerIdToPromote}
+     * Endpoint: PUT api/Team/{teamId}/members/promote/{playerIdToPromote}
      *
      * @param teamId O identificador da equipa.
      * @param playerId O identificador do membro que receberá a promoção.
      * @return [Response] vazia (Unit) confirmando a promoção.
      */
-    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/{playerId}/promote/{playerIdToPromote}")
+    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/promote/{playerIdToPromote}")
     suspend fun promotePlayer(
         @Path("teamId") teamId: String,
         @Path("playerIdToPromote") playerId: String
@@ -166,13 +166,13 @@ interface TeamApi {
      * O membro volta a ser um jogador regular sem permissões de gestão.
      * O status muda de 'ADMIN_TEAM' para 'PLAYER'.
      *
-     * Endpoint: PUT api/Team/{teamId}/members/{playerId}/demote/{adminIdToDemote}
+     * Endpoint: PUT api/Team/{teamId}/members/demote/{adminIdToDemote}
      *
      * @param teamId O identificador da equipa.
      * @param playerId O identificador do administrador que será despromovido.
      * @return [Response] vazia (Unit) confirmando a despromoção.
      */
-    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/{playerId}/demote/{adminIdToDemote}")
+    @PUT("${BaseEndpoints.TEAM_API}/{teamId}/members/demote/{adminIdToDemote}")
     suspend fun desmoteAdmin(
         @Path("teamId") teamId: String,
         @Path("adminIdToDemote") playerId: String
