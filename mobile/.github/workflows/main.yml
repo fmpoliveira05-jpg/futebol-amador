@@ -65,31 +65,14 @@ jobs:
       - name: Build APK and Test APK
         run: ./gradlew assembleDebug assembleDebugAndroidTest --build-cache --parallel
 
-      # --------------------------------------
-      # 6. Instalar e configurar emulador Android
-      # --------------------------------------
-      - name: Install Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Create AVD
-        run: |
-          echo "no" | avdmanager create avd \
-            --name test \
-            --package "system-images;android-30;google_apis;x86_64" \
-            --tag google_apis --abi x86_64
-
-      - name: Start emulator
-        run: |
-          nohup emulator -avd test -no-snapshot -noaudio -no-window -gpu swiftshader_indirect &
-          adb wait-for-device
-          adb shell input keyevent 82
-        timeout-minutes: 3
-
-      # --------------------------------------
-      # 7. Executar system tests (instrumentation)
-      # --------------------------------------
-      - name: Run system/instrumentation tests
-        run: ./gradlew connectedDebugAndroidTest --build-cache --parallel
+      - name: Run instrumentation tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 30
+          target: google_apis
+          arch: x86_64
+          profile: Pixel_5
+          script: ./gradlew connectedDebugAndroidTest --stacktrace
 
       # --------------------------------------
       # 8. Export test reports
