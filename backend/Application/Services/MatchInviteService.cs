@@ -8,6 +8,8 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+//using Google.Type;
+
 
 namespace Application.Services
 {
@@ -114,7 +116,8 @@ namespace Application.Services
             {
                 await notificationService.SendUserAsync(receiver.Id.ToString(), "New Match Invite", $"{sender.Name} wants to play a match against your team!");
             }
-            await ChatService.CreateMatchRoomAsync(new CreateChatRoomRequestDto {RoomName = sender.Name + ".V.S." + receiver.Name, TeamIds ={receiver.Id, sender.Id } },idSender.ToString());
+            var roomname = sender.Name + ".V.S." + receiver.Name + " " + gameDate;
+            await ChatService.CreateMatchRoomAsync(new CreateChatRoomRequestDto {RoomName = roomname, TeamIds ={receiver.Id, sender.Id } },idSender.ToString());
 
             await UnityOfWork.SaveChangesAsync();
 

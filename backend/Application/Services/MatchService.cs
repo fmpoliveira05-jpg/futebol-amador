@@ -171,7 +171,7 @@ namespace Application.Services
                 throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento.");
             }
 
-            if (newDate <= DateTime.UtcNow)
+            if (DateTime.Compare(newDate, DateTime.UtcNow) <= 0)
             {
                 throw new BusinessRuleException("A nova data não pode ser igual ou antes da data atual.");
             }
