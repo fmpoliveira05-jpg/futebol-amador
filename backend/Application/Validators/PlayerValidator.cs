@@ -4,27 +4,46 @@ using Application.Interfaces.Validators;
 using Domain.Constants;
 using Domain.Entities;
 using Domain.Exceptions;
-using System.Net.Mail;
 using System.Text.RegularExpressions;
 using static Domain.Constants.ModelConstants;
 using Domain.Enums;
 
 namespace Application.Validators
 {
+    /// <summary>
+    /// Validador de Regras de Negócio e de Entidade para operações relacionadas com [Player].
+    /// 
+    /// Esta classe verifica o formato, os limites de valores (ex: altura, idade) e as regras de negócio
+    /// (ex: se o jogador pertence a uma equipa) antes de executar operações na base de dados.
+    /// </summary>
     public class PlayerValidator : IPlayerValidator
     {
-        IUserDataValidator UserDatalValidator;
+        /// <summary>
+        /// Validador delegado para operações de validação de formato de baixo nível.
+        /// </summary>
+        private readonly IUserDataValidator UserDatalValidator;
 
-
+        /// <summary>
+        /// Construtor da classe [PlayerValidator] que aceita um validador delegado.
+        /// </summary>
+        /// <param name="emailValidator">O validador delegado de dados de utilizador, injetado via Dependency Injection.</param>
         public PlayerValidator(IUserDataValidator emailValidator)
         {
             this.UserDatalValidator = emailValidator;
         }
+
+        /// <summary>
+        /// Construtor padrão da classe [PlayerValidator].
+        /// </summary>
         public PlayerValidator()
         {
-
         }
 
+        /// <summary>
+        /// Valida se a entidade [Player] existe.
+        /// </summary>
+        /// <param name="player">A entidade Player a ser verificada.</param>
+        /// <exception cref="NotFoundException">Lançada se a entidade Player for nula.</exception>
         public void PlayerExists(Player? player)
         {
             if (player == null)
@@ -33,6 +52,16 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida todos os campos de um novo perfil de jogador antes da criação.
+        /// </summary>
+        /// <remarks>
+        /// Regras verificadas: Unicidade de Email/Telefone, Limites de Altura e Idade, e Formato da Posição.
+        /// </remarks>
+        /// <param name="CreatePlayerDto">O DTO com os dados do novo jogador.</param>
+        /// <param name="phoneUser">O utilizador existente com o mesmo telefone (se houver).</param>
+        /// <param name="emailUser">O utilizador existente com o mesmo email (se houver).</param>
+        /// <exception cref="ValidationException">Se a altura, idade, posição, email ou telefone forem inválidos.</exception>
         public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User? phoneUser, User? emailUser)
         {
             if (emailUser != null)
@@ -55,16 +84,34 @@ namespace Application.Validators
             ValidateAddress(CreatePlayerDto.Address);
         }
 
+        /// <summary>
+        /// Valida se a entidade [Player] existe antes de ser eliminada.
+        /// </summary>
+        /// <param name="player">A entidade Player a ser eliminada.</param>
         public void DeletePlayerValidator(Player? player)
         {
             PlayerExists(player);
         }
 
+        /// <summary>
+        /// Valida a existência de um jogador antes da consulta de detalhes.
+        /// </summary>
+        /// <param name="player">A entidade Player a ser consultada.</param>
         public void GetPlayerByIdValidator(Player? player)
         {
             PlayerExists(player);
         }
 
+        /// <summary>
+        /// Valida todos os campos de um perfil de jogador antes da atualização.
+        /// </summary>
+        /// <remarks>
+        /// Regras verificadas: Unicidade de Email/Telefone (apenas se forem alterados), Altura, Idade, Posição e Endereço.
+        /// </remarks>
+        /// <param name="UpdatePlayerDto">O DTO com os novos dados.</param>
+        /// <param name="player">A entidade [Player] existente.</param>
+        /// <param name="players">Utilizadores existentes com o novo Email/Telefone (para verificação de unicidade).</param>
+        /// <exception cref="ValidationException">Se houver violação de unicidade ou formato.</exception>
         public void UpdatePlayerValidator(UpdatePlayerDto UpdatePlayerDto, Player player, User[] players)
         {
             PlayerExists(player);
@@ -97,6 +144,11 @@ namespace Application.Validators
             ValidateAddress(UpdatePlayerDto.Address);
         }
 
+        /// <summary>
+        /// Valida se houve alguma alteração de dados num objeto de atualização.
+        /// </summary>
+        /// <param name="hasChange">Booleano que indica se a comparação de DTOs detetou mudanças.</param>
+        /// <exception cref="ValidationException">Lançada se o DTO não tiver alterado nenhum valor.</exception>
         public void ValidateHasChangeDataPlayer(bool hasChange)
         {
             if (!hasChange)
@@ -105,6 +157,11 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida se o jogador pode sair da equipa.
+        /// </summary>
+        /// <param name="player">A entidade [Player] que está a tentar sair.</param>
+        /// <exception cref="ValidationException">Lançada se o jogador não pertencer a nenhuma equipa.</exception>
         public void LeaveTeamValidator(Player player)
         {
             if (player.Team == null && player.IdTeam == null)
@@ -115,6 +172,11 @@ namespace Application.Validators
             PlayerExists(player);
         }
 
+        /// <summary>
+        /// Valida os filtros de listagem de equipas (Marketplace/Pesquisa).
+        /// </summary>
+        /// <param name="filter">O DTO de filtros.</param>
+        /// <exception cref="InvalidOperationException">Lançada se os intervalos de pontos, idade ou jogadores forem inconsistentes.</exception>
         public void ValidateFiltersListTeams(FilterListTeamDto filter)
         {
             if (filter.MinNumberPoints.HasValue && filter.MaxNumberPoints.HasValue)
@@ -142,6 +204,17 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida o pedido de adesão/convite de recrutamento.
+        /// </summary>
+        /// <remarks>
+        /// Regras verificadas: Existência do jogador/equipa e ausência de pedidos pendentes.
+        /// </remarks>
+        /// <param name="player">O jogador.</param>
+        /// <param name="team">A equipa.</param>
+        /// <param name="request">O pedido pendente (se existir).</param>
+        /// <exception cref="NotFoundException">Se a equipa não existir.</exception>
+        /// <exception cref="BusinessRuleException">Se o jogador já tiver equipa ou já houver um pedido pendente.</exception>
         public void SendMembershipRequestValidator(Player player, Team team, MembershipRequest request)
         {
             PlayerExists(player);
@@ -168,35 +241,12 @@ namespace Application.Validators
         }
 
         #region Private Validations
-        private static bool IsValidEmail(string email)
-        {
-            var valid = true;
-
-            try
-            {
-                var emailAddress = new MailAddress(email);
-            }
-            catch
-            {
-                valid = false;
-            }
-
-            if (!email.EndsWith(".com"))
-            {
-                valid = false;
-            }
-            return valid;
-        }
-        public void PlayerHasChatRoomsValidation(Player player) {
-            PlayerExists(player);
-            
-            
-        }
-
-        private void PlayerHasChatRooms(Player player) { 
-            //if(player.)
-        }
-
+        
+        /// <summary>
+        /// Valida se a altura ([heigth]) está dentro dos limites definidos nas constantes.
+        /// </summary>
+        /// <param name="heigth">A altura do jogador (em cm).</param>
+        /// <exception cref="ValidationException">Lançada se o valor for menor que o mínimo ou maior que o máximo.</exception>
         private static void ValidateHeigth(int heigth)
         {
             if (heigth < ModelConstants.PlayerConst.MinHeight || heigth > ModelConstants.PlayerConst.MaxHeight)
@@ -205,14 +255,11 @@ namespace Application.Validators
             }
         }
 
-        private static void ValidateEmail(string email)
-        {
-            if (!IsValidEmail(email))
-            {
-                throw new ValidationException($"Email format is invalid ({email}).");
-            }
-        }
-
+        /// <summary>
+        /// Valida se a data de nascimento é válida (o jogador deve ter entre 18 e 70 anos).
+        /// </summary>
+        /// <param name="dateOfBirth">A data de nascimento a ser verificada.</param>
+        /// <exception cref="ValidationException">Lançada se o jogador for menor de 18 ou maior de 70.</exception>
         private static void ValidateAge(DateOnly dateOfBirth)
         {
             if (dateOfBirth > DateOnly.FromDateTime(DateTime.Now).AddYears(-ModelConstants.UserConst.MinAge)
@@ -222,6 +269,11 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida se o valor da posição corresponde a um dos valores definidos no Enum [Position].
+        /// </summary>
+        /// <param name="position">O valor do Enum Position.</param>
+        /// <exception cref="ValidationException">Lançada se o valor não for mapeável.</exception>
         private static void ValidatePosition(Position position)
         {
             if (!Enum.IsDefined(typeof(Position), position))
@@ -229,6 +281,12 @@ namespace Application.Validators
                 throw new ValidationException("Position invalid.");
             }
         }
+
+        /// <summary>
+        /// Valida se o formato do endereço está correto (deve terminar com ", [NomeDaCidade]").
+        /// </summary>
+        /// <param name="addressTeam">O endereço a ser validado.</param>
+        /// <exception cref="ValidationException">Lançada se o endereço estiver vazio ou tiver formato incorreto.</exception>
         private static void ValidateAddress(string addressTeam)
         {
             if (string.IsNullOrWhiteSpace(addressTeam))
@@ -244,7 +302,6 @@ namespace Application.Validators
             {
                 throw new ValidationException($"Formato de endereço inválido. O endereço deve terminar com ', [NomeDaCidade]'. (Ex: 'Rua x, Lisboa')");
             }
-
         }
         #endregion
     }

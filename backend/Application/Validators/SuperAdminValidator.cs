@@ -5,15 +5,33 @@ using Domain.Exceptions;
 
 namespace Application.Validators
 {
+    /// <summary>
+    /// Validador de Regras de Negócio e de Entidade para operações relacionadas com [SuperAdmin].
+    /// 
+    /// Esta classe verifica a validade dos dados e a unicidade de campos críticos (Email, Telefone)
+    /// antes de a persistência de dados ser executada.
+    /// </summary>
     public class SuperAdminValidator : ISuperAdminValidator
     {
-        IUserDataValidator emailValidator;
+        /// <summary>
+        /// Validador delegado para operações de validação de formato de baixo nível (Email, Telefone).
+        /// </summary>
+        private readonly IUserDataValidator emailValidator;
 
+        /// <summary>
+        /// Construtor da classe [SuperAdminValidator].
+        /// </summary>
+        /// <param name="emailValidator">O validador delegado de dados de utilizador, injetado via Dependency Injection.</param>
         public SuperAdminValidator(IUserDataValidator emailValidator)
         {
             this.emailValidator = emailValidator;
         }
 
+        /// <summary>
+        /// Valida se a entidade [SuperAdmin] existe.
+        /// </summary>
+        /// <param name="sadmin">A entidade SuperAdmin a ser verificada.</param>
+        /// <exception cref="NotFoundException">Lançada se a entidade SuperAdmin for nula.</exception>
         public void SuperAdminExists(SuperAdmin sadmin)
         {
             if (sadmin == null)
@@ -22,6 +40,20 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida os dados e a unicidade antes de criar um novo Super Administrador.
+        /// </summary>
+        /// <remarks>
+        /// Regras verificadas:
+        /// <list type="bullet">
+        ///     <item>Unicidade: O Email e o Telefone não podem estar em uso por outro utilizador.</item>
+        ///     <item>Formato: O formato do Email deve ser válido.</item>
+        ///     <item>Idade: A data de nascimento deve estar dentro dos limites válidos (18 a 70 anos).</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="dto">O DTO contendo os dados do Super Admin.</param>
+        /// <param name="sadmins">Um array/coleção de utilizadores existentes (utilizado para verificação de unicidade).</param>
+        /// <exception cref="ValidationException">Se o email/telefone já estiver em uso ou a data de nascimento for inválida.</exception>
         public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, User[] sadmins)
         {
             if (sadmins[0] != null)
@@ -43,12 +75,36 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Valida as condições para eliminar um Super Administrador.
+        /// </summary>
+        /// <remarks>
+        /// A única regra verificada é que a entidade [SuperAdmin] a ser eliminada deve existir.
+        /// </remarks>
+        /// <param name="sadmin">A entidade SuperAdmin a ser eliminada.</param>
+        /// <exception cref="NotFoundException">Se a entidade SuperAdmin não for encontrada.</exception>
         public void DeleteSuperAdminValidator(SuperAdmin sadmin)
         {
             SuperAdminExists(sadmin);
         }
 
-
+        /// <summary>
+        /// Valida os dados e a unicidade antes de atualizar um Super Administrador.
+        /// </summary>
+        /// <remarks>
+        /// Regras verificadas:
+        /// <list type="bullet">
+        ///     <item>A entidade deve existir.</item>
+        ///     <item>Unicidade: Se o Email/Telefone for alterado, o novo valor não pode estar em uso por outra conta.</item>
+        ///     <item>Formato: Validação de formato de Email e Telefone (comprimento e caracteres).</item>
+        ///     <item>Idade: A data de nascimento deve ser válida.</item>
+        /// </list>
+        /// </remarks>
+        /// <param name="dto">O DTO com os novos dados de atualização.</param>
+        /// <param name="sadmin">A entidade SuperAdmin existente.</param>
+        /// <param name="sadmins">Utilizadores existentes (para verificação de unicidade).</param>
+        /// <exception cref="NotFoundException">Se a entidade SuperAdmin não for encontrada.</exception>
+        /// <exception cref="ValidationException">Se o formato ou a unicidade for violada.</exception>
         public void UpdateSuperAdminValidator(UpdateSuperAdminDTO dto, SuperAdmin sadmin, User[] sadmins)
         {
             SuperAdminExists(sadmin);
@@ -88,6 +144,11 @@ namespace Application.Validators
             }
         }
 
+        /// <summary>
+        /// Validação de existência para o Super Administrador através do seu ID.
+        /// </summary>
+        /// <param name="sadmin">A entidade SuperAdmin a ser verificada.</param>
+        /// <exception cref="NotFoundException">Se a entidade SuperAdmin não for encontrada.</exception>
         public void GetSuperAdminByIdValidator(SuperAdmin sadmin)
         {
             SuperAdminExists(sadmin);

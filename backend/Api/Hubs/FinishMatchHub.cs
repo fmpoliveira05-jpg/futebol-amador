@@ -8,12 +8,24 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
 {
+    /// <summary>
+    /// Hub SignalR responsável pela coordenação da finalização de uma partida (Finish Match).
+    /// 
+    /// Este hub gere o processo de submissão de resultados finais por parte dos administradores das equipas.
+    /// O objetivo é garantir que ambas as equipas concordam com o resultado (número de golos) antes de oficializar o fim do jogo.
+    /// </summary>
     public class FinishMatchHub : Hub<IFinishMatchHub>
     {
         private readonly IManagerFinishMatchService managerFinishMatchService;
         private readonly IHubFinshMatchValidator validator;
         private readonly IGeralHubValidator geralValidator;
 
+        /// <summary>
+        /// Construtor do FinishMatchHub.
+        /// </summary>
+        /// <param name="managerFinishMatchService">Serviço que gere o estado dos resultados submetidos.</param>
+        /// <param name="validator">Validador específico para regras de finalização de jogo.</param>
+        /// <param name="geralValidator">Validador para regras gerais de Hub.</param>
         public FinishMatchHub(IManagerFinishMatchService managerFinishMatchService,
             IHubFinshMatchValidator validator, IGeralHubValidator geralValidator)
         {
@@ -22,6 +34,16 @@ namespace Api.Hubs
             this.geralValidator = geralValidator;
         }
 
+        /// <summary>
+        /// Método invocado por um cliente (Admin) para submeter o resultado final do jogo.
+        /// 
+        /// Fluxo:
+        /// 1. O admin envia o resultado ([ResultMatchDto]).
+        /// 2. O serviço armazena o resultado e verifica se a outra equipa já submeteu.
+        /// 3. Se ambos submeteram e os resultados coincidem ([result.IsCoincides]), o jogo é finalizado e o grupo é limpo.
+        /// </summary>
+        /// <param name="finishMatch">DTO contendo os golos e IDs da partida/equipa.</param>
+        /// <exception cref="HubException">Se os dados forem inválidos ou o estado do jogo não permitir finalização.</exception>
         public async Task JoinFinishMatch(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
@@ -54,6 +76,11 @@ namespace Api.Hubs
             }
         }
 
+        /// <summary>
+        /// Método invocado por um cliente para editar um resultado previamente submetido (correção de erro).
+        /// </summary>
+        /// <param name="finishMatch">O novo DTO de resultado corrigido.</param>
+        /// <exception cref="HubException">Se a edição não for permitida (ex: jogo já fechado).</exception>
         public async Task EditResult(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
@@ -87,6 +114,10 @@ namespace Api.Hubs
             await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
         }
 
+        /// <summary>
+        /// Método invocado explicitamente pelo cliente para sair do ecrã de finalização sem concluir.
+        /// </summary>
+        /// <exception cref="HubException">Se ocorrer erro ao processar a saída.</exception>
         public async Task LeaveFinishMatch()
         {
             try
@@ -104,6 +135,11 @@ namespace Api.Hubs
             }
         }
 
+        /// <summary>
+        /// Chamado automaticamente quando a conexão cai ou o cliente fecha a app.
+        /// Garante que os dados temporários de finalização são limpos ou marcados como pendentes.
+        /// </summary>
+        /// <param name="exception">A exceção que causou a desconexão, se houver.</param>
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             Guid? matchId = null;
@@ -124,10 +160,11 @@ namespace Api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        /*
-         * Contém a lógica de limpeza que é partilhada
-         * Retorna 'true' se limpou algo, 'false' se não encontrou nada
-        */
+        #region Private Methods
+        /// <summary>
+        /// Lógica auxiliar para remover o utilizador do Hub e do Grupo SignalR.
+        /// </summary>
+        /// <returns><c>true</c> se a remoção foi bem-sucedida; <c>false</c> caso contrário.</returns>
         private async Task<bool> HandleLeaveHub()
         {
             if (Context.Items.TryGetValue(ModelConstants.FinishMatchHubConst.ContentMatchId, out var matchIdObj) &&
@@ -156,11 +193,22 @@ namespace Api.Hubs
             return false;
         }
 
+        /// <summary>
+        /// Gera o nome padronizado para o grupo de finalização de partida.
+        /// </summary>
+        /// <param name="idMatch">O ID da partida.</param>
+        /// <returns>Uma string no formato "hubFinishMatch-{Guid}".</returns>
         private static string GetGroupName(Guid idMatch)
         {
             return ModelConstants.FinishMatchHubConst.PrefixGroupName + idMatch;
         }
 
+        /// <summary>
+        /// Remove ambos os administradores do grupo e limpa o contexto, sinalizando o fim do processo.
+        /// </summary>
+        /// <param name="groupName">O nome do grupo.</param>
+        /// <param name="fisrtAdminConnectionId">ID da conexão do primeiro admin.</param>
+        /// <param name="SecondAdminConnectionId">ID da conexão do segundo admin.</param>
         private async Task CleanHub(string groupName, string? fisrtAdminConnectionId, string SecondAdminConnectionId)
         {
             if (!string.IsNullOrEmpty(fisrtAdminConnectionId))
@@ -173,5 +221,6 @@ namespace Api.Hubs
             Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentMatchId);
             Context.Items.Remove(ModelConstants.FinishMatchHubConst.ContentTeamId);
         }
+        #endregion
     }
 }
