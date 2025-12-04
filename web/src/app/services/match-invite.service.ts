@@ -116,7 +116,6 @@ export class MatchInviteService {
    * Inicia ou processa a negociação de um convite existente (contraproposta).
    */
   negotiateMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<any> {
-    console.log(data);
     return this.http.put<void>(`${this.baseUrl}/${teamId}/Negociate/`, data);
   }
 }

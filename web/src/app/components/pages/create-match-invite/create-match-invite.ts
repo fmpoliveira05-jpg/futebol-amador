@@ -7,6 +7,10 @@ import { AuthService } from '../../../services/auth.service';
 import { MatchInviteService } from '../../../services/match-invite.service';
 import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDto';
 
+/**
+ * Componente responsável pela criação e negociação de convites de partida.
+ * Opera em dois modos: Criação (POST) ou Negociação (PUT/Contraproposta).
+ */
 @Component({
   selector: 'app-create-match-invite',
   imports: [CommonModule, ReactiveFormsModule],
@@ -14,17 +18,40 @@ import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDt
   styleUrl: './create-match-invite.css',
 })
 export class CreateMatchInvite implements OnInit {
+  
+  /** ID da equipa do utilizador logado (remetente ou negociador). */
   currentTeamId = signal<string | null>(null);
 
+  /** ID da equipa adversária (recetor ou alvo da negociação). */
   targetTeamId: string | null = null;
+  
+  /** Dados do convite original, presentes apenas no modo Negociação (passado via Router State). */
   inviteToNegotiate: InfoMatchInviteDto | null = null;
+  
+  /** Flag que indica se o componente está no modo de Negociação. */
   isNegotiating = false;
 
+  /** Estado de carregamento da requisição. */
   protected readonly isLoading = signal<boolean>(false);
+  
+  /** Mensagem de erro a ser exibida na UI. */
   protected readonly errorMessage = signal<string | null>(null);
+  
+  /** O grupo de formulário reativo que contém os inputs de data e local. */
   protected form!: FormGroup;
+  
+  /** A data mínima permitida para o jogo (atual + 12 horas), formatada para o input HTML5. */
   minDate = '';
 
+  /**
+   * Construtor do componente.
+   * Verifica o estado da navegação para determinar o modo de operação e calcula a data mínima.
+   * @param auth Serviço de autenticação para obter o ID do utilizador/equipa.
+   * @param fb Serviço para construção de formulários reativos.
+   * @param route Serviço para acesso aos parâmetros da rota.
+   * @param router Serviço para navegação entre páginas.
+   * @param matchInviteService Serviço para operações com convites de partida.
+   */
   constructor(
     private auth: AuthService,
     private fb: FormBuilder,
@@ -41,6 +68,11 @@ export class CreateMatchInvite implements OnInit {
     }
   }
 
+  /**
+   * @method ngOnInit
+   * Inicializa o componente.
+   * Configura o formulário e subscreve à obtenção do ID da equipa do utilizador logado.
+   */
   ngOnInit() {
     this.form = this.fb.group({
       gameDate: ['', [Validators.required]],
@@ -50,48 +82,30 @@ export class CreateMatchInvite implements OnInit {
     this.auth.getCurrentTeamId().subscribe({
       next: (data) => {
         this.currentTeamId.set(data);
-        // this.setupForm();
         this.targetTeamId = this.route.snapshot.paramMap.get('teamId');
-        console.log(data);
       },
       error: (err) => console.error(err),
     });
   }
 
-  private setupForm() {
-    if (this.isNegotiating && this.inviteToNegotiate) {
-      const myId = this.currentTeamId();
-      const originalSenderId = this.inviteToNegotiate.sender.idTeam;
-      const originalReceiverId = this.inviteToNegotiate.receiver.idTeam;
-
-      if (myId === originalSenderId) {
-        this.targetTeamId = originalReceiverId;
-      } else {
-        this.targetTeamId = originalSenderId;
-      }
-
-      console.log('Negociando contra:', this.targetTeamId);
-
-      const existingDate = new Date(this.inviteToNegotiate.gameDate);
-      existingDate.setMinutes(existingDate.getMinutes() - existingDate.getTimezoneOffset());
-      const formattedDate = existingDate.toISOString().slice(0, 16);
-
-      this.form.patchValue({
-        gameDate: formattedDate,
-        homePitch: true,
-      });
-    } else {
-      this.targetTeamId = this.route.snapshot.paramMap.get('teamId');
-    }
-  }
-
+  /**
+   * @method calculateMinDate
+   * Calcula e formata a data mínima permitida para a partida (atual + 12 horas) no formato exigido pelo input HTML5 (`datetime-local`).
+   * @private
+   */
   private calculateMinDate() {
     const now = new Date();
     now.setHours(now.getHours() + 12);
     const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
     this.minDate = localDate.toISOString().slice(0, 16);
   }
-
+  
+  /**
+   * @method submitAction
+   * Processa a submissão do formulário.
+   * Determina a rota da API (Negociação ou Envio) com base no estado do componente.
+   * @returns {void}
+   */
   submitAction() {
     if (this.form.invalid) return;
     if (!this.targetTeamId || !this.currentTeamId()) return;
@@ -106,8 +120,6 @@ export class CreateMatchInvite implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    console.log(payload);
-
     if (this.isNegotiating && this.inviteToNegotiate) {
       this.matchInviteService.negotiateMatchInvite(this.currentTeamId()!, payload).subscribe({
         next: () => this.handleSuccess(),
@@ -121,11 +133,24 @@ export class CreateMatchInvite implements OnInit {
     }
   }
 
+  /**
+   * @method handleSuccess
+   * Trata a conclusão bem-sucedida de uma requisição, limpando o estado de loading e navegando.
+   * @private
+   * @returns {void}
+   */
   private handleSuccess() {
     this.isLoading.set(false);
     this.router.navigate(['/team/matchInvites']);
   }
 
+  /**
+   * @method handleError
+   * Trata erros de requisição, exibindo a mensagem na UI.
+   * @private
+   * @param {any} err - O erro retornado pela API.
+   * @returns {void}
+   */
   private handleError(err: any) {
     console.error(err);
     this.errorMessage.set('Ocorreu um erro ao processar o convite.');
