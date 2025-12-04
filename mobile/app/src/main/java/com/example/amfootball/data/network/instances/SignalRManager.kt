@@ -14,7 +14,7 @@ class SignalRManager (
     fun startConnection() {
         Log.d("SIGNALR_TEST", "1. Iniciando conexão SignalR...") // <--- LOG 1
 
-        hubConnection = HubConnectionBuilder.create("$baseUrl/hubs/notifications")
+        hubConnection = HubConnectionBuilder.create("${baseUrl}Notification")
             .withAccessTokenProvider(tokenProvider())
             .build()
 
