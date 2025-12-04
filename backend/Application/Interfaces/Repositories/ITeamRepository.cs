@@ -1,5 +1,4 @@
 ﻿using Application.DTOs.Filters;
-using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
@@ -8,7 +7,7 @@ namespace Application.Interfaces.Repositories
 {
     public interface ITeamRepository
     {
-        Task<TeamDto> GetOpponentTeamById(Guid idTeam);
+        Task<TeamDto?> GetOpponentTeamById(Guid idTeam);
 
         Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId);
 

@@ -109,7 +109,7 @@ namespace Infrastructure.Repositories
         /// </remarks>
         /// <param name="idTeam">O ID (GUID) da equipa.</param>
         /// <returns>A entidade [TeamDto] ou null.</returns>
-        public async Task<TeamDto> GetOpponentTeamById(Guid idTeam)
+        public async Task<TeamDto?> GetOpponentTeamById(Guid idTeam)
         {
             return await DbContext.Team
                     .Where(t => t.Id == idTeam)  

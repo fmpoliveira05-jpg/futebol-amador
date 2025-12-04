@@ -13,6 +13,12 @@ using System.Xml.Linq;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// Serviço de domínio responsável pela lógica de negócio e ciclo de vida dos Pedidos de Adesão ([MembershipRequest]).
+    /// 
+    /// Esta classe gere a criação, aceitação e rejeição de pedidos de adesão, tanto quando o Jogador envia
+    /// (Join Request) quanto quando a Equipa convida (Recruitment Invite).
+    /// </summary>
     public class MembershipService : IMembershipRequestService
     {
         private readonly ITeamRepository teamRepository;
@@ -25,6 +31,9 @@ namespace Application.Services
 
         private readonly INotificationService notificationService;
 
+        /// <summary>
+        /// Construtor do MembershipService.
+        /// </summary>
         public MembershipService(
             ITeamRepository teamRepository,
             IPlayerRepository playerRepository,
@@ -48,6 +57,17 @@ namespace Application.Services
 
         #region Pedidos de adesão da Team
 
+        /// <summary>
+        /// Envia um convite de recrutamento de uma Equipa para um Jogador.
+        /// </summary>
+        /// <remarks>
+        /// **Regras:** O remetente deve ser um Admin. O jogador alvo não pode ter equipa. A equipa não pode estar cheia.
+        /// **Side-Effects:** Envia notificação ao jogador alvo.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa que convida.</param>
+        /// <param name="playerIdToInvite">ID do jogador alvo.</param>
+        /// <param name="sender">ID do administrador que executa a ação.</param>
+        /// <returns>DTO do pedido criado.</returns>
         public async Task<MemberShipRequestDto> SendMembershipRequestTeam(Guid teamId, string playerIdToInvite, string sender)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
@@ -87,6 +107,20 @@ namespace Application.Services
             };
         }
 
+        /// <summary>
+        /// Aceita um pedido de adesão (Join Request) por parte de um Administrador de Equipa.
+        /// </summary>
+        /// <remarks>
+        /// **Transação:**
+        /// 1. Valida a permissão do Admin e se a equipa está cheia.
+        /// 2. Remove o [MembershipRequest].
+        /// 3. Atualiza o [Player] com o novo [IdTeam] (afiliação).
+        /// 4. Remove TODOS os pedidos pendentes associados a esse jogador (seja de outras equipas ou convites de recrutamento).
+        /// 5. Notifica o jogador aceite.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa que aceita.</param>
+        /// <param name="requestId">ID do pedido a aceitar.</param>
+        /// <param name="adminId">ID do administrador que executa a ação.</param>
         public async Task AcceptMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
         {
             var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
@@ -108,6 +142,15 @@ namespace Application.Services
             await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
         }
 
+        /// <summary>
+        /// Rejeita um pedido de adesão (Join Request) por parte de um Administrador de Equipa.
+        /// </summary>
+        /// <remarks>
+        /// **Transação:** Apenas remove o pedido e notifica o jogador, sem alterar a afiliação.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa que rejeita.</param>
+        /// <param name="requestId">ID do pedido a rejeitar.</param>
+        /// <param name="adminId">ID do administrador que executa a ação.</param>
         public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
         {
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
@@ -127,6 +170,15 @@ namespace Application.Services
             }).Unwrap();
         }
 
+        /// <summary>
+        /// Obtém a lista de pedidos de adesão (Join Requests) recebidos por uma Equipa.
+        /// </summary>
+        /// <remarks>
+        /// **Permissões:** Apenas Admins da equipa podem ver esta lista.
+        /// </remarks>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="playerId">ID do administrador que está a consultar.</param>
+        /// <returns>Lista de DTOs dos pedidos de adesão pendentes.</returns>
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeam(Guid teamId, string playerId)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
@@ -138,6 +190,13 @@ namespace Application.Services
             return await membershipRequestRepository.GetMembershipRequestsByTeam(teamId);
         }
 
+        /// <summary>
+        /// Obtém a lista de pedidos de adesão recebidos por uma Equipa, aplicando filtros de pesquisa.
+        /// </summary>
+        /// <param name="teamId">ID da equipa.</param>
+        /// <param name="filters">Filtros (Nome do Jogador, Data).</param>
+        /// <param name="playerId">ID do administrador que está a consultar.</param>
+        /// <returns>Lista filtrada de DTOs dos pedidos.</returns>
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsByTeamWithFilters(Guid teamId, FilterMembershipRequestsTeam filters, string playerId)
         {
             var team = await teamRepository.GetTeamForMemberManagementAsync(teamId);
@@ -154,6 +213,14 @@ namespace Application.Services
 
         #region Pedidos de adesão do Player
 
+        /// <summary>
+        /// Obtém a lista de Convites de Recrutamento (enviados por Equipas) recebidos por um Jogador.
+        /// </summary>
+        /// <remarks>
+        /// **Permissões:** Apenas para jogadores sem equipa ([ValidatePlayerAutorizationWithoutTeam]).
+        /// </remarks>
+        /// <param name="playerId">ID do jogador alvo.</param>
+        /// <returns>Lista de DTOs dos convites recebidos.</returns>
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayer(string playerId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
@@ -162,6 +229,12 @@ namespace Application.Services
             return await membershipRequestRepository.GetMembershipRequestsByPlayer(playerId);
         }
 
+        /// <summary>
+        /// Obtém a lista de Convites de Recrutamento recebidos por um Jogador, aplicando filtros.
+        /// </summary>
+        /// <param name="playerId">ID do jogador alvo.</param>
+        /// <param name="filters">Filtros (Nome da Equipa, Data).</param>
+        /// <returns>Lista filtrada de DTOs dos convites.</returns>
         public async Task<List<MemberShipRequestDto>> GetMembershipRequestsAsyncPlayerWithFilters(string playerId, FilterMembershipRequestsPlayer filters)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
@@ -170,6 +243,16 @@ namespace Application.Services
             return await membershipRequestRepository.GetMembershipRequestsByPlayerWithFilters(playerId, filters);
         }
 
+        /// <summary>
+        /// Aceita um convite de recrutamento de uma Equipa por parte do Jogador.
+        /// </summary>
+        /// <remarks>
+        /// **Transação:** O jogador é afiliado à equipa ([IdTeam] é definido). Todos os outros pedidos pendentes do jogador são eliminados.
+        /// **Side-Effects:** Notifica os administradores da equipa.
+        /// </remarks>
+        /// <param name="playerId">ID do jogador que aceita.</param>
+        /// <param name="requestId">ID do convite a ser aceite.</param>
+        /// <returns>DTO do pedido aceito.</returns>
         public async Task<MemberShipRequestDto> AcceptMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
             var membershipRequest = await membershipRequestRepository.GetMembershipRequestById(requestId);
@@ -227,6 +310,11 @@ namespace Application.Services
             };
         }
 
+        /// <summary>
+        /// Rejeita um convite de recrutamento de uma Equipa por parte do Jogador.
+        /// </summary>
+        /// <param name="playerId">ID do jogador que rejeita.</param>
+        /// <param name="requestId">ID do convite a ser rejeitado.</param>
         public Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
             return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
@@ -276,6 +364,16 @@ namespace Application.Services
             }).Unwrap();
         }
 
+        /// <summary>
+        /// Envia um pedido de adesão (Join Request) de um Jogador para uma Equipa.
+        /// </summary>
+        /// <remarks>
+        /// **Regras:** O jogador deve ser agente livre.
+        /// **Side-Effects:** Notifica os administradores da equipa.
+        /// </remarks>
+        /// <param name="playerId">ID do jogador que envia o pedido.</param>
+        /// <param name="teamId">ID da equipa alvo.</param>
+        /// <returns>DTO do pedido criado.</returns>
         public async Task<MemberShipRequestDto> SendMembershipRequestAsyncPlayer(string playerId, Guid teamId)
         {
             var player = await playerRepository.GetPlayerByIdAsync(playerId);
@@ -333,6 +431,14 @@ namespace Application.Services
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// Verifica se a equipa atingiu o número máximo de membros e, se sim, remove todos os pedidos pendentes para essa equipa.
+        /// </summary>
+        /// <remarks>
+        /// Utilizado após a aceitação de um novo membro para limpar a fila de recrutamento.
+        /// </remarks>
+        /// <param name="team">A equipa (carregada com membros).</param>
         private async Task RemoveAllMatchInviteTeam(Team team)
         {
             if (team.Members.Count >= ModelConstants.TeamConst.MaxMembers)
@@ -342,5 +448,4 @@ namespace Application.Services
         }
         #endregion
     }
-
 } 

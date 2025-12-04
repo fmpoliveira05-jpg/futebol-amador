@@ -1,11 +1,8 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
-using Application.Interfaces.Validators;
 using Domain.Exceptions;
 using FirebaseAdmin.Auth;
-using Google.Cloud.Firestore;
-using Microsoft.Extensions.Configuration;
 using System.Net.Http.Json;
 
 namespace Application.Services
@@ -18,40 +15,20 @@ namespace Application.Services
     /// </summary>
     public class FireBaseAuthService : IAuthService
     {
-        private readonly FirestoreDb DbContext;
-
-        private readonly ITeamRepository TeamRepository;
         private readonly IPlayerRepository PlayerRepository;
         private readonly ISuperAdminRepository SuperAdminRepository;
-
-        private readonly IPlayerValidator PlayerValidator;
-
-        private readonly IConfiguration Configuration;
-        private readonly string FirebaseApiKey;
         private readonly HttpClient HttpClient;
 
         /// <summary>
         /// Construtor do serviço de autenticação Firebase.
         /// </summary>
-        /// <param name="firestoreDb">Instância da base de dados Firestore (se utilizada).</param>
-        /// <param name="teamRepository">Repositório de equipas.</param>
         /// <param name="playerRepository">Repositório de jogadores.</param>
-        /// <param name="playerValidator">Validador de dados de jogador.</param>
         /// <param name="superAdminRepository">Repositório de super administradores.</param>
-        /// <param name="configuration">Configurações da aplicação (para aceder à API Key).</param>
         /// <param name="httpClient">Cliente HTTP para chamadas REST ao Firebase.</param>
-        public FireBaseAuthService(FirestoreDb firestoreDb, ITeamRepository teamRepository, IPlayerRepository playerRepository,
-                                   IPlayerValidator playerValidator, ISuperAdminRepository superAdminRepository,
-                                   IConfiguration configuration, HttpClient httpClient)
+        public FireBaseAuthService(IPlayerRepository playerRepository, ISuperAdminRepository superAdminRepository, HttpClient httpClient)
         {
-            DbContext = firestoreDb;
-            TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
-            PlayerValidator = playerValidator;
             SuperAdminRepository = superAdminRepository;
-            Configuration = configuration;
-            FirebaseApiKey = configuration["Firebase:ApiKey"]
-            ?? throw new ArgumentNullException("Firebase:ApiKey não encontrada no secrets.json");
             HttpClient = httpClient;
         }
 
