@@ -1,27 +1,38 @@
 <section class="page">
     <div class="card">
-        <h2 class="card-title">Enviar convite de partida:</h2>
-        <form class="form">
+        <h2 class="card-title">
+            {{ isNegotiating ? 'Negociar Convite' : 'Enviar convite de partida' }}
+        </h2>
+        
+        <form class="form" [formGroup]="form">
             <div class="form-grid">
+                
                 <label class="form-field">
                     <span>Data da partida: </span>
-                    <input type="text" formControlName="data" />
+                    <input type="datetime-local" formControlName="gameDate" [min]="minDate" />
                 </label>
 
                 <label class="form-field">
                     <span>Localização: </span>
-                    <select formControlName="location">
+                    <select formControlName="homePitch">
                         <option [ngValue]="true">Casa</option>
                         <option [ngValue]="false">Adversário</option>
                     </select>
                 </label>
+
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-primary">
-                    {{ 'Enviar' }}
+                <button 
+                    type="button" 
+                    class="btn btn-primary" 
+                    (click)="submitAction()" 
+                    [disabled]="form.invalid || isLoading()">
+                    {{ isLoading() ? 'Enviando...' : (isNegotiating ? 'Enviar Contraproposta' : 'Enviar') }}
                 </button>
             </div>
+            
+            <p *ngIf="errorMessage()" class="error">{{ errorMessage() }}</p>
         </form>
     </div>
 </section>

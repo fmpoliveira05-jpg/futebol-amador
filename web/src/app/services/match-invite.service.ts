@@ -39,7 +39,7 @@ export class MatchInviteService {
     return this.http.get<InfoMatchInviteDto[]>(`${this.baseUrl}/${teamId}`, { params });
   }
 
-  sendMatchInvites(teamId: string, data: SendMatchInviteDto): Observable<void> {
+  sendMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${teamId}/match-invites`, data);
   }
 
@@ -56,8 +56,19 @@ export class MatchInviteService {
   }
 
   refuseMatchInvite(teamId: string, idMatchInvite: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${teamId}/RefuseMatchInvite/${idMatchInvite}`);
+    const body = JSON.stringify(idMatchInvite);
+
+    const params = new HttpParams().set('idTeam', teamId);
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    return this.http.delete<void>(`${this.baseUrl}/${teamId}/RefuseMatchInvite/`, {
+      headers,
+      params,
+      body,
+    });
   }
 
-  negotiateMatchInvite() {}
+  negotiateMatchInvite(teamId: string, data: SendMatchInviteDto) {
+    return this.http.put<void>(`${this.baseUrl}/${teamId}/Negociate/`, data);
+  }
 }

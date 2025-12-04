@@ -1,9 +1,9 @@
 import { Component, computed, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { CommonModule } from '@angular/common';
-import { SendMatchInviteDto } from '../../../shared/Dtos/Match/SendMatchInviteDto';
 import { MatchInviteService } from '../../../services/match-invite.service';
 import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDto';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-match-invites',
@@ -20,7 +20,11 @@ export class MatchInvites {
 
   matchInvites = signal<InfoMatchInviteDto[]>([]);
 
-  constructor(private auth: AuthService, private matchInviteService: MatchInviteService) {}
+  constructor(
+    private auth: AuthService,
+    private matchInviteService: MatchInviteService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.auth.getCurrentTeamId().subscribe((teamId) => {
@@ -58,6 +62,7 @@ export class MatchInvites {
       this.matchInviteService.acceptMatchInvite(this.teamId()!, invite.id).subscribe({
         next: () => {
           this.isLoading.set(false);
+          this.loadMatchInvites(this.teamId()!);
         },
         error: () => {
           this.errorMessage.set('Não foi possível aceitar convite de partida.');
@@ -72,6 +77,7 @@ export class MatchInvites {
       this.matchInviteService.refuseMatchInvite(this.teamId()!, invite.id).subscribe({
         next: () => {
           this.isLoading.set(false);
+          this.loadMatchInvites(this.teamId()!);
         },
         error: () => {
           this.errorMessage.set('Não foi possível recusar convite de partida.');
@@ -81,5 +87,9 @@ export class MatchInvites {
     }
   }
 
-  negotiate(invite: InfoMatchInviteDto) {}
+  negotiate(invite: InfoMatchInviteDto) {
+    this.router.navigate(['/team/negotiateMatchInvite', this.teamId()!], {
+      state: { invite: invite },
+    });
+  }
 }

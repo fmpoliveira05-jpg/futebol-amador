@@ -215,7 +215,7 @@ export class TeamProfile {
   }
 
   protected sendMatchInvite(): void {
-    this.router.navigate(['/team/createMatchInvite']);
+    this.router.navigate(['/team/createMatchInvite', this.team()?.id]);
   }
 
   protected deleteTeam(): void {
