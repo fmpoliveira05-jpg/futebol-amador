@@ -55,8 +55,7 @@ class AuthService @Inject constructor(
 
                 return true
             } else {
-                val errorMsg =
-                    response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
                 Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
 
                 sessionManager.clearSession()

@@ -220,7 +220,7 @@ class FormMatchInviteViewModel @Inject constructor(
                 //Lançar exceção
             }
         }
-
+        Log.d("FormMatchInviteViewModel", "ID MY TEAM: $idMyTeam")
         navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
             popUpTo(0)
         }
