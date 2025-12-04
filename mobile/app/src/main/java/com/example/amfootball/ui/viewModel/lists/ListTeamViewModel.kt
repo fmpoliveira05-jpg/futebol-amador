@@ -18,12 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import kotlin.text.ifEmpty
-import com.example.amfootball.R
-import com.example.amfootball.data.errors.filtersError.FilterTeamError
-import com.example.amfootball.navigation.objects.Arguments
-import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
 
 // TODO: Falta implementar a chamada à API no método memberShipRequest (e também para a página variar para ser a lista de teams para matchInvite, geral ou pedidos de adesão)
 //TODO: Falta a parte dos erros de filtragem

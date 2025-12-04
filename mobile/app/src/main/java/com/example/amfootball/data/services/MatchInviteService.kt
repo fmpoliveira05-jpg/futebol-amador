@@ -5,6 +5,7 @@ import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.MatchInviteApi
+import com.example.amfootball.utils.handleApiError
 import com.example.amfootball.utils.safeApiCallWithReturn
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,7 +40,7 @@ class MatchInviteService @Inject constructor(
         matchInvite: SendMatchInviteDto
     ): InfoMatchInviteDto {
         return safeApiCallWithReturn {
-            matchInviteApi.sendMatchInvite(idTeam = teamId, matchInivite = matchInvite)
+            matchInviteApi.sendMatchInvite(idTeam = teamId, dto = matchInvite)
         }
     }
 
@@ -59,7 +60,7 @@ class MatchInviteService @Inject constructor(
         matchInvite: SendMatchInviteDto
     ): InfoMatchInviteDto {
         return safeApiCallWithReturn {
-            matchInviteApi.negotiateMatch(idTeam = teamId, matchInivite = matchInvite)
+            matchInviteApi.negotiateMatch(idTeam = teamId, matchInvite = matchInvite)
         }
     }
 

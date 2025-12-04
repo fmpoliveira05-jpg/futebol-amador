@@ -64,7 +64,6 @@ interface MatchInviteApi {
     @PUT("api/MatchInvite/{idTeam}/Negociate")
     suspend fun negotiateMatch(
         @Path("idTeam") idTeam: String,
-        //se falhar voltar a por mal escrito por culpa do artur: matchInivite
         @Body matchInvite: SendMatchInviteDto
     ): Response<InfoMatchInviteDto>
 }
