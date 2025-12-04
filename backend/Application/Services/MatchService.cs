@@ -84,12 +84,12 @@ namespace Application.Services
                 IdMatch = match.Id,
                 Team = new TeamDto
                 {
-                    IdTeam = team.Id,
+                    IdTeam = team.IdTeam,
                     Name = team.Team.Name,
                 },
                 Opponent = new TeamDto
                 {
-                    IdTeam = opponent.Id,
+                    IdTeam = opponent.IdTeam,
                     Name = opponent.Team.Name,
                 },
                 GameDate = match.MatchDate,
@@ -130,7 +130,7 @@ namespace Application.Services
                 throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento.");
             }
 
-            if (newDate <= DateTime.UtcNow)
+            if (DateTime.Compare(newDate, DateTime.UtcNow) <= 0)
             {
                 throw new BusinessRuleException("A nova data não pode ser igual ou antes da data atual.");
             }

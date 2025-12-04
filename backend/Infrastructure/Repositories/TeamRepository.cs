@@ -737,12 +737,10 @@ namespace Infrastructure.Repositories
         }
         public Task<List<string>> GetAdminsIdsByTeamIdAsync(Guid teamId)
         {
-            return DbContext.Team
-                .Where(t => t.Id == teamId)
-                .Include(p => p.Members)
-                .Where(p => p.Members.Any(m => m.IsAdmin))
-                .Select(p => p.Id.ToString())
-                .ToListAsync();
+            return DbContext.Player
+                    .Where(p => p.IdTeam == teamId && p.IsAdmin) // Filtra direto pelo ID da FK e flag Admin
+                    .Select(p => p.Id.ToString())
+                    .ToListAsync();
         }
     }
 }
