@@ -69,8 +69,8 @@ export class AuthService {
    */
   isAdmin(): boolean {
     return this.cookieService.get('is_admin') === 'true';
-  }
-
+  }  
+  
   /**
    * Verifica se o utilizador tem permissões de administrador.
    * @returns `true` se o utilizador for administrador, caso contrário `false`.
@@ -84,8 +84,11 @@ export class AuthService {
    * @returns `true` se o utilizador tiver uma equipa associada, caso contrário `false`.
    */
   hasTeam(): boolean {
-    return this.getCurrentTeamId != null;
+    return this.cookieService.check('team_id');
   }
+  // hasTeam(): boolean {
+  //   return this.getCurrentTeamId != null;
+  // }
 
   /**
    * Realiza o login do utilizador utilizando email e senha.
@@ -103,7 +106,8 @@ export class AuthService {
 
         this.cookieService.set('access_token', idToken, 7, '/');
         this.cookieService.set('user_id', localId, 7, '/');
-        this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');
+        // this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');
+        this.cookieService.set('is_admin', String(isAdmin), 7, '/');
 
         return response;
       })
@@ -156,7 +160,18 @@ export class AuthService {
    * @returns Um Observable com os detalhes do jogador.
    */
   getPlayerData(playerId: string): Observable<PlayerDetails> {
-    return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`);
+    // return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`);
+    return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`).pipe(
+        // Side-effect: Sempre que carregarmos os dados, atualizamos os cookies para garantir sincronia
+        map(data => {
+            if (data.team?.idTeam) {
+                this.cookieService.set('team_id', data.team.idTeam, 7, '/');
+            }
+            // Atualiza o admin também por segurança
+            this.cookieService.set('is_admin', String(data.isAdmin), 7, '/');
+            return data;
+        })
+    );
   }
 
   /**
@@ -164,10 +179,24 @@ export class AuthService {
    * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
    */
   getCurrentTeamId(): Observable<string | null> {
+    // const playerId = this.getCurrentPlayerId();
+    // if (!playerId) {
+    //   return of(null);
+    // }
+
+    // return this.getPlayerData(playerId).pipe(
+    //   map((playerData) => playerData?.team?.idTeam ?? null),
+    //   catchError((error) => {
+    //     console.error('Erro ao buscar dados do jogador:', error);
+    //     return of(null);
+    //   })
+    // );
     const playerId = this.getCurrentPlayerId();
-    if (!playerId) {
-      return of(null);
-    }
+    if (!playerId) return of(null);
+
+    // Tenta pegar do cookie primeiro para ser rápido
+    const cachedTeamId = this.cookieService.get('team_id');
+    if (cachedTeamId) return of(cachedTeamId);
 
     return this.getPlayerData(playerId).pipe(
       map((playerData) => playerData?.team?.idTeam ?? null),
@@ -186,17 +215,12 @@ export class AuthService {
    */
   canUserActivateAdminRoute(): Observable<boolean> {
     const playerId = this.getCurrentPlayerId();
-
-    // 1. Se não tiver ID local, não é Admin.
     if (!playerId) {
       return of(false);
     }
 
-    // 2. Retorna a chamada para a API, mapeando o resultado para o status isAdmin
     return this.getPlayerData(playerId).pipe(
       map((playerData) => playerData?.isAdmin === true),
-
-      // Se a chamada à API falhar (ex: token expirado, erro 404/500), nega a permissão.
       catchError(() => of(false))
     );
   }
