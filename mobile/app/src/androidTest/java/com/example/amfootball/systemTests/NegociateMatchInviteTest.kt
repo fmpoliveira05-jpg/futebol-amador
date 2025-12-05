@@ -43,27 +43,27 @@ class NegociateMatchInviteTest {
 
                 return when {
                     //Pedido do login
-                    path.contains("${BaseEndpoints.authApi}/login") && request.method == "POST" -> {
+                    path.contains("${BaseEndpoints.AUTH_API}/login") && request.method == "POST" -> {
                         MockResponse().setResponseCode(200).setBody(loginResponseJson)
                     }
 
                     //Pedido da HomePage
-                    path.contains("${BaseEndpoints.teamApi}/opponent/") && request.method == "GET" -> {
+                    path.contains("${BaseEndpoints.TEAM_API}/opponent/") && request.method == "GET" -> {
                         MockResponse().setResponseCode(200).setBody(detailsTeamJson)
                     }
 
                     //Pedido do calendario
-                    path.contains("${BaseEndpoints.teamApi}/") && request.method == "GET" -> {
+                    path.contains("${BaseEndpoints.TEAM_API}/") && request.method == "GET" -> {
                         MockResponse().setResponseCode(200).setBody(calendarJson)
                     }
 
                     //Pedido para ir buscar detalhes da partida
-                    path.contains("${BaseEndpoints.calendarApi}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
+                    path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
                         MockResponse().setResponseCode(200).setBody(matchToCancelJson)
                     }
 
                     //Pedido de cancelamento
-                    path.contains("${BaseEndpoints.calendarApi}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
+                    path.contains("${BaseEndpoints.CALENDAR_API}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
                         val descriptionRecebida = request.body.readUtf8()
                         println("A App tentou cancelar com descrição: $descriptionRecebida")
 
