@@ -2,6 +2,7 @@ package com.example.amfootball.mockWebServer
 
 import com.example.amfootball.data.network.instances.FireBaseInstance
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -19,5 +20,11 @@ object TestFirebaseModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return Mockito.mock(FirebaseAuth::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return Mockito.mock(FirebaseFirestore::class.java)
     }
 }
