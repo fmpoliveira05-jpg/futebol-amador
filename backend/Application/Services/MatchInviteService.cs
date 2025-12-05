@@ -234,14 +234,17 @@ namespace Application.Services
             var isHome = dto.homePitch;
             var idReceiver = dto.IdReceiver;
             var hasChanged = false;
-            var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idSender, idReceiver);
-            var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
+            var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idReceiver, idSender);
+            //var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
 
-            var senderTeam = matchInvite?.Sender;
-            var receiverTeam = matchInvite?.Receiver;
+            var senderTeam = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
+            var receiverTeam = await TeamRepository.GetTeamByIdAsync(matchInvite.IdReceiver);
+            var senderPitch = await PitchRepository.GetPitchById(senderTeam.IdPitch);
+            var receiverPitch = await PitchRepository.GetPitchById(receiverTeam.IdPitch);
+
             var pitch = GetPitchMatch(isHome, senderTeam.Pitch, receiverTeam.Pitch);
 
-            MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
+            //MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
             
             hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); 
 
