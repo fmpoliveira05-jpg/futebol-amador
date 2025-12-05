@@ -134,6 +134,7 @@ jobs:
             -Dsonar.projectKey=$SONAR_PROJ_KEY \
             -Dsonar.projectName=$SONAR_PROJ_NAME \
             -Dsonar.sources=src \
-            -Dsonar.tests=src \
             -Dsonar.exclusions=**/*.spec.ts \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+
