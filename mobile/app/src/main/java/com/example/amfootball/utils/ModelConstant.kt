@@ -204,3 +204,7 @@ object MatchConsts {
     /** Tempo máximo em dias que o jogador tem antes da partida para poder adia-la*/
     const val MAX_HOURS_TO_POST_PONE = 48
 }
+
+object NotificationConst {
+    const val TEAM_CHANNEL_ID = "team_channel_id"
+}

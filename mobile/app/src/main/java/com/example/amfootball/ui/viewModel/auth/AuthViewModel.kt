@@ -1,10 +1,13 @@
 package com.example.amfootball.ui.viewModel.auth
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.services.AuthService
+import com.example.amfootball.data.services.NotificationCallsService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -20,7 +23,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val repository: AuthService
+    private val repository: AuthService,
+    private val notificationCallsService: NotificationCallsService
 ) : ViewModel() {
 
     /**
@@ -55,8 +59,16 @@ class AuthViewModel @Inject constructor(
      * e atualiza o estado [_isUserLoggedIn] para `false`, forçando a UI a voltar ao ecrã de login.
      */
     fun logoutUser() {
-        repository.logout()
-        _isUserLoggedIn.value = false
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                notificationCallsService.sendDeviceToken("")
+            } catch (e: Exception) {
+                Log.e("FCM", "Erro ao limpar token no logout (não crítico): ${e.message}")
+            } finally {
+                repository.logout()
+                _isUserLoggedIn.value = false
+            }
+        }
     }
 
     /**

@@ -1,79 +1,107 @@
 package com.example.amfootball
 
 import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
+import androidx.core.content.ContextCompat
 import com.example.amfootball.navigation.MainNavigation
-import com.example.amfootball.ui.viewModel.MainViewModel
+import com.example.amfootball.utils.NotificationConst
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 /**
- * A Atividade principal da aplicação, atuando como o ponto de entrada do sistema Android.
+ * A Atividade principal ([AppCompatActivity]) da aplicação e o ponto de entrada da UI.
  *
- * É responsável pela configuração inicial, pelo host da hierarquia de Views do Jetpack Compose
- * e pela gestão das permissões de runtime.
+ * As responsabilidades principais incluem:
+ * 1. Configurar o sistema de Injeção de Dependência ([AndroidEntryPoint]).
+ * 2. Gerir o [MainNavigation] (Compose Navigation Host).
+ * 3. Configurar canais de notificação e solicitar permissões de runtime essenciais.
  *
- * Anotada com [@AndroidEntryPoint] para ativar a injeção de dependências do Hilt.
- *
- * Nota: Esta classe herda de [AppCompatActivity], que é a base recomendada para aplicações modernas.
+ * Nota: Esta Activity não gere o fluxo de notificação FCM diretamente; essa tarefa é delegada
+ * ao [com.example.amfootball.data.services.PushNotificationService].
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private val viewModel: MainViewModel by viewModels()
 
+    /**
+     * Chamado quando a Activity é criada. Configura a UI e os serviços de sistema.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Permissões
-        requestLocationPermission.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        createNotificationChannel()
+
+        requestPermissions()
 
         enableEdgeToEdge()
 
         setContent {
             MainNavigation()
         }
-        observeNotifications()
-    }
-
-    private fun observeNotifications() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.notificationFlow.collect { (title, message) ->
-                    showUiNotification(title, message)
-                }
-            }
-        }
-    }
-
-    private fun showUiNotification(title: String, message: String) {
-        Log.d("SIGNALR_TEST", "6. UI a mostrar notificação agora!") // <--- LOG 6
-
-        Toast.makeText(this, "$title\n$message", Toast.LENGTH_LONG).show()
-
-        println("SIGNALR_DEBUG: Recebi: $title - $message")
     }
 
     /**
-     * Launcher registrado para solicitar permissões de runtime (tempo de execução) ao utilizador.
+     * Cria e regista o canal de notificações para a equipa ([NotificationConst.TEAM_CHANNEL_ID]).
      *
-     * Este mecanismo moderno substitui o antigo `onRequestPermissionsResult`.
-     *
-     * Nota: O resultado pode ser processado aqui, mas o fluxo de negócio principal (ex: mostrar mensagem de erro)
-     * é tipicamente gerido nos ViewModels e Composables.
+     * O canal é configurado com [NotificationManager.IMPORTANCE_HIGH], o que permite
+     * a exibição de notificações visuais intrusivas (heads-up) e som.
+     * Esta função é executada apenas em dispositivos Android 8.0 (Oreo) ou superior.
      */
-    private val requestLocationPermission = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        // handled inside composables as well; kept here for completeness
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channelTeam = NotificationChannel(
+                NotificationConst.TEAM_CHANNEL_ID,
+                "Notificações de Equipa",
+                NotificationManager.IMPORTANCE_HIGH
+            )
+            channelTeam.description = "Notificações eventos da equipa"
+
+            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channelTeam)
+        }
+    }
+
+    /**
+     * Verifica as permissões de runtime da aplicação e solicita-as ao utilizador.
+     *
+     * Permissões solicitadas:
+     * 1. [Manifest.permission.ACCESS_FINE_LOCATION] (Opcional, se necessário para a app).
+     * 2. [Manifest.permission.POST_NOTIFICATIONS] (Essencial para FCM a partir do Android 13/Tiramisu).
+     */
+    private fun requestPermissions() {
+        val permissionsToRequest = mutableListOf<String>()
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
+        }
+
+        if (permissionsToRequest.isNotEmpty()) {
+            requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
+
+    /**
+     * Callback para lidar com a resposta do utilizador ao pedido de permissões.
+     *
+     * Após o utilizador conceder ou negar as permissões, este launcher é ativado.
+     */
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+        if (!notificationGranted) {
+            Log.d("PERMISSIONS", "Notificações negadas")
+        }
     }
 }

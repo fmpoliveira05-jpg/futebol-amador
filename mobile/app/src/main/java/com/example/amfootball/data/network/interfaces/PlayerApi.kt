@@ -17,7 +17,6 @@ import retrofit2.http.QueryMap
  * e gestão de pedidos de adesão (Membership Requests) bidirecionais (Jogador -> Equipa e Equipa -> Jogador).
  */
 interface PlayerApi {
-
     /**
      * Obtém os detalhes públicos completos de um jogador específico.
      *

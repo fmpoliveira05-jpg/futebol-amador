@@ -1,5 +1,7 @@
 package com.example.amfootball.data.services
 
+import android.util.Log
+import com.example.amfootball.data.dtos.fcm.DeviceTokenDto
 import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.filters.FilterListPlayer
@@ -25,7 +27,6 @@ import javax.inject.Singleton
 class PlayerService @Inject constructor(
     private val playerApi: PlayerApi
 ) {
-
     /**
      * Obtém o perfil detalhado de um jogador específico.
      *

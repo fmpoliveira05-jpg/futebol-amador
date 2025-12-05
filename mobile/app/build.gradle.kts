@@ -132,10 +132,13 @@ dependencies {
 
     //Dependencias FireBas para Auth
     implementation(platform("com.google.firebase:firebase-bom:34.4.0"))
+
     // Dependência do Firebase Authentication
     implementation("com.google.firebase:firebase-auth:24.0.1")
-
     implementation("com.google.firebase:firebase-firestore")
+
+    //Push Notification FireBase
+    implementation("com.google.firebase:firebase-messaging")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
@@ -157,9 +160,12 @@ dependencies {
     // Bibliotecas para chamadas de rede
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    //Dagger.Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")
     ksp("com.google.dagger:hilt-compiler:2.51.1") // Para KSP
 
