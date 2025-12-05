@@ -1,0 +1,24 @@
+{
+  "name": "adversario do xico",
+  "dateOfBirth": "2003-11-16",
+  "address": "nao interessa, Coimbra",
+  "email": "admin.equipa.b@exemplo.pt",
+  "phone": "+351919111000",
+  "creationDate": "2025-11-16T22:26:30.2126576",
+  "isAdminLastChanged": "2025-11-16T22:28:44.4130712",
+  "position": 2,
+  "height": 200,
+  "team": {
+    "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+    "name": ""
+  },
+  "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+  "isAdmin": true,
+  "firebaseLoginResponseDto": {
+    "idToken": "REMOVIDO",
+    "email": "admin.equipa.b@exemplo.pt",
+    "refreshToken": "REMOVIDO",
+    "expiresIn": "3600",
+    "localId": "EZ9gF4xswyc1WFTwQwCC99mhWcD3"
+  }
+}

@@ -2,4 +2,8 @@
 <resources>
     <string name="page_profile_user">Perfil Utilizador</string>
     <string name="profile_user_title_page">Perfil Utilizador</string>
+
+    <string name="profile">Perfil</string>
+    <string name="profile_edit">Editar Perfil</string>
+    <string name="profile_delete">Apagar Perfil</string>
 </resources>

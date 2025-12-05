@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="logo_team">Logótipo da equipa</string>
+    <string name="logo_team_name">%1$s %2$s</string>
+    <string name="proflie_image">Foto de perfil</string>
+    <string name="proflie_image_name">%1$s do %2$s</string>
+</resources>

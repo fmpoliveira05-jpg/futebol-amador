@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AMFootball</string>
+    <string name="age">anos</string>
+    <string name="average_age">idade média</string>
+
+    <string name="title_login">Conteudo do Login</string>
 </resources>

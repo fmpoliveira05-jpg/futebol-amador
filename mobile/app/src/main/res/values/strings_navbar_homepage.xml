@@ -40,5 +40,9 @@
     <string name="team_profile_description">Show team profile</string>
     <string name="team_settings">Team Settings</string>
     <string name="team_settings_description">Team settings</string>
+    <string name="item_list_chat">Chat List</string>
+    <string name="item_list_chat_description">List of chats</string>
+    <string name="single_chat">Chat</string>
+    <string name="single_chat_description">Chat</string>
 
 </resources>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="position_forward">Forward</string>
+    <string name="position_midfields">Midfields</string>
+    <string name="position_defender">Defender</string>
+    <string name="position_goalkeeper">Goalkeeper</string>
+
+    <string name="type_member_player">Player</string>
+    <string name="type_member_admin_team">Admin</string>
+
+    <string name="match_result_win">Winner</string>
+    <string name="match_result_draw">Draw</string>
+    <string name="match_result_lose">Loser</string>
+    <string name="match_result_undefined">Undefined</string>
+
+    <string name="type_match_competitive">Competitive</string>
+    <string name="type_match_casual">Casual</string>
+
+    <string name="match_status_scheduled">Scheduled</string>
+    <string name="match_status_in_progress">In Progress"</string>
+    <string name="match_status_done">Done</string>
+    <string name="match_status_post_poned">Post Poned</string>
+    <string name="match_status_canceled">Canceled</string>
+</resources>

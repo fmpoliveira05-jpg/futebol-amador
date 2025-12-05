@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,67 +40,66 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.amfootball.data.dtos.chat.MessageDto
+import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
-// --- Modelo de Dados Simples para a Mensagem ---
-
-data class Message(
-    val id: String,
-    val text: String,
-    val isSentByMe: Boolean,
-    val timestamp: String
-)
-
-// --- Composable Principal da Tela de Chat ---
-
+/**
+ * Ecrã de conversa individual (Single Chat Screen).
+ *
+ * Responsável por exibir o histórico de mensagens e permitir o envio de novas mensagens
+ * em tempo real.
+ *
+ * **Fluxo de Dados:**
+ * 1. O `viewModel` carrega as mensagens (`listenForMessages`) assim que o `chatRoomId` é definido.
+ * 2. As mensagens são observadas via `collectAsState` e renderizadas numa `LazyColumn`.
+ * 3. Novas mensagens digitadas no `MessageInput` são enviadas através do `viewModel.sendMessage`.
+ *
+ * @param chatViewModel O ViewModel que gere a lógica de chat e conexão ao Firebase.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
-    // Lista de mensagens de exemplo (mock)
-    val mockMessages = listOf(
-        Message("1", "Olá! Tudo bem?", isSentByMe = false, "10:00"),
-        Message("2", "Tudo ótimo! E com você?", isSentByMe = true, "10:01"),
-        Message("3", "Estou bem também, obrigado por perguntar.", isSentByMe = false, "10:01"),
-        Message("4", "Você viu o novo layout do app? Achei incrível!", isSentByMe = false, "10:02"),
-        Message("5", "Vi sim! O time de design fez um trabalho excelente.", isSentByMe = true, "10:03"),
-        Message("6", "Com certeza. A navegação está muito mais fluida.", isSentByMe = true, "10:03"),
-        Message("7", "Verdade!", isSentByMe = false, "10:04")
-    )
-
-    // Estado para armazenar o texto digitado
+fun ChatScreen(
+    chatViewModel: ChatViewModel = hiltViewModel()
+) {
     var messageText by remember { mutableStateOf("") }
-
+    val roomName by chatViewModel.roomName.collectAsState()
     Scaffold(
         topBar = {
-            ChatTopBar(contactName = "Jane Doe") {
-                // Ação para o botão de voltar (ex: fechar a tela)
-            }
+            ChatTopBar(contactName = roomName)
         },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues) // Aplica o padding do Scaffold
+                    .padding(paddingValues)
             ) {
-                // --- 1. Lista de Mensagens ---
+                LaunchedEffect(key1 = chatViewModel.chatRoomId) {
+                    chatViewModel.listenForMessages()
+                }
+
+                val messages by chatViewModel.messages.collectAsState()
+
                 LazyColumn(
                     modifier = Modifier
-                        .weight(1f) // Ocupa todo o espaço disponível
+                        .weight(1f)
                         .padding(horizontal = 16.dp),
-                    reverseLayout = false // Opcional: true se quiser começar do fim
+                    reverseLayout = false
                 ) {
-                    items(mockMessages) { message ->
-                        MessageBubble(message = message)
+                    items(messages) { message ->
+                        MessageBubble(
+                            message = message,
+                            isSentByMe = chatViewModel.isSentByMe(message)
+                        )
                     }
                 }
 
-                // --- 2. Campo de Entrada de Mensagem ---
                 MessageInput(
                     message = messageText,
                     onMessageChange = { messageText = it },
                     onSendClick = {
-                        // Lógica para enviar a mensagem (aqui apenas limpa o campo)
                         if (messageText.isNotBlank()) {
-                            // Adicionar a nova mensagem à lista (em um app real)
+                            chatViewModel.sendMessage(messageText)
                             messageText = ""
                         }
                     }
@@ -110,27 +109,28 @@ fun ChatScreen() {
     )
 }
 
-// --- Componentes da Tela de Chat ---
-
 /**
- * Barra superior com nome, foto (placeholder) e ações.
+ * Barra superior específica do Chat.
+ *
+ * Exibe o avatar, nome do contacto/sala e estado (Online).
+ *
+ * @param contactName O nome a exibir no título.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
+fun ChatTopBar(contactName: String) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                // Placeholder para a foto do perfil
                 Surface(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(20.dp)
                 ) {
-                    // Você pode usar uma imagem real aqui com AsyncImage (Coil)
                     Box(contentAlignment = Alignment.Center) {
+                        val initial = contactName.firstOrNull()?.toString()?.uppercase() ?: "?"
                         Text(
-                            text = contactName.first().toString(),
+                            text = initial,
                             color = MaterialTheme.colorScheme.onSecondary,
                             fontWeight = FontWeight.Bold
                         )
@@ -146,16 +146,11 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
                         fontSize = 18.sp
                     )
                     Text(
-                        text = "Online", // Status
+                        text = "Online",
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-            }
-        },
-        navigationIcon = {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Voltar")
             }
         },
         actions = {
@@ -170,14 +165,22 @@ fun ChatTopBar(contactName: String, onBackClick: () -> Unit) {
 }
 
 /**
- * Balão de mensagem individual (distingue enviadas e recebidas).
+ * Componente visual que representa um balão de mensagem.
+ *
+ * Ajusta automaticamente o alinhamento, cor e forma (cantos arredondados) com base
+ * em quem enviou a mensagem (Eu vs Outro).
+ *
+ * @param message O DTO contendo o texto da mensagem.
+ * @param isSentByMe Booleano que indica se a mensagem pertence ao utilizador atual.
  */
 @Composable
-fun MessageBubble(message: Message) {
-    val alignment = if (message.isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
-    val bubbleColor = if (message.isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (message.isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-    val bubbleShape = if (message.isSentByMe) {
+fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
+    val alignment = if (isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
+    val bubbleColor =
+        if (isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+    val textColor =
+        if (isSentByMe) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+    val bubbleShape = if (isSentByMe) {
         RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
     } else {
         RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
@@ -204,7 +207,13 @@ fun MessageBubble(message: Message) {
 }
 
 /**
- * Campo de texto e botão de enviar na parte inferior.
+ * Componente de entrada de texto para novas mensagens.
+ *
+ * Inclui um campo de texto arredondado e um botão de envio que só fica ativo se houver texto.
+ *
+ * @param message O texto atual no campo.
+ * @param onMessageChange Callback para atualizar o estado do texto.
+ * @param onSendClick Callback disparado ao carregar no botão de envio.
  */
 @Composable
 fun MessageInput(
@@ -213,7 +222,7 @@ fun MessageInput(
     onSendClick: () -> Unit
 ) {
     Surface(
-        tonalElevation = 2.dp, // Adiciona uma leve sombra/elevação
+        tonalElevation = 2.dp,
     ) {
         Row(
             modifier = Modifier
@@ -239,7 +248,7 @@ fun MessageInput(
                     .clip(CircleShape)
             ) {
                 Icon(
-                    Icons.Default.Send,
+                    Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Enviar mensagem",
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -248,12 +257,43 @@ fun MessageInput(
     }
 }
 
-// --- Preview para o Android Studio ---
-
-@Preview(showBackground = true)
+/*
+@Preview(name = "Chat Screen - English", locale = "en", showBackground = true)
+@Preview(name = "Chat Screen - Portuguese", locale = "pt", showBackground = true)
 @Composable
 fun ChatScreenPreview() {
-    // Você pode envolver com seu tema do app se tiver um
-    // Ex: SeuAppTheme { ... }
-    ChatScreen()
+    // Mock de dados para visualizar o layout sem ViewModel
+    val mockMessages = listOf(
+        MessageDto(text = "Olá! Tudo bem?", senderId = "other"),
+        MessageDto(text = "Tudo ótimo! E contigo?", senderId = "me"),
+        MessageDto(text = "Vamos treinar amanhã?", senderId = "other"),
+        MessageDto(text = "Claro, às 19h no campo principal.", senderId = "me")
+    )
+
+    MaterialTheme {
+        Scaffold(
+            topBar = { ChatTopBar(contactName = "Treinador João", onBackClick = {}) }
+        ) { padding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)
+                ) {
+                    items(mockMessages) { msg ->
+                        MessageBubble(
+                            message = msg,
+                            isSentByMe = (msg.senderId == "me")
+                        )
+                    }
+                }
+                MessageInput(message = "", onMessageChange = {}, onSendClick = {})
+            }
+        }
+    }
 }
+*/

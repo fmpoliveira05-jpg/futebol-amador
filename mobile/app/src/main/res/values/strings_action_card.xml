@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="action_card_casual">Casual</string>
+    <string name="action_card_casual_description">Schedule a casual match</string>
+
+    <string name="action_card_ranked">Ranked</string>
+    <string name="action_card_ranked_description">Schedule a ranked match</string>
+
+    <string name="action_card_calendar">Calendar</string>
+    <string name="action_card_calendar_description">Team match calendar</string>
+
+    <string name="action_card_members">Members</string>
+    <string name="action_card_members_description">Team member list</string>
+</resources>

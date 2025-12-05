@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="list_teams_description_logo_team">Logo da Equipa</string>
     <string name="list_teams_members">Membros</string>
     <string name="list_teams_view_team">Ver Equipa</string>
+
+    <string name="list_calendar_empty">Não foram encontradas partidas no calendário da equipa</string>
+    <string name="list_player_empty">Não foram encontrados jogadores</string>
+    <string name="list_membership_request_empty">Ainda não recebeu nenhum pedido de adesão</string>
+    <string name="list_teams_empty">Não foram encontradas equipas</string>
+    <string name="list_match_invite_empty">Ainda não recebeu nenhum pedido de partida</string>
+    <string name="list_members_empty">Não foi encontrado nenhum jogador com essas características</string>
+    <string name="list_post_pone_match_empty">Não foram encontrado nenhum pedido de adiamento</string>
+    <string name="leadboard_empty">Ainda não temos equipas para a tabela de classificação</string>
 </resources>

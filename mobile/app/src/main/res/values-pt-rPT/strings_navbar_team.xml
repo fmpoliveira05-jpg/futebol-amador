@@ -5,6 +5,12 @@
     <string name="navbar_home_page_team">Pagina Inicial Equipa</string>
     <string name="description_navbar_homepage_team">Pagina inicial da equipa</string>
 
+    <string name="navbar_create_tean">Criar Equipa</string>
+    <string name="description_navbar_crate_team">Página que permite criar uma nova Equipa</string>
+
+    <string name="navbar_update_team">Atualizar Equipa</string>
+    <string name="description_navbar_update_team">Página que permite-lhe atualizar os dados da sua equipa</string>
+
     <string name="navbar_calendar">Calendario</string>
     <string name="description_navbar_calendar">Calendario de jogos da equipa</string>
 
@@ -22,4 +28,10 @@
 
     <string name="navbar_matchinvite_list">Pedidos de partida</string>
     <string name="description_navbar_matchinvite_list">Lista de pedidos de partida recebidos pela equipa</string>
+
+    <string name="navbar_find_competitive_match">Procurar partida competitiva</string>
+    <string name="description_navbar_find_competitive_match">Funcionalidade que lhe permite pesquisar por outra equipa disponivel para outra partida competitiva</string>
+
+    <string name="navbar_list_post_pone_match">Lista de Adiamentos</string>
+    <string name="description_navbar_list_post_pone_match">Lista com todos os adiamentos de partida mandados há equipa</string>
 </resources>

@@ -6,9 +6,83 @@
     <string name="clear_button">Clear</string>
     <string name="clear_button_description">Button that allows you to clear the applied filters</string>
 
+    <string name="submit_button">Submit</string>
+    <string name="submit_button_description">Button that allows you to submit a form</string>
+
+    <string name="button_back">Back</string>
+    <string name="button_back_description">Button that allows you to go back to the previous page</string>
+
+    <string name="remove_button">Remove</string>
+    <string name="remove_button_player_description">Button that allows you to remove a player from your team</string>
+
+    <string name="button_try_again">Try Again</string>
+    <string name="button_try_again_description">Button that allows reloading the data</string>
+
+    <string name="button_login">Log In</string>
+    <string name="button_login_description">Button to log in to the application</string>
+
+    <string name="button_signup">Sign Up</string>
+    <string name="button_signup_description">Button to create a new account</string>
+
+    <string name="accept_button">Accept</string>
+    <string name="accept_button_description">Button that allows you to accept something</string>
+
+    <string name="negotiate_button">Negotiate</string>
+    <string name="negotiate_button_description">Button that allows you to trade something</string>
+
+    <string name="reject_button">Refuse</string>
+    <string name="reject_button_description">Button that allows rejecting something</string>
+
     <string name="button_send_match_invite">Send Match Invite</string>
     <string name="button_description_send_match_invite">Button that allows you to submit a match invite after filling out the form.</string>
 
+    <string name="button_membership_request">Membership Request</string>
+    <string name="button_description_membership_request">Button to view received membership requests</string>
+
+    <string name="button_send_membership_request">Send Membership Request</string>
+    <string name="button_send_membership_request_description">Button that allows you to send a membership request to a team or player</string>
+
+    <string name="button_start_match">Start Match</string>
+    <string name="button_start_match_description">Button that allows starting a match</string>
+
+    <string name="button_finish_match">Finish Match</string>
+    <string name="button_finish_match_description">Button that allows finishing a match</string>
+
+    <string name="button_post_pone_match">Postpone Match</string>
+    <string name="button_post_pone_match_description">Button that allows the user to postpone a match</string>
+
+    <string name="button_cancel_match">Cancel Match</string>
+    <string name="button_cancel_match_description">Button that allows the user to cancel a match</string>
+
+    <string name="button_view_more">View More</string>
+    <string name="button_view_more_description">Button that allows you to load more items from the list.</string>
+
     <string name="button_create_team">Create Team</string>
     <string name="button_description_create_team">Button to submit the submitted data and create the team</string>
+
+    <string name="button_edit_team">Edit Team</string>
+    <string name="button_description_edit_team">Edit team details</string>
+
+    <string name="button_list_teams">Team List</string>
+    <string name="button_description_list_teams_membership">Button that allows you to view all teams that still have openings for new players</string>
+    <string name="button_description_list_teams_match">Button that allows you to view all teams available for a casual match</string>
+    <string name="button_description_list_team">Button that allows you to view all teams in the app</string>
+
+    <string name="app_theme">Theme</string>
+    <string name="darkMode">Dark Mode</string>
+    <string name="light_mode">Light Mode</string>
+    <string name="theme_same_then_system">Sync with system theme</string>
+
+    <string name="app_language">Language</string>
+    <string name="language_english">English</string>
+    <string name="language_portuguese">Portuguese</string>
+
+    <string name="notifications">Notifications</string>
+    <string name="activate_notifications">Allow Notifications</string>
+
+    <string name="delete_profile_confirmation">Are you sure you want to delete your account? This action is irreversible.</string>
+    <string name="delete_profile_action">Yes, delete my account</string>
+    <string name="cancel">Cancel</string>
+
+
 </resources>

@@ -16,7 +16,7 @@
     <string name="item_leadboard">Tabela de Equipas</string>
     <string name="item_leadboard_description">Tabela de classificacao das equipas</string>
 
-    <string name="item_settings">Configuracoes</string>
+    <string name="item_settings">Configurações</string>
     <string name="item_settings_description">Configuracoes da aplicacao</string>
 
     <string name="item_preference">Preferencias</string>
@@ -42,10 +42,10 @@
     <string name="team_settings">Definições da Equipa</string>
     <string name="team_settings_description">Definições da equipa</string>
 
-
-
-
-
+    <string name="item_list_chat">Lista de conversas</string>
+    <string name="item_list_chat_description">Lista de conversas</string>
+    <string name="single_chat">Conversa</string>
+    <string name="single_chat_description">Conversa</string>
 
 
 </resources>

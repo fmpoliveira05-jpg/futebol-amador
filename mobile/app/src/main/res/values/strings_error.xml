@@ -1,4 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="unknown_error">Unknown error</string>
+    <string name="connection_error">No connection</string>
+    <string name="without_internet">No internet</string>
+    <string name="without_internet_save_data">No internet. Showing saved data</string>
     <string name="mandatory_field">Mandatory field</string>
+
+    <string name="error_min_email_length">Email must be at least %1$d characters long</string>
+    <string name="error_max_email_length">Email must not exceed %1$d characters</string>
+
+    <string name="error_min_password_length">Password must be at least %1$d characters long</string>
+    <string name="error_max_password_length">Password must not exceed %1$d characters</string>
+    <string name="error_password_requires_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="error_password_requires_digit">Password must contain at least one number</string>
+    <string name="error_password_requires_special_char">Password must contain at least one special character</string>
+
+    <string name="error_min_address">Address must have at least %1$d characters</string>
+    <string name="error_max_address">Address must have at most %1$d characters</string>
+    <string name="error_max_city">City name must have at most %1$d characters</string>
+
+    <string name="error_min_name_player">Player name must have at least %1$d characters</string>
+    <string name="error_max_name_player">Player name must have at most %1$d characters</string>
+    <string name="error_min_name_team">Team name must have at least %1$d characters</string>
+    <string name="error_max_name_team">Team name must have at most %1$d characters</string>
+    <string name="error_nin_name_member">Member name must have at least %1$d characters</string>
+    <string name="error_max_name_member">Member name must have at most %1$d characters</string>
+    <string name="error_min_name_opponent">Opponent name must have at least %1$d characters</string>
+    <string name="error_max_name_opponent">Opponent name must have at most %1$d characters</string>
+    <string name="error_min_name_sender">Sender name must have at least %1$d characters</string>
+    <string name="error_max_name_sender">Sender name must have at most %1$d characters</string>
+
+    <string name="error_max_description">Description must have at most %1$d characters</string>
+
+    <string name="error_min_pitch_name">Pitch name must have at least %1$d characters</string>
+    <string name="error_max_pitch_name">Pitch name must have at most %1$d characters</string>
+
+    <string name="error_post_pone_Date">postponement</string>
+    <string name="error_date_game">game</string>
+    <string name="error_date_sende">sending</string>
+    <string name="error_min_date_after">Minimum %1$s date must be before maximum %1$s date</string>
+    <string name="error_max_date_before">Maximum %1$s date must be after minimum %1$s date</string>
+
+    <string name="error_min_size">Minimum game size must be greater than %1$d</string>
+    <string name="error_max_size">Maximum game size must be less than %1$d</string>
+    <string name="error_min_size_greater_max">Minimum size must be less than maximum size</string>
+    <string name="error_max_size_minor_min">Maximum size must be greater than minimum size</string>
+
+    <string name="error_min_age">Player\'s minimum age must be greater than %1$d</string>
+    <string name="error_max_age">Player\'s maximum age must be less than %1$d</string>
+    <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
+    <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
+
+    <string name="error_min_number_points">Minimum points must be greater than %1$d</string>
+    <string name="error_max_number_points">Maximum points must be less than %1$d</string>
+    <string name="error_min_number_points_greater_max">Minimum number must be less than maximum number</string>
+    <string name="error_max_number_points_minor_min">Maximum number must be greater than minimum number</string>
+
+    <string name="error_min_number_members">Minimum number of members must be greater than %1$d</string>
+    <string name="error_max_number_members">Maximum number of members must be less than %1$d</string>
+    <string name="error_min_number_members_greater_max">Minimum members must be less than maximum members</string>
+    <string name="error_max_number_members_minor_min">Maximum members must be greater than minimum members</string>
+
+    <string name="error_min_goals_team">The minimum number of goals scored by a team is %1$d</string>
+    <string name="error_max_goals_team">The maximum number of goals scored by a team is %1$d</string>
+
+    <string name="error_login">An error occurred during login. Verify email and password.</string>
+    <string name="error_min_length_cancel_match_reason">The reason must be at least %1$d characters long</string>
+    <string name="error_max_length_cancel_match_reason">The reason cannot exceed %1$d characters</string>
 </resources>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tag_email_input" translatable="false">emailInput</string>
+    <string name="tag_password_input" translatable="false">passwordInput</string>
+    <string name="tag_login_button" translatable="false">loginButton</string>
+    <string name="tag_logo_team" translatable="false">LogoTeam</string>
+    <string name="tag_name_team" translatable="false">nameTeam</string>
+
+    <string name="tag_action_card_calendar" translatable="false">actionCardCalendar</string>
+
+    <string name="tag_filter_section" translatable="false">filterSection</string>
+    <string name="tag_filter_name_team" translatable="false">filterNameTeam</string>
+    <string name="tag_filter_home_match" translatable="false">filterIsHomeMatch</string>
+    <string name="tag_filter_min_date_game" translatable="false">filterMinDateGame</string>
+    <string name="tag_filter_max_date_game" translatable="false">filterMaxDateGame</string>
+    <string name="tag_filter_type_match" translatable="false">filterTypeMatch</string>
+    <string name="tag_filter_finish_match" translatable="false">filterFinishMatch</string>
+    <string name="tag_apply_filter" translatable="false">applyFilter</string>
+    <string name="tag_clear_filter" translatable="false">clearFilter</string>
+
+    <string name="tag_options_match" translatable="false">optionsMatch</string>
+    <string name="tag_button_cancel_match" translatable="false">buttonCancelMatch</string>
+
+    <string name="tag_description_cancel" translatable="false">cancelMatchDescprtionTextField</string>
+</resources>
