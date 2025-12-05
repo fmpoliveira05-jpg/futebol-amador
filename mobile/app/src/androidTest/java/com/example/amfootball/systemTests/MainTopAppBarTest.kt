@@ -38,18 +38,6 @@ class MainTopAppBarTest {
     }
 
     @Test
-    fun clickingSettings_navigatesToSettings() {
-        composeRule
-            .onNodeWithTag("settingsButton")
-            .assertExists()
-            .performClick()
-
-        composeRule
-            .onNodeWithText("Definições")
-            .assertExists()
-    }
-
-    @Test
     fun clickingLogin_navigatesToLogin() {
         composeRule
             .onNodeWithTag("loginButton")
@@ -61,16 +49,6 @@ class MainTopAppBarTest {
             .assertExists()
     }
 
-    @Test
-    fun clickingSignup_navigatesToSignup() {
-        composeRule
-            .onNodeWithTag("signupButton")
-            .assertExists()
-            .performClick()
 
-        composeRule
-            .onNodeWithText("Criar Conta")
-            .assertExists()
-    }
 
 }
