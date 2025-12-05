@@ -129,7 +129,9 @@ class SendMessageTest {
         val chatItemTag = context.getString(R.string.tag_item_list_chat)
 
         composeRule.waitUntil(timeoutMillis = 15000) {
-            composeRule.onAllNodesWithTag(chatItemTag).fetchSemanticsNodes().isNotEmpty()
+            composeRule
+                .onAllNodesWithTag(chatItemTag)
+                .fetchSemanticsNodes().isNotEmpty()
         }
 
         composeRule.onAllNodesWithTag(chatItemTag)
