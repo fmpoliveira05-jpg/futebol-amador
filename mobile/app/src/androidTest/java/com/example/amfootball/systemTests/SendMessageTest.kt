@@ -19,6 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 import android.Manifest
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.performScrollTo
 import com.example.amfootball.data.local.SessionManager
 import org.junit.Before
 import javax.inject.Inject
@@ -54,6 +55,7 @@ class SendMessageTest {
         val context = composeRule.activity.applicationContext
         val email = "player@player.com"
         val password = "Teste123."
+        val message = "Mensagem de Teste"
 
         checkHomePageAndNavigateChatList(context = context)
 
@@ -65,9 +67,9 @@ class SendMessageTest {
 
         findAndSelectChat(context = context)
 
-        sendMessage(context = context, testMessage)
+        sendMessage(context = context, message)
 
-        checkMessageAreSend(context = context)
+        checkMessageAreSend(message)
     }
 
     private fun checkHomePageAndNavigateChatList(context: Context) {
@@ -105,37 +107,43 @@ class SendMessageTest {
             .performClick()
             .performTextInput(password)
 
-        composeRule
-            .onNodeWithTag(context.getString(R.string.tag_login_button))
-            .performClick()
-    }
-
-    private fun findAndSelectChat(context: Context) {
-        composeRule
-            .onAllNodesWithText(context.getString(Routes.PlayerRoutes.CHAT_LIST.labelResId))
-            .onFirst()
-            .assertIsDisplayed()
-
-        val chatItemTag = context.getString(R.string.tag_item_list_chat)
-
-        composeRule.waitUntil(timeoutMillis = 10000) {
-            composeRule
-                .onAllNodesWithTag(chatItemTag)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
+        composeRule.waitForIdle()
 
         composeRule
-            .onAllNodesWithTag(chatItemTag)
+            .onAllNodesWithTag(context.getString(R.string.tag_login_button))
             .onFirst()
             .performClick()
 
         composeRule.waitForIdle()
     }
 
-    private fun sendMessage(context: Context, message: String) {
-        //TODO: Ir buscar o titulo do chat
+    private fun findAndSelectChat(context: Context) {
+        val homeTitle = context.getString(Routes.GeralRoutes.HOMEPAGE.labelResId)
+        if (composeRule.onAllNodesWithText(homeTitle).fetchSemanticsNodes().isNotEmpty()) {
+            composeRule
+                .onNodeWithText(context.getString(Routes.BottomNavBarRoutes.CHAT_LIST.labelResId))
+                .performClick()
+        }
 
+        val chatItemTag = context.getString(R.string.tag_item_list_chat)
+
+        composeRule.waitUntil(timeoutMillis = 15000) {
+            composeRule
+                .onAllNodesWithTag(chatItemTag)
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onAllNodesWithTag(chatItemTag)
+            .onFirst()
+            .performClick()
+
+        composeRule.waitForIdle()
+    }
+
+    private fun sendMessage(
+        context: Context,
+        message: String
+    ) {
         composeRule
             .onNodeWithTag(context.getString(R.string.tag_field_message))
             .performClick()
@@ -143,10 +151,17 @@ class SendMessageTest {
 
         composeRule
             .onNodeWithTag(context.getString(R.string.tag_button_send_message))
-        
+            .performClick()
+
+        composeRule.waitForIdle()
     }
 
-    private fun checkMessageAreSend(context: Context) {
+    private fun checkMessageAreSend(message: String) {
+        composeRule.waitForIdle()
 
+        composeRule
+            .onNodeWithText(message)
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 }

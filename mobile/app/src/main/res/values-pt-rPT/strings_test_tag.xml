@@ -24,6 +24,7 @@
     <string name="tag_description_cancel" translatable="false">cancelMatchDescprtionTextField</string>
 
     <string name="tag_item_list_chat" translatable="false">itemListChat</string>
+    <string name="tag_empty_list_chat" translatable="false">tagEmptyListChat</string>
     <string name="tag_field_message" translatable="false">fieldSendMessage</string>
     <string name="tag_button_send_message" translatable="false">buttonSendMessage</string>
 </resources>

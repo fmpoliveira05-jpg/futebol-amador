@@ -1,42 +1,39 @@
 package com.example.amfootball.mockWebServer
 
-import com.example.amfootball.data.network.instances.FireBaseInstance
+
 import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
-import com.google.firebase.Firebase
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.components.SingletonComponent
-import dagger.hilt.testing.TestInstallIn
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
-import javax.inject.Singleton
 
-@Module
-@TestInstallIn(
-    components = [SingletonComponent::class],
-    replaces = [FireBaseInstance::class]
-)
 object TestFirebaseModule {
-    @Provides
-    @Singleton
+
     fun provideFirebaseAuth(): FirebaseAuth {
-        return Mockito.mock(FirebaseAuth::class.java)
+        val mockAuth = Mockito.mock(FirebaseAuth::class.java)
+        val mockAuthResult = Mockito.mock(AuthResult::class.java)
+        val mockUser = Mockito.mock(FirebaseUser::class.java)
+        val successTask = Tasks.forResult(mockAuthResult)
+
+        Mockito.`when`(mockAuth.signInWithEmailAndPassword(anyString(), anyString()))
+            .thenReturn(successTask)
+
+        Mockito.`when`(mockAuth.currentUser).thenReturn(mockUser)
+
+        return mockAuth
     }
 
-    @Provides
-    @Singleton
-    fun provideFirebaseFirestore(): FirebaseFirestore {
-        return Mockito.mock(Firebase.firestore::class.java)
+    fun provideFirestore(): FirebaseFirestore {
+        return Mockito.mock(FirebaseFirestore::class.java)
     }
 
-    @Provides
-    @Singleton
     fun provideFcmTokenProvider(): FcmTokenProvider {
         return object : FcmTokenProvider {
             override fun getDeviceToken(onResult: (String?) -> Unit) {
-                onResult("token-teste-123456")
+                onResult("token-teste-mock")
             }
         }
     }

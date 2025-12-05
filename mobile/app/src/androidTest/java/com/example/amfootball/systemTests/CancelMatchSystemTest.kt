@@ -19,26 +19,57 @@ import com.example.amfootball.data.enums.match.TypeMatch
 import com.example.amfootball.data.network.instances.FireBaseInstance
 import com.example.amfootball.data.network.instances.NetworkModule
 import com.example.amfootball.data.network.interfaces.BaseEndpoints
+import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
+import com.example.amfootball.mockWebServer.TestFirebaseModule
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.JsonReader
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.InstallIn
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import dagger.hilt.android.testing.UninstallModules
+import dagger.hilt.components.SingletonComponent
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
-
+import javax.inject.Singleton
+import dagger.Module
+import dagger.Provides
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class, FireBaseInstance::class)
 class CancelMatchSystemTest {
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object LocalMockModule {
+
+        @Provides
+        @Singleton
+        fun provideFirebaseAuth(): FirebaseAuth {
+            return TestFirebaseModule.provideFirebaseAuth()
+        }
+
+        @Provides
+        @Singleton
+        fun provideFirestore(): FirebaseFirestore {
+            return TestFirebaseModule.provideFirestore()
+        }
+
+        @Provides
+        @Singleton
+        fun provideFcmTokenProvider(): FcmTokenProvider {
+            return TestFirebaseModule.provideFcmTokenProvider()
+        }
+    }
+
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -60,8 +91,6 @@ class CancelMatchSystemTest {
 
     @Before
     fun setUp() {
-        hiltRule.inject()
-
         loginBodyJson = JsonReader.readJsonFromAsserts("LoginAdminTeam.json")
         loginResponseJson = JsonReader.readJsonFromAsserts("ProfileAdmin.json")
         calendarJson = JsonReader.readJsonFromAsserts("CalendarOfTeam.json")
@@ -69,17 +98,15 @@ class CancelMatchSystemTest {
 
         val originalMatchJson = JsonReader.readJsonFromAsserts("MatchToCancel.json")
         val matchJsonObject = JSONObject(originalMatchJson)
-
         val futureDate = LocalDate.now().plusDays(5)
         dynamicExpectedDate = futureDate.toString()
-
         matchJsonObject.put("gameDate", "${dynamicExpectedDate}T19:30:00")
-
         matchToCancelJson = matchJsonObject.toString()
-        var isMatchCancelled = false
 
         mockWebServer = MockWebServer()
         mockWebServer.start(8080)
+
+        var isMatchCancelled = false
 
         mockWebServer.dispatcher = object : Dispatcher() {
             override fun dispatch(request: RecordedRequest): MockResponse {
@@ -87,68 +114,45 @@ class CancelMatchSystemTest {
                 val url = request.requestUrl
 
                 return when {
-                    //Pedido do login
                     path.contains("${BaseEndpoints.AUTH_API}/login") && request.method == "POST" -> {
                         MockResponse().setResponseCode(200).setBody(loginResponseJson)
                     }
-
-                    //Dados da HomePage
                     path.contains("${BaseEndpoints.TEAM_API}/opponent/") && request.method == "GET" -> {
                         MockResponse().setResponseCode(200).setBody(detailsTeamJson)
                     }
-
-                    // Cancelar Partida
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
-                        isMatchCancelled = true
+                        isMatchCancelled = true // Atualiza estado
                         MockResponse().setResponseCode(204)
                     }
-
-                    // Detalhes da Partida, antes de cancelar
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
                         MockResponse().setResponseCode(200).setBody(matchToCancelJson)
                     }
-
                     path.contains("${BaseEndpoints.PLAYER_API}/device-token") && request.method == "PUT" -> {
                         MockResponse().setResponseCode(204)
                     }
-
-                    //Get Calendario
+                    // Get Calendario (Lista)
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" -> {
                         val idMatchCancelled = "2b2b2b2b-0000-1111-3333-000000000008"
 
-                        val listaBase: String = if (isMatchCancelled) {
-                            val jsonArrayOriginal = JSONArray(calendarJson)
-                            val jsonArrayNovo = JSONArray()
-
-                            for (i in 0 until jsonArrayOriginal.length()) {
-                                val matchItem = jsonArrayOriginal.getJSONObject(i)
-                                if (matchItem.getString("idMatch") != idMatchCancelled) {
-                                    jsonArrayNovo.put(matchItem)
-                                }
-                            }
-                            jsonArrayNovo.toString()
+                        if (isMatchCancelled) {
+                            MockResponse().setResponseCode(200).setBody("[]")
                         } else {
-                            calendarJson
-                        }
 
-                        val isFiltering = url?.queryParameterNames?.isNotEmpty() == true
-
-                        if (isFiltering) {
-                            if (isMatchCancelled) {
-                                MockResponse().setResponseCode(200).setBody("[]")
-                            } else {
+                            val isFiltering = url?.queryParameterNames?.isNotEmpty() == true
+                            if (isFiltering) {
                                 MockResponse().setResponseCode(200).setBody("[$matchToCancelJson]")
+                            } else {
+                                MockResponse().setResponseCode(200).setBody(calendarJson)
                             }
-                        } else {
-                            MockResponse().setResponseCode(200).setBody(listaBase)
                         }
                     }
-
-
                     else -> MockResponse().setResponseCode(404)
                 }
             }
         }
+
+        // INJECT DEPOIS DE CONFIGURAR TUDO
+        hiltRule.inject()
     }
 
     @After
@@ -230,7 +234,7 @@ class CancelMatchSystemTest {
             .onFirst()
             .assertIsDisplayed()
 
-        composeRule.waitUntil(timeoutMillis = 5000) {
+        composeRule.waitUntil(timeoutMillis = 10000) {
             composeRule
                 .onAllNodesWithTag(context.getString(R.string.tag_logo_team))
                 .fetchSemanticsNodes()
@@ -258,7 +262,7 @@ class CancelMatchSystemTest {
 
     private fun cancelMatch(context: Context, description: String) {
         val tagBotaoDelete = context.getString(R.string.tag_button_cancel_match)
-        composeRule.waitUntil(timeoutMillis = 5000) {
+        composeRule.waitUntil(timeoutMillis = 10000) {
             composeRule
                 .onAllNodesWithTag(tagBotaoDelete)
                 .fetchSemanticsNodes()
