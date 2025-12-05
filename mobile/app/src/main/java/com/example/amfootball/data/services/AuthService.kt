@@ -1,13 +1,11 @@
 package com.example.amfootball.data.services
 
-import android.util.Log
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.interfaces.AuthApi
 import com.example.amfootball.utils.safeApiCallWithReturn
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,13 +45,12 @@ class AuthService @Inject constructor(
                 authApiService.loginUser(login)
             }
 
+            firebaseAuth.signInWithEmailAndPassword(login.email, login.password).await()
+
             sessionManager.saveUserProfile(userProfile)
             sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
-            Log.d("AuthRepository", "Login completo e dados guardados.")
-
             return true
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Erro no login: ${e.message}")
             e.printStackTrace()
             return false
         }
@@ -83,11 +80,8 @@ class AuthService @Inject constructor(
 
                 sessionManager.saveUserProfile(userProfile)
                 sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
-                Log.d("AuthRepository", "Login completo e dados guardados.")
-
             } else {
                 val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
-                Log.e("AuthRepository", "Falha ao buscar perfil: $errorMsg")
 
                 sessionManager.clearSession()
                 throw Exception(errorMsg)

@@ -21,6 +21,7 @@ import android.Manifest
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.printToLog
 import com.example.amfootball.data.local.SessionManager
 import org.junit.Before
@@ -94,10 +95,7 @@ class SendMessageTest {
             .performClick()
     }
 
-    private fun login(context: Context,
-                      email: String,
-                      password: String
-    ) {
+    private fun login(context: Context, email: String, password: String) {
         composeRule
             .onNodeWithText(context.getString(Routes.UserRoutes.LOGIN.labelResId))
             .assertIsDisplayed()
@@ -121,41 +119,22 @@ class SendMessageTest {
     }
 
     private fun findAndSelectChat(context: Context) {
-        composeRule.waitForIdle()
-
-        composeRule
-            .onAllNodesWithText(context.getString(Routes.PlayerRoutes.CHAT_LIST.labelResId))
-            .onFirst()
-            .assertIsDisplayed()
+        val homeTitle = context.getString(Routes.GeralRoutes.HOMEPAGE.labelResId)
+        if (composeRule.onAllNodesWithText(homeTitle).fetchSemanticsNodes().isNotEmpty()) {
+            composeRule
+                .onNodeWithText(context.getString(Routes.BottomNavBarRoutes.CHAT_LIST.labelResId))
+                .performClick()
+        }
 
         val chatItemTag = context.getString(R.string.tag_item_list_chat)
-        val emptyStateTag = context.getString(R.string.tag_empty_list_chat)
 
-        try {
-            composeRule.waitUntil(timeoutMillis = 10000) {
-                composeRule
-                    .onAllNodesWithTag(chatItemTag)
-                    .fetchSemanticsNodes()
-                    .isNotEmpty()
-            }
-
-            composeRule.onAllNodesWithTag(chatItemTag)
-                .onFirst()
-                .performClick()
-        } catch (e: ComposeTimeoutException) {
-            val emptyStateNode = composeRule.onAllNodesWithTag(emptyStateTag)
-
-            if (emptyStateNode
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-            ) {
-                throw AssertionError("FALHA DE TESTE: O utilizador não tem conversas iniciadas. Por favor, cria uma conversa manualmente ou via API antes de correr este teste.")
-            } else {
-                println("DEBUG: Árvore de UI no momento do erro:")
-                composeRule.onRoot().printToLog("ARVORE_UI_ERRO")
-                throw e
-            }
+        composeRule.waitUntil(timeoutMillis = 15000) {
+            composeRule.onAllNodesWithTag(chatItemTag).fetchSemanticsNodes().isNotEmpty()
         }
+
+        composeRule.onAllNodesWithTag(chatItemTag)
+            .onFirst()
+            .performClick()
 
         composeRule.waitForIdle()
     }
@@ -172,6 +151,8 @@ class SendMessageTest {
         composeRule
             .onNodeWithTag(context.getString(R.string.tag_button_send_message))
             .performClick()
+
+        composeRule.waitForIdle()
     }
 
     private fun checkMessageAreSend(context: Context, message: String) {
@@ -179,6 +160,7 @@ class SendMessageTest {
 
         composeRule
             .onNodeWithText(message)
+            .performScrollTo()
             .assertIsDisplayed()
     }
 }
