@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { AuthService } from '../..//services/auth.service';
 
 /**
@@ -11,7 +11,6 @@ import { AuthService } from '../..//services/auth.service';
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
-
   /**
    * Serviço de autenticação, utilizado para verificar se o utilizador está autenticado,
    * se ele é um administrador, ou se está associado a uma equipa.
@@ -30,7 +29,6 @@ export class AuthGuard implements CanActivate {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Observable<boolean> | Promise<boolean> | boolean {
-
     const isAuthenticated = this.authService.isAuthenticated();
 
     if (!isAuthenticated) {
@@ -38,10 +36,22 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    if (route.data['isAdmin'] && !this.authService.isAdmin()) {
-      this.router.navigate(['/']);
-      return false;
+    if (route.data['isAdmin']) {
+      // Retorna o Observable, permitindo que o Angular ESPERE pela resposta do servidor
+      return this.authService.canUserActivateAdminRoute().pipe(
+        map((isAdmin) => {
+          if (!isAdmin) {
+            this.router.navigate(['/']); // Redireciona se a permissão final for Negada
+            return false;
+          }
+          return true; // Permissão Concedida
+        })
+      );
     }
+    // if (route.data['isAdmin'] && !this.authService.isAdmin()) {
+    //   this.router.navigate(['/']);
+    //   return false;
+    // }
 
     if (route.data['requiresTeam'] && !this.authService.hasTeam()) {
       this.router.navigate(['/players']);
