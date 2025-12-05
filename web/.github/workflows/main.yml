@@ -91,17 +91,6 @@ jobs:
           name: cypress-report
           path: cypress/reports/
       
-      - name: Upload Cypress Videos
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-videos
-          path: cypress/videos/
-
-      - name: Upload Cypress Screenshots
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots
-          path: cypress/screenshots/
 
   sonarqube:
     name: SonarQube Analysis
