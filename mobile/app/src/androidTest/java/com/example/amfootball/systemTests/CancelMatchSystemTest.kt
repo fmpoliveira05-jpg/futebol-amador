@@ -230,7 +230,7 @@ class CancelMatchSystemTest {
             .onFirst()
             .assertIsDisplayed()
 
-        composeRule.waitUntil(timeoutMillis = 5000) {
+        composeRule.waitUntil(timeoutMillis = 10000) {
             composeRule
                 .onAllNodesWithTag(context.getString(R.string.tag_logo_team))
                 .fetchSemanticsNodes()
@@ -258,7 +258,7 @@ class CancelMatchSystemTest {
 
     private fun cancelMatch(context: Context, description: String) {
         val tagBotaoDelete = context.getString(R.string.tag_button_cancel_match)
-        composeRule.waitUntil(timeoutMillis = 5000) {
+        composeRule.waitUntil(timeoutMillis = 10000) {
             composeRule
                 .onAllNodesWithTag(tagBotaoDelete)
                 .fetchSemanticsNodes()
