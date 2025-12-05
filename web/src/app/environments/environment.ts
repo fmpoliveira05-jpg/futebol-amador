@@ -14,5 +14,5 @@ export const environment = {
    * A URL base para a API do backend.
    * A URL foi configurada para um servidor local durante a produção.
    */
-  apiBaseUrl: 'http://localhost:5218/api',
+  apiBaseUrl: 'https://amfootballapi.duckdns.org/api',
 }
