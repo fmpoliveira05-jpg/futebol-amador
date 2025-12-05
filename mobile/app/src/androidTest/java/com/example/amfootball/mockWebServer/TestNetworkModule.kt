@@ -6,6 +6,7 @@ import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.data.network.interfaces.ChatApi
 import com.example.amfootball.data.network.interfaces.LeadBoardApi
 import com.example.amfootball.data.network.interfaces.MatchInviteApi
+import com.example.amfootball.data.network.interfaces.NotificationApi
 import com.example.amfootball.data.network.interfaces.PlayerApi
 import com.example.amfootball.data.network.interfaces.TeamApi
 import dagger.Module
@@ -81,5 +82,11 @@ object TestNetworkModule {
     @Singleton
     fun provideTeamApi(retrofit: Retrofit): TeamApi {
         return retrofit.create(TeamApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
+        return retrofit.create(NotificationApi::class.java)
     }
 }

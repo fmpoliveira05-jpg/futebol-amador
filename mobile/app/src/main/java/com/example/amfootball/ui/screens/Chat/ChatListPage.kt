@@ -26,12 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
@@ -101,7 +104,7 @@ fun ChatListScreen(
 fun ChatItem(
     chat: ChatRoom,
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = Modifier
@@ -114,7 +117,8 @@ fun ChatItem(
                     )
                 )
             }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .testTag(stringResource(id = R.string.tag_item_list_chat)),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box {

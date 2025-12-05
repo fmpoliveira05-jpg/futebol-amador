@@ -7,6 +7,7 @@ import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.LoginError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
 import com.example.amfootball.data.services.AuthService
 import com.example.amfootball.data.services.NotificationCallsService
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
@@ -34,7 +35,8 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val repository: AuthService,
     private val networkObserver: NetworkConnectivityObserver,
-    private val notificationCallsService: NotificationCallsService
+    private val notificationCallsService: NotificationCallsService,
+    private val fcmTokenProvider: FcmTokenProvider
 ) : FormsViewModel<LoginDto, LoginError>(
     networkObserver = networkObserver,
     initialData = LoginDto(),
@@ -164,18 +166,14 @@ class LoginViewModel @Inject constructor(
      * logo após o login ser bem sucedido.
      */
     private fun updateFcmTokenAfterLogin() {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                return@addOnCompleteListener
-            }
-
-            val token = task.result
-
-            viewModelScope.launch(Dispatchers.IO) {
-                try {
-                    notificationCallsService.sendDeviceToken(token)
-                } catch (e: Exception) {
-                    Log.e("FCM", "Erro ao enviar token após login", e)
+        fcmTokenProvider.getDeviceToken { token ->
+            if (token != null) {
+                viewModelScope.launch(Dispatchers.IO) {
+                    try {
+                        notificationCallsService.sendDeviceToken(token)
+                    } catch (e: Exception) {
+                        Log.e("FCM", "Erro ao enviar token após login", e)
+                    }
                 }
             }
         }

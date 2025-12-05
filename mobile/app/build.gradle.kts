@@ -175,7 +175,7 @@ dependencies {
     // Hilt Testing
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.57.1")
     kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
-
+    androidTestImplementation("androidx.test:rules:1.6.1")
     // MockWebServer
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 
