@@ -48,7 +48,4 @@ class MainTopAppBarTest {
             .onNodeWithText("Login")
             .assertExists()
     }
-
-
-
 }

@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 @HiltAndroidTest
 class SendMessageTest {
-
+    val testMessage = "Test message";
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
@@ -65,7 +65,7 @@ class SendMessageTest {
 
         findAndSelectChat(context = context)
 
-        sendMessage(context = context)
+        sendMessage(context = context, testMessage)
 
         checkMessageAreSend(context = context)
     }
@@ -142,7 +142,7 @@ class SendMessageTest {
             .performTextInput(message)
 
         composeRule
-            .onNodeWithTag(context.getString(R.string.tag_button_send_message)) )
+            .onNodeWithTag(context.getString(R.string.tag_button_send_message))
         
     }
 

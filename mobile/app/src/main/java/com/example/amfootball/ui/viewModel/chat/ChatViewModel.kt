@@ -140,7 +140,7 @@ class ChatViewModel @Inject constructor(
 
         val query = db.collection("chatRooms").document(chatRoomId)
             .collection("messages")
-            .orderBy("timestamp", Query.Direction.ASCENDING) // ASCENDING = mais antigo primeiro
+            .orderBy("timestamp", Query.Direction.ASCENDING)
             .limit(50)
 
         messagesListener = query.addSnapshotListener { snapshot, error ->

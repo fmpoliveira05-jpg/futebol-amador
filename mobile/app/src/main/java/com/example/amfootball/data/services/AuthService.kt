@@ -43,6 +43,7 @@ class AuthService @Inject constructor(
      */
     suspend fun loginUser(login: LoginDto): Boolean {
         try {
+            firebaseAuth.signInWithEmailAndPassword(login.email, login.password).await()
             val userProfile = safeApiCallWithReturn {
                 authApiService.loginUser(login)
             }

@@ -5,6 +5,7 @@ import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -27,7 +28,7 @@ object TestFirebaseModule {
     @Provides
     @Singleton
     fun provideFirebaseFirestore(): FirebaseFirestore {
-        return Mockito.mock(FirebaseFirestore::class.java)
+        return Mockito.mock(Firebase.firestore::class.java)
     }
 
     @Provides
