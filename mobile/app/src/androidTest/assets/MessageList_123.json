@@ -1,0 +1,20 @@
+[
+  {
+    "id": "msg-001",
+    "text": "Olá a todos, treino marcado para as 19h.",
+    "senderId": "user-coach-456",
+    "timestamp": 1733221200000
+  },
+  {
+    "id": "msg-002",
+    "text": "Entendido! Levo as bolas.",
+    "senderId": "user-player-123",
+    "timestamp": 1733221260000
+  },
+  {
+    "id": "msg-003",
+    "text": "Alguma alteração no horário?",
+    "senderId": "user-admin-789",
+    "timestamp": 1733221320000
+  }
+]

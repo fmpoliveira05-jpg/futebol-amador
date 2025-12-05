@@ -18,11 +18,8 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import android.Manifest
-import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.printToLog
 import com.example.amfootball.data.local.SessionManager
 import org.junit.Before
 import javax.inject.Inject
@@ -72,7 +69,7 @@ class SendMessageTest {
 
         sendMessage(context = context, message)
 
-        checkMessageAreSend(context = context, message)
+        checkMessageAreSend(message)
     }
 
     private fun checkHomePageAndNavigateChatList(context: Context) {
@@ -109,6 +106,8 @@ class SendMessageTest {
             .onNodeWithTag(context.getString(R.string.tag_password_input))
             .performClick()
             .performTextInput(password)
+
+        composeRule.waitForIdle()
 
         composeRule
             .onAllNodesWithTag(context.getString(R.string.tag_login_button))
@@ -157,7 +156,7 @@ class SendMessageTest {
         composeRule.waitForIdle()
     }
 
-    private fun checkMessageAreSend(context: Context, message: String) {
+    private fun checkMessageAreSend(message: String) {
         composeRule.waitForIdle()
 
         composeRule

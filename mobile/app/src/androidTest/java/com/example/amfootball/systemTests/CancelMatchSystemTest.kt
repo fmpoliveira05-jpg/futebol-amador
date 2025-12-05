@@ -34,7 +34,6 @@ import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
-import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Before
