@@ -8,29 +8,22 @@ on:
   pull_request: {}
 
 jobs:
-  # ================================================================
-  # 1) INSTALL + BUILD (REUTILIZADO PELOS OUTROS JOBS)
-  # ================================================================
   build:
     name: Build Angular App
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout
       - uses: actions/checkout@v4
 
-      # Node + Cache
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22.12
           cache: 'npm'
 
-      # Instalar dependências
       - name: Install Dependencies
         run: npm ci
 
-      # Build com cache do Angular
       - name: Restore Angular Cache
         uses: actions/cache@v4
         with:
@@ -42,16 +35,12 @@ jobs:
       - name: Build Application
         run: npm run build --if-present
 
-      # Export build para os outros jobs
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
         with:
           name: angular-build
           path: dist/
 
-  # ================================================================
-  # 3) CYPRESS E2E TESTS
-  # ================================================================
   e2e:
     name: Cypress System Tests
     runs-on: ubuntu-latest
@@ -69,28 +58,24 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # Cache do Cypress (muiiiito importante)
       - name: Cypress Cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/Cypress
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
 
-      # Baixar build gerado no job build
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: angular-build
           path: dist/
 
-      # Iniciar servidor Angular
       - name: Start Angular Server
         run: npm run start -- --port 4200 &
       
       - name: Wait for server
         run: npx wait-on http://localhost:4200
 
-      # Executar Cypress
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
@@ -118,9 +103,6 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots/
 
-  # ================================================================
-  # 4) SONARQUBE — ANALISE COMPLETA
-  # ================================================================
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
