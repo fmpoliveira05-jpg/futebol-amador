@@ -5,6 +5,10 @@ import { TeamMembersService } from '../../../services/team-members.service';
 import { PlayerTeamDto } from '../../../shared/Dtos/Player/PlayerTeamDto';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 
+/**
+ * Componente responsável pela gestão dos membros de uma equipa.
+ * Permite listar, filtrar, promover, despromover e remover jogadores da equipa.
+ */
 @Component({
   selector: 'app-team-members-page',
   standalone: true,
@@ -23,6 +27,9 @@ export class TeamMembersPageComponent {
 
   protected readonly searchTerm = signal<string>('');
 
+  /**
+   * Computada: Filtra a lista de membros em tempo real com base no termo de pesquisa (nome ou posição).
+   */
   protected readonly filteredMembers = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();
     const list = this.members();
@@ -40,10 +47,16 @@ export class TeamMembersPageComponent {
 
   constructor() {}
 
+  /**
+   * Inicializa o componente obtendo o ID da equipa do utilizador logado.
+   */
   ngOnInit(): void {
     this.getTeamIdOrShowError();
   }
 
+  /**
+   * Obtém o ID da equipa atual e carrega os membros, ou exibe erro se o utilizador não tiver equipa.
+   */
   private getTeamIdOrShowError(): void {
     this.authService.getCurrentTeamId().subscribe((teamId) => {
       if (!teamId) {
@@ -55,6 +68,10 @@ export class TeamMembersPageComponent {
     });
   }
 
+  /**
+   * Carrega a lista completa de membros da equipa via API.
+   * @param teamId ID da equipa.
+   */
   protected loadMembers(teamId: string): void {
     if (!teamId) return;
 
@@ -73,22 +90,39 @@ export class TeamMembersPageComponent {
     });
   }
 
+  /**
+   * Atualiza o termo de pesquisa conforme o utilizador digita.
+   * @param value O novo termo de pesquisa.
+   */
   protected onSearchTermChange(value: string): void {
     this.searchTerm.set(value);
   }
 
+  /**
+   * Verifica se é possível promover o membro (se não for admin).
+   */
   protected canPromote(member: PlayerTeamDto): boolean {
     return !member.isAdmin;
   }
 
+  /**
+   * Verifica se é possível despromover o membro (se for admin e não for o próprio utilizador).
+   */
   protected canDemote(member: PlayerTeamDto): boolean {
     return member.playerId !== this.authService.getCurrentPlayerId() && member.isAdmin;
   }
 
+  /**
+   * Verifica se é possível remover o membro (se não for admin).
+   */
   protected canRemove(member: PlayerTeamDto): boolean {
     return !member.isAdmin;
   }
 
+  /**
+   * Promove um jogador a administrador da equipa.
+   * @param member O jogador a promover.
+   */
   protected promote(member: PlayerTeamDto): void {
     const teamId = member.team.idTeam;
 
@@ -112,6 +146,10 @@ export class TeamMembersPageComponent {
     });
   }
 
+  /**
+   * Remove o privilégio de administrador de um jogador.
+   * @param member O jogador a despromover.
+   */
   protected demote(member: PlayerTeamDto): void {
     const teamId = member.team.idTeam;
 
@@ -133,6 +171,10 @@ export class TeamMembersPageComponent {
     });
   }
 
+  /**
+   * Remove (expulsa) um jogador da equipa.
+   * @param member O jogador a remover.
+   */
   protected remove(member: PlayerTeamDto): void {
     const teamId = member.team.idTeam;
 

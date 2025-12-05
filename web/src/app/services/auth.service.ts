@@ -12,7 +12,6 @@ import { PlayerDetails } from '../shared/Dtos/player.model';
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  
   /**
    * Serviço HTTP utilizado para realizar requisições à API.
    */
@@ -85,7 +84,7 @@ export class AuthService {
    * @returns `true` se o utilizador tiver uma equipa associada, caso contrário `false`.
    */
   hasTeam(): boolean {
-    return this.getCurrentTeamId != null
+    return this.getCurrentTeamId != null;
   }
 
   /**
@@ -100,17 +99,17 @@ export class AuthService {
       map((response: any) => {
         const idToken = response?.firebaseLoginResponseDto?.idToken;
         const localId = response?.firebaseLoginResponseDto?.localId;
-        const isAdmin = response?.isAdmin; 
+        const isAdmin = response?.isAdmin;
 
         this.cookieService.set('access_token', idToken, 7, '/');
         this.cookieService.set('user_id', localId, 7, '/');
-        this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');  
+        this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');
 
         return response;
       })
     );
   }
-  
+
   /**
    * Realiza o registo de um novo jogador.
    * @param name Nome do jogador.
@@ -133,20 +132,24 @@ export class AuthService {
     position: number,
     height: number
   ): Observable<any> {
-    return this.http.post(`${this.baseUrl}/Player/create-profile`, {
-      name,
-      email,
-      password,
-      dateOfBirth,
-      address,
-      phone,
-      position,
-      height,
-    }).pipe(catchError((error) => {
-      return throwError(error);
-    }));
+    return this.http
+      .post(`${this.baseUrl}/Player/create-profile`, {
+        name,
+        email,
+        password,
+        dateOfBirth,
+        address,
+        phone,
+        position,
+        height,
+      })
+      .pipe(
+        catchError((error) => {
+          return throwError(error);
+        })
+      );
   }
-  
+
   /**
    * Obtém os dados detalhados de um jogador pelo seu ID.
    * @param playerId ID do jogador.
@@ -157,21 +160,44 @@ export class AuthService {
   }
 
   /**
-  * Obtém o ID da equipa do jogador atual.
-  * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
-  */
+   * Obtém o ID da equipa do jogador atual.
+   * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
+   */
   getCurrentTeamId(): Observable<string | null> {
     const playerId = this.getCurrentPlayerId();
     if (!playerId) {
-      return of(null); 
+      return of(null);
     }
 
     return this.getPlayerData(playerId).pipe(
-      map(playerData => playerData?.team?.idTeam ?? null), 
+      map((playerData) => playerData?.team?.idTeam ?? null),
       catchError((error) => {
         console.error('Erro ao buscar dados do jogador:', error);
-        return of(null); 
+        return of(null);
       })
+    );
+  }
+
+  /**
+   * @method canUserActivateAdminRoute
+   * Obtém o ID do jogador atual e verifica, via API, se o utilizador possui permissões de administrador.
+   * Este método é o ponto de verificação assíncrono para o AuthGuard.
+   * @returns Um Observable que emite true se o utilizador for Admin, ou false caso contrário.
+   */
+  canUserActivateAdminRoute(): Observable<boolean> {
+    const playerId = this.getCurrentPlayerId();
+
+    // 1. Se não tiver ID local, não é Admin.
+    if (!playerId) {
+      return of(false);
+    }
+
+    // 2. Retorna a chamada para a API, mapeando o resultado para o status isAdmin
+    return this.getPlayerData(playerId).pipe(
+      map((playerData) => playerData?.isAdmin === true),
+
+      // Se a chamada à API falhar (ex: token expirado, erro 404/500), nega a permissão.
+      catchError(() => of(false))
     );
   }
 }

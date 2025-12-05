@@ -10,6 +10,10 @@ import { AuthService } from '../../../services/auth.service';
 import { PlayerDetails } from '../../../shared/Dtos/player.model';
 import { TeamService } from '../../../services/team.service';
 
+/**
+ * Componente responsável pela página de listagem de equipas.
+ * Permite visualizar a equipa do jogador atual ou pesquisar outras equipas disponíveis.
+ */
 @Component({
   selector: 'app-teams',
   imports: [SearchTeam, CommonModule, RouterLink],
@@ -35,8 +39,15 @@ export class Teams {
     private membershipRequestService: MembershipRequestService
   ) {}
 
+  /**
+   * Propriedade computada que verifica se o jogador logado possui uma equipa.
+   */
   protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam);
 
+  /**
+   * Inicializa o componente.
+   * Carrega o perfil do jogador e subscreve aos parâmetros de query da URL para aplicar filtros de pesquisa automaticamente.
+   */
   ngOnInit() {
     this.playerService.getMyProfile().subscribe({
       next: (player) => {
@@ -57,6 +68,11 @@ export class Teams {
     });
   }
 
+  /**
+   * Carrega a lista de equipas.
+   * Se o jogador já tiver equipa, carrega equipas sugeridas ou relacionadas.
+   * Caso contrário, utiliza os filtros definidos para pesquisar equipas no sistema.
+   */
   loadTeams() {
     this.isLoading.set(true);
     this.errorMessage.set(null);
@@ -93,11 +109,18 @@ export class Teams {
     }
   }
 
+  /**
+   * Aplica um novo filtro de pesquisa e recarrega a lista de equipas.
+   * @param newFilter O DTO contendo os novos critérios de filtro.
+   */
   applyFilter(newFilter: FilterListTeamDto) {
     this.filter.set(newFilter);
     this.loadTeams();
   }
 
+  /**
+   * Navega para a página de criação de uma nova equipa.
+   */
   goToCreateTeam() {
     this.router.navigate(['/createTeam']);
   }
