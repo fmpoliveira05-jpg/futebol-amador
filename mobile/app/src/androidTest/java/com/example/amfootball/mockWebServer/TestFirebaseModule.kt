@@ -1,6 +1,8 @@
 package com.example.amfootball.mockWebServer
 
 import com.example.amfootball.data.network.instances.FireBaseInstance
+import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
@@ -26,5 +28,15 @@ object TestFirebaseModule {
     @Singleton
     fun provideFirebaseFirestore(): FirebaseFirestore {
         return Mockito.mock(FirebaseFirestore::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFcmTokenProvider(): FcmTokenProvider {
+        return object : FcmTokenProvider {
+            override fun getDeviceToken(onResult: (String?) -> Unit) {
+                onResult("token-teste-123456")
+            }
+        }
     }
 }

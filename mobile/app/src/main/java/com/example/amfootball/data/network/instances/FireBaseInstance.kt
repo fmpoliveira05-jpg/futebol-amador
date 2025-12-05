@@ -1,5 +1,7 @@
 package com.example.amfootball.data.network.instances
 
+import com.example.amfootball.data.network.FirebaseFcmTokenProvider
+import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -46,5 +48,11 @@ object FireBaseInstance {
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
         return Firebase.firestore
+    }
+
+    @Provides
+    @Singleton
+    fun provideFcmTokenProvider(): FcmTokenProvider {
+        return FirebaseFcmTokenProvider()
     }
 }

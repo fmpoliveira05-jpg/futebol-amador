@@ -80,6 +80,8 @@ class ChatViewModel @Inject constructor(
     private var messagesListener: ListenerRegistration? = null
 
     init {
+        Log.d("ChatViewModel", "fetchMyChatRooms() myUserId=$myUserId")
+
         if (myUserId != null) {
             fetchMyChatRooms()
         }

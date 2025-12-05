@@ -1,5 +1,6 @@
 package com.example.amfootball.systemTests
 
+import android.Manifest
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -11,14 +12,18 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.test.rule.GrantPermissionRule
 import com.example.amfootball.MainActivity
 import com.example.amfootball.R
 import com.example.amfootball.data.enums.match.TypeMatch
+import com.example.amfootball.data.network.instances.FireBaseInstance
+import com.example.amfootball.data.network.instances.NetworkModule
 import com.example.amfootball.data.network.interfaces.BaseEndpoints
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.JsonReader
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import dagger.hilt.android.testing.UninstallModules
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -32,12 +37,18 @@ import org.junit.Test
 import java.time.LocalDate
 
 @HiltAndroidTest
+@UninstallModules(NetworkModule::class, FireBaseInstance::class)
 class CancelMatchSystemTest {
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
     val composeRule = createAndroidComposeRule<MainActivity>()
+
+    @get:Rule(order = 2)
+    val permissionRule: GrantPermissionRule = GrantPermissionRule.grant(
+        Manifest.permission.POST_NOTIFICATIONS
+    )
 
     private lateinit var mockWebServer: MockWebServer
     private lateinit var loginBodyJson: String
@@ -97,6 +108,10 @@ class CancelMatchSystemTest {
                         MockResponse().setResponseCode(200).setBody(matchToCancelJson)
                     }
 
+                    path.contains("${BaseEndpoints.PLAYER_API}/device-token") && request.method == "PUT" -> {
+                        MockResponse().setResponseCode(204)
+                    }
+
                     //Get Calendario
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" -> {
                         val idMatchCancelled = "2b2b2b2b-0000-1111-3333-000000000008"
@@ -128,6 +143,7 @@ class CancelMatchSystemTest {
                             MockResponse().setResponseCode(200).setBody(listaBase)
                         }
                     }
+
 
                     else -> MockResponse().setResponseCode(404)
                 }
@@ -203,7 +219,8 @@ class CancelMatchSystemTest {
             .performTextInput(password)
 
         composeRule
-            .onNodeWithTag(context.getString(R.string.tag_login_button))
+            .onAllNodesWithTag(context.getString(R.string.tag_login_button))
+            .onFirst()
             .performClick()
     }
 
