@@ -45,7 +45,7 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           chmod +x ./gradlew
-          ./gradlew assembleDebug dokkaHtml sonar \
+          ./gradlew assembleDebug dokkaGenerateHtml sonar \
             --parallel \
             --build-cache \
             -Dsonar.tests="" \
