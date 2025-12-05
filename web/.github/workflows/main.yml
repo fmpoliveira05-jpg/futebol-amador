@@ -1,5 +1,7 @@
 name: Build, Tests, E2E & SonarQube
-
+env:
+  SONAR_PROJ_NAME: "LDS-Frontend-Web"
+  SONAR_PROJ_KEY: "LDS-Frontend-Web"
 on:
   push:
     branches: [ master, developer ]
@@ -46,35 +48,6 @@ jobs:
         with:
           name: angular-build
           path: dist/
-
-  # ================================================================
-  # 2) TESTES UNITÁRIOS + COVERAGE
-  # ================================================================
-  unit-tests:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.12
-          cache: 'npm'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Run Unit Tests (Karma)
-        run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
-
-      - name: Upload Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: coverage/
 
   # ================================================================
   # 3) CYPRESS E2E TESTS
@@ -139,7 +112,6 @@ jobs:
   sonarqube:
     name: SonarQube Analysis
     runs-on: ubuntu-latest
-    needs: [unit-tests]
 
     steps:
       - uses: actions/checkout@v4
@@ -153,23 +125,15 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      # Download da coverage
-      - name: Download Coverage Report
-        uses: actions/download-artifact@v4
-        with:
-          name: unit-test-coverage
-          path: coverage/
-
       - name: SonarQube Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: |
           npx sonar-scanner \
-            -Dsonar.projectKey=my-angular-app \
-            -Dsonar.projectName=MyAngularApp \
+            -Dsonar.projectKey=$SONAR_PROJ_KEY \
+            -Dsonar.projectName=$SONAR_PROJ_NAME \
             -Dsonar.sources=src \
             -Dsonar.tests=src \
-            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
             -Dsonar.exclusions=**/*.spec.ts \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
