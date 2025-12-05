@@ -18,7 +18,10 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import android.Manifest
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.printToLog
 import com.example.amfootball.data.local.SessionManager
 import org.junit.Before
 import javax.inject.Inject
@@ -54,6 +57,7 @@ class SendMessageTest {
         val context = composeRule.activity.applicationContext
         val email = "player@player.com"
         val password = "Teste123."
+        val message = "Mensagem de Teste"
 
         checkHomePageAndNavigateChatList(context = context)
 
@@ -65,9 +69,9 @@ class SendMessageTest {
 
         findAndSelectChat(context = context)
 
-        sendMessage(context = context)
+        sendMessage(context = context, message)
 
-        checkMessageAreSend(context = context)
+        checkMessageAreSend(context = context, message)
     }
 
     private fun checkHomePageAndNavigateChatList(context: Context) {
@@ -90,7 +94,10 @@ class SendMessageTest {
             .performClick()
     }
 
-    private fun login(context: Context, email: String, password: String) {
+    private fun login(context: Context,
+                      email: String,
+                      password: String
+    ) {
         composeRule
             .onNodeWithText(context.getString(Routes.UserRoutes.LOGIN.labelResId))
             .assertIsDisplayed()
@@ -106,47 +113,72 @@ class SendMessageTest {
             .performTextInput(password)
 
         composeRule
-            .onNodeWithTag(context.getString(R.string.tag_login_button))
-            .performClick()
-    }
-
-    private fun findAndSelectChat(context: Context) {
-        composeRule
-            .onAllNodesWithText(context.getString(Routes.PlayerRoutes.CHAT_LIST.labelResId))
-            .onFirst()
-            .assertIsDisplayed()
-
-        val chatItemTag = context.getString(R.string.tag_item_list_chat)
-
-        composeRule.waitUntil(timeoutMillis = 10000) {
-            composeRule
-                .onAllNodesWithTag(chatItemTag)
-                .fetchSemanticsNodes()
-                .isNotEmpty()
-        }
-
-        composeRule
-            .onAllNodesWithTag(chatItemTag)
+            .onAllNodesWithTag(context.getString(R.string.tag_login_button))
             .onFirst()
             .performClick()
 
         composeRule.waitForIdle()
     }
 
-    private fun sendMessage(context: Context, message: String) {
-        //TODO: Ir buscar o titulo do chat
+    private fun findAndSelectChat(context: Context) {
+        composeRule.waitForIdle()
 
+        composeRule
+            .onAllNodesWithText(context.getString(Routes.PlayerRoutes.CHAT_LIST.labelResId))
+            .onFirst()
+            .assertIsDisplayed()
+
+        val chatItemTag = context.getString(R.string.tag_item_list_chat)
+        val emptyStateTag = context.getString(R.string.tag_empty_list_chat)
+
+        try {
+            composeRule.waitUntil(timeoutMillis = 10000) {
+                composeRule
+                    .onAllNodesWithTag(chatItemTag)
+                    .fetchSemanticsNodes()
+                    .isNotEmpty()
+            }
+
+            composeRule.onAllNodesWithTag(chatItemTag)
+                .onFirst()
+                .performClick()
+        } catch (e: ComposeTimeoutException) {
+            val emptyStateNode = composeRule.onAllNodesWithTag(emptyStateTag)
+
+            if (emptyStateNode
+                .fetchSemanticsNodes()
+                .isNotEmpty()
+            ) {
+                throw AssertionError("FALHA DE TESTE: O utilizador não tem conversas iniciadas. Por favor, cria uma conversa manualmente ou via API antes de correr este teste.")
+            } else {
+                println("DEBUG: Árvore de UI no momento do erro:")
+                composeRule.onRoot().printToLog("ARVORE_UI_ERRO")
+                throw e
+            }
+        }
+
+        composeRule.waitForIdle()
+    }
+
+    private fun sendMessage(
+        context: Context,
+        message: String
+    ) {
         composeRule
             .onNodeWithTag(context.getString(R.string.tag_field_message))
             .performClick()
             .performTextInput(message)
 
         composeRule
-            .onNodeWithTag(context.getString(R.string.tag_button_send_message)) )
-        
+            .onNodeWithTag(context.getString(R.string.tag_button_send_message))
+            .performClick()
     }
 
-    private fun checkMessageAreSend(context: Context) {
+    private fun checkMessageAreSend(context: Context, message: String) {
+        composeRule.waitForIdle()
 
+        composeRule
+            .onNodeWithText(message)
+            .assertIsDisplayed()
     }
 }

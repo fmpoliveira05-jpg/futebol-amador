@@ -35,7 +35,7 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     sessionManager: SessionManager,
     private val db: FirebaseFirestore
-    ): ViewModel() {
+): ViewModel() {
     private val myUser = sessionManager.getUserProfile()
     private val myUserId = myUser?.loginResponseDto?.localId
 

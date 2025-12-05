@@ -68,12 +68,25 @@ fun ChatListScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             if (rooms.isEmpty()) {
-                item { Text("Sem chats") }
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillParentMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Sem chats",
+                            modifier = Modifier.testTag(stringResource(id = R.string.tag_empty_list_chat))
+                        )
+                    }
+                }
             } else {
                 items(rooms) { chat ->
                     ChatItem(chat, navController = navController)
                     HorizontalDivider(
-                        modifier = Modifier.padding(start = 80.dp),
+                        modifier = Modifier
+                            .padding(start = 80.dp),
                         thickness = 0.5.dp,
                         color = Color.LightGray.copy(alpha = 0.4f)
                     )
