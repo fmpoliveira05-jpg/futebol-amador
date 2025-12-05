@@ -33,10 +33,11 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/developer' }}
 
       - name: Generate google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_JSON" > app/google-services.json
 
-      # CORREÇÃO 1: Mudei 'dokkaGenerateHtml' para 'dokkaHtml' (nome padrão da task)
-      # Se falhar novamente, significa que o plugin Dokka não está aplicado no build.gradle
+
       - name: Build, Dokka & Sonar Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -77,22 +78,19 @@ jobs:
         with:
           cache-read-only: true
 
-      # Habilita KVM (Permissão para a máquina virtual rodar rápido)
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      # CORREÇÃO 2: Dar permissão ao gradlew NESTE job também
       - name: Make gradlew executable
         run: chmod +x ./gradlew
 
       - name: Generate google-services.json
-        run: |
-          cat <<EOF > app/google-services.json
-          ${{ secrets.GOOGLE_SERVICES_JSON }}
-          EOF
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_JSON" > app/google-services.json
 
       - name: Run Android Instrumentated Tests
         uses: reactivecircus/android-emulator-runner@v2
@@ -104,8 +102,7 @@ jobs:
           disable-linux-hw-accel: false
           ram-size: 2048M
           disk-size: 4000M
-          # O script agora vai funcionar porque demos chmod +x acima
-          script: ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace
+          script: ./gradlew connectedDebugAndroidTest --no-daemon --info
 
       - name: Upload Instrumentation Reports
         if: always()
