@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services;
+﻿using Application.Interfaces;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Services.Hub.ClienteService;
 using Application.Interfaces.Validators;
@@ -57,6 +58,7 @@ namespace Application
             services.AddScoped<IChatRoomService, FirebaseChatService>();
             services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
             services.AddScoped<IAuthService, FireBaseAuthService>();
+            services.AddScoped<INotificationFirebaseService, NotificationFirebaseService>();
 
             services.AddManagerHubService();
             services.AddHubServiceClients();

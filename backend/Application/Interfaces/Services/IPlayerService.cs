@@ -83,5 +83,7 @@ namespace Application.Interfaces.Services
         /// <param name="filter">Filtros de pesquisa (Nome, Rank, Pontos, etc.).</param>
         /// <returns>Lista de [InfoTeamsDto] filtrados.</returns>
         Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter);
+
+        Task<bool> UpdateDeviceTokenAsync(string userId, string token);
     }
 }

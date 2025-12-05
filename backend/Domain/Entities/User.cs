@@ -60,6 +60,8 @@ namespace Domain.Entities
         [Required]
         public DateTime CreationDate { get; set; }
 
+        public string? DeviceToken { get; set; }
+
         /// <summary>
         /// Construtor protegido exigido pelo Entity Framework (EF) para inicialização.
         /// Utilizado apenas pelas classes que herdam de [User].
@@ -84,6 +86,7 @@ namespace Domain.Entities
             this.Email = email;
             this.Phone = phone;
             this.CreationDate = DateTime.Now;
+            this.DeviceToken = null;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            /*
             migrationBuilder.CreateTable(
                 name: "Calendar",
                 columns: table => new
@@ -490,6 +491,7 @@ namespace Infrastructure.Migrations
                 name: "IX_TeamStatistics_MatchesId",
                 table: "TeamStatistics",
                 column: "MatchesId");
+            */
         }
 
         /// <inheritdoc />

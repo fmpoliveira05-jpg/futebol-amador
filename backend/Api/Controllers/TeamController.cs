@@ -3,6 +3,7 @@ using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace Api.Controllers
         private readonly ITeamService TeamService;
         private readonly IMembershipRequestService MemberShipRequestService;
         private readonly IPlayerAuthorizationService PlayerAuthorizationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do TeamController.
@@ -30,11 +32,13 @@ namespace Api.Controllers
         /// <param name="TeamService">Serviço com a lógica de negócio das equipas.</param>
         /// <param name="MemberShipRequestService">Serviço para gerir pedidos de adesão.</param>
         /// <param name="PlayerAuthorizationService">Serviço para validar permissões dos jogadores.</param>
-        public TeamController(ITeamService TeamService, IMembershipRequestService MemberShipRequestService, IPlayerAuthorizationService PlayerAuthorizationService)
+        public TeamController(ITeamService TeamService, IMembershipRequestService MemberShipRequestService, 
+           IPlayerAuthorizationService PlayerAuthorizationService, INotificationFirebaseService notificationFirebaseService)
         {
             this.TeamService = TeamService;
             this.MemberShipRequestService = MemberShipRequestService;
             this.PlayerAuthorizationService = PlayerAuthorizationService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
 
         #endregion
@@ -258,7 +262,10 @@ namespace Api.Controllers
         public async Task<IActionResult> RemovePlayerFromTeam(Guid teamId, string playerIdToRemove)
         {
             var playerRemovingId = GetCurrentUserId();
+            
             await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
+            await notificationFirebaseService.SendNotificationToUser(playerIdToRemove, "Saída da Equipa","Você foi removido da equipa.");
+
             return NoContent();
         }
 
@@ -280,7 +287,10 @@ namespace Api.Controllers
         public async Task<IActionResult> PromotePlayerToAdmin(Guid teamId, string playerIdToPromote)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
             await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, userId);
+            await notificationFirebaseService.SendNotificationToUser(playerIdToPromote, "Promoção a Administrador", "Parabéns! Você foi promovido a administrador da sua equipa.");
+
             return Ok("Jogador promovido a admin.");
         }
 
@@ -301,6 +311,9 @@ namespace Api.Controllers
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, userId);
+
+            await notificationFirebaseService.SendNotificationToUser(adminIdToDemote, "Despromovido", "Você foi despromovido a jogador de equipa.");
+            
             return Ok("Admin rebaixado a jogador.");
         }
 

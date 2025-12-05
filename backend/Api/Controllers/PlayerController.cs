@@ -1,10 +1,12 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs;
+using Application.DTOs.Filters;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -356,6 +358,18 @@ namespace Api.Controllers
         }
 
         #endregion
+
+        [HttpPut("device-token")]
+        public async Task<IActionResult> UpdateDeviceToken([FromBody] DeviceTokenDto dto)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            var result = await playerService.UpdateDeviceTokenAsync(userId, dto.Token);
+
+            if (!result) return BadRequest("Erro ao atualizar token");
+
+            return Ok();
+        }
 
         #endregion
 

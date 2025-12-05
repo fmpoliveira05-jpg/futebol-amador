@@ -324,6 +324,17 @@ namespace Application.Services
         }
         #endregion
 
+        public async Task<bool> UpdateDeviceTokenAsync(string userId, string token)
+        {
+            var user = await playerRepository.GetPlayerByIdAsync(userId);
+            if (user == null) return false;
+
+            user.DeviceToken = string.IsNullOrWhiteSpace(token) ? null : token;
+
+            await unityOfWork.SaveChangesAsync();
+            return true;
+        }
+
         #region Private Methods
 
         /// <summary>
