@@ -1,15 +1,21 @@
 package com.example.amfootball.ui.viewModel.auth
 
+import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.LoginDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.LoginError
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.AuthService
+import com.example.amfootball.data.services.NotificationCallsService
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import com.example.amfootball.utils.UserConst
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -27,7 +33,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val repository: AuthService,
-    private val networkObserver: NetworkConnectivityObserver
+    private val networkObserver: NetworkConnectivityObserver,
+    private val notificationCallsService: NotificationCallsService
 ) : FormsViewModel<LoginDto, LoginError>(
     networkObserver = networkObserver,
     initialData = LoginDto(),
@@ -79,6 +86,11 @@ class LoginViewModel @Inject constructor(
         submitForm(
             apiCall = {
                 val success = repository.loginUser(login)
+
+                if (success) {
+                    updateFcmTokenAfterLogin()
+                }
+
                 onResult(success)
             }
         )
@@ -145,5 +157,27 @@ class LoginViewModel @Inject constructor(
         val isValid = listOf(emailError, passwordError).all { it == null }
 
         return isValid
+    }
+
+    /**
+     * Função auxiliar para obter o token do Firebase e enviar para o Backend
+     * logo após o login ser bem sucedido.
+     */
+    private fun updateFcmTokenAfterLogin() {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                return@addOnCompleteListener
+            }
+
+            val token = task.result
+
+            viewModelScope.launch(Dispatchers.IO) {
+                try {
+                    notificationCallsService.sendDeviceToken(token)
+                } catch (e: Exception) {
+                    Log.e("FCM", "Erro ao enviar token após login", e)
+                }
+            }
+        }
     }
 }

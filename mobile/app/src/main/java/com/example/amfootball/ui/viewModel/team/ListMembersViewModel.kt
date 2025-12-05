@@ -144,6 +144,8 @@ class ListMembersViewModel @Inject constructor(
     fun onPromoteMember(playerId: String) {
         launchDataLoad {
             teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
+
+            updateMemberRoleLocally(playerId, true)
         }
     }
 
@@ -156,6 +158,8 @@ class ListMembersViewModel @Inject constructor(
     fun onDemoteMember(adminId: String) {
         launchDataLoad {
             val teams = teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
+
+            updateMemberRoleLocally(adminId, false)
         }
     }
 
@@ -168,6 +172,12 @@ class ListMembersViewModel @Inject constructor(
     fun onRemovePlayer(playerId: String) {
         launchDataLoad {
             teamRepository.removePlayerTeam(teamId = teamId, playerId = playerId)
+
+            val currentList = listState.value.toMutableList()
+            currentList.removeAll { it.id == playerId }
+
+            listState.value = currentList
+            originalList = currentList
         }
     }
 
@@ -219,6 +229,26 @@ class ListMembersViewModel @Inject constructor(
             Position.DEFENDER,
             Position.GOALKEEPER
         )
+    }
+
+    private fun updateMemberRoleLocally(memberId: String, isAdminNewValue: Boolean) {
+        val currentList = listState.value.toMutableList()
+        val index = currentList.indexOfFirst { it.id == memberId }
+
+        if (index != -1) {
+            val updatedMember = currentList[index].copy(isAdmin = isAdminNewValue)
+            currentList[index] = updatedMember
+            listState.value = currentList
+        }
+
+        val backupList = originalList.toMutableList()
+        val indexBackup = backupList.indexOfFirst { it.id == memberId }
+
+        if (indexBackup != -1) {
+            val updatedMemberBackup = backupList[indexBackup].copy(isAdmin = isAdminNewValue)
+            backupList[indexBackup] = updatedMemberBackup
+            originalList = backupList
+        }
     }
 
     /**

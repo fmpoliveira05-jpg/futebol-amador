@@ -12,10 +12,10 @@ import javax.inject.Singleton
  * Gestor centralizado de persistência de dados de sessão local.
  *
  * Esta classe utiliza [SharedPreferences] para armazenar dados sensíveis e de configuração do utilizador
- * que devem persistir entre reinícios da aplicação (como tokens de autenticação e perfil em cache).
+ * que devem persistir entre reinícios da aplicação (como tokens de autenticação, tokens FCM e perfil em cache).
  *
- * Como é anotada com [@Singleton], existe apenas uma instância desta classe durante todo o ciclo de vida
- * da aplicação, garantindo acesso consistente ao ficheiro de preferências.
+ * É anotada com [@Singleton], garantindo acesso consistente ao ficheiro de preferências durante todo o ciclo de vida
+ * da aplicação.
  *
  * @property context O contexto da aplicação injetado pelo Hilt via [@ApplicationContext], garantindo que não há leaks de memória de Activities.
  */
@@ -40,6 +40,7 @@ class SessionManager @Inject constructor(
         private const val PREFS_FILENAME = "com.example.amfootball.auth_prefs"
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_USER_PROFILE = "user_profile_json"
+        private const val KEY_FCM_TOKEN = "fcm_device_token"
     }
 
     init {
@@ -67,6 +68,29 @@ class SessionManager @Inject constructor(
      */
     fun getAuthToken(): String? {
         return prefs.getString(KEY_AUTH_TOKEN, null)
+    }
+
+    /**
+     * Guarda o Token do Firebase Cloud Messaging (FCM) localmente.
+     *
+     * Essencial para associar o token do dispositivo ao utilizador, permitindo que o [PushNotificationService]
+     * o envie para o backend.
+     *
+     * @param token A string do token FCM obtida do Firebase Messaging.
+     */
+    fun saveFcmToken(token: String) {
+        prefs.edit().putString(KEY_FCM_TOKEN, token).apply()
+    }
+
+    /**
+     * Obtém o Token do Firebase Cloud Messaging (FCM) guardado.
+     *
+     * Utilizado para verificar o token em cache ou enviá-lo ao backend.
+     *
+     * @return O token FCM como [String], ou `null` se ainda não tiver sido guardado.
+     */
+    fun getFcmToken(): String? {
+        return prefs.getString(KEY_FCM_TOKEN, null)
     }
 
     /**

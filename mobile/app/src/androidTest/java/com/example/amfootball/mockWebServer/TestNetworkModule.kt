@@ -1,6 +1,6 @@
 package com.example.amfootball.mockWebServer
 
-import com.example.amfootball.data.network.instances.RetrofitInstance
+import com.example.amfootball.data.network.instances.NetworkModule
 import com.example.amfootball.data.network.interfaces.AuthApi
 import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.data.network.interfaces.ChatApi
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Module
 @TestInstallIn(
     components = [SingletonComponent::class],
-    replaces = [RetrofitInstance::class]
+    replaces = [NetworkModule::class]
 )
 object TestNetworkModule {
 

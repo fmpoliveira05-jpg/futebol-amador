@@ -6,6 +6,7 @@ import com.example.amfootball.data.network.interfaces.CalendarApi
 import com.example.amfootball.data.network.interfaces.ChatApi
 import com.example.amfootball.data.network.interfaces.LeadBoardApi
 import com.example.amfootball.data.network.interfaces.MatchInviteApi
+import com.example.amfootball.data.network.interfaces.NotificationApi
 import com.example.amfootball.data.network.interfaces.PlayerApi
 import com.example.amfootball.data.network.interfaces.TeamApi
 import dagger.Module
@@ -18,39 +19,36 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 /**
- * Módulo principal de configuração de Rede (Network) utilizando Dagger Hilt.
+ * Módulo de Rede (NetworkModule) para configuração de dependências de conectividade.
  *
- * Este objeto centraliza a criação e fornecimento de todas as instâncias relacionadas
- * com a comunicação HTTP da aplicação, incluindo o cliente [OkHttpClient],
- * o construtor [Retrofit] e as implementações das interfaces de API.
+ * Este objeto centraliza a configuração de **toda a conectividade** da aplicação,
+ * incluindo chamadas REST (Retrofit) e gerenciamento de conexões em tempo real (SignalR).
+ *
+ * É instalado no [SingletonComponent], garantindo que as instâncias providenciadas
+ * (como o Retrofit e o OkHttpClient) são únicas durante todo o ciclo de vida da aplicação.
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object RetrofitInstance {
+object NetworkModule {
 
     /**
      * URL base da API de Backend.
      *
-     * Atualmente configurado para um túnel **Ngrok** (HTTPS), permitindo expor o localhost
-     * da máquina de desenvolvimento para a internet pública e ser acessível pelo dispositivo Android.
+     * Atualmente configurado para um túnel **Ngrok** (HTTPS) para acesso externo
+     * durante o desenvolvimento.
      */
-    // MUDE ISTO para o URL base da sua API .NET
-    //private const val BASE_URL = "http:192.168.196.1" // link com ngrok
-    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
+    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 
     /**
      * Providencia e configura o cliente HTTP [OkHttpClient].
      *
-     * Este cliente inclui dois interceptores cruciais:
-     * 1. [AuthInterceptor]: Injeta o token de autenticação nos pedidos.
-     * 2. **Interceptor Anónimo (Ngrok):** Adiciona o header `ngrok-skip-browser-warning`.
-     * Isto é necessário porque o Ngrok gratuito apresenta uma página HTML de aviso
-     * antes de deixar passar o pedido, o que quebraria o parsing de JSON da app (Crash).
+     * Este cliente é configurado com:
+     * 1. Um interceptor de autenticação ([AuthInterceptor]) para injetar o token JWT nos pedidos.
+     * 2. Um interceptor customizado para adicionar o header `ngrok-skip-browser-warning`,
+     * necessário para evitar crashes de parsing de JSON devido à página de aviso do Ngrok.
      *
-     * @param authInterceptor A instância do interceptor de autenticação injetada automaticamente pelo Hilt.
-     * O Hilt sabe como criar isto porque o AuthInterceptor tem um construtor @Inject.
-     *
-     * @return Uma instância configurada de [OkHttpClient].
+     * @param authInterceptor A instância do interceptor de autenticação injetada.
+     * @return Uma instância configurada e [Singleton] de [OkHttpClient].
      */
     @Provides
     @Singleton
@@ -88,7 +86,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Autenticação.
+     * Fornece a implementação da interface [AuthApi] para chamadas de autenticação (Login/Registo).
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [AuthApi].
      */
     @Provides
     @Singleton
@@ -97,7 +97,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Calendário de Jogos.
+     * Fornece a implementação da interface [CalendarApi] para gestão de eventos e jogos.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [CalendarApi].
      */
     @Provides
     @Singleton
@@ -106,7 +108,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Chat e Mensagens.
+     * Fornece a implementação da interface [ChatApi] para chamadas de chat e mensagens.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [ChatApi].
      */
     @Provides
     @Singleton
@@ -115,7 +119,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Classificações (Leaderboard).
+     * Fornece a implementação da interface [LeadBoardApi] para consulta de classificações.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [LeadBoardApi].
      */
     @Provides
     @Singleton
@@ -124,7 +130,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Convites de Jogo.
+     * Fornece a implementação da interface [MatchInviteApi] para gestão de convites de jogo.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [MatchInviteApi].
      */
     @Singleton
     @Provides
@@ -133,7 +141,9 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Gestão de Jogadores.
+     * Fornece a implementação da interface [PlayerApi] para gestão de perfis de jogadores.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [PlayerApi].
      */
     @Provides
     @Singleton
@@ -142,11 +152,24 @@ object RetrofitInstance {
     }
 
     /**
-     * Fornece a implementação da API de Gestão de Equipas.
+     * Fornece a implementação da interface [TeamApi] para gestão de equipas.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [TeamApi].
      */
     @Provides
     @Singleton
     fun provideTeamApi(retrofit: Retrofit): TeamApi {
         return retrofit.create(TeamApi::class.java)
+    }
+
+    /**
+     * Fornece a implementação da interface [NotificationApi] para atualização do Device Token FCM.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [NotificationApi].
+     */
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
+        return retrofit.create(NotificationApi::class.java)
     }
 }
