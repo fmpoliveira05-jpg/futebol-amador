@@ -92,7 +92,7 @@ namespace Tests.Integration.Membership
         public async Task GetPlayersWithoutTeam_WithFilters_Returns_Ok_With_ListOfPlayers()
         {
             var teamId = Guid.NewGuid();
-            var filter = new FilterPlayersWithoutTeamDto
+            var filter = new FilterTeamDto
             {
                 PlayerName = "Player1",
                 City = "City1",
@@ -110,7 +110,7 @@ namespace Tests.Integration.Membership
             var mockTeamService = new Mock<ITeamService>();
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
-            mockTeamService.Setup(s => s.GetPlayersWithoutTeamWithFilters(It.IsAny<FilterPlayersWithoutTeamDto>()))
+            mockTeamService.Setup(s => s.GetPlayersWithoutTeamWithFilters(It.IsAny<FilterTeamDto>()))
                 .ReturnsAsync(expectedPlayers);
 
             _client = _factory.WithWebHostBuilder(builder =>
@@ -140,7 +140,7 @@ namespace Tests.Integration.Membership
             Assert.That(result, Has.Count.EqualTo(1));
             Assert.That(result[0].Name, Is.EqualTo("Player1"));
 
-            mockTeamService.Verify(s => s.GetPlayersWithoutTeamWithFilters(It.IsAny<FilterPlayersWithoutTeamDto>()), Times.Once);
+            mockTeamService.Verify(s => s.GetPlayersWithoutTeamWithFilters(It.IsAny<FilterTeamDto>()), Times.Once);
         }
 
         [Test]

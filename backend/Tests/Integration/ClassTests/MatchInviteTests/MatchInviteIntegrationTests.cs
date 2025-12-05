@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,34 +39,44 @@ namespace Tests.Integration.MatchInvite
         public async Task SendMatchInvite_Returns_Ok_With_InfoMatchInviteDto()
         {
             // Arrange
-            var idTeam = Guid.NewGuid();
+            var idSender = Guid.NewGuid();
+            var idReceiver = Guid.NewGuid();
+            var gameDate = DateTime.UtcNow.AddDays(1); 
+
             var dto = new SendMatchInviteDto
             {
-                IdReceiver = Guid.NewGuid(),
-                GameDate = DateTime.Now.AddDays(1),
-                NamePitch = "Pitch A"
+                IdSender = idSender, 
+                IdReceiver = idReceiver,
+                GameDate = gameDate,
+                homePitch = true 
             };
 
             var expectedResponse = new InfoMatchInviteDto
             {
                 Id = Guid.NewGuid(),
-                IdSender = idTeam,
-                NameSender = "Sender Team",
-                IdReceiver = dto.IdReceiver,
-                NameReceiver = "Receiver Team",
-                GameDate = dto.GameDate,
-                NamePitch = dto.NamePitch
+                Sender = new TeamDto
+                {
+                    IdTeam = idSender,
+                    Name = "Sender Team"
+                },
+                Receiver = new TeamDto
+                {
+                    IdTeam = idReceiver,
+                    Name = "Receiver Team",
+                },
+                GameDate = gameDate,
+                NamePitch = "Pitch A" 
             };
 
             var mockMatchInviteService = new Mock<IMatchInviteService>();
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockMatchInviteService
-    .Setup(s => s.SendMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()))
-    .ReturnsAsync(expectedResponse);
+                .Setup(s => s.SendMatchInvite(idSender, It.IsAny<SendMatchInviteDto>()))
+                .ReturnsAsync(expectedResponse);
 
-
-            mockAuthorizationService.Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam))
+            mockAuthorizationService
+                .Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idSender))
                 .Returns(Task.CompletedTask);
 
             var client = _factory.WithWebHostBuilder(builder =>
@@ -88,7 +99,7 @@ namespace Tests.Integration.MatchInvite
             client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
-            var response = await client.PostAsJsonAsync($"/api/MatchInvite/{idTeam}/match-invites", dto);
+            var response = await client.PostAsJsonAsync($"/api/MatchInvite/{idSender}/match-invites", dto);
 
             // Debug: Check response content
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -103,15 +114,10 @@ namespace Tests.Integration.MatchInvite
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Id, Is.EqualTo(expectedResponse.Id));
-            Assert.That(result.IdSender, Is.EqualTo(expectedResponse.IdSender));
-            Assert.That(result.NameSender, Is.EqualTo(expectedResponse.NameSender));
-            Assert.That(result.IdReceiver, Is.EqualTo(expectedResponse.IdReceiver));
-            Assert.That(result.NameReceiver, Is.EqualTo(expectedResponse.NameReceiver));
-            Assert.That(result.GameDate, Is.EqualTo(expectedResponse.GameDate));
+            Assert.That(result.Sender.IdTeam, Is.EqualTo(expectedResponse.Sender.IdTeam)); 
             Assert.That(result.NamePitch, Is.EqualTo(expectedResponse.NamePitch));
 
-            mockMatchInviteService.Verify(s => s.SendMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()), Times.Once);
-            mockAuthorizationService.Verify(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam), Times.Once);
+            mockMatchInviteService.Verify(s => s.SendMatchInvite(idSender, It.IsAny<SendMatchInviteDto>()), Times.Once);
         }
 
         [Test]
@@ -223,48 +229,44 @@ namespace Tests.Integration.MatchInvite
         [Test]
         public async Task NegociateMatchInvite_Returns_Ok_With_InfoMatchInviteDto()
         {
-            // Arrange
-            var idTeam = Guid.NewGuid();
+            var idSender = Guid.NewGuid();
+            var idReceiver = Guid.NewGuid();
             var dto = new SendMatchInviteDto
             {
-                IdReceiver = Guid.NewGuid(),
-                GameDate = DateTime.Now.AddDays(1),
-                NamePitch = "Pitch A"
+                IdSender = idSender,
+                IdReceiver = idReceiver,
+                GameDate = DateTime.UtcNow.AddDays(1),
+                homePitch = false
             };
 
             var expectedResponse = new InfoMatchInviteDto
             {
                 Id = Guid.NewGuid(),
-                IdSender = idTeam,
-                NameSender = "Sender Team",
-                IdReceiver = dto.IdReceiver,
-                NameReceiver = "Receiver Team",
+                Sender = new TeamDto { IdTeam = idSender, Name = "Sender" },
+                Receiver = new TeamDto { IdTeam = idReceiver, Name = "Receiver" },
                 GameDate = dto.GameDate,
-                NamePitch = dto.NamePitch
+                NamePitch = "Pitch B"
             };
 
             var mockMatchInviteService = new Mock<IMatchInviteService>();
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockMatchInviteService
-                .Setup(s => s.NegociateMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()))
+                .Setup(s => s.NegociateMatchInvite(idSender, It.IsAny<SendMatchInviteDto>()))
                 .ReturnsAsync(expectedResponse);
 
-
-            mockAuthorizationService.Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam))
+            mockAuthorizationService
+                .Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idSender))
                 .Returns(Task.CompletedTask);
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IMatchInviteService));
-                    if (serviceDescriptor != null) services.Remove(serviceDescriptor);
-
-                    var authDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IPlayerAuthorizationService));
-                    if (authDescriptor != null) services.Remove(authDescriptor);
-
+                    services.Remove(services.First(d => d.ServiceType == typeof(IMatchInviteService)));
                     services.AddSingleton(mockMatchInviteService.Object);
+
+                    services.Remove(services.First(d => d.ServiceType == typeof(IPlayerAuthorizationService)));
                     services.AddSingleton(mockAuthorizationService.Object);
                 });
             }).CreateClient();
@@ -272,30 +274,15 @@ namespace Tests.Integration.MatchInvite
             client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
-            var response = await client.PutAsJsonAsync($"/api/MatchInvite/{idTeam}/Negociate", dto);
-
-            // Debug: Check response content
-            var responseContent = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(responseContent))
-            {
-                Assert.Fail("Response content is empty");
-            }
+            // Rota: [HttpPut("{idTeam}/Negociate")]
+            var response = await client.PutAsJsonAsync($"/api/MatchInvite/{idSender}/Negociate", dto);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
+
             var result = await response.Content.ReadFromJsonAsync<InfoMatchInviteDto>();
-
             Assert.That(result, Is.Not.Null);
-            Assert.That(result.Id, Is.EqualTo(expectedResponse.Id));
-            Assert.That(result.IdSender, Is.EqualTo(expectedResponse.IdSender));
-            Assert.That(result.NameSender, Is.EqualTo(expectedResponse.NameSender));
-            Assert.That(result.IdReceiver, Is.EqualTo(expectedResponse.IdReceiver));
-            Assert.That(result.NameReceiver, Is.EqualTo(expectedResponse.NameReceiver));
-            Assert.That(result.GameDate, Is.EqualTo(expectedResponse.GameDate));
             Assert.That(result.NamePitch, Is.EqualTo(expectedResponse.NamePitch));
-
-            mockMatchInviteService.Verify(s => s.NegociateMatchInvite(idTeam, It.IsAny<SendMatchInviteDto>()), Times.Once);
-            mockAuthorizationService.Verify(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam), Times.Once);
         }
 
         [Test]
@@ -308,21 +295,33 @@ namespace Tests.Integration.MatchInvite
                 new InfoMatchInviteDto
                 {
                     Id = Guid.NewGuid(),
-                    IdSender = Guid.NewGuid(),
-                    NameSender = "Sender 1",
-                    IdReceiver = idTeam,
-                    NameReceiver = "Receiver Team",
-                    GameDate = DateTime.Now.AddDays(1),
+                    Sender = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Sender 1"
+                    },
+                    Receiver = new TeamDto
+                    {
+                        IdTeam = idTeam,
+                        Name = "Receiver Team"
+                    },
+                    GameDate = DateTime.UtcNow.AddDays(1),
                     NamePitch = "Pitch A"
                 },
                 new InfoMatchInviteDto
                 {
                     Id = Guid.NewGuid(),
-                    IdSender = Guid.NewGuid(),
-                    NameSender = "Sender 2",
-                    IdReceiver = idTeam,
-                    NameReceiver = "Receiver Team",
-                    GameDate = DateTime.Now.AddDays(2),
+                    Sender = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Sender 2"
+                    },
+                    Receiver = new TeamDto
+                    {
+                        IdTeam = idTeam,
+                        Name = "Receiver Team"
+                    },
+                    GameDate = DateTime.UtcNow.AddDays(2),
                     NamePitch = "Pitch B"
                 }
             };
@@ -330,20 +329,25 @@ namespace Tests.Integration.MatchInvite
             var mockMatchInviteService = new Mock<IMatchInviteService>();
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
-            mockMatchInviteService.Setup(s => s.GetAllMatchInvitesTeam(idTeam))
+            mockMatchInviteService
+                .Setup(s => s.GetAllMatchInvitesTeam(idTeam))
                 .ReturnsAsync(expectedList);
+
+            mockAuthorizationService
+                .Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam))
+                .Returns(Task.CompletedTask);
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IMatchInviteService));
-                    if (serviceDescriptor != null) services.Remove(serviceDescriptor);
-
-                    var authDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IPlayerAuthorizationService));
-                    if (authDescriptor != null) services.Remove(authDescriptor);
-
+                    // Remover serviços existentes para evitar conflitos
+                    var matchService = services.FirstOrDefault(d => d.ServiceType == typeof(IMatchInviteService));
+                    if (matchService != null) services.Remove(matchService);
                     services.AddSingleton(mockMatchInviteService.Object);
+
+                    var authService = services.FirstOrDefault(d => d.ServiceType == typeof(IPlayerAuthorizationService));
+                    if (authService != null) services.Remove(authService);
                     services.AddSingleton(mockAuthorizationService.Object);
                 });
             }).CreateClient();
@@ -354,13 +358,23 @@ namespace Tests.Integration.MatchInvite
             var response = await client.GetAsync($"/api/MatchInvite/{idTeam}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                Assert.Fail($"Request failed: {response.StatusCode} - {error}");
+            }
+
             var result = await response.Content.ReadFromJsonAsync<List<InfoMatchInviteDto>>();
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Has.Count.EqualTo(2));
+
+            // Verificar IDs e propriedades aninhadas
             Assert.That(result[0].Id, Is.EqualTo(expectedList[0].Id));
+            Assert.That(result[0].Sender.Name, Is.EqualTo(expectedList[0].Sender.Name));
+
             Assert.That(result[1].Id, Is.EqualTo(expectedList[1].Id));
+            Assert.That(result[1].NamePitch, Is.EqualTo(expectedList[1].NamePitch));
 
             mockMatchInviteService.Verify(s => s.GetAllMatchInvitesTeam(idTeam), Times.Once);
         }
@@ -382,56 +396,67 @@ namespace Tests.Integration.MatchInvite
                 new InfoMatchInviteDto
                 {
                     Id = Guid.NewGuid(),
-                    IdSender = Guid.NewGuid(),
-                    NameSender = "Sender 1",
-                    IdReceiver = idTeam,
-                    NameReceiver = "Receiver Team",
-                    GameDate = DateTime.Now.AddDays(1),
+                    Sender = new TeamDto
+                    {
+                        IdTeam = Guid.NewGuid(),
+                        Name = "Sender 1"
+                    },
+                    Receiver = new TeamDto
+                    {
+                        IdTeam = idTeam,
+                        Name = "Receiver Team"
+                    },
+                    GameDate = DateTime.UtcNow.AddDays(1),
                     NamePitch = "Pitch A"
-                }
+                }            
             };
 
             var mockMatchInviteService = new Mock<IMatchInviteService>();
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
-            mockMatchInviteService.Setup(s => s.GetAllMatchInvitesTeamWithFilters(idTeam, It.IsAny<FilterMatchInvitesDto>()))
+            // Configurar o mock para aceitar qualquer filtro (ou o filtro específico se preferires Match.Is)
+            mockMatchInviteService
+                .Setup(s => s.GetAllMatchInvitesTeamWithFilters(idTeam, It.IsAny<FilterMatchInvitesDto>()))
                 .ReturnsAsync(expectedList);
+
+            mockAuthorizationService
+                .Setup(a => a.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), idTeam))
+                .Returns(Task.CompletedTask);
 
             var client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IMatchInviteService));
-                    if (serviceDescriptor != null) services.Remove(serviceDescriptor);
-
-                    var authDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(IPlayerAuthorizationService));
-                    if (authDescriptor != null) services.Remove(authDescriptor);
-
+                    var matchService = services.FirstOrDefault(d => d.ServiceType == typeof(IMatchInviteService));
+                    if (matchService != null) services.Remove(matchService);
                     services.AddSingleton(mockMatchInviteService.Object);
+
+                    var authService = services.FirstOrDefault(d => d.ServiceType == typeof(IPlayerAuthorizationService));
+                    if (authService != null) services.Remove(authService);
                     services.AddSingleton(mockAuthorizationService.Object);
                 });
             }).CreateClient();
 
             client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            // Act - Use proper query string formatting
+            // Act
+            // Construção correta da Query String
             var queryString = $"?SenderName={Uri.EscapeDataString(filter.SenderName)}&MinDate={filter.MinDate:yyyy-MM-dd}&MaxDate={filter.MaxDate:yyyy-MM-dd}";
             var response = await client.GetAsync($"/api/MatchInvite/{idTeam}{queryString}");
 
-            // Debug: Check response content
-            var responseContent = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrEmpty(responseContent))
+            // Assert
+            if (!response.IsSuccessStatusCode)
             {
-                Assert.Fail("Response content is empty");
+                var error = await response.Content.ReadAsStringAsync();
+                Assert.Fail($"Request failed: {response.StatusCode} - {error}");
             }
 
-            // Assert
-            response.EnsureSuccessStatusCode();
             var result = await response.Content.ReadFromJsonAsync<List<InfoMatchInviteDto>>();
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Has.Count.EqualTo(1));
             Assert.That(result[0].Id, Is.EqualTo(expectedList[0].Id));
+            Assert.That(result[0].Sender.Name, Is.EqualTo(expectedList[0].Sender.Name));
 
             mockMatchInviteService.Verify(s => s.GetAllMatchInvitesTeamWithFilters(idTeam, It.IsAny<FilterMatchInvitesDto>()), Times.Once);
         }

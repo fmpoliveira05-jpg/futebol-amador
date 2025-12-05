@@ -26,10 +26,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         private Mock<IPlayerValidator> validatorMock;
         private Mock<ITeamRepository> teamRepoMock;
         private Mock<IMembershipRequestRepository> membershipReqRepoMock;
-        private Mock<IPlayerAuthorizationValidator> authorizationValidatorMock;
         private Mock<IUserDataValidator> userDataValidator;
         private Mock<IAuthService> authService;
-
+        private Mock<ITeamValidator> teamValidatorMock;
         private PlayerService service;
 
         #endregion
@@ -45,21 +44,21 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock = new Mock<IPlayerValidator>();
             teamRepoMock = new Mock<ITeamRepository>();
             membershipReqRepoMock = new Mock<IMembershipRequestRepository>();
-            authorizationValidatorMock = new Mock<IPlayerAuthorizationValidator>();
             userDataValidator = new Mock<IUserDataValidator>();
             authService = new Mock<IAuthService>();
+            teamValidatorMock = new Mock<ITeamValidator>(); 
 
             service = new PlayerService(
-                playerRepoMock.Object,
-                teamRepoMock.Object,
-                uowMock.Object,
-                membershipReqRepoMock.Object,
-                validatorMock.Object,
-                userRepoMock.Object,
-                authorizationValidatorMock.Object,
-                teamServiceMock.Object,
-                userDataValidator.Object,
-                authService.Object
+                playerRepoMock.Object,       
+                teamRepoMock.Object,          
+                uowMock.Object,               
+                membershipReqRepoMock.Object,  
+                validatorMock.Object,          
+                userRepoMock.Object,          
+                teamServiceMock.Object,     
+                userDataValidator.Object,  
+                authService.Object,         
+                teamValidatorMock.Object     
             );
         }
         #endregion
@@ -89,7 +88,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             };
         }
 
-        private Player BuildValidPlayer(string id , Team team = null, bool isAdmin = false, DateTime? creationDate = null)
+        private Player BuildValidPlayer(string id = null, Team team = null, bool isAdmin = false, DateTime? creationDate = null)
         {
             var player = new Player
             {
@@ -275,21 +274,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId))
                           .ReturnsAsync((Player)null);
 
-            // !! ARRANGE (A CORREÇÃO): Configure o MOCK do validador !!
-            // Diga ao mock para lançar a exceção quando receber null.
-            // (Estou a assumir que o seu mock se chama playerValidatorMock)
             validatorMock
-                .Setup(v => v.DeletePlayerValidator(It.IsAny<Player>())) // ou .Setup(v => v.DeletePlayerValidator(null))
+                .Setup(v => v.DeletePlayerValidator(It.IsAny<Player>())) 
                 .Throws(new NotFoundException("O Player não existe"));
 
             // ACT / ASSERT: 
-            // Mude de DoesNotThrowAsync para ThrowsAsync
             Assert.ThrowsAsync<NotFoundException>(async () =>
                 await service.DeletePlayerAsync(playerId));
 
             // VERIFY: Verifica comportamento
-            // Estas verificações agora vão passar, porque a exceção
-            // é lançada ANTES de DeletePlayer ou SaveChanges serem chamados.
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             playerRepoMock.Verify(r => r.DeletePlayer(It.IsAny<Player>()), Times.Never);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -325,7 +318,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(resultDto, Is.Not.Null);
             Assert.That(resultDto, Is.TypeOf<PlayerDetailsDto>());
             Assert.That(resultDto.Name, Is.EqualTo(mockPlayer.Name));
-            Assert.That(resultDto.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
+            Assert.That(resultDto.Team.IdTeam, Is.EqualTo(mockPlayer.IdTeam));
 
             playerRepoMock.Verify(r => r.GetPlayerByIdAsync(playerId), Times.Once);
             validatorMock.Verify(v => v.GetPlayerByIdValidator(mockPlayer), Times.Once);
@@ -587,24 +580,30 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
-        
-        [Test(Description = "Caminho feliz: jogador normal (não-admin) sai da equipa")]
-        [Ignore("Teste desativado temporariamente devido a alterações na lógica de validação.")]
+        [Test(Description = "Caminho feliz: Membro regular sai da equipa")]
         public async Task LeaveTeam_RegularMember_LeavesSuccessfully()
         {
+            // Arrange
             var team = BuildValidTeam();
             var player = BuildValidPlayer(id: "player-leaving-1", team: team, isAdmin: false);
-            string expectedTeamName = team.Name;
-            
+            team.Members = new List<Player> { player };
+            player.Team = team;
 
+            // Mocks
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(player.Id)).ReturnsAsync(player);
+
+            teamRepoMock.Setup(r => r.GetTeamByIdAsync((Guid)player.IdTeam)).ReturnsAsync(team);
+
             validatorMock.Setup(v => v.LeaveTeamValidator(player)).Verifiable();
             playerRepoMock.Setup(r => r.UpdatePlayer(player)).Verifiable();
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
-            var resultTeamName = await service.LeaveTeam(player.Id);
+            // Act
+            var resultDto = await service.LeaveTeam(player.Id);
 
-            Assert.That(resultTeamName, Is.EqualTo(expectedTeamName));
+            // Assert
+            Assert.That(resultDto, Is.Not.Null);
+            Assert.That(resultDto.HaveTeam, Is.False);
             Assert.That(player.IdTeam, Is.Null);
             Assert.That(player.Team, Is.Null);
             Assert.That(player.IsAdmin, Is.False);
@@ -614,90 +613,102 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
             teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
-        
 
-        
         [Test(Description = "Caminho feliz: Admin sai da equipa, mas existe outro admin")]
-        [Ignore("Teste desativado temporariamente devido a alterações na lógica de validação.")]
         public async Task LeaveTeam_AdminLeaves_AnotherAdminExists_LeavesSuccessfully()
         {
+            // Arrange
             var team = BuildValidTeam();
             var playerLeaving = BuildValidPlayer(id: "admin-leaving-1", team: team, isAdmin: true);
             var otherAdmin = BuildValidPlayer(id: "admin-staying-1", team: team, isAdmin: true);
-            string expectedTeamName = team.Name;
-            team.Members.Add(otherAdmin);
-            team.Members.Add(playerLeaving);
-
-            teamRepoMock.Setup(r => r.AddAsync(team));
+            team.Members = new List<Player> { playerLeaving, otherAdmin };
+            
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
+            teamRepoMock.Setup(r => r.GetTeamByIdAsync((Guid)playerLeaving.IdTeam)).ReturnsAsync(team);
+
             validatorMock.Setup(v => v.LeaveTeamValidator(playerLeaving)).Verifiable();
             playerRepoMock.Setup(r => r.UpdatePlayer(playerLeaving)).Verifiable();
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
-            var resultTeamName = await service.LeaveTeam(playerLeaving.Id);
+            // Act
+            var resultDto = await service.LeaveTeam(playerLeaving.Id);
 
-            Assert.That(resultTeamName, Is.EqualTo(expectedTeamName));
+            // Assert
+            Assert.That(resultDto, Is.Not.Null);
+            Assert.That(resultDto.Id, Is.EqualTo(playerLeaving.Id));
+            Assert.That(resultDto.HaveTeam, Is.False);
             Assert.That(playerLeaving.IdTeam, Is.Null);
-            Assert.That(playerLeaving.IsAdmin, Is.False); 
+            Assert.That(playerLeaving.IsAdmin, Is.False);
             Assert.That(otherAdmin.IsAdmin, Is.True);
-            Assert.That(team.Members, Does.Not.Contain(playerLeaving)); 
+            Assert.That(team.Members, Does.Not.Contain(playerLeaving));
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
             teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
-        
 
-        [Test(Description = "Caminho feliz: Último admin sai, promove o membro mais antigo (que não ele próprio)")]
-        [Ignore("Teste desativado temporariamente devido a alterações na lógica de validação.")]
+        [Test(Description = "Caminho feliz: Último admin sai, promove o membro mais antigo")]
         public async Task LeaveTeam_LastAdminLeaves_OtherMembersExist_PromotesOldestMember()
         {
+            // Arrange
             var team = BuildValidTeam();
             var oldestMember = BuildValidPlayer(id: "oldest-member-1", team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-2));
             var otherMember = BuildValidPlayer(id: "other-member-1", team: team, isAdmin: false, creationDate: DateTime.UtcNow.AddYears(-1));
             var playerLeaving = BuildValidPlayer(id: "last-admin-leaving-1", team: team, isAdmin: true, creationDate: DateTime.UtcNow.AddMonths(-6));
 
+            team.Members = new List<Player> { oldestMember, otherMember, playerLeaving };
+            playerLeaving.Team = team;
+            oldestMember.Team = team;
+            otherMember.Team = team;
+
+            // Mocks
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
+            teamRepoMock.Setup(r => r.GetTeamByIdAsync((Guid)playerLeaving.IdTeam)).ReturnsAsync(team);
+
             validatorMock.Setup(v => v.LeaveTeamValidator(playerLeaving)).Verifiable();
             playerRepoMock.Setup(r => r.UpdatePlayer(playerLeaving)).Verifiable();
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
-            await service.LeaveTeam(playerLeaving.Id);
+            // Act
+            var resultDto = await service.LeaveTeam(playerLeaving.Id);
 
+            // Assert
+            Assert.That(resultDto.HaveTeam, Is.False);
             Assert.That(playerLeaving.IdTeam, Is.Null);
             Assert.That(playerLeaving.IsAdmin, Is.False);
-            Assert.That(oldestMember.IsAdmin, Is.True); 
+            Assert.That(oldestMember.IsAdmin, Is.True, "O membro mais antigo devia ter sido promovido a Admin");
             Assert.That(otherMember.IsAdmin, Is.False);
-            Assert.That(team.Members, Does.Not.Contain(playerLeaving)); 
+            Assert.That(team.Members, Does.Not.Contain(playerLeaving));
 
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
             teamServiceMock.Verify(s => s.DeleteTeamAsync(It.IsAny<Guid>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test(Description = "Caminho feliz: Último admin e único membro sai, eliminando a equipa")]
-        [Ignore("Teste desativado temporariamente devido a alterações na lógica de validação.")]
         public async Task LeaveTeam_LastAdminAndOnlyMember_DeletesTeamSuccessfully()
         {
             var team = BuildValidTeam();
             var playerLeaving = BuildValidPlayer(id: "only-member-leaving-1", team: team, isAdmin: true);
-            string expectedTeamName = team.Name;
-
-            Assert.That(team.Members.Count, Is.EqualTo(1)); 
+            team.Members = new List<Player> { playerLeaving };
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerLeaving.Id)).ReturnsAsync(playerLeaving);
+            teamRepoMock.Setup(r => r.GetTeamByIdAsync((Guid)playerLeaving.IdTeam)).ReturnsAsync(team);
+
             validatorMock.Setup(v => v.LeaveTeamValidator(playerLeaving)).Verifiable();
 
             teamServiceMock.Setup(s => s.DeleteTeamAsync(team.Id, playerLeaving.Id))
-                   .Returns(Task.CompletedTask)
-                   .Verifiable();
+                    .Returns(Task.CompletedTask)
+                    .Verifiable();
 
             playerRepoMock.Setup(r => r.UpdatePlayer(playerLeaving)).Verifiable();
             uowMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1).Verifiable();
 
-            var resultTeamName = await service.LeaveTeam(playerLeaving.Id);
+            // Act
+            var resultDto = await service.LeaveTeam(playerLeaving.Id);
 
-            Assert.That(resultTeamName, Is.EqualTo(expectedTeamName));
+            // Assert
+            Assert.That(resultDto.HaveTeam, Is.False);
             Assert.That(playerLeaving.IdTeam, Is.Null);
-            Assert.That(team.Members, Is.Empty); 
+            Assert.That(team.Members, Is.Empty);
 
             teamServiceMock.Verify(s => s.DeleteTeamAsync(team.Id, playerLeaving.Id), Times.Once);
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);

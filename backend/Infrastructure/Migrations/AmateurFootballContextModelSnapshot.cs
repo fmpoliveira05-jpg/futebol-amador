@@ -380,6 +380,9 @@ namespace Infrastructure.Migrations
                     b.Property<DateOnly>("DateOfBirth")
                         .HasColumnType("date");
 
+                    b.Property<string>("DeviceToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(256)

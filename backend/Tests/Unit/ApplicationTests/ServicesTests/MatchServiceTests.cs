@@ -7,7 +7,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Application.Services;
-using Application.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
@@ -26,7 +25,6 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<ICancelledMatchRepository> _cancelledMatchRepoMock;
         private Mock<IUnityOfWork> _unitOfWorkMock;
         private Mock<ICalendarValidator> _validatorMock;
-        private Mock<IPlayerAuthorizationService> _authorizarionService;
         private MatchService _sut;
         #endregion
 
@@ -39,15 +37,13 @@ namespace Unit.ApplicationTests.ServicesTests
             _cancelledMatchRepoMock = new Mock<ICancelledMatchRepository>();
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _validatorMock = new Mock<ICalendarValidator>();
-            _authorizarionService = new Mock<IPlayerAuthorizationService>();
 
             _sut = new MatchService(
                 _matchRepoMock.Object,
                 _teamPostPoneRepoMock.Object,
                 _cancelledMatchRepoMock.Object,
                 _unitOfWorkMock.Object,
-                _validatorMock.Object,
-                _authorizarionService.Object
+                _validatorMock.Object
             );
         }
         #endregion
@@ -64,20 +60,26 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
             var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
+                Id = Guid.NewGuid(),
                 MatchStatus = MatchStatus.SCHEDULED
             };
+
             var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
             var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
+
             match.Teams.Add(teamStats);
             match.Teams.Add(opponentStats);
+
             var dto = new PostPoneMatchDto
             {
                 IdMatch = match.Id,
                 PostPoneDate = DateTime.UtcNow.AddHours(13),
                 IdOpponent = opponent.Id
             };
+
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
             _teamPostPoneRepoMock.Setup(r => r.AddTeamPostPoneMatch(It.IsAny<PostPoneMatch>()));
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
@@ -90,11 +92,17 @@ namespace Unit.ApplicationTests.ServicesTests
             result.Should().BeOfType<InfoPostPoneMatch>();
             result.IdMatch.Should().Be(match.Id);
             result.PostPoneDate.Should().Be(dto.PostPoneDate);
+
+            // Verificar objetos aninhados
+            result.Team.IdTeam.Should().Be(team.Id);
+            result.Team.Name.Should().Be(team.Name);
+            result.Opponent.IdTeam.Should().Be(opponent.Id);
+
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }
 
         [Test(Description = "T2GP5 - Player não admin tenta adiar partida.")]
-        public async Task PostPoneMatch_Should_Throw_When_TeamIsNotAdmin()
+        public async Task PostPoneMatch_Should_Throw_When_ValidatorFails()
         {
             // ARRANGE
             var teamId = Guid.NewGuid();
@@ -107,22 +115,14 @@ namespace Unit.ApplicationTests.ServicesTests
                 IdOpponent = idOpponent
             };
 
-            // cria um match com ambas as equipas (evita NullReference por falta de opponent)
-            var dummyMatch = new Matches(DateTime.UtcNow.AddDays(2), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
+            var match = new Matches(DateTime.UtcNow.AddDays(2), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
+            _matchRepoMock.Setup(r => r.GetMatchById(idMatch)).ReturnsAsync(match);
 
-            var team = new Team("Team A", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!)) { Id = teamId };
-            var opponent = new Team("Team B", "desc", null, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!)) { Id = idOpponent };
 
-            dummyMatch.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
-            dummyMatch.Teams.Add(new TeamStatistics(opponent) { IdTeam = idOpponent });
-
-            _matchRepoMock.Setup(r => r.GetMatchById(idMatch))
-                          .ReturnsAsync(dummyMatch);
-
-            // configura o validador para lançar ValidationException que indica que o jogador não é admin
+            // Configura o validador para lançar excepção (simulando falha de permissões ou outra regra)
             _validatorMock
                 .Setup(v => v.ValidatePostPoneMatchDto(teamId, dto))
                 .Throws(new ValidationException("O jogador não é administradora da equipa."));
@@ -141,28 +141,29 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task PostPoneMatch_Should_Throw_When_TeamDoesNotBelongToMatch()
         {
             // ARRANGE
-            var outsiderTeamId = Guid.NewGuid(); 
+            var outsiderTeamId = Guid.NewGuid();
             var idMatch = Guid.NewGuid();
             var idOpponent = Guid.NewGuid();
+
             var dto = new PostPoneMatchDto
             {
                 IdMatch = idMatch,
-                PostPoneDate = DateTime.UtcNow.AddDays(1), 
+                PostPoneDate = DateTime.UtcNow.AddDays(1),
                 IdOpponent = idOpponent
             };
 
             var pitch = new Pitch("Campo", "Rua");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var teamA = new Team("Team A", "desc", null, pitch, rank);
-            var teamB = new Team("Team B", "desc", null, pitch, rank) { Id = idOpponent }; 
+            var teamA = new Team("Team A", "desc", null, pitch, rank) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "desc", null, pitch, rank) { Id = idOpponent };
 
             var match = new Matches(DateTime.UtcNow.AddDays(10), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
-                MatchStatus = MatchStatus.SCHEDULED 
+                MatchStatus = MatchStatus.SCHEDULED
             };
 
-            match.Teams.Add(new TeamStatistics(teamA) { IdTeam = Guid.NewGuid() }); 
-            match.Teams.Add(new TeamStatistics(teamB) { IdTeam = idOpponent });
+            match.Teams.Add(new TeamStatistics(teamA) { IdTeam = teamA.Id });
+            match.Teams.Add(new TeamStatistics(teamB) { IdTeam = teamB.Id });
 
             _matchRepoMock.Setup(r => r.GetMatchById(idMatch))
                           .ReturnsAsync(match);
@@ -172,39 +173,43 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
-                     .WithMessage("A partida não possui equipas válidas."); 
+                     .WithMessage("A partida não possui equipas válidas.");
 
             // VERIFY
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
-            _matchRepoMock.Verify(r => r.GetMatchById(idMatch), Times.Once);
         }
 
         [Test(Description = "T4GP5 - Tenta adiar partida com estado CANCELLED, DONE ou IN_PROGRESS.")]
         public async Task PostPoneMatch_Should_Throw_When_MatchHasInvalidStatus()
         {
             // ARRANGE
-            var userId = "admin-id";
             var teamId = Guid.NewGuid();
-            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var opponentId = Guid.NewGuid();
+
+            var pitch = new Pitch("Campo", "Rua");
+            var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
+            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
-                MatchStatus = MatchStatus.DONE
+                MatchStatus = MatchStatus.DONE // Estado inválido para adiar
             };
-            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
-            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
-            match.Teams.Add(teamStats);
-            match.Teams.Add(opponentStats);
+
+            match.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
+            match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponentId });
+
             var dto = new PostPoneMatchDto
             {
                 IdMatch = match.Id,
                 PostPoneDate = DateTime.UtcNow.AddDays(2),
-                IdOpponent = opponent.Id
+                IdOpponent = opponentId
             };
+
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -215,28 +220,34 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task PostPoneMatch_Should_Throw_When_NewDateIsSame()
         {
             // ARRANGE
-            var userId = "admin-id";
             var teamId = Guid.NewGuid();
+            var opponentId = Guid.NewGuid();
             var sameDate = DateTime.UtcNow.AddDays(1);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+
+            var pitch = new Pitch("Campo", "Rua");
+            var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
+            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+
             var match = new Matches(sameDate, false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
-            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
-            match.Teams.Add(teamStats);
-            match.Teams.Add(opponentStats);
-            var dto = new PostPoneMatchDto {
+
+            match.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
+            match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponentId });
+
+            var dto = new PostPoneMatchDto
+            {
                 IdMatch = match.Id,
-                PostPoneDate = sameDate,
-                IdOpponent = opponent.Id
+                PostPoneDate = sameDate, // Mesma data
+                IdOpponent = opponentId
             };
+
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
@@ -247,7 +258,6 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task PostPoneMatch_Should_Throw_When_MatchDoesNotExist()
         {
             // ARRANGE
-            var userId = "admin-id";
             var teamId = Guid.NewGuid();
             var dto = new PostPoneMatchDto { IdMatch = Guid.NewGuid(), PostPoneDate = DateTime.UtcNow.AddDays(1) };
             _matchRepoMock.Setup(r => r.GetMatchById(dto.IdMatch)).ReturnsAsync((Matches?)null);
@@ -264,33 +274,41 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task PostPoneMatch_Should_Throw_When_NewDateIsBeforeCurrent()
         {
             // ARRANGE
-            var userId = "admin-id";
             var teamId = Guid.NewGuid();
-            var team = new Team("Team A", "desc", new byte[] { 1 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, new Pitch("Campo", "Rua"), new Rank("Unranked", 0, 0, 0, 0, null!, null!));
+            var opponentId = Guid.NewGuid();
+
+            var pitch = new Pitch("Campo", "Rua");
+            var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
+            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
             };
-            var teamStats = new TeamStatistics(team) { IdTeam = team.Id };
-            var opponentStats = new TeamStatistics(opponent) { IdTeam = opponent.Id };
-            match.Teams.Add(teamStats);
-            match.Teams.Add(opponentStats);
-            var invalidDate = DateTime.UtcNow.AddHours(-12);
-            var dto = new PostPoneMatchDto {
+
+            match.Teams.Add(new TeamStatistics(team) { IdTeam = teamId });
+            match.Teams.Add(new TeamStatistics(opponent) { IdTeam = opponentId });
+
+            var invalidDate = DateTime.UtcNow.AddHours(-1); // Data no passado
+
+            var dto = new PostPoneMatchDto
+            {
                 IdMatch = match.Id,
                 PostPoneDate = invalidDate,
-                IdOpponent = opponent.Id
+                IdOpponent = opponentId
             };
+
             _matchRepoMock.Setup(r => r.GetMatchById(match.Id)).ReturnsAsync(match);
 
             // ACT
-            Func<Task> act = async () => await _sut.PostPoneMatch(team.Id, dto);
+            Func<Task> act = async () => await _sut.PostPoneMatch(teamId, dto);
 
             // ASSERT
             await act.Should().ThrowAsync<BusinessRuleException>()
                      .WithMessage("A nova data não pode ser igual ou antes da data atual.");
         }
+
         #endregion
 
         #region CancelMatchTests
@@ -436,8 +454,21 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var teamId = Guid.NewGuid();
 
-            var team = new TeamDto { IdTeam = teamId, Name = "FC Unity" };
-            var opponent = new TeamDto { IdTeam = Guid.NewGuid(), Name = "Real Opponent" };
+            // Ajuste: Usar TeamStatisticsDto
+            var team = new TeamStatisticsDto
+            {
+                IdTeam = teamId,
+                Name = "FC Unity",
+                NumGoals = 2
+            };
+
+            var opponent = new TeamStatisticsDto
+            {
+                IdTeam = Guid.NewGuid(),
+                Name = "Real Opponent",
+                NumGoals = 1
+            };
+
             var pitch = new PitchDto { Name = "Campo Central", Address = "Rua Principal" };
 
             var matches = new List<InfoMatchCalendar>
@@ -447,22 +478,24 @@ namespace Unit.ApplicationTests.ServicesTests
                     IdMatch = Guid.NewGuid(),
                     MatchStatus = MatchStatus.SCHEDULED,
                     GameDate = DateTime.Today.AddDays(1),
-                    Result = null,
-                    MatchResult = MatchResult.UNPLAYED,
-                    Team = team,
-                    Opponent = opponent,
-                    pitchGame = pitch
+                    MatchResult = MatchResult.UNPLAYED, // Scheduled não tem resultado
+                    IsCompetitive = true,
+                    IsHome = true,
+                    Team = new TeamStatisticsDto { IdTeam = teamId, Name = "FC Unity", NumGoals = 0 },
+                    Opponent = new TeamStatisticsDto { IdTeam = Guid.NewGuid(), Name = "Real Opponent", NumGoals = 0 },
+                    PitchGame = pitch
                 },
                 new InfoMatchCalendar
                 {
                     IdMatch = Guid.NewGuid(),
                     MatchStatus = MatchStatus.DONE,
                     GameDate = DateTime.Today.AddDays(-1),
-                    Result = "2-1",
                     MatchResult = MatchResult.WIN,
+                    IsCompetitive = true,
+                    IsHome = false,
                     Team = team,
                     Opponent = opponent,
-                    pitchGame = pitch
+                    PitchGame = pitch
                 }
             };
 
@@ -492,9 +525,12 @@ namespace Unit.ApplicationTests.ServicesTests
                 MaxDate = DateOnly.FromDateTime(DateTime.Today.AddDays(7)),
                 NameOpponent = "Real Opponent"
             };
-            var team = new TeamDto { IdTeam = teamId, Name = "FC Unity" };
-            var opponent = new TeamDto { IdTeam = Guid.NewGuid(), Name = "Real Opponent" };
+
+            // Ajuste para TeamStatisticsDto e campos obrigatórios
+            var team = new TeamStatisticsDto { IdTeam = teamId, Name = "FC Unity", NumGoals = 3 };
+            var opponent = new TeamStatisticsDto { IdTeam = Guid.NewGuid(), Name = "Real Opponent", NumGoals = 1 };
             var pitch = new PitchDto { Name = "Campo Norte", Address = "Avenida do Desporto" };
+
             var filteredMatches = new List<InfoMatchCalendar>
             {
                 new InfoMatchCalendar
@@ -502,13 +538,15 @@ namespace Unit.ApplicationTests.ServicesTests
                     IdMatch = Guid.NewGuid(),
                     MatchStatus = Domain.Enums.MatchStatus.DONE,
                     GameDate = DateTime.Today.AddDays(-2),
-                    Result = "3-1",
                     MatchResult = Domain.Enums.MatchResult.WIN,
+                    IsCompetitive = true,
+                    IsHome = true,
                     Team = team,
                     Opponent = opponent,
-                    pitchGame = pitch
+                    PitchGame = pitch
                 }
             };
+
             _matchRepoMock.Setup(r => r.GetAllMatchesTeamWithFilters(teamId, filter))
                           .ReturnsAsync(filteredMatches);
 

@@ -11,6 +11,15 @@ using System.Collections.Concurrent;
 
 namespace Application.Services.Hub
 {
+    /// <summary>
+    /// Serviço de gestão de estado para o Hub de Finalização de Partida ([FinishMatchHub]).
+    /// 
+    /// Responsável por:
+    /// 1. Coordenar a submissão de resultados finais pelos administradores das equipas.
+    /// 2. Manter o estado temporário dos resultados submetidos em memória (Cache).
+    /// 3. Verificar se os resultados submetidos por ambas as equipas coincidem.
+    /// 4. Se coincidirem, finalizar a partida, definir o vencedor e atualizar os pontos/ranks das equipas.
+    /// </summary>
     public class ManagerFinishMatchService : IManagerFinishMatchService
     {
         #region Initialization
@@ -20,6 +29,14 @@ namespace Application.Services.Hub
         private readonly IGeralHubValidator geralValidator;
         private readonly IMemoryCache cache;
 
+        /// <summary>
+        /// Construtor do ManagerFinishMatchService.
+        /// </summary>
+        /// <param name="matchRepository">Repositório de partidas (para carregar e atualizar o jogo).</param>
+        /// <param name="unityOfWork">Unidade de trabalho para persistir o resultado final.</param>
+        /// <param name="validator">Validador de regras de negócio específicas de finalização.</param>
+        /// <param name="geralValidator">Validador genérico de Hubs.</param>
+        /// <param name="cache">Cache em memória para armazenar os resultados pendentes de validação.</param>
         public ManagerFinishMatchService(IMatchRepository matchRepository, IUnityOfWork unityOfWork, IFinishMatchValidator validator, IGeralHubValidator geralValidator, IMemoryCache cache)
         {
             this.matchRepository = matchRepository;
@@ -31,6 +48,23 @@ namespace Application.Services.Hub
         #endregion
 
         #region public Methods
+
+        /// <summary>
+        /// Regista a submissão de um resultado por uma equipa no Hub de Finalização.
+        /// </summary>
+        /// <remarks>
+        /// **Fluxo de Execução:**
+        /// 1. Valida a entrada (IDs, Golos não negativos, Admin correto).
+        /// 2. Obtém ou cria o estado do lobby no Cache.
+        /// 3. Adiciona o resultado da equipa ao lobby.
+        /// 4. Se a outra equipa já submeteu o resultado, verifica se coincidem ([FinalizeMatchIfResultsMatch]).
+        /// 5. Retorna o estado atual (se o jogo terminou ou se é necessário esperar).
+        /// </remarks>
+        /// <param name="matchId">ID da partida.</param>
+        /// <param name="finishMatch">DTO com os golos submetidos.</param>
+        /// <param name="userId">ID do administrador que submete.</param>
+        /// <param name="connectionId">ID da conexão SignalR.</param>
+        /// <returns>Objeto [JoinFinishMatch] com o estado da finalização.</returns>
         public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
@@ -90,6 +124,18 @@ namespace Application.Services.Hub
             return result;
         }
 
+        /// <summary>
+        /// Atualiza um resultado previamente submetido (correção de erro).
+        /// </summary>
+        /// <remarks>
+        /// Permite que um administrador altere o número de golos se a validação inicial tiver falhado (resultados divergentes).
+        /// Após a atualização, tenta novamente finalizar a partida se os resultados agora coincidirem.
+        /// </remarks>
+        /// <param name="matchId">ID da partida.</param>
+        /// <param name="finishMatch">Novo DTO com os golos corrigidos.</param>
+        /// <param name="userId">ID do administrador.</param>
+        /// <param name="connectionId">ID da conexão.</param>
+        /// <returns>Objeto [JoinFinishMatch] atualizado.</returns>
         public async Task<JoinFinishMatch> UpdateResult(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
@@ -126,6 +172,10 @@ namespace Application.Services.Hub
             return result;
         }
 
+        /// <summary>
+        /// Remove um administrador do lobby de finalização (Cancelamento/Saída).
+        /// </summary>
+        /// <returns><c>true</c> se a remoção foi bem-sucedida.</returns>
         public async Task<bool> LeaveHubAsync(Guid matchId, Guid teamId, string connectionId)
         {
             geralValidator.ValidateIdMatchLeaveMatch(matchId, teamId);
@@ -150,6 +200,9 @@ namespace Application.Services.Hub
             return false;
         }
 
+        /// <summary>
+        /// Trata a desconexão abrupta de um cliente.
+        /// </summary>
         public async Task<bool> HandleDisconnectAsync(Guid? maybeMatchId, Guid? maybeTeamId, string connectionId)
         {
             if (!maybeMatchId.HasValue || !maybeTeamId.HasValue)
@@ -162,17 +215,42 @@ namespace Application.Services.Hub
         #endregion
 
         #region private Methods
+
+        /// <summary>
+        /// Gera a chave única de cache (Key) para o lobby de finalização de uma partida.
+        /// </summary>
+        /// <remarks>
+        /// Esta chave é usada para armazenar o estado de submissão de resultados ([ConcurrentDictionary]) 
+        /// na cache em memória ([IMemoryCache]).
+        /// </remarks>
+        /// <param name="matchId">O ID da partida (GUID).</param>
+        /// <returns>Uma string única no formato "PrefixHubCache-{MatchId}".</returns>
         private static string GetHubCacheKey(Guid matchId)
         {
             return ModelConstants.FinishMatchHubConst.PrefixHubCache + matchId;
         }
 
+        /// <summary>
+        /// Configura as opções de expiração e políticas de entrada da cache em memória.
+        /// </summary>
+        /// <remarks>
+        /// Define a expiração absoluta do item na cache para **10 minutos**, garantindo que os dados
+        /// pendentes (resultados divergentes) não fiquem na memória por tempo indefinido.
+        /// </remarks>
+        /// <returns>Um objeto [MemoryCacheEntryOptions] configurado.</returns>
         private static MemoryCacheEntryOptions GetCacheOptions()
         {
             return new MemoryCacheEntryOptions()
                 .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
         }
 
+        /// <summary>
+        /// Compara dois DTOs de resultado para verificar se são consistentes.
+        /// </summary>
+        /// <remarks>
+        /// Verifica se: Golo(Equipa A) segundo A == Golo(Equipa A) segundo B, e vice-versa.
+        /// </remarks>
+        /// <returns><c>true</c> se os resultados coincidirem.</returns>
         private bool CoincideResults(ResultMatchDto firstResult, ResultMatchDto secondResult)
         {
             var coincide = false;
@@ -187,6 +265,18 @@ namespace Application.Services.Hub
             return coincide;
         }
 
+        /// <summary>
+        /// Lógica central de finalização: Verifica coincidência e persiste o resultado.
+        /// </summary>
+        /// <remarks>
+        /// 1. Obtém o resultado da equipa adversária do cache.
+        /// 2. Compara com o resultado atual ([CoincideResults]).
+        /// 3. Se coincidirem:
+        ///     - Atualiza os golos nas estatísticas.
+        ///     - Determina o vencedor ([DefineWinnerMatch]).
+        ///     - Marca o jogo como [DONE].
+        ///     - Persiste na BD e limpa o cache.
+        /// </remarks>
         private async Task FinalizeMatchIfResultsMatch(ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub,
             Matches match, TeamStatistics team, JoinFinishMatch result, string hubCacheKey, ResultMatchDto finishMatch)
         {
@@ -227,6 +317,9 @@ namespace Application.Services.Hub
             }
         }
 
+        /// <summary>
+        /// Define o resultado da partida (Vitória/Derrota/Empate) e atualiza os pontos.
+        /// </summary>
         private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
         {
             var numGoalsTeam = team.NumGoals;
@@ -252,6 +345,9 @@ namespace Application.Services.Hub
             updatePointsTeams(opponent);
         }
 
+        /// <summary>
+        /// Atualiza os pontos da equipa com base no resultado e verifica Promoção/Despromoção.
+        /// </summary>
         private static void updatePointsTeams(TeamStatistics teamStatistic)
         {
             var team = teamStatistic.Team;
@@ -279,6 +375,9 @@ namespace Application.Services.Hub
             ValidatePromotionOrDepromotionTeam(team);
         }
 
+        /// <summary>
+        /// Verifica se a equipa deve subir ou descer de Rank com base nos novos pontos.
+        /// </summary>
         private static void ValidatePromotionOrDepromotionTeam(Team team)
         {
             var nextRank = team.Rank.NextRank;

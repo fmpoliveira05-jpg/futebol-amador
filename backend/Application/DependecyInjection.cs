@@ -1,4 +1,5 @@
-﻿using Application.Interfaces.Services;
+﻿using Application.Interfaces;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Services.Hub.ClienteService;
 using Application.Interfaces.Validators;
@@ -12,8 +13,26 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Application
 {
+    /// <summary>
+    /// Classe estática de extensão responsável pela configuração e registo de dependências da camada de Aplicação.
+    /// 
+    /// Centraliza a injeção de todos os Serviços de Domínio, Validadores e Gestores de Hubs SignalR,
+    /// garantindo que a lógica de negócio está desacoplada e pronta a ser utilizada pelos controladores ou outros serviços.
+    /// </summary>
     public static class DependecyInjection
     {
+        /// <summary>
+        /// Método de extensão principal para registar todos os serviços da camada de Aplicação no contentor DI.
+        /// </summary>
+        /// <remarks>
+        /// Este método orquestra a chamada de métodos privados auxiliares para registar categorias específicas de dependências:
+        /// <list type="bullet">
+        /// <item><description><see cref="AddServices"/>: Serviços de lógica de negócio.</description></item>
+        /// <item><description><see cref="AddValidators"/>: Validadores de dados e regras de negócio.</description></item>
+        /// </list>
+        /// </remarks>
+        /// <param name="services">A coleção de serviços ([IServiceCollection]) onde as dependências serão registadas.</param>
+        /// <returns>A coleção de serviços atualizada para permitir encadeamento (Fluent API).</returns>
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddServices();
@@ -22,6 +41,11 @@ namespace Application
             return services;
         }
 
+        /// <summary>
+        /// Regista os serviços de domínio e lógica de negócio.
+        /// </summary>
+        /// <param name="services">A coleção de serviços.</param>
+        /// <returns>A coleção de serviços atualizada.</returns>
         private static IServiceCollection AddServices(this IServiceCollection services)
         {
             services.AddScoped<ITeamService, TeamService>();
@@ -34,6 +58,7 @@ namespace Application
             services.AddScoped<IChatRoomService, FirebaseChatService>();
             services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
             services.AddScoped<IAuthService, FireBaseAuthService>();
+            services.AddScoped<INotificationFirebaseService, NotificationFirebaseService>();
 
             services.AddManagerHubService();
             services.AddHubServiceClients();
@@ -41,6 +66,15 @@ namespace Application
             return services;
         }
 
+        /// <summary>
+        /// Regista os serviços clientes dos Hubs SignalR (Hub Client Services).
+        /// </summary>
+        /// <remarks>
+        /// Estes serviços são registados como <c>Transient</c> porque geralmente mantêm estado leve ou são instanciados per-call
+        /// para interagir diretamente com o contexto do Hub.
+        /// </remarks>
+        /// <param name="services">A coleção de serviços.</param>
+        /// <returns>A coleção de serviços atualizada.</returns>
         private static IServiceCollection AddHubServiceClients(this IServiceCollection services)
         {
             services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
@@ -50,6 +84,14 @@ namespace Application
             return services;
         }
 
+        /// <summary>
+        /// Regista os serviços de gestão de estado dos Hubs (Manager Hub Services).
+        /// </summary>
+        /// <remarks>
+        /// Estes serviços contêm a lógica pesada de gestão de salas, lobbies e sincronização de estado (ex: quem está pronto para começar o jogo).
+        /// </remarks>
+        /// <param name="services">A coleção de serviços.</param>
+        /// <returns>A coleção de serviços atualizada.</returns>
         private static IServiceCollection AddManagerHubService(this IServiceCollection services)
         {
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
@@ -59,6 +101,15 @@ namespace Application
             return services;
         }
 
+        /// <summary>
+        /// Regista todos os validadores da aplicação.
+        /// </summary>
+        /// <remarks>
+        /// Inclui validadores de entidades (Player, Team), validadores de lógica de negócio (MatchInvite)
+        /// e validadores específicos para operações de Hub em tempo real.
+        /// </remarks>
+        /// <param name="services">A coleção de serviços.</param>
+        /// <returns>A coleção de serviços atualizada.</returns>
         private static IServiceCollection AddValidators(this IServiceCollection services)
         {
             services.AddScoped<IPlayerValidator, PlayerValidator>();
@@ -75,6 +126,5 @@ namespace Application
             services.AddScoped<IMembershipValidator, MembershipValidator>();
             return services;
         }
-
     }
 }

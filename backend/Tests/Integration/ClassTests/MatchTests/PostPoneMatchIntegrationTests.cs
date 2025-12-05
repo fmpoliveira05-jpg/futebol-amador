@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
+using Application.DTOs.Team;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,8 +45,22 @@ namespace Tests.Integration.ClassTests.MatchTests
             var teamId = Guid.NewGuid();
             var expectedList = new List<InfoPostPoneMatch>
             {
-                new InfoPostPoneMatch { IdMatch = Guid.NewGuid(), nameOpponent = "Team A", GameDate = DateTime.UtcNow.AddDays(7), PostPoneDate = DateTime.UtcNow.AddDays(14) },
-                new InfoPostPoneMatch { IdMatch = Guid.NewGuid(), nameOpponent = "Team B", GameDate = DateTime.UtcNow.AddDays(10), PostPoneDate = DateTime.UtcNow.AddDays(17) }
+                new InfoPostPoneMatch
+                {
+                    IdMatch = Guid.NewGuid(),
+                    GameDate = DateTime.UtcNow.AddDays(7),
+                    PostPoneDate = DateTime.UtcNow.AddDays(14),
+                    Team = new TeamDto { IdTeam = teamId, Name = "My Team" },
+                    Opponent = new TeamDto { IdTeam = Guid.NewGuid(), Name = "Team A" }
+                },
+                new InfoPostPoneMatch
+                {
+                    IdMatch = Guid.NewGuid(),
+                    GameDate = DateTime.UtcNow.AddDays(10),
+                    PostPoneDate = DateTime.UtcNow.AddDays(17),
+                    Team = new TeamDto { IdTeam = teamId, Name = "My Team" },
+                    Opponent = new TeamDto { IdTeam = Guid.NewGuid(), Name = "Team B" }
+                }
             };
 
             var mockMatchService = new Mock<IMatchService>();
@@ -75,12 +90,13 @@ namespace Tests.Integration.ClassTests.MatchTests
             var response = await _client.GetAsync($"/api/Team/{teamId}/PostPoneMatch");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             var result = await response.Content.ReadFromJsonAsync<List<InfoPostPoneMatch>>();
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(2));
+            Assert.That(result[0].Opponent.Name, Is.EqualTo(expectedList[0].Opponent.Name)); // Verificar propriedade aninhada
 
             mockAuthorizationService.Verify(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId), Times.Once);
             mockMatchService.Verify(s => s.GetListPostPoneMatchTeam(teamId), Times.Once);
@@ -93,7 +109,14 @@ namespace Tests.Integration.ClassTests.MatchTests
             var teamId = Guid.NewGuid();
             var expectedList = new List<InfoPostPoneMatch>
             {
-                new InfoPostPoneMatch { IdMatch = Guid.NewGuid(), nameOpponent = "Team A", GameDate = DateTime.UtcNow.AddDays(7), PostPoneDate = DateTime.UtcNow.AddDays(14) }
+                new InfoPostPoneMatch
+                {
+                    IdMatch = Guid.NewGuid(),
+                    GameDate = DateTime.UtcNow.AddDays(7),
+                    PostPoneDate = DateTime.UtcNow.AddDays(14),
+                    Team = new TeamDto { IdTeam = teamId, Name = "My Team" },
+                    Opponent = new TeamDto { IdTeam = Guid.NewGuid(), Name = "Team A" }
+                }
             };
 
             var mockMatchService = new Mock<IMatchService>();
@@ -102,6 +125,7 @@ namespace Tests.Integration.ClassTests.MatchTests
             mockAuthorizationService.Setup(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId))
                 .Returns(Task.CompletedTask);
 
+            // Ajuste no Mock para aceitar qualquer filtro
             mockMatchService.Setup(s => s.GetListPostPoneMatchTeamWithFilters(teamId, It.IsAny<FilterPostPoneMatchDto>()))
                 .ReturnsAsync(expectedList);
 
@@ -129,6 +153,7 @@ namespace Tests.Integration.ClassTests.MatchTests
             var result = await response.Content.ReadFromJsonAsync<List<InfoPostPoneMatch>>();
             Assert.That(result, Is.Not.Null);
             Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].IdMatch, Is.EqualTo(expectedList[0].IdMatch));
 
             mockAuthorizationService.Verify(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId), Times.Once);
             mockMatchService.Verify(s => s.GetListPostPoneMatchTeamWithFilters(teamId, It.IsAny<FilterPostPoneMatchDto>()), Times.Once);

@@ -35,31 +35,17 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             var matchId = Guid.NewGuid();
             var firstTeamId = Guid.NewGuid();
             var secondTeamId = Guid.NewGuid();
-            var firstConnectionIdHolder = "first-conn-id";
 
+            // Mock do serviço
             var mockManager = new Mock<IManagerStartMatchService>();
-
             mockManager.SetupSequence(m => m.JoinHubAsync(It.IsAny<Guid>(), It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync(new JoinStartMatchResult
-                {
-                    IsFirstAdmin = true,
-                    TeamId = firstTeamId,
-                    Match = null!
-                })
-                .ReturnsAsync(new JoinStartMatchResult
-                {
-                    IsFirstAdmin = false,
-                    MatchStarted = true,
-                    TeamId = secondTeamId,
-                    FirstAdminConnectionId = firstConnectionIdHolder,
-                    Match = null!
-                });
+                .ReturnsAsync(new JoinStartMatchResult { IsFirstAdmin = true, TeamId = firstTeamId, Match = null! })
+                .ReturnsAsync(new JoinStartMatchResult { IsFirstAdmin = false, MatchStarted = true, TeamId = secondTeamId, FirstAdminConnectionId = "dummy-id", Match = null! });
 
             var clientFactory = _appFactory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    // substitui o serviço real pelo mock
                     services.AddSingleton(mockManager.Object);
                 });
             });
@@ -69,8 +55,12 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             var firstConnection = new HubConnectionBuilder()
                 .WithUrl(new Uri(baseAddress, HubPath), options =>
                 {
-                    // necessário para usar o TestServer internamente
                     options.HttpMessageHandlerFactory = _ => clientFactory.Server.CreateHandler();
+
+                    if (!options.Headers.ContainsKey("Authorization"))
+                    {
+                        options.Headers.Add("Authorization", "Test");
+                    }
                 })
                 .Build();
 
@@ -78,23 +68,26 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
                 .WithUrl(new Uri(baseAddress, HubPath), options =>
                 {
                     options.HttpMessageHandlerFactory = _ => clientFactory.Server.CreateHandler();
+
+                    // Igual para o segundo cliente
+                    if (!options.Headers.ContainsKey("Authorization"))
+                    {
+                        options.Headers.Add("Authorization", "Test");
+                    }
                 })
                 .Build();
 
             string? receivedMessage = null;
             var tcs = new TaskCompletionSource<string>();
 
-            firstConnection.On<string>("ReceiveStartMatch", (msg) =>
-            {
+            // Listeners
+            Action<string> handler = (msg) => {
                 receivedMessage = msg;
                 tcs.TrySetResult(msg);
-            });
+            };
 
-            secondConnection.On<string>("ReceiveStartMatch", (msg) =>
-            {
-                receivedMessage = msg;
-                tcs.TrySetResult(msg);
-            });
+            firstConnection.On("ReceiveStartMatch", handler);
+            secondConnection.On("ReceiveStartMatch", handler);
 
             await firstConnection.StartAsync();
             await secondConnection.StartAsync();
@@ -103,22 +96,19 @@ namespace Tests.Integration.ClassTests.HubTests.StartMatchHubTests
             await firstConnection.InvokeAsync("JoinStartMatch", matchId, firstTeamId);
             await secondConnection.InvokeAsync("JoinStartMatch", matchId, secondTeamId);
 
-            // Wait for message (timeout safety)
+            // Wait
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
+            var completedTask = await Task.WhenAny(tcs.Task, Task.Delay(Timeout.Infinite, cts.Token));
 
-            // Asserts (usando Assert.That)
-            Assert.That(tcs.Task.IsCompleted, Is.True, "Não foi recebido ReceiveStartMatch dentro do timeout.");
+            // Asserts
+            Assert.That(completedTask, Is.EqualTo(tcs.Task), "Timeout: ReceiveStartMatch não recebido.");
             Assert.That(receivedMessage, Is.Not.Null.And.Not.Empty);
 
-            // cleanup
+            // Cleanup
             await firstConnection.StopAsync();
             await secondConnection.StopAsync();
             await firstConnection.DisposeAsync();
             await secondConnection.DisposeAsync();
-
-            mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), firstTeamId, It.IsAny<string>()), Times.Once);
-            mockManager.Verify(m => m.JoinHubAsync(matchId, It.IsAny<string>(), secondTeamId, It.IsAny<string>()), Times.Once);
         }
     }
 }

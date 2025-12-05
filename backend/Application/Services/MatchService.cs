@@ -1,16 +1,22 @@
 ﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
+using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
-using Application.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
 
 namespace Application.Services
 {
+    /// <summary>
+    /// Serviço de domínio responsável pela lógica de negócio e ciclo de vida das Partidas ([Matches]).
+    /// 
+    /// Gere o calendário de jogos, pedidos de adiamento (Postpone), cancelamentos e visualização de detalhes.
+    /// Coordena a interação entre repositórios de jogos, equipas e validadores de regras de negócio.
+    /// </summary>
     public class MatchService: IMatchService
     {
         #region Inicializer
@@ -19,45 +25,123 @@ namespace Application.Services
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
-        private readonly IPlayerAuthorizationService AuthorizationService;
-        private readonly IPlayerAuthorizationValidator AuthorizationValidator;
-        private IMatchRepository object1;
-        private ITeamPostPoneGameRepository object2;
-        private ICancelledMatchRepository object3;
-        private IUnityOfWork object4;
-        private CalendarValidator validator;
-        private IPlayerAuthorizationService object5;
 
+        /// <summary>
+        /// Construtor do MatchService.
+        /// </summary>
+        /// <param name="matchRepository">Repositório de Partidas.</param>
+        /// <param name="teamPostPoneGameRepository">Repositório de Pedidos de Adiamento.</param>
+        /// <param name="cancelledMatchRepository">Repositório de Partidas Canceladas.</param>
+        /// <param name="unityOfWork">Unidade de Trabalho para transações.</param>
+        /// <param name="MatchValidator">Validador de regras de calendário e jogo.</param>
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            ICalendarValidator MatchValidator,
-            IPlayerAuthorizationService AuthorizationService)
+            ICalendarValidator MatchValidator)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
-            this.AuthorizationService = AuthorizationService;
         }
         #endregion
 
         #region Calendar
+
+        /// <summary>
+        /// Obtém o calendário completo de jogos de uma equipa.
+        /// </summary>
+        /// <param name="idTeam">ID da equipa.</param>
+        /// <returns>Lista de [InfoMatchCalendar] com os jogos agendados e realizados.</returns>
         public async Task<List<InfoMatchCalendar>> GetCalendar(Guid idTeam)
         {
             MatchValidator.ValidateTeamCalendar(idTeam);
             return await MatchRepository.GetAllMatchesTeam(idTeam);
         }
 
+        /// <summary>
+        /// Obtém o calendário de jogos de uma equipa, aplicando filtros de pesquisa.
+        /// </summary>
+        /// <param name="idTeam">ID da equipa.</param>
+        /// <param name="filter">Filtros (Datas, Adversário, Local).</param>
+        /// <returns>Lista filtrada de [InfoMatchCalendar].</returns>
         public async Task<List<InfoMatchCalendar>> GetCalendarWithFilters(Guid idTeam, FilterCalendarDto filter)
         {
             MatchValidator.ValidateFilterCalendar(idTeam, filter);
             return await MatchRepository.GetAllMatchesTeamWithFilters(idTeam, filter);
         }
 
+        /// <summary>
+        /// Obtém os detalhes de uma partida específica para visualização.
+        /// </summary>
+        /// <remarks>
+        /// Valida se a equipa solicitante faz parte do jogo e identifica o adversário.
+        /// </remarks>
+        /// <param name="idTeam">ID da equipa que está a consultar.</param>
+        /// <param name="idMatch">ID da partida.</param>
+        /// <returns>DTO [InfoMatch] com os detalhes do jogo.</returns>
+        /// <exception cref="ArgumentException">Se a partida não existir ou a equipa não participar nela.</exception>
+        public async Task<InfoMatch> GetMatchById(Guid idTeam, Guid idMatch)
+        {
+            var match = await MatchRepository.GetMatchById(idMatch);
+
+            if (match == null)
+            {
+                throw new ArgumentException("A match não foi encontrada");
+            }
+
+            var team = match.Teams.FirstOrDefault(ts => ts.Team.Id == idTeam);
+
+            if (team == null)
+            {
+                throw new ArgumentException("A equipa solicitante não faz parte desta partida.");
+            }
+
+            var opponent = match.Teams.FirstOrDefault(ts => ts.Team.Id != idTeam);
+
+            if (opponent == null)
+            {
+                throw new Exception("Oponente não encontrado.");
+            }
+
+            return new InfoMatch
+            {
+                IdMatch = match.Id,
+                Team = new TeamDto
+                {
+                    IdTeam = team.IdTeam,
+                    Name = team.Team.Name,
+                },
+                Opponent = new TeamDto
+                {
+                    IdTeam = opponent.IdTeam,
+                    Name = opponent.Team.Name,
+                },
+                GameDate = match.MatchDate,
+                IsCompetitive = match.IsCompetive,
+                IsHome = match.idPitch == team.Team.IdPitch
+            };
+        }
+
         #endregion
 
         #region PostPoneMatch
+
+        /// <summary>
+        /// Inicia um pedido de adiamento (remarcação) de uma partida.
+        /// </summary>
+        /// <remarks>
+        /// **Regras:**
+        /// <list type="bullet">
+        ///     <item>A partida deve existir e ter equipas válidas.</item>
+        ///     <item>O status deve ser [SCHEDULED] ou [POST_PONED].</item>
+        ///     <item>A nova data deve ser futura e diferente da atual.</item>
+        /// </list>
+        /// **Transação:** Cria um registo [PostPoneMatch] e atualiza o status da partida para [POST_PONED].
+        /// </remarks>
+        /// <param name="idTeam">ID da equipa que solicita o adiamento.</param>
+        /// <param name="dto">DTO com a nova data proposta.</param>
+        /// <returns>DTO [InfoPostPoneMatch] com os detalhes do pedido criado.</returns>
         public async Task<InfoPostPoneMatch> PostPoneMatch(Guid idTeam, PostPoneMatchDto dto)
         {
             var idMatch = dto.IdMatch;
@@ -87,7 +171,7 @@ namespace Application.Services
                 throw new BusinessRuleException("Só podem ser adiadas partidas marcadas ou em estado de adiamento.");
             }
 
-            if (newDate <= DateTime.UtcNow)
+            if (DateTime.Compare(newDate, DateTime.UtcNow) <= 0)
             {
                 throw new BusinessRuleException("A nova data não pode ser igual ou antes da data atual.");
             }
@@ -107,10 +191,16 @@ namespace Application.Services
             {
                 IdMatch = idMatch,
                 PostPoneDate = newDate,
-                IdTeam = idTeam,
-                nameTeam = team.Name,
-                IdOpponent = idOpponnent,
-                nameOpponent = opponentStatistics.Team.Name
+                Team = new TeamDto
+                {
+                    IdTeam = team.Id,
+                    Name = team.Name,
+                },
+                Opponent = new TeamDto
+                {
+                    IdTeam = idOpponnent,
+                    Name = opponentStatistics.Team.Name
+                }
             };
 
             await UnityOfWork.SaveChangesAsync();
@@ -118,7 +208,19 @@ namespace Application.Services
             return postPoneMatch;
         }
 
-        //Vou ter que implementar aquele find na database para ver se quem adiou tem um jogo já marcado a pelo menos 12 horas
+        /// <summary>
+        /// Aceita um pedido de adiamento de partida.
+        /// </summary>
+        /// <remarks>
+        /// **Transação:**
+        /// 1. Verifica se não há conflito de horário (jogos nas 12h adjacentes).
+        /// 2. Remove o registo de pedido de adiamento ([TeamPostPoneGameRepository.RemoveTeamPostPoneMatch]).
+        /// 3. Atualiza a data do jogo ([MatchDate]) para a nova data proposta.
+        /// 4. Restaura o status do jogo para [SCHEDULED].
+        /// </remarks>
+        /// <param name="idTeam">ID da equipa que aceita (deve ser o recetor do pedido).</param>
+        /// <param name="dto">DTO de aceitação.</param>
+        /// <returns>DTO [MatchDto] com a partida atualizada.</returns>
         public async Task<MatchDto> AcceptPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
         {
             MatchValidator.ValidateAcceptPostPoneMatchDto(idTeam, dto);
@@ -153,9 +255,14 @@ namespace Application.Services
             return matchDTO;
         }
 
-        /**
-         * O jogo fica cancelado, chama o cancelMatch
-         */
+        /// <summary>
+        /// Rejeita um pedido de adiamento de partida.
+        /// </summary>
+        /// <remarks>
+        /// **Transação:** Remove o pedido de adiamento e marca a partida como [CANCELED], pois não houve acordo.
+        /// </remarks>
+        /// <param name="idTeam">ID da equipa que rejeita.</param>
+        /// <param name="dto">DTO de rejeição.</param>
         public async Task RejectPostPoneMatch(Guid idTeam, AcceptRefusePostPoneDto dto)
         {
             MatchValidator.ValidateRejectPostPoneMatchDTO(idTeam, dto);
@@ -176,6 +283,11 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
         }
 
+        /// <summary>
+        /// Obtém a lista de pedidos de adiamento pendentes recebidos pela equipa.
+        /// </summary>
+        /// <param name="idTeam">ID da equipa.</param>
+        /// <returns>Lista de [InfoPostPoneMatch].</returns>
         public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeam(Guid idTeam)
         {
             MatchValidator.ValidateTeamCalendar(idTeam);
@@ -184,6 +296,12 @@ namespace Application.Services
             return listPostPone;
         }
 
+        /// <summary>
+        /// Obtém a lista de pedidos de adiamento pendentes com filtros.
+        /// </summary>
+        /// <param name="idTeam">ID da equipa.</param>
+        /// <param name="filter">Filtros de data e adversário.</param>
+        /// <returns>Lista filtrada de [InfoPostPoneMatch].</returns>
         public async Task<List<InfoPostPoneMatch>> GetListPostPoneMatchTeamWithFilters(Guid idTeam, FilterPostPoneMatchDto filter)
         {
             MatchValidator.ValidateTeamCalendar(idTeam);
@@ -196,6 +314,17 @@ namespace Application.Services
         #endregion
 
         #region CancelMatch
+
+        /// <summary>
+        /// Cancela uma partida agendada.
+        /// </summary>
+        /// <remarks>
+        /// **Regras:** Só pode cancelar com antecedência mínima (ex: 2 dias).
+        /// **Transação:** Cria um registo em [CancelledMatch] para histórico e atualiza o status da partida para [CANCELED].
+        /// </remarks>
+        /// <param name="idTeam">ID da equipa que cancela.</param>
+        /// <param name="idMatch">ID da partida.</param>
+        /// <param name="description">Motivo do cancelamento.</param>
         public async Task CancelMatch(Guid idTeam, Guid idMatch, string description)
         {
             var match = await MatchRepository.GetMatchToCancelById(idMatch);

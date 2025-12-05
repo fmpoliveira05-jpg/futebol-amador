@@ -1,4 +1,5 @@
-﻿using Application.DTOs.PlayerDTOs;
+﻿using Application.DTOs.Pitch;
+using Application.DTOs.PlayerDTOs;
 using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
@@ -28,7 +29,7 @@ namespace Application.DTOs.Team
         public string RankName { get; set; } = null!;
 
         [Required]
-        public string PitchDto { get; set; } = null!;
+        public PitchDto PitchDto { get; set; } = null!;
 
         [Required]
         public List<PlayerDetailsDto> Players { get; set; } = null!;

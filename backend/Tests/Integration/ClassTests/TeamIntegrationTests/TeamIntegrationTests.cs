@@ -135,7 +135,12 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
                 FoundationDate = DateOnly.FromDateTime(DateTime.UtcNow),
                 TotalPoints = 0,
                 RankName = "Gold",
-                PitchDto = "pitch",
+                // CORREÇÃO: PitchDto agora é um objeto completo, não uma string
+                PitchDto = new PitchDto
+                {
+                    Name = "Main Pitch",
+                    Address = "Stadium Road 123"
+                },
                 Players = new List<PlayerDetailsDto>()
             };
 
@@ -152,8 +157,8 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
                     services.RemoveAll(typeof(ITeamService));
                     services.RemoveAll(typeof(IMembershipRequestService));
 
-                    services.AddSingleton<ITeamService>(mockTeamService.Object);
-                    services.AddSingleton<IMembershipRequestService>(mockMembershipRequestService.Object);
+                    services.AddSingleton(mockTeamService.Object);
+                    services.AddSingleton(mockMembershipRequestService.Object);
                 });
             }).CreateClient();
 
@@ -161,11 +166,13 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             var response = await _client.GetAsync($"/api/Team/{teamId}");
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode) Assert.Fail(await response.Content.ReadAsStringAsync());
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             var result = await response.Content.ReadFromJsonAsync<TeamDetailsDto>();
             Assert.That(result, Is.Not.Null);
+
+            // Verificações Detalhadas
             Assert.Multiple(() =>
             {
                 Assert.That(result.Id, Is.EqualTo(expectedTeam.Id));
@@ -174,8 +181,12 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
                 Assert.That(result.FoundationDate, Is.EqualTo(expectedTeam.FoundationDate));
                 Assert.That(result.TotalPoints, Is.EqualTo(expectedTeam.TotalPoints));
                 Assert.That(result.RankName, Is.EqualTo(expectedTeam.RankName));
-                Assert.That(result.PitchDto, Is.EqualTo(expectedTeam.PitchDto));
-                Assert.That(result.Players, Is.EqualTo(expectedTeam.Players));
+
+                // Verificar propriedade aninhada do PitchDto
+                Assert.That(result.PitchDto.Name, Is.EqualTo(expectedTeam.PitchDto.Name));
+                Assert.That(result.PitchDto.Address, Is.EqualTo(expectedTeam.PitchDto.Address));
+
+                Assert.That(result.Players, Is.Empty);
             });
 
             mockTeamService.Verify(s => s.GetTeamByIdAsync(teamId), Times.Once);
@@ -219,18 +230,21 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
         {
             // Arrange
             var teamId = Guid.NewGuid();
-            var updateDto = new UpdateTeamDto
+            var updateDto = new CreateTeamDto
             {
                 Name = "Updated Team Name",
                 Description = "Updated Description",
-                PitchName = "Updated Pitch",
-                PitchLocation = "Updated Address"
+                HomePitch = new PitchDto
+                {
+                    Name = "Updated Pitch",
+                    Address = "Updated Address"
+                }
             };
 
             var mockTeamService = new Mock<ITeamService>();
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
-            mockTeamService.Setup(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<UpdateTeamDto>(), It.IsAny<string>()))
+            mockTeamService.Setup(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<CreateTeamDto>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             _client = _factory.WithWebHostBuilder(builder =>
@@ -257,7 +271,7 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             var content = await response.Content.ReadAsStringAsync();
             Assert.That(content, Contains.Substring("Equipa atualizada com sucesso"));
 
-            mockTeamService.Verify(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<UpdateTeamDto>(), It.IsAny<string>()), Times.Once);
+            mockTeamService.Verify(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<CreateTeamDto>(), It.IsAny<string>()), Times.Once);
         }
 
         [Test]
@@ -265,7 +279,7 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
         {
             // Arrange
             var teamId = Guid.NewGuid();
-            var updateDto = new UpdateTeamDto
+            var updateDto = new CreateTeamDto
             {
                 Name = "Updated Team Name",
                 Description = "Updated Description"

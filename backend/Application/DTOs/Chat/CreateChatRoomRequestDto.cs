@@ -3,6 +3,6 @@
     public class CreateChatRoomRequestDto
     {
         public string RoomName { get; set; }
-        public List<Guid> TeamIds { get; set; }
+        public List<Guid> TeamIds { get; set; } = new List<Guid>();
     }
 }

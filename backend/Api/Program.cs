@@ -20,13 +20,11 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 
-//notification service for the application layer
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentacion();
 
-//adiciona o Tratador de exceções global
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -52,21 +50,32 @@ if (!File.Exists(credentialPath))
 
 Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
 
-//Autenticação com Firebase
 await builder.Services.AddFirebaseAuthentication(builder.Configuration);
 
 builder.Services.AddSingleton(provider => FirestoreDb.Create(firebaseProjectId));
 
 builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, HttpClient) =>
-{ 
+{
     var configuration = sp.GetRequiredService<IConfiguration>();
     HttpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]);
-}
+});
 
-);
 builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngular", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowAngular");
 
 app.MapHubs();
 
@@ -74,7 +83,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
 }
 
 app.UseHttpsRedirection();
@@ -86,5 +94,4 @@ app.MapControllers();
 
 app.Run();
 
-//Classe para os testes de integração
 public partial class Program { }

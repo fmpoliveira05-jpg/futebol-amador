@@ -1,18 +1,35 @@
 ﻿using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Protocols;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.Text.Json;
 
 namespace Api.Extensions
 {
+    /// <summary>
+    /// Classe estática de extensão responsável pela configuração personalizada da Autenticação Firebase.
+    /// 
+    /// Esta classe configura o pipeline de autenticação JWT (JSON Web Token) para validar tokens emitidos pelo Google Firebase,
+    /// implementando uma lógica manual de gestão de chaves públicas (JWKS - JSON Web Key Set) para garantir
+    /// que a validação continua a funcionar mesmo quando a Google roda as chaves de assinatura.
+    /// </summary>
     public static class FirebaseAuthenticationExtensions
     {
-        public async static Task<IServiceCollection> AddFirebaseAuthentication(
-            this IServiceCollection services,
-            IConfiguration configuration)
+        /// <summary>
+        /// Adiciona e configura os serviços de autenticação do Firebase ao contentor de DI.
+        /// </summary>
+        /// <remarks>
+        /// O processo de configuração envolve:
+        /// 1. Inicialização do SDK Admin do Firebase com credenciais de ficheiro.
+        /// 2. Download síncrono inicial das chaves públicas da Google (JWKS).
+        /// 3. Configuração do esquema de autenticação [JwtBearer].
+        /// 4. Implementação de um [IssuerSigningKeyResolver] personalizado para atualizar as chaves dinamicamente se um token for assinado com uma chave nova.
+        /// </remarks>
+        /// <param name="services">A coleção de serviços da aplicação.</param>
+        /// <param name="configuration">A configuração da aplicação (para ler o caminho das credenciais).</param>
+        /// <returns>A coleção de serviços atualizada (Fluent API).</returns>
+        /// <exception cref="FileNotFoundException">Lançada se o ficheiro de credenciais JSON não for encontrado no caminho especificado.</exception>
+        public async static Task<IServiceCollection> AddFirebaseAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
 
             var firebaseCredentialPath = configuration["Firebase:CredentialPath"];
@@ -119,7 +136,6 @@ namespace Api.Extensions
                         }
                     };
                 });
-
 
             return services;
         }
