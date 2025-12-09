@@ -140,7 +140,7 @@ fun DatePickerDocked(
     modifier: Modifier = Modifier,
     contentDescription: String,
     isError: Boolean = false,
-    enabled: Boolean = false,
+    enabled: Boolean = true,
     errorMessage: String? = null,
     textFieldModifier: Modifier = Modifier
 ) {
@@ -182,7 +182,7 @@ private fun LimitedDatePickerBase(
     isSingleLine: Boolean,
     isError: Boolean,
     errorMessage: String?,
-    enabled: Boolean = false,
+    enabled: Boolean = true,
     modifier: Modifier,
     textFieldModifier: Modifier = Modifier,
     validator: (dateMillis: Long, todayMillis: Long) -> Boolean,

@@ -22,8 +22,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-//TODO: Falta o StartMatch
-//TODO: Talvez falte meter verificações de tempo
+//TODO: Falta Todo que precisa do signalR
 /**
  * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.
  *
@@ -51,8 +50,7 @@ class CalendarTeamViewModel @Inject constructor(
     val filter: StateFlow<FilterCalendar> = filterState
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
-    private val listErrors: MutableStateFlow<FilterCalendarError> =
-        MutableStateFlow(FilterCalendarError())
+    private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
     val uiErrors: StateFlow<FilterCalendarError> = listErrors
 
     //Inicializer
@@ -150,7 +148,7 @@ class CalendarTeamViewModel @Inject constructor(
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Para cancelar o jogo é necessária conexão à internet."
+            toastMessage = R.string.toast_offline_cancel_game
         )
     }
 
@@ -165,7 +163,7 @@ class CalendarTeamViewModel @Inject constructor(
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Para adiar o jogo é necessária conexão à internet."
+            toastMessage = R.string.toast_offline_postpone_game
         )
     }
 
@@ -179,7 +177,7 @@ class CalendarTeamViewModel @Inject constructor(
                 //TODO: Chamar endPoint da API para iniciar a partida (E meter o user em loading ate algum adversario se conectar ao Hub com ele)
                 //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
             },
-            toastMessage = "Para iniciar o jogo é necessária conexão à internet."
+            toastMessage = R.string.toast_offline_start_game
         )
     }
 
@@ -194,7 +192,7 @@ class CalendarTeamViewModel @Inject constructor(
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Para finalizar a partida é necessária conexão à internet."
+            toastMessage = R.string.toast_offline_finish_match
         )
     }
 

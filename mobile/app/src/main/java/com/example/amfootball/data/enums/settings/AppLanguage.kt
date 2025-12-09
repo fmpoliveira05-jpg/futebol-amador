@@ -14,6 +14,7 @@ enum class AppLanguage(val code: String) {
      * Idioma: Inglês. Código de localidade padrão "en".
      */
     ENGLISH("en"),
+
     /**
      * Idioma: Português de Portugal. Código de localidade específico "pt-PT".
      */

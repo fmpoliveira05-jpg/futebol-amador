@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.viewModel.homePages
 
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.local.SessionManager
@@ -99,13 +100,13 @@ class TeamHomePageViewModel @Inject constructor(
      */
     fun onNavigateCasualMatch(onSucess: () -> Unit) {
         if (roleState.value != UserRole.ADMIN_TEAM) {
-            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            updateToast(message = R.string.toast_admin_only_casual)
             return
         }
 
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar as equipas disponiveis para uma partida precisa estar conectado há internet"
+            toastMessage = R.string.toast_offline_casual_teams
         )
     }
 
@@ -118,13 +119,13 @@ class TeamHomePageViewModel @Inject constructor(
      */
     fun onNavigateRankedMatch(onSucess: () -> Unit) {
         if (roleState.value != UserRole.ADMIN_TEAM) {
-            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            updateToast(message = R.string.toast_admin_only_ranked)
             return
         }
 
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para marcar uma partida competitiva, necessita estar online"
+            toastMessage = R.string.toast_offline_ranked_match
         )
     }
 
@@ -136,7 +137,7 @@ class TeamHomePageViewModel @Inject constructor(
     fun onNavigateMembers(onSucess: () -> Unit) {
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar a lista de membros precisa ter internet"
+            toastMessage = R.string.toast_offline_members_list
         )
     }
 
@@ -148,7 +149,7 @@ class TeamHomePageViewModel @Inject constructor(
     fun onNavigateCalendar(onSucess: () -> Unit) {
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar o calendário de jogo precisa de ter internet"
+            toastMessage = R.string.toast_offline_calendar
         )
     }
 

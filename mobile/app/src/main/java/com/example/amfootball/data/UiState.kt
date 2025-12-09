@@ -13,5 +13,5 @@ package com.example.amfootball.data
 data class UiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val toastMessage: String? = null
+    val toastMessage: Int? = null
 )

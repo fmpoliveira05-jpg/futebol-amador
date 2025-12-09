@@ -48,7 +48,7 @@ data class ChatRoom(
     val name: String = "",
     val members: List<String> = emptyList(),
     val createdBy: String = ""
-){
+) {
     constructor() : this("", "", emptyList(), "")
 }
 

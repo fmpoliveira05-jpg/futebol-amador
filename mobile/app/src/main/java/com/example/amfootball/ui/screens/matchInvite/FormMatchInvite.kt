@@ -28,7 +28,6 @@ import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
-
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
@@ -40,7 +39,6 @@ import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
 import com.example.amfootball.utils.MatchConsts
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -64,7 +62,7 @@ fun FormMatchInviteScreen(
     navHostController: NavHostController
 ) {
     val fields by viewModel.uiFormState.collectAsStateWithLifecycle()
-    val errors by viewModel.uiErrorsForm.collectAsStateWithLifecycle()
+    val errors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
 
     val actions = FormMatchInviteActions(
         onGameDateChange = viewModel::onGameDateChange,
@@ -255,7 +253,7 @@ val emptyFields = MatchInviteDto(
         id = "1",
         name = ""
     ),
-    gameDateString = null,
+    gameDateString = "",
     gameTimeString = null,
     isHomeGame = true
 )

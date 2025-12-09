@@ -24,11 +24,14 @@ import javax.inject.Inject
  * @property notificationCallsService O serviço injetado, usado para comunicar o token FCM com o backend via API.
  */
 @AndroidEntryPoint
-class PushNotificationService: FirebaseMessagingService() {
-    @Inject lateinit var notificationService: NotificationService
+class PushNotificationService : FirebaseMessagingService() {
+    @Inject
+    lateinit var notificationService: NotificationService
 
-    @Inject lateinit var sessionManager: SessionManager
-    @Inject lateinit var notificationCallsService: NotificationCallsService
+    @Inject
+    lateinit var sessionManager: SessionManager
+    @Inject
+    lateinit var notificationCallsService: NotificationCallsService
 
     /**
      * Chamado quando uma mensagem FCM é recebida.

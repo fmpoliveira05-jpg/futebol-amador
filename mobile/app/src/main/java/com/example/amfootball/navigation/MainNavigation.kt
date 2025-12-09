@@ -398,8 +398,11 @@ private fun NavGraphBuilder.casualMatches(
     )
 
     composableProtectedAdminTeam(
-        route = Routes.TeamRoutes.LIST_MATCH_INVITES.route,
+        route = "${Routes.TeamRoutes.LIST_MATCH_INVITES.route}/{${Arguments.TEAM_ID}}",
         navController = globalNavController,
+        arguments = listOf(
+            navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
+        ),
         sessionManager = sessionManager,
         content = {
             ListMatchInviteScreen(navHostController = globalNavController)

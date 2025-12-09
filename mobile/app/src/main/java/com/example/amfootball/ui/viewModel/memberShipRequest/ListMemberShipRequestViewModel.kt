@@ -34,7 +34,8 @@ class ListMemberShipRequestViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
      */
-    private val filterState: MutableStateFlow<FilterMemberShipRequest> = MutableStateFlow(FilterMemberShipRequest())
+    private val filterState: MutableStateFlow<FilterMemberShipRequest> =
+        MutableStateFlow(FilterMemberShipRequest())
 
     /**
      * Fluxo público de leitura dos filtros observados pela UI.
@@ -44,7 +45,8 @@ class ListMemberShipRequestViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> = MutableStateFlow(FilterMemberShipRequestError())
+    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> =
+        MutableStateFlow(FilterMemberShipRequestError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.

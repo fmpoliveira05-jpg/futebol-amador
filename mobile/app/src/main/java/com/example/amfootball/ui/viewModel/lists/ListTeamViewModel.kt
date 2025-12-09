@@ -17,7 +17,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
-import kotlin.text.ifEmpty
 
 // TODO: Falta implementar a chamada à API no método memberShipRequest (e também para a página variar para ser a lista de teams para matchInvite, geral ou pedidos de adesão)
 //TODO: Falta a parte dos erros de filtragem
@@ -140,7 +139,7 @@ class ListTeamViewModel @Inject constructor(
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Não pode mandar um pedido de partida sem estar conectado há internet"
+            toastMessage = R.string.toast_offline_send_match_invite
         )
 
     }

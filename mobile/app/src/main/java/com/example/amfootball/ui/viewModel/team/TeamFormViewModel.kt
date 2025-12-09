@@ -1,7 +1,6 @@
 package com.example.amfootball.ui.viewModel.team
 
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
@@ -59,11 +58,9 @@ class TeamFormViewModel @Inject constructor(
 
     init {
         if (isEditMode) {
-            Log.d("TeamFormViewModel", "Modo Edição detetado: A carregar dados da equipa...")
             loadDataTeam()
         } else {
             stopLoading()
-            Log.d("TeamFormViewModel", "Modo Criação: Formulário limpo")
         }
     }
 

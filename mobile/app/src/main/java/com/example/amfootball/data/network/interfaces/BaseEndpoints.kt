@@ -56,4 +56,11 @@ object BaseEndpoints {
      * Valor: `api/Team`
      */
     const val TEAM_API = "$API/Team"
+
+    /**
+     * Rota base para gestão de **Convites de Jogo (Match Invites)**.
+     * Utilizada para enviar, aceitar, recusar e negociar desafios de jogos entre equipas.
+     * Valor: `api/MatchInvite`
+     */
+    const val MATCH_INVITE_API = "$API/MatchInvite"
 }

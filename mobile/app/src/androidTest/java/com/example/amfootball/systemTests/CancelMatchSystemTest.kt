@@ -25,6 +25,8 @@ import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.utils.JsonReader
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import dagger.Module
+import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -41,8 +43,7 @@ import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
 import javax.inject.Singleton
-import dagger.Module
-import dagger.Provides
+
 @HiltAndroidTest
 @UninstallModules(NetworkModule::class, FireBaseInstance::class)
 class CancelMatchSystemTest {
@@ -117,16 +118,20 @@ class CancelMatchSystemTest {
                     path.contains("${BaseEndpoints.AUTH_API}/login") && request.method == "POST" -> {
                         MockResponse().setResponseCode(200).setBody(loginResponseJson)
                     }
+
                     path.contains("${BaseEndpoints.TEAM_API}/opponent/") && request.method == "GET" -> {
                         MockResponse().setResponseCode(200).setBody(detailsTeamJson)
                     }
+
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && path.contains("/CancelMatch/") && request.method == "DELETE" -> {
                         isMatchCancelled = true // Atualiza estado
                         MockResponse().setResponseCode(204)
                     }
+
                     path.contains("${BaseEndpoints.CALENDAR_API}/") && request.method == "GET" && path.count { it == '/' } >= 4 -> {
                         MockResponse().setResponseCode(200).setBody(matchToCancelJson)
                     }
+
                     path.contains("${BaseEndpoints.PLAYER_API}/device-token") && request.method == "PUT" -> {
                         MockResponse().setResponseCode(204)
                     }
@@ -146,6 +151,7 @@ class CancelMatchSystemTest {
                             }
                         }
                     }
+
                     else -> MockResponse().setResponseCode(404)
                 }
             }

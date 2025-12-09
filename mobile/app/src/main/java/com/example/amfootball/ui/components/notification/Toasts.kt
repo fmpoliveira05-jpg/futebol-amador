@@ -16,14 +16,17 @@ import com.example.amfootball.R
  */
 @Composable
 fun ToastHandler(
-    toastMessage: String?,
+    toastMessage: Int?,
     onToastShown: () -> Unit
 ) {
     val context = LocalContext.current
 
     LaunchedEffect(toastMessage) {
         if (toastMessage != null) {
-            Toast.makeText(context, toastMessage, Toast.LENGTH_LONG).show()
+            Toast.makeText(
+                context,
+                context.getString(toastMessage),
+                Toast.LENGTH_LONG).show()
             onToastShown()
         }
     }

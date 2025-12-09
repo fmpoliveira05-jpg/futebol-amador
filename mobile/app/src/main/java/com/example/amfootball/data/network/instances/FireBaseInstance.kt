@@ -44,6 +44,7 @@ object FireBaseInstance {
     fun provideFirebaseAuth(): FirebaseAuth {
         return FirebaseAuth.getInstance()
     }
+
     @Provides
     @Singleton
     fun provideFirestore(): FirebaseFirestore {

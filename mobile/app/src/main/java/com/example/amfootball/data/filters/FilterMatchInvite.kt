@@ -17,3 +17,12 @@ data class FilterMatchInvite(
     val minDate: LocalDateTime? = null,
     val maxDate: LocalDateTime? = null
 )
+
+fun FilterMatchInvite.toQueryMap(): Map<String, String> {
+    val map = mutableMapOf<String, String>()
+    senderName?.let { map["SenderName"] = it }
+    minDate?.let { map["MinDate"] = it.toString() }
+    maxDate?.let { map["MaxDate"] = it.toString() }
+
+    return map
+}

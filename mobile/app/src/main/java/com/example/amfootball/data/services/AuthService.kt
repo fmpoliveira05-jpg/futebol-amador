@@ -81,7 +81,8 @@ class AuthService @Inject constructor(
                 sessionManager.saveUserProfile(userProfile)
                 sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
             } else {
-                val errorMsg = response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
+                val errorMsg =
+                    response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
 
                 sessionManager.clearSession()
                 throw Exception(errorMsg)

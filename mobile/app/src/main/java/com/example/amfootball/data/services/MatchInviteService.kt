@@ -1,11 +1,11 @@
 package com.example.amfootball.data.services
 
-import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
+import com.example.amfootball.data.filters.FilterMatchInvite
 import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.data.network.interfaces.MatchInviteApi
-import com.example.amfootball.utils.handleApiError
+import com.example.amfootball.utils.safeApiCallWithNotReturn
 import com.example.amfootball.utils.safeApiCallWithReturn
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,15 +32,37 @@ class MatchInviteService @Inject constructor(
      *
      * @param teamId O identificador da equipa que está a enviar o convite (Desafiante).
      * @param matchInvite O DTO contendo os detalhes do jogo proposto (Data, Hora, Local, Adversário).
-     * @return [InfoMatchInviteDto] contendo os dados do convite recém-criado e o seu estado inicial (ex: PENDING).
+     * @return [MatchInviteDto] contendo os dados do convite recém-criado e o seu estado inicial (ex: PENDING).
      * @throws Exception Propagada automaticamente se ocorrer erro de rede ou se a API devolver um código de erro (4xx/5xx).
      */
-    suspend fun sendMatchInvite(
-        teamId: String,
-        matchInvite: SendMatchInviteDto
-    ): InfoMatchInviteDto {
+    suspend fun sendMatchInvite(teamId: String, matchInvite: SendMatchInviteDto): MatchInviteDto {
         return safeApiCallWithReturn {
             matchInviteApi.sendMatchInvite(idTeam = teamId, dto = matchInvite)
+        }
+    }
+
+    suspend fun getListMatchInvite(
+        teamId: String,
+        filter: FilterMatchInvite
+    ): List<MatchInviteDto> {
+        val filterMatchInvite = filter.toQueryMap() ?: emptyMap()
+
+        return safeApiCallWithReturn {
+            matchInviteApi.getMatchInviteList(idTeam = teamId, filterMatchInvite)
+        }
+    }
+
+    //TODO: Testar
+    suspend fun rejectMatchInivite(teamId: String, matchInviteId: String) {
+        safeApiCallWithNotReturn {
+            matchInviteApi.refuseMatchInvite(idTeam = teamId, matchInviteId = matchInviteId)
+        }
+    }
+
+    //TODO: Testar
+    suspend fun acceptMatchInvitee(teamId: String, matchInviteId: String): SendMatchInviteDto {
+        return safeApiCallWithReturn {
+            matchInviteApi.acceptMatchInvite(idTeam = teamId, matchInviteId = matchInviteId)
         }
     }
 
@@ -52,30 +74,21 @@ class MatchInviteService @Inject constructor(
      *
      * @param teamId O identificador da equipa que está a realizar a negociação.
      * @param matchInvite O DTO com os novos detalhes propostos para o jogo.
-     * @return [InfoMatchInviteDto] com o convite atualizado refletindo a negociação.
+     * @return [MatchInviteDto] com o convite atualizado refletindo a negociação.
      * @throws Exception Propagada automaticamente em caso de falha na comunicação ou validação.
      */
     suspend fun negociateMatchInvite(
         teamId: String,
         matchInvite: SendMatchInviteDto
-    ): InfoMatchInviteDto {
+    ): MatchInviteDto {
         return safeApiCallWithReturn {
             matchInviteApi.negotiateMatch(idTeam = teamId, matchInvite = matchInvite)
         }
     }
 
     suspend fun getInviteMatch(teamId: String, matchInviteId: String): MatchInviteDto {
-        try {
-            val response = matchInviteApi.getMatchInvite(idTeam = teamId, matchInviteId = matchInviteId)
-
-            if (response.isSuccessful && response.body() != null) {
-                return response.body()!!.first()
-            } else {
-                handleApiError(response)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw Exception("Sem conexão: ${e.localizedMessage}")
+        return safeApiCallWithReturn {
+            matchInviteApi.getMatchInvite(idTeam = teamId, idMatchInvite = matchInviteId)
         }
     }
 }

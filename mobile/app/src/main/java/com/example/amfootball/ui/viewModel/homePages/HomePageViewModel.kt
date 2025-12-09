@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.viewModel.homePages
 
+import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.local.SessionManager
@@ -60,18 +61,13 @@ class HomePageViewModel @Inject constructor(
     fun onNavigateCreateTeam(onSuccessNavigation: () -> Unit) {
         val user = sessionManager.getUserProfile()
 
-        if (user == null) {
-            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+        if (user == null || sessionManager.getAuthToken() == null) {
+            updateToast(message = R.string.toast_autenticate_people)
             return
         }
 
-        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
-            updateToast("Apenas utilizadores sem equipa podem criar uma equipa")
-            return
-        }
-
-        if (sessionManager.getAuthToken() == null) {
-            updateToast(message = "Precisa de estar autenticado para aceder a esta funcionalidade")
+        if (user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast(R.string.toast_only_player_without_team)
             return
         }
 
@@ -94,17 +90,17 @@ class HomePageViewModel @Inject constructor(
         val user = sessionManager.getUserProfile()
 
         if (user == null || idPlayer.isNullOrBlank()) {
-            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+            updateToast(message = R.string.toast_autenticate_people)
             return
         }
 
-        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
-            updateToast("Apenas utilizadores sem equipa podem ver os seus pedidos de adesão")
+        if (user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast(message = R.string.toast_only_player_without_team_membership)
             return
         }
 
         if (idPlayer != sessionManager.getUserProfile()?.loginResponseDto?.localId) {
-            updateToast(message = "O id enviado não é o mesmo do seu")
+            updateToast(message = R.string.toast_id_not_matching)
             return
         }
 
@@ -112,7 +108,7 @@ class HomePageViewModel @Inject constructor(
             action = {
                 onSuccessNavigation()
             },
-            toastMessage = "Precisa de estar conectado, para visualiza os pedidos de adesão recebidos"
+            toastMessage = R.string.toast_offline_membership_request
         )
     }
 
@@ -127,7 +123,7 @@ class HomePageViewModel @Inject constructor(
     fun onNavigateToListTeams(onSuccessNavigation: () -> Unit) {
         onlineFunctionality(
             action = { onSuccessNavigation() },
-            toastMessage = "Precisa de estar conectado, para visualiza a lista de equipas"
+            toastMessage = R.string.toast_offline_list_team
         )
     }
 

@@ -7,13 +7,10 @@ import com.example.amfootball.data.dtos.chat.ChatRoom
 import com.example.amfootball.data.dtos.chat.MessageDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.navigation.objects.Routes
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.getField
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,7 +32,7 @@ class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     sessionManager: SessionManager,
     private val db: FirebaseFirestore
-): ViewModel() {
+) : ViewModel() {
     private val myUser = sessionManager.getUserProfile()
     private val myUserId = myUser?.loginResponseDto?.localId
 

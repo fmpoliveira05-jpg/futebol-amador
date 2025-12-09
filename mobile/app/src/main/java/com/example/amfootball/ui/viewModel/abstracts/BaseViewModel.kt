@@ -103,7 +103,7 @@ abstract class BaseViewModel(
      *
      * @param message A mensagem a exibir.
      */
-    protected fun updateToast(message: String?) {
+    protected fun updateToast(message: Int?) {
         _uiState.update { it.copy(toastMessage = message) }
     }
 
@@ -116,7 +116,7 @@ abstract class BaseViewModel(
         _uiState.update { it.copy(toastMessage = null) }
     }
 
-    protected fun onlineFunctionality(action: () -> Unit, toastMessage: String) {
+    protected fun onlineFunctionality(action: () -> Unit, toastMessage: Int?) {
         if (networkObserver.isOnlineOneShot()) {
             action()
         } else {

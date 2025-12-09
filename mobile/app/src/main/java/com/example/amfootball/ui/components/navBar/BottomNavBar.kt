@@ -101,7 +101,7 @@ fun BottomSheetContent(
     buttonsToShow.addAll(
         listOf(
             Routes.GeralRoutes.LEADERBOARD,
-            )
+        )
     )
     when (currentScreenRoute) {
         Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
@@ -158,6 +158,14 @@ fun BottomSheetContent(
                 onClick = {
                     when (routeInfo) {
                         Routes.TeamRoutes.CALENDAR -> {
+                            if (teamId != null) {
+                                navController.navigate("${routeInfo.route}/{${teamId}}")
+                            } else {
+                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
+                            }
+                        }
+
+                        Routes.TeamRoutes.LIST_MATCH_INVITES -> {
                             if (teamId != null) {
                                 navController.navigate("${routeInfo.route}/{${teamId}}")
                             } else {

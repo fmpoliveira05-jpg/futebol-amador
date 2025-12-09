@@ -5,7 +5,6 @@ import com.example.amfootball.utils.Patterns
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
 /**
  * Data Transfer Object (DTO) que representa os detalhes completos de um convite de partida.
  *
@@ -19,45 +18,48 @@ import java.time.format.DateTimeFormatter
  * @property gameDate A representação em String da data do jogo (formato: "dd/MM/yyyy").
  * @property gameTime A representação em String da hora do jogo (formato: "HH:mm").
  * @property gameDateTime O objeto [LocalDateTime] real contendo a data e hora do jogo.
- * @property isCompetitive Indica se o jogo é competitivo (true) ou casual (false). Padrão é false.
  */
 data class MatchInviteDto(
-    @SerializedName("", alternate = ["idMatch"])
-    val id: String? = null,
-    @SerializedName("Opponent", alternate = ["opponent", "sender", "Sender"])
-    val opponent: TeamDto? = null,
-    @SerializedName("IsHome", alternate = ["isHome"])
+    @SerializedName("Id", alternate = ["id"])
+    val id: String = "",
+    @SerializedName("Sender", alternate = ["sender", "Opponent"])
+    val opponent: TeamDto = TeamDto(),
+    @SerializedName("Receiver", alternate = ["receiver"])
+    val receiver: TeamDto = TeamDto(),
+    @SerializedName("NamePitch", alternate = ["namePitch"])
+    val namePitch: String = "",
+    @SerializedName("isHome", alternate = ["IsHome", "homePitch"])
     val isHomeGame: Boolean = true,
     @SerializedName("GameDate", alternate = ["gameDate"])
-    val gameDateRaw: String? = null,
-    val gameDateString: String? = null,
-    val gameTimeString: String? = null,
-    @SerializedName("IsCompetitive", alternate = ["isCompetitive"])
-    val isCompetitive: Boolean? = false
+    val gameDateRaw: String = "",
+    val gameDateString: String = "",
+    val gameTimeString: String? = "",
 ) {
-    companion object {
-        private val dateFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
-        private val timeFormatter = DateTimeFormatter.ofPattern(Patterns.TIME)
-        private val apiParser = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-
-        fun createFromBackend(dto: MatchInviteDto): MatchInviteDto {
-            val parsedDateTime: LocalDateTime? = try {
-                if (!dto.gameDateRaw.isNullOrBlank()) {
-                    LocalDateTime.parse(dto.gameDateRaw, apiParser)
+    val gameDate: LocalDateTime
+        get() {
+            return try {
+                if (gameDateRaw.isNotBlank()) {
+                    LocalDateTime.parse(gameDateRaw, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
                 } else {
-                    null
+                    LocalDateTime.now()
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                null
+                LocalDateTime.now()
             }
-
-            return dto.copy(
-                gameDateString = parsedDateTime?.format(dateFormatter),
-                gameTimeString = parsedDateTime?.format(timeFormatter)
-            )
         }
 
-        fun createEmpty(): MatchInviteDto = MatchInviteDto()
+    companion object {
+        private val dateFormatter = DateTimeFormatter.ofPattern(Patterns.DATE)
+        private val timeFormatter = DateTimeFormatter.ofPattern(Patterns.TIME)
+
+        fun createFromBackend(dto: MatchInviteDto): MatchInviteDto {
+            val parsedDateTime = dto.gameDate
+
+            return dto.copy(
+                gameDateString = parsedDateTime.format(dateFormatter),
+                gameTimeString = parsedDateTime.format(timeFormatter)
+            )
+        }
     }
 }

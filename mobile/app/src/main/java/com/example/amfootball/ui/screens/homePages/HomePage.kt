@@ -374,7 +374,12 @@ fun PreviewHomePagePlayerNoTeam() {
 // CENÁRIO 3: Jogador COM Equipa
 @Preview(name = "3. With Team - English", group = "With Team", showBackground = true, locale = "en")
 @Preview(name = "3. With Team - PT", group = "With Team", showBackground = true, locale = "pt-rPT")
-@Preview(name = "3. With Team - Dark", group = "With Team", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(
+    name = "3. With Team - Dark",
+    group = "With Team",
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 fun PreviewHomePagePlayerWithTeam() {
     MaterialTheme {

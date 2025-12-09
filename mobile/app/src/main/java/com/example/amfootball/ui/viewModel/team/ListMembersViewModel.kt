@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.viewModel.team
 
-import android.util.Log
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.MemberTeamDto
@@ -51,11 +50,13 @@ class ListMembersViewModel @Inject constructor(
     private val teamId: String = sessionManager.getUserProfile()?.effectiveTeamId ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
-    private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())
+    private val filterState: MutableStateFlow<FilterMembersTeam> =
+        MutableStateFlow(FilterMembersTeam())
     val uiFilter: StateFlow<FilterMembersTeam> = filterState
 
     /** Estado que contém os erros de validação dos filtros (ex: idade mínima maior que máxima). */
-    private val errorFilters: MutableStateFlow<FilterMembersFilterError> = MutableStateFlow(FilterMembersFilterError())
+    private val errorFilters: MutableStateFlow<FilterMembersFilterError> =
+        MutableStateFlow(FilterMembersFilterError())
     val uiErrorFilters: StateFlow<FilterMembersFilterError> = errorFilters
 
     /** Lista de opções para o filtro de Tipo de Membro (ex: Jogador, Admin). */

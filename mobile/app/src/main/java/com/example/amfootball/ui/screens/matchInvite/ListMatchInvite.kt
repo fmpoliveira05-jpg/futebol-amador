@@ -22,9 +22,10 @@ import com.example.amfootball.data.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
 import com.example.amfootball.data.actions.itemsList.ItemListMatchIniviteActions
-import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
+import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.data.filters.FilterMatchInvite
+import com.example.amfootball.data.mocks.listMatchInviteMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
@@ -42,10 +43,12 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import com.example.amfootball.utils.Patterns
 import java.time.format.DateTimeFormatter
 
+//TODO: FALTA APENAS TESTAR O ACCEPT
 /**
  * Ecrã de Listagem de Convites de Jogo Recebidos.
  *
@@ -89,6 +92,11 @@ fun ListMatchInviteScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
+    )
+
     ListMatchInviteContent(
         uiState = uiState,
         isOnline = isOnline,
@@ -126,7 +134,7 @@ private fun ListMatchInviteContent(
     filters: FilterMatchInvite,
     filterActions: FilterMatchInviteActions,
     filterError: FilterMatchInviteError,
-    list: List<InfoMatchInviteDto>,
+    list: List<MatchInviteDto>,
     itemsListActions: ItemListMatchIniviteActions,
     navHostController: NavHostController
 ) {
@@ -219,7 +227,8 @@ private fun FilterListMatchInvite(
                     errorMessage = filterError.minDateError?.let {
                         stringResource(id = it.messageId, *it.args.toTypedArray())
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+
                 )
 
                 FilterMaxDatePicker(
@@ -258,13 +267,13 @@ private fun FilterListMatchInvite(
  */
 @Composable
 private fun ItemListMatchInivite(
-    matchInvite: InfoMatchInviteDto,
+    matchInvite: MatchInviteDto,
     itemsListActions: ItemListMatchIniviteActions,
     navHostController: NavHostController
 ) {
     GenericListItem(
         item = matchInvite,
-        title = { it.opponent.name },
+        title = { it.opponent!!.name },
         leading = {
             StringImageList(
                 image = matchInvite.opponent.image,
@@ -277,10 +286,10 @@ private fun ItemListMatchInivite(
         },
         supporting = {
             Column {
-                PitchAddressRow(ptichAdrress = matchInvite.pitchGame)
+                PitchAddressRow(ptichAdrress = matchInvite.namePitch)
 
                 DateRow(
-                    date = matchInvite.gameDate.format(
+                    date = matchInvite.gameDateRaw.format(
                         DateTimeFormatter.ofPattern(
                             Patterns.DATE,
                         )
@@ -313,16 +322,23 @@ private fun ItemListMatchInivite(
 @Preview(
     name = "Lista de convite de partida - PT",
     locale = "pt-rPT",
-    showBackground = true
+    showBackground = true,
 )
 @Preview(
     name = "List Match Invite - EN",
     locale = "en",
-    showBackground = true
+    showBackground = true,
 )
 @Composable
-fun PreviewListMatchInvite() {
-    ListMatchInviteScreen(
-        navHostController = rememberNavController(),
+fun PreviewListMatchInviteContent() {
+    ListMatchInviteContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        filters = FilterMatchInvite(),
+        filterActions = listMatchInviteMocks.mockFilterActions,
+        filterError = FilterMatchInviteError(),
+        list = listMatchInviteMocks.mockList,
+        itemsListActions = listMatchInviteMocks.mockItemsListActions,
+        navHostController = rememberNavController()
     )
 }

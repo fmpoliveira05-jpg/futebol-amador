@@ -46,7 +46,6 @@ import androidx.navigation.NavController
 import com.example.amfootball.R
 import com.example.amfootball.data.enums.settings.AppLanguage
 import com.example.amfootball.data.enums.settings.AppTheme
-import com.example.amfootball.ui.components.Loading
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 
@@ -71,7 +70,7 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     modifier: Modifier = Modifier
 ) {
-    val showDeleteDialog =  settingsViewModel.deleteProfileState.collectAsState()
+    val showDeleteDialog = settingsViewModel.deleteProfileState.collectAsState()
     val isLoading = settingsViewModel.isLoading.collectAsState()
 
 
@@ -88,7 +87,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsPageContent(modifier: Modifier,settingsViewModel: SettingsViewModel){
+private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsViewModel) {
     val currentTheme = settingsViewModel.theme.collectAsState()
     val currentLanguage = settingsViewModel.language.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
@@ -265,7 +264,7 @@ private fun LanguageSection(
             onClick = {
                 settingsViewModel.changeLanguage(AppLanguage.ENGLISH)
 
-                      },
+            },
             label = { Text(stringResource(id = R.string.language_english)) }
         )
 

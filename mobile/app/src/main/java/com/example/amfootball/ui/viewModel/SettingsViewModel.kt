@@ -45,15 +45,16 @@ class SettingsViewModel @Inject constructor(
     val deleteProfileState = deleteProfile.asStateFlow()
 
     /**
-    * Fluxo de estado do idioma atual da aplicação.
-    * Inicializado lendo o valor persistido.
-    */
+     * Fluxo de estado do idioma atual da aplicação.
+     * Inicializado lendo o valor persistido.
+     */
     private var _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+
     /**
-    * Fluxo de estado do idioma atual da aplicação.
-    * Inicializado lendo o valor persistido.
-    */
+     * Fluxo de estado do idioma atual da aplicação.
+     * Inicializado lendo o valor persistido.
+     */
     private var _language = MutableStateFlow(settingsStore.getLanguage())
     val language = _language.asStateFlow()
 
@@ -154,11 +155,11 @@ class SettingsViewModel @Inject constructor(
         _isLoading.value = false
     }
 
-    private fun startLoading(){
+    private fun startLoading() {
         _isLoading.value = true
     }
 
-    fun stopLoading(){
+    fun stopLoading() {
         _isLoading.value = false
     }
 

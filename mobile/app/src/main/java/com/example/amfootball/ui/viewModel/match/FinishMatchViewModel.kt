@@ -33,7 +33,8 @@ class FinishMatchViewModel() : ViewModel() {
     /**
      * Estado interno mutável contendo os erros de validação do formulário.
      */
-    private val resultErrorState: MutableLiveData<FinishMatchFormErrors> = MutableLiveData<FinishMatchFormErrors>()
+    private val resultErrorState: MutableLiveData<FinishMatchFormErrors> =
+        MutableLiveData<FinishMatchFormErrors>()
 
     /**
      * Estado público de leitura dos erros.

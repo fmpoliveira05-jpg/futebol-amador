@@ -1,7 +1,6 @@
 package com.example.amfootball.data.dtos.matchInivite
 
 import com.google.gson.annotations.SerializedName
-import java.time.LocalDateTime
 
 /**
  * Data Transfer Object (DTO) utilizado para enviar um novo convite de jogo para outra equipa.

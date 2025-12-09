@@ -34,7 +34,8 @@ class ListPostPoneMatchViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
      */
-    private val filterState: MutableStateFlow<FilterPostPoneMatch> = MutableStateFlow(FilterPostPoneMatch())
+    private val filterState: MutableStateFlow<FilterPostPoneMatch> =
+        MutableStateFlow(FilterPostPoneMatch())
 
     /**
      * Fluxo público de leitura dos critérios de filtro.
@@ -44,7 +45,8 @@ class ListPostPoneMatchViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> = MutableStateFlow(ListPostPoneMatchFiltersError())
+    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> =
+        MutableStateFlow(ListPostPoneMatchFiltersError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.
@@ -154,7 +156,7 @@ class ListPostPoneMatchViewModel @Inject constructor(
                     launchSingleTop = true
                 }
             },
-            toastMessage = "Só pode ver mais informações da equipa se estiver online."
+            toastMessage = R.string.toast_offline_info_team
         )
     }
 
