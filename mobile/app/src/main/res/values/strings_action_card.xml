@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_card_team">My Team</string>
+    <string name="action_card_team_description">Your team's main page</string>
+
     <string name="action_card_casual">Casual</string>
     <string name="action_card_casual_description">Schedule a casual match</string>
 
