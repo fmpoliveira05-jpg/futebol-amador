@@ -83,6 +83,4 @@
     <string name="delete_profile_confirmation">Are you sure you want to delete your account? This action is irreversible.</string>
     <string name="delete_profile_action">Yes, delete my account</string>
     <string name="cancel">Cancel</string>
-
-
 </resources>
