@@ -78,4 +78,11 @@ class PlayerService @Inject constructor(
             playerApi.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
         }
     }
+
+    //TODO: Ver se tenho um DTO pra o retorno, se não criar e também é preciso atualizar o sessionManager
+    suspend fun leaveTeam(playerId: String): InfoPlayerDto {
+        return safeApiCallWithReturn {
+            playerApi.leaveTeam(playerId = playerId)
+        }
+    }
 }

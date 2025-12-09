@@ -7,6 +7,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
@@ -81,9 +82,14 @@ interface PlayerApi {
      * @param playerId O ID do jogador convidado, enviado no corpo (Body) da requisição.
      * @return [Response] com os detalhes do convite criado [MembershipRequestInfoDto].
      */
-    @POST("api/Team/{teamId}/membership-requests/send")
+    @POST("${BaseEndpoints.PLAYER_API}/{teamId}/membership-requests/send")
     suspend fun sendMemberShipRequestToPlayer(
         @Path("teamId") teamId: String,
         @Body playerId: String
     ): Response<MembershipRequestInfoDto>
+
+    @PUT("${BaseEndpoints.PLAYER_API}/{playerId}/leave-team")
+    suspend fun leaveTeam(
+        @Path("playerId") playerId: String
+    ): Response<InfoPlayerDto>
 }

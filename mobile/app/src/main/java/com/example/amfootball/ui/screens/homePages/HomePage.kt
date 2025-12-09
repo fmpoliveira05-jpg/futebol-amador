@@ -95,7 +95,7 @@ fun HomePageScreen(
         onNavigateToTeamHome = {
             val teamId = user?.effectiveTeamId
             if (teamId != null) {
-                globalNavController.navigate("${Routes.TeamRoutes.HOMEPAGE.route}/$teamId") {
+                globalNavController.navigate(Routes.TeamRoutes.HOMEPAGE.route) {
                     launchSingleTop = true
                 }
             }

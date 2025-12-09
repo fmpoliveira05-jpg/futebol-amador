@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -20,6 +21,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -40,7 +44,9 @@ import com.example.amfootball.data.mocks.homePages.HomePageTeamMock
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.CompactActionCard
+import com.example.amfootball.ui.components.actionCards.pages.ActionCardLeaveTeam
 import com.example.amfootball.ui.components.cards.ActionCard
+import com.example.amfootball.ui.components.diaglos.pages.LeaveTeamAlertDialog
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
@@ -111,6 +117,15 @@ fun HomePageTeamScreen(
                 }
             )
         },
+        onLeaveTeam = {
+            viewModel.onLeaveTeam(
+                onSucess = {
+                    globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     )
 
     HomePageTeam(
@@ -161,16 +176,14 @@ fun HomePageTeam(
 /**
  * Componente que define a estrutura de scroll e layout da página.
  *
- * Organiza o ecrã em:
- * 1. Cabeçalho ([HeaderHomePageTeam]).
- * 2. Conteúdo Principal ([HomePageTeamContent]).
+ * Organiza o ecrã em três secções principais:
+ * 1. Cabeçalho ([HeaderHomePageTeam]): Identidade da equipa.
+ * 2. Conteúdo de Gestão ([HomePageTeamContent]): Match Center e ferramentas.
+ * 3. Zona de Saída ([ActionCardLeaveTeam]): Opção para abandonar a equipa.
  *
  * @param team Objeto com os dados da equipa para exibir no cabeçalho.
  * @param role Papel do utilizador para controlo de acesso visual.
- * @param onNavigateCasualMatch Ação para navegação de jogo casual.
- * @param onNavigateRankedMatch Ação para navegação de jogo rankeado.
- * @param onNavigateCalendar Ação para navegação do calendário.
- * @param onNavigateMembers Ação para navegação da lista de membros.
+ * @param homePageTeamActions Ações de navegação a serem propagadas para os componentes filhos.
  */
 @Composable
 private fun TeamHomePageDrawer(
@@ -178,6 +191,15 @@ private fun TeamHomePageDrawer(
     role: UserRole,
     homePageTeamActions: HomePageTeamActions
 ) {
+    var showLeaveDialog by remember { mutableStateOf(false) }
+
+    if (showLeaveDialog) {
+        LeaveTeamAlertDialog(
+            onLeaveTeam = homePageTeamActions.onLeaveTeam,
+            onDismiss = { showLeaveDialog = false }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -191,6 +213,12 @@ private fun TeamHomePageDrawer(
             role = role,
             homePageTeamActions = homePageTeamActions
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        ActionCardLeaveTeam(onClick = { showLeaveDialog = true })
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -201,10 +229,7 @@ private fun TeamHomePageDrawer(
  * utilizando `verticalArrangement`.
  *
  * @param role Se for [UserRole.ADMIN_TEAM], exibe a secção "Match Center".
- * @param onNavigateCasualMatch Callback para criar partida casual.
- * @param onNavigateRankedMatch Callback para criar partida rankeada.
- * @param onNavigateCalendar Callback para ver calendário.
- * @param onNavigateMembers Callback para ver lista de membros.
+ * @param homePageTeamActions Ações de navegação a serem propagadas.
  */
 @Composable
 private fun HomePageTeamContent(
@@ -268,8 +293,7 @@ private fun HeaderHomePageTeam(team: TeamDto) {
  * Secção "Match Center": Contém os botões para agendar partidas.
  * Utiliza cartões compactos ([CompactActionCard]) dispostos horizontalmente.
  *
- * @param onNavigateCasualMatch Ação ao clicar no botão "Casual".
- * @param onNavigateRankedMatch Ação ao clicar no botão "Rankeada".
+ * @param homePageTeamActions Objeto contendo os callbacks de navegação.
  */
 @Composable
 private fun HomePageMatchCenter(homePageTeamActions: HomePageTeamActions) {
@@ -305,8 +329,7 @@ private fun HomePageMatchCenter(homePageTeamActions: HomePageTeamActions) {
  * Secção "Gestão de Equipa": Contém botões para Calendário e Membros.
  * Utiliza cartões de ação padrão ([ActionCard]) dispostos verticalmente.
  *
- * @param onNavigateMembers Ação ao clicar no botão "Membros".
- * @param onNavigateCalendar Ação ao clicar no botão "Calendário".
+ * @param homePageTeamActions Objeto contendo os callbacks de navegação.
  */
 @Composable
 private fun HomePageManagerTeam(homePageTeamActions: HomePageTeamActions) {
@@ -367,7 +390,8 @@ fun PreviewTeamHomePageAdmin() {
                 onNavigateCasualMatch = {},
                 onNavigateRankedMatch = {},
                 onNavigateMembers = {},
-                onNavigateCalendar = {}
+                onNavigateCalendar = {},
+                onLeaveTeam = {}
             )
         )
     }
@@ -403,7 +427,8 @@ fun PreviewTeamHomePageMember() {
                 onNavigateCasualMatch = {},
                 onNavigateRankedMatch = {},
                 onNavigateMembers = {},
-                onNavigateCalendar = {}
+                onNavigateCalendar = {},
+                onLeaveTeam = {}
             )
         )
     }

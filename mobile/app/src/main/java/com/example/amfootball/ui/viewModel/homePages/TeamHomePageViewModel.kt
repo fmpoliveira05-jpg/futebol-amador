@@ -5,6 +5,7 @@ import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.services.PlayerService
 import com.example.amfootball.data.services.TeamService
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,6 +31,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class TeamHomePageViewModel @Inject constructor(
+    private val playerService: PlayerService,
     private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
@@ -151,6 +153,25 @@ class TeamHomePageViewModel @Inject constructor(
             action = onSucess,
             toastMessage = R.string.toast_offline_calendar
         )
+    }
+
+    //TODO: Testar
+    fun onLeaveTeam(onSucess: () -> Unit) {
+        launchDataLoad {
+            val userId = sessionManager.getUserProfile()?.loginResponseDto?.localId
+
+            if(userId == null) {
+                return@launchDataLoad
+            }
+
+            val updatedUser = playerService.leaveTeam(playerId = userId)
+
+            if (updatedUser != null) {
+                sessionManager.updateTeamIdUser(null)
+            }
+
+            onSucess()
+        }
     }
 
     /**

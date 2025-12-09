@@ -120,6 +120,22 @@ class SessionManager @Inject constructor(
         }
     }
 
+    fun updateTeamIdUser(teamId: String?) {
+        var currentProfile = getUserProfile()
+        if (currentProfile != null) {
+            val updatedProfile = currentProfile.copy(
+                idTeam = teamId,
+                team = if (currentProfile.team != null && teamId != null) {
+                    currentProfile.team.copy(id = teamId)
+                } else {
+                    currentProfile.team
+                }
+            )
+
+            saveUserProfile(updatedProfile)
+        }
+    }
+
     /**
      * Método utilitário para obter rapidamente o ID local do utilizador autenticado.
      *

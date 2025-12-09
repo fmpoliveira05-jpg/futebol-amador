@@ -21,6 +21,7 @@
     <string name="toast_offline_postpone_game">Para adiar o jogo, é necessária ligação à internet.</string>
     <string name="toast_offline_start_game">Para iniciar o jogo, é necessária ligação à internet.</string>
     <string name="toast_offline_finish_match">Para finalizar a partida, é necessária ligação à internet.</string>
+    <string name="toast_offline_leave_team">Para poder sair da equipa precisa estar conectado há internet</string>
 
     <string name="toast_autenticate_people">Apenas pessoas autenticadas podem aceder a esta funcionalidade</string>
     <string name="toast_only_player_without_team">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>

@@ -178,6 +178,7 @@ class ListMatchInviteViewModel @Inject constructor(
         }
     }
 
+    //TODO: Falta fazer pedido há API do Calendar para adicionar o jogo no calendario das duas equipas.
     /**
      * Envia o pedido para aceitar um convite de jogo.
      *
