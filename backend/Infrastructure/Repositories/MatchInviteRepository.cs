@@ -57,7 +57,11 @@ namespace Infrastructure.Repositories
         /// <returns>A entidade [MatchInvite] ou null se não for encontrada.</returns>
         public async Task<MatchInvite?> GetMatchInviteById(Guid id)
         {
-            return await context.MatchInvite.FirstOrDefaultAsync(mi => mi.Id == id);
+            return await context.MatchInvite
+                .Include(mi => mi.Sender)
+                .Include(mi => mi.Receiver)
+                .Include(mi => mi.Pitch)
+                .FirstOrDefaultAsync(mi => mi.Id == id);
         }
 
         /// <summary>
@@ -102,7 +106,7 @@ namespace Infrastructure.Repositories
         /// </remarks>
         /// <param name="idReceiver">O ID da equipa recetora dos convites.</param>
         /// <returns>Uma lista de [InfoMatchInviteDto] com informações resumidas dos convites.</returns>
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInviteReceiverById(Guid idReceiver)
+        public async Task<List<InfoMatchInviteDto?>> GetAllMatchInviteReceiverById(Guid idReceiver)
         {
             var query = await context.MatchInvite
                 .Where(mi => mi.IdReceiver == idReceiver)
@@ -141,13 +145,11 @@ namespace Infrastructure.Repositories
         /// <param name="idReceiver">O ID da equipa que está a receber os convites.</param>
         /// <param name="filter">O DTO contendo os critérios de filtragem (Nome do Remetente, Intervalo de Datas, IDs).</param>
         /// <returns>Uma lista de [InfoMatchInviteDto] que satisfaz os critérios de filtragem.</returns>
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter)
+        public async Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter)
         {
             var senderName = filter.SenderName;
             var minDate = filter.MinDate;
             var maxDate = filter.MaxDate;
-            var senderId = filter.SenderId;
-            var matchInviteId = filter.MatchInviteId;
 
             var query = context.MatchInvite.AsQueryable();
 
@@ -168,34 +170,23 @@ namespace Infrastructure.Repositories
                 query = query.Where(mi => DateOnly.FromDateTime(mi.GameDate) <= maxDate);
             }
 
-            if (senderId != null)
-            {
-                query = query.Where(mi => mi.Sender.Id.Equals(senderId));
-            }
-            if (matchInviteId != null)
-            {
-                query = query.Where(mi => mi.Id.Equals(matchInviteId));
-            }
-
             var list = await query
                 .Select(mi => new InfoMatchInviteDto
                 {
                     Id = mi.Id,
-
                     Sender = new TeamDto
                     {
                         IdTeam = mi.IdSender,
                         Name = mi.Sender.Name
                     },
-
                     Receiver = new TeamDto
                     {
                         IdTeam = mi.IdReceiver,
                         Name = mi.Receiver.Name
                     },
-
                     GameDate = mi.GameDate,
-                    NamePitch = mi.Pitch.Name
+                    NamePitch = mi.Pitch.Name,
+                    isHome = mi.IdPitch == mi.Receiver.IdPitch
                 }).ToListAsync();
 
             return list;

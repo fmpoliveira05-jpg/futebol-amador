@@ -8,8 +8,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-//using Google.Type;
-
 
 namespace Application.Services
 {
@@ -57,6 +55,52 @@ namespace Application.Services
         #endregion
 
         #region Methods MatchInvite
+
+        /// <summary>
+        /// Obtém a informação resumida de um convite de partida se este estiver associado à equipa especificada.
+        /// </summary>
+        /// <remarks>
+        /// Verifica se a equipa (`idTeam`) é a remetente ou recetora do convite e projeta os dados no DTO **[InfoMatchInviteDto]**.
+        /// </remarks>
+        /// <param name="idMatchInvite">O ID (GUID) do convite.</param>
+        /// <param name="idTeam">O ID da equipa (Utilizador) que está a aceder ao convite.</param>
+        /// <returns>O DTO **[InfoMatchInviteDto]** com os detalhes resumidos, ou <c>null</c> se não for encontrado ou se a equipa não estiver envolvida.</returns>
+        public async Task<InfoMatchInviteDto?> GetMatchInvite(Guid idTeam, Guid idMatchInvite)
+        {
+            var matchInvite = await MatchInviteRepository.GetMatchInviteById(idMatchInvite);
+            
+            if(matchInvite == null)
+            {
+                return null;
+            }
+
+            var team = matchInvite.Sender;
+
+            if (team.Id != idTeam)
+            {
+                team = matchInvite.Receiver;
+            }
+
+            var infoMatchInvite = new InfoMatchInviteDto
+            {
+                Id = matchInvite.Id,
+                Receiver = new TeamDto
+                {
+                    IdTeam = matchInvite.Receiver.Id,
+                    Name = matchInvite.Receiver.Name
+                },
+                Sender = new TeamDto
+                {
+                    IdTeam = matchInvite.Sender.Id,
+                    Name = matchInvite.Sender.Name
+                },
+                GameDate = matchInvite.GameDate,
+                NamePitch = matchInvite.Pitch.Name,
+                isHome = matchInvite.Pitch == team.Pitch,
+            };
+
+            return infoMatchInvite;
+        }
 
         /// <summary>
         /// Envia um novo convite de partida (desafio) de uma equipa para outra.
@@ -235,7 +279,7 @@ namespace Application.Services
             var idReceiver = dto.IdReceiver;
             var hasChanged = false;
             var matchInvite = await MatchInviteRepository.GetMatchInviteWithPitchByTeams(idReceiver, idSender);
-            //var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
+            var findMatchWith12hour = await MatchRepository.GetMatchProxim12HoursMatchs(idReceiver, gameDate);
 
             var senderTeam = await TeamRepository.GetTeamByIdAsync(matchInvite.IdSender);
             var receiverTeam = await TeamRepository.GetTeamByIdAsync(matchInvite.IdReceiver);
@@ -244,7 +288,7 @@ namespace Application.Services
 
             var pitch = GetPitchMatch(isHome, senderTeam.Pitch, receiverTeam.Pitch);
 
-            //MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
+            MatchInviteValidator.ValidateNegociateMatchInvite(pitch, matchInvite, senderTeam, receiverTeam, findMatchWith12hour);
             
             hasChanged = NegociateMatchInvite(matchInvite, gameDate, pitch); 
 
@@ -277,7 +321,7 @@ namespace Application.Services
         /// </summary>
         /// <param name="idTeam">ID da equipa.</param>
         /// <returns>Lista de [InfoMatchInviteDto].</returns>
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(Guid idTeam)
+        public async Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeam(Guid idTeam)
         {
             MatchInviteValidator.ValidateTeamCalendar(idTeam);
 
@@ -292,7 +336,7 @@ namespace Application.Services
         /// <param name="idTeam">ID da equipa.</param>
         /// <param name="filter">Filtros (Nome do Remetente, Data).</param>
         /// <returns>Lista filtrada de [InfoMatchInviteDto].</returns>
-        public async Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
+        public async Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter)
         {
             MatchInviteValidator.ValidateFilterMatchInvite(idTeam, filter);
             var teamSearching = await TeamRepository.GetTeamByIdAsync(idTeam);
@@ -301,13 +345,7 @@ namespace Application.Services
             }
 
             var listMatchInvite = await MatchInviteRepository.GetAllMatchInvitesTeamWithFilters(idTeam, filter);
-            foreach (InfoMatchInviteDto matchInvite in listMatchInvite)
-            {
-                if (teamSearching.Pitch.Name.Equals(matchInvite.NamePitch))
-                {
-                    matchInvite.isHome = true;
-                }
-            }
+
             return listMatchInvite;
         }
         #endregion

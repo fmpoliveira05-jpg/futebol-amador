@@ -58,7 +58,7 @@ namespace Application.Interfaces.Repositories
         /// </remarks>
         /// <param name="idReceiver">O ID da equipa recetora dos convites.</param>
         /// <returns>Uma lista de [InfoMatchInviteDto] com informações resumidas dos convites.</returns>
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInviteReceiverById(Guid idReceiver);
+        public Task<List<InfoMatchInviteDto?>> GetAllMatchInviteReceiverById(Guid idReceiver);
 
         /// <summary>
         /// Obtém uma lista filtrada de convites de partida recebidos, utilizando critérios avançados.
@@ -66,6 +66,6 @@ namespace Application.Interfaces.Repositories
         /// <param name="idReceiver">O ID da equipa que está a receber os convites.</param>
         /// <param name="filter">O DTO contendo os critérios de filtragem (Nome do Remetente, Intervalo de Datas, IDs).</param>
         /// <returns>Uma lista de [InfoMatchInviteDto] que satisfaz os critérios de filtragem.</returns>
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter);
+        public Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeamWithFilters(Guid idReceiver, FilterMatchInvitesDto filter);
     }
 }
