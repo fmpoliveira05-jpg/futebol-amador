@@ -18,14 +18,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
 import com.example.amfootball.data.actions.itemsList.ItemListMatchIniviteActions
 import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.data.filters.FilterMatchInvite
-import com.example.amfootball.data.mocks.listMatchInviteMocks
+import com.example.amfootball.data.mocks.ListMatchInviteMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
@@ -335,10 +335,10 @@ fun PreviewListMatchInviteContent() {
         uiState = UiState(isLoading = false),
         isOnline = true,
         filters = FilterMatchInvite(),
-        filterActions = listMatchInviteMocks.mockFilterActions,
+        filterActions = ListMatchInviteMocks.mockFilterActions,
         filterError = FilterMatchInviteError(),
-        list = listMatchInviteMocks.mockList,
-        itemsListActions = listMatchInviteMocks.mockItemsListActions,
+        list = ListMatchInviteMocks.mockList,
+        itemsListActions = ListMatchInviteMocks.mockItemsListActions,
         navHostController = rememberNavController()
     )
 }

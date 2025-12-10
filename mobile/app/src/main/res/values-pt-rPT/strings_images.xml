@@ -2,6 +2,8 @@
 <resources>
     <string name="logo_team">Logótipo da equipa</string>
     <string name="logo_team_name">%1$s %2$s</string>
+    <string name="logo_team_add">Adicione um logótipo há equipa</string>
+
     <string name="proflie_image">Foto de perfil</string>
     <string name="proflie_image_name">%1$s do %2$s</string>
 </resources>

@@ -1,8 +1,11 @@
 package com.example.amfootball.ui.viewModel.homePages
 
+import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.enums.UserRole
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
@@ -10,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -29,7 +33,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomePageViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val globalEventBus: GlobalEventBus
 ) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = true) {
     /**
      * Estado interno mutável que armazena os dados do perfil do jogador.
@@ -46,6 +51,22 @@ class HomePageViewModel @Inject constructor(
 
     init {
         loadUserData()
+        observeEvents()
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            globalEventBus.events.collect { event ->
+                when(event) {
+                    is AppEvent.UserLoggedOut -> {
+                        userData.value = null
+                    }
+                    is AppEvent.TeamDeleted -> {
+                        loadUserData()
+                    }
+                }
+            }
+        }
     }
 
     /**

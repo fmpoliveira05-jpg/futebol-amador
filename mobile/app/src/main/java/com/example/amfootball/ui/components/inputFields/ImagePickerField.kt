@@ -24,23 +24,52 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 
 /**
- * Componente de Interface (UI) para seleção de imagens da galeria utilizando o Photo Picker moderno.
+ * Componente de seleção de imagens que trabalha com [String].
+ * Ideal para interagir com DTOs ou APIs que esperam URLs ou URIs serializadas.
  *
- * Este componente apresenta uma área circular interativa que serve dois propósitos:
- * 1. **Visualização:** Exibe a imagem selecionada (via Coil) ou um ícone de placeholder ("Adicionar Foto").
- * 2. **Interação:** Ao ser clicado, lança o seletor de média nativo do Android (`PickVisualMedia`),
- * garantindo privacidade e segurança (não requer permissão `READ_EXTERNAL_STORAGE` em versões recentes).
+ * Internamente converte a [Uri] selecionada pelo sistema para [String].
  *
- * **Características Visuais:**
- * - Formato circular fixo ([CircleShape]).
- * - Tamanho predefinido de 150.dp (ajustável via modifier).
- * - Imagens são cortadas ([ContentScale.Crop]) para preencher o círculo uniformemente.
+ * @param modifier Modificador para estilizar o contentor externo.
+ * @param imageSelectedUrl A string representando a imagem (URL ou URI). Se nulo/vazio, mostra placeholder.
+ * @param onImageSelected Callback invocado com a string da URI selecionada (ou null).
+ * @param contentDescription Descrição para acessibilidade da imagem carregada.
+ * @param contentDescriptionWithoutImage Descrição para acessibilidade do ícone de placeholder.
+ */
+@Composable
+fun ImagePickerString(
+    modifier: Modifier = Modifier,
+    imageSelectedUrl: String?,
+    onImageSelected: (String?) -> Unit,
+    contentDescription: String? = null,
+    contentDescriptionWithoutImage: String? = null,
+) {
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> onImageSelected(uri?.toString()) }
+    )
+
+    BaseImagePickerContent(
+        modifier = modifier,
+        model = imageSelectedUrl,
+        contentDescription = contentDescription,
+        contentDescriptionWithoutImage = contentDescriptionWithoutImage,
+        onClick = {
+            photoPickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    )
+}
+
+/**
+ * Componente de seleção de imagens que trabalha com objetos [Uri] nativos do Android.
+ * Ideal para manipulação de arquivos locais ou upload via ContentResolver antes de serializar.
  *
- * @param modifier Modificador para estilizar o contentor externo (margens, tamanho, etc.).
- * @param imageSelectedUri O [Uri] da imagem a ser exibida. Se for `null`, o componente mostra o ícone de placeholder.
- * @param onImageSelected Callback executado quando o seletor retorna. Recebe o [Uri] da imagem escolhida ou `null` se o utilizador cancelar.
- * @param contentDescription Texto de acessibilidade (TalkBack) para descrever a **imagem carregada** (ex: "Foto de perfil de João").
- * @param contentDescriptionWithoutImage Texto de acessibilidade para o **estado vazio** (ex: "Toque para adicionar uma foto de perfil").
+ * @param modifier Modificador para estilizar o contentor externo.
+ * @param imageSelectedUri O [Uri] da imagem. Se nulo, mostra placeholder.
+ * @param onImageSelected Callback invocado com o objeto [Uri] selecionado (ou null).
+ * @param contentDescription Descrição para acessibilidade da imagem carregada.
+ * @param contentDescriptionWithoutImage Descrição para acessibilidade do ícone de placeholder.
  */
 @Composable
 fun ImagePicker(
@@ -50,32 +79,57 @@ fun ImagePicker(
     contentDescription: String? = null,
     contentDescriptionWithoutImage: String? = null,
 ) {
-    //Cria o launcher para o Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
-            onImageSelected(uri)
-        }
+        onResult = { uri -> onImageSelected(uri) }
     )
 
+    BaseImagePickerContent(
+        modifier = modifier,
+        model = imageSelectedUri,
+        contentDescription = contentDescription,
+        contentDescriptionWithoutImage = contentDescriptionWithoutImage,
+        onClick = {
+            photoPickerLauncher.launch(
+                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+            )
+        }
+    )
+}
+
+/**
+ * Componente interno privado que detém toda a lógica visual (UI) para evitar duplicação de código.
+ * É agnóstico quanto ao tipo de launcher (Uri ou String), recebendo apenas o modelo para o Coil e a ação de click.
+ *
+ * @param model O modelo para o Coil carregar (pode ser String, Uri, URL, etc.).
+ * @param onClick Ação a ser executada ao clicar no componente (geralmente lançar o picker).
+ */
+@Composable
+private fun BaseImagePickerContent(
+    modifier: Modifier,
+    model: Any?,
+    contentDescription: String?,
+    contentDescriptionWithoutImage: String?,
+    onClick: () -> Unit
+) {
     Box(
         modifier = modifier
             .size(150.dp)
             .clip(CircleShape)
             .background(Color.LightGray.copy(alpha = 0.6f))
             .border(1.dp, Color.Gray, CircleShape)
-            .clickable {
-                photoPickerLauncher.launch(
-                    PickVisualMediaRequest(
-                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                    )
-                )
-            },
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        if (imageSelectedUri != null) {
+        val hasImage = when (model) {
+            null -> false
+            is String -> model.isNotBlank()
+            else -> true
+        }
+
+        if (hasImage) {
             AsyncImage(
-                model = imageSelectedUri,
+                model = model,
                 contentDescription = contentDescription,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

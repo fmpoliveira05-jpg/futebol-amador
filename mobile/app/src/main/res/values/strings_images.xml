@@ -2,6 +2,8 @@
 <resources>
     <string name="logo_team">Team logo</string>
     <string name="logo_team_name">%1$s %2$s</string>
+    <string name="logo_team_add">Add a team logo</string>
+
     <string name="proflie_image">Profile picture</string>
     <string name="proflie_image_name">%1$s of %2$s</string>
 </resources>

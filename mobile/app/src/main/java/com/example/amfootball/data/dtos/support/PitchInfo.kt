@@ -12,8 +12,8 @@ import com.google.gson.annotations.SerializedName
  * @property address O endereço físico do campo. Configurado para aceitar "Address" ou "address" no JSON.
  */
 data class PitchInfo(
-    @SerializedName("Name", alternate = ["name"])
+    @SerializedName("name", alternate = ["Name"])
     val name: String = "",
-    @SerializedName("Address", alternate = ["address"])
+    @SerializedName("address", alternate = ["Address"])
     val address: String = ""
 )

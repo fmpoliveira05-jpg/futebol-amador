@@ -14,4 +14,7 @@
 
     <string name="action_card_members">Members</string>
     <string name="action_card_members_description">Team member list</string>
+
+    <string name="action_card_leave_team">Leave Team</string>
+    <string name="action_card_leave_team_description">Button that allows you to leave the team</string>
 </resources>

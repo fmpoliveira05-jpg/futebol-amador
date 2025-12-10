@@ -1,15 +1,13 @@
 package com.example.amfootball.ui.viewModel.team
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
-import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.team.FormTeamDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.TeamFormErros
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.TeamService
-import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PitchConst
@@ -17,7 +15,6 @@ import com.example.amfootball.utils.TeamConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-//TODO: Testar tudo, quando tiver a rota com a autentificação e autorização funcional
 /**
  * ViewModel responsável pela lógica de negócio do formulário de Equipas.
  *
@@ -36,7 +33,8 @@ import javax.inject.Inject
 class TeamFormViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val teamRepository: TeamService,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager
 ) : FormsViewModel<FormTeamDto, TeamFormErros>(
     networkObserver = networkObserver,
     initialData = FormTeamDto(),
@@ -44,18 +42,29 @@ class TeamFormViewModel @Inject constructor(
 ) {
 
     /**
-     * ID da equipa recebido via argumentos de navegação.
-     * - `null`: Modo Criação.
-     * - `String`: Modo Edição.
+     * ID da equipa recebido via argumentos de navegação (Navigation Component).
+     *
+     * - Se for `null` ou inválido, assume-se que é uma **Criação**.
+     * - Se for uma String válida, assume-se que é uma **Edição**.
      */
     private val teamId: String? = savedStateHandle.get("teamId")
 
     /**
-     * Propriedade computada que indica se o ViewModel está em modo de edição.
-     * Útil para decidir entre chamar `createTeam` ou `updateTeam`.
+     * Propriedade computada que determina o modo de operação do formulário.
+     *
+     * Validações adicionais (`"null"`, `"{teamId}"`) são necessárias devido a comportamentos
+     * específicos da injeção de argumentos no Jetpack Navigation em certos cenários.
+     *
+     * @return `true` se estiver em modo de edição, `false` caso contrário.
      */
     val isEditMode: Boolean = !teamId.isNullOrBlank() && teamId != "null" && teamId != "{teamId}"
 
+    /**
+     * Bloco de inicialização.
+     *
+     * Se estiver em modo de edição, inicia imediatamente o carregamento dos dados da equipa.
+     * Caso contrário, sinaliza que o carregamento "terminou" (pois o form começa vazio e pronto a usar).
+     */
     init {
         if (isEditMode) {
             loadDataTeam()
@@ -70,48 +79,55 @@ class TeamFormViewModel @Inject constructor(
     // ============================================================================================
 
     /**
-     * Atualiza o nome da equipa no estado do formulário.
-     * @param name O novo nome inserido pelo utilizador.
+     * Atualiza o campo "Nome da Equipa".
+     *
+     * @param name O novo valor inserido pelo utilizador.
      */
     fun onNameChange(name: String) {
         formState.value = formState.value.copy(name = name)
     }
 
     /**
-     * Atualiza a descrição da equipa.
-     * @param description A nova descrição (pode ser nula ou vazia).
+     * Atualiza o campo "Descrição".
+     *
+     * @param description A nova descrição. Pode ser nula ou vazia (opcional).
      */
     fun onDescriptionChange(description: String?) {
         formState.value = formState.value.copy(description = description)
     }
 
     /**
-     * Atualiza a URI da imagem selecionada (logótipo da equipa).
-     * @param image A URI da imagem escolhida na galeria (ou null se removida).
+     * Atualiza o campo de Imagem (Logótipo).
+     *
+     * Recebe uma [String] que pode ser:
+     * 1. Uma URL remota (ex: "https://...").
+     * 2. Uma URI local convertida em String (ex: "content://media/...").
+     *
+     * @param image A string da imagem ou null se removida.
      */
-    fun onImageChange(image: Uri?) {
+    fun onImageChange(image: String?) {
         formState.value = formState.value.copy(image = image)
     }
 
     /**
-     * Atualiza o nome do estádio (Pitch).
+     * Atualiza o campo "Nome do Campo/Estádio".
      *
-     * Nota: Como o [Pitch] é um objeto aninhado dentro do [FormTeamDto],
-     * é necessário fazer uma cópia aninhada:
-     * 1. Copia o estado principal.
-     * 2. Dentro dele, copia o objeto 'pitch' alterando apenas o 'name'.
+     * Como o [PitchInfo] é um objeto aninhado dentro do DTO, utiliza-se o método [copy]
+     * de forma recursiva para garantir a imutabilidade do estado.
+     *
+     * @param name O novo nome do campo.
      */
     fun onNamePitchChange(name: String) {
         formState.value = formState.value.copy(pitch = formState.value.pitch.copy(name = name))
     }
 
     /**
-     * Atualiza a morada/endereço do estádio (Pitch).
-     * Também realiza uma atualização num objeto aninhado.
+     * Atualiza o campo "Endereço do Campo".
+     *
+     * @param address O novo endereço físico do campo.
      */
     fun onAddressPitchChange(address: String) {
-        formState.value =
-            formState.value.copy(pitch = formState.value.pitch.copy(address = address))
+        formState.value = formState.value.copy(pitch = formState.value.pitch.copy(address = address))
     }
 
     // --- MÉTODOS PÚBLICOS (Ações) ---
@@ -131,44 +147,65 @@ class TeamFormViewModel @Inject constructor(
     }
 
     /**
-     * Ação principal de submissão do formulário.
+     * Executa a submissão do formulário (Criar ou Editar).
      *
-     * Fluxo:
-     * 1. Valida o formulário localmente via [validateForm].
-     * 2. Verifica a internet.
-     * 3. Decide se cria ou atualiza com base no [isEditMode].
-     * 4. Em caso de sucesso, navega para a Homepage da equipa.
+     * Fluxo de Execução:
+     * 1. **Verificação de Rede:** Se offline, exibe Toast e aborta.
+     * 2. **Validação:** Executa [validateForm]. Se falhar, exibe erros nos inputs.
+     * 3. **Chamada API:** Chama `createTeam` ou `updateTeam` baseado no [isEditMode].
+     * 4. **Sucesso:** Invoca o callback [onSuccess] (geralmente navegação para trás).
      *
-     * @param navHostController Controlador para realizar a navegação após o sucesso.
+     * @param onSuccess Callback executado após a API retornar sucesso (código 200-299).
      */
-    fun onSubmit(navHostController: NavHostController) {
+    fun onSubmit(onSucess: () -> Unit) {
+        if (!isNetworkAvailable()) {
+            updateToast(R.string.toast_offline_edit_team)
+            return
+        }
+
         submitForm(
-            onSuccess = {
-                navHostController.navigate(route = Routes.TeamRoutes.HOMEPAGE.route) {
-                    popUpTo(Routes.TeamRoutes.HOMEPAGE.route) { inclusive = true }
-                }
-            },
+            onSuccess = onSucess,
             apiCall = {
                 if (teamId != null && isEditMode) {
                     teamRepository.updateTeam(teamId = teamId, team = formState.value)
                 } else {
-                    teamRepository.createTeam(team = formState.value)
+                    val createdTeamDto = teamRepository.createTeam(team = formState.value)
+
+                    if (createdTeamDto != null && !createdTeamDto.id.isNullOrBlank()) {
+                        sessionManager.updateTeamIdUser(teamId = createdTeamDto.id)
+                        sessionManager.updateRoleMemberTeam(isAdmin = true)
+
+                        onSucess()
+                    } else {
+                        updateToast(R.string.toast_error_create_team)
+                    }
                 }
             }
         )
     }
 
     /**
-     * Implementação das regras de validação específicas para Equipas.
+     * Ação de recarregar dados. Útil quando ocorre um erro de rede e o utilizador clica em "Tentar Novamente".
+     * Apenas tem efeito em modo de edição.
+     */
+    fun retry() {
+        if (isEditMode) {
+            loadDataTeam()
+        }
+    }
+
+    /**
+     * Implementação das regras de validação síncronas do formulário.
      *
-     * É [protected] porque apenas a classe Pai ([FormsViewModel]) precisa de a chamar
-     * internamente antes de submeter. Não deve ser acessível pela UI.
+     * Este método é chamado automaticamente pelo [submitForm] da classe base.
      *
-     * Verifica:
-     * - Campos obrigatórios (Nome, Estádio).
-     * - Limites de caracteres (Mínimos e Máximos).
+     * **Regras de Negócio:**
+     * - **Nome da Equipa:** Obrigatório, min [TeamConst.MIN_NAME_LENGTH], max [TeamConst.MAX_NAME_LENGTH].
+     * - **Descrição:** Opcional, mas se preenchida, max [TeamConst.MAX_DESCRIPTION_LENGTH].
+     * - **Nome do Campo:** Obrigatório, min [PitchConst.MIN_NAME_LENGTH], max [PitchConst.MAX_NAME_LENGTH].
+     * - **Endereço do Campo:** Obrigatório, min [GeneralConst.MIN_ADDRESS_LENGTH], max [GeneralConst.MAX_ADDRESS_LENGTH].
      *
-     * @return `true` se não houver erros, `false` caso contrário.
+     * @return `true` se todos os campos forem válidos, `false` caso contrário (atualizando `formErrors`).
      */
     override fun validateForm(): Boolean {
         val name = formState.value.name

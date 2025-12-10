@@ -38,7 +38,7 @@ interface TeamApi {
     @POST(BaseEndpoints.TEAM_API)
     suspend fun createTeam(
         @Body team: FormTeamDto
-    ): Response<String>
+    ): Response<FormTeamDto>
 
     /**
      * Atualiza os dados informativos de uma equipa existente.
@@ -57,6 +57,21 @@ interface TeamApi {
         @Path("teamId") teamId: String,
         @Body team: FormTeamDto
     ): Response<FormTeamDto>
+
+    /**
+     * Ponto de acesso (Endpoint) para apagar uma equipa através do seu ID.
+     *
+     * Esta chamada HTTP DELETE notifica o backend para remover permanentemente a equipa especificada.
+     *
+     * @param teamId O identificador único (ID) da equipa a ser eliminada, extraído do Path da URL.
+     * @return Um objeto [Response<Unit>], onde:
+     * - [Unit] significa que não é esperado corpo de resposta (sucesso é indicado pelo código HTTP, ex: 204 No Content).
+     * - [Response] permite verificar o status HTTP (sucesso ou erro).
+     */
+    @DELETE("${BaseEndpoints.TEAM_API}/{teamId}")
+    suspend fun deleteTeam(
+        @Path("teamId") teamId: String
+    ): Response<Unit>
 
     /**
      * Obtém uma visão simplificada de uma equipa, otimizada para contextos de adversário.

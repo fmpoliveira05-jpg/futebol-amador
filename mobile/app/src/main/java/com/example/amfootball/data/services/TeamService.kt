@@ -95,7 +95,7 @@ class TeamService @Inject constructor(
      * @param team O DTO com os dados do formulário de criação.
      * @return O ID da nova equipa gerada (String).
      */
-    suspend fun createTeam(team: FormTeamDto): String {
+    suspend fun createTeam(team: FormTeamDto): FormTeamDto {
         return safeApiCallWithReturn {
             teamApi.createTeam(team = team)
         }
@@ -115,6 +115,21 @@ class TeamService @Inject constructor(
     }
 
     /**
+     * Envia o pedido de eliminação da equipa para a API.
+     *
+     * Utiliza a função [safeApiCallWithNotReturn] para envolver a chamada,
+     * garantindo que erros de rede ou da API são tratados de forma segura
+     * (e convertidos, tipicamente, para um erro UI).
+     *
+     * @param teamId O identificador único (ID) da equipa a ser eliminada.
+     */
+    suspend fun deleteTeam(teamId: String) {
+        safeApiCallWithNotReturn {
+            teamApi.deleteTeam(teamId = teamId)
+        }
+    }
+
+    /**
      * Lista os membros (jogadores/staff) de uma equipa, com filtros opcionais.
      *
      * @param teamId O ID da equipa.
@@ -129,7 +144,6 @@ class TeamService @Inject constructor(
         }
     }
 
-    //TODO: Testar
     /**
      * Promove um membro a Administrador da equipa.
      *
@@ -144,7 +158,6 @@ class TeamService @Inject constructor(
         }
     }
 
-    //TODO: Testar
     /**
      * Despromove um Administrador para membro normal.
      *
@@ -157,7 +170,6 @@ class TeamService @Inject constructor(
         }
     }
 
-    //TODO: Testar
     /**
      * Remove (expulsa) um jogador da equipa.
      *

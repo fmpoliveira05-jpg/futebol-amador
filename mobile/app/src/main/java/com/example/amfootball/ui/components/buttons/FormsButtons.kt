@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -45,6 +46,41 @@ fun SubmitFormButton(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
+    ) {
+        Icon(
+            imageVector = imageButton,
+            contentDescription = contentDescription
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(text = text)
+    }
+}
+
+/**
+ * Botão específico para ações de EDIÇÃO ou ATUALIZAÇÃO de dados.
+ *
+ * Diferencia-se visualmente do botão de submissão padrão por utilizar um estilo **Tonal**
+ * (Fundo secundário/terciário), indicando que é uma modificação de dados existentes
+ * e não uma criação nova.
+ *
+ * @param onClick Lambda executado ao clicar.
+ * @param imageButton Ícone do botão (Padrão: [Icons.Default.Edit]).
+ * @param text Texto do botão (Padrão: "Guardar Alterações" ou similar).
+ * @param contentDescription Descrição de acessibilidade.
+ */
+@Composable
+fun EditFormButton(
+    onClick: () -> Unit,
+    imageButton: ImageVector = Icons.Default.Edit,
+    text: String,
+    contentDescription: String
+) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        colors = ButtonDefaults.filledTonalButtonColors()
     ) {
         Icon(
             imageVector = imageButton,

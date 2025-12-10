@@ -3,7 +3,7 @@ package com.example.amfootball.ui.viewModel.team
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.enums.match.MatchStatus
 import com.example.amfootball.data.enums.match.TypeMatch

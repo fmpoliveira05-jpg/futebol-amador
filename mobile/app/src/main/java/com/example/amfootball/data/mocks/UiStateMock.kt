@@ -1,6 +1,6 @@
 package com.example.amfootball.data.mocks
 
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 
 /**
  * Fornece estados base fictícios (Mocks) para o wrapper genérico de estado da UI [UiState].

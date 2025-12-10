@@ -17,7 +17,7 @@ import android.net.Uri
 data class FormTeamActions(
     val onNameChange: (String) -> Unit,
     val onDescriptionChange: (String?) -> Unit,
-    val onImageChange: (Uri?) -> Unit,
+    val onImageChange: (String?) -> Unit,
     val onNamePitchChange: (String) -> Unit,
     val onAddressPitchChange: (String) -> Unit
 )
