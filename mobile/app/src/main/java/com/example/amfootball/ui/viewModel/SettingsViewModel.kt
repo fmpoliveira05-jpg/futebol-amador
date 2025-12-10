@@ -180,6 +180,7 @@ class SettingsViewModel @Inject constructor(
      * @return `true` se a eliminação for bem-sucedida, `false` caso contrário.
      */
     fun deleteProfile(): Boolean {
+        startLoading()
         launchDataLoad(
             callApi = {
                 val player = repository.getUserProfile()
@@ -187,8 +188,10 @@ class SettingsViewModel @Inject constructor(
                     playerService.deletePlayerProfile(playerId = player!!.loginResponseDto!!.localId)
                     updateToast(R.string.toast_playerProfile_deleted)
                     repository.clearSession()
-                    finishLoading()
+                } else{
+                    updateToast(R.string.toast_playerProfile_error)
                 }
+                finishLoading()
             },
             checkOnline = true
         )

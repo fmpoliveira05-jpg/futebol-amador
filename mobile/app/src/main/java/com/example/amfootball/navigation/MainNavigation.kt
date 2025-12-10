@@ -211,7 +211,6 @@ private fun NavGraphBuilder.autPages(
         content = {
             SignUpScreen(
                 navHostController = globalNavController,
-                authViewModel = authViewModel
             )
         }
     )
