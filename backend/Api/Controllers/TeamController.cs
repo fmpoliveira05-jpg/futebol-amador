@@ -302,7 +302,7 @@ namespace Api.Controllers
             var playerRemovingId = GetCurrentUserId();
             
             await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
-            await notificationFirebaseService.SendNotificationToUser(playerIdToRemove, "Saída da Equipa","Você foi removido da equipa.");
+            await notificationFirebaseService.SendNotificationToUser(playerIdToRemove, null, "Saída da Equipa","Você foi removido da equipa.");
 
             return NoContent();
         }
@@ -327,7 +327,7 @@ namespace Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
             await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, userId);
-            await notificationFirebaseService.SendNotificationToUser(playerIdToPromote, "Promoção a Administrador", "Parabéns! Você foi promovido a administrador da sua equipa.");
+            await notificationFirebaseService.SendNotificationToUser(playerIdToPromote, null, "Promoção a Administrador", "Parabéns! Você foi promovido a administrador da sua equipa.");
 
             return Ok("Jogador promovido a admin.");
         }
@@ -350,7 +350,7 @@ namespace Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, userId);
 
-            await notificationFirebaseService.SendNotificationToUser(adminIdToDemote, "Despromovido", "Você foi despromovido a jogador de equipa.");
+            await notificationFirebaseService.SendNotificationToUser(adminIdToDemote, null, "Despromovido", "Você foi despromovido a jogador de equipa.");
             
             return Ok("Admin rebaixado a jogador.");
         }

@@ -2,10 +2,8 @@
 {
     public interface INotificationFirebaseService
     {
-        Task SendNotificationToUser(string userId, string titulo, string corpo);
+        Task SendNotificationToUser(string userId, Dictionary<string, string> data = null, string title = null, string body = null);
 
-        Task SendNotificationMembersTeam(Guid idTeam, string titulo, string corpo);
-
-        Task SendNotificationAdminsTeam(Guid idTeam, string titulo, string corpo);
+        Task SendMulticastNotification(List<string> tokens, Dictionary<string, string> data = null, string title = null, string body = null);
     }
 }

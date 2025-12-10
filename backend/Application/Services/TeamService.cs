@@ -2,6 +2,7 @@
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -24,10 +25,9 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
-        private readonly IMembershipRequestRepository MembershipRequestRepository;
-        private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
         private readonly INotificationService notificationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do TeamService.
@@ -37,8 +37,6 @@ namespace Application.Services
         /// <param name="unityOfWork">Unidade de Trabalho para gerir transações.</param>
         /// <param name="teamValidator">Validador de Regras de Negócio de Equipa.</param>
         /// <param name="rankRepository">Repositório de Ranks (para obter o rank padrão).</param>
-        /// <param name="membershipRequestRepository">Repositório de Pedidos de Adesão.</param>
-        /// <param name="playerValidator">Validador de Jogadores.</param>
         /// <param name="authorizationValidator">Validador de Controlo de Acesso (RBAC).</param>
         /// <param name="notificationService">Serviço de Hub para envio de notificações em tempo real.</param>
         public TeamService(
@@ -47,10 +45,9 @@ namespace Application.Services
             IUnityOfWork unityOfWork,
             ITeamValidator teamValidator,
             IRankRepository rankRepository,
-            IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator,
             IPlayerAuthorizationValidator authorizationValidator,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            INotificationFirebaseService notificationFirebaseService)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
@@ -59,6 +56,7 @@ namespace Application.Services
             RankRepository = rankRepository;
             AuthorizationValidator = authorizationValidator;
             this.notificationService = notificationService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
 
@@ -140,12 +138,19 @@ namespace Application.Services
                 }
             }
 
-            /*TODO: Meter para todas as partidas dessa team serem cancelados pelo 
-            motivo que a equipa foi eliminada
-            */
             TeamRepository.DeleteTeam(teamToDelete);
 
+            //Vai buscar os tokens dos membros da equipa para enviar notificação
+            var memberTokens = await PlayerRepository.GetDeviceTokensMembersTeam(teamId, null);
+
+            var activeTokens = memberTokens
+                .Where(t => !string.IsNullOrEmpty(t))
+                .Distinct()
+                .ToList();
+
             await UnityOfWork.SaveChangesAsync();
+
+            await SendNotificationDeleteTeam(activeTokens, teamId);
         }
 
         /// <summary>
@@ -436,5 +441,24 @@ namespace Application.Services
 
             return team;
         }
+
+        #region private Methods
+        private async Task SendNotificationDeleteTeam(List<string> activeTokens, Guid teamId)
+        {
+            if (activeTokens.Any())
+            {
+                var dataPayload = new Dictionary<string, string>()
+                {
+                    { "type", "TEAM_DELETED" },
+                    { "teamId", teamId.ToString() },
+                    { "title", "Equipa Eliminada" },
+                    { "body", "A sua equipa foi eliminada por um administrador." }
+                };
+
+                await notificationFirebaseService.SendMulticastNotification(activeTokens, dataPayload, null, null);
+            }
+        }
+        
+        #endregion
     }
 }

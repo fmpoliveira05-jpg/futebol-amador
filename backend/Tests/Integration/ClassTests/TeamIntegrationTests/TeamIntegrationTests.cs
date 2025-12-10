@@ -52,11 +52,14 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             };
             var expectedTeamId = Guid.NewGuid();
 
+            var returnedDto = teamDto;
+            returnedDto.Id = expectedTeamId;
+
             var mockTeamService = new Mock<ITeamService>();
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockTeamService.Setup(s => s.CreateTeamAsync(It.IsAny<CreateTeamDto>(), It.IsAny<string>()))
-                .ReturnsAsync(expectedTeamId);
+                .ReturnsAsync(returnedDto);
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -228,7 +231,6 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
         [Test]
         public async Task UpdateTeamInfo_Returns_Success_When_ValidRequest()
         {
-            // Arrange
             var teamId = Guid.NewGuid();
             var updateDto = new CreateTeamDto
             {
@@ -245,7 +247,7 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockTeamService.Setup(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<CreateTeamDto>(), It.IsAny<string>()))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync(updateDto);
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
