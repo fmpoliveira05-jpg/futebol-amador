@@ -7,14 +7,12 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -79,8 +77,6 @@ class MainActivity : AppCompatActivity() {
     fun ObserveGlobalEvents(navController: NavHostController,
                             eventBus: GlobalEventBus
     ) {
-        val context = LocalContext.current
-
         LaunchedEffect(Unit) {
             eventBus.events.collect { event ->
                 when (event) {
