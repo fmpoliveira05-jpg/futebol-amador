@@ -54,21 +54,6 @@ class HomePageViewModel @Inject constructor(
         observeEvents()
     }
 
-    private fun observeEvents() {
-        viewModelScope.launch {
-            globalEventBus.events.collect { event ->
-                when(event) {
-                    is AppEvent.UserLoggedOut -> {
-                        userData.value = null
-                    }
-                    is AppEvent.TeamDeleted -> {
-                        loadUserData()
-                    }
-                }
-            }
-        }
-    }
-
     /**
      * Tenta navegar para o ecrã de "Criar Equipa".
      *
@@ -159,5 +144,20 @@ class HomePageViewModel @Inject constructor(
             checkOnline = false,
             callApi = { userData.value = sessionManager.getUserProfile() }
         )
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            globalEventBus.events.collect { event ->
+                when(event) {
+                    is AppEvent.UserLoggedOut -> {
+                        userData.value = null
+                    }
+                    is AppEvent.TeamDeleted -> {
+                        loadUserData()
+                    }
+                }
+            }
+        }
     }
 }

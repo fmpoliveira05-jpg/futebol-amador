@@ -14,7 +14,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
@@ -86,7 +85,6 @@ class MainActivity : AppCompatActivity() {
             eventBus.events.collect { event ->
                 when (event) {
                     is AppEvent.TeamDeleted -> {
-                        Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
                         navigateToHomePage(navController = navController)
                     }
                     is AppEvent.UserLoggedOut -> {
