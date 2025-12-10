@@ -8,6 +8,7 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using Grpc.Core;
 
 namespace Application.Services
 {
@@ -238,12 +239,14 @@ namespace Application.Services
             
             TeamValidator.PromoteMemberToAdminValidation(existingTeam, playerToPromote, playerPromoting);
 
-            await notificationService.SendUserAsync(playerIdToPromoteId, "Team Promotion", $"You have been promoted to admin of the team {existingTeam.Name}.");
+            await notificationService.SendUserAsync(playerIdToPromoteId, "TEAM_PROMOTE", $"You have been promoted to admin of the team {existingTeam.Name}.");
 
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
             await UnityOfWork.SaveChangesAsync();
+
+            await SendPromotePlayerTeam(playerIdToPromoteId);
         }
 
         /// <summary>
@@ -268,6 +271,8 @@ namespace Application.Services
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
             await UnityOfWork.SaveChangesAsync();
             await notificationService.SendUserAsync(adminIdToDemote, "Team Demotion", $"You have been demoted to player of the team {existingTeam.Name}.");
+        
+            await SendDemotePlayerTeam(adminIdToDemote);
         }
 
         #endregion
@@ -448,7 +453,39 @@ namespace Application.Services
 
             await notificationFirebaseService.SendMulticastNotification(teamId, dataPayload, null, null);
         }
-        
+
+        private async Task SendPromotePlayerTeam(string playerId)
+        {
+            var title = "Promoção administrador";
+            var body = "Você foi promovido a administrador de equipa.";
+
+            var dataPayload = new Dictionary<string, string>()
+            {
+                { "type", "TEAM_PROMOTE" },
+                { "teamId", playerId.ToString() },
+                { "title", title },
+                { "body", body}
+            };
+
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayload, title, body);
+        }
+
+        private async Task SendDemotePlayerTeam(string playerId)
+        {
+            var title = "Despromoção a jogador";
+            var body = "Você foi despomovido a jogador de equipa.";
+
+            var dataPayload = new Dictionary<string, string>()
+            {
+                { "type", "TEAM_DEMOTION" },
+                { "teamId", playerId.ToString() },
+                { "title", title },
+                { "body", body}
+            };
+
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayload, title, body);
+        }
+
         #endregion
     }
 }
