@@ -4,8 +4,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -16,12 +14,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.previewsMocks.LeadboardMocks
 import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 
 /**
@@ -164,49 +162,9 @@ private fun LeaderBoardItems(
 )
 @Composable
 fun PreviewLeaderboardContentPopulated() {
-    val fakeList = listOf(
-        LeadboardDto(
-            position = 1,
-            team = InfoTeamLeadboard(
-                id = "1",
-                name = "Porto Lions",
-                currentPoints = 1250,
-                nameRank = "Elite",
-                logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 2,
-            team = InfoTeamLeadboard(
-                id = "2",
-                name = "Lisboa Navigators",
-                currentPoints = 980,
-                nameRank = "Pro",
-                logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 3,
-            team = InfoTeamLeadboard(
-                id = "3",
-                name = "Braga Warriors",
-                currentPoints = 450,
-                nameRank = "Amateur",
-                logoTeam = null
-            )
-        )
-    )
-
-    val showMoreState = remember { mutableStateOf(true) }
-    val fakeActions = LeadBoardActions(
-        onShowMore = { _, _ -> },
-        isValidShowMoreTeams = { showMoreState },
-        onLoadMoreTeams = {}
-    )
-
     LeadBoardContent(
-        list = fakeList,
-        leadBoardActions = fakeActions,
+        list = LeadboardMocks.fakeList,
+        leadBoardActions = LeadboardMocks.fakeActions,
         navHostController = rememberNavController()
     )
 }
@@ -223,16 +181,9 @@ fun PreviewLeaderboardContentPopulated() {
 )
 @Composable
 fun PreviewLeaderboardContentEmpty() {
-    val showMoreState = remember { mutableStateOf(true) }
-    val fakeActions = LeadBoardActions(
-        onShowMore = { _, _ -> },
-        isValidShowMoreTeams = { showMoreState },
-        onLoadMoreTeams = {}
-    )
-
     LeadBoardContent(
         list = emptyList(),
-        leadBoardActions = fakeActions,
+        leadBoardActions = LeadboardMocks.fakeActions,
         navHostController = rememberNavController()
     )
 }

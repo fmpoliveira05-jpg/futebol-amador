@@ -38,7 +38,6 @@ import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.ui.actions.itemsList.ItemsListMemberAction
-import com.example.amfootball.ui.previewsMocks.lists.ListMembersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -58,6 +57,7 @@ import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.previewsMocks.ListMembersMocks
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
 //TODO: Corrigir previews + toast de network + retry

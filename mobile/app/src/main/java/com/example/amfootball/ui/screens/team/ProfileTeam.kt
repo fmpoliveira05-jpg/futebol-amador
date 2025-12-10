@@ -245,7 +245,7 @@ fun ProfileTeamScreenAdminPreview() {
                 onDeleteClick = {},
                 retry = {}
             ),
-            role = UserRole.ADMIN_TEAM, // SIMULA ADMIN -> Botões Visíveis
+            role = UserRole.ADMIN_TEAM,
             modifier = Modifier.padding(16.dp)
         )
     }

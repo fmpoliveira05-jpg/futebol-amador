@@ -30,6 +30,7 @@ import com.example.amfootball.ui.components.buttons.LoginButton
 import com.example.amfootball.ui.components.inputFields.EmailTextField
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.previewsMocks.LoginMocks
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 import com.example.amfootball.ui.viewModel.auth.LoginViewModel
 
@@ -210,35 +211,9 @@ private fun FieldsLogin(
 fun LoginScreenPreview() {
     ContentLogin(
         uiState = UiState(isLoading = false),
-        login = LoginDto(email = "test@example.com", password = ""),
+        login = LoginMocks.login,
         errors = LoginError(),
-        loginActions = LoginActions(
-            onLoginUser = { _, onResult ->
-                onResult(true)
-            },
-            onEmailChange = {},
-            onPasswordChange = {},
-            onIsUserLoggedInChange = {}
-        ),
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "Login Loading State", showBackground = true)
-@Composable
-fun LoginScreenLoadingPreview() {
-    ContentLogin(
-        uiState = UiState(isLoading = true),
-        login = LoginDto(),
-        errors = LoginError(),
-        loginActions = LoginActions(
-            onLoginUser = { _, onResult ->
-                onResult(false)
-            },
-            onEmailChange = {},
-            onPasswordChange = {},
-            onIsUserLoggedInChange = {}
-        ),
+        loginActions = LoginMocks.loginActions,
         navHostController = rememberNavController()
     )
 }

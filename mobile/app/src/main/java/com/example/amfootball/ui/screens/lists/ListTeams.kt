@@ -28,7 +28,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.ui.previewsMocks.lists.ListTeamMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -54,6 +53,7 @@ import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterTeamActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
+import com.example.amfootball.ui.previewsMocks.ListTeamMocks
 
 /**
  * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful).

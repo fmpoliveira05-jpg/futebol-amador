@@ -44,6 +44,8 @@ import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipReque
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
+import com.example.amfootball.ui.previewsMocks.ListMemberShipRequestMocks
+import com.example.amfootball.ui.theme.AMFootballTheme
 import java.time.format.DateTimeFormatter
 
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
@@ -336,33 +338,38 @@ private fun ListMemberShipRequestContent(
     )
 }
 
-@Preview(
-    name = "Lista de pedidos de adesão Jogador - PT",
-    locale = "pt-rPT",
-    showBackground = true
-)
-@Preview(
-    name = "List MemberShip Request player - EN",
-    locale = "en",
-    showBackground = true
-)
+@Preview(name = "Lista Preenchida - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Populated List - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMemberShipRequestPlayerScreen() {
-    ListMemberShipRequest(rememberNavController())
+fun PreviewContentListMemberShipRequest_Populated() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = ListMemberShipRequestMocks.mockRequests,
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            navHostController = rememberNavController()
+        )
+    }
 }
 
-
-@Preview(
-    name = "Lista de pedidos de adesão Jogador - PT",
-    locale = "pt-rPT",
-    showBackground = true
-)
-@Preview(
-    name = "List MemberShip Request player - EN",
-    locale = "en",
-    showBackground = true
-)
+@Preview(name = "Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Empty List - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMemberShipRequestTeamScreen() {
-    ListMemberShipRequest(rememberNavController())
+fun PreviewContentListMemberShipRequest_Empty() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = emptyList(),
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            navHostController = rememberNavController()
+        )
+    }
 }

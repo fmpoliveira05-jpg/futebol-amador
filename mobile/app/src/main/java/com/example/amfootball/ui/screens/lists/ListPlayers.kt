@@ -25,7 +25,6 @@ import com.example.amfootball.data.events.UiState
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.data.filters.FilterListPlayer
-import com.example.amfootball.ui.previewsMocks.lists.ListPlayersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -52,6 +51,7 @@ import com.example.amfootball.core.utils.PlayerConst
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
+import com.example.amfootball.ui.previewsMocks.ListPlayersMocks
 
 /**
  * Ecrã principal de Listagem de Jogadores.

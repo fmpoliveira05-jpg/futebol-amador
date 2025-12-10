@@ -21,7 +21,6 @@ import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.domains.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.data.filters.FilterPostPoneMatch
-import com.example.amfootball.ui.previewsMocks.lists.ListPostPoneMatchMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -46,6 +45,7 @@ import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterListPostPoneMatchActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListPostPoneMatchActions
+import com.example.amfootball.ui.previewsMocks.ListPostPoneMatchMocks
 import java.time.format.DateTimeFormatter
 
 //TODO: POR METER CONEXÃO COM O BACKEND
