@@ -24,8 +24,8 @@ import javax.inject.Inject
 class SignupViewmodel @Inject constructor(
     private val authService: AuthService,
     private val networkObserver: NetworkConnectivityObserver,
-    // Se precisares de outros serviços injeta aqui
-) : FormsViewModel<CreateProfileDto, SignUpFormErrors>(
+
+    ) : FormsViewModel<CreateProfileDto, SignUpFormErrors>(
     networkObserver = networkObserver,
     initialData = CreateProfileDto(
         userName = "",
@@ -40,33 +40,23 @@ class SignupViewmodel @Inject constructor(
     initialError = SignUpFormErrors()
 ) {
 
-    // --- Estados Auxiliares (que não estão diretamente no DTO ou precisam de gestão separada) ---
-
-    // O código do país é gerido à parte e concatenado ao submeter
     private val _countryCode = MutableStateFlow("+351")
     val countryCode = _countryCode.asStateFlow()
 
-    // A verificação da password não vai para a API, serve apenas para validação local
     private val _passwordVerification = MutableStateFlow("")
     val passwordVerification = _passwordVerification.asStateFlow()
 
-    // Guardamos a data em millis para facilitar a validação e o display no DatePicker
+
     private var dateOfBirthMillis: Long? = null
 
-    // Formatador para a API
     private val apiDateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
         timeZone = TimeZone.getTimeZone("UTC")
     }
 
-    // Formatador para Display (podes usar este se quiseres formatar no VM)
     val displayDateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
     init {
         stopLoading()
     }
-
-    // ============================================================================================
-    //  SETTERS (Data Binding)
-    // ============================================================================================
 
     fun onNameChange(name: String) {
         formState.value = formState.value.copy(userName = name)
@@ -77,7 +67,7 @@ class SignupViewmodel @Inject constructor(
     }
 
     fun onPhoneChange(phone: String) {
-        formState.value = formState.value.copy(phone = phone) // Aqui guardamos apenas o número
+        formState.value = formState.value.copy(phone = phone)
     }
 
     fun onCountryCodeChange(code: String) {
@@ -119,17 +109,10 @@ class SignupViewmodel @Inject constructor(
         _passwordVerification.value = pass
     }
 
-    // ============================================================================================
-    //  AÇÕES E VALIDAÇÃO
-    // ============================================================================================
-
     fun onSubmit(navHostController: NavHostController) {
-        // Antes de enviar, concatenamos o countryCode ao telemóvel
         val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
-        // Atualizamos o estado com o número completo apenas para o envio (ou criamos uma cópia local)
         val finalDto = formState.value.copy(phone = fullPhoneNumber)
 
-        // Chamamos a função genérica do Pai
         submitForm(
             onSuccess = {
                 navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
@@ -138,7 +121,6 @@ class SignupViewmodel @Inject constructor(
                 }
             },
             apiCall = {
-                // Aqui usamos o finalDto com o numero completo
                 authService.registerUser(finalDto)
             }
         )
@@ -147,7 +129,6 @@ class SignupViewmodel @Inject constructor(
     override fun validateForm(): Boolean {
         val currentDto = formState.value
 
-        // Usamos a tua função de validação existente
         val validationResult = validateSignUpForm(
             name = currentDto.userName,
             phone = currentDto.phone,
@@ -158,16 +139,9 @@ class SignupViewmodel @Inject constructor(
             dateOfBirth = dateOfBirthMillis,
             position = currentDto.position
         )
-
-        // Mapear o erro retornado pela tua função `validateSignUpForm` para o objeto `SignUpFormErrors`.
-        // Nota: A tua função validateSignUpForm parece retornar apenas UM erro de cada vez (fail-fast).
-        // Para uma UX melhor, o ideal seria validar tudo, mas vamos adaptar ao que tens.
-
         if (!validationResult.isValid) {
-            // Criamos uma mensagem de erro genérica baseada no campo que falhou
             if (validationResult.errorMessageId !=null) {
                 val errorMsg = ErrorMessage(messageId = validationResult.errorMessageId, args = validationResult.args)
-            // Atribuímos o erro ao campo correto
             val errors = when (validationResult.fieldName) {
                 SignUpField.NAME.name -> SignUpFormErrors(nameError = errorMsg)
                 SignUpField.EMAIL.name -> SignUpFormErrors(emailError = errorMsg)

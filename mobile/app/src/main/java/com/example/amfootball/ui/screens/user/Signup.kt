@@ -205,19 +205,13 @@ private fun ContentSignUp(
 
         // DATA DE NASCIMENTO
         Text(text = "${stringResource(R.string.date_of_birthday)}:")
-        // Aqui convertemos a string do DTO de volta para visualização se necessário,
-        // ou usamos a lógica do displayDateFormatter do VM
         val displayDate = if (formDto.dateOfBirth.isBlank()) "" else {
-            // Pequeno truque: se a string já estiver formatada em yyyy-MM-dd,
-            // talvez precises de converter para dd/MM/yyyy para mostrar.
-            // Como tens o DatePickerDockedPastLimitedDate a receber value, assume-se que é String.
-            // O ideal seria usar o valor formatado para display.
-            formDto.dateOfBirth // Ou viewModel.displayDateFormatter.format(...) se tiveres guardado o long
+            formDto.dateOfBirth
         }
 
         DatePickerDockedPastLimitedDate(
             value = displayDate,
-            onDateSelected = viewModel::onDateChange, // Passa o Long para o VM
+            onDateSelected = viewModel::onDateChange,
             label = stringResource(R.string.date_of_birthday),
             contentDescription = stringResource(R.string.date_of_birthday_description),
             isSingleLine = true,
@@ -248,7 +242,6 @@ private fun ContentSignUp(
 
         Spacer(Modifier.height(16.dp))
 
-        // MENSAGEM DE ERRO GERAL (DA API OU VALIDAÇÃO)
         if (globalErrorMessage != null) {
             Text(
                 text = globalErrorMessage,
