@@ -42,11 +42,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.amfootball.R
 import com.example.amfootball.data.enums.settings.AppLanguage
 import com.example.amfootball.data.enums.settings.AppTheme
+import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
+import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 
 /**
@@ -72,13 +75,18 @@ fun SettingsScreen(
 ) {
     val showDeleteDialog = settingsViewModel.deleteProfileState.collectAsState()
     val isLoading = settingsViewModel.isLoading.collectAsState()
+    val uiState = settingsViewModel.uiState.collectAsState()
 
+    ToastHandler(
+        onToastShown = settingsViewModel::onToastShown,
+        toastMessage = uiState.value.toastMessage
+    )
 
-    DeleteProfileDialog(showDeleteDialog, settingsViewModel)
+    DeleteProfileDialog(showDeleteDialog, settingsViewModel, navController)
     LoadingPage(
         isLoading = isLoading.value,
         content = {
-            SettingsPageContent(modifier, settingsViewModel)
+            SettingsPageContent(modifier, settingsViewModel, navController)
         },
         errorMsg = null,
         retry = {}
@@ -87,7 +95,7 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsViewModel) {
+private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsViewModel, navController: NavController) {
     val currentTheme = settingsViewModel.theme.collectAsState()
     val currentLanguage = settingsViewModel.language.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }
@@ -138,6 +146,7 @@ private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsV
                 SettingsSectionTitle(title = stringResource(id = R.string.profile))
                 ProfileSection(
                     onEditClick = {
+                        navController.navigate(Routes.UserRoutes.PROFILE.route)
                         //TODO: ir para pagina de editar perfil
                     },
                     onDeleteClick = {
@@ -354,7 +363,8 @@ private fun ProfileSection(
 @Composable
 private fun DeleteProfileDialog(
     showDeleteDialog: State<Boolean>,
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    navController: NavController
 ) {
     if (showDeleteDialog.value) {
         AlertDialog(
@@ -370,6 +380,9 @@ private fun DeleteProfileDialog(
                 TextButton(
                     onClick = {
                         settingsViewModel.hideDeleteProfile()
+                        settingsViewModel.deleteProfile()
+                        navController.navigate(Routes.GeralRoutes.HOMEPAGE.route)
+
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) {

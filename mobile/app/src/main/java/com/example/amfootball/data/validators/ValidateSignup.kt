@@ -2,7 +2,7 @@ package com.example.amfootball.data.validators
 
 import android.util.Patterns
 import com.example.amfootball.data.enums.Position
-
+import java.util.Calendar
 /**
  * Um objeto de resultado padrão para a nossa validação.
  *
@@ -237,6 +237,7 @@ private fun validateHeight(height: String): ValidationResult {
  * Valida o campo da data de nascimento.
  *
  * Verifica se a data foi selecionada (não é nula).
+ * Verifica se a idade é maior que 18 anos e menor que 70 anos.
  *
  * @param dateInMillis O valor da data de nascimento em milissegundos (Long?).
  * @return [ValidationResult] indicando sucesso ou falha por campo vazio.
@@ -249,7 +250,33 @@ private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
             "Por favor, selecione a data de nascimento."
         )
     }
-    // TODO: Validar se o user é maior que a idade definida como idade minima (acho que foram 18 anos)
+
+    val dob = Calendar.getInstance()
+    dob.timeInMillis = dateInMillis
+
+    val today = Calendar.getInstance()
+
+    var age = today.get(Calendar.YEAR) - dob.get(Calendar.YEAR)
+
+    if (today.get(Calendar.DAY_OF_YEAR) < dob.get(Calendar.DAY_OF_YEAR)) {
+        age--
+    }
+    if (age < 18) {
+        return ValidationResult(
+            false,
+            SignUpField.DATE_OF_BIRTH.name,
+            "Deve ter pelo menos 18 anos para se registar."
+        )
+    }
+
+    if (age >= 70) {
+        return ValidationResult(
+            false,
+            SignUpField.DATE_OF_BIRTH.name,
+            "A idade deve ser inferior a 70 anos."
+        )
+    }
+
     return ValidationResult(true)
 }
 

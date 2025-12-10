@@ -77,13 +77,11 @@ class AuthViewModel @Inject constructor(
      * Coordena o processo de criação de conta assíncrono.
      *
      * @param profile DTO contendo os dados pessoais do utilizador (nome, idade, posição, etc.).
-     * @param password A palavra-passe escolhida para a conta.
      * @param onSuccess Callback executado apenas se o registo for concluído com sucesso.
      * @param onError Callback executado se ocorrer alguma falha (rede, validação, etc.), fornecendo a mensagem de erro.
      */
     fun registerUser(
         profile: CreateProfileDto,
-        password: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {

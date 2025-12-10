@@ -1,16 +1,23 @@
 package com.example.amfootball.ui.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.amfootball.R
 import com.example.amfootball.data.SettingsStore
+import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.enums.settings.AppLanguage
 import com.example.amfootball.data.enums.settings.AppTheme
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.services.PlayerService
+import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 
@@ -31,8 +38,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SessionManager,
-    private val settingsStore: SettingsStore
-) : ViewModel() {
+    private val settingsStore: SettingsStore,
+    private val playerService: PlayerService,
+    private val networkObserver: NetworkConnectivityObserver,
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
 
     /**
      * Estado interno mutável para controlar a visibilidade do diálogo de confirmação de eliminação de perfil.
@@ -137,7 +146,7 @@ class SettingsViewModel @Inject constructor(
 
         val localeList = LocaleListCompat.forLanguageTags(code)
         AppCompatDelegate.setApplicationLocales(localeList)
-        _isLoading.value = false
+        finishLoading()
     }
 
     /**
@@ -152,14 +161,14 @@ class SettingsViewModel @Inject constructor(
         _theme.value = theme.name
 
         settingsStore.saveTheme(theme)
-        _isLoading.value = false
+        this.finishLoading()
     }
 
     private fun startLoading() {
         _isLoading.value = true
     }
 
-    fun stopLoading() {
+    fun finishLoading() {
         _isLoading.value = false
     }
 
@@ -171,6 +180,44 @@ class SettingsViewModel @Inject constructor(
      * @return `true` se a eliminação for bem-sucedida, `false` caso contrário.
      */
     fun deleteProfile(): Boolean {
+        launchDataLoad(
+            callApi = {
+                val player = repository.getUserProfile()
+                if(validProfile(player)) {
+                    playerService.deletePlayerProfile(playerId = player!!.loginResponseDto!!.localId)
+                    updateToast(R.string.toast_playerProfile_deleted)
+                    repository.clearSession()
+                    finishLoading()
+                }
+            },
+            checkOnline = true
+        )
         return false
     }
+
+    fun editProfile() {
+        startLoading()
+        val player = repository.getUserProfile()
+
+        launchDataLoad(
+            callApi = {
+                val player = repository.getUserProfile()
+                if(validProfile(player)) {
+                    playerService.updatePlayerProfile(playerProfile = player!!)
+                    updateToast(R.string.toast_playerProfile_edited)
+                    finishLoading()
+                }
+            },
+            checkOnline = true
+        )
+    }
+
+    private fun validProfile(profile: PlayerProfileDto?) : Boolean{
+        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId == null){
+            updateToast(R.string.toast_playerProfile_error)
+            return false
+        }
+        return true
+    }
+
 }

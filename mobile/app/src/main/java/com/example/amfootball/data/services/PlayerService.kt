@@ -78,4 +78,16 @@ class PlayerService @Inject constructor(
             playerApi.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
         }
     }
+
+    suspend fun updatePlayerProfile(playerProfile: PlayerProfileDto){
+        safeApiCallWithNotReturn {
+            playerApi.updatePlayer(playerId = playerProfile.loginResponseDto!!.localId, player = playerProfile)
+        }
+    }
+
+    suspend fun deletePlayerProfile(playerId: String){
+        safeApiCallWithNotReturn {
+            playerApi.deletePlayer(playerId = playerId)
+        }
+    }
 }

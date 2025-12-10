@@ -5,8 +5,10 @@ import com.example.amfootball.data.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.QueryMap
 
@@ -86,4 +88,16 @@ interface PlayerApi {
         @Path("teamId") teamId: String,
         @Body playerId: String
     ): Response<MembershipRequestInfoDto>
+
+    @DELETE("${BaseEndpoints.PLAYER_API}/{playerId}")
+    suspend fun deletePlayer(
+        @Path("playerId") playerId: String,
+    ) : Response<Unit>
+
+
+    @PUT("${BaseEndpoints.PLAYER_API}/update/{playerId}")
+    suspend fun updatePlayer(
+        @Path("playerId") playerId: String,
+        @Body player: PlayerProfileDto
+    ) : Response<Unit>
 }

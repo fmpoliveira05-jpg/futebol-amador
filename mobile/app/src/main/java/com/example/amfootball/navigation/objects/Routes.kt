@@ -215,8 +215,9 @@ object Routes {
             "ListMembersTeam",
             R.string.navbar_members_list,
             Icons.Default.Group,
-            R.string.navbar_members_list
-        ),
+            R.string.navbar_members_list,
+            haveBackButton = true,
+            ),
         SEND_MATCH_INVITE(
             "SendMatchInvite",
             R.string.title_page_send_match_Invite,

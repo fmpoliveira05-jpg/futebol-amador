@@ -87,7 +87,7 @@ fun SignUpScreen(
 @Composable
 private fun ContentSignUp(
     navController: NavHostController,
-    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit,
+    onRegister: (CreateProfileDto, () -> Unit, (String) -> Unit) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -118,7 +118,7 @@ private fun ContentSignUp(
 @Composable
 private fun FieldsSignUp(
     navHostController: NavHostController,
-    onRegister: (CreateProfileDto, String, () -> Unit, (String) -> Unit) -> Unit
+    onRegister: (CreateProfileDto, () -> Unit, (String) -> Unit) -> Unit
 ) {
     // --- Estados para os campos ---
     var email by rememberSaveable { mutableStateOf("") }
@@ -294,7 +294,6 @@ private fun FieldsSignUp(
 
                 onRegister(
                     userProfile,
-                    password,
                     {
                         isLoading = false
                         navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
@@ -337,7 +336,7 @@ fun SignUpScreenContentPreview() {
     AMFootballTheme {
         ContentSignUp(
             navController = rememberNavController(),
-            onRegister = { _, _, onSuccess, _ ->
+            onRegister = { _, onSuccess, _ ->
                 onSuccess()
             }
         )

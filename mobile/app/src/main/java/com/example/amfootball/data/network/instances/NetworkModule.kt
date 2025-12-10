@@ -37,7 +37,8 @@ object NetworkModule {
      * Atualmente configurado para um túnel **Ngrok** (HTTPS) para acesso externo
      * durante o desenvolvimento.
      */
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
+    //"https://amfootballapi.duckdns.org/"
 
     /**
      * Providencia e configura o cliente HTTP [OkHttpClient].

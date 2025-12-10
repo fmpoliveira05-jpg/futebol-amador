@@ -68,7 +68,6 @@ class AuthService @Inject constructor(
      * para evitar inconsistência de dados (Utilizador fantasma sem perfil na BD).
      *
      * @param profile DTO com os dados do perfil (Nome, Idade, Posição, etc.).
-     * @param password A palavra-passe para criação da conta.
      * @throws Exception Se ocorrer erro na API ou no Firebase, propagando a mensagem para a UI.
      */
     suspend fun registerUser(profile: CreateProfileDto) {

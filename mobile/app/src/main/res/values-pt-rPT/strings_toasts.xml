@@ -27,4 +27,7 @@
     <string name="toast_only_player_without_team_membership">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
     <string name="toast_admin_only_casual">Apenas administradores de equipa podem agendar partidas casuais.</string>
     <string name="toast_admin_only_ranked">Apenas administradores de equipa podem agendar partidas competitivas.</string>
+
+    <string name="toast_playerProfile_error">Erro ao obter perfil do utilizador, por favor tente novamente</string>
+    <string name="toast_delete_profile_error">Erro ao eliminar perfil do utilizador, por favor tente novamente</string>
 </resources>

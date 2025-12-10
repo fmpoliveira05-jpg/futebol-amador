@@ -35,7 +35,7 @@ data class PlayerProfileDto(
     val name: String,
     @SerializedName("Email", alternate = ["email"])
     val email: String?,
-    @SerializedName("PhoneNumber", alternate = ["phoneNumber"])
+    @SerializedName("PhoneNumber", alternate = ["phone"])
     val phoneNumber: String?,
     @SerializedName("DateOfBirth", alternate = ["dateOfBirth"])
     val dateOfBirth: String?,
