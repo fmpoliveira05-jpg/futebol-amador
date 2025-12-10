@@ -170,6 +170,10 @@ namespace Application.Services
 
             await UnityOfWork.SaveChangesAsync();
 
+            await notificationFirebaseService.sendNotificationToTeamsAsync(idSender, idReceiver, "NEW_MATCH_INVITE", "Novo convite de partida",
+                $"Envio do convite para a equipa {receiver.Name}, com sucesso!",
+                $"A sua equipa recebeu um novo convite de partida da equipa {sender.Name}.");
+
             return sendMatchInviteDto;
         }
 

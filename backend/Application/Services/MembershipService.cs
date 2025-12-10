@@ -297,7 +297,7 @@ namespace Application.Services
                 await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!");
             }
 
-            await SendNotificationAcceptMemberShipRequest(team.Id, team.Name, playerId, player.Name)
+            await SendNotificationAcceptMemberShipRequest(team.Id, team.Name, playerId, player.Name);
             return new MemberShipRequestDto
             {
                 RequestId = membershipRequest.Id,
