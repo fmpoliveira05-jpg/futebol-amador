@@ -91,7 +91,6 @@ class PushNotificationService : FirebaseMessagingService() {
                 handleDefaultMessageReceiver(message = message)
             }
         }
-
     }
 
     private fun handleDefaultMessageReceiver(message: RemoteMessage) {
