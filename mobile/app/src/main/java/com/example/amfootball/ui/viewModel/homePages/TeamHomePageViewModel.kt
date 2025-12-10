@@ -4,6 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.UserRole
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.PlayerService
@@ -36,7 +38,8 @@ class TeamHomePageViewModel @Inject constructor(
     private val playerService: PlayerService,
     private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val globalEventBus: GlobalEventBus
 ) : BaseViewModel(
     networkObserver = networkObserver,
     needObserverNetwork = true
@@ -72,6 +75,7 @@ class TeamHomePageViewModel @Inject constructor(
     init {
         loadInfoTeam()
         loadUserRole()
+
         //refreshUserProfile()
     }
 

@@ -8,6 +8,7 @@ import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.FilterMatchInvite
+import com.example.amfootball.data.manager.CalendarManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.MatchInviteService
 import com.example.amfootball.navigation.objects.Routes
@@ -40,7 +41,8 @@ import javax.inject.Inject
 class ListMatchInviteViewModel @Inject constructor(
     private val matchInviteService: MatchInviteService,
     private val networkObserver: NetworkConnectivityObserver,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val calendarManager: CalendarManager
 ) : ListsViewModels<MatchInviteDto>(networkObserver = networkObserver) {
 
     /**
@@ -178,7 +180,6 @@ class ListMatchInviteViewModel @Inject constructor(
         }
     }
 
-    //TODO: Falta fazer pedido há API do Calendar para adicionar o jogo no calendario das duas equipas.
     /**
      * Envia o pedido para aceitar um convite de jogo.
      *
@@ -194,8 +195,11 @@ class ListMatchInviteViewModel @Inject constructor(
                 return@launchDataLoad
             }
 
-            matchInviteService.acceptMatchInvitee(teamId = teamId, matchInviteId = idMatchInvite)
+            val match = matchInviteService.acceptMatchInvitee(teamId = teamId, matchInviteId = idMatchInvite)
             removeItemFromList(idToRemove = idMatchInvite)
+
+            //TODO: Meter para adicionar no calendario de todos os jogadores da equipa e da equipa adversaria, de alguma forma
+            //calendarManager.addMatch(matchId = match.idMatch)
         }
     }
 

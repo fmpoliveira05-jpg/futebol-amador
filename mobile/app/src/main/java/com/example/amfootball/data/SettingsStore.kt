@@ -11,7 +11,7 @@ import javax.inject.Singleton
 /**
  * Repositório local responsável pela persistência das preferências e configurações da aplicação.
  *
- * Esta classe encapsula o acesso ao [SharedPreferences] do Android, fornecendo métodos
+ * Esta classe encapsula o acesso ao [android.content.SharedPreferences] do Android, fornecendo métodos
  * tipados para guardar e ler definições do utilizador (Tema, Idioma, Notificações).
  *
  * Anotada com [@Singleton], garantindo que existe apenas uma instância a gerir o ficheiro
@@ -24,7 +24,7 @@ class SettingsStore @Inject constructor(
     @ApplicationContext context: Context
 ) {
     /**
-     * Instância privada do [SharedPreferences].
+     * Instância privada do [android.content.SharedPreferences].
      * O ficheiro é aberto em modo [Context.MODE_PRIVATE], tornando-o acessível apenas por esta aplicação.
      */
     private val prefs: SharedPreferences =
@@ -50,7 +50,7 @@ class SettingsStore @Inject constructor(
      * Obtém o idioma atualmente guardado.
      *
      * @return O código ou nome do idioma guardado.
-     * Se não existir nenhum valor, retorna o nome do idioma por defeito: [AppLanguage.ENGLISH.name].
+     * Se não existir nenhum valor, retorna o nome do idioma por defeito: [com.example.amfootball.data.enums.settings.AppLanguage.ENGLISH.name].
      */
     fun getLanguage(): String {
         return prefs.getString(LANG_KEY, AppLanguage.ENGLISH.name) ?: AppLanguage.ENGLISH.name
@@ -60,7 +60,7 @@ class SettingsStore @Inject constructor(
      * Obtém o tema visual atualmente configurado.
      *
      * @return O nome do tema guardado (ex: "DARK", "LIGHT").
-     * Se não existir, retorna o padrão do sistema: [AppTheme.SYSTEM_DEFAULT.name].
+     * Se não existir, retorna o padrão do sistema: [com.example.amfootball.data.enums.settings.AppTheme.SYSTEM_DEFAULT.name].
      */
     fun getTheme(): String {
         return prefs.getString(THEME_KEY, AppTheme.SYSTEM_DEFAULT.name)

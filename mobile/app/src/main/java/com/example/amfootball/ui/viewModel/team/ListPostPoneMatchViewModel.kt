@@ -6,6 +6,7 @@ import com.example.amfootball.data.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.data.filters.FilterPostPoneMatch
+import com.example.amfootball.data.manager.CalendarManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
@@ -29,7 +30,8 @@ import javax.inject.Inject
 */
 @HiltViewModel
 class ListPostPoneMatchViewModel @Inject constructor(
-    private val networkObserver: NetworkConnectivityObserver
+    private val networkObserver: NetworkConnectivityObserver,
+    private val calendarManager: CalendarManager
 ) : ListsViewModels<PostPoneMatchDto>(networkObserver = networkObserver) {
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
@@ -129,6 +131,9 @@ class ListPostPoneMatchViewModel @Inject constructor(
      */
     fun acceptPostPoneMatch(idPostPoneMatch: String) {
         //TODO: Implementar
+
+        //Trocar o xx, pela nova data no calendario
+        //calendarManager.updateMatch(matchId = idPostPoneMatch, start = xx, end = xxx)
     }
 
     /**

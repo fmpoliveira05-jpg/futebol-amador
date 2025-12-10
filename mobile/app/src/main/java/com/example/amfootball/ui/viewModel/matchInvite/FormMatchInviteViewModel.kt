@@ -11,6 +11,7 @@ import com.example.amfootball.data.enums.Forms.MatchFormMode
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.manager.CalendarManager
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import com.example.amfootball.data.services.CalendarService
 import com.example.amfootball.data.services.MatchInviteService
@@ -48,7 +49,8 @@ class FormMatchInviteViewModel @Inject constructor(
     private val teamRepository: TeamService,
     private val matchInviteRepository: MatchInviteService,
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val calendarManager: CalendarManager
 ) : FormsViewModel<MatchInviteDto, MatchInviteFormErros>(
     initialData = MatchInviteDto(),
     initialError = MatchInviteFormErros(),
@@ -279,7 +281,10 @@ class FormMatchInviteViewModel @Inject constructor(
                         matchId = matchId,
                         description = cancelReason
                     )
+
+                    calendarManager.removeMatch(matchId)
                 }
+
             },
             onSuccess = {
                 navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
