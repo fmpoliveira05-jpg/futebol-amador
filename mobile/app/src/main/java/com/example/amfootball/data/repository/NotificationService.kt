@@ -1,4 +1,4 @@
-package com.example.amfootball.data.remote.services
+package com.example.amfootball.data.repository
 
 import android.Manifest
 import android.app.PendingIntent
@@ -19,8 +19,8 @@ import javax.inject.Singleton
 /**
  * Serviço responsável por construir e exibir Notificações Push locais no sistema Android.
  *
- * Esta classe abstrai a complexidade do uso direto do [NotificationManagerCompat], tratando
- * da permissão de runtime (Android 13+) e da criação dos Intents para abrir a [MainActivity].
+ * Esta classe abstrai a complexidade do uso direto do [androidx.core.app.NotificationManagerCompat], tratando
+ * da permissão de runtime (Android 13+) e da criação dos Intents para abrir a [com.example.amfootball.MainActivity].
  *
  * É injetada como Singleton, garantindo uma única instância ao longo do ciclo de vida da aplicação.
  *
@@ -31,19 +31,19 @@ class NotificationService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     /**
-     * Constrói e exibe uma notificação no canal de "Equipa" ([NotificationConst.TEAM_CHANNEL_ID]).
+     * Constrói e exibe uma notificação no canal de "Equipa" ([com.example.amfootball.core.utils.NotificationConst.TEAM_CHANNEL_ID]).
      *
      * Este método trata de:
-     * 1. Criar o [PendingIntent] para abrir a [MainActivity] quando a notificação é clicada.
+     * 1. Criar o [android.app.PendingIntent] para abrir a [com.example.amfootball.MainActivity] quando a notificação é clicada.
      * 2. Configurar o layout e prioridade da notificação (Prioridade Alta, ícone, título, texto).
-     * 3. Verificar a permissão de runtime [Manifest.permission.POST_NOTIFICATIONS] no Android 13 (Tiramisu) ou superior,
+     * 3. Verificar a permissão de runtime [android.Manifest.permission.POST_NOTIFICATIONS] no Android 13 (Tiramisu) ou superior,
      * retornando silenciosamente se a permissão não tiver sido concedida.
      * 4. Disparar a notificação para o sistema.
      *
      * @param title O título principal a ser exibido na notificação.
      * @param message O corpo principal da mensagem.
      *
-     * @see NotificationCompat
+     * @see androidx.core.app.NotificationCompat
      */
     fun showNotificationTeam(title: String, message: String, navigationAction: String? = null) {
         val intent = Intent(context, MainActivity::class.java).apply {

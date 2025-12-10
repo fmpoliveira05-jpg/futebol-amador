@@ -33,7 +33,7 @@
         </service>
 
         <service
-            android:name=".data.remote.services.PushNotificationService"
+            android:name=".data.repository.PushNotificationService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

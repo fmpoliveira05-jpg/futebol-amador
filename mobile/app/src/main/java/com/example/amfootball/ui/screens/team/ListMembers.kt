@@ -60,7 +60,7 @@ import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.previewsMocks.ListMembersMocks
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
-//TODO: Corrigir previews + toast de network + retry
+//TODO: Corrigir atualizar a ui State do user promovido e despromovido
 /**
  * Ecrã de Gestão e Listagem de Membros da Equipa.
  *

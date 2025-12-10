@@ -1,9 +1,10 @@
-package com.example.amfootball.data.remote.services
+package com.example.amfootball.data.repository
 
 import android.util.Log
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.services.NotificationCallsService
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
@@ -19,7 +20,7 @@ import javax.inject.Inject
  * 1. Receber payloads de notificação e dados quando a aplicação está em primeiro plano (foreground).
  * 2. Gerar e exibir notificações visuais através do [NotificationService].
  * 3. Gerenciar atualizações do token de dispositivo ([onNewToken]) e enviá-lo ao backend.
- * * É anotada com [AndroidEntryPoint] para permitir a injeção de dependências via Hilt.
+ * * É anotada com [dagger.hilt.android.AndroidEntryPoint] para permitir a injeção de dependências via Hilt.
  *
  * @property notificationService O serviço injetado, usado para construir e exibir notificações visuais no sistema.
  * @property sessionManager O gestor de sessão injetado, usado para verificar o estado de autenticação e guardar o token FCM localmente.
