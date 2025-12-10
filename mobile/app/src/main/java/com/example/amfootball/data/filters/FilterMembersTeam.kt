@@ -1,7 +1,7 @@
 package com.example.amfootball.data.filters
 
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.enums.TypeMember
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.enums.TypeMember
 
 /**
  * Data class que contém todos os critérios de filtro aplicáveis a uma lista de membros de equipa.

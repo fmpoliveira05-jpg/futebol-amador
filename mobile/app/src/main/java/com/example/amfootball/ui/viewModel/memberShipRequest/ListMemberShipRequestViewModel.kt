@@ -2,15 +2,15 @@ package com.example.amfootball.ui.viewModel.memberShipRequest
 
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.data.filters.FilterMemberShipRequest
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.UserConst
-import com.example.amfootball.utils.extensions.toLocalDateTime
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

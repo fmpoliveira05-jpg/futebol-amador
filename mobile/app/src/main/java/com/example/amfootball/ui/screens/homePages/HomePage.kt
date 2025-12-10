@@ -21,12 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.homePageActions.HomePageActions
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.enums.UserRole
-import com.example.amfootball.data.mocks.UiStateMock
-import com.example.amfootball.data.mocks.homePages.HomePageMock
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.ui.actions.homePageActions.HomePageActions
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.previewsMocks.UiStateMock
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.ActionCardSection
 import com.example.amfootball.ui.components.pages.homePage.ActionCardCreateTeam
@@ -35,6 +34,7 @@ import com.example.amfootball.ui.components.pages.homePage.ActionCardListTeam
 import com.example.amfootball.ui.components.pages.homePage.ActionCardMyTeam
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.previewsMocks.HomePageMock
 import com.example.amfootball.ui.viewModel.homePages.HomePageViewModel
 
 /**

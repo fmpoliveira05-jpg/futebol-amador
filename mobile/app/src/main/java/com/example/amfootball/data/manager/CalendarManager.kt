@@ -9,7 +9,7 @@ import javax.inject.Singleton
  * Gerenciador (Manager) de alto nível que orquestra as operações de calendário.
  *
  * Esta classe é responsável por coordenar a comunicação entre:
- * 1. [com.example.amfootball.data.repository.CalendarRepository]: Interage com o Calendar Provider do Android (adicionar/remover eventos).
+ * 1. [CalendarRepository]: Interage com o Calendar Provider do Android (adicionar/remover eventos).
  * 2. [com.example.amfootball.data.local.CalendarPreference]: Armazena e recupera o mapeamento entre o ID da partida (API) e o ID do evento (Android).
  *
  * Garante que a adição e remoção de eventos seja atômica: se o evento for criado/removido,

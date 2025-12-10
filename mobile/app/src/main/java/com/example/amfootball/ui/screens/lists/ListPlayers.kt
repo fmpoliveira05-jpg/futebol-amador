@@ -22,13 +22,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterListPlayersActions
-import com.example.amfootball.data.dtos.player.InfoPlayerDto
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.data.filters.FilterListPlayer
-import com.example.amfootball.data.mocks.lists.ListPlayersMocks
+import com.example.amfootball.ui.previewsMocks.lists.ListPlayersMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -51,7 +48,10 @@ import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.core.utils.PlayerConst
+import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
 
 /**
  * Ecrã principal de Listagem de Jogadores.

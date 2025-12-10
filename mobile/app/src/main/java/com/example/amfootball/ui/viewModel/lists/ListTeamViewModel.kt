@@ -2,17 +2,17 @@ package com.example.amfootball.ui.viewModel.lists
 
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterTeamError
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterTeamError
 import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.TeamService
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.remote.dtos.rank.RankNameDto
+import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

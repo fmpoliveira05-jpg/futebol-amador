@@ -4,9 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.services.PlayerService
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.remote.services.PlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

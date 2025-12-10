@@ -4,23 +4,23 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.dtos.matchInivite.SendMatchInviteDto
-import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.Forms.MatchFormMode
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.domains.enums.forms.MatchFormMode
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.manager.CalendarManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.CalendarService
-import com.example.amfootball.data.services.MatchInviteService
-import com.example.amfootball.data.services.TeamService
-import com.example.amfootball.navigation.objects.Arguments
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.services.CalendarService
+import com.example.amfootball.data.remote.services.MatchInviteService
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.ui.navigation.objects.Arguments
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
-import com.example.amfootball.utils.MatchConsts
-import com.example.amfootball.utils.extensions.toLocalDate
+import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.core.extensions.toLocalDate
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.remote.dtos.matchInivite.SendMatchInviteDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -299,7 +299,6 @@ class FormMatchInviteViewModel @Inject constructor(
 
     // --- MÉTODOS PRIVADOS (Lógica Interna) ---
 
-    //TODO: Testar
     private fun loadDataSend() {
         val opponentTeamId = savedStateHandle.get<String>(Arguments.TEAM_ID)
         val opponentTeamName = savedStateHandle.get<String>(Arguments.TEAM_NAME)

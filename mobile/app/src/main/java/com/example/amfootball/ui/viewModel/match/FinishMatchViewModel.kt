@@ -5,11 +5,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.match.ResultMatchDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.formErrors.FinishMatchFormErrors
-import com.example.amfootball.navigation.objects.Routes
-import com.example.amfootball.utils.FinishMatchConst
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.FinishMatchFormErrors
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.core.utils.FinishMatchConst
+import com.example.amfootball.data.remote.dtos.match.ResultMatchDto
 
 //TODO: Falta a conexão com o Backend
 /**

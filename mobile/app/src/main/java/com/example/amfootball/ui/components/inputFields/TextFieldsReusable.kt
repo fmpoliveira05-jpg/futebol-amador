@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
-import com.example.amfootball.utils.UserConst
+import com.example.amfootball.core.utils.UserConst
 
 /**
  * Componente de campo de input especializado para Endereços de Email.

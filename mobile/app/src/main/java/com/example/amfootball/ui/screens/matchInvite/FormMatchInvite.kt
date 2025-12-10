@@ -23,11 +23,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.forms.FormMatchInviteActions
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.Forms.MatchFormMode
-import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.domains.enums.forms.MatchFormMode
+import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
@@ -37,7 +34,10 @@ import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
-import com.example.amfootball.utils.MatchConsts
+import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.ui.actions.forms.FormMatchInviteActions
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone

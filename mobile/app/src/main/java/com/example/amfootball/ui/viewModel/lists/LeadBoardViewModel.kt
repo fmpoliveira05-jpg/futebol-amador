@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.leadboard.LeadboardDto
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
+import com.example.amfootball.ui.navigation.objects.Routes
 
 //TODO: Falta conexão com o Backend e extender com o ListsViewModel
 /**
@@ -56,7 +56,7 @@ class LeadBoardViewModel : ViewModel() {
     //Inicializer
     init {
         //TODO: Depois adaptar para ir buscar ao FireBase
-        listTeam.value = LeadboardDto.Companion.generateLeadboardExample()
+        listTeam.value = LeadboardDto.generateLeadboardExample()
     }
 
     //Metodo

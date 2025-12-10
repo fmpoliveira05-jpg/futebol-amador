@@ -21,10 +21,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.forms.LoginActions
-import com.example.amfootball.data.dtos.player.LoginDto
-import com.example.amfootball.data.errors.formErrors.LoginError
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.remote.dtos.player.LoginDto
+import com.example.amfootball.domains.errors.formErrors.LoginError
+import com.example.amfootball.ui.actions.forms.LoginActions
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LoginButton
 import com.example.amfootball.ui.components.inputFields.EmailTextField

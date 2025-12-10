@@ -16,7 +16,7 @@ import androidx.test.rule.GrantPermissionRule
 import com.example.amfootball.MainActivity
 import com.example.amfootball.R
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.navigation.objects.Routes
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before

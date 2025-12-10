@@ -16,8 +16,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.amfootball.R
-import com.example.amfootball.navigation.objects.AppRouteInfo
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.navigation.objects.AppRouteInfo
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.buttons.BackButton
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 

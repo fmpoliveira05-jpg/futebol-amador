@@ -27,13 +27,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterTeamActions
-import com.example.amfootball.data.actions.itemsList.ItemsListTeamAction
-import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.data.mocks.lists.ListTeamMocks
+import com.example.amfootball.ui.previewsMocks.lists.ListTeamMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -52,8 +47,13 @@ import com.example.amfootball.ui.components.lists.NumMembersTeamRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.remote.dtos.rank.RankNameDto
+import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterTeamActions
+import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
 
 /**
  * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful).

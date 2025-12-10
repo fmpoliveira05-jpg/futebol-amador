@@ -2,8 +2,7 @@ package com.example.amfootball.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.enums.UserRole
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject

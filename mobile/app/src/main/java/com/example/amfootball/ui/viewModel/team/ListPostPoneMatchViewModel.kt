@@ -2,23 +2,23 @@ package com.example.amfootball.ui.viewModel.team
 
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.match.PostPoneMatchDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.data.filters.FilterPostPoneMatch
 import com.example.amfootball.data.manager.CalendarManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.TeamConst
-import com.example.amfootball.utils.extensions.toLocalDateTime
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
-/*
+/**
 * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Listagem de Pedidos de Adiamento.
 *
 * Gere o estado dos filtros (pesquisa por nome, local e, crucialmente, por quatro critérios de data:
@@ -57,7 +57,8 @@ class ListPostPoneMatchViewModel @Inject constructor(
 
     init {
         //TODO: Carregar a lista da API
-        listState.value = PostPoneMatchDto.createExamplePostPoneMatchList()
+        //listState.value = PostPoneMatchDto.createExamplePostPoneMatchList()
+        listState.value = emptyList()
         stopLoading()
     }
 

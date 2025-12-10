@@ -19,13 +19,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterMatchInviteActions
-import com.example.amfootball.data.actions.itemsList.ItemListMatchIniviteActions
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.data.filters.FilterMatchInvite
-import com.example.amfootball.data.mocks.ListMatchInviteMocks
+import com.example.amfootball.ui.previewsMocks.ListMatchInviteMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
@@ -45,7 +41,11 @@ import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
-import com.example.amfootball.utils.Patterns
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterMatchInviteActions
+import com.example.amfootball.ui.actions.itemsList.ItemListMatchIniviteActions
 import java.time.format.DateTimeFormatter
 
 //TODO: FALTA APENAS TESTAR O ACCEPT

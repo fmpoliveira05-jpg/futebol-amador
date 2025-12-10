@@ -42,12 +42,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.settings.AppLanguage
-import com.example.amfootball.data.enums.settings.AppTheme
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.domains.enums.settings.AppLanguage
+import com.example.amfootball.domains.enums.settings.AppTheme
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.SettingsViewModel

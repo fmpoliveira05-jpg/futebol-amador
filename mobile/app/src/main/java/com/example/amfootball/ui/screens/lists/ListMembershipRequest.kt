@@ -22,11 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
-import com.example.amfootball.data.actions.itemsList.ItemsMemberShipRequest
-import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -42,8 +38,12 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
-import com.example.amfootball.utils.Patterns
-import com.example.amfootball.utils.UserConst
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
+import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
 import java.time.format.DateTimeFormatter
 
 //TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros

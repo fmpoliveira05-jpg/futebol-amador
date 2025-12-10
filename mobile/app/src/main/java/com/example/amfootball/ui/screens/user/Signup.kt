@@ -15,10 +15,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,11 +27,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.player.CreateProfileDto
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.errors.formErrors.SignUpFormErrors
-import com.example.amfootball.data.validators.validateSignUpForm
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.ui.OsmMapView
 import com.example.amfootball.ui.components.Loading
 import com.example.amfootball.ui.components.inputFields.DatePickerDockedPastLimitedDate
@@ -44,15 +37,11 @@ import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.notification.showOfflineToast
 import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.PlayerConst
-import com.example.amfootball.utils.UserConst
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.PlayerConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
 
 /**
  * Ecrã de Registo de Novo Utilizador (Sign Up).

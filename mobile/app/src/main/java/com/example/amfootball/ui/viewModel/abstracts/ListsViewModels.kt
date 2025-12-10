@@ -1,8 +1,8 @@
 package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.utils.ListsSizesConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.core.utils.ListsSizesConst
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,7 +43,7 @@ abstract class ListsViewModels<T>(
 
     /**
      * Contador do número máximo de itens a exibir na UI atualmente.
-     * Inicia com [com.example.amfootball.utils.ListsSizesConst.INICIAL_SIZE] e incrementa conforme o utilizador pede "Mais".
+     * Inicia com [ListsSizesConst.INICIAL_SIZE] e incrementa conforme o utilizador pede "Mais".
      */
     protected val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
 

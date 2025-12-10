@@ -1,6 +1,6 @@
 package com.example.amfootball.ui.viewModel.abstracts
 
-import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

@@ -1,23 +1,20 @@
 package com.example.amfootball.ui.viewModel
 
 import android.content.Context
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
-import com.example.amfootball.data.SettingsStore
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.enums.settings.AppLanguage
-import com.example.amfootball.data.enums.settings.AppTheme
+import com.example.amfootball.data.local.SettingsStore
+import com.example.amfootball.domains.enums.settings.AppLanguage
+import com.example.amfootball.domains.enums.settings.AppTheme
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.PlayerService
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.remote.services.PlayerService
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 

@@ -16,9 +16,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.actions.lists.LeadBoardActions
-import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
-import com.example.amfootball.data.dtos.leadboard.LeadboardDto
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
+import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
+import com.example.amfootball.ui.actions.lists.LeadBoardActions
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList

@@ -24,11 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.profiles.ProfileTeamAction
-import com.example.amfootball.data.dtos.team.ProfileTeamDto
-import com.example.amfootball.data.enums.UserRole
-import com.example.amfootball.data.mocks.ProfileTeamMocks
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.previewsMocks.ProfileTeamMocks
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImageString
@@ -36,8 +34,10 @@ import com.example.amfootball.ui.components.pages.team.ProfileTeamDialogDelte
 import com.example.amfootball.ui.components.pages.team.RowButtonsProfileTeam
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
-import com.example.amfootball.utils.PitchConst
-import com.example.amfootball.utils.TeamConst
+import com.example.amfootball.core.utils.PitchConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
+import com.example.amfootball.ui.actions.profiles.ProfileTeamAction
 
 //TODO: Colocar mapa com a morada da Team
 /**

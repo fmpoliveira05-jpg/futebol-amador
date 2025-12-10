@@ -2,12 +2,12 @@ package com.example.amfootball.ui.viewModel.homePages
 
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.enums.UserRole
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

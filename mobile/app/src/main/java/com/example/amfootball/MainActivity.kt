@@ -18,10 +18,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
-import com.example.amfootball.navigation.MainNavigation
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.navigation.MainNavigation
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.utils.NotificationConst
+import com.example.amfootball.core.utils.NotificationConst
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -34,7 +34,7 @@ import javax.inject.Inject
  * 3. Configurar canais de notificação e solicitar permissões de runtime essenciais.
  *
  * Nota: Esta Activity não gere o fluxo de notificação FCM diretamente; essa tarefa é delegada
- * ao [com.example.amfootball.data.services.PushNotificationService].
+ * ao [com.example.amfootball.data.remote.services.PushNotificationService].
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {

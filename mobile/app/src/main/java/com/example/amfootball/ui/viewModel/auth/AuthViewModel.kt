@@ -3,12 +3,12 @@ package com.example.amfootball.ui.viewModel.auth
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.services.AuthService
-import com.example.amfootball.data.services.NotificationCallsService
+import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
+import com.example.amfootball.data.remote.services.AuthService
+import com.example.amfootball.data.remote.services.NotificationCallsService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +19,7 @@ import javax.inject.Inject
 /**
  * ViewModel responsável pela gestão da lógica de Autenticação (Login, Registo e Logout).
  *
- * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([com.example.amfootball.data.services.AuthService]).
+ * Este ViewModel atua como intermediário entre a UI (Ecrãs de Login/Registo) e a camada de dados ([AuthService]).
  * Gere o estado de sessão do utilizador e executa operações assíncronas, notificando a UI através de callbacks e StateFlows.
  *
  * @property repository O repositório injetado que contém a lógica de negócio (Firebase + API + Sessão Local).

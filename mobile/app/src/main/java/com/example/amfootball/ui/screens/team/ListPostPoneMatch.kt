@@ -19,13 +19,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterListPostPoneMatchActions
-import com.example.amfootball.data.actions.itemsList.ItemsListPostPoneMatchActions
-import com.example.amfootball.data.dtos.match.PostPoneMatchDto
-import com.example.amfootball.data.errors.filtersError.ListPostPoneMatchFiltersError
+import com.example.amfootball.domains.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.data.filters.FilterPostPoneMatch
-import com.example.amfootball.data.mocks.lists.ListPostPoneMatchMocks
+import com.example.amfootball.ui.previewsMocks.lists.ListPostPoneMatchMocks
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -45,7 +41,11 @@ import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
-import com.example.amfootball.utils.Patterns
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterListPostPoneMatchActions
+import com.example.amfootball.ui.actions.itemsList.ItemsListPostPoneMatchActions
 import java.time.format.DateTimeFormatter
 
 //TODO: POR METER CONEXÃO COM O BACKEND
