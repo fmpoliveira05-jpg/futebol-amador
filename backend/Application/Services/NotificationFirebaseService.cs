@@ -47,5 +47,16 @@ namespace Application.Services
                 Console.WriteLine($"Erro Firebase: {ex.Message}");
             }
         }
+
+        public Task SendNotificationAdminsTeam(Guid idTeam, string titulo, string corpo)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SendNotificationMembersTeam(Guid idTeam, string titulo, string corpo)
+        {
+            throw new NotImplementedException();
+        }
+
     }
 }

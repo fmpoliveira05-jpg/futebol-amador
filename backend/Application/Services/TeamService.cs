@@ -77,7 +77,7 @@ namespace Application.Services
         /// <param name="teamDto">Dados da equipa a criar.</param>
         /// <param name="playerId">ID do jogador autenticado que está a criar.</param>
         /// <returns>O ID (GUID) da nova equipa criada.</returns>
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, string playerId)
+        public async Task<CreateTeamDto> CreateTeamAsync(CreateTeamDto teamDto, string playerId)
         {
             var playerCreating = await PlayerRepository.GetPlayerByIdAsync(playerId);
             AuthorizationValidator.ValidatePlayerAutorizationWithoutTeam(playerCreating);
@@ -107,7 +107,9 @@ namespace Application.Services
             PlayerRepository.UpdatePlayer(playerCreating);
 
             await UnityOfWork.SaveChangesAsync();
-            return newTeam.Id;
+
+            teamDto.Id = newTeam.Id;
+            return teamDto;
         }
 
         /// <summary>
@@ -155,7 +157,7 @@ namespace Application.Services
         /// <param name="teamId">ID da equipa a ser atualizada.</param>
         /// <param name="dto">DTO com os novos dados.</param>
         /// <param name="currentUserId">ID do utilizador que está a atualizar (deve ser Admin).</param>
-        public async Task UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId)
+        public async Task<CreateTeamDto> UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId)
         {
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
@@ -179,6 +181,7 @@ namespace Application.Services
             TeamRepository.UpdateTeam(teamToUpdate);
 
             await UnityOfWork.SaveChangesAsync();
+            return dto;
         }
 
         /// <summary>

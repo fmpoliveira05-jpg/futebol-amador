@@ -6,6 +6,8 @@ namespace Application.DTOs.Team
 {
     public class CreateTeamDto
     {
+        public Guid? Id { get; set; }
+
         [Required]
         [Length(ModelConstants.TeamConst.MinNameLength, ModelConstants.TeamConst.MaxNameLength)]
         public string Name { get; set; } = null!;

@@ -47,27 +47,46 @@ namespace Api.Controllers
 
         #region CRUD Team
         /// <summary>
-        /// Cria uma nova equipa.
+        /// Cria uma nova equipa na plataforma.
         /// </summary>
         /// <remarks>
-        /// O jogador que cria a equipa torna-se automaticamente o Administrador da mesma.
-        /// Requer que o jogador ainda não pertença a nenhuma outra equipa.
+        /// Esta operação é fundamental para iniciar a participação de um jogador.
+        /// 
+        /// **Regras de Negócio:**
+        /// * O utilizador autenticado que cria a equipa é designado como **Administrador** (dono) inicial.
+        /// * Um utilizador só pode pertencer a uma equipa de cada vez (validação de unicidade).
+        /// 
+        /// **Retorno (201 Created):**
+        /// A resposta inclui o DTO completo da equipa criada e, crucialmente,
+        /// o Header 'Location' que aponta para o URI de acesso direto ao novo recurso.
         /// </remarks>
-        /// <param name="teamDto">Dados da nova equipa (Nome, Campo, etc.).</param>
-        /// <returns>Dados da equipa criada e localização do recurso.</returns>
-        /// <response code="201">Equipa criada com sucesso.</response>
-        /// <response code="400">Dados inválidos ou jogador já tem equipa.</response>
-        /// <response code="401">Utilizador não autenticado.</response>
+        /// <param name="teamDto">
+        /// Data Transfer Object (DTO) contendo os dados essenciais para a criação da equipa,
+        /// incluindo o nome, descrição, e informações do campo principal.
+        /// </param>
+        /// <returns>
+        /// Retorna o objeto DTO da equipa criada e o código de status 201 Created.
+        /// </returns>
+        /// <response code="201">
+        /// Equipa criada com sucesso. O Header 'Location' aponta para o endpoint GET da equipa (ex: /api/Team/{id}).
+        /// </response>
+        /// <response code="400">
+        /// Dados inválidos (ex: falha na validação do [CreateTeamDto]) ou violação de regras de negócio
+        /// (ex: o jogador autenticado já possui uma equipa).
+        /// </response>
+        /// <response code="401">
+        /// O utilizador não está autenticado e, portanto, não pode realizar a criação da equipa.
+        /// </response>
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
-        {            
+        {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var newTeamId = await TeamService.CreateTeamAsync(teamDto, userId);
+            var newTeam = await TeamService.CreateTeamAsync(teamDto, userId);
 
-            return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
+            return CreatedAtAction(nameof(GetTeamById), new { id = newTeam.Id }, newTeam);
         }
 
         /// <summary>
@@ -89,25 +108,44 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Atualiza as informações de uma equipa.
+        /// Atualiza as informações de uma equipa existente (Nome, Descrição, Logótipo, Campo Principal).
         /// </summary>
         /// <remarks>
-        /// Apenas administradores da equipa podem realizar esta ação.
+        /// Esta é uma operação HTTP PUT idempotente.
+        /// 
+        /// **Requer Autorização:** Apenas o utilizador que possui permissão de **Administrador**
+        /// da equipa especificada pelo <paramref name="teamId"/> pode executar esta ação.
+        /// 
+        /// **Corpo do Pedido (Request Body):**
+        /// O corpo deve conter todos os campos necessários para a atualização, conforme definido
+        /// no esquema do [CreateTeamDto] (incluindo as informações aninhadas do campo de jogo).
         /// </remarks>
-        /// <param name="teamId">ID da equipa a atualizar.</param>
-        /// <param name="dto">Novos dados da equipa.</param>
-        /// <response code="200">Equipa atualizada com sucesso.</response>
-        /// <response code="400">Dados inválidos.</response>
-        /// <response code="403">Utilizador não é administrador da equipa.</response>
+        /// <param name="teamId">O identificador único (GUID) da equipa a ser atualizada.</param>
+        /// <param name="dto">O Data Transfer Object (DTO) contendo os novos dados da equipa.</param>
+        /// <response code="200">
+        /// Retorna o objeto DTO da equipa com as informações atualizadas, confirmando a operação.
+        /// </response>
+        /// <response code="400">
+        /// Ocorreu um erro de validação (ex: dados incompletos ou fora dos limites de caracteres).
+        /// O corpo da resposta (Body) conterá o objeto de erros de validação.
+        /// </response>
+        /// <response code="403">
+        /// O utilizador autenticado não tem a permissão de Administrador necessária para modificar a equipa.
+        /// </response>
+        /// <response code="404">
+        /// A equipa especificada pelo <paramref name="teamId"/> não foi encontrada.
+        /// </response>
         [HttpPut("{teamId}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // Adicionei 404, comum para recursos que não existem.
         public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] CreateTeamDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
-            return Ok("Equipa atualizada com sucesso.");
+
+            var teamUpdate = await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
+            return Ok(teamUpdate);
         }
 
         /// <summary>

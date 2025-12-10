@@ -22,7 +22,7 @@ namespace Application.Interfaces.Services
         /// <param name="teamDto">DTO com os dados da equipa a criar.</param>
         /// <param name="adminUserId">ID do jogador autenticado que está a criar a equipa.</param>
         /// <returns>Uma tarefa assíncrona que retorna o ID (GUID) da nova equipa criada.</returns>
-        Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, string adminUserId);
+        Task<CreateTeamDto> CreateTeamAsync(CreateTeamDto teamDto, string adminUserId);
 
         /// <summary>
         /// Obtém os dados detalhados do perfil de uma equipa, incluindo Pitch e a lista de membros.
@@ -40,7 +40,7 @@ namespace Application.Interfaces.Services
         /// <param name="teamId">ID da equipa a ser atualizada.</param>
         /// <param name="dto">DTO com os novos dados.</param>
         /// <param name="currentUserId">ID do utilizador que está a executar a atualização.</param>
-        Task UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId);
+        Task<CreateTeamDto> UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId);
 
         /// <summary>
         /// Elimina uma equipa permanentemente.
