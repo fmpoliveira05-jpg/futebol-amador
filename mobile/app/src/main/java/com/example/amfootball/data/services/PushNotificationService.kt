@@ -1,6 +1,8 @@
 package com.example.amfootball.data.services
 
 import android.util.Log
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -30,34 +32,12 @@ class PushNotificationService : FirebaseMessagingService() {
 
     @Inject
     lateinit var sessionManager: SessionManager
+
     @Inject
     lateinit var notificationCallsService: NotificationCallsService
 
-    /**
-     * Chamado quando uma mensagem FCM é recebida.
-     * * Este método é invocado quando:
-     * 1. A aplicação está em primeiro plano (foreground) e recebe qualquer tipo de mensagem.
-     * 2. A aplicação está em segundo plano ou fechada, mas a mensagem contém apenas um payload de dados (data payload).
-     *
-     * Se o payload contiver dados (data) ou uma notificação (notification), este método delega a exibição
-     * ao [notificationService].
-     *
-     * @param message A mensagem completa recebida, contendo dados e/ou notificação.
-     */
-    override fun onMessageReceived(message: RemoteMessage) {
-        super.onMessageReceived(message)
-
-        if (message.data.isNotEmpty()) {
-            val title = message.data["title"] ?: "Nova Notificação"
-            val body = message.data["body"] ?: "Tens uma nova mensagem"
-
-            notificationService.showNotificationTeam(title, body)
-        }
-
-        message.notification?.let {
-            notificationService.showNotificationTeam(it.title ?: "", it.body ?: "")
-        }
-    }
+    @Inject
+    lateinit var globalEventBus: GlobalEventBus
 
     /**
      * Chamado quando um novo Token de Dispositivo FCM é gerado.
@@ -86,5 +66,63 @@ class PushNotificationService : FirebaseMessagingService() {
                 }
             }
         }
+    }
+
+    /**
+     * Chamado quando uma mensagem FCM é recebida.
+     * * Este método é invocado quando:
+     * 1. A aplicação está em primeiro plano (foreground) e recebe qualquer tipo de mensagem.
+     * 2. A aplicação está em segundo plano ou fechada, mas a mensagem contém apenas um payload de dados (data payload).
+     *
+     * Se o payload contiver dados (data) ou uma notificação (notification), este método delega a exibição
+     * ao [notificationService].
+     *
+     * @param message A mensagem completa recebida, contendo dados e/ou notificação.
+     */
+    override fun onMessageReceived(message: RemoteMessage) {
+        super.onMessageReceived(message)
+
+        val eventType = message.data["type"]
+
+        when(eventType) {
+            "TEAM_DELETED" -> {
+                handleTeamDeleted(message = message)
+            } else -> {
+                handleDefaultMessageReceiver(message = message)
+            }
+        }
+
+    }
+
+    private fun handleDefaultMessageReceiver(message: RemoteMessage) {
+        if (message.data.isNotEmpty()) {
+            val title = message.data["title"] ?: "Nova Notificação"
+            val body = message.data["body"] ?: "Tens uma nova mensagem"
+
+            notificationService.showNotificationTeam(title, body)
+        }
+
+        message.notification?.let {
+            notificationService.showNotificationTeam(
+                title = it.title ?: "", message = it.body ?: ""
+            )
+        }
+    }
+
+    private fun handleTeamDeleted(message: RemoteMessage) {
+        val title = message.data["title"] ?: "Equipa Eliminada"
+        val message = message.data["body"] ?: "A tua equipa foi eliminada."
+
+        sessionManager.updateTeamIdUser(null)
+
+        CoroutineScope(Dispatchers.Main).launch {
+            globalEventBus.emitEvent(AppEvent.TeamDeleted(message))
+        }
+
+        notificationService.showNotificationTeam(
+            title = title,
+            message = message,
+            navigationAction = "NAVIGATE_TO_HOME"
+        )
     }
 }

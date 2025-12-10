@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -58,10 +59,11 @@ import com.example.amfootball.utils.extensions.composableProtectedAdminTeam
 import com.example.amfootball.utils.extensions.composableProtectedMemberTeam
 import com.example.amfootball.utils.extensions.composableProtectedPlayerWithouTeam
 
-//TODO: Colocar autorização nas rotas, até agora só temos autentificação
 @Composable
-fun MainNavigation() {
-    val globalNavController = rememberNavController()
+fun MainNavigation(
+    globalNavController: NavHostController,
+    startDestination: String
+) {
     val authViewModel: AuthViewModel = hiltViewModel<AuthViewModel>()
     val context = LocalContext.current
     val sessionManager by remember { mutableStateOf(SessionManager(context = context)) }
@@ -92,7 +94,7 @@ fun MainNavigation() {
         ) { innerPadding ->
             NavHost(
                 navController = globalNavController,
-                startDestination = Routes.GeralRoutes.HOMEPAGE.route,
+                startDestination = startDestination,
                 modifier = Modifier.padding(innerPadding)
             ) {
                 homePages(
@@ -492,7 +494,7 @@ private fun NavGraphBuilder.profileTeam(
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {
-            ProfileTeamScreen()
+            ProfileTeamScreen(navHostController = globalNavController)
         }
     )
 
@@ -502,7 +504,7 @@ private fun NavGraphBuilder.profileTeam(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
         )
     ) {
-        ProfileTeamScreen()
+        ProfileTeamScreen(navHostController = globalNavController)
     }
 }
 

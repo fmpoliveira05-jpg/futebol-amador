@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.viewModel.homePages
 
+import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.support.TeamDto
 import com.example.amfootball.data.enums.UserRole
@@ -12,6 +13,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 //TODO: Meter um endPoint na API, que carrega os dados da teamDto + próximos 3 jogos da equipa + sequencia de resultados 5 próximos jogos (W, L, D), depois trocar o TeamDto, por isso
@@ -65,12 +67,12 @@ class TeamHomePageViewModel @Inject constructor(
      *
      * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
      */
-
     val role: StateFlow<UserRole> = roleState.asStateFlow()
 
     init {
         loadInfoTeam()
         loadUserRole()
+        //refreshUserProfile()
     }
 
     /**
@@ -173,6 +175,41 @@ class TeamHomePageViewModel @Inject constructor(
             onSucess()
         }
     }
+
+    /*
+    Metodo para apos o user ser promovido ou despromovido ao entrar na HomePage, o mesmo ter a role atualizada
+    fun refreshUserProfile() {
+        viewModelScope.launch {
+            try {
+                // Chama a API para obter o perfil atualizado
+                // Nota: Não precisas de ativar 'isLoading' visual que bloqueie o ecrã
+                val response = userRepository.getUserProfile()
+
+                if (response.isSuccessful && response.body() != null) {
+                    val freshProfile = response.body()!!
+
+                    // 1. Verificar se houve mudanças críticas
+                    val oldProfile = sessionManager.getUserProfile()
+
+                    // Se o user foi expulso da equipa (ex: teamId veio null ou diferente)
+                    if (oldProfile?.idTeam != null && freshProfile.idTeam == null) {
+                        // Lógica para redirecionar para ecrã de "Sem Equipa"
+                        // _navigationEvent.emit(NavigateToNoTeam)
+                    }
+
+                    sessionManager.saveUserProfile(freshProfile)
+                    loadUserRole()
+                }
+            } catch (e: Exception) {
+                // Se falhar (sem net), não faz mal.
+                // O utilizador continua a ver os dados em cache.
+                // Podes mostrar um pequeno Toast ou ignorar.
+            }
+        }
+    }
+
+     */
+
 
     /**
      * Carrega o Role do utilizador a partir da sessão local.

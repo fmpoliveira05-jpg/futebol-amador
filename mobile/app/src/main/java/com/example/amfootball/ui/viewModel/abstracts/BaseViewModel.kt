@@ -2,7 +2,7 @@ package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.network.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * ViewModel Base Abstrato.
  *
  * Serve como fundação para todos os ViewModels da aplicação. Centraliza a lógica comum de:
- * 1. Gestão de Estado da UI ([com.example.amfootball.data.UiState]) para Loading, Erros e Mensagens (Toasts).
+ * 1. Gestão de Estado da UI ([UiState]) para Loading, Erros e Mensagens (Toasts).
  * 2. Monitorização de Conectividade de Rede em tempo real.
  * 3. Execução segura de chamadas assíncronas (Corrotinas) com tratamento de exceções automático.
  *
@@ -26,8 +26,8 @@ abstract class BaseViewModel(
 ) : ViewModel() {
     /**
      * Estado global da UI.
-     * Contém informações sobre se o ecrã está a carregar ([com.example.amfootball.data.UiState.isLoading]),
-     * se ocorreu algum erro ([com.example.amfootball.data.UiState.errorMessage]) ou se há mensagens para exibir ([com.example.amfootball.data.UiState.toastMessage]).
+     * Contém informações sobre se o ecrã está a carregar ([UiState.isLoading]),
+     * se ocorreu algum erro ([UiState.errorMessage]) ou se há mensagens para exibir ([UiState.toastMessage]).
      */
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()

@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.dtos.player.FireBaseLoginResponseDto
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.dtos.support.TeamDto

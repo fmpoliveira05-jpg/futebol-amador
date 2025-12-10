@@ -1,6 +1,5 @@
 package com.example.amfootball.data.dtos.team
 
-import android.net.Uri
 import com.example.amfootball.data.dtos.PitchFormDto
 import com.example.amfootball.data.dtos.support.PitchInfo
 import com.google.gson.annotations.SerializedName
@@ -19,11 +18,12 @@ import com.google.gson.annotations.SerializedName
  */
 data class FormTeamDto(
     val id: String? = null,
-    @SerializedName("Name")
+    @SerializedName("name", alternate = ["Name"])
     val name: String = "",
-    @SerializedName("Description")
+    @SerializedName("description", alternate = ["Description"])
     val description: String? = null,
-    val image: Uri? = null,
-    @SerializedName("PitchDto", alternate = ["pitchDto"])
+    @SerializedName("icon")
+    val image: String? = null,
+    @SerializedName("homePitch", alternate = ["HomePitch", "pitchDto", "PitchDto"])
     val pitch: PitchInfo = PitchInfo()
 )

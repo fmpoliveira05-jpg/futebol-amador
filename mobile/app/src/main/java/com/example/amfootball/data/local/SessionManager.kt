@@ -3,6 +3,7 @@ package com.example.amfootball.data.local
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.enums.UserRole
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -121,16 +122,30 @@ class SessionManager @Inject constructor(
     }
 
     fun updateTeamIdUser(teamId: String?) {
-        var currentProfile = getUserProfile()
+        val currentProfile = getUserProfile()
         if (currentProfile != null) {
             val updatedProfile = currentProfile.copy(
                 idTeam = teamId,
-                team = if (currentProfile.team != null && teamId != null) {
-                    currentProfile.team.copy(id = teamId)
+                team = if (teamId == null) {
+                    null
                 } else {
                     currentProfile.team
+                },
+                isAdmin = if (teamId == null) {
+                    false
+                } else {
+                    currentProfile.isAdmin
                 }
             )
+
+            saveUserProfile(updatedProfile)
+        }
+    }
+
+    fun updateRoleMemberTeam(isAdmin: Boolean) {
+        val currentProfile = getUserProfile()
+        if (currentProfile != null) {
+            val updatedProfile = currentProfile.copy(isAdmin = isAdmin)
 
             saveUserProfile(updatedProfile)
         }

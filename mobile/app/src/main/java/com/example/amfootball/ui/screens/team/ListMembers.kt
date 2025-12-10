@@ -28,13 +28,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.data.actions.itemsList.ItemsListMemberAction
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.mocks.lists.ListMembersMocks
@@ -102,6 +103,7 @@ fun ListMembersScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
 
     ListMemberContent(
         filters = filters,
@@ -114,6 +116,7 @@ fun ListMembersScreen(
         isOnline = isOnline,
         itemsListActions = itemsListActions,
         navHostController = navHostController,
+        role = role
     )
 }
 
@@ -145,6 +148,7 @@ private fun ListMemberContent(
     listTypeMember: List<TypeMember?>,
     listPosition: List<Position?>,
     itemsListActions: ItemsListMemberAction,
+    role: UserRole,
     navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
@@ -185,7 +189,8 @@ private fun ListMemberContent(
                         promote = { itemsListActions.onPromoteMember(member.id) },
                         despromote = { itemsListActions.onDemoteMember(member.id) },
                         remove = { itemsListActions.onRemovePlayer(member.id) },
-                        showMore = { itemsListActions.onShowMoreInfo(member.id, navHostController) }
+                        showMore = { itemsListActions.onShowMoreInfo(member.id, navHostController) },
+                        role = role
                     )
                 },
                 messageEmptyList = stringResource(id = R.string.list_members_empty)
@@ -315,6 +320,7 @@ private fun ListMemberItem(
     despromote: () -> Unit,
     remove: () -> Unit,
     showMore: () -> Unit,
+    role: UserRole
 ) {
     GenericListItem(
         item = member,
@@ -338,7 +344,8 @@ private fun ListMemberItem(
                 promote = promote,
                 despromote = despromote,
                 remove = remove,
-                showMore = showMore
+                showMore = showMore,
+                role = role
             )
         }
     )
@@ -379,40 +386,20 @@ private fun MemberTrailingButtons(
     promote: () -> Unit,
     despromote: () -> Unit,
     remove: () -> Unit,
-    showMore: () -> Unit
+    showMore: () -> Unit,
+    role: UserRole
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(start = 8.dp)
     ) {
-        when (typeMember) {
-            TypeMember.PLAYER -> {
-                IconButton(onClick = promote) {
-                    Icon(
-                        imageVector = Icons.Filled.Upgrade,
-                        contentDescription = stringResource(id = R.string.accept_button_description),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-
-            TypeMember.ADMIN_TEAM -> {
-                IconButton(onClick = despromote) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowDownward,
-                        contentDescription = stringResource(id = R.string.reject_button_description),
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        }
-
-        IconButton(onClick = remove) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.remove_button_player_description),
-                tint = MaterialTheme.colorScheme.error
+        if(role == UserRole.ADMIN_TEAM) {
+            AdminItensListFields(
+                typeMember = typeMember,
+                promote = promote,
+                despromote = despromote,
+                remove = remove
             )
         }
 
@@ -423,10 +410,47 @@ private fun MemberTrailingButtons(
     }
 }
 
-@Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMemberContent_Normal() {
+private fun AdminItensListFields(
+    typeMember: TypeMember,
+    promote: () -> Unit,
+    despromote: () -> Unit,
+    remove: () -> Unit,
+) {
+    when (typeMember) {
+        TypeMember.PLAYER -> {
+            IconButton(onClick = promote) {
+                Icon(
+                    imageVector = Icons.Filled.Upgrade,
+                    contentDescription = stringResource(id = R.string.accept_button_description),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
+        TypeMember.ADMIN_TEAM -> {
+            IconButton(onClick = despromote) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowDownward,
+                    contentDescription = stringResource(id = R.string.reject_button_description),
+                    tint = MaterialTheme.colorScheme.error
+                )
+            }
+        }
+    }
+
+    IconButton(onClick = remove) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = stringResource(id = R.string.remove_button_player_description),
+            tint = MaterialTheme.colorScheme.error
+        )
+    }
+}
+
+@Preview(name = "1. Admin View", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Admin() {
     ListMemberContent(
         filters = FilterMembersTeam(),
         filterActions = ListMembersMocks.mockFilterActions,
@@ -437,12 +461,30 @@ fun PreviewListMemberContent_Normal() {
         uiState = UiState(isLoading = false),
         isOnline = true,
         itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        role = UserRole.ADMIN_TEAM
     )
 }
 
-@Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "2. List Empty - EN", locale = "en", showBackground = true)
+@Preview(name = "2. Member View", showBackground = true)
+@Composable
+fun PreviewListMemberContent_Member() {
+    ListMemberContent(
+        filters = FilterMembersTeam(),
+        filterActions = ListMembersMocks.mockFilterActions,
+        filtersErrors = FilterMembersFilterError(),
+        list = ListMembersMocks.mockMembers,
+        listTypeMember = ListMembersMocks.mockListTypes,
+        listPosition = ListMembersMocks.mockListPositions,
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        itemsListActions = ListMembersMocks.mockItemActions,
+        navHostController = rememberNavController(),
+        role = UserRole.MEMBER_TEAM
+    )
+}
+
+@Preview(name = "3. Empty List", showBackground = true)
 @Composable
 fun PreviewListMemberContent_Empty() {
     ListMemberContent(
@@ -455,59 +497,7 @@ fun PreviewListMemberContent_Empty() {
         uiState = UiState(isLoading = false),
         isOnline = true,
         itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "3. Loading - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "3. Loading - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListMemberContent_Loading() {
-    ListMemberContent(
-        filters = FilterMembersTeam(),
-        filterActions = ListMembersMocks.mockFilterActions,
-        filtersErrors = FilterMembersFilterError(),
-        list = emptyList(),
-        listTypeMember = ListMembersMocks.mockListTypes,
-        listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = true),
-        isOnline = true,
-        itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "4. Erro - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "4. Error - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListMemberContent_Error() {
-    ListMemberContent(
-        filters = FilterMembersTeam(),
-        filterActions = ListMembersMocks.mockFilterActions,
-        filtersErrors = FilterMembersFilterError(),
-        list = emptyList(),
-        listTypeMember = ListMembersMocks.mockListTypes,
-        listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = false, errorMessage = "Falha ao conectar ao servidor."),
-        isOnline = true,
-        itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "5. Offline Banner - PT", locale = "pt-rPT", showBackground = true)
-@Composable
-fun PreviewListMemberContent_Offline() {
-    ListMemberContent(
-        filters = FilterMembersTeam(),
-        filterActions = ListMembersMocks.mockFilterActions,
-        filtersErrors = FilterMembersFilterError(),
-        list = ListMembersMocks.mockMembers,
-        listTypeMember = ListMembersMocks.mockListTypes,
-        listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = false),
-        isOnline = false,
-        itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        role = UserRole.ADMIN_TEAM
     )
 }

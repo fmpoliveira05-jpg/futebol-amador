@@ -1,4 +1,4 @@
-package com.example.amfootball.data
+package com.example.amfootball.data.events
 
 /**
  * Data class que encapsula o estado visual genérico de um ecrã (UI State).

@@ -68,6 +68,9 @@
     <string name="button_edit_team">Editar Equipa</string>
     <string name="button_description_edit_team">Editar detalhes da equipa</string>
 
+    <string name="button_delete_team">Apagar Equipa</string>
+    <string name="button_delete_team_description">Botão que lhe permite eliminar a equipa</string>
+
     <string name="app_theme">Tema</string>
     <string name="darkMode">Modo escuro</string>
     <string name="light_mode">Modo Claro</string>

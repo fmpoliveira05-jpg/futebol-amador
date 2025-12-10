@@ -1,4 +1,4 @@
-package com.example.amfootball.ui.components.actionCards.pages
+package com.example.amfootball.ui.components.pages.homePage
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -8,7 +8,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
-import com.example.amfootball.ui.components.cards.ActionCard
+import com.example.amfootball.ui.components.actionCards.ActionCard
 
 /**
  * Cartão específico para a ação de Criar Equipa.

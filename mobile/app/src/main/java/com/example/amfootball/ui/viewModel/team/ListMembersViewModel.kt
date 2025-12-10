@@ -5,6 +5,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.MemberTeamDto
 import com.example.amfootball.data.enums.Position
 import com.example.amfootball.data.enums.TypeMember
+import com.example.amfootball.data.enums.UserRole
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.filtersError.FilterMembersFilterError
 import com.example.amfootball.data.filters.FilterMembersTeam
@@ -17,6 +18,7 @@ import com.example.amfootball.utils.UserConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
@@ -67,11 +69,29 @@ class ListMembersViewModel @Inject constructor(
     private val listPositions: MutableStateFlow<List<Position?>> = MutableStateFlow(emptyList())
     val uiListPositions: StateFlow<List<Position?>> = listPositions
 
+    /**
+     * Estado interno mutável do Role do utilizador.
+     */
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.MEMBER_TEAM)
+
+    /**
+     * Fluxo público imutável que indica o nível de permissão do utilizador na equipa.
+     *
+     * A UI deve observar este estado para decidir quais cartões mostrar:
+     * - [UserRole.ADMIN_TEAM]: Mostra tudo (Agendar, Gerir).
+     * - [UserRole.MEMBER_TEAM]: Mostra apenas visualização (Calendário, Lista).
+     *
+     * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
+     */
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
+
     //Init
     init {
         loadListMember()
         loadListTypeMember()
         loadListPosition()
+        loadUserRole()
     }
 
     // --- SETTERS DE FILTROS ---
@@ -107,7 +127,6 @@ class ListMembersViewModel @Inject constructor(
     }
 
     //Metodos
-    //TODO: Perguntar ao setor se aqui tem logica filtrar sempre offline
     /**
      * Aplica os filtros definidos pelo utilizador.
      *
@@ -121,7 +140,6 @@ class ListMembersViewModel @Inject constructor(
             return
         }
 
-
         if (!isOnline.value) {
             listState.value = filterListOffline(
                 originalList = originalList,
@@ -132,7 +150,6 @@ class ListMembersViewModel @Inject constructor(
         }
     }
 
-    //TODO: Validar se o utilizador tem autorização para aceder a cada um dos recursos (embora o botão não pode aparecer na mesma no forntend confirmar aqui também)
     /**
      * Promove um jogador a Administrador da equipa.
      *
@@ -143,34 +160,43 @@ class ListMembersViewModel @Inject constructor(
      * @param playerId O ID do jogador a promover.
      */
     fun onPromoteMember(playerId: String) {
+        if(roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_promote)
+            return
+        }
+
         launchDataLoad {
             teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
-
-            updateMemberRoleLocally(playerId, true)
         }
     }
 
-    //TODO: Validar se o utilizador tem autorização para aceder a cada um dos recursos (embora o botão não pode aparecer na mesma no forntend confirmar aqui também)
     /**
      * Despromove um Administrador a membro regular (Jogador).
      *
      * @param adminId O ID do administrador a despromover.
      */
     fun onDemoteMember(adminId: String) {
-        launchDataLoad {
-            val teams = teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
+        if(roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_demote)
+            return
+        }
 
-            updateMemberRoleLocally(adminId, false)
+        launchDataLoad {
+            teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
         }
     }
 
-    //TODO: Validar se o utilizador tem autorização para aceder a cada um dos recursos (embora o botão não pode aparecer na mesma no forntend confirmar aqui também)
     /**
      * Remove (expulsa) um membro da equipa.
      *
      * @param playerId O ID do membro a remover.
      */
     fun onRemovePlayer(playerId: String) {
+        if(roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_remove_player)
+            return
+        }
+
         launchDataLoad {
             teamRepository.removePlayerTeam(teamId = teamId, playerId = playerId)
 
@@ -230,26 +256,6 @@ class ListMembersViewModel @Inject constructor(
             Position.DEFENDER,
             Position.GOALKEEPER
         )
-    }
-
-    private fun updateMemberRoleLocally(memberId: String, isAdminNewValue: Boolean) {
-        val currentList = listState.value.toMutableList()
-        val index = currentList.indexOfFirst { it.id == memberId }
-
-        if (index != -1) {
-            val updatedMember = currentList[index].copy(isAdmin = isAdminNewValue)
-            currentList[index] = updatedMember
-            listState.value = currentList
-        }
-
-        val backupList = originalList.toMutableList()
-        val indexBackup = backupList.indexOfFirst { it.id == memberId }
-
-        if (indexBackup != -1) {
-            val updatedMemberBackup = backupList[indexBackup].copy(isAdmin = isAdminNewValue)
-            backupList[indexBackup] = updatedMemberBackup
-            originalList = backupList
-        }
     }
 
     /**
@@ -338,5 +344,14 @@ class ListMembersViewModel @Inject constructor(
         }
 
         return isValid
+    }
+
+    /**
+     * Carrega o Role do utilizador a partir da sessão local.
+     * Deve ser chamado na inicialização para configurar a UI imediatamente.
+     */
+    private fun loadUserRole() {
+        val profile = sessionManager.getUserProfile()
+        roleState.value = profile?.role ?: UserRole.MEMBER_TEAM
     }
 }

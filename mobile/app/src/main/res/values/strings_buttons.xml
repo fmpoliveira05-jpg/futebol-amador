@@ -63,6 +63,9 @@
     <string name="button_edit_team">Edit Team</string>
     <string name="button_description_edit_team">Edit team details</string>
 
+    <string name="button_delete_team">Delete Team</string>
+    <string name="button_delete_team_description">Button that allows you to delete the team</string>
+
     <string name="button_list_teams">Team List</string>
     <string name="button_description_list_teams_membership">Button that allows you to view all teams that still have openings for new players</string>
     <string name="button_description_list_teams_match">Button that allows you to view all teams available for a casual match</string>

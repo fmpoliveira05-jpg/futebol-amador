@@ -4,6 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.data.dtos.player.CreateProfileDto
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.services.AuthService
 import com.example.amfootball.data.services.NotificationCallsService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +27,9 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: AuthService,
-    private val notificationCallsService: NotificationCallsService
+    private val notificationCallsService: NotificationCallsService,
+    private val sessionManager: SessionManager,
+    private val globalEventBus: GlobalEventBus
 ) : ViewModel() {
 
     /**
@@ -40,6 +45,9 @@ class AuthViewModel @Inject constructor(
      */
     val isUserLoggedIn = _isUserLoggedIn.asStateFlow()
 
+    init {
+        checkLoginStatus()
+    }
     /**
      * Função utilitária para alterar o estado de autenticação de forma manual.
      *
@@ -67,6 +75,7 @@ class AuthViewModel @Inject constructor(
             } finally {
                 repository.logout()
                 _isUserLoggedIn.value = false
+                globalEventBus.emitEvent(AppEvent.UserLoggedOut)
             }
         }
     }
@@ -77,13 +86,11 @@ class AuthViewModel @Inject constructor(
      * Coordena o processo de criação de conta assíncrono.
      *
      * @param profile DTO contendo os dados pessoais do utilizador (nome, idade, posição, etc.).
-     * @param password A palavra-passe escolhida para a conta.
      * @param onSuccess Callback executado apenas se o registo for concluído com sucesso.
      * @param onError Callback executado se ocorrer alguma falha (rede, validação, etc.), fornecendo a mensagem de erro.
      */
     fun registerUser(
         profile: CreateProfileDto,
-        password: String,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ) {
@@ -99,5 +106,10 @@ class AuthViewModel @Inject constructor(
                 onError(e.message ?: "Erro desconhecido no registo")
             }
         }
+    }
+
+    private fun checkLoginStatus() {
+        val token = sessionManager.getAuthToken()
+        _isUserLoggedIn.value = !token.isNullOrBlank()
     }
 }

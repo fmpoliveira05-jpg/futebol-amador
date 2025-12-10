@@ -3,7 +3,7 @@ package com.example.amfootball.ui.viewModel.user
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.services.PlayerService

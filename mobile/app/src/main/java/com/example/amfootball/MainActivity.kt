@@ -7,14 +7,26 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.navigation.MainNavigation
+import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.utils.NotificationConst
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * A Atividade principal ([AppCompatActivity]) da aplicação e o ponto de entrada da UI.
@@ -29,6 +41,8 @@ import dagger.hilt.android.AndroidEntryPoint
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+    @Inject
+    lateinit var globalEventBus: GlobalEventBus
 
     /**
      * Chamado quando a Activity é criada. Configura a UI e os serviços de sistema.
@@ -42,8 +56,51 @@ class MainActivity : AppCompatActivity() {
 
         enableEdgeToEdge()
 
+        val startDestination = Routes.GeralRoutes.HOMEPAGE.route
+
         setContent {
-            MainNavigation()
+            AMFootballTheme {
+                val navController = rememberNavController()
+
+                MainNavigation(
+                    globalNavController = navController,
+                    startDestination = startDestination
+                )
+
+                // OBSERVADOR DE EVENTOS GLOBAIS
+                ObserveGlobalEvents(
+                    navController = navController,
+                    eventBus = globalEventBus
+                )
+            }
+        }
+    }
+
+    @Composable
+    fun ObserveGlobalEvents(navController: NavHostController,
+                            eventBus: GlobalEventBus
+    ) {
+        val context = LocalContext.current
+
+        LaunchedEffect(Unit) {
+            eventBus.events.collect { event ->
+                when (event) {
+                    is AppEvent.TeamDeleted -> {
+                        Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+                        navigateToHomePage(navController = navController)
+                    }
+                    is AppEvent.UserLoggedOut -> {
+                        navigateToHomePage(navController = navController)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun navigateToHomePage(navController: NavHostController) {
+        navController.navigate(route = Routes.GeralRoutes.HOMEPAGE.route) {
+            popUpTo(0) { inclusive = true }
+            launchSingleTop = true
         }
     }
 

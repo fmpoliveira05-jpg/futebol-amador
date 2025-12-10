@@ -20,7 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.actions.homePageActions.HomePageActions
 import com.example.amfootball.data.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.enums.UserRole
@@ -29,10 +29,10 @@ import com.example.amfootball.data.mocks.homePages.HomePageMock
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.ActionCardSection
-import com.example.amfootball.ui.components.actionCards.pages.ActionCardCreateTeam
-import com.example.amfootball.ui.components.actionCards.pages.ActionCardListMembershipRequests
-import com.example.amfootball.ui.components.actionCards.pages.ActionCardListTeam
-import com.example.amfootball.ui.components.actionCards.pages.ActionCardMyTeam
+import com.example.amfootball.ui.components.pages.homePage.ActionCardCreateTeam
+import com.example.amfootball.ui.components.pages.homePage.ActionCardListMembershipRequests
+import com.example.amfootball.ui.components.pages.homePage.ActionCardListTeam
+import com.example.amfootball.ui.components.pages.homePage.ActionCardMyTeam
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.viewModel.homePages.HomePageViewModel

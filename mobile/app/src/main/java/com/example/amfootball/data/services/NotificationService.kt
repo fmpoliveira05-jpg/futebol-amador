@@ -45,16 +45,21 @@ class NotificationService @Inject constructor(
      *
      * @see NotificationCompat
      */
-    fun showNotificationTeam(title: String, message: String) {
+    fun showNotificationTeam(title: String, message: String, navigationAction: String? = null) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            //Permite ao clicar na notificação navegar para algum lado
+            if (navigationAction != null) {
+                putExtra("NAVIGATION_ACTION", navigationAction)
+            }
         }
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context,
             0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val builder = NotificationCompat.Builder(context, NotificationConst.TEAM_CHANNEL_ID)

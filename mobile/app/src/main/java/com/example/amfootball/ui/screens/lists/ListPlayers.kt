@@ -21,7 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.actions.filters.ButtonFilterActions
 import com.example.amfootball.data.actions.filters.FilterListPlayersActions
 import com.example.amfootball.data.dtos.player.InfoPlayerDto

@@ -6,6 +6,7 @@
 
     <string name="toast_team_id_null">Your team ID is invalid. Please log in again.</string>
     <string name="toast_id_not_matching">The sent ID does not match yours.</string>
+    <string name="toast_error_create_team">Error processing team creation.</string>
 
     <string name="toast_offline">No internet connection. Please check your network.</string>
     <string name="toast_offline_info_team">You can only view more team information if you are online.</string>
@@ -21,10 +22,19 @@
     <string name="toast_offline_postpone_game">To postpone the game, an internet connection is required.</string>
     <string name="toast_offline_start_game">To start the game, an internet connection is required.</string>
     <string name="toast_offline_finish_match">To finish the match, an internet connection is required.</string>
+    <string name="toast_offline_leave_team">To leave the team, you need to be connected to the internet</string>
+    <string name="toast_offline_edit_team">To edit your team\'s data, you need to be connected to the internet</string>
+    <string name="toast_offline_delete_team">To delete your team, you need to be connected to the internet</string>
 
     <string name="toast_autenticate_people">Only authenticated users can access this feature.</string>
     <string name="toast_only_player_without_team">Only users without a team can view their membership requests.</string>
     <string name="toast_only_player_without_team_membership">Only users without a team can view their membership requests.</string>
+
     <string name="toast_admin_only_casual">Only team administrators can schedule casual matches.</string>
     <string name="toast_admin_only_ranked">Only team administrators can schedule competitive matches.</string>
+    <string name="toast_admin_only_edit">Only team administrators can edit team data</string>
+    <string name="toast_admin_only_delete">Only team administrators can delete the team</string>
+    <string name="toast_admin_only_promote">Only team administrators can promote players</string>
+    <string name="toast_admin_only_demote">Only team administrators can demote other administrators</string>
+    <string name="toast_admin_only_remove_player">Only team administrators can remove players from the team</string>
 </resources>
