@@ -53,14 +53,14 @@ namespace Application.Services
             };
 
             try
-                {
-                    string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                    Console.WriteLine($"Mensagem enviada: {response}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Erro Firebase: {ex.Message}");
-                }
+            {
+                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                Console.WriteLine($"Mensagem enviada: {response}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro Firebase: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -76,9 +76,12 @@ namespace Application.Services
         /// <param name="title">O título da notificação visual (opcional).</param>
         /// <param name="body">O corpo da notificação visual (opcional).</param>
         /// <returns>Uma <see cref="Task"/> que representa a operação de envio assíncrona.</returns>
-        public async Task SendMulticastNotification(List<string> tokens, Dictionary<string, string> data = null, string title = null, string body = null)
+        public async Task SendMulticastNotification(Guid teamId, Dictionary<string, string> data = null, string title = null, string body = null)
         {
-            if (tokens == null || !tokens.Any())
+            var memberTokens = await playerRepository.GetDeviceTokensMembersTeam(teamId, null);
+            var activeTokens = FilterActiveTokens(memberTokens);
+
+            if (activeTokens == null || !activeTokens.Any())
             {
                 return;
             }
@@ -88,7 +91,7 @@ namespace Application.Services
 
             var message = new MulticastMessage()
             {
-                Tokens = tokens,
+                Tokens = activeTokens,
                 Data = finalData,
                 Notification = notificationObject
             };
@@ -105,6 +108,30 @@ namespace Application.Services
             {
                 Console.WriteLine($"Erro crítico Firebase Multicast: {ex.Message}");
             }
+        }
+
+        public async Task sendNotificationToTeamsAsync(Guid teamId, Guid opponentId, string eventType,
+            string title, string bodyForTeam, string bodyForOpponent)
+        {
+            var payloadTeam = new Dictionary<string, string>
+            {
+                { "type", eventType },
+                { "teamId", teamId.ToString() },
+                { "title", title },
+                { "body", bodyForTeam }
+            };
+
+            SendMulticastNotification(teamId, payloadTeam, null, null);
+            
+            var payloadOpponent = new Dictionary<string, string>
+            {
+                { "type", eventType },
+                { "teamId", opponentId.ToString() },
+                { "title", title },
+                { "body", bodyForOpponent }
+            };
+
+            await SendMulticastNotification(opponentId, payloadOpponent, null, null);
         }
 
         #region Method Private
@@ -137,6 +164,11 @@ namespace Application.Services
                 { "click_action", "FLUTTER_NOTIFICATION_CLICK" },
                 { "type", "invite" }
             };
+        }
+
+        private List<string> FilterActiveTokens(List<string> tokens)
+        {
+            return tokens.Where(token => !string.IsNullOrEmpty(token)).ToList();
         }
         #endregion
     }

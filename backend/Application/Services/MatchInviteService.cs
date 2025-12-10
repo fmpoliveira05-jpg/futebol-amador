@@ -3,11 +3,13 @@ using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using System.ComponentModel;
 
 namespace Application.Services
 {
@@ -27,6 +29,7 @@ namespace Application.Services
         private readonly IMatchInviteValidator MatchInviteValidator;
         private readonly IUnityOfWork UnityOfWork;
         private readonly INotificationService notificationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
         private readonly IChatRoomService ChatService;
 
         /// <summary>
@@ -40,17 +43,19 @@ namespace Application.Services
             IMatchInviteValidator matchInviteValidator,
             IUnityOfWork unityOfWork,
             INotificationService notificationService,
-            IChatRoomService chatRoomService)
+            IChatRoomService chatRoomService,
+            INotificationFirebaseService notificationFirebaseService)
 
         {
-            MatchInviteRepository = matchInviteRepository;
-            TeamRepository = teamRepository;
-            MatchRepository = matchRepository;
-            PitchRepository = pitchRepository;
-            MatchInviteValidator = matchInviteValidator;
-            UnityOfWork = unityOfWork;
+            this.MatchInviteRepository = matchInviteRepository;
+            this.TeamRepository = teamRepository;
+            this.MatchRepository = matchRepository;
+            this.PitchRepository = pitchRepository;
+            this.MatchInviteValidator = matchInviteValidator;
+            this.UnityOfWork = unityOfWork;
             this.notificationService = notificationService;
-            ChatService = chatRoomService;
+            this.ChatService = chatRoomService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
 
@@ -212,17 +217,24 @@ namespace Application.Services
             sender.Calendar.Matches.Add(match);
             await MatchRepository.AddMatch(match);
  
+            var nameTeam = receiver.Name;
+            var nameOpponent = sender.Name;
+
             var matchDTO = new MatchDto
             {
                 IdMatch = match.Id,
                 GameDate = match.MatchDate,
-                NameTeam = receiver.Name,
+                NameTeam = nameTeam,
                 NameOpponent = sender.Name,
                 NamePitch = pitch.Name
             };
 
             await notificationService.SendTeamAsync(receiver.Id.ToString(), "Match Scheduled!", $"Your match against {sender.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
             await notificationService.SendTeamAsync(sender.Id.ToString(), "Match Scheduled!", $"Your match against {receiver.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
+
+            await notificationFirebaseService.sendNotificationToTeamsAsync(idTeam, sender.Id, "ACCEPT_MATCH_INVITE", "Partida marcada",
+                $"A sua partida com a equipa {nameOpponent} foi marcada!",
+                $"A sua partida com a equipa {nameTeam} foi marcada.");
 
             await UnityOfWork.SaveChangesAsync();
 

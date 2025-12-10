@@ -2,6 +2,7 @@
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
@@ -25,6 +26,8 @@ namespace Application.Services
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
+        private readonly IPlayerRepository PlayerRepository;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do MatchService.
@@ -36,13 +39,16 @@ namespace Application.Services
         /// <param name="MatchValidator">Validador de regras de calendário e jogo.</param>
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            ICalendarValidator MatchValidator)
+            ICalendarValidator MatchValidator, IPlayerRepository PlayerRepository,
+            INotificationFirebaseService notificationFirebaseService)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
+            this.PlayerRepository = PlayerRepository;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
 
@@ -242,16 +248,23 @@ namespace Application.Services
             match.MatchDate = newDate;
             match.MatchStatus = MatchStatus.SCHEDULED;
 
+            var nameTeam = teamStatistic.Team.Name;
+            var opponentName = opponentStatistics.Team.Name;
             var matchDTO = new MatchDto
             {
                 IdMatch = idMatch,
                 GameDate = newDate,
-                NameTeam = teamStatistic.Team.Name,
+                NameTeam = nameTeam,
                 NameOpponent = opponentStatistics.Team.Name,
                 NamePitch = match.Pitch.Name
             };
 
             await UnityOfWork.SaveChangesAsync();
+
+            await notificationFirebaseService.sendNotificationToTeamsAsync(idTeam, idOpponnent, "POST_PONE_MATCH", "Partida adiada",
+                $"A sua partida com a equipa {opponentName} foi adiada para o dia {newDate}.",
+                $"A sua partida com a equipa {nameTeam} foi adiada para o dia {newDate}.");
+            
             return matchDTO;
         }
 
@@ -333,8 +346,9 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            var idOpponentTeam = opponent.IdTeam;
 
-            MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
+            MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, idOpponentTeam);
 
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
 
@@ -343,6 +357,11 @@ namespace Application.Services
             match.MatchStatus = MatchStatus.CANCELED;
 
             await UnityOfWork.SaveChangesAsync();
+
+            await notificationFirebaseService.sendNotificationToTeamsAsync(idTeam, 
+                idOpponentTeam, "CANCEL_MATCH", "Cancelamento de Partida",
+                $"A sua partida com a equipa {opponent.Team.Name} foi cancelada!",
+                $"A sua partida com a equipa {team.Team.Name} foi cancelada pelos mesmos.");
         }
         #endregion
     }

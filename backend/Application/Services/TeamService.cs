@@ -141,16 +141,9 @@ namespace Application.Services
             TeamRepository.DeleteTeam(teamToDelete);
 
             //Vai buscar os tokens dos membros da equipa para enviar notificação
-            var memberTokens = await PlayerRepository.GetDeviceTokensMembersTeam(teamId, null);
-
-            var activeTokens = memberTokens
-                .Where(t => !string.IsNullOrEmpty(t))
-                .Distinct()
-                .ToList();
-
             await UnityOfWork.SaveChangesAsync();
 
-            await SendNotificationDeleteTeam(activeTokens, teamId);
+            await SendNotificationDeleteTeam(teamId);
         }
 
         /// <summary>
@@ -443,20 +436,17 @@ namespace Application.Services
         }
 
         #region private Methods
-        private async Task SendNotificationDeleteTeam(List<string> activeTokens, Guid teamId)
+        private async Task SendNotificationDeleteTeam(Guid teamId)
         {
-            if (activeTokens.Any())
+            var dataPayload = new Dictionary<string, string>()
             {
-                var dataPayload = new Dictionary<string, string>()
-                {
-                    { "type", "TEAM_DELETED" },
-                    { "teamId", teamId.ToString() },
-                    { "title", "Equipa Eliminada" },
-                    { "body", "A sua equipa foi eliminada por um administrador." }
-                };
+                { "type", "TEAM_DELETED" },
+                { "teamId", teamId.ToString() },
+                { "title", "Equipa Eliminada" },
+                { "body", "A sua equipa foi eliminada por um administrador." }
+            };
 
-                await notificationFirebaseService.SendMulticastNotification(activeTokens, dataPayload, null, null);
-            }
+            await notificationFirebaseService.SendMulticastNotification(teamId, dataPayload, null, null);
         }
         
         #endregion
