@@ -48,7 +48,7 @@ object FireBaseInstance {
     @Provides
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
-        return Firebase.firestore
+        return FirebaseFirestore.getInstance()
     }
 
     @Provides

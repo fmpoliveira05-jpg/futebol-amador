@@ -93,8 +93,8 @@ sonarqube {
             "build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml"
         )
 
-        property("sonar.sources", "src/main/kotlin")
-        property("sonar.tests", "src/test/kotlin")
+        property("sonar.sources", "src/main/java")
+        property("sonar.tests", "src/test/java")
     }
 }
 

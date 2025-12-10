@@ -1,0 +1,114 @@
+name: Android CI/CD
+
+on:
+  push:
+    branches: [ master, developer ]
+  pull_request: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # =======================================================================
+  # JOB 1: Build, Análise Estática (Sonar) e Docs
+  # =======================================================================
+  static-checks-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' && github.ref != 'refs/heads/developer' }}
+
+      # GERAÇÃO SEGURA DO JSON
+      - name: Generate google-services.json
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_JSON" > app/google-services.json
+
+      # CORREÇÃO SONARQUBE + DOKKA
+      - name: Build, Dokka & Sonar Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleDebug dokkaGenerateHtml sonar \
+            --parallel \
+            --build-cache \
+            -Dsonar.tests="" \
+            -Dsonar.coverage.exclusions=**/*
+
+      - name: Upload Dokka Docs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dokka-html
+          path: app/build/dokka/html
+
+  # =======================================================================
+  # JOB 2: Instrumentation Tests (Sistema)
+  # =======================================================================
+  instrumentation-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 17
+          distribution: zulu
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          cache-read-only: true
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      # GERAÇÃO SEGURA DO JSON
+      - name: Generate google-services.json
+        env:
+          GOOGLE_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_JSON" > app/google-services.json
+
+      - name: Run Android Instrumentated Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: default
+          arch: x86_64
+          profile: Nexus 6
+          disable-linux-hw-accel: false
+          ram-size: 2048M
+          disk-size: 4000M
+          script: ./gradlew connectedDebugAndroidTest --no-daemon --info
+
+      - name: Upload Instrumentation Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-instrumentation-report
+          path: app/build/reports/androidTests/connected

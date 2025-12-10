@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 @HiltAndroidTest
 class SendMessageTest {
-
+    val testMessage = "Test message";
     @get:Rule(order = 0)
     val hiltRule = HiltAndroidRule(this)
 
