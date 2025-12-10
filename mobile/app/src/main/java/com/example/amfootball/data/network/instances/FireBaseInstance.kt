@@ -2,10 +2,8 @@ package com.example.amfootball.data.network.instances
 
 import com.example.amfootball.data.network.FirebaseFcmTokenProvider
 import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

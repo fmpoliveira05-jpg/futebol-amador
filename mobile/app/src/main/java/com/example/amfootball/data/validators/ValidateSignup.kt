@@ -1,7 +1,12 @@
 package com.example.amfootball.data.validators
 
 import android.util.Patterns
+import com.example.amfootball.R
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.utils.GeneralConst
+import com.example.amfootball.utils.PlayerConst
+import com.example.amfootball.utils.UserConst
+import okhttp3.Address
 import java.util.Calendar
 /**
  * Um objeto de resultado padrão para a nossa validação.
@@ -13,14 +18,15 @@ import java.util.Calendar
 data class ValidationResult(
     val isValid: Boolean,
     val fieldName: String? = null,
-    val errorMessage: String? = null
+    val errorMessageId: Int? = null,
+    val args: List<Any> = emptyList()
 )
 
 /**
  * Enumeração para os nomes dos campos do formulário de registo, para evitar erros de digitação.
  */
 enum class SignUpField {
-    NAME, PHONE, HEIGHT, EMAIL, PASSWORD, PASSWORD_VERIFICATION, DATE_OF_BIRTH, POSITION
+    NAME, PHONE,ADDRESS, HEIGHT, EMAIL, PASSWORD, PASSWORD_VERIFICATION, DATE_OF_BIRTH, POSITION
 }
 
 /**
@@ -36,16 +42,17 @@ fun validateSignUpForm(
     phone: String,
     height: String,
     email: String,
+    address: String,
     password: String,
     passwordVerification: String,
     dateOfBirth: Long?,
     position: Int?
 ): ValidationResult {
     validateName(name).let { if (!it.isValid) return it }
-    validatePhone(phone).let { if (!it.isValid) return it }
-    validateHeight(height).let { if (!it.isValid) return it }
-    //acrescentar aqui o validate morada
     validateEmail(email).let { if (!it.isValid) return it }
+    validatePhone(phone).let { if (!it.isValid) return it }
+    validateAddress(address).let { if (!it.isValid) return it }
+    validateHeight(height).let { if (!it.isValid) return it }
     validatePosition(position).let { if (!it.isValid) return it }
     validateDateOfBirth(dateOfBirth).let { if (!it.isValid) return it }
     validatePassword(password).let { if (!it.isValid) return it }
@@ -56,6 +63,20 @@ fun validateSignUpForm(
 }
 
 // --- Funções de Validação Individuais ---
+
+private fun validateAddress(address: String): ValidationResult {
+    if (address.isBlank()){
+        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_field_cannot_be_null)
+    }
+    if (address.length < GeneralConst.MIN_ADDRESS_LENGTH){
+        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_min_address, args = listOf(GeneralConst.MIN_ADDRESS_LENGTH))
+    }
+    if (address.length > GeneralConst.MAX_ADDRESS_LENGTH) {
+        return ValidationResult(
+            false, SignUpField.ADDRESS.name, R.string.error_max_address, args = listOf(GeneralConst.MAX_ADDRESS_LENGTH))
+    }
+    return ValidationResult(true)
+}
 /**
  * Valida o campo do nome.
  *
@@ -64,13 +85,22 @@ fun validateSignUpForm(
  */
 private fun validateName(name: String): ValidationResult {
     if (name.isBlank()) {
-        return ValidationResult(false, SignUpField.NAME.name, "O nome não pode estar vazio.")
+        return ValidationResult(false, SignUpField.NAME.name, R.string.error_field_cannot_be_null)
     }
-    if (name.length < 3) {
+    if (name.length < UserConst.MIN_NAME_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.NAME.name,
-            "O nome deve ter pelo menos 3 caracteres."
+            R.string.error_min_name_player,
+            listOf(UserConst.MIN_NAME_LENGTH)
+        )
+    }
+    if (name.length > UserConst.MAX_NAME_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.NAME.name,
+            R.string.error_max_name_player,
+            listOf(UserConst.MAX_NAME_LENGTH)
         )
     }
     return ValidationResult(true)
@@ -86,10 +116,21 @@ private fun validateName(name: String): ValidationResult {
  */
 private fun validateEmail(email: String): ValidationResult {
     if (email.isBlank()) {
-        return ValidationResult(false, SignUpField.EMAIL.name, "O email não pode estar vazio.")
+        return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_field_cannot_be_null)
+    }
+    if (email.length < UserConst.MIN_EMAIL_LENGTH){
+        return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_min_email_length, args = listOf(UserConst.MIN_EMAIL_LENGTH))
+    }
+    if (email.length > UserConst.MAX_EMAIL_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.EMAIL.name,
+            R.string.error_max_email_length,
+            listOf(UserConst.MAX_EMAIL_LENGTH)
+        )
     }
     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-        return ValidationResult(false, SignUpField.EMAIL.name, "O formato do email é inválido.")
+        return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_invalid_email)
     }
     return ValidationResult(true)
 }
@@ -108,56 +149,59 @@ private fun validatePassword(password: String): ValidationResult {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password não pode estar vazia."
+            R.string.error_field_cannot_be_null
         )
     }
-    if (password.length < 8) {
+    if (password.length < UserConst.MIN_PASSWORD_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password deve ter pelo menos 6 caracteres."
+            R.string.error_min_password_length,
+            listOf(UserConst.MIN_PASSWORD_LENGTH)
         )
     }
     if (!password.any { it.isUpperCase() }) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password deve conter pelo menos uma letra maiúscula."
+            R.string.error_password_requires_uppercase
         )
     }
     if (!password.any { it.isLowerCase() }) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password deve conter pelo menos uma letra minúscula."
+            R.string.error_password_requires_lowercase
         )
     }
     if (!password.any { it.isDigit() }) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password deve conter pelo menos um número."
+            R.string.error_password_requires_digit
         )
     }
     if (!password.any { !it.isLetterOrDigit() }) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password deve conter pelo menos um caractere especial."
+            R.string.error_password_requires_special_char
         )
     }
     if (password.any { it.isWhitespace() }) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password não pode conter espaços em branco."
+            R.string.error_password_requires_no_whitespace
+
         )
     }
-    if (password.length > 100) {
+    if (password.length > UserConst.MAX_PASSWORD_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
-            "A password não pode ter mais de 100 caracteres."
+            R.string.error_max_password_length,
+            listOf(UserConst.MAX_PASSWORD_LENGTH)
         )
     }
 
@@ -178,14 +222,14 @@ private fun validatePasswordConfirmation(password: String, confirmation: String)
         return ValidationResult(
             false,
             SignUpField.PASSWORD_VERIFICATION.name,
-            "Por favor, confirme a password."
+            R.string.error_field_cannot_be_null
         )
     }
     if (password != confirmation) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD_VERIFICATION.name,
-            "As passwords não coincidem."
+            R.string.error_password_mismatch
         )
     }
     return ValidationResult(true)
@@ -201,10 +245,11 @@ private fun validatePasswordConfirmation(password: String, confirmation: String)
  */
 private fun validatePhone(phone: String): ValidationResult {
     if (phone.isBlank()) {
-        return ValidationResult(false, SignUpField.PHONE.name, "O telemóvel não pode estar vazio.")
+        return ValidationResult(false, SignUpField.PHONE.name,R.string.error_field_cannot_be_null)
     }
-    if (!phone.matches(Regex("^\\d{9}$"))) {
-        return ValidationResult(false, SignUpField.PHONE.name, "O telemóvel deve ter 9 dígitos.")
+    if (!phone.matches(Regex("^\\d{${UserConst.SIZE_PHONE_NUMBER}}$"))) {
+        return ValidationResult(false, SignUpField.PHONE.name, R.string.error_min_phone_length
+        , listOf(UserConst.SIZE_PHONE_NUMBER))
     }
     return ValidationResult(true)
 }
@@ -220,14 +265,15 @@ private fun validatePhone(phone: String): ValidationResult {
  */
 private fun validateHeight(height: String): ValidationResult {
     if (height.isBlank()) {
-        return ValidationResult(false, SignUpField.HEIGHT.name, "A altura não pode estar vazia.")
+        return ValidationResult(false, SignUpField.HEIGHT.name, R.string.error_field_cannot_be_null)
     }
     val heightInt = height.toIntOrNull()
     if (heightInt == null || heightInt !in 100..250) {
         return ValidationResult(
             false,
             SignUpField.HEIGHT.name,
-            "Altura inválida (deve ser entre 100 e 250 cm)."
+            R.string.error_min_height_max_height,
+            listOf(PlayerConst.MIN_HEIGHT, PlayerConst.MAX_HEIGHT)
         )
     }
     return ValidationResult(true)
@@ -247,7 +293,7 @@ private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
         return ValidationResult(
             false,
             SignUpField.DATE_OF_BIRTH.name,
-            "Por favor, selecione a data de nascimento."
+            R.string.error_field_cannot_be_null
         )
     }
 
@@ -265,7 +311,8 @@ private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
         return ValidationResult(
             false,
             SignUpField.DATE_OF_BIRTH.name,
-            "Deve ter pelo menos 18 anos para se registar."
+            R.string.error_min_age,
+            listOf(UserConst.MIN_AGE)
         )
     }
 
@@ -273,7 +320,8 @@ private fun validateDateOfBirth(dateInMillis: Long?): ValidationResult {
         return ValidationResult(
             false,
             SignUpField.DATE_OF_BIRTH.name,
-            "A idade deve ser inferior a 70 anos."
+            R.string.error_max_age,
+            listOf(UserConst.MAX_AGE)
         )
     }
 
@@ -294,13 +342,12 @@ private fun validatePosition(position: Int?): ValidationResult {
         return ValidationResult(
             false,
             SignUpField.POSITION.name,
-            "Por favor, selecione a sua posição."
+            R.string.error_field_cannot_be_null
         )
     }
-    // Verifica se o Int é um ordinal válido no nosso enum
     val isValidPosition = position in Position.values().indices
     if (!isValidPosition) {
-        return ValidationResult(false, SignUpField.POSITION.name, "Posição inválida.")
+        return ValidationResult(false, SignUpField.POSITION.name, R.string.error_field_cannot_be_null)
     }
     return ValidationResult(true)
 }

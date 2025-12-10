@@ -75,8 +75,8 @@ object UserConst {
     /** Comprimento máximo permitido para a palavra-passe. */
     const val MAX_PASSWORD_LENGTH = 18
 
-    /** Tamanho fixo esperado para um número de telemóvel (incluindo indicativo). */
-    const val SIZE_PHONE_NUMBER = 13
+    /** Tamanho fixo esperado para um número de telemóvel (excluindo indicativo). */
+    const val SIZE_PHONE_NUMBER = 9
 
     /** Idade mínima permitida para registo na aplicação. */
     const val MIN_AGE = 18

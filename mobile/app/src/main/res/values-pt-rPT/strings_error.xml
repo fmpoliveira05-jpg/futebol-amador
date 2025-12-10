@@ -5,11 +5,26 @@
     <string name="without_internet">Sem internet</string>
     <string name="without_internet_save_data">Sem internet. A mostrar dados guardados</string>
     <string name="mandatory_field">Campo obrigatório</string>
+    <string name="error_min_email_length">O email deve ter pelo menos %1$d caracteres</string>
+    <string name="error_max_email_length">O email não deve exceder %1$d caracteres</string>
+    <string name="error_invalid_email">Email Invalido</string>
+    <string name="error_min_password_length">A palavra-passe deve ter pelo menos %1$d caracteres</string>
+    <string name="error_max_password_length">A palavra-passe só deve ter até %1$d caracteres</string>
+    <string name="error_password_requires_uppercase">A palavra-passe deve conter pelo menos uma letra maiúscula</string>
+    <string name="error_password_requires_digit">A palavra-passe deve conter pelo menos um número</string>
+    <string name="error_password_requires_special_char">A palavra-passe deve conter pelo menos um caractere especial</string>
 
     <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_address">A morada só deve até %1$d caracteres</string>
+    <string name="error_address_not_found">Morada invalida, endereço não encontrado, deve ter o formato \"Rua, Cidade\"</string>
     <string name="error_max_city">O nome da cidade deve ter até %1$d caracteres</string>
+    <string name="error_password_requires_lowercase">Palavra-passe deve conter pelo menos uma letra minúscula</string>
+    <string name="error_password_requires_no_whitespace">Palavra-passe não pode conter espaços em branco</string>
+    <string name="error_password_mismatch">As palavras-passe não coincidem</string>
+    <string name="error_min_height_max_height">A altura deve ser entre %1$d cm e %2$d cm</string>
+    <string name="error_min_phone_length">O número de telemóvel deve ter %1$d dígitos</string>
 
+    <string name="error_field_cannot_be_null">O campo não pode ser nulo</string>
     <string name="error_min_name_player">O nome do jogador deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_name_player">O nome do jogador deve ter até %1$d caracteres</string>
     <string name="error_min_name_team">O nome da equipa deve ter pelo menos %1$d caracteres</string>
