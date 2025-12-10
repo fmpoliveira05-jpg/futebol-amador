@@ -1,11 +1,13 @@
 package com.example.amfootball.ui.viewModel.auth
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.errors.ErrorMessage
 import com.example.amfootball.data.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.network.interfaces.OpenStreetMapService
 import com.example.amfootball.data.services.AuthService
 import com.example.amfootball.data.validators.SignUpField
 import com.example.amfootball.data.validators.validateSignUpForm
@@ -23,6 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SignupViewmodel @Inject constructor(
     private val authService: AuthService,
+    private val osmService: OpenStreetMapService,
     private val networkObserver: NetworkConnectivityObserver,
 
     ) : FormsViewModel<CreateProfileDto, SignUpFormErrors>(
@@ -45,6 +48,9 @@ class SignupViewmodel @Inject constructor(
 
     private val _passwordVerification = MutableStateFlow("")
     val passwordVerification = _passwordVerification.asStateFlow()
+
+    var _foundLat = mutableStateOf<Double?>(null)
+    var _foundLon = mutableStateOf<Double?>(null)
 
 
     private var dateOfBirthMillis: Long? = null
@@ -109,22 +115,44 @@ class SignupViewmodel @Inject constructor(
         _passwordVerification.value = pass
     }
 
-    fun onSubmit(navHostController: NavHostController) {
-        val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
-        val finalDto = formState.value.copy(phone = fullPhoneNumber)
+    fun onSubmit() {
+        if (!validateForm()) return
+        launchDataLoad {
 
-        submitForm(
-            onSuccess = {
-                navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-                    popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
-                    launchSingleTop = true
-                }
-            },
-            apiCall = {
-                authService.registerUser(finalDto)
+            val addressQuery = "${formState.value.address}, Portugal"
+
+            val results = osmService.verifyAddress(address = addressQuery)
+
+            if (results.isEmpty()) {
+                val errorMsg = ErrorMessage(messageId = R.string.error_address_not_found)
+
+                formErrors.value = formErrors.value.copy(
+                    addressError = errorMsg
+                )
+                return@launchDataLoad
             }
-        )
+            _foundLat.value = results[0].lat.toDoubleOrNull()
+            _foundLon.value = results[0].lon.toDoubleOrNull()
+
+            }
+        }
+
+
+    fun submitConfirmation(navHostController: NavHostController) {
+        launchDataLoad {
+            val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
+            val finalDto = formState.value.copy(phone = fullPhoneNumber)
+            authService.registerUser(finalDto)
+
+            navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+            popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
+            launchSingleTop = true
+        }
+
+
+        }
     }
+
 
     override fun validateForm(): Boolean {
         val currentDto = formState.value
@@ -137,7 +165,8 @@ class SignupViewmodel @Inject constructor(
             password = currentDto.password,
             passwordVerification = _passwordVerification.value,
             dateOfBirth = dateOfBirthMillis,
-            position = currentDto.position
+            position = currentDto.position,
+            address = currentDto.address
         )
         if (!validationResult.isValid) {
             if (validationResult.errorMessageId !=null) {

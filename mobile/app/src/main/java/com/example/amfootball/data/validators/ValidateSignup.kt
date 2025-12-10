@@ -3,8 +3,10 @@ package com.example.amfootball.data.validators
 import android.util.Patterns
 import com.example.amfootball.R
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.UserConst
+import okhttp3.Address
 import java.util.Calendar
 /**
  * Um objeto de resultado padrão para a nossa validação.
@@ -40,6 +42,7 @@ fun validateSignUpForm(
     phone: String,
     height: String,
     email: String,
+    address: String,
     password: String,
     passwordVerification: String,
     dateOfBirth: Long?,
@@ -48,8 +51,8 @@ fun validateSignUpForm(
     validateName(name).let { if (!it.isValid) return it }
     validateEmail(email).let { if (!it.isValid) return it }
     validatePhone(phone).let { if (!it.isValid) return it }
+    validateAddress(address).let { if (!it.isValid) return it }
     validateHeight(height).let { if (!it.isValid) return it }
-    //acrescentar aqui o validate morada
     validatePosition(position).let { if (!it.isValid) return it }
     validateDateOfBirth(dateOfBirth).let { if (!it.isValid) return it }
     validatePassword(password).let { if (!it.isValid) return it }
@@ -60,6 +63,20 @@ fun validateSignUpForm(
 }
 
 // --- Funções de Validação Individuais ---
+
+private fun validateAddress(address: String): ValidationResult {
+    if (address.isBlank()){
+        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_field_cannot_be_null)
+    }
+    if (address.length < GeneralConst.MIN_ADDRESS_LENGTH){
+        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_min_address, args = listOf(GeneralConst.MIN_ADDRESS_LENGTH))
+    }
+    if (address.length > GeneralConst.MAX_ADDRESS_LENGTH) {
+        return ValidationResult(
+            false, SignUpField.ADDRESS.name, R.string.error_max_address, args = listOf(GeneralConst.MAX_ADDRESS_LENGTH))
+    }
+    return ValidationResult(true)
+}
 /**
  * Valida o campo do nome.
  *
@@ -70,12 +87,20 @@ private fun validateName(name: String): ValidationResult {
     if (name.isBlank()) {
         return ValidationResult(false, SignUpField.NAME.name, R.string.error_field_cannot_be_null)
     }
-    if (name.length < 3) {
+    if (name.length < UserConst.MIN_NAME_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.NAME.name,
             R.string.error_min_name_player,
             listOf(UserConst.MIN_NAME_LENGTH)
+        )
+    }
+    if (name.length > UserConst.MAX_NAME_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.NAME.name,
+            R.string.error_max_name_player,
+            listOf(UserConst.MAX_NAME_LENGTH)
         )
     }
     return ValidationResult(true)
@@ -92,6 +117,17 @@ private fun validateName(name: String): ValidationResult {
 private fun validateEmail(email: String): ValidationResult {
     if (email.isBlank()) {
         return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_field_cannot_be_null)
+    }
+    if (email.length < UserConst.MIN_EMAIL_LENGTH){
+        return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_min_email_length, args = listOf(UserConst.MIN_EMAIL_LENGTH))
+    }
+    if (email.length > UserConst.MAX_EMAIL_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.EMAIL.name,
+            R.string.error_max_email_length,
+            listOf(UserConst.MAX_EMAIL_LENGTH)
+        )
     }
     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
         return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_invalid_email)
@@ -116,7 +152,7 @@ private fun validatePassword(password: String): ValidationResult {
             R.string.error_field_cannot_be_null
         )
     }
-    if (password.length < 8) {
+    if (password.length < UserConst.MIN_PASSWORD_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
@@ -160,7 +196,7 @@ private fun validatePassword(password: String): ValidationResult {
 
         )
     }
-    if (password.length > 100) {
+    if (password.length > UserConst.MAX_PASSWORD_LENGTH) {
         return ValidationResult(
             false,
             SignUpField.PASSWORD.name,
@@ -211,7 +247,7 @@ private fun validatePhone(phone: String): ValidationResult {
     if (phone.isBlank()) {
         return ValidationResult(false, SignUpField.PHONE.name,R.string.error_field_cannot_be_null)
     }
-    if (!phone.matches(Regex("^\\d{9}$"))) {
+    if (!phone.matches(Regex("^\\d{${UserConst.SIZE_PHONE_NUMBER}}$"))) {
         return ValidationResult(false, SignUpField.PHONE.name, R.string.error_min_phone_length
         , listOf(UserConst.SIZE_PHONE_NUMBER))
     }
@@ -309,7 +345,6 @@ private fun validatePosition(position: Int?): ValidationResult {
             R.string.error_field_cannot_be_null
         )
     }
-    // Verifica se o Int é um ordinal válido no nosso enum
     val isValidPosition = position in Position.values().indices
     if (!isValidPosition) {
         return ValidationResult(false, SignUpField.POSITION.name, R.string.error_field_cannot_be_null)

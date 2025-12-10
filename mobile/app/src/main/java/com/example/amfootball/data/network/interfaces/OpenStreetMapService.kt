@@ -13,7 +13,6 @@ interface OpenStreetMapService {
         @Query("q") address: String,
         @Query("format") format: String = "json",
         @Query("limit") limit: Int = 1,
-        // É OBRIGATÓRIO enviar o User-Agent com o teu contacto para usar a versão gratuita
-        @Header("User-Agent") userAgent: String = "AMFootball-App (teu_email@example.com)"
+        @Header("User-Agent") userAgent: String = "AMFootball-App (willkie79@.com)"
     ): List<OpenStreetMapPlace>
 }
