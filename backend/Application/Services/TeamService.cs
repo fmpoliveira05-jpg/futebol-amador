@@ -8,7 +8,6 @@ using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
-using Grpc.Core;
 
 namespace Application.Services
 {
