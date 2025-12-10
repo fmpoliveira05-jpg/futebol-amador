@@ -9,7 +9,13 @@
     <string name="error_min_address">A morada deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_address">A morada só deve até %1$d caracteres</string>
     <string name="error_max_city">O nome da cidade deve ter até %1$d caracteres</string>
+    <string name="error_password_requires_lowercase">Palavra-passe deve conter pelo menos uma letra minúscula</string>
+    <string name="error_password_requires_no_whitespace">Palavra-passe não pode conter espaços em branco</string>
+    <string name="error_password_mismatch">As palavras-passe não coincidem</string>
+    <string name="error_min_height_max_height">A altura deve ser entre %1$d cm e %2$d cm</string>
+    <string name="error_min_phone_length">O número de telemóvel deve ter %1$d dígitos</string>
 
+    <string name="error_field_cannot_be_null">O campo não pode ser nulo</string>
     <string name="error_min_name_player">O nome do jogador deve ter pelo menos %1$d caracteres</string>
     <string name="error_max_name_player">O nome do jogador deve ter até %1$d caracteres</string>
     <string name="error_min_name_team">O nome da equipa deve ter pelo menos %1$d caracteres</string>

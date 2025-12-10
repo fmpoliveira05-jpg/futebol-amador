@@ -24,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val repository: AuthService,
-    private val notificationCallsService: NotificationCallsService
+    private val notificationCallsService: NotificationCallsService,
 ) : ViewModel() {
 
     /**

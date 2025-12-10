@@ -21,17 +21,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.dtos.player.CreateProfileDto
 import com.example.amfootball.data.enums.Position
+import com.example.amfootball.data.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.data.validators.validateSignUpForm
 import com.example.amfootball.navigation.objects.Routes
 import com.example.amfootball.ui.components.Loading
@@ -41,8 +42,8 @@ import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.ui.viewModel.auth.AuthViewModel
+import com.example.amfootball.ui.components.notification.showOfflineToast
+import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
 import com.example.amfootball.utils.GeneralConst
 import com.example.amfootball.utils.PlayerConst
 import com.example.amfootball.utils.UserConst
@@ -63,31 +64,48 @@ import java.util.TimeZone
 @Composable
 fun SignUpScreen(
     navHostController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    viewModel: SignupViewmodel = hiltViewModel()
 ) {
+    // --- Observar Estados do ViewModel ---
+    val uiFormState by viewModel.uiFormState.collectAsStateWithLifecycle()
+    val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle() // Loading e Erros Globais
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+
+    // Estados auxiliares do VM
+    val countryCode by viewModel.countryCode.collectAsStateWithLifecycle()
+    val passwordVerification by viewModel.passwordVerification.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+
     ContentSignUp(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        navController = navHostController,
-        onRegister = authViewModel::registerUser
+        formDto = uiFormState,
+        formErrors = uiErrors,
+        countryCode = countryCode,
+        passwordVerification = passwordVerification,
+        isLoading = uiState.isLoading,
+        globalErrorMessage = uiState.errorMessage,
+        viewModel = viewModel, // Passamos o VM para aceder aos setters
+        onSubmit = {
+            viewModel.onSubmit(navHostController)
+        }
     )
 }
 
-/**
- * Conteúdo visual do ecrã de Registo.
- *
- * Centraliza e alinha verticalmente o formulário de registo.
- *
- * @param navController Controlador de navegação.
- * @param onRegister Callback assíncrona para iniciar o registo. Recebe (DTO, Password, onSuccess, onError).
- * @param modifier Modificador de layout.
- */
 @Composable
 private fun ContentSignUp(
-    navController: NavHostController,
-    onRegister: (CreateProfileDto, () -> Unit, (String) -> Unit) -> Unit,
+    formDto: CreateProfileDto,
+    formErrors: SignUpFormErrors,
+    countryCode: String,
+    passwordVerification: String,
+    isLoading: Boolean,
+    globalErrorMessage: String?,
+    viewModel: SignupViewmodel,
+    onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -95,10 +113,161 @@ private fun ContentSignUp(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        FieldsSignUp(
-            navHostController = navController,
-            onRegister = onRegister
+
+        Spacer(Modifier.height(20.dp))
+
+        // NOME
+        TextFieldOutline(
+            label = stringResource(id = R.string.player_name),
+            value = formDto.userName,
+            onValueChange = viewModel::onNameChange,
+            maxLenght = UserConst.MAX_NAME_LENGTH,
+            isRequired = true,
+            isError = formErrors.nameError != null,
+            errorMessage = formErrors.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
         )
+
+        // EMAIL
+        EmailTextField(
+            value = formDto.email,
+            onValueChange = viewModel::onEmailChange,
+            isError = formErrors.emailError != null,
+            errorMessage = formErrors.emailError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: "",
+            textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_email_input))
+        )
+
+        // TELEMÓVEL
+        PhoneInputWithDynamicCountries(
+            phoneNumber = formDto.phone,
+            onPhoneNumberChange = { novoNumero ->
+                if (novoNumero.length <= UserConst.SIZE_PHONE_NUMBER) {
+                    viewModel.onPhoneChange(novoNumero)
+                }
+            },
+            initialCountryCode = countryCode,
+            onCountryCodeChange = { novoPais ->
+                viewModel.onCountryCodeChange(novoPais.dialCode)
+            },
+            isRequired = true,
+            modifier = Modifier.fillMaxWidth(),
+            isError = formErrors.phoneError != null,
+            errorMessage = formErrors.phoneError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+        )
+
+        // MORADA
+
+        TextFieldOutline(
+            label = stringResource(id = R.string.address),
+            value = formDto.address,
+            maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
+            onValueChange = viewModel::onAddressChange,
+            isRequired = true,
+            isError = formErrors.addressError != null,
+            errorMessage = formErrors.addressError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+        )
+
+        // ALTURA
+        TextFieldOutline(
+            label = stringResource(id = R.string.player_size),
+            value = if (formDto.height == 0) "" else formDto.height.toString(),
+            onValueChange = viewModel::onHeightChange,
+            isRequired = true,
+            maxLenght = PlayerConst.MAX_HEIGHT,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            isError = formErrors.heightError != null,
+            errorMessage = formErrors.heightError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+        )
+
+        Spacer(Modifier.height(8.dp))
+
+        // POSIÇÃO
+        val listPosition: List<Position> = Position.values().toList()
+        val selectedPositionObject: Position? = listPosition.find { it.ordinal == formDto.position }
+
+        LabelSelectBox(
+            label = stringResource(id = R.string.filter_position),
+            list = listPosition,
+            selectedValue = selectedPositionObject,
+            onSelectItem = { selectedPosition ->
+                viewModel.onPositionChange(selectedPosition?.ordinal)
+            },
+            itemToString = { pos ->
+                if (pos == null) stringResource(R.string.player_position_picker)
+                else stringResource(id = pos.stringId)
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        if(formErrors.positionError != null) {
+            Text(text = stringResource(id = formErrors.positionError.messageId), color = Color.Red)
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // DATA DE NASCIMENTO
+        Text(text = "${stringResource(R.string.date_of_birthday)}:")
+        // Aqui convertemos a string do DTO de volta para visualização se necessário,
+        // ou usamos a lógica do displayDateFormatter do VM
+        val displayDate = if (formDto.dateOfBirth.isBlank()) "" else {
+            // Pequeno truque: se a string já estiver formatada em yyyy-MM-dd,
+            // talvez precises de converter para dd/MM/yyyy para mostrar.
+            // Como tens o DatePickerDockedPastLimitedDate a receber value, assume-se que é String.
+            // O ideal seria usar o valor formatado para display.
+            formDto.dateOfBirth // Ou viewModel.displayDateFormatter.format(...) se tiveres guardado o long
+        }
+
+        DatePickerDockedPastLimitedDate(
+            value = displayDate,
+            onDateSelected = viewModel::onDateChange, // Passa o Long para o VM
+            label = stringResource(R.string.date_of_birthday),
+            contentDescription = stringResource(R.string.date_of_birthday_description),
+            isSingleLine = true,
+        )
+        if(formErrors.dateError != null) {
+            Text(text = stringResource(id = formErrors.dateError.messageId), color = Color.Red)
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // PASSWORD
+        PasswordTextField(
+            label = stringResource(id = R.string.password_label),
+            value = formDto.password,
+            onValueChange = viewModel::onPasswordChange,
+            isError = formErrors.passwordError != null,
+            errorMessage = formErrors.passwordError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: ""
+        )
+
+        // CONFIRMAR PASSWORD
+        PasswordTextField(
+            label = stringResource(id = R.string.password_confirm),
+            value = passwordVerification,
+            onValueChange = viewModel::onPasswordVerificationChange,
+            isError = formErrors.passwordVerifyError != null,
+            errorMessage = formErrors.passwordVerifyError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: ""
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        // MENSAGEM DE ERRO GERAL (DA API OU VALIDAÇÃO)
+        if (globalErrorMessage != null) {
+            Text(
+                text = globalErrorMessage,
+                color = Color.Red,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+
+        Button(
+            onClick = onSubmit,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !isLoading
+        ) {
+            if (isLoading) {
+                Loading()
+            } else {
+                Text(stringResource(id = R.string.signup))
+            }
+        }
     }
 }
 
@@ -263,6 +432,18 @@ private fun FieldsSignUp(
 
     Button(
         onClick = {
+            val fullPhoneNumber = "$countryCode$phone"
+
+            val userProfile = CreateProfileDto(
+                userName = name,
+                phone = fullPhoneNumber,
+                height = height.toInt(),
+                dateOfBirth = apiDateFormatter.format(Date(dateOfBirth!!)),
+                position = position!!,
+                address = address,
+                password = password,
+                email = email
+            )
             val validationResult = validateSignUpForm(
                 name = name,
                 phone = phone,
@@ -275,22 +456,11 @@ private fun FieldsSignUp(
             )
 
             if (!validationResult.isValid) {
-                errorMessage = "${validationResult.fieldName}: ${validationResult.errorMessage}"
+                //errorMessage = "${validationResult.fieldName}: ${validationResult.errorMessage}"
             } else {
                 isLoading = true
                 errorMessage = null
-                val fullPhoneNumber = "$countryCode$phone"
 
-                val userProfile = CreateProfileDto(
-                    userName = name,
-                    phone = fullPhoneNumber,
-                    height = height.toInt(),
-                    dateOfBirth = apiDateFormatter.format(Date(dateOfBirth!!)),
-                    position = position!!,
-                    address = address,
-                    password = password,
-                    email = email
-                )
 
                 onRegister(
                     userProfile,
@@ -320,7 +490,7 @@ private fun FieldsSignUp(
         }
     }
 }
-
+/*
 @Preview(
     name = "SignUp Screen - EN",
     locale = "en",
@@ -331,6 +501,7 @@ private fun FieldsSignUp(
     locale = "pt-rPT",
     showBackground = true
 )
+/*
 @Composable
 fun SignUpScreenContentPreview() {
     AMFootballTheme {
@@ -342,3 +513,5 @@ fun SignUpScreenContentPreview() {
         )
     }
 }
+
+ */

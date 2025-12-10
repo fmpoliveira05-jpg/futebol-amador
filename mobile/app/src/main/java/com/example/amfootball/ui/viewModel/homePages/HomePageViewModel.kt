@@ -35,7 +35,7 @@ class HomePageViewModel @Inject constructor(
      * Estado interno mutável que armazena os dados do perfil do jogador.
      * Inicializado como `null` até que os dados sejam carregados da sessão.
      */
-    private val userData: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(null)
+    private val userData: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(sessionManager.getUserProfile())
 
     /**
      * Fluxo público imutável (Read-only) contendo os dados do utilizador.

@@ -2,7 +2,7 @@
 <resources>
     <string name="toast_invalid_filters">Invalid filters!</string>
     <string name="toast_invalid_page">Invalid page</string>
-    <string name="toast_invalid_operation">Invalid page</string>
+    <string name="toast_invalid_operation">Invalid operation</string>
 
     <string name="toast_team_id_null">Your team ID is invalid. Please log in again.</string>
     <string name="toast_id_not_matching">The sent ID does not match yours.</string>
