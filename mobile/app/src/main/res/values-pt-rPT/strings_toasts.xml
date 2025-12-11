@@ -34,6 +34,9 @@
     <string name="toast_admin_only_ranked">Apenas administradores de equipa podem agendar partidas competitivas.</string>
 
     <string name="toast_playerProfile_error">Erro ao obter perfil do utilizador, por favor tente novamente</string>
+    <string name="toast_playerProfile_deleted">Perfil do utilizador eliminado com sucesso.</string>
+    <string name="toast_playerProfile_edited">Perfil do utilizador atualizado com sucesso</string>
+
     <string name="toast_delete_profile_error">Erro ao eliminar perfil do utilizador, por favor tente novamente</string>
     <string name="toast_admin_only_edit">Apenas administradores de equipa podem editar os dados da equipa</string>
     <string name="toast_admin_only_delete">Apenas administradores de equipa podem apagar a equipa</string>

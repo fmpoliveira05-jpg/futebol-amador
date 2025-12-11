@@ -34,9 +34,10 @@
     <string name="toast_admin_only_ranked">Only team administrators can schedule competitive matches.</string>
 
     <string name="toast_playerProfile_error">Error retrieving user profile, please try again.</string>
-    <string name="toast_delete_profile_error">Error deleting user profile, please try again.</string>
     <string name="toast_playerProfile_deleted">User profile deleted successfully.</string>
     <string name="toast_playerProfile_edited">User Profile Updated successfully</string>
+
+    <string name="toast_delete_profile_error">Error deleting user profile, please try again.</string>
     <string name="toast_admin_only_edit">Only team administrators can edit team data</string>
     <string name="toast_admin_only_delete">Only team administrators can delete the team</string>
     <string name="toast_admin_only_promote">Only team administrators can promote players</string>

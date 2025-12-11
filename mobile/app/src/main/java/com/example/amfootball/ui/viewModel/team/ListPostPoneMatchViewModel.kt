@@ -146,7 +146,15 @@ class ListPostPoneMatchViewModel @Inject constructor(
      * @param idPostPoneMatch O ID do pedido de adiamento a ser rejeitado.
      */
     fun rejectPostPoneMatch(idPostPoneMatch: String) {
-        //TODO: Implementar
+        if(!isNetworkAvailable()) {
+            updateToast(R.string)
+            return
+        }
+        /*
+         launchDataLoad {
+            postPoneMatchService.rejectPostPoneMatch(teamId = teamId, postPone = po)
+        }
+        * */
     }
 
     /**
