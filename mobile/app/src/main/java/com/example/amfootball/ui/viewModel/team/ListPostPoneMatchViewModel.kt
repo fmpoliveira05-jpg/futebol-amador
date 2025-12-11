@@ -15,6 +15,7 @@ import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
@@ -36,24 +37,22 @@ class ListPostPoneMatchViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
      */
-    private val filterState: MutableStateFlow<FilterPostPoneMatch> =
-        MutableStateFlow(FilterPostPoneMatch())
+    private val filterState: MutableStateFlow<FilterPostPoneMatch> = MutableStateFlow(FilterPostPoneMatch())
 
     /**
      * Fluxo público de leitura dos critérios de filtro.
      */
-    val filter: StateFlow<FilterPostPoneMatch> = filterState
+    val filter: StateFlow<FilterPostPoneMatch> = filterState.asStateFlow()
 
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> =
-        MutableStateFlow(ListPostPoneMatchFiltersError())
+    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> = MutableStateFlow(ListPostPoneMatchFiltersError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.
      */
-    val filterErros: StateFlow<ListPostPoneMatchFiltersError> = filtersErrorsState
+    val filterErros: StateFlow<ListPostPoneMatchFiltersError> = filtersErrorsState.asStateFlow()
 
     init {
         //TODO: Carregar a lista da API

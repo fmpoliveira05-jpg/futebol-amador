@@ -52,22 +52,21 @@ class ListMembersViewModel @Inject constructor(
     private val teamId: String = sessionManager.getUserProfile()?.effectiveTeamId ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
-    private val filterState: MutableStateFlow<FilterMembersTeam> =
-        MutableStateFlow(FilterMembersTeam())
-    val uiFilter: StateFlow<FilterMembersTeam> = filterState
+    private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())
+    val uiFilter: StateFlow<FilterMembersTeam> = filterState.asStateFlow()
 
     /** Estado que contém os erros de validação dos filtros (ex: idade mínima maior que máxima). */
     private val errorFilters: MutableStateFlow<FilterMembersFilterError> =
         MutableStateFlow(FilterMembersFilterError())
-    val uiErrorFilters: StateFlow<FilterMembersFilterError> = errorFilters
+    val uiErrorFilters: StateFlow<FilterMembersFilterError> = errorFilters.asStateFlow()
 
     /** Lista de opções para o filtro de Tipo de Membro (ex: Jogador, Admin). */
     private val listTypeMember: MutableStateFlow<List<TypeMember?>> = MutableStateFlow(emptyList())
-    val uiListTypeMember: StateFlow<List<TypeMember?>> = listTypeMember
+    val uiListTypeMember: StateFlow<List<TypeMember?>> = listTypeMember.asStateFlow()
 
     /** Lista de opções para o filtro de Posição em campo. */
     private val listPositions: MutableStateFlow<List<Position?>> = MutableStateFlow(emptyList())
-    val uiListPositions: StateFlow<List<Position?>> = listPositions
+    val uiListPositions: StateFlow<List<Position?>> = listPositions.asStateFlow()
 
     /**
      * Estado interno mutável do Role do utilizador.

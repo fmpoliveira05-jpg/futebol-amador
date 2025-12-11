@@ -72,8 +72,6 @@ class TeamHomePageViewModel @Inject constructor(
     init {
         loadInfoTeam()
         loadUserRole()
-
-        //refreshUserProfile()
     }
 
     /**
@@ -158,7 +156,6 @@ class TeamHomePageViewModel @Inject constructor(
         )
     }
 
-    //TODO: Testar
     fun onLeaveTeam(onSucess: () -> Unit) {
         launchDataLoad {
             val userId = sessionManager.getUserProfile()?.loginResponseDto?.localId
@@ -176,41 +173,6 @@ class TeamHomePageViewModel @Inject constructor(
             onSucess()
         }
     }
-
-    /*
-    Metodo para apos o user ser promovido ou despromovido ao entrar na HomePage, o mesmo ter a role atualizada
-    fun refreshUserProfile() {
-        viewModelScope.launch {
-            try {
-                // Chama a API para obter o perfil atualizado
-                // Nota: Não precisas de ativar 'isLoading' visual que bloqueie o ecrã
-                val response = userRepository.getUserProfile()
-
-                if (response.isSuccessful && response.body() != null) {
-                    val freshProfile = response.body()!!
-
-                    // 1. Verificar se houve mudanças críticas
-                    val oldProfile = sessionManager.getUserProfile()
-
-                    // Se o user foi expulso da equipa (ex: teamId veio null ou diferente)
-                    if (oldProfile?.idTeam != null && freshProfile.idTeam == null) {
-                        // Lógica para redirecionar para ecrã de "Sem Equipa"
-                        // _navigationEvent.emit(NavigateToNoTeam)
-                    }
-
-                    sessionManager.saveUserProfile(freshProfile)
-                    loadUserRole()
-                }
-            } catch (e: Exception) {
-                // Se falhar (sem net), não faz mal.
-                // O utilizador continua a ver os dados em cache.
-                // Podes mostrar um pequeno Toast ou ignorar.
-            }
-        }
-    }
-
-     */
-
 
     /**
      * Carrega o Role do utilizador a partir da sessão local.

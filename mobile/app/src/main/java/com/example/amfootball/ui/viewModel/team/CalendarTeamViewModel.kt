@@ -20,6 +20,7 @@ import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 //TODO: Falta Todo que precisa do signalR
@@ -47,11 +48,11 @@ class CalendarTeamViewModel @Inject constructor(
 
     /** Estado atual dos filtros de pesquisa aplicados pelo utilizador. */
     private val filterState: MutableStateFlow<FilterCalendar> = MutableStateFlow(FilterCalendar())
-    val filter: StateFlow<FilterCalendar> = filterState
+    val filter: StateFlow<FilterCalendar> = filterState.asStateFlow()
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
     private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
-    val uiErrors: StateFlow<FilterCalendarError> = listErrors
+    val uiErrors: StateFlow<FilterCalendarError> = listErrors.asStateFlow()
 
     //Inicializer
     init {

@@ -19,8 +19,7 @@ import com.example.amfootball.ui.navigation.objects.Routes
  * @property listTeam Armazena a lista completa de dados do Leaderboard ([LeadboardDto]), observável via [MutableLiveData].
  */
 class LeadBoardViewModel : ViewModel() {
-    private val listTeam: MutableLiveData<List<LeadboardDto>> =
-        MutableLiveData(emptyList())
+    private val listTeam: MutableLiveData<List<LeadboardDto>> = MutableLiveData(emptyList())
 
     /**
      * Estado mutável que controla quantos itens devem ser exibidos na UI (usado para paginação).

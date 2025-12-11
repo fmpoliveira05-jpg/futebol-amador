@@ -6,6 +6,7 @@ import com.example.amfootball.core.utils.ListsSizesConst
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -59,7 +60,7 @@ abstract class ListsViewModels<T>(
             lista.take(numero)
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
 

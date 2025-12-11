@@ -14,6 +14,7 @@ import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipReque
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
@@ -40,18 +41,17 @@ class ListMemberShipRequestViewModel @Inject constructor(
     /**
      * Fluxo público de leitura dos filtros observados pela UI.
      */
-    val uiFilterState: StateFlow<FilterMemberShipRequest> = filterState
+    val uiFilterState: StateFlow<FilterMemberShipRequest> = filterState.asStateFlow()
 
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> =
-        MutableStateFlow(FilterMemberShipRequestError())
+    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> = MutableStateFlow(FilterMemberShipRequestError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.
      */
-    val uiFilterErrorState: StateFlow<FilterMemberShipRequestError> = filterErrorState
+    val uiFilterErrorState: StateFlow<FilterMemberShipRequestError> = filterErrorState.asStateFlow()
 
     //Inicializador
     init {

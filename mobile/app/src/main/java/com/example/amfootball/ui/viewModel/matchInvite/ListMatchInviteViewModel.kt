@@ -19,6 +19,7 @@ import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
@@ -60,7 +61,7 @@ class ListMatchInviteViewModel @Inject constructor(
      * Fluxo imutável exposto para a UI que representa os filtros ativos.
      * A UI deve observar este fluxo para preencher os campos de filtro.
      */
-    val uiFilters: StateFlow<FilterMatchInvite> = filterState
+    val uiFilters: StateFlow<FilterMatchInvite> = filterState.asStateFlow()
 
     /**
      * Estado interno mutável contendo os erros de validação dos campos de filtro.
@@ -71,7 +72,7 @@ class ListMatchInviteViewModel @Inject constructor(
      * Fluxo imutável exposto para a UI contendo mensagens de erro nos filtros.
      * (Ex: Data mínima maior que data máxima, nome muito longo).
      */
-    val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState
+    val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState.asStateFlow()
 
     init {
         loadDataList()
