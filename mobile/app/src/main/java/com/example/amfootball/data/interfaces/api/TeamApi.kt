@@ -28,7 +28,7 @@ import retrofit2.http.QueryMap
 interface TeamApi {
     @GET("${BaseEndpoints.TEAM_API}/homeTeam/{idTeam}")
     suspend fun getHomePageTeam(
-        @Path("teamId") teamId: String
+        @Path("idTeam") teamId: String
     ): Response<HomePageTeamDto>
 
 
