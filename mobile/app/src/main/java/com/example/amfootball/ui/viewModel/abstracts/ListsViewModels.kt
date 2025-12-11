@@ -75,7 +75,7 @@ abstract class ListsViewModels<T>(
             tamanhoAtual < listaCompleta.size
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = false
         )
 
@@ -84,7 +84,7 @@ abstract class ListsViewModels<T>(
      * Incrementa o limite de paginação em [ListsSizesConst.INCREMENT_SIZE],
      * fazendo com que [uiList] emita uma nova lista maior.
      */
-    protected fun loadMoreItems() {
+    fun loadMoreItems() {
         inicialSizeList.update { it + ListsSizesConst.INCREMENT_SIZE }
     }
 

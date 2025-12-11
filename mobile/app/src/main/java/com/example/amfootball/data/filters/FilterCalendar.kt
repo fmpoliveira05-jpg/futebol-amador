@@ -41,15 +41,15 @@ data class FilterCalendar(
  */
 fun FilterCalendar.toQueryMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()
-    opponentName?.let { map["PlayerName"] = it }
-    minGameDate?.let { map["City"] = it.toString() }
-    maxGameDate?.let { map["MinAge"] = it.toString() }
-    isHome?.let { map["MaxAge"] = it.toString() }
+    opponentName?.let { map["NameOpponent"] = it }
+    minGameDate?.let { map["MinDate"] = it.toString() }
+    maxGameDate?.let { map["MaxDate"] = it.toString() }
+    isHome?.let { map["IsHome"] = it.toString() }
     typeMatch?.let {
         val isRanked = (it == TypeMatch.COMPETITIVE)
         map["IsRanqued"] = isRanked.toString()
     }
-    isFinish?.let { map["IsFinish"] = it.toString() }
+    isFinish?.let { map["IsRealized"] = it.toString() }
 
     return map
 }

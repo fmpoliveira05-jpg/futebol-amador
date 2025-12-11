@@ -4,21 +4,25 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.LeadboardMocks
 import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 
@@ -34,18 +38,23 @@ import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 @Composable
 fun LeaderboardScreen(
     navHostController: NavHostController,
-    viewModel: LeadBoardViewModel = viewModel()
+    viewModel: LeadBoardViewModel = hiltViewModel()
 ) {
-    val list = viewModel.inicialList.value
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+
     val leadBoardActions = LeadBoardActions(
         onShowMore = viewModel::showInfoTeam,
-        isValidShowMoreTeams = viewModel::showMoreButton,
-        onLoadMoreTeams = viewModel::loadMoreTeams
+    )
+
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
     )
 
     LeadBoardContent(
         list = list,
         leadBoardActions = leadBoardActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -63,8 +72,10 @@ fun LeaderboardScreen(
 private fun LeadBoardContent(
     list: List<LeadboardDto>,
     leadBoardActions: LeadBoardActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     ListSurface(
         list = list,
@@ -79,8 +90,8 @@ private fun LeadBoardContent(
                 }
             )
         },
-        isValidShowMore = leadBoardActions.isValidShowMoreTeams().value,
-        showMoreItems = { leadBoardActions.onLoadMoreTeams() },
+        isValidShowMore = isShowMoreVisible,
+        showMoreItems = showMoreItensAction.onLoadMore,
         messageEmptyList = stringResource(id = R.string.leadboard_empty)
     )
 }
@@ -165,6 +176,7 @@ fun PreviewLeaderboardContentPopulated() {
     LeadBoardContent(
         list = LeadboardMocks.fakeList,
         leadBoardActions = LeadboardMocks.fakeActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -184,6 +196,7 @@ fun PreviewLeaderboardContentEmpty() {
     LeadBoardContent(
         list = emptyList(),
         leadBoardActions = LeadboardMocks.fakeActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         navHostController = rememberNavController()
     )
 }
