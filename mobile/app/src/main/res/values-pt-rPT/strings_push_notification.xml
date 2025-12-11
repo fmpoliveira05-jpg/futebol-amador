@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notif_team_deleted_title">Equipa Eliminada</string>
+    <string name="notif_team_deleted_body">A tua equipa foi eliminada.</string>
+
+    <string name="notif_promote_title">Promoção a Administrador</string>
+    <string name="notif_promote_body">Foste promovido a administrador da equipa.</string>
+
+    <string name="notif_demote_title">Despromoção a Jogador</string>
+    <string name="notif_demote_body">Foste despromovido a jogador da equipa.</string>
+</resources>

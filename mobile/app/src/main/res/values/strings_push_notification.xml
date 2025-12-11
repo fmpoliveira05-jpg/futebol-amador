@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notif_team_deleted_title">Team Deleted</string>
+    <string name="notif_team_deleted_body">Your team has been deleted.</string>
+
+    <string name="notif_promote_title">Admin Promotion</string>
+    <string name="notif_promote_body">You have been promoted to team admin.</string>
+
+    <string name="notif_demote_title">Demotion to Player</string>
+    <string name="notif_demote_body">You have been demoted to team player.</string>
+</resources>
