@@ -108,6 +108,25 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// Obtém as informações principais para o painel inicial (Dashboard) de uma equipa específica.
+        /// </summary>
+        /// <remarks>
+        /// Este endpoint agrega dados como os próximos jogos, estatísticas recentes ou resultados, 
+        /// retornando um objeto agregado para construir a Home Page da equipa.
+        /// </remarks>
+        /// <param name="idTeam">O identificador único (GUID) da equipa a consultar.</param>
+        /// <returns>Um objeto com as informações da Home Page ou 200 OK.</returns>
+        /// <response code="200">Retorna as informações da equipa com sucesso.</response>
+        /// <response code="404">Se a equipa não for encontrada (caso o serviço trate isso).</response>
+        [HttpGet("homeTeam/{idTeam}")]
+        [ProducesResponseType(typeof(HomePageDto), StatusCodes.Status200OK)] // Ajusta 'HomePageInfoDto' para o nome real da tua classe de retorno
+        public async Task<IActionResult> GetHomePageInfo(Guid idTeam)
+        {
+            var homePageInfo = await TeamService.getHomePageInfo(idTeam);
+            return Ok(homePageInfo);
+        }
+
+        /// <summary>
         /// Atualiza as informações de uma equipa existente (Nome, Descrição, Logótipo, Campo Principal).
         /// </summary>
         /// <remarks>

@@ -234,7 +234,7 @@ namespace Application.Services
             var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
             DateTime newDate;
-            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idOpponnent, idMatch);
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch);
             var match = postPoneMatch?.Match;
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
@@ -265,7 +265,6 @@ namespace Application.Services
             await UnityOfWork.SaveChangesAsync();
 
             await notifyAcceptPostPone(idMatch, idTeam, nameTeam, idOpponnent, opponentName, newDate);
-
 
             return matchDTO;
         }
@@ -385,7 +384,7 @@ namespace Application.Services
                 { "type", type },
                 { "matchId", matchId.ToString() },
                 { "title", title },
-                { "body", textTeam }
+                { "body", textOpponent }
             };
 
             await notificationFirebaseService.sendNotificationToTeamsWithDataAsync(idTeam, idOpponnent, payloadTeam, payloadOpponent);

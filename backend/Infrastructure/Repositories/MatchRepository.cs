@@ -141,16 +141,16 @@ namespace Infrastructure.Repositories
         /// <returns>A partida [Matches] encontrada ou null se não houver conflito nas 12h.</returns>
         public async Task<Matches?> GetMatchProxim12HoursMatchs(Guid idTeam, DateTime gameDate)
         {
-            const int totalHours = 12;
-            const int totalMinutes = 60 * totalHours;
+            var minDate = gameDate.AddHours(-12);
+            var maxDate = gameDate.AddHours(12);
 
             var query = await context.Match
-                .Include(m => m.Teams)
-                .Where(m => m.Teams.Any(t => t.IdTeam == idTeam)
-                    && EF.Functions.DateDiffMinute(m.MatchDate, gameDate) <= totalMinutes
-                    && EF.Functions.DateDiffMinute(m.MatchDate, gameDate) >= -totalMinutes
-                    && (m.MatchStatus == MatchStatus.SCHEDULED || m.MatchStatus == MatchStatus.POST_PONED))
-                .FirstOrDefaultAsync();
+                    .Include(m => m.Teams)
+                    .Where(m => m.Teams.Any(t => t.IdTeam == idTeam)
+                         && m.MatchDate >= minDate
+                         && m.MatchDate <= maxDate
+                         && (m.MatchStatus == MatchStatus.SCHEDULED || m.MatchStatus == MatchStatus.POST_PONED))
+                    .FirstOrDefaultAsync();
 
             return query;
         }

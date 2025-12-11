@@ -60,6 +60,22 @@ namespace Application.Services
         }
         #endregion
 
+        public async Task<HomePageDto> getHomePageInfo(Guid idTeam)
+        {
+            var teamInfo = await TeamRepository.GetOpponentTeamById(idTeam);
+            var nextMatches = await TeamRepository.GetNextMatchTeam(idTeam);
+            var sequencyVitory = await TeamRepository.GetSequenceVitorysTeam(idTeam);
+
+            var homePage = new HomePageDto
+            {
+                Team = teamInfo,
+                NextsMatchs = nextMatches,
+                HistoricPreviousGames = sequencyVitory
+            };
+
+            return homePage; 
+        }
+
         #region CRUD Team
 
         /// <summary>

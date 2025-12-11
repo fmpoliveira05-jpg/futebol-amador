@@ -369,12 +369,19 @@ namespace Application.Services
 
         private async Task notifyAcceptMatchInvite(Guid matchId, Guid idTeam, string nameTeam, Guid idOpponnent, string opponentName, string addressPitch, DateTime gameDate)
         {
+            long startMillisLong = new DateTimeOffset(gameDate).ToUnixTimeMilliseconds();
+            long endMillisLong = startMillisLong + 7200000;
+
             var titleTeam = $"Jogo: {nameTeam} vs {opponentName}";
             var titleOpponent = $"Jogo: {opponentName} vs {nameTeam}";
 
             var text = "Tem um novo jogo agendadao no seu calendário.";
             var description = $"Jogo marcado pela app AMFootbal";
             var type = "ACCEPT_MATCH_INVITE";
+
+            string startMillis = startMillisLong.ToString();
+            string endMillis = endMillisLong.ToString();
+
             var payloadTeam = new Dictionary<string, string>
             {
                 { "type", type },
@@ -382,8 +389,8 @@ namespace Application.Services
                 { "calendarTitle", titleTeam },
                 { "calendarDescription", description },
                 { "location", addressPitch ?? "Local a definir" },
-                { "startMillis", gameDate.ToString() },
-                { "endMillis", gameDate.ToString() },
+                { "startMillis", startMillis },
+                { "endMillis", endMillis },
                 { "title", titleTeam },
                 { "body", text }
             };
@@ -395,8 +402,8 @@ namespace Application.Services
                 { "calendarTitle", titleTeam },
                 { "calendarDescription", description },
                 { "location", addressPitch ?? "Local a definir" },
-                { "startMillis", gameDate.ToString() },
-                { "endMillis", gameDate.ToString() },
+                { "startMillis", startMillis },
+                { "endMillis", endMillis },
                 { "title", titleOpponent },
                 { "body", text }
             };
