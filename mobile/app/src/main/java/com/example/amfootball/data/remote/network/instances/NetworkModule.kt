@@ -7,6 +7,7 @@ import com.example.amfootball.data.interfaces.api.LeadBoardApi
 import com.example.amfootball.data.interfaces.api.MatchInviteApi
 import com.example.amfootball.data.interfaces.api.NotificationApi
 import com.example.amfootball.data.interfaces.api.PlayerApi
+import com.example.amfootball.data.interfaces.api.PostPoneMatchApi
 import com.example.amfootball.data.interfaces.api.TeamApi
 import com.example.amfootball.data.remote.network.AuthInterceptor
 import dagger.Module
@@ -161,6 +162,12 @@ object NetworkModule {
     @Singleton
     fun provideTeamApi(retrofit: Retrofit): TeamApi {
         return retrofit.create(TeamApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePostPoneMatchApi(retrofit: Retrofit): PostPoneMatchApi {
+        return retrofit.create(PostPoneMatchApi::class.java)
     }
 
     /**

@@ -13,6 +13,7 @@ import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
 import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 
 /**
  * Fornece dados fictícios (Mocks) e stubs de ações para o ecrã de Pesquisa/Listagem de Jogadores Globais.
@@ -235,10 +236,7 @@ object LeadboardMocks {
         )
     )
 
-    val showMoreState = true
     val fakeActions = LeadBoardActions(
         onShowMore = { _, _ -> },
-        isValidShowMoreTeams = { mutableStateOf(showMoreState) },
-        onLoadMoreTeams = {}
     )
 }
