@@ -36,15 +36,16 @@ import com.example.amfootball.ui.components.lists.FilterRow
 import com.example.amfootball.ui.components.lists.FilterSection
 import com.example.amfootball.ui.components.lists.GenericListItem
 import com.example.amfootball.ui.components.lists.ListSurface
-import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.viewModel.team.ListPostPoneMatchViewModel
 import com.example.amfootball.core.utils.Patterns
-import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
+import com.example.amfootball.data.remote.dtos.postponeMatch.PostponeDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterListPostPoneMatchActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListPostPoneMatchActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListPostPoneMatchMocks
 import java.time.format.DateTimeFormatter
 
@@ -85,6 +86,11 @@ fun ListPostPoneMatchScreen(
         showMoreInfo = viewModel::showMoreInfo
     )
 
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
@@ -96,6 +102,7 @@ fun ListPostPoneMatchScreen(
         filterActions = filterActions,
         list = list,
         itemsListActions = itemsListActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -114,7 +121,7 @@ fun ListPostPoneMatchScreen(
  * @param filters Valores atuais dos filtros.
  * @param filtersError Erros de validação nos filtros.
  * @param filterActions Callbacks para filtros.
- * @param list A lista de pedidos [PostPoneMatchDto].
+ * @param list A lista de pedidos [PostponeDto].
  * @param itemsListActions Callbacks de ação do item (Aceitar/Rejeitar).
  * @param navHostController Controlador de navegação.
  */
@@ -125,11 +132,13 @@ private fun ListPostPoneMatchContent(
     filters: FilterPostPoneMatch,
     filtersError: ListPostPoneMatchFiltersError,
     filterActions: FilterListPostPoneMatchActions,
-    list: List<PostPoneMatchDto>,
+    list: List<PostponeDto>,
     itemsListActions: ItemsListPostPoneMatchActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -161,6 +170,8 @@ private fun ListPostPoneMatchContent(
                         navHostController = navHostController
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_post_pone_match_empty)
             )
         }
@@ -279,7 +290,7 @@ private fun FilterListPostPoneMatchContent(
  */
 @Composable
 private fun ItemListPosPoneMatch(
-    postPoneMatch: PostPoneMatchDto,
+    postPoneMatch: PostponeDto,
     itemsListActions: ItemsListPostPoneMatchActions,
     navHostController: NavHostController
 ) {
@@ -292,14 +303,15 @@ private fun ItemListPosPoneMatch(
                 DateRow(date = "Game: ${it.gameDate.format(DateTimeFormatter.ofPattern(Patterns.DATE_TIME))}")
                 DateRow(
                     date = "Postpone: ${
-                        it.postPoneDate.format(
+                        it.postponeDate.format(
                             DateTimeFormatter.ofPattern(
                                 Patterns.DATE_TIME
                             )
                         )
                     }"
                 )
-                PitchAddressRow(ptichAdrress = it.pitchMatch)
+                //Comentei o Dto não tem
+                //PitchAddressRow(ptichAdrress = it.)
             }
         },
         leading = {
@@ -314,8 +326,8 @@ private fun ItemListPosPoneMatch(
         },
         trailing = {
             Row {
-                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.id) })
-                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.id) })
+                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.idMatch) })
+                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.idMatch) })
                 ShowMoreInfoButton(
                     showMoreDetails = {
                         itemsListActions.showMoreInfo(
@@ -333,7 +345,7 @@ private fun ItemListPosPoneMatch(
 @Preview(name = "1. Lista Normal - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "1. List Normal - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListPostPoneMatch_Normal() {
+fun PreviewListPostPoneMatchNormal() {
     ListPostPoneMatchContent(
         uiState = UiState(isLoading = false),
         isOnline = true,
@@ -342,6 +354,7 @@ fun PreviewListPostPoneMatch_Normal() {
         filterActions = ListPostPoneMatchMocks.mockFilterActions,
         list = ListPostPoneMatchMocks.mockPostPoneMatches,
         itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -349,7 +362,7 @@ fun PreviewListPostPoneMatch_Normal() {
 @Preview(name = "2. Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "2. List Empty - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListPostPoneMatch_Empty() {
+fun PreviewListPostPoneMatchEmpty() {
     ListPostPoneMatchContent(
         uiState = UiState(isLoading = false),
         isOnline = true,
@@ -358,54 +371,7 @@ fun PreviewListPostPoneMatch_Empty() {
         filterActions = ListPostPoneMatchMocks.mockFilterActions,
         list = emptyList(),
         itemsListActions = ListPostPoneMatchMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "3. Loading - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "3. Loading - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListPostPoneMatch_Loading() {
-    ListPostPoneMatchContent(
-        uiState = UiState(isLoading = true),
-        isOnline = true,
-        filters = FilterPostPoneMatch(),
-        filtersError = ListPostPoneMatchFiltersError(),
-        filterActions = ListPostPoneMatchMocks.mockFilterActions,
-        list = emptyList(),
-        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "4. Erro - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "4. Error - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListPostPoneMatch_Error() {
-    ListPostPoneMatchContent(
-        uiState = UiState(isLoading = false, errorMessage = "Falha ao carregar adiamentos."),
-        isOnline = true,
-        filters = FilterPostPoneMatch(),
-        filtersError = ListPostPoneMatchFiltersError(),
-        filterActions = ListPostPoneMatchMocks.mockFilterActions,
-        list = emptyList(),
-        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "5. Offline Banner - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "5. Offline Banner - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListPostPoneMatch_Offline() {
-    ListPostPoneMatchContent(
-        uiState = UiState(isLoading = false),
-        isOnline = false,
-        filters = FilterPostPoneMatch(),
-        filtersError = ListPostPoneMatchFiltersError(),
-        filterActions = ListPostPoneMatchMocks.mockFilterActions,
-        list = ListPostPoneMatchMocks.mockPostPoneMatches,
-        itemsListActions = ListPostPoneMatchMocks.mockItemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         navHostController = rememberNavController()
     )
 }

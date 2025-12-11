@@ -16,6 +16,7 @@ import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 // TODO: Falta implementar a chamada à API no método memberShipRequest (e também para a página variar para ser a lista de teams para matchInvite, geral ou pedidos de adesão)
@@ -38,16 +39,16 @@ class ListTeamViewModel @Inject constructor(
 ) : ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
-    val uiFilterState: StateFlow<FiltersListTeam> = filterState
+    val uiFilterState: StateFlow<FiltersListTeam> = filterState.asStateFlow()
 
     /** Estado dos erros de validação dos filtros (ex: mensagens vermelhas nos inputs). */
-    private val filterErrorState: MutableStateFlow<FilterTeamError> =
-        MutableStateFlow(FilterTeamError())
-    val filterError: StateFlow<FilterTeamError> = filterErrorState
+    private val filterErrorState: MutableStateFlow<FilterTeamError> = MutableStateFlow(FilterTeamError())
+
+    val filterError: StateFlow<FilterTeamError> = filterErrorState.asStateFlow()
 
     /** Lista de Ranks disponíveis para seleção no filtro. */
     private val listRanks: MutableStateFlow<List<RankNameDto>> = MutableStateFlow(emptyList())
-    var listRank: StateFlow<List<RankNameDto>> = listRanks
+    var listRank: StateFlow<List<RankNameDto>> = listRanks.asStateFlow()
 
     init {
         loadListTeam()

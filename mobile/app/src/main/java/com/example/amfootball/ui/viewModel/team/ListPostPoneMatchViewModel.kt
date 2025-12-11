@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.viewModel.team
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.domains.errors.ErrorMessage
@@ -11,10 +12,12 @@ import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.core.extensions.toLocalDateTime
-import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
+import com.example.amfootball.data.remote.dtos.postponeMatch.PostponeDto
+import com.example.amfootball.data.remote.services.PostPoneMatchService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 //TODO: Implementar os metodos todos com as chamadas há API (se necessário)
@@ -31,35 +34,35 @@ import javax.inject.Inject
 @HiltViewModel
 class ListPostPoneMatchViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val calendarManager: CalendarManager
-) : ListsViewModels<PostPoneMatchDto>(networkObserver = networkObserver) {
+    private val postPoneMatchService: PostPoneMatchService,
+    private val calendarManager: CalendarManager,
+    private val savedStateHandle: SavedStateHandle
+) : ListsViewModels<PostponeDto>(networkObserver = networkObserver) {
+
+    private val teamId: String = savedStateHandle.get<String>("teamId") ?: ""
+
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
      */
-    private val filterState: MutableStateFlow<FilterPostPoneMatch> =
-        MutableStateFlow(FilterPostPoneMatch())
+    private val filterState: MutableStateFlow<FilterPostPoneMatch> = MutableStateFlow(FilterPostPoneMatch())
 
     /**
      * Fluxo público de leitura dos critérios de filtro.
      */
-    val filter: StateFlow<FilterPostPoneMatch> = filterState
+    val filter: StateFlow<FilterPostPoneMatch> = filterState.asStateFlow()
 
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> =
-        MutableStateFlow(ListPostPoneMatchFiltersError())
+    private val filtersErrorsState: MutableStateFlow<ListPostPoneMatchFiltersError> = MutableStateFlow(ListPostPoneMatchFiltersError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.
      */
-    val filterErros: StateFlow<ListPostPoneMatchFiltersError> = filtersErrorsState
+    val filterErros: StateFlow<ListPostPoneMatchFiltersError> = filtersErrorsState.asStateFlow()
 
     init {
-        //TODO: Carregar a lista da API
-        //listState.value = PostPoneMatchDto.createExamplePostPoneMatchList()
-        listState.value = emptyList()
-        stopLoading()
+        loadListPostPone()
     }
 
     /**
@@ -115,7 +118,7 @@ class ListPostPoneMatchViewModel @Inject constructor(
         if (!validateFilters()) {
             return
         }
-        //TODO: Implementar
+        //TODO: Implementar para filtrar online e offline
     }
 
     /**
@@ -146,7 +149,6 @@ class ListPostPoneMatchViewModel @Inject constructor(
         //TODO: Implementar
     }
 
-    //TODO: Passar o id da equipa na rota
     /**
      * Navega para o ecrã de perfil do adversário.
      *
@@ -164,6 +166,15 @@ class ListPostPoneMatchViewModel @Inject constructor(
             },
             toastMessage = R.string.toast_offline_info_team
         )
+    }
+
+    private fun loadListPostPone() {
+        launchDataLoad {
+            val teams = postPoneMatchService.getPostPoneMatch(teamId = teamId, filterState.value)
+
+            listState.value = teams
+            originalList = teams
+        }
     }
 
     /**

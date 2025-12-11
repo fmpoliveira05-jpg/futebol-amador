@@ -63,4 +63,7 @@ object BaseEndpoints {
      * Valor: `api/MatchInvite`
      */
     const val MATCH_INVITE_API = "$API/MatchInvite"
+
+    const val POSTPONED_MATCH_API = TEAM_API
+
 }

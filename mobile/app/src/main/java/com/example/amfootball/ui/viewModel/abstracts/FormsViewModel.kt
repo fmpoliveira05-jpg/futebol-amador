@@ -3,6 +3,7 @@ package com.example.amfootball.ui.viewModel.abstracts
 import com.example.amfootball.data.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /**
  * **ViewModel Abstrato e Genérico para Gestão de Formulários.**
@@ -49,7 +50,7 @@ abstract class FormsViewModel<F, E>(
      * Exposto para a UI (Jetpack Compose). Deve ser consumido utilizando `collectAsStateWithLifecycle()`.
      * Garante o princípio de "Unidirectional Data Flow", impedindo que a UI modifique o estado diretamente.
      */
-    val uiFormState: StateFlow<F> = formState
+    val uiFormState: StateFlow<F> = formState.asStateFlow()
 
     /**
      * **Estado Interno Mutável dos Erros.**
@@ -65,7 +66,7 @@ abstract class FormsViewModel<F, E>(
      * Exposto para a UI. Permite que os componentes visuais (ex: `OutlinedTextField`) mostrem
      * mensagens de erro (texto vermelho) e estados de erro (bordas vermelhas) reativamente.
      */
-    val uiFormErrors: StateFlow<E> = formErrors
+    val uiFormErrors: StateFlow<E> = formErrors.asStateFlow()
 
     /**
      * **Lógica de Validação Abstrata.**

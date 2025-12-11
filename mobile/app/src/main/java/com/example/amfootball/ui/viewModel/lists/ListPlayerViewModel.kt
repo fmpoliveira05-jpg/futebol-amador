@@ -19,6 +19,7 @@ import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 //TODO: Falta a parte para este viewModel permiteit com que a página deia para a lista geral e para o de mandar convites de adesão
@@ -44,9 +45,8 @@ class ListPlayerViewModel @Inject constructor(
      * Estado atual dos filtros aplicados pelo utilizador.
      * Observado pela UI para manter os campos de texto e seletores sincronizados.
      */
-    private val filterState: MutableStateFlow<FilterListPlayer> =
-        MutableStateFlow(FilterListPlayer())
-    val uiFilters: StateFlow<FilterListPlayer> = filterState
+    private val filterState: MutableStateFlow<FilterListPlayer> = MutableStateFlow(FilterListPlayer())
+    val uiFilters: StateFlow<FilterListPlayer> = filterState.asStateFlow()
 
     /**
      * Estado dos erros de validação dos filtros.
@@ -54,7 +54,7 @@ class ListPlayerViewModel @Inject constructor(
      */
     private val filterErrorState: MutableStateFlow<FilterPlayersErrors> =
         MutableStateFlow(FilterPlayersErrors())
-    val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
+    val filterError: StateFlow<FilterPlayersErrors> = filterErrorState.asStateFlow()
 
     /**
      * Lista de posições disponíveis para preencher o Dropdown de filtro.
@@ -63,7 +63,7 @@ class ListPlayerViewModel @Inject constructor(
     private val listPositions = MutableStateFlow(
         listOf(null, Position.FORWARD, Position.MIDFIELDER, Position.DEFENDER, Position.GOALKEEPER)
     )
-    val uiListPositions: StateFlow<List<Position?>> = listPositions
+    val uiListPositions: StateFlow<List<Position?>> = listPositions.asStateFlow()
 
     init {
         loadingListPlayer()

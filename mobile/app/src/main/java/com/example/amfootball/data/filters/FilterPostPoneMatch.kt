@@ -23,3 +23,16 @@ data class FilterPostPoneMatch(
     val minDatePostPone: LocalDateTime? = null,
     val maxDatePostPone: LocalDateTime? = null
 )
+
+fun FilterPostPoneMatch.toQueryMap(): Map<String, String> {
+    val map = mutableMapOf<String, String>()
+
+    nameOpponent?.let { map["NameOpponent"] = it }
+    isHome?.let { map["IsHome"] = it.toString() }
+    minDataGame?.let { map["MinDateGame"] = it.toString() }
+    maxDateGame?.let { map["MaxDateGame"] = it.toString() }
+    minDatePostPone?.let { map["MinDatePostPoneGame"] = it.toString() }
+    maxDatePostPone?.let { map["MaxDatePostPoneGame"] = it.toString() }
+
+    return map
+}

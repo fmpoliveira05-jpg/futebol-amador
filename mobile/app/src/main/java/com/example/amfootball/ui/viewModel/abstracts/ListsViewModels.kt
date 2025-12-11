@@ -6,6 +6,7 @@ import com.example.amfootball.core.utils.ListsSizesConst
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -59,7 +60,7 @@ abstract class ListsViewModels<T>(
             lista.take(numero)
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
 
@@ -74,7 +75,7 @@ abstract class ListsViewModels<T>(
             tamanhoAtual < listaCompleta.size
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = false
         )
 
@@ -83,7 +84,7 @@ abstract class ListsViewModels<T>(
      * Incrementa o limite de paginação em [ListsSizesConst.INCREMENT_SIZE],
      * fazendo com que [uiList] emita uma nova lista maior.
      */
-    protected fun loadMoreItems() {
+    fun loadMoreItems() {
         inicialSizeList.update { it + ListsSizesConst.INCREMENT_SIZE }
     }
 

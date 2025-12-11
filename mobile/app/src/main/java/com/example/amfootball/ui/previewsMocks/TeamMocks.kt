@@ -1,9 +1,9 @@
 package com.example.amfootball.ui.previewsMocks
 
 import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.remote.dtos.match.PostPoneMatchDto
 import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
+import com.example.amfootball.data.remote.dtos.postponeMatch.PostponeDto
 import com.example.amfootball.data.remote.dtos.support.PitchInfo
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamStatisticsDto
@@ -11,6 +11,8 @@ import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.enums.TypeMember
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDateTime
 import javax.inject.Singleton
 
@@ -307,6 +309,11 @@ object ListPostPoneMatchMocks {
      */
     val mockDate = LocalDateTime.now()
 
+    private val myTeamMock = TeamDto(
+        id = "99",
+        name = "Minha Equipa",
+        image = ""
+    )
     /**
      * Lista estática de pedidos de adiamento com cenários de teste.
      *
@@ -317,27 +324,40 @@ object ListPostPoneMatchMocks {
      * Estes dados permitem verificar se a UI formata corretamente a diferença de datas e locais.
      */
     val mockPostPoneMatches = listOf(
-        PostPoneMatchDto(
-            id = "1",
+        PostponeDto(
+            idMatch = "1",
+            gameDate = mockDate.plusDays(1),
+            postponeDate = mockDate.plusDays(2),
+            team = myTeamMock,
             opponent = TeamDto(
                 id = "10",
                 name = "Dragons FC",
                 image = ""
-            ),
-            gameDate = mockDate.plusDays(1),
-            postPoneDate = mockDate.plusDays(2),
-            pitchMatch = "Estádio Municipal"
+            )
         ),
-        PostPoneMatchDto(
-            id = "2",
+        PostponeDto(
+            idMatch = "2",
+            gameDate = mockDate.plusDays(5),
+            postponeDate = mockDate.plusDays(7),
+            team = myTeamMock,
             opponent = TeamDto(
                 id = "11",
                 name = "Lions Club",
                 image = ""
-            ),
-            gameDate = mockDate.plusDays(5),
-            postPoneDate = mockDate.plusDays(7),
-            pitchMatch = "Arena Central"
+            )
         )
+    )
+}
+
+object ItemActionsMock {
+    val mockShowMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { MutableStateFlow(true) },
+        onLoadMore = {}
+    )
+
+    // Mock para quando NÃO há mais itens
+    val mockShowMoreItensActionHidden = ShowMoreItensAction(
+        isValidShowMore = { MutableStateFlow(false) },
+        onLoadMore = {}
     )
 }
