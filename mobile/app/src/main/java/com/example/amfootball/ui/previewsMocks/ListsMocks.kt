@@ -1,20 +1,18 @@
 package com.example.amfootball.ui.previewsMocks
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.remote.dtos.rank.RankNameDto
-import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
 import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
-import java.time.LocalDate
 
 /**
  * Fornece dados fictícios (Mocks) e stubs de ações para o ecrã de Pesquisa/Listagem de Jogadores Globais.
@@ -62,7 +60,7 @@ object ListPlayersMocks {
      * permitindo renderizar a interface de filtros complexa sem lógica de negócio associada.
      */
     val Actions =
-        _root_ide_package_.com.example.amfootball.ui.actions.filters.FilterListPlayersActions(
+        FilterListPlayersActions(
             onNameChange = {},
             onCityChange = {},
             onMinAgeChange = {},
@@ -70,7 +68,7 @@ object ListPlayersMocks {
             onPositionChange = {},
             onMinSizeChange = {},
             onMaxSizeChange = {},
-            buttonActions = _root_ide_package_.com.example.amfootball.ui.actions.filters.ButtonFilterActions(
+            buttonActions = ButtonFilterActions(
                 onFilterApply = {},
                 onFilterClean = {}
             )
