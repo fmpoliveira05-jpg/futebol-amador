@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
+import com.example.amfootball.data.remote.services.TeamService
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,8 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class LeadBoardViewModel @Inject constructor(
-    private val networkObserver: NetworkConnectivityObserver
+    private val networkObserver: NetworkConnectivityObserver,
+    private val teamService: TeamService
 ) : ListsViewModels<LeadboardDto>(networkObserver = networkObserver) {
 
     //Inicializer

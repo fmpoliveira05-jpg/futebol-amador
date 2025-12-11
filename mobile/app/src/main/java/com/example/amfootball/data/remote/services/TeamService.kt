@@ -44,6 +44,9 @@ class TeamService @Inject constructor(
         }
     }
 
+    suspend fun getLeaderBoard(): TeamDto {
+
+
     /**
      * Obtém os dados de uma equipa formatados para o formulário de edição.
      *
@@ -181,4 +184,6 @@ class TeamService @Inject constructor(
             teamApi.removePlayerforTeam(teamId = teamId, playerId = playerId)
         }
     }
-}
+
+        return 
+    }
