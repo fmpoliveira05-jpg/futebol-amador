@@ -333,7 +333,7 @@ private fun NavGraphBuilder.teamMatch(
     competitiveMatches(globalNavController = globalNavController, sessionManager = sessionManager)
 
     composableProtectedAdminTeam(
-        route = Routes.TeamRoutes.LIST_POST_PONE_MATCH.route,
+        route = "${Routes.TeamRoutes.LIST_POST_PONE_MATCH.route}/{${Arguments.TEAM_ID}}",
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {

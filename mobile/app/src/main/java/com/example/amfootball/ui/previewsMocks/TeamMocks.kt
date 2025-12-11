@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.previewsMocks
 
+import com.example.amfootball.core.extensions.toUiString
 import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
@@ -298,8 +299,8 @@ object ListPostPoneMatchMocks {
      */
     val mockItemActions =
         _root_ide_package_.com.example.amfootball.ui.actions.itemsList.ItemsListPostPoneMatchActions(
-            acceptPostPoneMatch = {},
-            rejectPostPoneMatch = {},
+            acceptPostPoneMatch = {_, _, _ -> },
+            rejectPostPoneMatch = {_, _ ->},
             showMoreInfo = { _, _ -> }
         )
 
@@ -326,8 +327,8 @@ object ListPostPoneMatchMocks {
     val mockPostPoneMatches = listOf(
         PostponeDto(
             idMatch = "1",
-            gameDate = mockDate.plusDays(1),
-            postponeDate = mockDate.plusDays(2),
+            gameDateStr = mockDate.plusDays(1).toUiString(),
+            postponeDateStr = mockDate.plusDays(2).toUiString(),
             team = myTeamMock,
             opponent = TeamDto(
                 id = "10",
@@ -337,8 +338,8 @@ object ListPostPoneMatchMocks {
         ),
         PostponeDto(
             idMatch = "2",
-            gameDate = mockDate.plusDays(5),
-            postponeDate = mockDate.plusDays(7),
+            gameDateStr = mockDate.plusDays(5).toUiString(),
+            postponeDateStr = mockDate.plusDays(7).toUiString(),
             team = myTeamMock,
             opponent = TeamDto(
                 id = "11",

@@ -5,6 +5,7 @@ import com.example.amfootball.R
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.manager.CalendarManager
 import com.example.amfootball.data.remote.services.NotificationCallsService
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -56,6 +57,12 @@ class PushNotificationService : FirebaseMessagingService() {
      */
     @Inject
     lateinit var globalEventBus: GlobalEventBus
+
+    /**
+     * O gestor de calendário injetado, usado para sincronizar eventos com o Calendário do Android.
+     */
+    @Inject
+    lateinit var calendarManager: CalendarManager
 
     /**
      * Chamado quando um novo Token de Dispositivo FCM é gerado.
@@ -116,6 +123,15 @@ class PushNotificationService : FirebaseMessagingService() {
             }
             "TEAM_DEMOTION" -> {
                 handleDemoteTeam(message = message)
+            }
+            "POST_PONE_MATCH" -> {
+                handlePostPoneMatch(message = message)
+            }
+            "CANCEL_MATCH" -> {
+                handleCancelMatch(message = message)
+            }
+            "ACCEPT_MATCH_INVITE" -> {
+                handleAcceptMatchInvite(message = message)
             }
             else -> {
                 handleDefaultMessageReceiver(message = message)
@@ -227,6 +243,115 @@ class PushNotificationService : FirebaseMessagingService() {
             title = title,
             message = message,
             navigationAction = "NAVIGATE_TO_HOME"
+        )
+    }
+
+    /**
+     * Trata o evento de "Adiamento de Partida" (POST_PONE_MATCH)
+     *
+     * Este handler é executado quando o Backend notifica o utilizador (Membro da Equipa ou Adversário)
+     * sobre uma mudança na data do jogo (após o aceite de um pedido de adiamento).
+     *
+     * **Ações:**
+     * 1. Extrai o `matchId` e os novos timestamps (`newDateMillis`) do payload.
+     * 2. Calcula um horário de fim padrão (assumindo 2 horas de duração, 7.200.000 ms).
+     * 3. Chama [CalendarManager.updateMatchDateOnly] para atualizar silenciosamente o evento no calendário local
+     * (se o utilizador o tiver adicionado).
+     * 4. Exibe uma notificação visual.
+     *
+     * @param message A [RemoteMessage] recebida contendo o payload de dados.
+     */
+    private fun handlePostPoneMatch(message: RemoteMessage) {
+        val matchId = message.data["matchId"]
+        val newDateMillis = message.data["newDateMillis"]?.toLongOrNull()
+
+        // Dados opcionais para notificação visual
+        val title = message.data["title"] ?: "Jogo Reagendado"
+        val body = message.data["body"] ?: "A data do jogo foi alterada."
+
+        if (matchId != null && newDateMillis != null) {
+            val endTime = newDateMillis + (2 * 60 * 60 * 1000)
+
+            calendarManager.updateMatchDateOnly(
+                matchId = matchId,
+                newStart = newDateMillis,
+                newEnd = endTime
+            )
+        }
+
+        notificationService.showNotificationTeam(
+            title = title,
+            message = body,
+        )
+    }
+
+    /**
+     * Trata o evento de "Cancelamento de Partida" (CANCEL_MATCH).
+     *
+     * Este handler é executado quando o Backend notifica os utilizadores que uma partida foi cancelada.
+     *
+     * **Ações:**
+     * 1. Extrai o `matchId` do payload.
+     * 2. Chama [CalendarManager.removeMatch] para remover o evento do calendário local do utilizador
+     * (se o utilizador o tiver adicionado).
+     * 3. Exibe uma notificação visual.
+     *
+     * @param message A [RemoteMessage] recebida.
+     */
+    private fun handleCancelMatch(message: RemoteMessage) {
+        val matchId = message.data["matchId"]
+
+        val title = message.data["title"] ?: "Jogo cancelado"
+        val body = message.data["body"] ?: "Uma das suas partidas foi cancelada."
+
+        if (matchId != null) {
+            calendarManager.removeMatch(matchId = matchId)
+        }
+
+        notificationService.showNotificationTeam(
+            title = title,
+            message = body,
+        )
+    }
+
+    /**
+     * Trata o evento de "Aceite de Convite de Partida" (ACCEPT_MATCH_INVITE).
+     *
+     * Este handler é executado quando uma partida passa do estado "Pendente" para "Confirmada".
+     *
+     * **Ações:**
+     * 1. Extrai todos os detalhes necessários do calendário (`title`, `location`, `startMillis`, `endMillis`).
+     * 2. Chama [CalendarManager.addMatch] para criar o evento no calendário local do utilizador.
+     * (Se o utilizador tinha um evento "Pendente" no calendário, deve-se remover antes).
+     * 3. Exibe uma notificação visual.
+     *
+     * @param message A [RemoteMessage] recebida, contendo dados completos do evento.
+     */
+    private fun handleAcceptMatchInvite(message: RemoteMessage) {
+        val matchId = message.data["matchId"]
+
+        val calendarTitle = message.data["calendarTitle"] ?: "Jogo de Futebol"
+        val calendarDescription = message.data["calendarDescription"] ?: ""
+        val location = message.data["location"] ?: "Campo"
+        val startMillis = message.data["startMillis"]?.toLongOrNull()
+        val endMillis = message.data["endMillis"]?.toLongOrNull()
+        val notifTitle = message.data["title"] ?: "Jogo Confirmado"
+        val notifBody = message.data["body"] ?: "O teu jogo foi agendado."
+
+        if (matchId != null && startMillis != null && endMillis != null) {
+            calendarManager.addMatch(
+                matchId = matchId,
+                title = calendarTitle,
+                desc = calendarDescription,
+                loc = location,
+                start = startMillis,
+                end = endMillis
+            )
+        }
+
+        notificationService.showNotificationTeam(
+            title = notifTitle,
+            message = notifBody,
         )
     }
 }

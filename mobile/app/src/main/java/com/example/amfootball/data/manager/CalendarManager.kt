@@ -1,6 +1,8 @@
 package com.example.amfootball.data.manager
 
+import android.util.Log
 import com.example.amfootball.data.local.CalendarPreference
+import com.example.amfootball.data.remote.dtos.CalendarEvent
 import com.example.amfootball.data.repository.CalendarRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -85,9 +87,21 @@ class CalendarManager @Inject constructor(
     fun removeMatch(matchId: String) {
         val eventId = calendarPreferences.getEventId(matchId)
 
+        Log.d("CalendarDebug", "A tentar remover MatchID: $matchId")
+
         if (eventId != null) {
-            calendarRepository.deleteEvent(eventId)
-            calendarPreferences.removeEventId(matchId)
+            Log.d("CalendarDebug", "EventID encontrado: $eventId. A apagar...")
+
+            val deleted = calendarRepository.deleteEvent(eventId)
+
+            if (deleted) {
+                Log.d("CalendarDebug", "Evento apagado com sucesso do Android.")
+                calendarPreferences.removeEventId(matchId)
+            } else {
+                Log.e("CalendarDebug", "Falha ao apagar evento (Permissão ou ID inválido).")
+            }
+        } else {
+            Log.e("CalendarDebug", "ERRO: EventID é NULL. Este jogo não estava associado no calendário local.")
         }
     }
 
@@ -110,5 +124,38 @@ class CalendarManager @Inject constructor(
         if (eventId != null) {
             calendarRepository.updateEvent(eventId, title, desc, start, end)
         }
+    }
+
+    /**
+     * Atualiza EXCLUSIVAMENTE as datas de um evento, mantendo o Título e Descrição originais.
+     * * Isto funciona porque o [CalendarRepository.updateEvent] ignora parâmetros nulos,
+     * atualizando na base de dados apenas os campos que forem enviados.
+     *
+     * @param matchId O ID da partida da API.
+     * @param newStart Novo timestamp de início (ms).
+     * @param newEnd Novo timestamp de fim (ms).
+     */
+    fun updateMatchDateOnly(matchId: String, newStart: Long, newEnd: Long) {
+        val eventId = calendarPreferences.getEventId(matchId)
+
+        if (eventId != null) {
+            calendarRepository.updateEvent(
+                eventId = eventId,
+                title = null,
+                description = null,
+                beginTime = newStart,
+                endTime = newEnd
+            )
+        }
+    }
+
+    /**
+     * Obtém os dados atuais do evento no calendário (ex: para verificar se o utilizador mudou algo manualmente).
+     * * @param matchId O ID da partida da API.
+     * @return O objeto [CalendarEvent] com os dados, ou null se não existir/erro.
+     */
+    fun getMatchDetails(matchId: String): CalendarEvent? {
+        val eventId = calendarPreferences.getEventId(matchId) ?: return null
+        return calendarRepository.getEvent(eventId)
     }
 }

@@ -13,7 +13,7 @@ import androidx.navigation.NavHostController
  * @property showMoreInfo Ação para visualizar mais detalhes sobre a equipa adversária envolvida no pedido.
  */
 data class ItemsListPostPoneMatchActions(
-    val acceptPostPoneMatch: (idPostPoneMatch: String) -> Unit,
-    val rejectPostPoneMatch: (idPostPoneMatch: String) -> Unit,
+    val acceptPostPoneMatch: (idPostPoneMatch: String, idOpponent: String, matchDate: Long) -> Unit,
+    val rejectPostPoneMatch: (idPostPoneMatch: String, idOpponent: String) -> Unit,
     val showMoreInfo: (idOpponent: String, navHostController: NavHostController) -> Unit
 )
