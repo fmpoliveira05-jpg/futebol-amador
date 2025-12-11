@@ -134,6 +134,12 @@ namespace Application.Services
             await SendMulticastNotification(opponentId, payloadOpponent, null, null);
         }
 
+        public async Task sendNotificationToTeamsWithDataAsync(Guid teamId, Guid opponentId, Dictionary<string, string> dataTeam, Dictionary<string, string> dataOpponent)
+        {
+            SendMulticastNotification(teamId, dataTeam, null, null);
+            await SendMulticastNotification(opponentId, dataOpponent, null, null);
+        }
+
         #region Method Private
         /// <summary>
         /// Cria o objeto Notification apenas se houver Título e Corpo.

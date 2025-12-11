@@ -8,5 +8,7 @@
 
         Task sendNotificationToTeamsAsync(Guid teamId, Guid opponentId, string eventType,
                 string title, string bodyForTeam, string bodyForOpponent);
+
+        Task sendNotificationToTeamsWithDataAsync(Guid teamId, Guid opponentId, Dictionary<string, string> dataTeam, Dictionary<string, string> dataOpponent);
     }
 }
