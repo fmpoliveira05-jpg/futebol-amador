@@ -2,4 +2,13 @@
 <resources>
     <string name="description_logo_team">Team %1$s logo</string>
     <string name="label_fields_pitch">Team\'s pitch</string>
+
+    <string name="next_games">Upcoming Matches</string>
+    <string name="no_games_scheduled">No games scheduled</string>
+
+    <string name="team_form">Team Form</string>
+    <string name="no_game_realized">No games played</string>
+
+    <string name="game_Home">H</string>
+    <string name="game_away">A</string>
 </resources>

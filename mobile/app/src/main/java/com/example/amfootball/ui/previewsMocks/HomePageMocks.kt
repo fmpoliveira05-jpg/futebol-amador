@@ -1,8 +1,12 @@
 package com.example.amfootball.ui.previewsMocks
 
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.homePageTeam.VitorySequenceTemDto
+import com.example.amfootball.data.remote.dtos.match.InfoMatch
 import com.example.amfootball.data.remote.dtos.player.FireBaseLoginResponseDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.ui.actions.homePageActions.HomePageTeamActions
 
 /**
  * Objeto utilitário que fornece dados fictícios (Mock Data) estáticos para o ecrã Principal (Home Page).
@@ -94,19 +98,35 @@ object HomePageMock {
  */
 object HomePageTeamMock {
 
-    /**
-     * Uma instância estática de [TeamDto] representando uma equipa completa e válida ("Happy Path").
-     *
-     * **Dados do Mock:**
-     * - **Nome:** "Porto Renegades"
-     * - **ID:** "1"
-     * - **Imagem:** String vazia (deve acionar o placeholder de imagem na UI).
-     *
-     * Útil para validar layouts que exibem o resumo da equipa associada ao utilizador.
-     */
-    val mockTeam = TeamDto(
-        id = "1",
-        name = "Porto Renegades",
-        image = ""
+    val team = TeamDto(id = "1", name = "VSC Warriors", image = null)
+    val opponent = TeamDto(id = "2", name = "Porto Lions", image = null)
+
+    val historyFull = listOf(
+        VitorySequenceTemDto(opponent, "2-1", 0),
+        VitorySequenceTemDto(opponent, "1-1", 1),
+        VitorySequenceTemDto(opponent, "0-3", 2),
+        VitorySequenceTemDto(opponent, "1-0", 0),
+        VitorySequenceTemDto(opponent, "2-2", 1)
     )
+
+    val nextMatchesFull = listOf(
+        InfoMatch("1", "2024-12-15T14:30:00", true, team, opponent, true),
+        InfoMatch("2", "2024-12-20T19:00:00", false, team, opponent, false),
+        InfoMatch("3", "2024-12-28T21:00:00", true, team, opponent, true)
+    )
+
+    val dataWithContent = HomePageTeamDto(
+        team = team,
+        vitorySequenceTeam = historyFull,
+        nextsMatch = nextMatchesFull
+    )
+
+    val dataEmpty = HomePageTeamDto(
+        team = team,
+        vitorySequenceTeam = emptyList(),
+        nextsMatch = emptyList()
+    )
+
+    // Actions Dummy (Não fazem nada)
+    val actions = HomePageTeamActions({}, {}, {}, {}, {})
 }

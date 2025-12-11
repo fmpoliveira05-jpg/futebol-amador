@@ -1,6 +1,7 @@
 package com.example.amfootball.data.interfaces.api
 
 import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -25,6 +26,12 @@ import retrofit2.http.QueryMap
  * - Gestão de membros (Listagem, Expulsão, Promoção e Despromoção de cargos).
  */
 interface TeamApi {
+    @GET("${BaseEndpoints.TEAM_API}/homeTeam/{idTeam}")
+    suspend fun getHomePageTeam(
+        @Path("teamId") teamId: String
+    ): Response<HomePageTeamDto>
+
+
     /**
      * Cria uma nova equipa na plataforma.
      *

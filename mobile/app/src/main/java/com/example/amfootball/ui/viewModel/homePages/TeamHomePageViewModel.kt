@@ -5,6 +5,7 @@ import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.services.PlayerService
 import com.example.amfootball.data.remote.services.TeamService
@@ -36,7 +37,6 @@ class TeamHomePageViewModel @Inject constructor(
     private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
-    private val globalEventBus: GlobalEventBus
 ) : BaseViewModel(
     networkObserver = networkObserver,
     needObserverNetwork = true
@@ -45,13 +45,13 @@ class TeamHomePageViewModel @Inject constructor(
      * Estado interno mutável contendo os dados da equipa.
      * Inicializado com um objeto [TeamDto] vazio.
      */
-    private val teamInfo: MutableStateFlow<TeamDto> = MutableStateFlow(TeamDto())
+    private val teamInfo: MutableStateFlow<HomePageTeamDto> = MutableStateFlow(HomePageTeamDto())
 
     /**
      * Fluxo público imutável com os dados da equipa (Nome, Logo, etc.).
      * Observado pela UI para renderizar o cabeçalho e informações.
      */
-    val team: StateFlow<TeamDto> = teamInfo.asStateFlow()
+    val team: StateFlow<HomePageTeamDto> = teamInfo.asStateFlow()
 
     /**
      * Estado interno mutável do Role do utilizador.
@@ -88,7 +88,7 @@ class TeamHomePageViewModel @Inject constructor(
         }
 
         launchDataLoad {
-            val teamData = teamRepository.getNameTeam(teamId = teamId)
+            val teamData = teamRepository.getHomePageTeam(teamId = teamId)
 
             teamInfo.value = teamData
         }

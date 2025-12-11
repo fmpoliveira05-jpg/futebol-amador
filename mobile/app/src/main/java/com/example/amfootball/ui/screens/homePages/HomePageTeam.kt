@@ -36,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.actions.homePageActions.HomePageTeamActions
@@ -49,6 +50,8 @@ import com.example.amfootball.ui.components.diaglos.pages.LeaveTeamAlertDialog
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.components.pages.homePage.RecentFormSection
+import com.example.amfootball.ui.components.pages.homePage.UpcomingMatchesSection
 import com.example.amfootball.ui.previewsMocks.HomePageTeamMock
 import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
 
@@ -102,7 +105,7 @@ fun HomePageTeamScreen(
         onNavigateCalendar = {
             viewModel.onNavigateCalendar(
                 onSucess = {
-                    globalNavController.navigate("${Routes.TeamRoutes.CALENDAR.route}/${team.id}") {
+                    globalNavController.navigate("${Routes.TeamRoutes.CALENDAR.route}/${team.team.id}") {
                         launchSingleTop = true
                     }
                 }
@@ -148,7 +151,7 @@ fun HomePageTeamScreen(
  */
 @Composable
 fun HomePageTeam(
-    team: TeamDto,
+    team: HomePageTeamDto,
     uiState: UiState,
     isOnline: Boolean,
     role: UserRole,
@@ -165,7 +168,7 @@ fun HomePageTeam(
             )
 
             TeamHomePageDrawer(
-                team = team,
+                teamData = team,
                 role = role,
                 homePageTeamActions = homePageTeamActions
             )
@@ -187,7 +190,7 @@ fun HomePageTeam(
  */
 @Composable
 private fun TeamHomePageDrawer(
-    team: TeamDto,
+    teamData: HomePageTeamDto,
     role: UserRole,
     homePageTeamActions: HomePageTeamActions
 ) {
@@ -207,7 +210,17 @@ private fun TeamHomePageDrawer(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.Start
     ) {
-        HeaderHomePageTeam(team = team)
+        HeaderHomePageTeam(team = teamData.team)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        RecentFormSection(history = teamData.vitorySequenceTeam)
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        UpcomingMatchesSection(matches = teamData.nextsMatch)
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         HomePageTeamContent(
             role = role,
@@ -360,76 +373,47 @@ private fun HomePageManagerTeam(homePageTeamActions: HomePageTeamActions) {
     }
 }
 
-@Preview(
-    name = "1. Admin - English",
-    group = "Admin View",
-    showBackground = true,
-    locale = "en"
-)
-@Preview(
-    name = "1. Admin - Português (PT)",
-    group = "Admin View",
-    showBackground = true,
-    locale = "pt-rPT"
-)
-@Preview(
-    name = "1. Admin - Dark Mode",
-    group = "Admin View",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
+@Preview(name = "1. Admin Full - PT", group = "Admin Full", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. Admin Full - EN", group = "Admin Full", locale = "en", showBackground = true)
 @Composable
-fun PreviewTeamHomePageAdmin() {
+fun PreviewAdminFullData() {
     MaterialTheme {
         HomePageTeam(
-            team = HomePageTeamMock.mockTeam,
-            uiState = UiStateMock.mockUiStateContent,
+            team = HomePageTeamMock.dataWithContent,
+            uiState = UiState(),
             isOnline = true,
             role = UserRole.ADMIN_TEAM,
-            homePageTeamActions = HomePageTeamActions(
-                onNavigateCasualMatch = {},
-                onNavigateRankedMatch = {},
-                onNavigateMembers = {},
-                onNavigateCalendar = {},
-                onLeaveTeam = {}
-            )
+            homePageTeamActions = HomePageTeamMock.actions
         )
     }
 }
 
-@Preview(
-    name = "2. Member - English",
-    group = "Member View",
-    showBackground = true,
-    locale = "en"
-)
-@Preview(
-    name = "2. Member - Português (PT)",
-    group = "Member View",
-    showBackground = true,
-    locale = "pt-rPT"
-)
-@Preview(
-    name = "2. Member - Dark Mode",
-    group = "Member View",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
+@Preview(name = "2. Member Full - PT", group = "Member Full", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. Member Full - EN", group = "Member Full", locale = "en", showBackground = true)
 @Composable
-fun PreviewTeamHomePageMember() {
+fun PreviewMemberFullData() {
     MaterialTheme {
         HomePageTeam(
-            team = HomePageTeamMock.mockTeam,
-            uiState = UiStateMock.mockUiStateContent,
+            team = HomePageTeamMock.dataWithContent,
+            uiState = UiState(),
             isOnline = true,
             role = UserRole.MEMBER_TEAM,
-            homePageTeamActions = HomePageTeamActions(
-                onNavigateCasualMatch = {},
-                onNavigateRankedMatch = {},
-                onNavigateMembers = {},
-                onNavigateCalendar = {},
-                onLeaveTeam = {}
-            )
+            homePageTeamActions = HomePageTeamMock.actions
+        )
+    }
+}
+
+@Preview(name = "3. Admin Empty - PT", group = "Admin Empty", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Admin Empty - EN", group = "Admin Empty", locale = "en", showBackground = true)
+@Composable
+fun PreviewEmptyData() {
+    MaterialTheme {
+        HomePageTeam(
+            team = HomePageTeamMock.dataEmpty,
+            uiState = UiState(),
+            isOnline = true,
+            role = UserRole.ADMIN_TEAM,
+            homePageTeamActions = HomePageTeamMock.actions
         )
     }
 }

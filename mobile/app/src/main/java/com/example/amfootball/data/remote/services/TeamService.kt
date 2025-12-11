@@ -6,6 +6,7 @@ import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.core.utils.safeApiCallWithNotReturn
 import com.example.amfootball.core.utils.safeApiCallWithReturn
 import com.example.amfootball.data.interfaces.api.TeamApi
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -44,8 +45,15 @@ class TeamService @Inject constructor(
         }
     }
 
-    suspend fun getLeaderBoard(): TeamDto {
+    suspend fun getHomePageTeam(teamId: String): HomePageTeamDto {
+        return safeApiCallWithReturn {
+            teamApi.getHomePageTeam(teamId = teamId)
+        }
+    }
 
+    suspend fun getLeaderBoard(): TeamDto {
+        return TeamDto()
+    }
 
     /**
      * Obtém os dados de uma equipa formatados para o formulário de edição.
@@ -139,7 +147,10 @@ class TeamService @Inject constructor(
      * @param filter Critérios de filtragem (cargo, nome, etc.).
      * @return Lista de [MemberTeamDto].
      */
-    suspend fun getListMembers(teamId: String, filter: FilterMembersTeam?): List<MemberTeamDto> {
+    suspend fun getListMembers(
+        teamId: String,
+        filter: FilterMembersTeam?
+    ): List<MemberTeamDto> {
         val filters = filter?.toQueryMap() ?: emptyMap()
 
         return safeApiCallWithReturn {
@@ -184,6 +195,4 @@ class TeamService @Inject constructor(
             teamApi.removePlayerforTeam(teamId = teamId, playerId = playerId)
         }
     }
-
-        return 
-    }
+}
