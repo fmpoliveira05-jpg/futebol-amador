@@ -48,7 +48,6 @@ import com.example.amfootball.ui.actions.filters.FilterMatchInviteActions
 import com.example.amfootball.ui.actions.itemsList.ItemListMatchIniviteActions
 import java.time.format.DateTimeFormatter
 
-//TODO: FALTA APENAS TESTAR O ACCEPT
 /**
  * Ecrã de Listagem de Convites de Jogo Recebidos.
  *
@@ -123,7 +122,7 @@ fun ListMatchInviteScreen(
  * @param filters Estado atual dos filtros aplicados.
  * @param filterActions Ações para atualizar filtros.
  * @param filterError Erros de validação nos campos de filtro.
- * @param list A lista de convites [InfoMatchInviteDto] a exibir.
+ * @param list A lista de convites [MatchInviteDto] a exibir.
  * @param itemsListActions Ações disponíveis para cada item da lista.
  * @param navHostController Controlador de navegação.
  */
@@ -273,7 +272,7 @@ private fun ItemListMatchInivite(
 ) {
     GenericListItem(
         item = matchInvite,
-        title = { it.opponent!!.name },
+        title = { it.opponent.name },
         leading = {
             StringImageList(
                 image = matchInvite.opponent.image,

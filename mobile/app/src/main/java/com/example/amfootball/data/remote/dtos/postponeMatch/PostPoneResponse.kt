@@ -7,7 +7,7 @@ data class PostPoneResponse(
     @SerializedName("IdMatch")
     val idMatch: String,
     @SerializedName("StatusPostPone")
-    val statusPostPone: StatusPostPone,
+    val statusPostPone: Int,
     @SerializedName("IdTeam")
     val idTeam: String,
     @SerializedName("IdOpponent")

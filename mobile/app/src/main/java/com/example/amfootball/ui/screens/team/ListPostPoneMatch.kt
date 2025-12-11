@@ -18,6 +18,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.extensions.toLong
+import com.example.amfootball.core.extensions.toUiString
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.domains.errors.filtersError.ListPostPoneMatchFiltersError
 import com.example.amfootball.data.filters.FilterPostPoneMatch
@@ -49,7 +51,6 @@ import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListPostPoneMatchMocks
 import java.time.format.DateTimeFormatter
 
-//TODO: POR METER CONEXÃO COM O BACKEND
 /**
  * Ecrã de Listagem de Pedidos de Adiamento (Postpone Match Requests).
  *
@@ -300,14 +301,10 @@ private fun ItemListPosPoneMatch(
         overline = {},
         supporting = {
             Column {
-                DateRow(date = "Game: ${it.gameDate.format(DateTimeFormatter.ofPattern(Patterns.DATE_TIME))}")
+                DateRow(date = "Game: ${it.gameDate?.toUiString()}")
                 DateRow(
                     date = "Postpone: ${
-                        it.postponeDate.format(
-                            DateTimeFormatter.ofPattern(
-                                Patterns.DATE_TIME
-                            )
-                        )
+                        it.postponeDate?.toUiString()
                     }"
                 )
                 //Comentei o Dto não tem
@@ -326,8 +323,13 @@ private fun ItemListPosPoneMatch(
         },
         trailing = {
             Row {
-                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(postPoneMatch.idMatch) })
-                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(postPoneMatch.idMatch) })
+                AcceptButton(accept = { itemsListActions.acceptPostPoneMatch(
+                    postPoneMatch.idMatch,
+                    postPoneMatch.opponent.id,
+                    postPoneMatch.gameDate.toLong()) })
+                RejectButton(reject = { itemsListActions.rejectPostPoneMatch(
+                    postPoneMatch.idMatch,
+                    postPoneMatch.opponent.id) })
                 ShowMoreInfoButton(
                     showMoreDetails = {
                         itemsListActions.showMoreInfo(

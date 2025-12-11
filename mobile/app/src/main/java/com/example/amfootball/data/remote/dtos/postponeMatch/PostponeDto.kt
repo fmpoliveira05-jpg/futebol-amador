@@ -3,6 +3,7 @@ package com.example.amfootball.data.remote.dtos.postponeMatch
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 
 /**
  * Objeto de Transferência de Dados (DTO) que representa os detalhes de um pedido de adiamento de jogo.
@@ -32,11 +33,33 @@ data class PostponeDto(
     @SerializedName("IdMatch", alternate = ["idMatch"])
     val idMatch: String,
     @SerializedName("GameDate", alternate = ["gameDate"])
-    val gameDate: LocalDateTime,
+    val gameDateStr: String,
     @SerializedName("PostPoneDate", alternate = ["postPoneDate"])
-    val postponeDate: LocalDateTime,
+    val postponeDateStr: String,
     @SerializedName("Team", alternate = ["team"])
     val team: TeamDto,
     @SerializedName("Opponent", alternate = ["opponent"])
     val opponent: TeamDto,
-)
+) {
+    val gameDate: LocalDateTime
+        get() = parseDateSafe(gameDateStr)
+
+    val postponeDate: LocalDateTime
+        get() = parseDateSafe(postponeDateStr)
+
+    private fun parseDateSafe(dateString: String): LocalDateTime {
+        if (dateString.isBlank()) {
+            throw IllegalArgumentException("Erro Crítico: O Backend enviou uma data vazia, mas ela é obrigatória.")
+        }
+
+        return try {
+            LocalDateTime.parse(dateString)
+        } catch (e: Exception) {
+            try {
+                ZonedDateTime.parse(dateString).toLocalDateTime()
+            } catch (e2: Exception) {
+                throw IllegalArgumentException("Erro Crítico: Formato de data desconhecido recebido do Backend: '$dateString'", e2)
+            }
+        }
+    }
+}

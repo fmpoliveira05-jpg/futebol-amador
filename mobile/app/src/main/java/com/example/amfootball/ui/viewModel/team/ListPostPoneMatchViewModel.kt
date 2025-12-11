@@ -12,15 +12,16 @@ import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.data.remote.dtos.postponeMatch.PostPoneResponse
 import com.example.amfootball.data.remote.dtos.postponeMatch.PostponeDto
 import com.example.amfootball.data.remote.services.PostPoneMatchService
+import com.example.amfootball.domains.enums.StatusPostPone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-//TODO: Implementar os metodos todos com as chamadas há API (se necessário)
 /**
 * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Listagem de Pedidos de Adiamento.
 *
@@ -118,7 +119,15 @@ class ListPostPoneMatchViewModel @Inject constructor(
         if (!validateFilters()) {
             return
         }
-        //TODO: Implementar para filtrar online e offline
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadListPostPone()
+        } else {
+            listState.value = filterOffline(
+                originalList = originalList,
+                filter = filterState.value
+            )
+        }
     }
 
     /**
@@ -133,11 +142,27 @@ class ListPostPoneMatchViewModel @Inject constructor(
      *
      * @param idPostPoneMatch O ID do pedido de adiamento a ser aceite.
      */
-    fun acceptPostPoneMatch(idPostPoneMatch: String) {
-        //TODO: Implementar
+    fun acceptPostPoneMatch(idPostPoneMatch: String, idOpponent: String, matchDate: Long) {
+        if(!isNetworkAvailable()) {
+            updateToast(R.string.toast_offline_accept_postpone)
+            return
+        }
 
-        //Trocar o xx, pela nova data no calendario
-        //calendarManager.updateMatch(matchId = idPostPoneMatch, start = xx, end = xxx)
+        launchDataLoad {
+            val acceptPostPone = PostPoneResponse(
+                idMatch = idPostPoneMatch,
+                statusPostPone = StatusPostPone.ACCEPTED.value,
+                idTeam = teamId,
+                idOpponent = idOpponent
+            )
+
+            postPoneMatchService.acceptPostPoneMatch(teamId = teamId, postPone = acceptPostPone)
+
+            removeItemFromState(idMatch = idPostPoneMatch)
+
+            calendarManager.updateMatchDateOnly(matchId = idPostPoneMatch, newStart = matchDate, newEnd = matchDate)
+            updateToast(R.string.toast_success_accept_postpone)
+        }
     }
 
     /**
@@ -145,16 +170,24 @@ class ListPostPoneMatchViewModel @Inject constructor(
      *
      * @param idPostPoneMatch O ID do pedido de adiamento a ser rejeitado.
      */
-    fun rejectPostPoneMatch(idPostPoneMatch: String) {
+    fun rejectPostPoneMatch(idPostPoneMatch: String, idOpponent: String) {
         if(!isNetworkAvailable()) {
-            updateToast(R.string)
+            updateToast(R.string.toast_offline_reject_postpone)
             return
         }
-        /*
+
          launchDataLoad {
-            postPoneMatchService.rejectPostPoneMatch(teamId = teamId, postPone = po)
-        }
-        * */
+
+             val rejectPostPone = PostPoneResponse(
+                 idMatch = idPostPoneMatch,
+                 statusPostPone = StatusPostPone.REJECTED.value,
+                 idTeam = teamId,
+                 idOpponent = idOpponent
+             )
+
+             postPoneMatchService.rejectPostPoneMatch(teamId = teamId, postPone = rejectPostPone)
+             updateToast(R.string.toast_success_reject_postpone)
+         }
     }
 
     /**
@@ -181,7 +214,39 @@ class ListPostPoneMatchViewModel @Inject constructor(
             val teams = postPoneMatchService.getPostPoneMatch(teamId = teamId, filterState.value)
 
             listState.value = teams
-            originalList = teams
+            if (filterState.value == FilterPostPoneMatch()) {
+                originalList = teams
+            }
+        }
+    }
+
+    private fun removeItemFromState(idMatch: String) {
+        val currentList = listState.value.toMutableList()
+        currentList.removeAll { it.idMatch == idMatch }
+        listState.value = currentList
+
+        val currentOriginal = originalList.toMutableList()
+        currentOriginal.removeAll { it.idMatch == idMatch }
+        originalList = currentOriginal
+    }
+
+    private fun filterOffline(
+        originalList: List<PostponeDto>,
+        filter: FilterPostPoneMatch
+    ): List<PostponeDto> {
+        return originalList.filter{ item ->
+            val name = filter.nameOpponent.isNullOrBlank()
+                    || item.opponent.name.contains(filter.nameOpponent, ignoreCase = true)
+
+            //val isHome = filter.isHome == null || item.isHome == filter.isHome
+
+            val minDate = filter.minDataGame == null || item.gameDate.toLocalDate() >= filter.minDataGame.toLocalDate()
+            val maxDate = filter.maxDateGame == null || item.gameDate.toLocalDate() <= filter.maxDateGame.toLocalDate()
+
+            val minDatePostPone = filter.minDatePostPone == null || item.gameDate.toLocalDate() >= filter.minDatePostPone.toLocalDate()
+            val maxDatePostPone = filter.maxDatePostPone == null || item.gameDate.toLocalDate() <= filter.maxDatePostPone.toLocalDate()
+
+            name && minDate && maxDate && minDatePostPone && maxDatePostPone
         }
     }
 

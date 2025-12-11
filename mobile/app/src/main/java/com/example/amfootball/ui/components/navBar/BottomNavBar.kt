@@ -107,6 +107,7 @@ fun BottomSheetContent(
         Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
             buttonsToShow.addAll(
                 listOf(
+                    Routes.GeralRoutes.HOMEPAGE,
                     Routes.PlayerRoutes.TEAM_LIST,
                     Routes.PlayerRoutes.PLAYER_LIST,
                     Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST,
@@ -159,7 +160,7 @@ fun BottomSheetContent(
                     when (routeInfo) {
                         Routes.TeamRoutes.CALENDAR -> {
                             if (teamId != null) {
-                                navController.navigate("${routeInfo.route}/{${teamId}}")
+                                navController.navigate("${routeInfo.route}/${teamId}")
                             } else {
                                 println("Erro: Tentativa de abrir calendário sem ID de equipa")
                             }
@@ -167,7 +168,15 @@ fun BottomSheetContent(
 
                         Routes.TeamRoutes.LIST_MATCH_INVITES -> {
                             if (teamId != null) {
-                                navController.navigate("${routeInfo.route}/{${teamId}}")
+                                navController.navigate("${routeInfo.route}/${teamId}")
+                            } else {
+                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
+                            }
+                        }
+
+                        Routes.TeamRoutes.LIST_POST_PONE_MATCH -> {
+                            if (teamId != null) {
+                                navController.navigate("${routeInfo.route}/${teamId}")
                             } else {
                                 println("Erro: Tentativa de abrir calendário sem ID de equipa")
                             }

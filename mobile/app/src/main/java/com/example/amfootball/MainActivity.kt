@@ -141,6 +141,17 @@ class MainActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
+        val hasReadCalendar = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
+        val hasWriteCalendar = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasReadCalendar) {
+            permissionsToRequest.add(Manifest.permission.READ_CALENDAR)
+        }
+
+        if (!hasWriteCalendar) {
+            permissionsToRequest.add(Manifest.permission.WRITE_CALENDAR)
+        }
+
         if (permissionsToRequest.isNotEmpty()) {
             requestPermissionLauncher.launch(permissionsToRequest.toTypedArray())
         }
@@ -154,9 +165,19 @@ class MainActivity : AppCompatActivity() {
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
-        if (!notificationGranted) {
-            Log.d("PERMISSIONS", "Notificações negadas")
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val notificationGranted = permissions[Manifest.permission.POST_NOTIFICATIONS] ?: false
+            if (!notificationGranted) {
+                Log.w("PERMISSIONS", "Notificações negadas pelo utilizador.")
+            }
+        }
+
+        // Verifica Calendário (Read/Write)
+        val readCalendarGranted = permissions[Manifest.permission.READ_CALENDAR] ?: false
+        val writeCalendarGranted = permissions[Manifest.permission.WRITE_CALENDAR] ?: false
+
+        if (readCalendarGranted && writeCalendarGranted) {
+            Log.d("PERMISSIONS", "Acesso ao Calendário concedido.")
         }
     }
 }

@@ -10,6 +10,11 @@ import com.example.amfootball.data.interfaces.api.PlayerApi
 import com.example.amfootball.data.interfaces.api.PostPoneMatchApi
 import com.example.amfootball.data.interfaces.api.TeamApi
 import com.example.amfootball.data.remote.network.AuthInterceptor
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonPrimitive
+import com.google.gson.JsonSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,6 +22,8 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import javax.inject.Singleton
 
 /**
@@ -38,7 +45,7 @@ object NetworkModule {
      * Atualmente configurado para um túnel **Ngrok** (HTTPS) para acesso externo
      * durante o desenvolvimento.
      */
-    private const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
+    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
     //"https://amfootballapi.duckdns.org/"
 
     /**
