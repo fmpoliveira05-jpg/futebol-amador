@@ -121,7 +121,7 @@ namespace Application.Services
                 { "body", bodyForTeam }
             };
 
-            SendMulticastNotification(teamId, payloadTeam, null, null);
+            await SendMulticastNotification(teamId, payloadTeam, null, null);
             
             var payloadOpponent = new Dictionary<string, string>
             {
@@ -136,7 +136,7 @@ namespace Application.Services
 
         public async Task sendNotificationToTeamsWithDataAsync(Guid teamId, Guid opponentId, Dictionary<string, string> dataTeam, Dictionary<string, string> dataOpponent)
         {
-            SendMulticastNotification(teamId, dataTeam, null, null);
+            await SendMulticastNotification(teamId, dataTeam, null, null);
             await SendMulticastNotification(opponentId, dataOpponent, null, null);
         }
 
