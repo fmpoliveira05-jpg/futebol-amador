@@ -50,9 +50,9 @@ namespace Application.Interfaces.Repositories
 
         Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top);
 
-        Task<List<InfoTeamsDto>> GetListTeamsPlayer();
+        Task<List<InfoTeamsDto>> GetListTeamsPlayer(string playerId);
 
-        Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters);
+        Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(string playerId, FilterListTeamDto filters);
 
         Task<List<InfoTeamsDto>> GetListTeamsForTeams(Guid idTeam);
 

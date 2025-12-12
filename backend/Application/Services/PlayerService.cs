@@ -303,9 +303,9 @@ namespace Application.Services
         /// Esta consulta é utilizada para popular a lista principal de pesquisa ou o mercado de equipas.
         /// </remarks>
         /// <returns>Lista de [InfoTeamsDto] com estatísticas resumidas das equipas.</returns>
-        public async Task<List<InfoTeamsDto>> GetListTeams()
+        public async Task<List<InfoTeamsDto>> GetListTeams(string playerId)
         {
-            return await teamRepository.GetListTeamsPlayer();
+            return await teamRepository.GetListTeamsPlayer(playerId);
         }
 
         /// <summary>
@@ -317,10 +317,10 @@ namespace Application.Services
         /// </remarks>
         /// <param name="filter">O DTO contendo os critérios de filtragem (Nome, Rank, Pontos, Idade Média, Localidade).</param>
         /// <returns>Lista de [InfoTeamsDto] filtrados.</returns>
-        public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter)
+        public async Task<List<InfoTeamsDto>> GetTeamListWithFilters(string playerId, FilterListTeamDto filter)
         {
             playerValidator.ValidateFiltersListTeams(filter);
-            return await teamRepository.GetListTeamsPlayersWithFilters(filter);
+            return await teamRepository.GetListTeamsPlayersWithFilters(playerId, filter);
         }
         #endregion
 

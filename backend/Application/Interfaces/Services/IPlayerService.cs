@@ -75,14 +75,14 @@ namespace Application.Interfaces.Services
         /// Obtém a lista completa de equipas elegíveis (com vagas) para que o jogador possa interagir (desafiar ou candidatar-se).
         /// </summary>
         /// <returns>Lista de [InfoTeamsDto] com estatísticas resumidas das equipas.</returns>
-        Task<List<InfoTeamsDto>> GetListTeams();
+        Task<List<InfoTeamsDto>> GetListTeams(string playerId);
 
         /// <summary>
         /// Obtém a lista de equipas elegíveis, aplicando filtros dinâmicos de pesquisa.
         /// </summary>
         /// <param name="filter">Filtros de pesquisa (Nome, Rank, Pontos, etc.).</param>
         /// <returns>Lista de [InfoTeamsDto] filtrados.</returns>
-        Task<List<InfoTeamsDto>> GetTeamListWithFilters(FilterListTeamDto filter);
+        Task<List<InfoTeamsDto>> GetTeamListWithFilters(string playerId, FilterListTeamDto filter);
 
         Task<bool> UpdateDeviceTokenAsync(string userId, string token);
     }

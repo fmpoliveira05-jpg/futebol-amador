@@ -213,9 +213,9 @@ namespace Api.Controllers
         /// <param name="filter">Filtros de pesquisa de equipas.</param>
         /// <returns>Lista de equipas.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
-        [HttpGet("listTeamsToMemberShipRequest")]
+        [HttpGet("{playerId}/listTeamsToMemberShipRequest")]
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> ListTeams([FromQuery] FilterListTeamDto filter)
+        public async Task<IActionResult> ListTeams(string playerId, [FromQuery] FilterListTeamDto filter)
         {
             var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
                            !string.IsNullOrEmpty(filter.NameRank) ||
@@ -230,11 +230,11 @@ namespace Api.Controllers
             IEnumerable<InfoTeamsDto> list;
             if (isFilter)
             {
-                list = await playerService.GetTeamListWithFilters(filter);
+                list = await playerService.GetTeamListWithFilters(playerId, filter);
             }
             else
             {
-                list = await playerService.GetListTeams();
+                list = await playerService.GetListTeams(playerId);
             }
 
             return Ok(list);

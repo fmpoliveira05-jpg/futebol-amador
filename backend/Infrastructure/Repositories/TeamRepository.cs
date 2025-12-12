@@ -402,7 +402,7 @@ namespace Infrastructure.Repositories
         /// Calcula a idade média dos membros na base de dados (o que pode ser dispendioso).
         /// </remarks>
         /// <returns>Uma lista de [InfoTeamsDto] com estatísticas agregadas.</returns>
-        public async Task<List<InfoTeamsDto>> GetListTeamsPlayer()
+        public async Task<List<InfoTeamsDto>> GetListTeamsPlayer(string playerId)
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
@@ -410,7 +410,8 @@ namespace Infrastructure.Repositories
                          join pitch in DbContext.Pitch on t.IdPitch equals pitch.Id
                          join rank in DbContext.Rank on t.IdRank equals rank.Id
 
-                         where t.Members.Count < ModelConstants.TeamConst.MaxMembers
+                         where t.Members.Count < ModelConstants.TeamConst.MaxMembers 
+                            && !t.MembershipRequests.Any(ms => ms.IdPlayer == playerId && ms.IsPlayerSender == true)
                          let averageAge = t.Members.Any()
                                     ? t.Members.Average(m =>
                                         ((double)EF.Functions.DateDiffDay(m.DateOfBirth, nowDateOnly) / 365.25))
@@ -443,17 +444,18 @@ namespace Infrastructure.Repositories
         /// <remarks>
         /// Carrega os dados necessários e projeta-os no DTO, aplicando filtros dinâmicos (Nome, Rank, Pontos, Idade Média, Localização e Contagem de Jogadores).
         /// </remarks>
-        /// <param name="idTeam">O ID (GUID) da equipa que está a fazer a pesquisa.</param>
+        /// <param name="playerId">O ID (GUID) da equipa que está a fazer a pesquisa.</param>
         /// <param name="filters">O DTO com os critérios de filtragem.</param>
         /// <returns>Uma lista de [InfoTeamsDto] filtrados, excluindo a equipa de origem.</returns>
-        public async Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(FilterListTeamDto filters)
+        public async Task<List<InfoTeamsDto>> GetListTeamsPlayersWithFilters(string playerId, FilterListTeamDto filters)
         {
             var nowDateOnly = DateOnly.FromDateTime(DateTime.UtcNow);
 
             var query = DbContext.Team
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
-                            .Where(t => t.Members.Count < ModelConstants.TeamConst.MaxMembers);
+                            .Where(t => t.Members.Count < ModelConstants.TeamConst.MaxMembers 
+                                    && !t.MembershipRequests.Any(ms => ms.IdPlayer == playerId && ms.IsPlayerSender == true));
 
             if (!string.IsNullOrEmpty(filters.NameTeam))
             {
@@ -629,7 +631,8 @@ namespace Infrastructure.Repositories
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
                             .Where(t => t.Id != idTeam 
-                                && t.Members.Count < ModelConstants.TeamConst.MaxMembers);
+                                && t.Members.Count < ModelConstants.TeamConst.MaxMembers
+                                && !t.ReceivedInvites.Any(ri => ri.IdSender == idTeam));
 
             if (!string.IsNullOrEmpty(filters.NameTeam))
             {
