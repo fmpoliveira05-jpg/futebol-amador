@@ -842,18 +842,20 @@ namespace Infrastructure.Repositories
         /// O resultado é projetado no DTO [PlayerWithoutTeamInfoDto] com cálculo de idade.
         /// </remarks>
         /// <returns>Uma lista de [PlayerWithoutTeamInfoDto] com os agentes livres.</returns>
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam()
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam(Guid idTeam)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow); 
 
-            var query = await DbContext.Player.Where(p => !p.IsAdmin 
-                                                    && p.IdTeam == null)
+            var query = await DbContext.Player
+                .Where(p => !p.IsAdmin 
+                    && p.IdTeam == null
+                    && !p.MembershipRequests.Any(ms => ms.IdTeam == idTeam && ms.IsPlayerSender == false))
                 .Select(p => new PlayerWithoutTeamInfoDto
                 {
                     PlayerId = p.Id,
                     Name = p.Name,
                     Address = p.Address,
-                    Age = EF.Functions.DateDiffDay(p.DateOfBirth, dateNow),
+                    Age = (int)(EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) / 365.25),
                     Height = p.Height,
                     Position = p.Position
                 })
@@ -870,11 +872,14 @@ namespace Infrastructure.Repositories
         /// </remarks>
         /// <param name="filters">O DTO com os critérios de filtragem.</param>
         /// <returns>Uma lista de [PlayerWithoutTeamInfoDto] filtrada.</returns>
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterTeamDto filters)
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(Guid idTeam, FilterTeamDto filters)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
 
-            var query = DbContext.Player.Where(p => !p.IsAdmin && p.IdTeam == null);
+            var query = DbContext.Player
+                .Where(p => !p.IsAdmin 
+                    && p.IdTeam == null
+                    && !p.MembershipRequests.Any(ms => ms.IdTeam == idTeam && ms.IsPlayerSender == false));
 
             if (!string.IsNullOrEmpty(filters.PlayerName))
             {

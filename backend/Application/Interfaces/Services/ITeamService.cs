@@ -134,13 +134,13 @@ namespace Application.Interfaces.Services
         /// Obtém a lista completa de Jogadores Agentes Livres (sem equipa) sem filtros.
         /// </summary>
         /// <returns>Lista de [PlayerWithoutTeamInfoDto].</returns>
-        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam();
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam(Guid idTeam);
 
         /// <summary>
         /// Obtém a lista de Jogadores Agentes Livres (sem equipa) aplicando filtros.
         /// </summary>
         /// <param name="filter">Filtros de pesquisa (Altura, Posição, Nome, Cidade).</param>
         /// <returns>Lista filtrada de [PlayerWithoutTeamInfoDto].</returns>
-        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterTeamDto filter);
+        Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(Guid idTeam, FilterTeamDto filter);
     }
 }

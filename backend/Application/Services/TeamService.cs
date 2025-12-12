@@ -420,20 +420,20 @@ namespace Application.Services
         /// </summary>
         /// <param name="filter">Filtros de jogador (Altura, Posição, Nome, Cidade).</param>
         /// <returns>Lista de [PlayerWithoutTeamInfoDto] filtrada.</returns>
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(FilterTeamDto filter)
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeamWithFilters(Guid idTeam, FilterTeamDto filter)
         {
             TeamValidator.ValidateFiltersGetPlayersWithout(filter);
 
-            return await TeamRepository.GetListPlayersWithoutTeamtWithFilters(filter);
+            return await TeamRepository.GetListPlayersWithoutTeamtWithFilters(idTeam, filter);
         }
 
         /// <summary>
         /// Obtém a lista completa de Jogadores Agentes Livres (sem filtros).
         /// </summary>
         /// <returns>Lista completa de [PlayerWithoutTeamInfoDto].</returns>
-        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam()
+        public async Task<List<PlayerWithoutTeamInfoDto>> GetPlayersWithoutTeam(Guid idTeam)
         {
-            return await TeamRepository.GetListPlayersWithoutTeam();
+            return await TeamRepository.GetListPlayersWithoutTeam(idTeam);
         }
 
         #endregion

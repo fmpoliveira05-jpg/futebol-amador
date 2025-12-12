@@ -58,9 +58,9 @@ namespace Application.Interfaces.Repositories
 
         Task<List<InfoTeamsDto>> GetListTeamsByTeamsWithFilters(Guid idTeam, FilterListTeamDto filters);
 
-        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam();
+        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeam(Guid idTeam);
 
-        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(FilterTeamDto filters);
+        Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(Guid idTeam, FilterTeamDto filters);
         
         Task<List<InfoTeamsDto>> GetListTeams(FilterListTeamDto? filters);
 

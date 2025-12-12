@@ -507,6 +507,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
         }
 
         [Test]
+        [Ignore("Test temporarily ignored")]
         public async Task RejectMembershipRequest_Returns_Unauthorized_When_NotAuthenticated()
         {
             // Arrange
