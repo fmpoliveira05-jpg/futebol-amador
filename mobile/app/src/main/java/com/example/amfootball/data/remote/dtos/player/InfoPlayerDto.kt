@@ -1,6 +1,7 @@
 package com.example.amfootball.data.remote.dtos.player
 
 import com.example.amfootball.domains.enums.Position
+import com.google.gson.annotations.SerializedName
 
 /**
  * Data Transfer Object (DTO) que representa as informações essenciais de um jogador.
@@ -18,12 +19,14 @@ import com.example.amfootball.domains.enums.Position
  * @property haveTeam Flag que indica se o jogador está atualmente associado a uma equipa.
  */
 data class InfoPlayerDto(
+    @SerializedName("Id", alternate = ["PlayerId", "playerId"])
     val id: String = "",
     val name: String = "",
     val image: String? = null,
     val address: String = "",
     val age: Int = 0,
     val position: Position,
+    @SerializedName("heigth", alternate = ["height", "Height"])
     val heigth: Int = 0,
     val haveTeam: Boolean = false,
 )

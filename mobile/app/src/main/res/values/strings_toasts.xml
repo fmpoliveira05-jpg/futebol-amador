@@ -34,6 +34,7 @@
 
     <string name="toast_admin_only_casual">Only team administrators can schedule casual matches.</string>
     <string name="toast_admin_only_ranked">Only team administrators can schedule competitive matches.</string>
+    <string name="toast_admin_only_send_membership_request">Only team admins can send membership requests.</string>
 
     <string name="toast_playerProfile_error">Error retrieving user profile, please try again.</string>
     <string name="toast_playerProfile_deleted">User profile deleted successfully.</string>
@@ -48,4 +49,5 @@
 
     <string name="toast_success_accept_postpone">Postponement request accepted successfully.</string>
     <string name="toast_success_reject_postpone">Postponement request rejected successfully.</string>
+    <string name="toast_success_send_membershipRequest">Membership request sent successfully.</string>
 </resources>

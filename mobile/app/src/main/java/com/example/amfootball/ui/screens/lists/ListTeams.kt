@@ -66,7 +66,7 @@ import com.example.amfootball.ui.previewsMocks.ListTeamMocks
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
  * @param viewModel O ViewModel injetado via Hilt.
  */
-//TODO: Falta filterErros
+//TODO: Falta filterErros e distinguir paginas + Backend e regras
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,

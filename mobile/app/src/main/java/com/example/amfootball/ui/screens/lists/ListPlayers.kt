@@ -49,8 +49,11 @@ import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
 import com.example.amfootball.core.utils.PlayerConst
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
+import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.previewsMocks.ListPlayersMocks
 
 /**
@@ -74,6 +77,10 @@ fun ListPlayersScreen(
     val list by viewModel.uiList.collectAsStateWithLifecycle()
     val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
     val showMorePlayersVisible by viewModel.showMoreButtonVisible.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
+    val userId by viewModel.userId.collectAsStateWithLifecycle()
+    val mode = viewModel.mode
+    val sentRequests by viewModel.sentRequestIds.collectAsStateWithLifecycle()
 
     val filterActions = FilterListPlayersActions(
         onNameChange = viewModel::onNameChange,
@@ -89,9 +96,18 @@ fun ListPlayersScreen(
         )
     )
 
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
+    )
+
     ListPlayersContent(
         isOnline = isOnline,
         uiState = uiState,
+        role = role,
+        userId = userId,
+        mode = mode,
+        sentRequests = sentRequests,
         list = list,
         filters = filters,
         filtersError = filtersError,
@@ -103,7 +119,7 @@ fun ListPlayersScreen(
             viewModel.showMore(idPlayer = id, navHostController = navHostController)
         },
         isValidShowMore = showMorePlayersVisible,
-        showMoreItems = { viewModel.loadMorePlayers() }
+        showMoreItems = { viewModel.loadMoreItems() }
     )
 }
 
@@ -133,6 +149,10 @@ fun ListPlayersScreen(
 fun ListPlayersContent(
     isOnline: Boolean,
     uiState: UiState,
+    role: UserRole,
+    userId: String,
+    mode: ListPlayerMode,
+    sentRequests: Set<String>,
     list: List<InfoPlayerDto>,
     filters: FilterListPlayer,
     filtersError: FilterPlayersErrors,
@@ -173,6 +193,10 @@ fun ListPlayersContent(
                 listItems = { player ->
                     ItemListPlayer(
                         player = player,
+                        mode = mode,
+                        sentRequests = sentRequests,
+                        role = role,
+                        userId = userId,
                         sendMemberShipRequest = { onSendMembership(player.id) },
                         showMore = { onShowMore(player.id) }
                     )
@@ -303,9 +327,14 @@ private fun FilterListPlayerContent(
 @Composable
 private fun ItemListPlayer(
     player: InfoPlayerDto,
+    role: UserRole,
+    userId: String,
+    mode: ListPlayerMode,
+    sentRequests: Set<String>,
     sendMemberShipRequest: () -> Unit,
     showMore: () -> Unit,
 ) {
+
     GenericListItem(
         item = player,
         title = { it.name },
@@ -328,18 +357,22 @@ private fun ItemListPlayer(
             }
         },
         trailing = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.End
-            ) {
-                if (!player.haveTeam) {
-                    ListSendMemberShipRequestButton(sendMemberShipRequest = sendMemberShipRequest)
-                }
+            val isRequestSent = sentRequests.contains(player.id)
 
-                ShowMoreInfoButton(
-                    showMoreDetails = showMore,
-                    contentDescription = stringResource(id = R.string.list_teams_view_team)
-                )
+            if (mode == ListPlayerMode.PLAYER_LIST || (mode == ListPlayerMode.PLAYER_WITHOU_TEAM && !isRequestSent)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (!player.haveTeam && role == UserRole.ADMIN_TEAM && player.id != userId && !isRequestSent) {
+                        ListSendMemberShipRequestButton(sendMemberShipRequest = sendMemberShipRequest)
+                    }
+
+                    ShowMoreInfoButton(
+                        showMoreDetails = showMore,
+                        contentDescription = stringResource(id = R.string.list_teams_view_team)
+                    )
+                }
             }
         }
     )
@@ -352,10 +385,10 @@ private fun ItemListPlayer(
  * Preview 1: Lista Normal com dados.
  * Mostra como a lista aparece quando tudo corre bem (Online).
  */
-@Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
-@Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. List Admin - EN", locale = "en", showBackground = true)
+@Preview(name = "1. Lista Admin - PT", locale = "pt-rPT", showBackground = true)
 @Composable
-fun ListPlayersPreview() {
+fun ListPlayersForAdminsPreview() {
     AMFootballTheme {
         ListPlayersContent(
             isOnline = true,
@@ -368,18 +401,52 @@ fun ListPlayersPreview() {
             filterActions = ListPlayersMocks.Actions,
             onSendMembership = {},
             onShowMore = {},
+            role = UserRole.ADMIN_TEAM,
             isValidShowMore = true,
+            userId = "",
+            mode = ListPlayerMode.PLAYER_LIST,
+            sentRequests = emptySet(),
             showMoreItems = {}
         )
     }
 }
 
 /**
- * Preview 2: Lista Vazia.
+ * Preview 2: Lista Normal com dados.
+ * Mostra como a lista aparece quando tudo corre bem (Online).
+ */
+@Preview(name = "2. List Player - EN", locale = "en", showBackground = true)
+@Preview(name = "2. Lista Jogador - PT", locale = "pt-rPT", showBackground = true)
+@Composable
+fun ListPlayersForPlayersPreview() {
+    AMFootballTheme {
+        ListPlayersContent(
+            isOnline = true,
+            uiState = UiState(isLoading = false),
+            list = ListPlayersMocks.list,
+            filters = FilterListPlayer(),
+            filtersError = FilterPlayersErrors(),
+            listPosition = ListPlayersMocks.Positions,
+            onRetry = {},
+            filterActions = ListPlayersMocks.Actions,
+            onSendMembership = {},
+            onShowMore = {},
+            role = UserRole.PLAYER_WITHOUT_TEAM,
+            isValidShowMore = true,
+            userId = "",
+            mode = ListPlayerMode.PLAYER_LIST,
+            sentRequests = emptySet(),
+            showMoreItems = {}
+        )
+    }
+}
+
+/**
+ * Preview 3: Lista Vazia.
  * Testa a mensagem de "sem jogadores" (stringResource(R.string.list_player_empty)).
  */
-@Preview(name = "2. Vazia - EN", locale = "en", showBackground = true)
-@Preview(name = "2. Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Vazia - EN", locale = "en", showBackground = true)
+@Preview(name = "3. Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersEmptyPreview() {
     AMFootballTheme {
@@ -395,84 +462,10 @@ fun ListPlayersEmptyPreview() {
             onSendMembership = {},
             onShowMore = {},
             isValidShowMore = false,
-            showMoreItems = {}
-        )
-    }
-}
-
-/**
- * Preview 3: Modo Offline.
- * Testa o banner de "Sem conexão" no topo da lista.
- */
-@Preview(name = "3. Offline - EN", locale = "en", showBackground = true)
-@Preview(name = "3. Offline - PT", locale = "pt-rPT", showBackground = true)
-@Composable
-fun ListPlayersOfflinePreview() {
-    AMFootballTheme {
-        ListPlayersContent(
-            isOnline = false,
-            uiState = UiState(isLoading = false),
-            list = ListPlayersMocks.list,
-            filters = FilterListPlayer(),
-            filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayersMocks.Positions,
-            onRetry = {},
-            filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
-            isValidShowMore = true,
-            showMoreItems = {}
-        )
-    }
-}
-
-/**
- * Preview 4: Estado de Carregamento.
- * Mostra o indicador de progresso (LoadingPage).
- */
-@Preview(name = "4. Loading - EN", locale = "en", showBackground = true)
-@Preview(name = "4. Loading - PT", locale = "pt-rPT", showBackground = true)
-@Composable
-fun ListPlayersLoadingPreview() {
-    AMFootballTheme {
-        ListPlayersContent(
-            isOnline = true,
-            uiState = UiState(isLoading = true),
-            list = emptyList(),
-            filters = FilterListPlayer(),
-            filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayersMocks.Positions,
-            onRetry = {},
-            filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
-            isValidShowMore = false,
-            showMoreItems = {}
-        )
-    }
-}
-
-/**
- * Preview 5: Estado de Erro.
- * Testa o ecrã de erro com o botão de Retry.
- */
-@Preview(name = "5. Erro - EN", locale = "en", showBackground = true)
-@Preview(name = "5. Erro - PT", locale = "pt-rPT", showBackground = true)
-@Composable
-fun ListPlayersErrorPreview() {
-    AMFootballTheme {
-        ListPlayersContent(
-            isOnline = true,
-            uiState = UiState(isLoading = false, errorMessage = "Erro de conexão ao servidor"),
-            list = emptyList(),
-            filters = FilterListPlayer(),
-            filtersError = FilterPlayersErrors(),
-            listPosition = ListPlayersMocks.Positions,
-            onRetry = {},
-            filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
-            isValidShowMore = false,
+            role = UserRole.PLAYER_WITHOUT_TEAM,
+            userId = "",
+            mode = ListPlayerMode.PLAYER_LIST,
+            sentRequests = emptySet(),
             showMoreItems = {}
         )
     }

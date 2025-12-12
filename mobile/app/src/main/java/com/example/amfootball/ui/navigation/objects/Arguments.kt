@@ -39,6 +39,8 @@ object Arguments {
      */
     const val MATCH_INVITE_ID = "matchInviteId"
 
+    const val TEAM_NAME = "teamName"
+
     /**
      * Chave utilizada para definir o **Modo de Operação** de um formulário.
      *
@@ -46,5 +48,8 @@ object Arguments {
      * permitindo reutilizar o mesmo ecrã (Composable) para criar ou editar entidades.
      */
     const val FORM_MODE = "formMode"
-    const val TEAM_NAME = "teamName"
+
+    const val LIST_PLAYER_MODE = "listPlayer"
+
+    const val LIST_TEAM_MODE = "listTeam"
 }

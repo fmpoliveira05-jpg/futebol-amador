@@ -111,6 +111,8 @@ fun BottomSheetContent(
                     Routes.PlayerRoutes.TEAM_LIST,
                     Routes.PlayerRoutes.PLAYER_LIST,
                     Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST,
+
+                    Routes.PlayerRoutes.TEAM_LIST_MEMBERSHIP_REQUEST
                 )
             )
         }
@@ -135,13 +137,9 @@ fun BottomSheetContent(
             )
         }
 
-        Routes.BottomNavBarRoutes.CHAT_LIST.route -> {
+        Routes.BottomNavBarRoutes.CHAT_LIST.route -> {}
 
-        }
-
-        Routes.BottomNavBarRoutes.USER_PROFILE.route -> {
-
-        }
+        Routes.BottomNavBarRoutes.USER_PROFILE.route -> {}
     }
 
     LazyVerticalGrid(
@@ -170,7 +168,7 @@ fun BottomSheetContent(
                             if (teamId != null) {
                                 navController.navigate("${routeInfo.route}/${teamId}")
                             } else {
-                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
+                                println("Erro: Tentativa de lista de matches sem ID de equipa")
                             }
                         }
 
@@ -178,10 +176,9 @@ fun BottomSheetContent(
                             if (teamId != null) {
                                 navController.navigate("${routeInfo.route}/${teamId}")
                             } else {
-                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
+                                println("Erro: Tentativa de adiamentos sem ID de equipa")
                             }
                         }
-
                         else -> {
                             navController.navigate(routeInfo.route)
                         }

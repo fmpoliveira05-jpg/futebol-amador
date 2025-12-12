@@ -18,7 +18,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.amfootball.domains.enums.forms.MatchFormMode
+import com.example.amfootball.domains.enums.pages.MatchFormMode
 import com.example.amfootball.domains.enums.settings.AppTheme
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.ui.navigation.objects.Arguments
@@ -56,6 +56,8 @@ import com.example.amfootball.core.extensions.composableProtected
 import com.example.amfootball.core.extensions.composableProtectedAdminTeam
 import com.example.amfootball.core.extensions.composableProtectedMemberTeam
 import com.example.amfootball.core.extensions.composableProtectedPlayerWithouTeam
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
+import com.example.amfootball.domains.enums.pages.ListTeamMode
 
 @Composable
 fun MainNavigation(
@@ -226,11 +228,33 @@ private fun NavGraphBuilder.userPages(
         sessionManager = sessionManager
     )
 
-    composable(Routes.PlayerRoutes.TEAM_LIST.route) {
+    composable(
+        route = Routes.PlayerRoutes.TEAM_LIST.route,
+        arguments = listOf(
+            navArgument(Arguments.LIST_TEAM_MODE) { defaultValue = ListTeamMode.LIST_TEAM.name }
+        ),
+    ) {
         ListTeamScreen(navHostController = globalNavController)
     }
 
-    composable(Routes.PlayerRoutes.PLAYER_LIST.route) {
+    composableProtectedPlayerWithouTeam(
+        route = Routes.PlayerRoutes.TEAM_LIST_MEMBERSHIP_REQUEST.route,
+        arguments = listOf(
+            navArgument(Arguments.LIST_TEAM_MODE) { defaultValue = ListTeamMode.LIST_TEAM_MEMBERSHIP_REQUEST.name }
+        ),
+        navController = globalNavController,
+        sessionManager = sessionManager,
+        content = {
+            ListTeamScreen(navHostController = globalNavController)
+        }
+    )
+
+    composable(
+        route = Routes.PlayerRoutes.PLAYER_LIST.route,
+        arguments = listOf(
+            navArgument(Arguments.LIST_PLAYER_MODE) { defaultValue = ListPlayerMode.PLAYER_LIST.name }
+        )
+    ) {
         ListPlayersScreen(navHostController = globalNavController)
     }
 
@@ -302,6 +326,9 @@ private fun NavGraphBuilder.teamPages(
 
     composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM.route,
+        arguments = listOf(
+            navArgument(Arguments.LIST_PLAYER_MODE) { defaultValue = ListPlayerMode.PLAYER_WITHOU_TEAM.name }
+        ),
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {
@@ -389,6 +416,9 @@ private fun NavGraphBuilder.casualMatches(
 ) {
     composableProtectedAdminTeam(
         route = Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE.route,
+        arguments = listOf(
+            navArgument(Arguments.LIST_TEAM_MODE) { defaultValue = ListTeamMode.LIST_TEAM_MATCH_INVITE.name }
+        ),
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {

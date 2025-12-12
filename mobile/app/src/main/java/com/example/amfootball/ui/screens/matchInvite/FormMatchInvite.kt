@@ -23,7 +23,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.domains.enums.forms.MatchFormMode
+import com.example.amfootball.domains.enums.pages.MatchFormMode
 import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton

@@ -27,12 +27,14 @@
     <string name="toast_offline_delete_team">Para poder a sua equipa, precisa estar conectado há internte</string>
     <string name="toast_offline_accept_postpone">Para aceitar a adiamento, precisa estar conectado há internet</string>
     <string name="toast_offline_reject_postpone">Para rejeitar a adiamento, precisa estar conectado há internet</string>
+
     <string name="toast_autenticate_people">Apenas pessoas autenticadas podem aceder a esta funcionalidade</string>
     <string name="toast_only_player_without_team">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
     <string name="toast_only_player_without_team_membership">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
 
     <string name="toast_admin_only_casual">Apenas administradores de equipa podem agendar partidas casuais.</string>
     <string name="toast_admin_only_ranked">Apenas administradores de equipa podem agendar partidas competitivas.</string>
+    <string name="toast_admin_only_send_membership_request">Apenas adminsitradores de equipa podem mandar pedidos de adesão.</string>
 
     <string name="toast_playerProfile_error">Erro ao obter perfil do utilizador, por favor tente novamente</string>
     <string name="toast_playerProfile_deleted">Perfil do utilizador eliminado com sucesso.</string>
@@ -47,4 +49,5 @@
 
     <string name="toast_success_accept_postpone">Pedido de adiamento aceite com sucesso.</string>
     <string name="toast_success_reject_postpone">Pedido de adiamento rejeitado com sucesso.</string>
+    <string name="toast_success_send_membershipRequest">Pedido de adesão envio com sucesso.</string>
 </resources>

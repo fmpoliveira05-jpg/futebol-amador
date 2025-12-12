@@ -5,8 +5,11 @@ import com.example.amfootball.data.filters.toQueryMap
 import com.example.amfootball.core.utils.safeApiCallWithNotReturn
 import com.example.amfootball.core.utils.safeApiCallWithReturn
 import com.example.amfootball.data.interfaces.api.PlayerApi
+import com.example.amfootball.data.remote.dtos.membershipRequest.InvitePlayerRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -50,11 +53,15 @@ class PlayerService @Inject constructor(
      * @return Uma lista de [InfoPlayerDto] com os resultados da pesquisa.
      * @throws Exception Se ocorrer falha na comunicação com o servidor.
      */
-    suspend fun getListPlayer(filter: FilterListPlayer?): List<InfoPlayerDto> {
+    suspend fun getListPlayer(teamId: String?, mode: ListPlayerMode, filter: FilterListPlayer?): List<InfoPlayerDto> {
         val filterMap = filter?.toQueryMap() ?: emptyMap()
 
         return safeApiCallWithReturn {
-            playerApi.getPlayersList(filters = filterMap)
+            if(!teamId.isNullOrEmpty() && mode == ListPlayerMode.PLAYER_WITHOU_TEAM) {
+                playerApi.getPlayersWithoutTeamList(teamId = teamId, filters = filterMap)
+            } else {
+                playerApi.getPlayersList(filters = filterMap)
+            }
         }
     }
 
@@ -73,9 +80,10 @@ class PlayerService @Inject constructor(
      * @param idPlayer O ID do jogador que vai receber o convite.
      * @throws Exception Se o convite falhar ou for rejeitado pelo servidor.
      */
-    suspend fun sendMemberShipRequestToPlayer(teamId: String, idPlayer: String) {
-        safeApiCallWithNotReturn {
-            playerApi.sendMemberShipRequestToPlayer(teamId = teamId, playerId = idPlayer)
+    suspend fun sendMemberShipRequestToPlayer(teamId: String, idPlayer: String): MembershipRequestInfoDto {
+        return safeApiCallWithReturn {
+            val request = InvitePlayerRequest(playerId = idPlayer)
+            playerApi.sendMemberShipRequestToPlayer(teamId = teamId, request = request)
         }
     }
 

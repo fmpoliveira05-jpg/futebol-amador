@@ -116,6 +116,13 @@ object Routes {
             Icons.Default.Groups3,
             R.string.item_list_team_description
         ),
+
+        TEAM_LIST_MEMBERSHIP_REQUEST(
+            "teamlistMemberShipRequest",
+            R.string.item_list_team_membership_request,
+            Icons.Default.Groups3,
+            R.string.item_list_team_membership_request_description
+        ),
         CHAT_LIST(
             "chatlist",
             R.string.item_list_chat,

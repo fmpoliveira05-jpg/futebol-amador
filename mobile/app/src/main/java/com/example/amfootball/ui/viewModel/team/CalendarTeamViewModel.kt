@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
+//TODO: Falta autorização
 //TODO: Falta Todo que precisa do signalR
 /**
  * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.forms.MatchFormMode
+import com.example.amfootball.domains.enums.pages.MatchFormMode
 import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
 import com.example.amfootball.data.local.SessionManager
@@ -24,7 +24,6 @@ import com.example.amfootball.data.remote.dtos.support.TeamDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-//TODO: O Negociate não carrega os dados corretamente
 /**
  * ViewModel responsável pela gestão do formulário de interações de partida (Convites e Gestão).
  *
@@ -330,7 +329,6 @@ class FormMatchInviteViewModel @Inject constructor(
     private fun loadDataMatch() {
         launchDataLoad {
             if (matchId != null) {
-
                 val rawMatch = calendarRepository.getMatchTeam(teamId = idMyTeam, matchId = matchId)
                 val processedMatch = MatchInviteDto.createFromBackend(rawMatch)
 

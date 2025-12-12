@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter
 data class MatchInviteDto(
     @SerializedName("Id", alternate = ["id"])
     val id: String = "",
-    @SerializedName("Sender", alternate = ["sender", "Opponent"])
+    @SerializedName("Sender", alternate = ["sender", "Opponent", "opponent"])
     val opponent: TeamDto = TeamDto(),
     @SerializedName("Receiver", alternate = ["receiver"])
     val receiver: TeamDto = TeamDto(),

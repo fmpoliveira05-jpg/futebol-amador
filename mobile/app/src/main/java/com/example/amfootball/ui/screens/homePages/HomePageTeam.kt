@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.homePages
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -40,7 +39,6 @@ import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.actions.homePageActions.HomePageTeamActions
-import com.example.amfootball.ui.previewsMocks.UiStateMock
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.ActionCard

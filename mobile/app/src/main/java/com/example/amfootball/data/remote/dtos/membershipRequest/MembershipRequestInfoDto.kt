@@ -3,6 +3,7 @@ package com.example.amfootball.data.remote.dtos.membershipRequest
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Data Transfer Object (DTO) que representa os detalhes de um pedido de adesão (membership request).
@@ -23,10 +24,16 @@ data class MembershipRequestInfoDto(
     @SerializedName("Team", alternate = ["team"])
     val team: TeamDto,
     @SerializedName("RequestDate", alternate = ["requestDate"])
-    val dateSend: LocalDateTime,
+    val dateSend: String,
     @SerializedName("IsPlayerSender", alternate = ["isPlayerSender"])
     val isPlayerSender: Boolean
 ) {
+    val requestDate: LocalDateTime
+        get() {
+            return LocalDateTime.parse(dateSend, DateTimeFormatter.ISO_DATE_TIME)
+        }
+
+    //Depois apagar, mas aproveitar depois para mocks de previews
     companion object {
         fun generateMemberShipRequestTeam(): List<MembershipRequestInfoDto> {
             val list = ArrayList<MembershipRequestInfoDto>()
@@ -68,7 +75,7 @@ data class MembershipRequestInfoDto(
                             name = playerNames[i],
                             image = ""
                         ),
-                        dateSend = LocalDateTime.now().plusDays(i.toLong()),
+                        dateSend = LocalDateTime.now().plusDays(i.toLong()).toString(),
                         isPlayerSender = false,
                     )
                 )
@@ -117,7 +124,7 @@ data class MembershipRequestInfoDto(
                             name = playerName,
                             image = ""
                         ),
-                        dateSend = LocalDateTime.now().plusDays(i.toLong()),
+                        dateSend = LocalDateTime.now().plusDays(i.toLong()).toString(),
                         isPlayerSender = true,
                     )
                 )

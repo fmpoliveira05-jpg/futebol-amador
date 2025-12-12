@@ -1,9 +1,11 @@
 package com.example.amfootball.data.interfaces.api
 
 import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.data.remote.dtos.membershipRequest.InvitePlayerRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.ui.navigation.objects.Arguments
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -30,7 +32,7 @@ interface PlayerApi {
      * @param playerId O identificador único (UUID) do jogador a consultar.
      * @return [Response] contendo o objeto detalhado [PlayerProfileDto].
      */
-    @GET("${BaseEndpoints.PLAYER_API}/details/{playerId}")
+    @GET("${BaseEndpoints.PLAYER_API}/details/{${Arguments.PLAYER_ID}}")
     suspend fun getPlayerProfile(
         @Path("playerId") playerId: String
     ): Response<PlayerProfileDto>
@@ -54,6 +56,11 @@ interface PlayerApi {
         @QueryMap filters: Map<String, String>
     ): Response<List<InfoPlayerDto>>
 
+    @GET("${BaseEndpoints.TEAM_API}/{${Arguments.TEAM_ID}}/playersWithoutTeam")
+    suspend fun getPlayersWithoutTeamList(
+        @Path(Arguments.TEAM_ID) teamId: String,
+        @QueryMap filters: Map<String, String>
+    ): Response<List<InfoPlayerDto>>
 
     /**
      * Envia um pedido de adesão (Join Request) de um Jogador para uma Equipa.
@@ -66,7 +73,7 @@ interface PlayerApi {
      * @param teamId O ID da equipa destinatária, enviado no corpo (Body) da requisição.
      * @return [Response] com os detalhes do pedido criado [MembershipRequestInfoDto].
      */
-    @POST("${BaseEndpoints.PLAYER_API}/{playerId}/membership-requests/send")
+    @POST("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests/send")
     suspend fun sendMemberShipRequestToTeam(
         @Path("playerId") playerId: String,
         @Body teamId: String
@@ -81,28 +88,28 @@ interface PlayerApi {
      * **Endpoint:** `POST api/Team/{teamId}/membership-requests/send`
      *
      * @param teamId O ID da equipa que está a fazer o convite.
-     * @param playerId O ID do jogador convidado, enviado no corpo (Body) da requisição.
+     * @param request O ID do jogador convidado, enviado no corpo (Body) da requisição.
      * @return [Response] com os detalhes do convite criado [MembershipRequestInfoDto].
      */
-    @POST("${BaseEndpoints.PLAYER_API}/{teamId}/membership-requests/send")
+    @POST("${BaseEndpoints.TEAM_API}/{${Arguments.TEAM_ID}}/membership-requests/send")
     suspend fun sendMemberShipRequestToPlayer(
-        @Path("teamId") teamId: String,
-        @Body playerId: String
+        @Path(Arguments.TEAM_ID) teamId: String,
+        @Body request: InvitePlayerRequest
     ): Response<MembershipRequestInfoDto>
 
-    @DELETE("${BaseEndpoints.PLAYER_API}/{playerId}")
+    @DELETE("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}")
     suspend fun deletePlayer(
         @Path("playerId") playerId: String,
     ) : Response<Unit>
 
 
-    @PUT("${BaseEndpoints.PLAYER_API}/update/{playerId}")
+    @PUT("${BaseEndpoints.PLAYER_API}/update/{${Arguments.PLAYER_ID}}")
     suspend fun updatePlayer(
         @Path("playerId") playerId: String,
         @Body player: PlayerProfileDto
     ) : Response<Unit>
 
-    @PUT("${BaseEndpoints.PLAYER_API}/{playerId}/leave-team")
+    @PUT("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/leave-team")
     suspend fun leaveTeam(
         @Path("playerId") playerId: String
     ): Response<InfoPlayerDto>

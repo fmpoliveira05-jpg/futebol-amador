@@ -1,4 +1,4 @@
-package com.example.amfootball.domains.enums.forms
+package com.example.amfootball.domains.enums.pages
 
 /**
  * Define o modo de operação (comportamento) do formulário de gestão de Jogos.
