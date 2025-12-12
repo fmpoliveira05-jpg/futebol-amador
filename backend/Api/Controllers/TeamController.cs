@@ -354,11 +354,11 @@ namespace Api.Controllers
             {
                 if (hasFilter)
                 {
-                    players = await TeamService.GetPlayersWithoutTeamWithFilters(filter);
+                    players = await TeamService.GetPlayersWithoutTeamWithFilters(teamId, filter);
                 }
                 else
                 {
-                    players = await TeamService.GetPlayersWithoutTeam();
+                    players = await TeamService.GetPlayersWithoutTeam(teamId);
                 }
                 return Ok(players);
             }
