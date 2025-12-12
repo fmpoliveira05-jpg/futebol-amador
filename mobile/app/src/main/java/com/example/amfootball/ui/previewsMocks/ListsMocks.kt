@@ -178,7 +178,7 @@ object ListTeamMocks {
      */
     val mockItemActions =
         _root_ide_package_.com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction(
-            { _, _, _ -> }, { _, _ -> }, { _, _ -> }
+            { _,_ -> }, { _ -> }, { _, _ -> }
         )
 }
 

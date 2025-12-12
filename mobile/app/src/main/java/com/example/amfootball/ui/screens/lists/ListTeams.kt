@@ -50,6 +50,7 @@ import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.remote.dtos.rank.RankNameDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterTeamActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
@@ -66,7 +67,7 @@ import com.example.amfootball.ui.previewsMocks.ListTeamMocks
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
  * @param viewModel O ViewModel injetado via Hilt.
  */
-//TODO: Falta filterErros e distinguir paginas + Backend e regras
+//TODO: Falta filterErros e distinguir paginas + Backend
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
@@ -77,6 +78,7 @@ fun ListTeamScreen(
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
 
     // Definição das ações de atualização dos filtros
     val filtersActions = FilterTeamActions(
@@ -110,6 +112,7 @@ fun ListTeamScreen(
         itemListActions = itemListActions,
         uiState = uiState,
         onRetry = { viewModel.retry() },
+        role = role,
         navHostController = navHostController
     )
 }
@@ -137,6 +140,7 @@ private fun ListTeamContent(
     listRanks: List<RankNameDto>,
     itemListActions: ItemsListTeamAction,
     uiState: UiState,
+    role: UserRole,
     onRetry: () -> Unit,
     navHostController: NavHostController
 ) {
@@ -173,6 +177,7 @@ private fun ListTeamContent(
                         ListTeam(
                             team = team,
                             itemActions = itemListActions,
+                            role = role,
                             navHostController = navHostController
                         )
                     },
@@ -337,6 +342,7 @@ private fun FiltersListTeamContent(
 private fun ListTeam(
     team: ItemTeamInfoDto,
     itemActions: ItemsListTeamAction,
+    role: UserRole,
     navHostController: NavHostController
 ) {
     GenericListItem(
@@ -364,6 +370,7 @@ private fun ListTeam(
             ListTeamTrailing(
                 team = team,
                 itemActions = itemActions,
+                role = role,
                 navHostController = navHostController
             )
         }
@@ -411,25 +418,29 @@ private fun ListTeamOverline(team: ItemTeamInfoDto) {
 private fun ListTeamTrailing(
     team: ItemTeamInfoDto,
     itemActions: ItemsListTeamAction,
+    role: UserRole,
     navHostController: NavHostController
 ) {
-    //TODO: Acrescentar o tipo de player no token e trocar ca
-    val typeUser by remember { mutableStateOf(false) }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(start = 8.dp)
     ) {
-        ListSendMemberShipRequestButton(
-            sendMemberShipRequest = {
-                if (typeUser) {
-                    itemActions.onSendMemberShipRequest(team.id, navHostController)
-                } else {
-                    itemActions.onSendMatchInvite(team.id, team.name, navHostController)
+        if (role == UserRole.PLAYER_WITHOUT_TEAM || role == UserRole.ADMIN_TEAM) {
+            ListSendMemberShipRequestButton(
+                sendMemberShipRequest = {
+                    when (role) {
+                        UserRole.PLAYER_WITHOUT_TEAM -> {
+                            itemActions.onSendMemberShipRequest(team.id)
+                        }
+                        UserRole.ADMIN_TEAM -> {
+                            itemActions.onSendMatchInvite(team.id, navHostController)
+                        }
+                        else -> {}
+                    }
                 }
-            }
-        )
+            )
+        }
 
         ShowMoreInfoButton(
             showMoreDetails = {
@@ -439,10 +450,10 @@ private fun ListTeamTrailing(
     }
 }
 
-@Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
+@Preview(name = "1. Administrador de Equipa - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. Admin Team - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListTeamContent_Normal() {
+fun PreviewListTeamContentAdmin() {
     ListTeamContent(
         isOnline = true,
         listTeams = ListTeamMocks.mockTeams,
@@ -452,14 +463,51 @@ fun PreviewListTeamContent_Normal() {
         itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        role = UserRole.ADMIN_TEAM
     )
 }
 
-@Preview(name = "2. Vazia - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "2. Empty - EN", locale = "en", showBackground = true)
+@Preview(name = "2. Jogador sem Equipa - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. Player Without Team - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListTeamContent_Empty() {
+fun PreviewListTeamContentPlayerWithoutTeam() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = ListTeamMocks.mockTeams,
+        filters = FiltersListTeam(),
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController(),
+        role = UserRole.ADMIN_TEAM
+    )
+}
+
+@Preview(name = "3. Jogador - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Player - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContentPlayer() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = ListTeamMocks.mockTeams,
+        filters = FiltersListTeam(),
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController(),
+        role = UserRole.ADMIN_TEAM
+    )
+}
+
+@Preview(name = "4. Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "4. Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContentEmpty() {
     ListTeamContent(
         isOnline = true,
         listTeams = emptyList(),
@@ -469,23 +517,7 @@ fun PreviewListTeamContent_Empty() {
         itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "3. Offline - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "3. Offline - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListTeamContent_Offline() {
-    ListTeamContent(
-        isOnline = false,
-        listTeams = ListTeamMocks.mockTeams,
-        filters = FiltersListTeam(),
-        filtersActions = ListTeamMocks.mockFiltersActions,
-        listRanks = ListTeamMocks.mockRanks,
-        itemListActions = ListTeamMocks.mockItemActions,
-        uiState = UiState(isLoading = false),
-        onRetry = {},
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        role = UserRole.PLAYER_WITHOUT_TEAM
     )
 }

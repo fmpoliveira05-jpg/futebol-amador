@@ -7,6 +7,8 @@ import com.example.amfootball.core.utils.safeApiCallWithNotReturn
 import com.example.amfootball.core.utils.safeApiCallWithReturn
 import com.example.amfootball.data.interfaces.api.TeamApi
 import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -97,6 +99,13 @@ class TeamService @Inject constructor(
 
         return safeApiCallWithReturn {
             teamApi.getListTeam(filters = filterMap)
+        }
+    }
+
+    suspend fun playerSendMembershipRequestToTeam(playerId: String, teamId: String): MembershipRequestInfoDto {
+        return safeApiCallWithReturn {
+            val request = InviteTeamRequest(teamId)
+            teamApi.sendMemberShipRequest(playerId = playerId, request = request)
         }
     }
 

@@ -439,10 +439,9 @@ private fun NavGraphBuilder.casualMatches(
     )
 
     composableProtectedAdminTeam(
-        route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}/{${Arguments.TEAM_NAME}}",
+        route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}",
         arguments = listOf(
             navArgument(Arguments.TEAM_ID) { type = NavType.StringType },
-            navArgument(Arguments.TEAM_NAME) { type = NavType.StringType },
             navArgument(Arguments.FORM_MODE) { defaultValue = MatchFormMode.SEND.name }
         ),
         sessionManager = sessionManager,

@@ -11,8 +11,14 @@ import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.rank.RankNameDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.data.remote.services.MatchInviteService
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.enums.UserRole.ADMIN_TEAM
+import com.example.amfootball.domains.enums.UserRole.MEMBER_TEAM
+import com.example.amfootball.ui.navigation.objects.Arguments
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,8 +41,29 @@ import javax.inject.Inject
 @HiltViewModel
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamRepository: TeamService,
+    private val teamService: TeamService,
+    private val matchInviteService: MatchInviteService,
+    private val sessionManager: SessionManager?
 ) : ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
+
+    private val teamId: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
+     * Estado interno mutável do Role do utilizador.
+     */
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.PLAYER_WITHOUT_TEAM)
+
+    /**
+     * Fluxo público imutável que indica o nível de permissão do utilizador na equipa.
+     *
+     * A UI deve observar este estado para decidir quais cartões mostrar:
+     * - [UserRole.ADMIN_TEAM]: Mostra tudo (Agendar, Gerir).
+     * - [UserRole.MEMBER_TEAM]: Mostra apenas visualização (Calendário, Lista).
+     *
+     * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
+     */
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
     val uiFilterState: StateFlow<FiltersListTeam> = filterState.asStateFlow()
@@ -51,6 +78,10 @@ class ListTeamViewModel @Inject constructor(
     var listRank: StateFlow<List<RankNameDto>> = listRanks.asStateFlow()
 
     init {
+        val profile = sessionManager?.getUserProfile()
+        teamId.value = profile?.effectiveTeamId ?: ""
+        roleState.value = profile?.role ?: UserRole.UNAUTHORIZED
+
         loadListTeam()
 
         //Por enquanto esta lista vai ser estatica
@@ -142,23 +173,68 @@ class ListTeamViewModel @Inject constructor(
             },
             toastMessage = R.string.toast_offline_send_match_invite
         )
-
     }
 
     /**
      * Envia um pedido de adesão (Membership) a uma equipa.
      */
-    fun sendMemberShipRequest(idTeam: String, navHostController: NavHostController) {
-        //TODO: Executar chamada há API para o sendMemberShipRequest
+    fun sendMemberShipRequest(idTeam: String) {
+        val userProfile = sessionManager?.getUserProfile()
+        if (userProfile == null) {
+            //TODO: Lançar toast
+            return
+        }
+
+        if(roleState.value != UserRole.PLAYER_WITHOUT_TEAM) {
+            //TODO: Lançar toast
+            return
+        }
+
+        //TODO: Fazer pedido ao backend com o launchData
+        launchDataLoad {
+            val playerId = userProfile?.loginResponseDto?.localId ?: ""
+
+            teamService.playerSendMembershipRequestToTeam(playerId = playerId, teamId = teamId.value)
+
+            //TODO: Retirar o botão de send
+        }
+    }
+
+    fun sendMatchInvite(idTeam: String, navHostController: NavHostController) {
+        val userProfile = sessionManager?.getUserProfile()
+
+        if (userProfile == null) {
+            //TODO: Lançar toast
+            return
+        }
+
+        if (roleState.value != UserRole.ADMIN_TEAM) {
+            //TODO: Lançar toast
+            return
+        }
+
+        if (idTeam == teamId.value) {
+            //TODO: Lançar Toast
+            return
+        }
+        //TODO: Chamar rota
+        navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/{${Arguments.TEAM_ID}}") {
+            launchSingleTop = true
+        }
     }
 
     /**
      * Navega para o perfil detalhado da equipa.
      */
     fun showMore(idTeam: String, navHostController: NavHostController) {
-        navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/${idTeam}") {
-            launchSingleTop = true
-        }
+        onlineFunctionality(
+            action = {
+                navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/${idTeam}") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = null
+        )
     }
 
     fun retry() {
@@ -175,10 +251,12 @@ class ListTeamViewModel @Inject constructor(
      */
     private fun loadListTeam() {
         launchDataLoad {
-            val teams = teamRepository.getListTeam(filterState.value)
+            val teams = teamService.getListTeam(filterState.value)
 
             listState.value = teams
-            originalList = teams
+            if(filterState.value == FiltersListTeam()) {
+                originalList = teams
+            }
         }
     }
 

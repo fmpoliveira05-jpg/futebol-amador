@@ -2,11 +2,14 @@ package com.example.amfootball.data.interfaces.api
 
 import com.example.amfootball.data.interfaces.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
+import com.example.amfootball.ui.navigation.objects.Arguments
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -128,6 +131,14 @@ interface TeamApi {
     suspend fun getListTeam(
         @QueryMap filters: Map<String, String>
     ): Response<List<ItemTeamInfoDto>>
+
+    @POST("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests/send")
+    suspend fun sendMemberShipRequest(
+        @Path(Arguments.PLAYER_ID) playerId: String,
+        @Body request: InviteTeamRequest
+    ): Response<MembershipRequestInfoDto>
+
+    @POST("${BaseEndpoints.TEAM_API}/{${Arguments.TEAM_ID}}/membership-requests/send")
 
     /**
      * Lista os membros (jogadores e staff) de uma equipa específica.
