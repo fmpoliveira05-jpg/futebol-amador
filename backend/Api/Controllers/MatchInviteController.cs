@@ -38,6 +38,7 @@ namespace Api.Controllers
         #region EndPoints
 
         #region MatchInvites
+        
         /// <summary>
         /// Envia um convite de partida amigável para outra equipa.
         /// </summary>
@@ -131,6 +132,33 @@ namespace Api.Controllers
             var matchInvite = await matchInviteService.NegociateMatchInvite(idTeam, dto);
 
             return Ok(matchInvite);
+        }
+
+        /// <summary>
+        /// Obtém os detalhes de um convite de jogo específico.
+        /// </summary>
+        /// <remarks>
+        /// Este endpoint recupera as informações completas de um convite (Match Invite) 
+        /// com base no ID da equipa e no ID do convite fornecido.
+        /// </remarks>
+        /// <param name="idTeam">O identificador único (GUID) da equipa contexto da operação.</param>
+        /// <param name="matchInvite">O identificador único (GUID) do convite que se pretende visualizar.</param>
+        /// <returns>Um objeto contendo os detalhes do convite.</returns>
+        /// <response code="200">Sucesso. Retorna os dados do convite.</response>
+        /// <response code="404">Convite ou equipa não encontrados (dependendo da implementação do serviço).</response>
+        [HttpGet("{idMatchInvite}")]
+        [ProducesResponseType(typeof(InfoMatchInviteDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetMatchInvite(Guid idTeam, Guid idMatchInvite)
+        {
+            var matchesInvite = await matchInviteService.GetMatchInvite(idTeam, idMatchInvite);
+
+            if (matchesInvite == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(matchesInvite);
         }
 
         /// <summary>

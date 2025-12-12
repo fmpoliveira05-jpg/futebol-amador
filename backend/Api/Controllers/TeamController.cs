@@ -1,4 +1,5 @@
 using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
@@ -47,27 +48,46 @@ namespace Api.Controllers
 
         #region CRUD Team
         /// <summary>
-        /// Cria uma nova equipa.
+        /// Cria uma nova equipa na plataforma.
         /// </summary>
         /// <remarks>
-        /// O jogador que cria a equipa torna-se automaticamente o Administrador da mesma.
-        /// Requer que o jogador ainda não pertença a nenhuma outra equipa.
+        /// Esta operação é fundamental para iniciar a participação de um jogador.
+        /// 
+        /// **Regras de Negócio:**
+        /// * O utilizador autenticado que cria a equipa é designado como **Administrador** (dono) inicial.
+        /// * Um utilizador só pode pertencer a uma equipa de cada vez (validação de unicidade).
+        /// 
+        /// **Retorno (201 Created):**
+        /// A resposta inclui o DTO completo da equipa criada e, crucialmente,
+        /// o Header 'Location' que aponta para o URI de acesso direto ao novo recurso.
         /// </remarks>
-        /// <param name="teamDto">Dados da nova equipa (Nome, Campo, etc.).</param>
-        /// <returns>Dados da equipa criada e localização do recurso.</returns>
-        /// <response code="201">Equipa criada com sucesso.</response>
-        /// <response code="400">Dados inválidos ou jogador já tem equipa.</response>
-        /// <response code="401">Utilizador não autenticado.</response>
+        /// <param name="teamDto">
+        /// Data Transfer Object (DTO) contendo os dados essenciais para a criação da equipa,
+        /// incluindo o nome, descrição, e informações do campo principal.
+        /// </param>
+        /// <returns>
+        /// Retorna o objeto DTO da equipa criada e o código de status 201 Created.
+        /// </returns>
+        /// <response code="201">
+        /// Equipa criada com sucesso. O Header 'Location' aponta para o endpoint GET da equipa (ex: /api/Team/{id}).
+        /// </response>
+        /// <response code="400">
+        /// Dados inválidos (ex: falha na validação do [CreateTeamDto]) ou violação de regras de negócio
+        /// (ex: o jogador autenticado já possui uma equipa).
+        /// </response>
+        /// <response code="401">
+        /// O utilizador não está autenticado e, portanto, não pode realizar a criação da equipa.
+        /// </response>
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> CreateTeam([FromBody] CreateTeamDto teamDto)
-        {            
+        {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var newTeamId = await TeamService.CreateTeamAsync(teamDto, userId);
+            var newTeam = await TeamService.CreateTeamAsync(teamDto, userId);
 
-            return CreatedAtAction(nameof(GetTeamById), new { id = newTeamId }, new { id = newTeamId });
+            return CreatedAtAction(nameof(GetTeamById), new { id = newTeam.Id }, newTeam);
         }
 
         /// <summary>
@@ -89,25 +109,63 @@ namespace Api.Controllers
         }
 
         /// <summary>
-        /// Atualiza as informações de uma equipa.
+        /// Obtém as informações principais para o painel inicial (Dashboard) de uma equipa específica.
         /// </summary>
         /// <remarks>
-        /// Apenas administradores da equipa podem realizar esta ação.
+        /// Este endpoint agrega dados como os próximos jogos, estatísticas recentes ou resultados, 
+        /// retornando um objeto agregado para construir a Home Page da equipa.
         /// </remarks>
-        /// <param name="teamId">ID da equipa a atualizar.</param>
-        /// <param name="dto">Novos dados da equipa.</param>
-        /// <response code="200">Equipa atualizada com sucesso.</response>
-        /// <response code="400">Dados inválidos.</response>
-        /// <response code="403">Utilizador não é administrador da equipa.</response>
+        /// <param name="idTeam">O identificador único (GUID) da equipa a consultar.</param>
+        /// <returns>Um objeto com as informações da Home Page ou 200 OK.</returns>
+        /// <response code="200">Retorna as informações da equipa com sucesso.</response>
+        /// <response code="404">Se a equipa não for encontrada (caso o serviço trate isso).</response>
+        [HttpGet("homeTeam/{idTeam}")]
+        [ProducesResponseType(typeof(HomePageDto), StatusCodes.Status200OK)] // Ajusta 'HomePageInfoDto' para o nome real da tua classe de retorno
+        public async Task<IActionResult> GetHomePageInfo(Guid idTeam)
+        {
+            var homePageInfo = await TeamService.getHomePageInfo(idTeam);
+            return Ok(homePageInfo);
+        }
+
+        /// <summary>
+        /// Atualiza as informações de uma equipa existente (Nome, Descrição, Logótipo, Campo Principal).
+        /// </summary>
+        /// <remarks>
+        /// Esta é uma operação HTTP PUT idempotente.
+        /// 
+        /// **Requer Autorização:** Apenas o utilizador que possui permissão de **Administrador**
+        /// da equipa especificada pelo <paramref name="teamId"/> pode executar esta ação.
+        /// 
+        /// **Corpo do Pedido (Request Body):**
+        /// O corpo deve conter todos os campos necessários para a atualização, conforme definido
+        /// no esquema do [CreateTeamDto] (incluindo as informações aninhadas do campo de jogo).
+        /// </remarks>
+        /// <param name="teamId">O identificador único (GUID) da equipa a ser atualizada.</param>
+        /// <param name="dto">O Data Transfer Object (DTO) contendo os novos dados da equipa.</param>
+        /// <response code="200">
+        /// Retorna o objeto DTO da equipa com as informações atualizadas, confirmando a operação.
+        /// </response>
+        /// <response code="400">
+        /// Ocorreu um erro de validação (ex: dados incompletos ou fora dos limites de caracteres).
+        /// O corpo da resposta (Body) conterá o objeto de erros de validação.
+        /// </response>
+        /// <response code="403">
+        /// O utilizador autenticado não tem a permissão de Administrador necessária para modificar a equipa.
+        /// </response>
+        /// <response code="404">
+        /// A equipa especificada pelo <paramref name="teamId"/> não foi encontrada.
+        /// </response>
         [HttpPut("{teamId}")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)] // Adicionei 404, comum para recursos que não existem.
         public async Task<IActionResult> UpdateTeamInfo(Guid teamId, [FromBody] CreateTeamDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
-            return Ok("Equipa atualizada com sucesso.");
+
+            var teamUpdate = await TeamService.UpdateTeamInfoAsync(teamId, dto, userId);
+            return Ok(teamUpdate);
         }
 
         /// <summary>
@@ -264,7 +322,7 @@ namespace Api.Controllers
             var playerRemovingId = GetCurrentUserId();
             
             await TeamService.RemovePlayerFromTeamAsync(teamId, playerIdToRemove, playerRemovingId);
-            await notificationFirebaseService.SendNotificationToUser(playerIdToRemove, "Saída da Equipa","Você foi removido da equipa.");
+            await notificationFirebaseService.SendNotificationToUser(playerIdToRemove, null, "Saída da Equipa","Você foi removido da equipa.");
 
             return NoContent();
         }
@@ -289,7 +347,7 @@ namespace Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
             await TeamService.PromotePlayerToAdminAsync(teamId, playerIdToPromote, userId);
-            await notificationFirebaseService.SendNotificationToUser(playerIdToPromote, "Promoção a Administrador", "Parabéns! Você foi promovido a administrador da sua equipa.");
+            await notificationFirebaseService.SendNotificationToUser(playerIdToPromote, null, "Promoção a Administrador", "Parabéns! Você foi promovido a administrador da sua equipa.");
 
             return Ok("Jogador promovido a admin.");
         }
@@ -312,7 +370,7 @@ namespace Api.Controllers
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             await TeamService.DemoteAdminToPlayerAsync(teamId, adminIdToDemote, userId);
 
-            await notificationFirebaseService.SendNotificationToUser(adminIdToDemote, "Despromovido", "Você foi despromovido a jogador de equipa.");
+            await notificationFirebaseService.SendNotificationToUser(adminIdToDemote, null, "Despromovido", "Você foi despromovido a jogador de equipa.");
             
             return Ok("Admin rebaixado a jogador.");
         }
@@ -454,7 +512,7 @@ namespace Api.Controllers
         /// Apenas administradores podem enviar convites.
         /// </remarks>
         /// <param name="teamId">ID da equipa.</param>
-        /// <param name="playerId">ID do jogador a convidar.</param>
+        /// <param name="request">ID do jogador a convidar.</param>
         /// <returns>Detalhes do convite criado.</returns>
         /// <response code="200">Convite enviado com sucesso.</response>
         /// <response code="400">Jogador já tem equipa ou convite duplicado.</response>
@@ -463,11 +521,11 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] InvitePlayerRequest request)
         {
             var senderId = GetCurrentUserId();
             //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
-            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId, senderId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, request.PlayerId, senderId);
 
             return Ok(dto);
         }

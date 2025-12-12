@@ -1,4 +1,5 @@
 ﻿using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
@@ -62,5 +63,9 @@ namespace Application.Interfaces.Repositories
         Task<List<PlayerWithoutTeamInfoDto>> GetListPlayersWithoutTeamtWithFilters(Guid idTeam, FilterTeamDto filters);
         
         Task<List<InfoTeamsDto>> GetListTeams(FilterListTeamDto? filters);
+
+        Task<List<InfoMatch>?> GetNextMatchTeam(Guid teamId);
+
+        Task<List<VitorySequenceTeam>?> GetSequenceVitorysTeam(Guid teamId);
     }
 }

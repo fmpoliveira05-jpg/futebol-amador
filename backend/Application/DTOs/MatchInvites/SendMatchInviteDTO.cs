@@ -14,6 +14,6 @@ namespace Application.DTOs.MatchInvites
         public DateTime GameDate { get; set; }
 
         [Required(ErrorMessage = "É obrigatório especificar o id do Campo")]
-        public bool homePitch { get; set; } 
+        public bool homePitch { get; set; }
     }
 }

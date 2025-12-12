@@ -2,6 +2,7 @@
 using Application.DTOs.Pitch;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
@@ -26,6 +27,8 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IRankRepository> _rankRepoMock;
         private Mock<IMembershipRequestRepository> _membershipRequestRepoMock;
         private Mock<INotificationService> _notificationServiceMock;
+        private Mock<INotificationFirebaseService> _notificationFireBaseServiceMock;
+        private Mock<IPlayerAuthorizationValidator> _playerAuthValidatorMock;
         private TeamValidator _teamValidator;
         private TeamService _sut;
         #endregion
@@ -39,9 +42,9 @@ namespace Unit.ApplicationTests.ServicesTests
             _unitOfWorkMock = new Mock<IUnityOfWork>();
             _rankRepoMock = new Mock<IRankRepository>();
             _membershipRequestRepoMock = new Mock<IMembershipRequestRepository>();
-            var playerValidator = new PlayerValidator();
-            var authorizationValidator = new PlayerAuthorizationValidator();
             _notificationServiceMock = new Mock<INotificationService>();
+            _notificationFireBaseServiceMock = new Mock<INotificationFirebaseService>();
+            _playerAuthValidatorMock = new Mock<IPlayerAuthorizationValidator>();
             _teamValidator = new TeamValidator();
 
             _sut = new TeamService(
@@ -50,10 +53,9 @@ namespace Unit.ApplicationTests.ServicesTests
                 _unitOfWorkMock.Object,
                 _teamValidator,
                 _rankRepoMock.Object,
-                _membershipRequestRepoMock.Object,
-                playerValidator,
-                authorizationValidator,
-                _notificationServiceMock.Object
+                _playerAuthValidatorMock.Object,
+                _notificationServiceMock.Object,
+                _notificationFireBaseServiceMock.Object
             );
         }
         #endregion
@@ -97,6 +99,8 @@ namespace Unit.ApplicationTests.ServicesTests
             };
             var unrankedRank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var adminPlayer = new Player { Id = "admin-id-123", IsAdmin = true };
+
+            // Setups
             _playerRepoMock.Setup(r => r.GetPlayerByIdAsync(adminPlayer.Id)).ReturnsAsync(adminPlayer);
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync((Team)null);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync(unrankedRank);
@@ -107,7 +111,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var result = await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
             // ASSERT
-            result.Should().NotBeEmpty("porque deve retornar o ID da equipa criada");
+            result.Should().NotBeNull();
+            result.Id.Should().NotBeEmpty("porque deve retornar o ID da equipa criada");
+
             _teamRepoMock.Verify(r => r.AddAsync(It.Is<Team>(t => t.Rank.Name == "Unranked")), Times.Once);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Once);
         }

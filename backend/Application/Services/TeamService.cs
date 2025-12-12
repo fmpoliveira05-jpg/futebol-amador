@@ -2,6 +2,7 @@
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -24,10 +25,9 @@ namespace Application.Services
         private readonly IUnityOfWork UnityOfWork;
         private readonly IRankRepository RankRepository;
         private readonly ITeamValidator TeamValidator;
-        private readonly IMembershipRequestRepository MembershipRequestRepository;
-        private readonly IPlayerValidator PlayerValidator;
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
         private readonly INotificationService notificationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do TeamService.
@@ -37,8 +37,6 @@ namespace Application.Services
         /// <param name="unityOfWork">Unidade de Trabalho para gerir transações.</param>
         /// <param name="teamValidator">Validador de Regras de Negócio de Equipa.</param>
         /// <param name="rankRepository">Repositório de Ranks (para obter o rank padrão).</param>
-        /// <param name="membershipRequestRepository">Repositório de Pedidos de Adesão.</param>
-        /// <param name="playerValidator">Validador de Jogadores.</param>
         /// <param name="authorizationValidator">Validador de Controlo de Acesso (RBAC).</param>
         /// <param name="notificationService">Serviço de Hub para envio de notificações em tempo real.</param>
         public TeamService(
@@ -47,10 +45,9 @@ namespace Application.Services
             IUnityOfWork unityOfWork,
             ITeamValidator teamValidator,
             IRankRepository rankRepository,
-            IMembershipRequestRepository membershipRequestRepository,
-            IPlayerValidator playerValidator,
             IPlayerAuthorizationValidator authorizationValidator,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            INotificationFirebaseService notificationFirebaseService)
         {
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
@@ -59,8 +56,25 @@ namespace Application.Services
             RankRepository = rankRepository;
             AuthorizationValidator = authorizationValidator;
             this.notificationService = notificationService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
+
+        public async Task<HomePageDto> getHomePageInfo(Guid idTeam)
+        {
+            var teamInfo = await TeamRepository.GetOpponentTeamById(idTeam);
+            var nextMatches = await TeamRepository.GetNextMatchTeam(idTeam);
+            var sequencyVitory = await TeamRepository.GetSequenceVitorysTeam(idTeam);
+
+            var homePage = new HomePageDto
+            {
+                Team = teamInfo,
+                NextsMatchs = nextMatches,
+                HistoricPreviousGames = sequencyVitory
+            };
+
+            return homePage; 
+        }
 
         #region CRUD Team
 
@@ -77,7 +91,7 @@ namespace Application.Services
         /// <param name="teamDto">Dados da equipa a criar.</param>
         /// <param name="playerId">ID do jogador autenticado que está a criar.</param>
         /// <returns>O ID (GUID) da nova equipa criada.</returns>
-        public async Task<Guid> CreateTeamAsync(CreateTeamDto teamDto, string playerId)
+        public async Task<CreateTeamDto> CreateTeamAsync(CreateTeamDto teamDto, string playerId)
         {
             var playerCreating = await PlayerRepository.GetPlayerByIdAsync(playerId);
             AuthorizationValidator.ValidatePlayerAutorizationWithoutTeam(playerCreating);
@@ -107,7 +121,9 @@ namespace Application.Services
             PlayerRepository.UpdatePlayer(playerCreating);
 
             await UnityOfWork.SaveChangesAsync();
-            return newTeam.Id;
+
+            teamDto.Id = newTeam.Id;
+            return teamDto;
         }
 
         /// <summary>
@@ -138,12 +154,12 @@ namespace Application.Services
                 }
             }
 
-            /*TODO: Meter para todas as partidas dessa team serem cancelados pelo 
-            motivo que a equipa foi eliminada
-            */
             TeamRepository.DeleteTeam(teamToDelete);
 
+            //Vai buscar os tokens dos membros da equipa para enviar notificação
             await UnityOfWork.SaveChangesAsync();
+
+            await SendNotificationDeleteTeam(teamId);
         }
 
         /// <summary>
@@ -155,7 +171,7 @@ namespace Application.Services
         /// <param name="teamId">ID da equipa a ser atualizada.</param>
         /// <param name="dto">DTO com os novos dados.</param>
         /// <param name="currentUserId">ID do utilizador que está a atualizar (deve ser Admin).</param>
-        public async Task UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId)
+        public async Task<CreateTeamDto> UpdateTeamInfoAsync(Guid teamId, CreateTeamDto dto, string currentUserId)
         {
             var playerTryingToUpdate = await PlayerRepository.GetPlayerByIdAsync(currentUserId);
             AuthorizationValidator.ValidatePlayerAutorizationIsAdmin(playerTryingToUpdate, teamId);
@@ -179,6 +195,7 @@ namespace Application.Services
             TeamRepository.UpdateTeam(teamToUpdate);
 
             await UnityOfWork.SaveChangesAsync();
+            return dto;
         }
 
         /// <summary>
@@ -237,12 +254,14 @@ namespace Application.Services
             
             TeamValidator.PromoteMemberToAdminValidation(existingTeam, playerToPromote, playerPromoting);
 
-            await notificationService.SendUserAsync(playerIdToPromoteId, "Team Promotion", $"You have been promoted to admin of the team {existingTeam.Name}.");
+            await notificationService.SendUserAsync(playerIdToPromoteId, "TEAM_PROMOTE", $"You have been promoted to admin of the team {existingTeam.Name}.");
 
             playerToPromote.IsAdmin = true;
             playerToPromote.IsAdminLastChangedAt = DateTime.UtcNow;
 
             await UnityOfWork.SaveChangesAsync();
+
+            await SendPromotePlayerTeam(playerIdToPromoteId);
         }
 
         /// <summary>
@@ -267,6 +286,8 @@ namespace Application.Services
             playerToDemote.IsAdminLastChangedAt = DateTime.UtcNow;
             await UnityOfWork.SaveChangesAsync();
             await notificationService.SendUserAsync(adminIdToDemote, "Team Demotion", $"You have been demoted to player of the team {existingTeam.Name}.");
+        
+            await SendDemotePlayerTeam(adminIdToDemote);
         }
 
         #endregion
@@ -433,5 +454,53 @@ namespace Application.Services
 
             return team;
         }
+
+        #region private Methods
+        private async Task SendNotificationDeleteTeam(Guid teamId)
+        {
+            var dataPayload = new Dictionary<string, string>()
+            {
+                { "type", "TEAM_DELETED" },
+                { "teamId", teamId.ToString() },
+                { "title", "Equipa Eliminada" },
+                { "body", "A sua equipa foi eliminada por um administrador." }
+            };
+
+            await notificationFirebaseService.SendMulticastNotification(teamId, dataPayload, null, null);
+        }
+
+        private async Task SendPromotePlayerTeam(string playerId)
+        {
+            var title = "Promoção administrador";
+            var body = "Você foi promovido a administrador de equipa.";
+
+            var dataPayload = new Dictionary<string, string>()
+            {
+                { "type", "TEAM_PROMOTE" },
+                { "teamId", playerId.ToString() },
+                { "title", title },
+                { "body", body}
+            };
+
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayload, title, body);
+        }
+
+        private async Task SendDemotePlayerTeam(string playerId)
+        {
+            var title = "Despromoção a jogador";
+            var body = "Você foi despomovido a jogador de equipa.";
+
+            var dataPayload = new Dictionary<string, string>()
+            {
+                { "type", "TEAM_DEMOTION" },
+                { "teamId", playerId.ToString() },
+                { "title", title },
+                { "body", body}
+            };
+
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayload, title, body);
+        }
+
+        #endregion
     }
 }

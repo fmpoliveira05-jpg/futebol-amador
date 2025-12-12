@@ -13,6 +13,18 @@ namespace Application.Interfaces.Services
     public interface IMatchInviteService
     {
         /// <summary>
+        /// Obtém a informação resumida de um convite de partida se este estiver associado à equipa especificada.
+        /// </summary>
+        /// <remarks>
+        /// Utilizado para validar se a equipa (`idTeam`) é a remetente ou recetora do convite (`idMatchInvite`),
+        /// permitindo que a equipa aceda aos detalhes antes de realizar operações.
+        /// </remarks>
+        /// <param name="idMatchInvite">O ID (GUID) do convite a ser consultado.</param>
+        /// <param name="idTeam">O ID da equipa (Utilizador) que está a tentar aceder ao convite.</param>
+        /// <returns>O DTO **[InfoMatchInviteDto]** se o convite existir e pertencer à equipa, ou <c>null</c>.</returns>
+        Task<InfoMatchInviteDto?> GetMatchInvite(Guid idTeam, Guid idMatchInvite);
+
+        /// <summary>
         /// Envia um novo convite de partida de uma equipa para outra.
         /// </summary>
         /// <remarks>
@@ -61,7 +73,7 @@ namespace Application.Interfaces.Services
         /// </summary>
         /// <param name="idTeam">O ID da equipa recetora.</param>
         /// <returns>Uma lista de [InfoMatchInviteDto] com informações resumidas dos convites.</returns>
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeam(Guid idTeam);
+        public Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeam(Guid idTeam);
 
         /// <summary>
         /// Obtém a lista de convites de partida recebidos, aplicando filtros de pesquisa.
@@ -69,6 +81,6 @@ namespace Application.Interfaces.Services
         /// <param name="idTeam">O ID da equipa recetora.</param>
         /// <param name="filter">O DTO contendo os critérios de filtragem (Nome do Remetente, Intervalo de Datas).</param>
         /// <returns>Uma lista filtrada de [InfoMatchInviteDto].</returns>
-        public Task<List<InfoMatchInviteDto>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter);
+        public Task<List<InfoMatchInviteDto?>> GetAllMatchInvitesTeamWithFilters(Guid idTeam, FilterMatchInvitesDto filter);
     }
 }

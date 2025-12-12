@@ -191,10 +191,12 @@ namespace Application.Validators
 
             ValidatePostPoneMatch(postPoneMatch, idTeam);
 
+            /*
             if (matcheFind != null)
             {
                 throw new ValidationException("A equipa já tem um jogo marcado 12 horas, antes desse adiamento");
             }
+            */
         }
 
         /// <summary>
@@ -466,7 +468,7 @@ namespace Application.Validators
 
             if (postPoneMatch.IdTeamPostPone == idTeam)
             {
-                throw new BusinessRuleException("Apenas a equipa que recebeu o convite pode aceita-lo ou rejeita-lo");
+                throw new BusinessRuleException($"Apenas a equipa que recebeu o convite pode aceita-lo ou rejeita-lo");
             }
         }
 

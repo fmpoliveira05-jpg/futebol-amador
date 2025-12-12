@@ -193,5 +193,19 @@ namespace Infrastructure.Repositories
 
             return list!; 
         }
+
+        public async Task<List<string?>> GetDeviceTokensMembersTeam(Guid idTeam, bool? isAdmin)
+        {
+            var query = context.Player.Where(p => p.IdTeam == idTeam);
+
+            if (isAdmin.HasValue)
+            {
+                query = query.Where(p => p.IsAdmin == isAdmin.Value);
+            }
+
+            return await query
+                .Select(p => p.DeviceToken)
+                .ToListAsync();
+        }
     }
 }

@@ -1,6 +1,4 @@
-﻿using Application.DTOs.Pitch;
-using Application.DTOs.Team;
-using Domain.Enums;
+﻿using Application.DTOs.Team;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Match

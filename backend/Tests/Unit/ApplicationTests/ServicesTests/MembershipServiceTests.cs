@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
@@ -29,6 +30,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IMembershipValidator> _membershipValidatorMock;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<IPlayerAuthorizationValidator> _authorizationValidatorMock;
+        private Mock<INotificationFirebaseService> _notificationFirebaseServiceMock;
 
         private TeamValidator _teamValidator;
         private MembershipService _sut;
@@ -48,6 +50,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             _teamValidator = new TeamValidator();
             _authorizationValidatorMock = new Mock<IPlayerAuthorizationValidator>();
+            _notificationFirebaseServiceMock = new Mock<INotificationFirebaseService>();
 
             _sut = new MembershipService(
                 _teamRepoMock.Object,
@@ -58,7 +61,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 _playerValidatorMock.Object,
                 _authorizationValidatorMock.Object,
                 _membershipValidatorMock.Object,
-                _notificationServiceMock.Object
+                _notificationServiceMock.Object,
+                _notificationFirebaseServiceMock.Object
             );
         }
         #endregion

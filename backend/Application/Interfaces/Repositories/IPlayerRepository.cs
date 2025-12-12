@@ -80,5 +80,7 @@ namespace Application.Interfaces.Repositories
         /// </summary>
         /// <param name="playerToRemove">A entidade [Player] a ser removida.</param>
         void DeletePlayer(Player playerToRemove);
+
+        Task<List<string?>> GetDeviceTokensMembersTeam(Guid idTeam, bool? isAdmin);
     }
 }
