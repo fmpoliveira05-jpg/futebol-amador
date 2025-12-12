@@ -1004,7 +1004,7 @@ namespace Infrastructure.Repositories
                                        Name = opponentTeam.Team.Name
                                    },
                                    Result = myTeam.NumGoals + " - " + opponentTeam.NumGoals,
-                                   MatchStatus = m.MatchStatus
+                                   MatchResult = myTeam.MatchResult
                                }
                               )
                               .Take(5)

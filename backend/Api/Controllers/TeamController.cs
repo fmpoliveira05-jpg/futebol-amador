@@ -1,4 +1,5 @@
 using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
@@ -511,7 +512,7 @@ namespace Api.Controllers
         /// Apenas administradores podem enviar convites.
         /// </remarks>
         /// <param name="teamId">ID da equipa.</param>
-        /// <param name="playerId">ID do jogador a convidar.</param>
+        /// <param name="request">ID do jogador a convidar.</param>
         /// <returns>Detalhes do convite criado.</returns>
         /// <response code="200">Convite enviado com sucesso.</response>
         /// <response code="400">Jogador já tem equipa ou convite duplicado.</response>
@@ -520,11 +521,11 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] InvitePlayerRequest request)
         {
             var senderId = GetCurrentUserId();
             //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
-            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId, senderId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, request.PlayerId, senderId);
 
             return Ok(dto);
         }

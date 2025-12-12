@@ -12,6 +12,6 @@ namespace Application.DTOs.Team
         public string Result { get; set; } = null!;
 
         [Required]
-        public MatchStatus MatchStatus { get; set; }
+        public MatchResult MatchResult { get; set; }
     }
 }
