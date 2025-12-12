@@ -1,4 +1,5 @@
 using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
@@ -105,6 +106,25 @@ namespace Api.Controllers
             var team = await TeamService.GetTeamByIdAsync(id);
 
             return Ok(team);
+        }
+
+        /// <summary>
+        /// Obtém as informações principais para o painel inicial (Dashboard) de uma equipa específica.
+        /// </summary>
+        /// <remarks>
+        /// Este endpoint agrega dados como os próximos jogos, estatísticas recentes ou resultados, 
+        /// retornando um objeto agregado para construir a Home Page da equipa.
+        /// </remarks>
+        /// <param name="idTeam">O identificador único (GUID) da equipa a consultar.</param>
+        /// <returns>Um objeto com as informações da Home Page ou 200 OK.</returns>
+        /// <response code="200">Retorna as informações da equipa com sucesso.</response>
+        /// <response code="404">Se a equipa não for encontrada (caso o serviço trate isso).</response>
+        [HttpGet("homeTeam/{idTeam}")]
+        [ProducesResponseType(typeof(HomePageDto), StatusCodes.Status200OK)] // Ajusta 'HomePageInfoDto' para o nome real da tua classe de retorno
+        public async Task<IActionResult> GetHomePageInfo(Guid idTeam)
+        {
+            var homePageInfo = await TeamService.getHomePageInfo(idTeam);
+            return Ok(homePageInfo);
         }
 
         /// <summary>
@@ -492,7 +512,7 @@ namespace Api.Controllers
         /// Apenas administradores podem enviar convites.
         /// </remarks>
         /// <param name="teamId">ID da equipa.</param>
-        /// <param name="playerId">ID do jogador a convidar.</param>
+        /// <param name="request">ID do jogador a convidar.</param>
         /// <returns>Detalhes do convite criado.</returns>
         /// <response code="200">Convite enviado com sucesso.</response>
         /// <response code="400">Jogador já tem equipa ou convite duplicado.</response>
@@ -501,11 +521,11 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] string playerId)
+        public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] InvitePlayerRequest request)
         {
             var senderId = GetCurrentUserId();
             //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
-            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, playerId, senderId);
+            var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, request.PlayerId, senderId);
 
             return Ok(dto);
         }

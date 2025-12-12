@@ -3,11 +3,13 @@ using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using System.ComponentModel;
 
 namespace Application.Services
 {
@@ -27,6 +29,7 @@ namespace Application.Services
         private readonly IMatchInviteValidator MatchInviteValidator;
         private readonly IUnityOfWork UnityOfWork;
         private readonly INotificationService notificationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
         private readonly IChatRoomService ChatService;
 
         /// <summary>
@@ -40,17 +43,19 @@ namespace Application.Services
             IMatchInviteValidator matchInviteValidator,
             IUnityOfWork unityOfWork,
             INotificationService notificationService,
-            IChatRoomService chatRoomService)
+            IChatRoomService chatRoomService,
+            INotificationFirebaseService notificationFirebaseService)
 
         {
-            MatchInviteRepository = matchInviteRepository;
-            TeamRepository = teamRepository;
-            MatchRepository = matchRepository;
-            PitchRepository = pitchRepository;
-            MatchInviteValidator = matchInviteValidator;
-            UnityOfWork = unityOfWork;
+            this.MatchInviteRepository = matchInviteRepository;
+            this.TeamRepository = teamRepository;
+            this.MatchRepository = matchRepository;
+            this.PitchRepository = pitchRepository;
+            this.MatchInviteValidator = matchInviteValidator;
+            this.UnityOfWork = unityOfWork;
             this.notificationService = notificationService;
-            ChatService = chatRoomService;
+            this.ChatService = chatRoomService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
 
@@ -165,6 +170,10 @@ namespace Application.Services
 
             await UnityOfWork.SaveChangesAsync();
 
+            await notificationFirebaseService.sendNotificationToTeamsAsync(idSender, idReceiver, "NEW_MATCH_INVITE", "Novo convite de partida",
+                $"Envio do convite para a equipa {receiver.Name}, com sucesso!",
+                $"A sua equipa recebeu um novo convite de partida da equipa {sender.Name}.");
+
             return sendMatchInviteDto;
         }
 
@@ -205,24 +214,30 @@ namespace Application.Services
             List<TeamStatistics> teamStatistics = ListTeamsStatistics(sender, receiver);
 
             var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.Chat);
-            
+
             MatchInviteRepository.DeleteMatchInvite(matchInvite);
 
             receiver.Calendar.Matches.Add(match);
             sender.Calendar.Matches.Add(match);
             await MatchRepository.AddMatch(match);
  
+            var matchId= match.Id;
+            var nameTeam = receiver.Name;
+            var nameOpponent = sender.Name;
+            var matchDate = match.MatchDate;
             var matchDTO = new MatchDto
             {
-                IdMatch = match.Id,
+                IdMatch = matchId,
                 GameDate = match.MatchDate,
-                NameTeam = receiver.Name,
-                NameOpponent = sender.Name,
+                NameTeam = nameTeam,
+                NameOpponent = nameOpponent,
                 NamePitch = pitch.Name
             };
 
             await notificationService.SendTeamAsync(receiver.Id.ToString(), "Match Scheduled!", $"Your match against {sender.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
             await notificationService.SendTeamAsync(sender.Id.ToString(), "Match Scheduled!", $"Your match against {receiver.Name} has been Scheduled to {match.MatchDate}, don't miss it!");
+
+            await notifyAcceptMatchInvite(matchId, idTeam, nameTeam, sender.Id, nameOpponent, pitch.Address, matchDate);
 
             await UnityOfWork.SaveChangesAsync();
 
@@ -348,6 +363,54 @@ namespace Application.Services
 
             return listMatchInvite;
         }
+        #endregion
+
+        #region Notification 
+
+        private async Task notifyAcceptMatchInvite(Guid matchId, Guid idTeam, string nameTeam, Guid idOpponnent, string opponentName, string addressPitch, DateTime gameDate)
+        {
+            long startMillisLong = new DateTimeOffset(gameDate).ToUnixTimeMilliseconds();
+            long endMillisLong = startMillisLong + 7200000;
+
+            var titleTeam = $"Jogo: {nameTeam} vs {opponentName}";
+            var titleOpponent = $"Jogo: {opponentName} vs {nameTeam}";
+
+            var text = "Tem um novo jogo agendadao no seu calendário.";
+            var description = $"Jogo marcado pela app AMFootbal";
+            var type = "ACCEPT_MATCH_INVITE";
+
+            string startMillis = startMillisLong.ToString();
+            string endMillis = endMillisLong.ToString();
+
+            var payloadTeam = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "calendarTitle", titleTeam },
+                { "calendarDescription", description },
+                { "location", addressPitch ?? "Local a definir" },
+                { "startMillis", startMillis },
+                { "endMillis", endMillis },
+                { "title", titleTeam },
+                { "body", text }
+            };
+
+            var payloadOpponent = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "calendarTitle", titleTeam },
+                { "calendarDescription", description },
+                { "location", addressPitch ?? "Local a definir" },
+                { "startMillis", startMillis },
+                { "endMillis", endMillis },
+                { "title", titleOpponent },
+                { "body", text }
+            };
+
+            await notificationFirebaseService.sendNotificationToTeamsWithDataAsync(idTeam, idOpponnent, payloadTeam, payloadOpponent);
+        }
+
         #endregion
 
         #region Private Methods

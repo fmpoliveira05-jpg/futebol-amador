@@ -13,6 +13,7 @@ namespace Application.Interfaces.Services
     /// </summary>
     public interface ITeamService
     {
+        Task<HomePageDto> getHomePageInfo(Guid idTeam);
         /// <summary>
         /// Cria e regista uma nova equipa na plataforma.
         /// </summary>

@@ -2,6 +2,7 @@
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -28,8 +29,8 @@ namespace Application.Services
         private readonly IPlayerValidator playerValidator;
         private readonly IPlayerAuthorizationValidator authorizationValidator;
         private readonly IMembershipValidator membershipValidator;
-
         private readonly INotificationService notificationService;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do MembershipService.
@@ -43,7 +44,8 @@ namespace Application.Services
             IPlayerValidator playerValidator,
             IPlayerAuthorizationValidator authorizationValidator,
             IMembershipValidator membershipValidator,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            INotificationFirebaseService notificationFirebaseService)
         {
             this.teamRepository = teamRepository;
             this.playerRepository = playerRepository;
@@ -53,6 +55,7 @@ namespace Application.Services
             this.authorizationValidator = authorizationValidator;
             this.membershipValidator = membershipValidator;
             this.notificationService = notificationService;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
 
         #region Pedidos de adesão da Team
@@ -140,6 +143,8 @@ namespace Application.Services
             await RemoveAllMatchInviteTeam(team);
             await unityOfWork.SaveChangesAsync();
             await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
+
+            SendNotificationAcceptMemberShipRequest(teamId, team.Name, playerAccepting.Id, playerAccepting.Name);
         }
 
         /// <summary>
@@ -292,6 +297,7 @@ namespace Application.Services
                 await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!");
             }
 
+            await SendNotificationAcceptMemberShipRequest(team.Id, team.Name, playerId, player.Name);
             return new MemberShipRequestDto
             {
                 RequestId = membershipRequest.Id,
@@ -445,6 +451,32 @@ namespace Application.Services
             {
                 await membershipRequestRepository.RemoveAllMemberShipRequestsOfTeam(team.Id);
             }
+        }
+
+        private async Task SendNotificationAcceptMemberShipRequest(Guid teamId, string nameTeam, string playerId, string namePlayer)
+        {
+            var title = "Convite de adesão Aceite!";
+            var textPlayer = $"O seu convite de adesão da equipa {nameTeam} foi aceite";
+            var textTeam = $"O {namePlayer} é um novo jogador da equipa";
+
+            var dataPayloadPlayer = new Dictionary<string, string>()
+            {
+                { "type", "ACCEPT_MEMBERSHIP_REQUEST_PLAYER" },
+                { "teamId", teamId.ToString() },
+                { "title", title },
+                { "body", textPlayer }
+            };
+
+            var dataPayloadTeam = new Dictionary<string, string>()
+            {
+                { "type", "ACCEPT_MEMBERSHIP_REQUEST_TEAM" },
+                { "teamId", teamId.ToString() },
+                { "title", title },
+                { "body", textTeam }
+            };
+
+            notificationFirebaseService.SendNotificationToUser(playerId, dataPayloadPlayer, title, textPlayer);
+            await notificationFirebaseService.SendMulticastNotification(teamId, dataPayloadTeam, title, textTeam);
         }
         #endregion
     }

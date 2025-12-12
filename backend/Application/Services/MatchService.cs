@@ -2,12 +2,14 @@
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Exceptions;
+using System.Text.RegularExpressions;
 
 namespace Application.Services
 {
@@ -25,6 +27,8 @@ namespace Application.Services
         private readonly ICancelledMatchRepository CancelledMatchRepository;
         private readonly IUnityOfWork UnityOfWork;
         private readonly ICalendarValidator MatchValidator;
+        private readonly IPlayerRepository PlayerRepository;
+        private readonly INotificationFirebaseService notificationFirebaseService;
 
         /// <summary>
         /// Construtor do MatchService.
@@ -36,13 +40,16 @@ namespace Application.Services
         /// <param name="MatchValidator">Validador de regras de calendário e jogo.</param>
         public MatchService(IMatchRepository matchRepository, ITeamPostPoneGameRepository teamPostPoneGameRepository, 
             ICancelledMatchRepository cancelledMatchRepository, IUnityOfWork unityOfWork, 
-            ICalendarValidator MatchValidator)
+            ICalendarValidator MatchValidator, IPlayerRepository PlayerRepository,
+            INotificationFirebaseService notificationFirebaseService)
         {
             this.MatchRepository = matchRepository;
             this.TeamPostPoneGameRepository = teamPostPoneGameRepository;
             this.CancelledMatchRepository = cancelledMatchRepository;
             this.UnityOfWork = unityOfWork;
             this.MatchValidator = MatchValidator;
+            this.PlayerRepository = PlayerRepository;
+            this.notificationFirebaseService = notificationFirebaseService;
         }
         #endregion
 
@@ -227,7 +234,7 @@ namespace Application.Services
             var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
             DateTime newDate;
-            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idOpponnent, idMatch);
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch);
             var match = postPoneMatch?.Match;
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
@@ -242,16 +249,23 @@ namespace Application.Services
             match.MatchDate = newDate;
             match.MatchStatus = MatchStatus.SCHEDULED;
 
+            var nameTeam = teamStatistic.Team.Name;
+            var opponentName = opponentStatistics.Team.Name;
+           
+
             var matchDTO = new MatchDto
             {
                 IdMatch = idMatch,
                 GameDate = newDate,
-                NameTeam = teamStatistic.Team.Name,
-                NameOpponent = opponentStatistics.Team.Name,
+                NameTeam = nameTeam,
+                NameOpponent = opponentName,
                 NamePitch = match.Pitch.Name
             };
 
             await UnityOfWork.SaveChangesAsync();
+
+            await notifyAcceptPostPone(idMatch, idTeam, nameTeam, idOpponnent, opponentName, newDate);
+
             return matchDTO;
         }
 
@@ -333,8 +347,9 @@ namespace Application.Services
             var teamsStatistics = match?.Teams;
             var team = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponent = teamsStatistics?.FirstOrDefault(ts => ts.IdTeam != idTeam);
+            var idOpponentTeam = opponent.IdTeam;
 
-            MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, opponent.IdTeam);
+            MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, idOpponentTeam);
 
             var cancelledMatch = new CancelledMatch(team.Team, match, description);
 
@@ -343,6 +358,66 @@ namespace Application.Services
             match.MatchStatus = MatchStatus.CANCELED;
 
             await UnityOfWork.SaveChangesAsync();
+
+            await notifyCancelMatch(idMatch, idTeam, team.Team.Name, idOpponentTeam, opponent.Team.Name);
+        }
+
+
+        #endregion
+
+        #region Notifications
+        private async Task notifyCancelMatch(Guid matchId, Guid idTeam, string nameTeam, Guid idOpponnent, string opponentName)
+        {
+            var title = "Jogo Cancelado";
+            var textTeam = $"A sua partida com a equipa {opponentName} foi cancelada!";
+            var textOpponent = $"A sua partida com a equipa {nameTeam} foi cancelada pelos mesmos.";
+            var type = "CANCEL_MATCH";
+            var payloadTeam = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "title", title },
+                { "body", textTeam }
+            };
+            var payloadOpponent = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "title", title },
+                { "body", textOpponent }
+            };
+
+            await notificationFirebaseService.sendNotificationToTeamsWithDataAsync(idTeam, idOpponnent, payloadTeam, payloadOpponent);
+        }
+
+        private async Task notifyAcceptPostPone(Guid matchId, Guid idTeam, string nameTeam, Guid idOpponnent, string opponentName, DateTime newDate)
+        {
+            long newDateMillis = new DateTimeOffset(newDate).ToUnixTimeMilliseconds();
+
+            var title = "Jogo Reagendado";
+            var textTeam = $"A sua partida com a equipa {opponentName} foi adiada para o dia {newDate:dd/MM HH:mm}.";
+            var textOpponent = $"A sua partida com a equipa {nameTeam} foi adiada para o dia {newDate:dd/MM HH:mm}.";
+            var type = "POST_PONE_MATCH";
+
+            var payloadTeam = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "newDateMillis", newDateMillis.ToString() },
+                { "title", title },
+                { "body", textTeam }
+            };
+
+            var payloadOpponent = new Dictionary<string, string>
+            {
+                { "type", type },
+                { "matchId", matchId.ToString() },
+                { "newDateMillis", newDateMillis.ToString() },
+                { "title", title },
+                { "body", textTeam }
+            };
+
+            await notificationFirebaseService.sendNotificationToTeamsWithDataAsync(idTeam, idOpponnent, payloadTeam, payloadOpponent);
         }
         #endregion
     }

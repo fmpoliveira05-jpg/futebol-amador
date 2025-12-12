@@ -1,5 +1,6 @@
 ﻿using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
+using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
@@ -25,6 +26,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IMatchInviteValidator> _validatorMock;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<IChatRoomService> _chatRoomServiceMock;
+        private Mock<INotificationFirebaseService> _notificationFireBase;
         private MatchInviteService _sut;
         private Rank _defaultRank;
         #endregion
@@ -41,6 +43,7 @@ namespace Unit.ApplicationTests.ServicesTests
             _validatorMock = new Mock<IMatchInviteValidator>();
             _notificationServiceMock = new Mock<INotificationService>();
             _chatRoomServiceMock = new Mock<IChatRoomService>();
+            _notificationFireBase = new Mock<INotificationFirebaseService>();
 
             _sut = new MatchInviteService(
                 _matchInviteRepoMock.Object, 
@@ -50,7 +53,8 @@ namespace Unit.ApplicationTests.ServicesTests
                 _validatorMock.Object,
                 _unitOfWorkMock.Object,
                 _notificationServiceMock.Object,
-                _chatRoomServiceMock.Object
+                _chatRoomServiceMock.Object,
+                _notificationFireBase.Object
             );
 
             // rank mínimo válido para testes

@@ -1,4 +1,5 @@
 using Application.DTOs.Filters;
+using Application.DTOs.Match;
 using Application.DTOs.Pitch;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
@@ -7,6 +8,8 @@ using Application.DTOs.Team;
 using Application.Interfaces.Repositories;
 using Domain.Constants;
 using Domain.Entities;
+using Domain.Enums;
+using Google.Api;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -943,5 +946,72 @@ namespace Infrastructure.Repositories
                     .Select(p => p.Id.ToString())
                     .ToListAsync();
         }
+
+        public async Task<List<InfoMatch>?> GetNextMatchTeam(Guid teamId)
+        {
+            var now = DateTime.UtcNow;
+
+            var query = await (from m in DbContext.Match
+
+                              where (m.Teams.Any(t => t.IdTeam == teamId)
+                                     && m.MatchDate >= now
+                                     && (m.MatchStatus == MatchStatus.SCHEDULED))
+
+                               orderby m.MatchDate ascending
+
+                              let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == teamId)
+                              let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != teamId)
+
+                              select new InfoMatch
+                              {
+                                  IdMatch = m.Id,
+                                  GameDate = m.MatchDate,
+                                  IsCompetitive = m.IsCompetive,
+                                  Team = new TeamDto
+                                  {
+                                      IdTeam = myTeam.IdTeam,
+                                      Name = myTeam.Team.Name
+                                  },
+                                  Opponent = new TeamDto
+                                  {
+                                      IdTeam = opponentTeam.IdTeam,
+                                      Name = opponentTeam.Team.Name
+                                  },
+                                  IsHome = m.idPitch == myTeam.Team.IdPitch
+                              })
+                              .Take(3)
+                              .ToListAsync();
+            
+            return query;
+        }
+
+        public async Task<List<VitorySequenceTeam>?> GetSequenceVitorysTeam(Guid teamId)
+        {
+            var query = await (from m in DbContext.Match
+
+                               where (m.Teams.Any(t => t.IdTeam == teamId)
+                                      && (m.MatchStatus == MatchStatus.DONE))
+
+                               orderby m.MatchDate ascending
+
+                               let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == teamId)
+                               let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != teamId)
+
+                               select new VitorySequenceTeam
+                               {
+                                   Opponent = new TeamDto
+                                   {
+                                       IdTeam = opponentTeam.IdTeam,
+                                       Name = opponentTeam.Team.Name
+                                   },
+                                   Result = myTeam.NumGoals + " - " + opponentTeam.NumGoals,
+                                   MatchResult = myTeam.MatchResult
+                               }
+                              )
+                              .Take(5)
+                              .ToListAsync();
+
+            return query;
+        } 
     }
 }
