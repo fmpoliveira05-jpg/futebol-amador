@@ -1,5 +1,6 @@
 ﻿using Application.DTOs;
 using Application.DTOs.Filters;
+using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
@@ -323,11 +324,11 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] Guid teamId)
+        public async Task<IActionResult> SendMembershipRequest(string playerId, [FromBody] InviteTeamRequest request)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            var dto = await membershipRequestService.SendMembershipRequestAsyncPlayer(playerId, teamId);
+            var dto = await membershipRequestService.SendMembershipRequestAsyncPlayer(playerId, request.TeamId);
             return Ok(dto);
         }
 
