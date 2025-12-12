@@ -164,6 +164,7 @@ object Routes {
             R.string.logout_description,
             haveBackButton = false
         ),
+        EDIT_PROFILE("editProfile", R.string.edit_profile, Icons.Default.Person, R.string.edit_profile)
     }
 
     /**

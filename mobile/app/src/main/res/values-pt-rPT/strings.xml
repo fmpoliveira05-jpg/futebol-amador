@@ -3,6 +3,7 @@
     <string name="app_name">AMFootball</string>
     <string name="age">anos</string>
     <string name="average_age">idade média</string>
+    <string name="edit_profile">Editar Perfil</string>
 
     <string name="title_login">Conteudo do Login</string>
 </resources>

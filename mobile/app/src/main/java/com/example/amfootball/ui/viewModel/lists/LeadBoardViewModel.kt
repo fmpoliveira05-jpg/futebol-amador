@@ -3,10 +3,12 @@ package com.example.amfootball.ui.viewModel.lists
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavHostController
 import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
 import com.example.amfootball.data.remote.services.TeamService
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -22,13 +24,21 @@ import javax.inject.Inject
 @HiltViewModel
 class LeadBoardViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamService: TeamService
-) : ListsViewModels<LeadboardDto>(networkObserver = networkObserver) {
+    private val teamService: TeamService,
+    private val db: FirebaseFirestore
+) : ListsViewModels<InfoTeamLeadboard>(networkObserver = networkObserver) {
 
     //Inicializer
     init {
         //TODO: Depois adaptar para ir buscar ao FireBase
-        listState.value = LeadboardDto.generateLeadboardExample()
+
+
+        launchDataLoad(
+            callApi = {
+                listState.value = teamService.getLeaderBoard()
+            },
+            checkOnline = true
+        )
     }
 
     /**

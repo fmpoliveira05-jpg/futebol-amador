@@ -1,6 +1,7 @@
 package com.example.amfootball.data.interfaces.api
 
 import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -25,6 +26,10 @@ import retrofit2.http.QueryMap
  * - Gestão de membros (Listagem, Expulsão, Promoção e Despromoção de cargos).
  */
 interface TeamApi {
+
+    @GET("api/Leaderboard")
+    suspend fun getLeaderBoard() : Response<List<InfoTeamLeadboard>>
+
     /**
      * Cria uma nova equipa na plataforma.
      *

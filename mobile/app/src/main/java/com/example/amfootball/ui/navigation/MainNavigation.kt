@@ -269,6 +269,11 @@ private fun NavGraphBuilder.profilePlayer(
     ) {
         ProfileScreen()
     }
+
+    composable(
+        Routes.UserRoutes.EDIT_PROFILE.route) {
+        SignUpScreen(navHostController=navHostController,profileEditMode = true)
+    }
 }
 
 /**

@@ -7,8 +7,11 @@ import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.interfaces.services.OpenStreetMapService
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.remote.services.AuthService
+import com.example.amfootball.data.remote.services.PlayerService
 import com.example.amfootball.domains.validators.SignUpField
 import com.example.amfootball.domains.validators.validateSignUpForm
 import com.example.amfootball.ui.navigation.objects.Routes
@@ -25,8 +28,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SignupViewmodel @Inject constructor(
     private val authService: AuthService,
+    private val PlayerService: PlayerService,
     private val osmService: OpenStreetMapService,
     private val networkObserver: NetworkConnectivityObserver,
+    private val sessionManager: SessionManager,
 
     ) : FormsViewModel<CreateProfileDto, SignUpFormErrors>(
     networkObserver = networkObserver,
@@ -134,15 +139,46 @@ class SignupViewmodel @Inject constructor(
             _foundLat.value = results[0].lat.toDoubleOrNull()
             _foundLon.value = results[0].lon.toDoubleOrNull()
 
-            }
         }
+    }
+
+    fun onEditMode() {
+        val userProfile = sessionManager.getUserProfile()
+        if (userProfile == null) return
+        onNameChange(userProfile.name)
+        onEmailChange(userProfile.email!!)
+        onPhoneChange(userProfile.phoneNumber!!)
+        onHeightChange(userProfile.height.toString())
+        onAddressChange(userProfile.address)
+        onPositionChange(userProfile.position.ordinal)
+        onDateChange(userProfile.dateOfBirth?.toLong())
+
+    }
 
 
-    fun submitConfirmation(navHostController: NavHostController) {
+    fun submitConfirmation(navHostController: NavHostController, profileEditMode: Boolean) {
         launchDataLoad {
             val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
             val finalDto = formState.value.copy(phone = fullPhoneNumber)
-            authService.registerUser(finalDto)
+            if (!profileEditMode){
+                authService.registerUser(finalDto)
+            } else{
+                PlayerService.updatePlayerProfile(playerProfile = PlayerProfileDto(
+                    name = finalDto.userName,
+                    email = finalDto.email,
+                    phoneNumber = finalDto.phone,
+                    dateOfBirth = finalDto.dateOfBirth,
+                    height = finalDto.height,
+                    address = finalDto.address,
+                    positionRaw = finalDto.position,
+                    loginResponseDto = null,
+                    icon = null,
+                    team = null,
+                    idTeam = null,
+                    isAdmin = false,
+                ))
+                updateToast(R.string.toast_playerProfile_edited)
+            }
 
             navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
             popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
@@ -152,7 +188,6 @@ class SignupViewmodel @Inject constructor(
 
         }
     }
-
 
     override fun validateForm(): Boolean {
         val currentDto = formState.value

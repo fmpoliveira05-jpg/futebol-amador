@@ -197,7 +197,6 @@ class SettingsViewModel @Inject constructor(
 
     fun editProfile() {
         startLoading()
-        val player = repository.getUserProfile()
 
         launchDataLoad(
             callApi = {

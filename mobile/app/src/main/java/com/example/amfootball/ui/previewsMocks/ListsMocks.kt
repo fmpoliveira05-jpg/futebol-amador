@@ -204,37 +204,32 @@ object ListMemberShipRequestMocks {
 
 object LeadboardMocks {
     val fakeList = listOf(
-        LeadboardDto(
-            position = 1,
-            team = InfoTeamLeadboard(
+            InfoTeamLeadboard(
                 id = "1",
                 name = "Porto Lions",
                 currentPoints = 1250,
                 nameRank = "Elite",
+                position = 1,
                 logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 2,
-            team = InfoTeamLeadboard(
+            ),
+            InfoTeamLeadboard(
                 id = "2",
                 name = "Lisboa Navigators",
                 currentPoints = 980,
                 nameRank = "Pro",
+                position = 2,
                 logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 3,
-            team = InfoTeamLeadboard(
+            ),
+        InfoTeamLeadboard(
                 id = "3",
                 name = "Braga Warriors",
                 currentPoints = 450,
                 nameRank = "Amateur",
+                position = 3,
                 logoTeam = null
             )
         )
-    )
+
 
     val fakeActions = LeadBoardActions(
         onShowMore = { _, _ -> },

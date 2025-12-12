@@ -147,7 +147,7 @@ class ListPostPoneMatchViewModel @Inject constructor(
      */
     fun rejectPostPoneMatch(idPostPoneMatch: String) {
         if(!isNetworkAvailable()) {
-            updateToast(R.string)
+            updateToast(R.string.toast_offline_postpone_game)
             return
         }
         /*
