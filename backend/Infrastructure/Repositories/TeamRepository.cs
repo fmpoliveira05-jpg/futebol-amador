@@ -370,6 +370,7 @@ namespace Infrastructure.Repositories
                 .Take(top)
                 .Select(t => new TeamLeaderboardDto
                 {
+                    Id = t.Id,
                     TeamName = t.Name,
                     CurrentPoints = t.CurrentPoints,
                     RankName = t.Rank.Name

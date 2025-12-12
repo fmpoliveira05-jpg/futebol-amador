@@ -6,6 +6,9 @@ namespace Application.DTOs.Team
     public class TeamLeaderboardDto
     {
         [Required]
+        public Guid Id{ get; set; }
+
+        [Required]
         [Range(ModelConstants.TeamLeaderBoardConst.FirstPosition, ModelConstants.TeamLeaderBoardConst.LastPosition)]
         public int Position { get; set; }
 
