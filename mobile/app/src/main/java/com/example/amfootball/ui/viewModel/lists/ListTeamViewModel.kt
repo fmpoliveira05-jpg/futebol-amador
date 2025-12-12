@@ -42,7 +42,6 @@ import javax.inject.Inject
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val teamService: TeamService,
-    private val matchInviteService: MatchInviteService,
     private val sessionManager: SessionManager?
 ) : ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
 

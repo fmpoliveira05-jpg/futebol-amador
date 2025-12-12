@@ -51,6 +51,7 @@ import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.remote.dtos.rank.RankNameDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.errors.filtersError.FilterTeamError
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterTeamActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
@@ -67,13 +68,14 @@ import com.example.amfootball.ui.previewsMocks.ListTeamMocks
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
  * @param viewModel O ViewModel injetado via Hilt.
  */
-//TODO: Falta filterErros e distinguir paginas + Backend
+//TODO: Falta apenas testar e validar se está tudo bem e conecatdo com o backend, os botões devem arrebentar
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
     viewModel: ListTeamViewModel = hiltViewModel()
 ) {
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
+    val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
     val listTeams by viewModel.uiList.collectAsStateWithLifecycle()
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
@@ -113,6 +115,7 @@ fun ListTeamScreen(
         uiState = uiState,
         onRetry = { viewModel.retry() },
         role = role,
+        filtersError = filtersError,
         navHostController = navHostController
     )
 }
@@ -136,6 +139,7 @@ private fun ListTeamContent(
     isOnline: Boolean,
     listTeams: List<ItemTeamInfoDto>,
     filters: FiltersListTeam,
+    filtersError: FilterTeamError,
     filtersActions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     itemListActions: ItemsListTeamAction,
@@ -164,6 +168,7 @@ private fun ListTeamContent(
                                     filters = filters,
                                     filtersActions = filtersActions,
                                     listRanks = listRanks,
+                                    filtersError = filtersError,
                                     modifier = Modifier.padding(
                                         start = 16.dp,
                                         end = 16.dp,
@@ -206,6 +211,7 @@ private fun ListTeamContent(
 @Composable
 private fun FiltersListTeamContent(
     filters: FiltersListTeam,
+    filtersError: FilterTeamError,
     filtersActions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier
@@ -216,8 +222,10 @@ private fun FiltersListTeamContent(
                 FilterNameTeamTextField(
                     nameTeam = filters.name,
                     onNameTeamChange = { filtersActions.onNameChange(it) },
-                    isError = false,
-                    errorMessage = "",
+                    isError = filtersError.nameError != null,
+                    errorMessage = filtersError.nameError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -226,6 +234,10 @@ private fun FiltersListTeamContent(
                     value = filters.city,
                     maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { filtersActions.onCityChange(it) },
+                    isError = filtersError.cityError != null,
+                    errorMessage = filtersError.cityError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -259,6 +271,10 @@ private fun FiltersListTeamContent(
                     onValueChange = { filtersActions.onMinPointChange(it) },
                     min = TeamConst.MIN_NUMBER_POINTS,
                     max = TeamConst.MAX_NUMBER_POINTS,
+                    isError = filtersError.minPointError != null,
+                    errorMessage = filtersError.minPointError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -268,6 +284,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_NUMBER_POINTS,
                     max = TeamConst.MAX_NUMBER_POINTS,
                     onValueChange = { filtersActions.onMaxPointChange(it) },
+                    isError = filtersError.maxPointError != null,
+                    errorMessage = filtersError.maxPointError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -281,6 +301,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_AVERAGE_AGE,
                     max = TeamConst.MAX_AVERAGE_AGE,
                     onValueChange = { filtersActions.onMinAgeChange(it) },
+                    isError = filtersError.minAgeError != null,
+                    errorMessage = filtersError.minAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -290,6 +314,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_AVERAGE_AGE,
                     max = TeamConst.MAX_AVERAGE_AGE,
                     onValueChange = { filtersActions.onMaxAgeChange(it) },
+                    isError = filtersError.maxAgeError != null,
+                    errorMessage = filtersError.maxAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -303,6 +331,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_MEMBERS,
                     max = TeamConst.MAX_MEMBERS,
                     onValueChange = { filtersActions.onMinNumberMembersChange(it) },
+                    isError = filtersError.minNumberMembersError != null,
+                    errorMessage = filtersError.minNumberMembersError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -312,6 +344,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_MEMBERS,
                     max = TeamConst.MAX_MEMBERS,
                     onValueChange = { filtersActions.onMaxNumberMembersChange(it) },
+                    isError = filtersError.maxNumberMembersError != null,
+                    errorMessage = filtersError.maxNumberMembersError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -464,6 +500,7 @@ fun PreviewListTeamContentAdmin() {
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
         role = UserRole.ADMIN_TEAM
     )
 }
@@ -482,6 +519,7 @@ fun PreviewListTeamContentPlayerWithoutTeam() {
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
         role = UserRole.ADMIN_TEAM
     )
 }
@@ -494,6 +532,7 @@ fun PreviewListTeamContentPlayer() {
         isOnline = true,
         listTeams = ListTeamMocks.mockTeams,
         filters = FiltersListTeam(),
+        filtersError = FilterTeamError(),
         filtersActions = ListTeamMocks.mockFiltersActions,
         listRanks = ListTeamMocks.mockRanks,
         itemListActions = ListTeamMocks.mockItemActions,
@@ -518,6 +557,7 @@ fun PreviewListTeamContentEmpty() {
         uiState = UiState(isLoading = false),
         onRetry = {},
         navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
         role = UserRole.PLAYER_WITHOUT_TEAM
     )
 }
