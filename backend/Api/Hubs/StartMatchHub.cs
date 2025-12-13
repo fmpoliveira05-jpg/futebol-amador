@@ -46,10 +46,11 @@ namespace Api.Hubs
         public async Task JoinStartMatch(Guid idMatch, Guid idTeam)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Context.User.Identity.Name;
+            var userId = Context.UserIdentifier;
             var groupName = GetGroupName(idMatch);
             JoinStartMatchResult result;
 
+            Console.WriteLine($"DEBUG -> Match: {idMatch} | Team: {idTeam} | User: {userId}");
             try
             {
                 result = await startMatchManager.JoinHubAsync(idMatch, userId, idTeam, connectionId);
@@ -72,11 +73,15 @@ namespace Api.Hubs
             }
             else if (result.MatchStarted)
             {
-                if (!string.IsNullOrEmpty(result.FirstAdminConnectionId))
+                var firstAdminId = result.FirstAdminConnectionId;
+
+                if (!string.IsNullOrEmpty(firstAdminId))
                 {
-                    await Groups.RemoveFromGroupAsync(result.FirstAdminConnectionId, groupName);
+                    await Clients.Client(firstAdminId).ReceiveStartMatch("O jogo começou!");
+                    await Groups.RemoveFromGroupAsync(firstAdminId, groupName);
                 }
-                await Clients.Group(groupName).ReceiveStartMatch("O jogo começou!");
+
+                await Clients.Caller.ReceiveStartMatch("O jogo começou!");
             }
         }
 

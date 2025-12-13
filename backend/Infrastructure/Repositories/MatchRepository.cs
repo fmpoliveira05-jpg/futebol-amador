@@ -170,7 +170,8 @@ namespace Infrastructure.Repositories
                                join pitch in context.Pitch on m.idPitch equals pitch.Id
 
                                where (m.MatchStatus == MatchStatus.SCHEDULED
-                                  || m.MatchStatus == MatchStatus.DONE)
+                                  || m.MatchStatus == MatchStatus.DONE
+                                  || m.MatchStatus == MatchStatus.IN_PROGRESS)
                                   && m.Teams.Any(tm => tm.IdTeam == idTeam)
                                   && m.Teams.Any(tm => tm.IdTeam != idTeam)
 
@@ -241,7 +242,8 @@ namespace Infrastructure.Repositories
             else
             {
                 query = query.Where(m => m.MatchStatus == MatchStatus.SCHEDULED ||
-                                         m.MatchStatus == MatchStatus.DONE);
+                                         m.MatchStatus == MatchStatus.DONE ||
+                                         m.MatchStatus == MatchStatus.IN_PROGRESS);
             }
 
             if (filter.IsRanqued.HasValue)
