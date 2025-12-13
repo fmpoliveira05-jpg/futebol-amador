@@ -6,18 +6,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.SignalRUrls
 import com.example.amfootball.data.remote.dtos.match.ResultMatchDto
 import com.example.amfootball.domains.errors.formErrors.FinishMatchFormErrors
 import com.example.amfootball.ui.actions.forms.FormFinishMatchActions
@@ -26,12 +27,17 @@ import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 
-//TODO: Mandar também o idMatch e depois com base disso fazer um pedido há API para carregar as teams da match
+//TODO: Implementar o HUB (Talvez receba o matchID+ nameOpponent do load)
 /**
- * Ecrã de finalização de partida (Reportar Resultado).
+ * Ecrã de finalização de partida (Reportar Resultado) - (Stateful Screen).
  *
  * Este ecrã permite ao utilizador (geralmente admin da equipa) introduzir o resultado final
  * de um jogo realizado (número de golos marcados e sofridos).
+ *
+ * **Responsabilidades:**
+ * 1. Coleta o estado reativo do [FinishMatchViewModel] (dados do formulário e erros).
+ * 2. Define as ações em [FormFinishMatchActions], encapsulando a lógica de navegação no callback de sucesso do `onSubmitForm`.
+ * 3. Delega a renderização visual para [FormFinishMatch].
  *
  * @param navHostController Controlador de navegação para redirecionamento após submissão bem-sucedida.
  * @param viewModel ViewModel injetado (ou criado) que gere o estado do formulário e a submissão.
@@ -39,35 +45,42 @@ import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 @Composable
 fun FinishMatchScreen(
     navHostController: NavHostController,
-    viewModel: FinishMatchViewModel = viewModel()
+    viewModel: FinishMatchViewModel = hiltViewModel()
 ) {
-    val result by viewModel.resutl.observeAsState(initial = null)
-    val formErrors by viewModel.resultError.observeAsState(initial = FinishMatchFormErrors())
+    val result by viewModel.uiFormState.collectAsStateWithLifecycle()
+    val formErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val formActions = FormFinishMatchActions(
         onNumGoalsTeamChange = viewModel::onNumGoalsTeamChange,
         onNumGoalsOpponentChange = viewModel::onNumGoalsOponnetChange,
-        onSubmitForm = viewModel::onSubmitForm
+        onSubmitForm = {
+            viewModel.onSubmitForm(
+                onSucess = {
+                    navHostController.navigate(route = SignalRUrls.FINISH_MATCH_URL) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     )
 
     FormFinishMatch(
         result = result,
         formActions = formActions,
         formErrors = formErrors,
-        navHostController = navHostController,
         modifier = Modifier
             .padding(16.dp)
     )
 }
 
 /**
- * Estrutura visual do formulário de resultado.
+ * Estrutura visual do formulário de resultado (Stateless Content).
  *
- * Centraliza os campos de input no ecrã.
+ * Componente de layout que centraliza os campos de input no ecrã e delega
+ * a renderização específica para [TextFieldForm].
  *
  * @param result O estado atual dos dados do resultado (golos equipa vs adversário).
  * @param formActions As ações disponíveis para interagir com o formulário.
  * @param formErrors Os erros de validação atuais para cada campo.
- * @param navHostController Controlador de navegação (passado para o botão de submit).
  * @param modifier Modificador de layout.
  */
 @Composable
@@ -75,7 +88,6 @@ private fun FormFinishMatch(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
     formErrors: FinishMatchFormErrors,
-    navHostController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -87,7 +99,6 @@ private fun FormFinishMatch(
             result = result,
             formActions = formActions,
             formErrors = formErrors,
-            navHostController = navHostController
         )
     }
 }
@@ -96,23 +107,21 @@ private fun FormFinishMatch(
  * Campos de texto e botão de submissão.
  *
  * Renderiza dois inputs numéricos (Golos da Equipa e Golos do Adversário) e valida a entrada
- * em tempo real (convertendo texto para inteiro).
+ * em tempo real, convertendo o texto para Inteiro.
  *
  * @param result Dados atuais do formulário.
- * @param formActions Callbacks para alteração de valores.
- * @param formErrors Erros de validação a exibir.
- * @param navHostController Controlador de navegação.
+ * @param formActions Callbacks para alteração de valores e submissão.
+ * @param formErrors Erros de validação a exibir nos campos.
  */
 @Composable
 private fun TextFieldForm(
     result: ResultMatchDto?,
     formActions: FormFinishMatchActions,
     formErrors: FinishMatchFormErrors,
-    navHostController: NavHostController
 ) {
     TextFieldOutline(
         label = stringResource(id = R.string.label_field_num_Goals_team),
-        value = result?.numGoals?.toString() ?: "",
+        value = result?.numGoalsTeam?.toString() ?: "",
         minLenght = GeneralConst.MIN_GOALS,
         maxLenght = GeneralConst.MAX_GOALS,
         onValueChange = { formActions.onNumGoalsTeamChange(it.toIntOrNull() ?: 0) },
@@ -139,7 +148,7 @@ private fun TextFieldForm(
     )
 
     SubmitFormButton(
-        onClick = { formActions.onSubmitForm(navHostController) }
+        onClick = { formActions.onSubmitForm }
     )
 }
 
@@ -150,7 +159,7 @@ private fun TextFieldForm(
 )
 @Preview(
     name = "Finalização de Partida - PT",
-    locale = "pt",
+    locale = "pt-rPT",
     showBackground = true
 )
 @Composable

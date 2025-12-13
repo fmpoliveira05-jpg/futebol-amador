@@ -38,6 +38,7 @@ import com.example.amfootball.domains.errors.filtersError.FilterMembersFilterErr
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.ui.actions.itemsList.ItemsListMemberAction
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -57,6 +58,7 @@ import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.lists.TypeMemberRow
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListMembersMocks
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
@@ -76,6 +78,9 @@ fun ListMembersScreen(
     navHostController: NavHostController,
     viewModel: ListMembersViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
     val listTypeMember by viewModel.uiListTypeMember.collectAsStateWithLifecycle()
     val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
@@ -100,22 +105,24 @@ fun ListMembersScreen(
         onShowMoreInfo = viewModel::onShowMoreInfo
     )
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
-    val role by viewModel.role.collectAsStateWithLifecycle()
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
 
     ListMemberContent(
+        uiState = uiState,
+        isOnline = isOnline,
+        role = role,
         filters = filters,
         filterActions = filterAction,
         filtersErrors = filtersErrors,
         list = list,
         listTypeMember = listTypeMember,
         listPosition = listPosition,
-        uiState = uiState,
-        isOnline = isOnline,
         itemsListActions = itemsListActions,
-        navHostController = navHostController,
-        role = role
+        showMoreItensAction = showMoreItensAction,
+        navHostController = navHostController
     )
 }
 
@@ -140,6 +147,7 @@ fun ListMembersScreen(
 private fun ListMemberContent(
     uiState: UiState,
     isOnline: Boolean,
+    role: UserRole,
     filters: FilterMembersTeam,
     filterActions: FilterMemberTeamAction,
     filtersErrors: FilterMembersFilterError,
@@ -147,10 +155,11 @@ private fun ListMemberContent(
     listTypeMember: List<TypeMember?>,
     listPosition: List<Position?>,
     itemsListActions: ItemsListMemberAction,
-    role: UserRole,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -197,6 +206,8 @@ private fun ListMemberContent(
                         role = role
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_members_empty)
             )
         }
@@ -452,56 +463,80 @@ private fun AdminItensListFields(
     }
 }
 
-@Preview(name = "1. Admin View", showBackground = true)
+@Preview(
+    name = "1. Admin View",
+    locale= "pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "1. Admin View",
+    locale= "en",
+    showBackground = true)
 @Composable
-fun PreviewListMemberContent_Admin() {
+fun PreviewListMemberContentAdmin() {
     ListMemberContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        role = UserRole.ADMIN_TEAM,
         filters = FilterMembersTeam(),
         filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = ListMembersMocks.mockMembers,
         listTypeMember = ListMembersMocks.mockListTypes,
         listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = false),
-        isOnline = true,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         itemsListActions = ListMembersMocks.mockItemActions,
-        navHostController = rememberNavController(),
-        role = UserRole.ADMIN_TEAM
+        navHostController = rememberNavController()
     )
 }
 
-@Preview(name = "2. Member View", showBackground = true)
+@Preview(
+    name = "2. Member View",
+    locale="pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "2. Member View",
+    locale="en",
+    showBackground = true)
 @Composable
-fun PreviewListMemberContent_Member() {
+fun PreviewListMemberContentMember() {
     ListMemberContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        role = UserRole.MEMBER_TEAM,
         filters = FilterMembersTeam(),
         filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = ListMembersMocks.mockMembers,
         listTypeMember = ListMembersMocks.mockListTypes,
         listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = false),
-        isOnline = true,
         itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController(),
-        role = UserRole.MEMBER_TEAM
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction
     )
 }
 
-@Preview(name = "3. Empty List", showBackground = true)
+@Preview(
+    name = "3. Empty List",
+    locale = "pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "3. Empty List",
+    locale = "en",
+    showBackground = true)
 @Composable
-fun PreviewListMemberContent_Empty() {
+fun PreviewListMemberContentEmpty() {
     ListMemberContent(
+        uiState = UiState(isLoading = false),
+        isOnline = true,
+        role = UserRole.ADMIN_TEAM,
         filters = FilterMembersTeam(),
         filterActions = ListMembersMocks.mockFilterActions,
         filtersErrors = FilterMembersFilterError(),
         list = emptyList(),
         listTypeMember = ListMembersMocks.mockListTypes,
         listPosition = ListMembersMocks.mockListPositions,
-        uiState = UiState(isLoading = false),
-        isOnline = true,
         itemsListActions = ListMembersMocks.mockItemActions,
         navHostController = rememberNavController(),
-        role = UserRole.ADMIN_TEAM
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden
     )
 }

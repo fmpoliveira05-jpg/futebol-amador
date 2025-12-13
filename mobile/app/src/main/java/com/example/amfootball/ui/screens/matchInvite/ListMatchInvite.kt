@@ -26,6 +26,7 @@ import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMatchInviteActions
 import com.example.amfootball.ui.actions.itemsList.ItemListMatchIniviteActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
@@ -44,6 +45,7 @@ import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListMatchInviteMocks
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
 import java.time.format.DateTimeFormatter
@@ -67,6 +69,9 @@ fun ListMatchInviteScreen(
     navHostController: NavHostController,
     viewModel: ListMatchInviteViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val filters by viewModel.uiFilters.collectAsStateWithLifecycle()
     val filterError by viewModel.filterError.collectAsStateWithLifecycle()
 
@@ -80,7 +85,6 @@ fun ListMatchInviteScreen(
         )
     )
 
-    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val itemsListActions = ItemListMatchIniviteActions(
         acceptMatchInvite = viewModel::acceptMatchInvite,
         rejectMatchInvite = viewModel::rejectMatchInvite,
@@ -88,8 +92,10 @@ fun ListMatchInviteScreen(
         showMoreDetails = viewModel::showMoreDetails
     )
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
 
     ToastHandler(
         toastMessage = uiState.toastMessage,
@@ -104,6 +110,7 @@ fun ListMatchInviteScreen(
         filterError = filterError,
         list = list,
         itemsListActions = itemsListActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -135,9 +142,11 @@ private fun ListMatchInviteContent(
     filterError: FilterMatchInviteError,
     list: List<MatchInviteDto>,
     itemsListActions: ItemListMatchIniviteActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -173,6 +182,8 @@ private fun ListMatchInviteContent(
                         navHostController = navHostController
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(R.string.list_match_invite_empty)
             )
         }
@@ -337,6 +348,7 @@ fun PreviewListMatchInviteContent() {
         filterError = FilterMatchInviteError(),
         list = ListMatchInviteMocks.mockList,
         itemsListActions = ListMatchInviteMocks.mockItemsListActions,
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction
     )
 }

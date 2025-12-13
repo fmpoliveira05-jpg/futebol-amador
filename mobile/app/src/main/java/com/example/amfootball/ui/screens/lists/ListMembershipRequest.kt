@@ -30,6 +30,7 @@ import com.example.amfootball.domains.errors.filtersError.FilterMemberShipReques
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -45,6 +46,7 @@ import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListMemberShipRequestMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
@@ -92,6 +94,11 @@ fun ListMemberShipRequest(
         showMore = viewModel::showMore
     )
 
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
+
     ToastHandler(
         toastMessage = uiState.toastMessage,
         onToastShown = viewModel::onToastShown
@@ -105,6 +112,7 @@ fun ListMemberShipRequest(
         filterActions = filterActions,
         list = list,
         itemsActions = itemsActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -136,9 +144,11 @@ private fun ContentListMemberShipRequest(
     filterActions: FilterMemberShipRequestActions,
     list: List<MembershipRequestInfoDto>,
     itemsActions: ItemsMemberShipRequest,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController,
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -174,6 +184,8 @@ private fun ContentListMemberShipRequest(
                         navHostController = navHostController
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
             )
         }
@@ -340,7 +352,7 @@ private fun ListMemberShipRequestContent(
 @Preview(name = "Lista Preenchida - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "Populated List - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewContentListMemberShipRequest_Populated() {
+fun PreviewContentListMemberShipRequestPopulated() {
     AMFootballTheme {
         ContentListMemberShipRequest(
             uiState = UiState(isLoading = false),
@@ -350,6 +362,7 @@ fun PreviewContentListMemberShipRequest_Populated() {
             filterActions = ListMemberShipRequestMocks.filterActions,
             list = ListMemberShipRequestMocks.mockRequests,
             itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
             navHostController = rememberNavController()
         )
     }
@@ -358,7 +371,7 @@ fun PreviewContentListMemberShipRequest_Populated() {
 @Preview(name = "Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Preview(name = "Empty List - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewContentListMemberShipRequest_Empty() {
+fun PreviewContentListMemberShipRequestEmpty() {
     AMFootballTheme {
         ContentListMemberShipRequest(
             uiState = UiState(isLoading = false),
@@ -368,6 +381,7 @@ fun PreviewContentListMemberShipRequest_Empty() {
             filterActions = ListMemberShipRequestMocks.filterActions,
             list = emptyList(),
             itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
             navHostController = rememberNavController()
         )
     }

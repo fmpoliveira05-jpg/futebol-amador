@@ -46,6 +46,7 @@ import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterCalendarActions
 import com.example.amfootball.ui.actions.itemsList.ItemsCalendarActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -61,8 +62,8 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
-import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.CalendarMocks
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import java.time.format.DateTimeFormatter
 
@@ -80,8 +81,10 @@ fun CalendarScreen(
     navHostController: NavHostController,
     viewModel: CalendarTeamViewModel = hiltViewModel()
 ) {
-    val filters by viewModel.filter.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val filters by viewModel.filter.collectAsStateWithLifecycle()
     val filterError by viewModel.uiErrors.collectAsStateWithLifecycle()
     val filterActions = FilterCalendarActions(
         onNameChange = viewModel::onNameChange,
@@ -105,8 +108,10 @@ fun CalendarScreen(
         onFinishMatch = viewModel::onFinishMatch
     )
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
 
     ToastHandler(
         toastMessage = uiState.toastMessage,
@@ -122,6 +127,7 @@ fun CalendarScreen(
         retry = viewModel::loadCalendar,
         isOnline = isOnline,
         itemsListAction = itemsListAction,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -141,9 +147,11 @@ private fun CalendarContent(
     retry: () -> Unit,
     isOnline: Boolean,
     itemsListAction: ItemsCalendarActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -176,6 +184,8 @@ private fun CalendarContent(
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_calendar_empty)
             )
         }
@@ -500,6 +510,7 @@ fun PreviewCalendarContentNormal() {
         isOnline = true,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -517,6 +528,7 @@ fun PreviewCalendarContentEmpty() {
         isOnline = true,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -534,6 +546,7 @@ fun PreviewCalendarContentOffline() {
         isOnline = false,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         navHostController = rememberNavController()
     )
 }

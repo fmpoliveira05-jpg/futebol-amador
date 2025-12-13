@@ -8,14 +8,14 @@ package com.example.amfootball.data.remote.dtos.match
  *
  * @property idMatch O identificador único da partida que está a ser finalizada.
  * @property idTeam O identificador único da equipa principal (geralmente a equipa do utilizador ou a equipa da casa).
- * @property numGoals O número de golos marcados pela equipa principal ([idTeam]). Padrão é 0.
+ * @property numGoalsTeam O número de golos marcados pela equipa principal ([idTeam]). Padrão é 0.
  * @property idOpponent O identificador único da equipa adversária.
  * @property numGoalsOpponent O número de golos marcados pela equipa adversária ([idOpponent]). Padrão é 0.
  */
 data class ResultMatchDto(
-    val idMatch: String,
-    val idTeam: String,
-    val numGoals: Int = 0,
-    val idOpponent: String,
+    val idMatch: String = "",
+    val idTeam: String = "",
+    val idOpponent: String = "",
+    val numGoalsTeam: Int = 0,
     val numGoalsOpponent: Int = 0
 )

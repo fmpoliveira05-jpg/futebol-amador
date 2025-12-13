@@ -5,6 +5,7 @@ import com.example.amfootball.core.utils.NetworkConsts
 import com.example.amfootball.core.utils.SignalRMethods
 import com.example.amfootball.core.utils.SignalRUrls
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.match.ResultMatchDto
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 import com.microsoft.signalr.HubConnectionState
@@ -17,20 +18,20 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class StartMatchSocketService @Inject constructor(
+class FinishMatchSockerServer @Inject constructor(
     private val sessionManager: SessionManager
 ) {
     private var hubConnection: HubConnection? = null
 
-    private val _matchEvents = MutableSharedFlow<String>(replay = 1)
-    val matchEvents = _matchEvents.asSharedFlow()
+    private val _finishEvents = MutableSharedFlow<Boolean>(replay = 1)
+    val finishEvents = _finishEvents.asSharedFlow()
 
     suspend fun startConnection(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                val hubUrl = NetworkConsts.BASE_URL + SignalRUrls.START_MATCH_URL
+                val hubUrl = NetworkConsts.BASE_URL + SignalRUrls.FINISH_MATCH_URL
 
-                if (hubConnection == null) {
+                if(hubConnection == null) {
                     hubConnection = HubConnectionBuilder.create(hubUrl)
                         .withAccessTokenProvider(Single.defer {
                             val token = sessionManager.getAuthToken() ?: ""
@@ -38,46 +39,36 @@ class StartMatchSocketService @Inject constructor(
                         })
                         .withHeader("ngrok-skip-browser-warning", "true")
                         .build()
-
-                    hubConnection?.on(SignalRMethods.RECEIVE_MATCH, { message ->
-                        Log.d("SIGNALR", "Mensagem recebida: $message")
-                        _matchEvents.tryEmit(message)
-                    }, String::class.java)
                 }
+
                 if (hubConnection?.connectionState != HubConnectionState.CONNECTED) {
                     hubConnection?.start()?.blockingAwait()
-                    Log.d("SIGNALR", "Conectado com sucesso!")
+                    Log.d("SIGNALR", "FinishHub Conectado!")
                 }
+
                 true
             } catch (e: Exception) {
-                Log.e("SIGNALR", "Erro ao conectar", e)
                 false
             }
-
         }
     }
 
-    fun joinStartMatch(idMatch: String, idTeam: String) {
-        if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
-            hubConnection?.send(SignalRMethods.JOIN_MATCH, idMatch, idTeam)
-        } else {
-            Log.e("SIGNALR", "Não está conectado. Chame startConnection() primeiro.")
+    fun joinFinishMatch(dto: ResultMatchDto) {
+        if (isConnected()) {
+            hubConnection?.send(SignalRMethods.JOIN_FINISH_MATCH, dto)
         }
     }
 
-    /**
-     * Chama o método 'LeaveStartMatch' do Backend
-     */
-    fun leaveStartMatch() {
-        if (hubConnection?.connectionState == HubConnectionState.CONNECTED) {
-            hubConnection?.send(SignalRMethods.LEAVE_MATCH)
+    // Edita o resultado (se o user se enganou)
+    fun editResult(dto: ResultMatchDto) {
+        if (isConnected()) {
+            hubConnection?.send(SignalRMethods.EDIT_RESULT, dto)
         }
     }
 
-    /**
-     * Fecha a conexão quando sair do ecrã ou destruir a app
-     */
     fun stopConnection() {
         hubConnection?.stop()
     }
+
+    private fun isConnected() = hubConnection?.connectionState == HubConnectionState.CONNECTED
 }

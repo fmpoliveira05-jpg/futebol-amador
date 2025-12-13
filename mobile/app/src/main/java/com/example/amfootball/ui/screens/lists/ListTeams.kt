@@ -36,7 +36,9 @@ import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.domains.errors.filtersError.FilterTeamError
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterTeamActions
+import com.example.amfootball.ui.actions.itemsList.ItemListPlayerActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -55,10 +57,10 @@ import com.example.amfootball.ui.components.lists.NumMembersTeamRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListTeamMocks
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
 
-//TODO: Meter Botão Ver Mais
 /**
  * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful Screen).
  *
@@ -115,6 +117,11 @@ fun ListTeamScreen(
         }
     )
 
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
+
     ListTeamContent(
         isOnline = isOnline,
         listTeams = listTeams,
@@ -126,6 +133,7 @@ fun ListTeamScreen(
         onRetry = { viewModel.retry() },
         role = role,
         filtersError = filtersError,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController,
         sentRequests = sentRequests
     )
@@ -161,10 +169,13 @@ private fun ListTeamContent(
     uiState: UiState,
     role: UserRole,
     onRetry: () -> Unit,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController,
     sentRequests: Set<String>
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
+
     LoadingPage(
         isLoading = uiState.isLoading,
         errorMsg = uiState.errorMessage,
@@ -203,6 +214,8 @@ private fun ListTeamContent(
                             sentRequests = sentRequests
                         )
                     },
+                    isValidShowMore = isShowMoreVisible,
+                    showMoreItems = showMoreItensAction.onLoadMore,
                     messageEmptyList = stringResource(id = R.string.list_teams_empty)
                 )
             }
@@ -518,6 +531,7 @@ fun PreviewListTeamContentAdmin() {
         navHostController = rememberNavController(),
         filtersError = FilterTeamError(),
         role = UserRole.ADMIN_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         sentRequests = emptySet()
     )
 }
@@ -538,6 +552,7 @@ fun PreviewListTeamContentPlayerWithoutTeam() {
         navHostController = rememberNavController(),
         filtersError = FilterTeamError(),
         role = UserRole.PLAYER_WITHOUT_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         sentRequests = emptySet()
     )
 }
@@ -558,6 +573,7 @@ fun PreviewListTeamContentPlayer() {
         onRetry = {},
         navHostController = rememberNavController(),
         role = UserRole.MEMBER_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         sentRequests = emptySet()
     )
 }
@@ -578,6 +594,7 @@ fun PreviewListTeamContentEmpty() {
         navHostController = rememberNavController(),
         filtersError = FilterTeamError(),
         role = UserRole.PLAYER_WITHOUT_TEAM,
-        sentRequests = emptySet()
+        sentRequests = emptySet(),
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden
     )
 }

@@ -33,6 +33,7 @@ import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
 import com.example.amfootball.ui.actions.itemsList.ItemListPlayerActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -55,6 +56,7 @@ import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.previewsMocks.ListPlayersMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
@@ -79,7 +81,6 @@ fun ListPlayersScreen(
     val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
     val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
-    val showMorePlayersVisible by viewModel.showMoreButtonVisible.collectAsStateWithLifecycle()
     val role by viewModel.role.collectAsStateWithLifecycle()
     val userId by viewModel.userId.collectAsStateWithLifecycle()
     val mode = viewModel.mode
@@ -104,6 +105,11 @@ fun ListPlayersScreen(
         onShowMore = viewModel::showMore,
     )
 
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
+
     ToastHandler(
         toastMessage = uiState.toastMessage,
         onToastShown = viewModel::onToastShown
@@ -123,8 +129,7 @@ fun ListPlayersScreen(
         onRetry = { viewModel.retry() },
         filterActions = filterActions,
         itemListPlayersActions = itemListPlayersActions,
-        isValidShowMore = showMorePlayersVisible,
-        showMoreItems = { viewModel.loadMoreItems() },
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -164,13 +169,13 @@ fun ListPlayersContent(
     filtersError: FilterPlayersErrors,
     listPosition: List<Position?>,
     onRetry: () -> Unit,
-    isValidShowMore: Boolean,
-    showMoreItems: () -> Unit,
     filterActions: FilterListPlayersActions,
     itemListPlayersActions: ItemListPlayerActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -214,8 +219,8 @@ fun ListPlayersContent(
                         }
                     )
                 },
-                isValidShowMore = isValidShowMore,
-                showMoreItems = showMoreItems,
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_player_empty)
             )
         }
@@ -435,11 +440,10 @@ fun ListPlayersForAdminsPreview() {
             ),
             navHostController = navController,
             role = UserRole.ADMIN_TEAM,
-            isValidShowMore = true,
             userId = "",
             mode = ListPlayerMode.PLAYER_LIST,
             sentRequests = emptySet(),
-            showMoreItems = {}
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         )
     }
 }
@@ -470,11 +474,10 @@ fun ListPlayersForPlayersPreview() {
             ),
             navHostController = navController,
             role = UserRole.PLAYER_WITHOUT_TEAM,
-            isValidShowMore = true,
             userId = "",
             mode = ListPlayerMode.PLAYER_LIST,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
             sentRequests = emptySet(),
-            showMoreItems = {}
         )
     }
 }
@@ -504,12 +507,11 @@ fun ListPlayersEmptyPreview() {
                 onShowMore = { onSuccess -> onSuccess() }
             ),
             navHostController = navController,
-            isValidShowMore = false,
             role = UserRole.PLAYER_WITHOUT_TEAM,
             userId = "",
             mode = ListPlayerMode.PLAYER_LIST,
             sentRequests = emptySet(),
-            showMoreItems = {}
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         )
     }
 }

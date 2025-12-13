@@ -65,6 +65,9 @@ fun ListPostPoneMatchScreen(
     navHostController: NavHostController,
     viewModel: ListPostPoneMatchViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val filters by viewModel.filter.collectAsStateWithLifecycle()
     val filtersError by viewModel.filterErros.collectAsStateWithLifecycle()
     val filterActions = FilterListPostPoneMatchActions(
@@ -80,7 +83,6 @@ fun ListPostPoneMatchScreen(
         )
     )
 
-    val list by viewModel.uiList.collectAsStateWithLifecycle()
     val itemsListActions = ItemsListPostPoneMatchActions(
         acceptPostPoneMatch = viewModel::acceptPostPoneMatch,
         rejectPostPoneMatch = viewModel::rejectPostPoneMatch,
@@ -91,9 +93,6 @@ fun ListPostPoneMatchScreen(
         isValidShowMore = { viewModel.showMoreButtonVisible },
         onLoadMore = { viewModel.loadMoreItems() }
     )
-
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
     ListPostPoneMatchContent(
         uiState = uiState,

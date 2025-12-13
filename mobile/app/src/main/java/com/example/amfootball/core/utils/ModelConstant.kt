@@ -396,12 +396,17 @@ object NetworkConsts {
 
 object SignalRUrls {
     const val START_MATCH_URL = "StartMatch"
+
+    const val FINISH_MATCH_URL = "FinishMatch"
 }
 
 object SignalRMethods {
     const val JOIN_MATCH = "JoinStartMatch"
     const val LEAVE_MATCH = "LeaveStartMatch"
     const val RECEIVE_MATCH = "ReceiveStartMatch"
+
+    const val JOIN_FINISH_MATCH = "JoinFinishMatch"
+    const val EDIT_RESULT = "EditResult"
 }
 
 object SignalRMessages {
