@@ -465,12 +465,14 @@ private fun AdminItensListFields(
 
 @Preview(
     name = "1. Admin View",
-    locale= "pt-rPT",
-    showBackground = true)
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Preview(
     name = "1. Admin View",
-    locale= "en",
-    showBackground = true)
+    locale = "en",
+    showBackground = true
+)
 @Composable
 fun PreviewListMemberContentAdmin() {
     ListMemberContent(
@@ -491,12 +493,14 @@ fun PreviewListMemberContentAdmin() {
 
 @Preview(
     name = "2. Member View",
-    locale="pt-rPT",
-    showBackground = true)
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Preview(
     name = "2. Member View",
-    locale="en",
-    showBackground = true)
+    locale = "en",
+    showBackground = true
+)
 @Composable
 fun PreviewListMemberContentMember() {
     ListMemberContent(
@@ -518,11 +522,13 @@ fun PreviewListMemberContentMember() {
 @Preview(
     name = "3. Empty List",
     locale = "pt-rPT",
-    showBackground = true)
+    showBackground = true
+)
 @Preview(
     name = "3. Empty List",
     locale = "en",
-    showBackground = true)
+    showBackground = true
+)
 @Composable
 fun PreviewListMemberContentEmpty() {
     ListMemberContent(

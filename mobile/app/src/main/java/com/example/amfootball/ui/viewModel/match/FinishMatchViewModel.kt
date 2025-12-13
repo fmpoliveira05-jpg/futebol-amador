@@ -27,7 +27,7 @@ import javax.inject.Inject
 class FinishMatchViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager
-): FormsViewModel<ResultMatchDto, FinishMatchFormErrors>(
+) : FormsViewModel<ResultMatchDto, FinishMatchFormErrors>(
     networkObserver = networkObserver,
     initialData = ResultMatchDto(),
     initialError = FinishMatchFormErrors()

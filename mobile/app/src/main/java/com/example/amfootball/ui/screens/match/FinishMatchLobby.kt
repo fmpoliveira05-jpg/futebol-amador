@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.data.events.FinishMatchUiState
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.match.FinishMatchLobbyViewModel
-import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 
 @Composable
 fun FinishMatchLobbyScreen(
@@ -33,7 +32,9 @@ fun FinishMatchLobbyScreen(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -80,6 +81,7 @@ fun FinishMatchLobbyScreen(
                     Text("Voltar")
                 }
             }
+
             else -> {}
         }
     }

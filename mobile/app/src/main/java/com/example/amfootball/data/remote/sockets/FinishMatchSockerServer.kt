@@ -31,7 +31,7 @@ class FinishMatchSockerServer @Inject constructor(
             try {
                 val hubUrl = NetworkConsts.BASE_URL + SignalRUrls.FINISH_MATCH_URL
 
-                if(hubConnection == null) {
+                if (hubConnection == null) {
                     hubConnection = HubConnectionBuilder.create(hubUrl)
                         .withAccessTokenProvider(Single.defer {
                             val token = sessionManager.getAuthToken() ?: ""

@@ -36,7 +36,6 @@ import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.domains.errors.filtersError.FilterTeamError
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterTeamActions
-import com.example.amfootball.ui.actions.itemsList.ItemListPlayerActions
 import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
 import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
