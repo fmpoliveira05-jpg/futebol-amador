@@ -346,7 +346,7 @@ namespace Infrastructure.Repositories
                          where m.MatchStatus == MatchStatus.POST_PONED
                             && m.Teams.Any(tm => tm.IdTeam == idReceiver)
                             && m.Teams.Any(tm => tm.IdTeam != idReceiver)
-                            && ppm.IdTeamPostPone == idReceiver
+                            && ppm.IdTeamPostPone != idReceiver
 
                          let receiverTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == idReceiver)
                          let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != idReceiver)
@@ -386,7 +386,7 @@ namespace Infrastructure.Repositories
                             .Include(ppm => ppm.Team)
                             .Include(ppm => ppm.Match).ThenInclude(m => m.Teams)
                             .Where(ppm => ppm.Match.MatchStatus == MatchStatus.POST_PONED
-                                && ppm.IdTeamPostPone == idReceiver
+                                && ppm.IdTeamPostPone != idReceiver
                                 && ppm.Match.Teams.Any(tm => tm.IdTeam == idReceiver)
                                 && ppm.Match.Teams.Any(tm => tm.IdTeam != idReceiver));
 

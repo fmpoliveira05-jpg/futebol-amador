@@ -142,7 +142,7 @@ namespace Api.Controllers
         /// com base no ID da equipa e no ID do convite fornecido.
         /// </remarks>
         /// <param name="idTeam">O identificador único (GUID) da equipa contexto da operação.</param>
-        /// <param name="matchInvite">O identificador único (GUID) do convite que se pretende visualizar.</param>
+        /// <param name="idMatchInvite">O identificador único (GUID) do convite que se pretende visualizar.</param>
         /// <returns>Um objeto contendo os detalhes do convite.</returns>
         /// <response code="200">Sucesso. Retorna os dados do convite.</response>
         /// <response code="404">Convite ou equipa não encontrados (dependendo da implementação do serviço).</response>

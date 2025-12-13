@@ -144,7 +144,7 @@ namespace Application.Services
             await unityOfWork.SaveChangesAsync();
             await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
 
-            SendNotificationAcceptMemberShipRequest(teamId, team.Name, playerAccepting.Id, playerAccepting.Name);
+            await SendNotificationAcceptMemberShipRequestTeam(teamId, team.Name, playerAccepted.Id, playerAccepted.Name);
         }
 
         /// <summary>
@@ -297,7 +297,7 @@ namespace Application.Services
                 await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!");
             }
 
-            await SendNotificationAcceptMemberShipRequest(team.Id, team.Name, playerId, player.Name);
+            await SendNotificationAcceptMemberShipRequestPlayer(team.Id, team.Name, playerId, player.Name);
             return new MemberShipRequestDto
             {
                 RequestId = membershipRequest.Id,
@@ -453,7 +453,7 @@ namespace Application.Services
             }
         }
 
-        private async Task SendNotificationAcceptMemberShipRequest(Guid teamId, string nameTeam, string playerId, string namePlayer)
+        private async Task SendNotificationAcceptMemberShipRequestPlayer(Guid teamId, string nameTeam, string playerId, string namePlayer)
         {
             var title = "Convite de adesão Aceite!";
             var textPlayer = $"O seu convite de adesão da equipa {nameTeam} foi aceite";
@@ -475,8 +475,35 @@ namespace Application.Services
                 { "body", textTeam }
             };
 
-            notificationFirebaseService.SendNotificationToUser(playerId, dataPayloadPlayer, title, textPlayer);
             await notificationFirebaseService.SendMulticastNotification(teamId, dataPayloadTeam, title, textTeam);
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayloadPlayer, title, textPlayer);
+        }
+
+        private async Task SendNotificationAcceptMemberShipRequestTeam(Guid teamId, string nameTeam, string playerId, string namePlayer)
+        {
+            var title = "Convite de adesão Aceite!";
+            var textPlayer = $"O seu convite de adesão da equipa {nameTeam} foi aceite";
+            var textTeam = $"O {namePlayer} é um novo jogador da equipa";
+
+            var dataPayloadPlayer = new Dictionary<string, string>()
+            {
+                { "type", "ACCEPT_MEMBERSHIP_REQUEST_PLAYER_NOTIFY" },
+                { "teamId", teamId.ToString() },
+                { "playerId", playerId },
+                { "title", title },
+                { "body", textPlayer }
+            };
+
+            var dataPayloadTeam = new Dictionary<string, string>()
+            {
+                { "type", "ACCEPT_MEMBERSHIP_REQUEST_TEAM" },
+                { "teamId", teamId.ToString() },
+                { "title", title },
+                { "body", textTeam }
+            };
+
+            await notificationFirebaseService.SendMulticastNotification(teamId, dataPayloadTeam, title, textTeam);
+            await notificationFirebaseService.SendNotificationToUser(playerId, dataPayloadPlayer, title, textPlayer);
         }
         #endregion
     }

@@ -631,8 +631,7 @@ namespace Infrastructure.Repositories
                             .Include(t => t.Pitch)
                             .Include(t => t.Rank)
                             .Where(t => t.Id != idTeam 
-                                && t.Members.Count < ModelConstants.TeamConst.MaxMembers
-                                && !t.ReceivedInvites.Any(ri => ri.IdSender == idTeam));
+                                && t.Members.Count >= ModelConstants.TeamConst.MimMembersToMatch);
 
             if (!string.IsNullOrEmpty(filters.NameTeam))
             {

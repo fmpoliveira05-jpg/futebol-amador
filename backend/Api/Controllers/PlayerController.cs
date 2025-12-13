@@ -277,18 +277,18 @@ namespace Api.Controllers
         /// Aceita um convite de uma equipa para se juntar a ela.
         /// </summary>
         /// <param name="playerId">ID do jogador que aceita.</param>
-        /// <param name="requestId">ID do pedido de adesão.</param>
+        /// <param name="request">ID do pedido de adesão.</param>
         /// <returns>Detalhes do pedido aceite.</returns>
         /// <response code="200">Pedido aceite com sucesso. Jogador adicionado à equipa.</response>
         /// <response code="403">Permissão negada.</response>
         [HttpPost("{playerId}/membership-requests/accept")]
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] Guid requestId)
+        public async Task<IActionResult> AcceptMembershipRequest(string playerId, [FromBody] RequestMemberShip request)
         {
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
 
-            var dto = await membershipRequestService.AcceptMembershipRequestAsyncPlayer(playerId, requestId);
+            var dto = await membershipRequestService.AcceptMembershipRequestAsyncPlayer(playerId, request.RequestId);
             return Ok(dto);
         }
 

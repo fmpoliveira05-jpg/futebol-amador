@@ -399,7 +399,7 @@ namespace Application.Services
             {
                 { "type", type },
                 { "matchId", matchId.ToString() },
-                { "calendarTitle", titleTeam },
+                { "calendarTitle", titleOpponent },
                 { "calendarDescription", description },
                 { "location", addressPitch ?? "Local a definir" },
                 { "startMillis", startMillis },

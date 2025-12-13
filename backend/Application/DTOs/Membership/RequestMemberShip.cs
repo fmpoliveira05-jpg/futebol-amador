@@ -2,9 +2,9 @@
 
 namespace Application.DTOs.Membership
 {
-    public class InviteTeamRequest
+    public class RequestMemberShip
     {
         [Required]
-        public Guid TeamId { get; set; }
+        public Guid RequestId { get; set; }
     }
 }

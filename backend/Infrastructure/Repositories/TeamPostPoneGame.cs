@@ -60,7 +60,7 @@ namespace Infrastructure.Repositories
         {
             return await context.PostPoneMatch
                 .Include(ts => ts.Match)
-                .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone == idTeam && ppm.IdMatch == idMatch);
+                .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone != idTeam && ppm.IdMatch == idMatch);
         }
 
         /// <summary>
@@ -80,7 +80,8 @@ namespace Infrastructure.Repositories
                         .ThenInclude(ts => ts.Team)
                 .Include(ts => ts.Match)    
                     .ThenInclude(m => m.Pitch)
-                .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone == idTeam && ppm.IdMatch == idMatch);
+                .Include(ts => ts.Match)
+                .FirstOrDefaultAsync(ppm => ppm.IdTeamPostPone != idTeam && ppm.IdMatch == idMatch);
         }
     }
 }

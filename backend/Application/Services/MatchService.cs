@@ -392,7 +392,8 @@ namespace Application.Services
 
         private async Task notifyAcceptPostPone(Guid matchId, Guid idTeam, string nameTeam, Guid idOpponnent, string opponentName, DateTime newDate)
         {
-            long newDateMillis = new DateTimeOffset(newDate).ToUnixTimeMilliseconds();
+            var dateUtc = newDate.Kind == DateTimeKind.Utc ? newDate : DateTime.SpecifyKind(newDate, DateTimeKind.Utc);
+            long newDateMillis = new DateTimeOffset(dateUtc).ToUnixTimeMilliseconds();
 
             var title = "Jogo Reagendado";
             var textTeam = $"A sua partida com a equipa {opponentName} foi adiada para o dia {newDate:dd/MM HH:mm}.";
@@ -414,7 +415,7 @@ namespace Application.Services
                 { "matchId", matchId.ToString() },
                 { "newDateMillis", newDateMillis.ToString() },
                 { "title", title },
-                { "body", textTeam }
+                { "body", textOpponent }
             };
 
             await notificationFirebaseService.sendNotificationToTeamsWithDataAsync(idTeam, idOpponnent, payloadTeam, payloadOpponent);

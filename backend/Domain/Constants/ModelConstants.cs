@@ -44,6 +44,8 @@
             public const int MinAdmins = 1;
             /// <summary> Número mínimo de membros (jogadores/staff) em uma equipa. </summary>
             public const int MinMembers = 1;
+
+            public const int MimMembersToMatch = 11;
             /// <summary> Número máximo de membros em uma equipa. </summary>
             public const int MaxMembers = 32;
             /// <summary> Valor mínimo para os pontos de ranking. </summary>

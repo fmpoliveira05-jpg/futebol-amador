@@ -473,17 +473,17 @@ namespace Api.Controllers
         /// O jogador é adicionado à lista de membros. Requer permissão de administrador.
         /// </remarks>
         /// <param name="teamId">ID da equipa.</param>
-        /// <param name="requestId">ID do pedido a aceitar.</param>
+        /// <param name="request">ID do pedido a aceitar.</param>
         /// <response code="200">Pedido aceite com sucesso.</response>
         /// <response code="403">Permissão negada.</response>
         [HttpPost("{teamId}/membership-request/accept")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] Guid requestId)
+        public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] RequestMemberShip request)
         {
             var userId = GetCurrentUserId();
             //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
-            await MemberShipRequestService.AcceptMembershipRequestTeam(teamId, requestId, userId);
+            await MemberShipRequestService.AcceptMembershipRequestTeam(teamId, request.RequestId, userId);
             return Ok();
         }
 
