@@ -53,17 +53,16 @@ fun MatchActionsMenu(
         onDismissRequest = onDismissRequest
     ) {
         if (matchStatus == MatchStatus.SCHEDULED || matchStatus == MatchStatus.POST_PONED) {
-            if (gameDate >= now) {
-                DropdownItem(
-                    text = stringResource(id = R.string.button_start_match),
-                    onClick = {
-                        onStartMatch()
-                        onDismissRequest()
-                    },
-                    leadingIcon = Icons.Default.PlayArrow,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            DropdownItem(
+                text = stringResource(id = R.string.button_start_match),
+                onClick = {
+                    onStartMatch()
+                    onDismissRequest()
+                },
+                leadingIcon = Icons.Default.PlayArrow,
+                color = MaterialTheme.colorScheme.primary
+            )
+
 
             if (hoursUntilGame >= MatchConsts.MAX_HOURS_TO_POST_PONE) {
                 DropdownItem(

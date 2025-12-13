@@ -158,12 +158,12 @@ class SessionManager @Inject constructor(
      *
      * @return O ID do utilizador (String) ou `null` se não for encontrado.
      */
-    fun fetchUserId(): String? {
-        return getUserProfile()?.loginResponseDto?.localId
+    fun fetchUserId(): String {
+        return getUserProfile()?.loginResponseDto?.localId ?: ""
     }
 
-    fun fetchTeamId(): String? {
-        return getUserProfile()?.effectiveTeamId
+    fun fetchTeamId(): String {
+        return getUserProfile()?.effectiveTeamId ?: ""
     }
 
     /**

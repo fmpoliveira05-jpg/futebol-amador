@@ -34,6 +34,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.SignalRUrls
 import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FilterCalendar
@@ -60,6 +61,7 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.CalendarMocks
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import java.time.format.DateTimeFormatter
@@ -97,7 +99,9 @@ fun CalendarScreen(
     val itemsListAction = ItemsCalendarActions(
         onCancelMatch = viewModel::onCancelMatch,
         onPostPoneMatch = viewModel::onPostPoneMatch,
-        onStartMatch = viewModel::onStartMatch,
+        onStartMatch = { matchId ->
+            navHostController.navigate("${SignalRUrls.START_MATCH_URL}/$matchId")
+        },
         onFinishMatch = viewModel::onFinishMatch
     )
 

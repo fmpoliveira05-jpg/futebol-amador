@@ -186,4 +186,5 @@ dependencies {
 
     //Signal R
     implementation("com.microsoft.signalr:signalr:8.0.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
 }

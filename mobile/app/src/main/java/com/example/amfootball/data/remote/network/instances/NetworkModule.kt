@@ -1,5 +1,6 @@
 package com.example.amfootball.data.remote.network.instances
 
+import com.example.amfootball.core.utils.NetworkConsts
 import com.example.amfootball.data.interfaces.api.AuthApi
 import com.example.amfootball.data.interfaces.api.CalendarApi
 import com.example.amfootball.data.interfaces.api.ChatApi
@@ -31,16 +32,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    /**
-     * URL base da API de Backend.
-     *
-     * Atualmente configurado para um túnel **Ngrok** (HTTPS) para acesso externo
-     * durante o desenvolvimento.
-     */
-    private const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
-    //"https://amfootballapi.duckdns.org/"
-
     /**
      * Providencia e configura o cliente HTTP [OkHttpClient].
      *
@@ -81,7 +72,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(NetworkConsts.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

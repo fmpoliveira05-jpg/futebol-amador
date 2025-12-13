@@ -25,6 +25,7 @@ import com.example.amfootball.core.extensions.composableProtectedAdminTeam
 import com.example.amfootball.core.extensions.composableProtectedMemberTeam
 import com.example.amfootball.core.extensions.composableProtectedPlayerWithouTeam
 import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.SignalRUrls
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.domains.enums.pages.ListMembershipRequestMode
@@ -47,6 +48,7 @@ import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
+import com.example.amfootball.ui.screens.match.StartMatchLobbyScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
 import com.example.amfootball.ui.screens.settings.SettingsScreen
@@ -358,8 +360,26 @@ private fun NavGraphBuilder.teamPages(
             ListPlayersScreen(navHostController = globalNavController)
         }
     )
+
+    hubPages(globalNavController = globalNavController, sessionManager = sessionManager)
 }
 
+private fun NavGraphBuilder.hubPages(
+    globalNavController: NavHostController,
+    sessionManager: SessionManager
+) {
+    composableProtectedAdminTeam(
+        route = "${SignalRUrls.START_MATCH_URL}/{${Arguments.MATCH_ID}}",
+        arguments = listOf(
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            StartMatchLobbyScreen(navHostController = globalNavController)
+        }
+    )
+}
 private fun NavGraphBuilder.teamMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -410,7 +430,10 @@ private fun NavGraphBuilder.managementMatch(
     )
 
     composableProtectedAdminTeam(
-        route = Routes.TeamRoutes.FINISH_MATCH.route,
+        route = "${Routes.TeamRoutes.FINISH_MATCH.route}/{${Arguments.MATCH_ID}}",
+        arguments = listOf(
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType }
+        ),
         navController = globalNavController,
         sessionManager = sessionManager,
         content = {

@@ -388,3 +388,22 @@ object NotificationConst {
      */
     const val TEAM_CHANNEL_ID = "team_channel_id"
 }
+
+object NetworkConsts {
+    //"https://amfootballapi.duckdns.org/"
+    const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+}
+
+object SignalRUrls {
+    const val START_MATCH_URL = "StartMatch"
+}
+
+object SignalRMethods {
+    const val JOIN_MATCH = "JoinStartMatch"
+    const val LEAVE_MATCH = "LeaveStartMatch"
+    const val RECEIVE_MATCH = "ReceiveStartMatch"
+}
+
+object SignalRMessages {
+    const val MATCH_STARTED = "O jogo começou!"
+}

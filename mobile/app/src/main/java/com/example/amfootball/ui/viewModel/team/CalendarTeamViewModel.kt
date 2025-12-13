@@ -170,20 +170,6 @@ class CalendarTeamViewModel @Inject constructor(
     }
 
     /**
-     * Inicia a partida.
-     * Requer conexão à internet.
-     */
-    fun onStartMatch(idMatch: String) {
-        onlineFunctionality(
-            action = {
-                //TODO: Chamar endPoint da API para iniciar a partida (E meter o user em loading ate algum adversario se conectar ao Hub com ele)
-                //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
-            },
-            toastMessage = R.string.toast_offline_start_game
-        )
-    }
-
-    /**
      * Navega para o ecrã de finalização de partida (inserção de resultados).
      * Requer conexão à internet.
      */

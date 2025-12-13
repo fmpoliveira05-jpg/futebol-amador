@@ -288,6 +288,13 @@ object Routes {
             R.string.button_cancel_match_description,
             haveBackButton = true
         ),
+        START_MATCH(
+            "StartMatch",
+            R.string.button_start_match,
+            Icons.Default.Flag,
+            R.string.button_start_match_description,
+            haveBackButton = false
+        ),
         FINISH_MATCH(
             "FinishMatch",
             R.string.button_finish_match,

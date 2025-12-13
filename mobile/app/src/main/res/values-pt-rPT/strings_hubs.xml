@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lobby_connecting">A conectar ao servidor...</string>
+    <string name="lobby_waiting_title">À espera do adversário...</string>
+    <string name="lobby_waiting_body">O outro administrador tem de entrar nesta sala para o jogo começar.</string>
+    <string name="lobby_btn_cancel">Cancelar e Sair</string>
+    <string name="lobby_error_prefix">Erro: %1$s</string>
+    <string name="btn_back">Voltar</string>
+</resources>
