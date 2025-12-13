@@ -46,9 +46,9 @@ import androidx.navigation.NavController
 import com.example.amfootball.R
 import com.example.amfootball.domains.enums.settings.AppLanguage
 import com.example.amfootball.domains.enums.settings.AppTheme
-import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 
 /**
@@ -94,7 +94,11 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsViewModel, navController: NavController) {
+private fun SettingsPageContent(
+    modifier: Modifier,
+    settingsViewModel: SettingsViewModel,
+    navController: NavController
+) {
     val currentTheme = settingsViewModel.theme.collectAsState()
     val currentLanguage = settingsViewModel.language.collectAsState()
     var notificationsEnabled by remember { mutableStateOf(true) }

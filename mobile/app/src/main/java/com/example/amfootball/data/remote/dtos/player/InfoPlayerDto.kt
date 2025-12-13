@@ -19,7 +19,7 @@ import com.google.gson.annotations.SerializedName
  * @property haveTeam Flag que indica se o jogador está atualmente associado a uma equipa.
  */
 data class InfoPlayerDto(
-    @SerializedName("Id", alternate = ["PlayerId", "playerId"])
+    @SerializedName("id", alternate = ["Id", "PlayerId", "playerId"])
     val id: String = "",
     val name: String = "",
     val image: String? = null,

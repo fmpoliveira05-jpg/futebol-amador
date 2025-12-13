@@ -27,27 +27,32 @@
     <string name="toast_offline_delete_team">Para poder a sua equipa, precisa estar conectado há internte</string>
     <string name="toast_offline_accept_postpone">Para aceitar a adiamento, precisa estar conectado há internet</string>
     <string name="toast_offline_reject_postpone">Para rejeitar a adiamento, precisa estar conectado há internet</string>
+    <string name="toast_offline_show_data_player">Para ver os dados do jogador precisa estar conectado há internet</string>
+    <string name="toast_offline_send_membership_request">Para mandar um pedido de adesão tem de estar conectado há internet</string>
 
     <string name="toast_autenticate_people">Apenas pessoas autenticadas podem aceder a esta funcionalidade</string>
     <string name="toast_only_player_without_team">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
     <string name="toast_only_player_without_team_membership">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
-
-    <string name="toast_admin_only_casual">Apenas administradores de equipa podem agendar partidas casuais.</string>
-    <string name="toast_admin_only_ranked">Apenas administradores de equipa podem agendar partidas competitivas.</string>
-    <string name="toast_admin_only_send_membership_request">Apenas adminsitradores de equipa podem mandar pedidos de adesão.</string>
 
     <string name="toast_playerProfile_error">Erro ao obter perfil do utilizador, por favor tente novamente</string>
     <string name="toast_playerProfile_deleted">Perfil do utilizador eliminado com sucesso.</string>
     <string name="toast_playerProfile_edited">Perfil do utilizador atualizado com sucesso</string>
 
     <string name="toast_delete_profile_error">Erro ao eliminar perfil do utilizador, por favor tente novamente</string>
+
+    <string name="toast_admin_only_casual">Apenas administradores de equipa podem agendar partidas casuais.</string>
+    <string name="toast_admin_only_ranked">Apenas administradores de equipa podem agendar partidas competitivas.</string>
+    <string name="toast_admin_only_send_membership_request">Apenas adminsitradores de equipa podem mandar pedidos de adesão.</string>
     <string name="toast_admin_only_edit">Apenas administradores de equipa podem editar os dados da equipa</string>
     <string name="toast_admin_only_delete">Apenas administradores de equipa podem apagar a equipa</string>
     <string name="toast_admin_only_promote">Apenas adminsitradores de equipa podem promover jogadores</string>
     <string name="toast_admin_only_demote">Apenas adminstradores de equipa podem despromover outros amdinistradores</string>
     <string name="toast_admin_only_remove_player">Apenas administradores de equipa podem remover jogadores da equipa</string>
+    <string name="toast_admin_only_send_match_invite">Apenas administradores de equipa podem mandar pedidos de partida</string>
 
     <string name="toast_success_accept_postpone">Pedido de adiamento aceite com sucesso.</string>
     <string name="toast_success_reject_postpone">Pedido de adiamento rejeitado com sucesso.</string>
     <string name="toast_success_send_membershipRequest">Pedido de adesão envio com sucesso.</string>
+
+    <string name="toast_send_match_invite_your_team">Você não pode mandar um pedido de partida a você mesmo</string>
 </resources>

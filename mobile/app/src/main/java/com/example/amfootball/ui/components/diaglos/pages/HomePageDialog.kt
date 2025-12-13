@@ -2,8 +2,8 @@ package com.example.amfootball.ui.components.diaglos.pages
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import com.example.amfootball.ui.components.diaglos.AppAlertDialog
 import com.example.amfootball.R
+import com.example.amfootball.ui.components.diaglos.AppAlertDialog
 
 @Composable
 fun LeaveTeamAlertDialog(

@@ -2,8 +2,8 @@ package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  */
 abstract class BaseViewModel(
     private val networkObserver: NetworkConnectivityObserver,
-    private val needObserverNetwork: Boolean = true,
+    private val needObserverNetwork: Boolean = true
 ) : ViewModel() {
     /**
      * Estado global da UI.
@@ -59,7 +59,7 @@ abstract class BaseViewModel(
      * @param checkOnline Se `true` (padrão), impede a execução se o dispositivo estiver offline.
      * @param callApi A função suspensa (lambda) que contém a lógica de negócio ou chamada à API.
      */
-    protected fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
+    fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 

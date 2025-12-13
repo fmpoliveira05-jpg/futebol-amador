@@ -58,7 +58,10 @@ data class PostponeDto(
             try {
                 ZonedDateTime.parse(dateString).toLocalDateTime()
             } catch (e2: Exception) {
-                throw IllegalArgumentException("Erro Crítico: Formato de data desconhecido recebido do Backend: '$dateString'", e2)
+                throw IllegalArgumentException(
+                    "Erro Crítico: Formato de data desconhecido recebido do Backend: '$dateString'",
+                    e2
+                )
             }
         }
     }

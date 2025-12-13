@@ -27,6 +27,7 @@
     <string name="toast_offline_delete_team">To delete your team, you need to be connected to the internet</string>
     <string name="toast_offline_accept_postpone">To accept the postponement, you need to be connected to the internet.</string>
     <string name="toast_offline_reject_postpone">To reject the postponement, you need to be connected to the internet.</string>
+    <string name="toast_offline_show_data_player">To view the player\'s data, you must be connected to the internet.</string>
 
     <string name="toast_autenticate_people">Only authenticated users can access this feature.</string>
     <string name="toast_only_player_without_team">Only users without a team can view their membership requests.</string>
@@ -46,8 +47,11 @@
     <string name="toast_admin_only_promote">Only team administrators can promote players</string>
     <string name="toast_admin_only_demote">Only team administrators can demote other administrators</string>
     <string name="toast_admin_only_remove_player">Only team administrators can remove players from the team</string>
+    <string name="toast_admin_only_send_match_invite">Only team admins can send match invites.</string>
 
     <string name="toast_success_accept_postpone">Postponement request accepted successfully.</string>
     <string name="toast_success_reject_postpone">Postponement request rejected successfully.</string>
     <string name="toast_success_send_membershipRequest">Membership request sent successfully.</string>
+
+    <string name="toast_send_match_invite_your_team">You cannot send a match invite to your own team.</string>
 </resources>

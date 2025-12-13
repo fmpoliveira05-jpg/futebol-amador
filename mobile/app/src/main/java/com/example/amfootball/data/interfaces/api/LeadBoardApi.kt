@@ -1,6 +1,6 @@
 package com.example.amfootball.data.interfaces.api
 
-import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.core.utils.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import retrofit2.Response
 import retrofit2.http.GET

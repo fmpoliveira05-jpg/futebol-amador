@@ -29,29 +29,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.remote.dtos.chat.ChatRoom
 import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ChatListMocks
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 /**
  * Ecrã principal de listagem de conversas (Inbox de Chats).
  *
- * Este ecrã exibe todas as salas de chat ([ChatRoom]) em que o utilizador participa.
- * Utiliza o [ChatViewModel] para observar em tempo real a lista de salas via `StateFlow`.
+ * Este ecrã atua como um container "Stateful" (com estado). Ele conecta-se ao [ChatViewModel]
+ * para observar os dados e passa-os para o [ChatListContent] desenhar a UI.
  *
- * **Estrutura:**
- * - **Scaffold:** Fornece a estrutura base (suporta FloatingActionButton para criar novas conversas, atualmente comentado).
- * - **LazyColumn:** Renderiza a lista de chats de forma eficiente.
- * - **Empty State:** Exibe uma mensagem "Sem chats" caso a lista esteja vazia.
- *
- * @param navController Controlador de navegação para transitar para o ecrã de detalhe do chat (Single Chat).
- * @param viewModel ViewModel injetado via Hilt que fornece os dados das salas (`rooms`).
- */
+ * @param navController Controlador de navegação para transitar para o ecrã de detalhe.*
+ * @param viewModel Hilt-injected ViewModel injetado via Hilt que fornece o fluxo de dados `rooms`.
+ * */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatListScreen(
@@ -59,6 +57,27 @@ fun ChatListScreen(
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val rooms by viewModel.rooms.collectAsState()
+
+    ChatListContent(
+        rooms = rooms,
+        navController = navController
+    )
+}
+
+/**
+ * Conteúdo visual da lista de chats (Stateless).
+ *
+ * Responsável apenas por desenhar a UI com base na lista de [rooms] fornecida.
+ * Separa a lógica de visualização da lógica de negócio, facilitando testes e Previews.
+ *
+ * @param rooms Lista de salas de chat a exibir.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatListContent(
+    rooms: List<ChatRoom>,
+    navController: NavHostController
+) {
     Scaffold { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -76,7 +95,7 @@ fun ChatListScreen(
                     ) {
                         Text(
                             text = "Sem chats",
-                            modifier = Modifier.testTag(stringResource(id = R.string.tag_empty_list_chat))
+                            modifier = Modifier.testTag("tag_empty_list_chat")
                         )
                     }
                 }
@@ -164,44 +183,55 @@ fun ChatItem(
     }
 }
 
-/*
 @Preview(
-    name = "Chat List - English",
+    name = "Lista com Chats",
+    locale = "pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "List With Chats",
     locale = "en",
-    showBackground = true,
-    showSystemUi = true
-)
-@Preview(
-    name = "Chat List - Portuguese",
-    locale = "pt",
-    showBackground = true,
-    showSystemUi = true
-)
+    showBackground = true)
 @Composable
-fun ChatListScreenPreview() {
-    // Dados fictícios para o Preview
-    val dummyRooms = listOf(
-        ChatRoom(id = "1", name = "Equipa A vs Equipa B"),
-        ChatRoom(id = "2", name = "Grupo de Treino"),
-        ChatRoom(id = "3", name = "João Silva")
-    )
-
+fun PreviewChatListPopulated() {
     MaterialTheme {
         ChatListContent(
-            rooms = dummyRooms,
-            onChatClick = {}
+            rooms = ChatListMocks.mockChatRooms,
+            navController = rememberNavController()
         )
     }
 }
 
-@Preview(name = "Empty State", showBackground = true)
+@Preview(
+    name = "Lista Vazia",
+    locale = "pt-rPT",
+    showBackground = true)
+@Preview(
+    name = "Empty List",
+    locale = "en",
+    showBackground = true)
 @Composable
-fun ChatListEmptyPreview() {
+fun PreviewChatListEmpty() {
     MaterialTheme {
         ChatListContent(
             rooms = emptyList(),
-            onChatClick = {}
+            navController = rememberNavController()
         )
     }
 }
- */
+
+@Preview(
+    name = "Item Individual",
+    locale = "pt-rPT",
+    showBackground = true)
+@Preview(name = "Individual Item",
+    locale = "en",
+    showBackground = true)
+@Composable
+fun PreviewChatItem() {
+    MaterialTheme {
+        ChatItem(
+            chat = ChatRoom(id = "99", name = "Grupo de Futebol"),
+            navController = rememberNavController()
+        )
+    }
+}

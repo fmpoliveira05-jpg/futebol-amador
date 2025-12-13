@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
-import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 
 /**
  * Agrupa os botões de Limpeza de Filtros lado a lado.

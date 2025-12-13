@@ -12,14 +12,16 @@ import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.components.buttons.NavigateButton
 import com.example.amfootball.ui.navigation.objects.AppRouteInfo
 import com.example.amfootball.ui.navigation.objects.Routes
-import com.example.amfootball.ui.components.buttons.NavigateButton
 
 /**
  * Barra de navegação inferior principal da aplicação.
@@ -38,7 +40,7 @@ fun MainBottomNavBar(
     navController: NavHostController,
     onShowBottomSheet: () -> Unit,
     currentSelectedRoute: String,
-    onRouteSelected: (String) -> Unit
+    onRouteSelected: (String) -> Unit,
 ) {
     NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
         Routes.BottomNavBarRoutes.entries.forEach { destination ->
@@ -75,71 +77,64 @@ fun MainBottomNavBar(
 }
 
 /**
- * Conteúdo dinâmico do Modal Bottom Sheet (Menu de Opções).
+ * Conteúdo dinâmico do Modal Bottom Sheet (Menu de Opções Secundárias).
  *
- * Este componente decide quais os atalhos de navegação a mostrar com base no contexto atual
- * ([currentScreenRoute]). Permite acesso rápido a funcionalidades secundárias que não cabem na Bottom Bar.
- *
- * **Lógica de Exibição:**
- * - Se estiver na **Home Geral**: Mostra atalhos para procurar equipas, jogadores e leaderboard.
- * - Se estiver na **Home de Equipa**: Mostra atalhos de gestão (Calendário, Pedidos, Membros).
+ * Exibe um grid de botões de navegação, cujo conteúdo é determinado dinamicamente
+ * com base na rota atual ([currentScreenRoute]) e no papel do utilizador ([role]).
+ * Isto permite mostrar atalhos de gestão de equipa apenas quando o utilizador está
+ * na área da equipa e tem permissões de administrador.
  *
  * @param modifier Modificador de layout.
  * @param navController Controlador para navegar ao clicar nos botões do grid.
  * @param currentScreenRoute A rota onde o utilizador estava quando abriu o menu.
- * @param teamId O ID da equipa (opcional), necessário para navegar para rotas que exigem parâmetros (ex: Calendário).
+ * @param teamId O ID da equipa (opcional), usado para construir rotas que exigem este parâmetro (ex: Calendário).
+ * @param role O papel do utilizador ([UserRole]) que determina a visibilidade de certas opções de gestão.
  */
 @Composable
 fun BottomSheetContent(
     modifier: Modifier = Modifier,
     navController: NavHostController,
     currentScreenRoute: String?,
-    teamId: String? = null
+    teamId: String? = null,
+    role: UserRole
 ) {
-    val buttonsToShow = mutableListOf<AppRouteInfo>()
+    val buttonsToShow = remember(currentScreenRoute, role, teamId) {
+        val list = mutableListOf<AppRouteInfo>()
 
-    buttonsToShow.addAll(
-        listOf(
-            Routes.GeralRoutes.LEADERBOARD,
-        )
-    )
-    when (currentScreenRoute) {
-        Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
-            buttonsToShow.addAll(
-                listOf(
-                    Routes.GeralRoutes.HOMEPAGE,
-                    Routes.PlayerRoutes.TEAM_LIST,
-                    Routes.PlayerRoutes.PLAYER_LIST,
-                    Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST,
+        when (currentScreenRoute) {
+            Routes.BottomNavBarRoutes.HOMEPAGE.route -> {
+                list.add(Routes.GeralRoutes.HOMEPAGE)
+                list.add(Routes.PlayerRoutes.TEAM_LIST)
+                list.add(Routes.PlayerRoutes.PLAYER_LIST)
+                list.add(Routes.GeralRoutes.LEADERBOARD)
 
-                    Routes.PlayerRoutes.TEAM_LIST_MEMBERSHIP_REQUEST
-                )
-            )
+                if (role == UserRole.PLAYER_WITHOUT_TEAM) {
+                    list.add(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST)
+                    list.add(Routes.PlayerRoutes.TEAM_LIST_MEMBERSHIP_REQUEST)
+                }
+            }
+
+            Routes.BottomNavBarRoutes.HOMEPAGE_TEAM.route -> {
+                if (role == UserRole.ADMIN_TEAM || role == UserRole.MEMBER_TEAM) {
+                    list.add(Routes.TeamRoutes.HOMEPAGE)
+                    list.add(Routes.TeamRoutes.CALENDAR)
+                    list.add(Routes.TeamRoutes.TEAM_PROFILE)
+                    list.add(Routes.TeamRoutes.MEMBERLIST)
+                }
+
+                if (role == UserRole.ADMIN_TEAM) {
+                    list.add(Routes.TeamRoutes.LIST_MATCH_INVITES)
+                    list.add(Routes.TeamRoutes.LIST_POST_PONE_MATCH)
+                    list.add(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST)
+
+                    list.add(Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM)
+                    list.add(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE)
+                    list.add(Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH)
+
+                }
+            }
         }
-
-        Routes.BottomNavBarRoutes.HOMEPAGE_TEAM.route -> {
-            buttonsToShow.addAll(
-                listOf(
-                    Routes.TeamRoutes.HOMEPAGE,
-                    Routes.TeamRoutes.CALENDAR,
-                    Routes.TeamRoutes.TEAM_PROFILE,
-
-                    Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST,
-                    Routes.TeamRoutes.MEMBERLIST,
-                    Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM,
-
-                    Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE,
-                    Routes.TeamRoutes.LIST_MATCH_INVITES,
-                    Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH,
-
-                    Routes.TeamRoutes.LIST_POST_PONE_MATCH
-                )
-            )
-        }
-
-        Routes.BottomNavBarRoutes.CHAT_LIST.route -> {}
-
-        Routes.BottomNavBarRoutes.USER_PROFILE.route -> {}
+        list
     }
 
     LazyVerticalGrid(
@@ -164,21 +159,6 @@ fun BottomSheetContent(
                             }
                         }
 
-                        Routes.TeamRoutes.LIST_MATCH_INVITES -> {
-                            if (teamId != null) {
-                                navController.navigate("${routeInfo.route}/${teamId}")
-                            } else {
-                                println("Erro: Tentativa de lista de matches sem ID de equipa")
-                            }
-                        }
-
-                        Routes.TeamRoutes.LIST_POST_PONE_MATCH -> {
-                            if (teamId != null) {
-                                navController.navigate("${routeInfo.route}/${teamId}")
-                            } else {
-                                println("Erro: Tentativa de adiamentos sem ID de equipa")
-                            }
-                        }
                         else -> {
                             navController.navigate(routeInfo.route)
                         }

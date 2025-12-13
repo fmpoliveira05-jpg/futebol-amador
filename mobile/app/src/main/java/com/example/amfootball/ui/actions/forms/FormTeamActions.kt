@@ -1,7 +1,5 @@
 package com.example.amfootball.ui.actions.forms
 
-import android.net.Uri
-
 /**
  * Data class que agrupa as ações lambda necessárias para manipular o estado de um formulário de Equipa.
  *

@@ -24,7 +24,7 @@ import javax.inject.Singleton
 class CalendarManager @Inject constructor(
     private val calendarRepository: CalendarRepository,
     private val calendarPreferences: CalendarPreference
-){
+) {
 
     /**
      * Verifica se um jogo específico (dado o seu ID da API) já foi adicionado ao calendário.
@@ -101,7 +101,10 @@ class CalendarManager @Inject constructor(
                 Log.e("CalendarDebug", "Falha ao apagar evento (Permissão ou ID inválido).")
             }
         } else {
-            Log.e("CalendarDebug", "ERRO: EventID é NULL. Este jogo não estava associado no calendário local.")
+            Log.e(
+                "CalendarDebug",
+                "ERRO: EventID é NULL. Este jogo não estava associado no calendário local."
+            )
         }
     }
 
@@ -139,13 +142,22 @@ class CalendarManager @Inject constructor(
         val eventId = calendarPreferences.getEventId(matchId)
 
         if (eventId != null) {
-            calendarRepository.updateEvent(
+            Log.d("CalendarDebug", "A atualizar evento ID: $eventId para data: $newStart")
+            val success = calendarRepository.updateEvent(
                 eventId = eventId,
                 title = null,
                 description = null,
                 beginTime = newStart,
                 endTime = newEnd
             )
+
+            if (success) {
+                Log.d("CalendarDebug", "Evento atualizado com sucesso!")
+            } else {
+                Log.e("CalendarDebug", "Falha ao atualizar. O evento $eventId ainda existe no calendário?")
+            }
+        } else {
+            Log.e("CalendarDebug", "ERRO CRÍTICO: Tentativa de adiar jogo $matchId, mas não tenho o ID do evento localmente.")
         }
     }
 

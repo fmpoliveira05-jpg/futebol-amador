@@ -8,7 +8,7 @@
 
     <string name="team_form">Forma da Equipa</string>
     <string name="no_game_realized">Sem jogos realizados</string>
-    
+
     <string name="game_Home">C</string>
     <string name="game_away">F</string>
 </resources>

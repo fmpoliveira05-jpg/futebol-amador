@@ -21,9 +21,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.UserConst
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
 import com.example.amfootball.data.filters.FilterMemberShipRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
+import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -37,18 +43,14 @@ import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
-import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
-import com.example.amfootball.core.utils.Patterns
-import com.example.amfootball.core.utils.UserConst
-import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.ui.actions.filters.ButtonFilterActions
-import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
-import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
+import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.ListMemberShipRequestMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
+import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
 import java.time.format.DateTimeFormatter
 
-//TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
+//TODO: Falta apenas o botão showMoreItens
 /**
  * Ecrã de Listagem de Pedidos de Adesão (Membership Requests).
  *
@@ -60,10 +62,6 @@ import java.time.format.DateTimeFormatter
  * 2. Construir as ações de filtro e de item (callbacks).
  * 3. Delegar a renderização visual para [ContentListMemberShipRequest].
  *
- * **Nota de Implementação (TODO):**
- * Atualmente exibe a mesma lista independentemente do papel do utilizador.
- * Futuramente, deve adaptar-se para diferenciar entre "Pedidos recebidos pela Equipa" (Visão Admin)
- * e "Convites recebidos pelo Jogador" (Visão Player).
  *
  * @param navHostController Controlador de navegação para transitar para detalhes ou aceitar pedidos.
  * @param viewModel ViewModel injetado via Hilt que fornece os dados e lógica de negócio.
@@ -92,6 +90,11 @@ fun ListMemberShipRequest(
         acceptMemberShipRequest = viewModel::acceptMemberShipRequest,
         rejectMemberShipRequest = viewModel::rejectMemberShipRequest,
         showMore = viewModel::showMore
+    )
+
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
     )
 
     ContentListMemberShipRequest(
@@ -266,15 +269,11 @@ private fun ListMemberShipRequestContent(
     itemsActions: ItemsMemberShipRequest,
     navHostController: NavHostController
 ) {
-    var receiver = ""
-    var sender = ""
+    val requestId = membershipRequest.id
+    var senderId = membershipRequest.team.id
 
     if (membershipRequest.isPlayerSender) {
-        sender = membershipRequest.player.id
-        receiver = membershipRequest.team.id
-    } else {
-        sender = membershipRequest.team.id
-        receiver = membershipRequest.player.id
+        senderId = membershipRequest.player.id
     }
 
     GenericListItem(
@@ -312,24 +311,24 @@ private fun ListMemberShipRequestContent(
         trailing = {
             ItemAcceptRejectAndShowMore(
                 accept = {
-                    itemsActions.acceptMemberShipRequest(
-                        receiver,
-                        membershipRequest.id,
-                        membershipRequest.isPlayerSender,
-                        navHostController
-                    )
+                    itemsActions.acceptMemberShipRequest(requestId, senderId) {
+                        navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+
+                            launchSingleTop = true
+                        }
+                    }
                 },
                 reject = {
                     itemsActions.rejectMemberShipRequest(
-                        receiver,
-                        membershipRequest.id,
-                        membershipRequest.isPlayerSender,
+                        requestId,
                     )
                 },
                 showMore = {
                     itemsActions.showMore(
-                        sender,
-                        membershipRequest.isPlayerSender,
+                        senderId,
                         navHostController,
                     )
                 }

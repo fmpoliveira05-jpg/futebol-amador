@@ -23,21 +23,21 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.PitchConst
+import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
 import com.example.amfootball.domains.enums.UserRole
-import com.example.amfootball.ui.previewsMocks.ProfileTeamMocks
-import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.actions.profiles.ProfileTeamAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.lists.ProfilesImageString
 import com.example.amfootball.ui.components.pages.team.ProfileTeamDialogDelte
 import com.example.amfootball.ui.components.pages.team.RowButtonsProfileTeam
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ProfileTeamMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.ProfileTeamViewModel
-import com.example.amfootball.core.utils.PitchConst
-import com.example.amfootball.core.utils.TeamConst
-import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
-import com.example.amfootball.ui.actions.profiles.ProfileTeamAction
 
 //TODO: Colocar mapa com a morada da Team
 /**
@@ -65,7 +65,7 @@ fun ProfileTeamScreen(
         uiState = uiState,
         profileTeamAction = ProfileTeamAction(
             onEditClick = {
-                viewModel.updateTeam (
+                viewModel.updateTeam(
                     onSucess = {
                         navHostController.navigate("${Routes.TeamRoutes.UPDATE_TEAM.route}/${profileTeam.value.id}") {
                             launchSingleTop = true

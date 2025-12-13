@@ -17,14 +17,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.data.remote.dtos.match.ResultMatchDto
 import com.example.amfootball.domains.errors.formErrors.FinishMatchFormErrors
+import com.example.amfootball.ui.actions.forms.FormFinishMatchActions
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
-import com.example.amfootball.core.utils.GeneralConst
-import com.example.amfootball.data.remote.dtos.match.ResultMatchDto
-import com.example.amfootball.ui.actions.forms.FormFinishMatchActions
 
 //TODO: Mandar também o idMatch e depois com base disso fazer um pedido há API para carregar as teams da match
 /**

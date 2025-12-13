@@ -48,6 +48,7 @@ class AuthViewModel @Inject constructor(
     init {
         checkLoginStatus()
     }
+
     /**
      * Função utilitária para alterar o estado de autenticação de forma manual.
      *

@@ -15,11 +15,11 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.rule.GrantPermissionRule
 import com.example.amfootball.MainActivity
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.match.TypeMatch
 import com.example.amfootball.data.network.instances.FireBaseInstance
 import com.example.amfootball.data.network.instances.NetworkModule
 import com.example.amfootball.data.network.interfaces.BaseEndpoints
 import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
+import com.example.amfootball.domains.enums.match.TypeMatch
 import com.example.amfootball.mockWebServer.TestFirebaseModule
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.utils.JsonReader

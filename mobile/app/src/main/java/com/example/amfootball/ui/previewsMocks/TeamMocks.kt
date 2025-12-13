@@ -13,6 +13,9 @@ import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.enums.TypeMember
 import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
+import com.example.amfootball.ui.previewsMocks.CalendarMocks.filterActions
+import com.example.amfootball.ui.previewsMocks.CalendarMocks.itemActions
+import com.example.amfootball.ui.previewsMocks.CalendarMocks.listNormal
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDateTime
 import javax.inject.Singleton
@@ -299,8 +302,8 @@ object ListPostPoneMatchMocks {
      */
     val mockItemActions =
         _root_ide_package_.com.example.amfootball.ui.actions.itemsList.ItemsListPostPoneMatchActions(
-            acceptPostPoneMatch = {_, _, _ -> },
-            rejectPostPoneMatch = {_, _ ->},
+            acceptPostPoneMatch = { _, _, _ -> },
+            rejectPostPoneMatch = { _, _ -> },
             showMoreInfo = { _, _ -> }
         )
 
@@ -315,6 +318,7 @@ object ListPostPoneMatchMocks {
         name = "Minha Equipa",
         image = ""
     )
+
     /**
      * Lista estática de pedidos de adiamento com cenários de teste.
      *

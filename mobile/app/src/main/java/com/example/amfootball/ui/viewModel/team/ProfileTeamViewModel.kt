@@ -2,13 +2,13 @@ package com.example.amfootball.ui.viewModel.team
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
 import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -78,7 +78,7 @@ class ProfileTeamViewModel @Inject constructor(
     }
 
     fun updateTeam(onSucess: () -> Unit) {
-        if(sessionManager.getUserProfile()?.role != UserRole.ADMIN_TEAM) {
+        if (sessionManager.getUserProfile()?.role != UserRole.ADMIN_TEAM) {
             updateToast(R.string.toast_admin_only_edit)
             return
         }
@@ -99,8 +99,7 @@ class ProfileTeamViewModel @Inject constructor(
         val teamIdFinal: String?
         if (teamId != null) {
             teamIdFinal = teamId
-        }
-        else if (profile.effectiveTeamId.isNotEmpty()) {
+        } else if (profile.effectiveTeamId.isNotEmpty()) {
             teamIdFinal = profile.effectiveTeamId
         } else {
             updateToast(R.string.toast_admin_only_delete)
@@ -114,7 +113,7 @@ class ProfileTeamViewModel @Inject constructor(
             sessionManager.updateTeamIdUser(teamId = null)
 
             //Emite o evento para remover os players todos da equipa
-            globalEventBus.emitEvent(AppEvent.TeamDeleted(message = "Equipa eliminada com sucesso!"))
+            globalEventBus.emitEvent(AppEvent.UpdateHomePage(message = "Equipa eliminada com sucesso!"))
 
             //onSucess()
         }

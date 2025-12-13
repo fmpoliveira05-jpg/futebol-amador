@@ -11,16 +11,8 @@ package com.example.amfootball.data.events
  */
 sealed interface AppEvent {
 
-    /**
-     * Evento emitido após a exclusão bem-sucedida de um time.
-     *
-     * Este evento pode ser usado para notificar diferentes partes da aplicação:
-     * - O ViewModel que contém a lista de times para recarregá-la.
-     * - A UI para exibir uma mensagem de confirmação (ex: Snackbar).
-     *
-     * @property message Uma mensagem opcional de feedback ou metadado sobre a exclusão.
-     */
-    data class TeamDeleted(val message: String) : AppEvent
+
+    data class UpdateHomePage(val message: String) : AppEvent
 
     /**
      * Evento emitido quando o usuário é desconectado (logout).

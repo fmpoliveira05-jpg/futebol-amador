@@ -3,12 +3,12 @@ package com.example.amfootball.ui.viewModel.auth
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.domains.errors.ErrorMessage
-import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.interfaces.services.OpenStreetMapService
 import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
 import com.example.amfootball.data.remote.services.AuthService
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.domains.validators.SignUpField
 import com.example.amfootball.domains.validators.validateSignUpForm
 import com.example.amfootball.ui.navigation.objects.Routes
@@ -60,6 +60,7 @@ class SignupViewmodel @Inject constructor(
     }
 
     val displayDateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
     init {
         stopLoading()
     }
@@ -134,8 +135,8 @@ class SignupViewmodel @Inject constructor(
             _foundLat.value = results[0].lat.toDoubleOrNull()
             _foundLon.value = results[0].lon.toDoubleOrNull()
 
-            }
         }
+    }
 
 
     fun submitConfirmation(navHostController: NavHostController) {
@@ -145,9 +146,9 @@ class SignupViewmodel @Inject constructor(
             authService.registerUser(finalDto)
 
             navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
-            popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
-            launchSingleTop = true
-        }
+                popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
+                launchSingleTop = true
+            }
 
 
         }
@@ -160,7 +161,7 @@ class SignupViewmodel @Inject constructor(
         val validationResult = validateSignUpForm(
             name = currentDto.userName,
             phone = currentDto.phone,
-            height = if(currentDto.height == 0) "" else currentDto.height.toString(),
+            height = if (currentDto.height == 0) "" else currentDto.height.toString(),
             email = currentDto.email,
             password = currentDto.password,
             passwordVerification = _passwordVerification.value,
@@ -169,21 +170,24 @@ class SignupViewmodel @Inject constructor(
             address = currentDto.address
         )
         if (!validationResult.isValid) {
-            if (validationResult.errorMessageId !=null) {
-                val errorMsg = ErrorMessage(messageId = validationResult.errorMessageId, args = validationResult.args)
-            val errors = when (validationResult.fieldName) {
-                SignUpField.NAME.name -> SignUpFormErrors(nameError = errorMsg)
-                SignUpField.EMAIL.name -> SignUpFormErrors(emailError = errorMsg)
-                SignUpField.PHONE.name -> SignUpFormErrors(phoneError = errorMsg)
-                SignUpField.ADDRESS.name -> SignUpFormErrors(addressError = errorMsg)
-                SignUpField.HEIGHT.name -> SignUpFormErrors(heightError = errorMsg)
-                SignUpField.POSITION.name -> SignUpFormErrors(positionError = errorMsg)
-                SignUpField.DATE_OF_BIRTH.name -> SignUpFormErrors(dateError = errorMsg)
-                SignUpField.PASSWORD.name -> SignUpFormErrors(passwordError = errorMsg)
-                SignUpField.PASSWORD_VERIFICATION.name -> SignUpFormErrors(passwordVerifyError = errorMsg)
-                else -> SignUpFormErrors()
-            }
-            formErrors.value = errors
+            if (validationResult.errorMessageId != null) {
+                val errorMsg = ErrorMessage(
+                    messageId = validationResult.errorMessageId,
+                    args = validationResult.args
+                )
+                val errors = when (validationResult.fieldName) {
+                    SignUpField.NAME.name -> SignUpFormErrors(nameError = errorMsg)
+                    SignUpField.EMAIL.name -> SignUpFormErrors(emailError = errorMsg)
+                    SignUpField.PHONE.name -> SignUpFormErrors(phoneError = errorMsg)
+                    SignUpField.ADDRESS.name -> SignUpFormErrors(addressError = errorMsg)
+                    SignUpField.HEIGHT.name -> SignUpFormErrors(heightError = errorMsg)
+                    SignUpField.POSITION.name -> SignUpFormErrors(positionError = errorMsg)
+                    SignUpField.DATE_OF_BIRTH.name -> SignUpFormErrors(dateError = errorMsg)
+                    SignUpField.PASSWORD.name -> SignUpFormErrors(passwordError = errorMsg)
+                    SignUpField.PASSWORD_VERIFICATION.name -> SignUpFormErrors(passwordVerifyError = errorMsg)
+                    else -> SignUpFormErrors()
+                }
+                formErrors.value = errors
             }
 
         } else {

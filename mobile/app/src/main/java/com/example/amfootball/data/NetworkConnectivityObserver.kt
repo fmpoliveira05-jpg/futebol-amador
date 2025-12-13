@@ -36,7 +36,7 @@ class NetworkConnectivityObserver @Inject constructor(
 
     /**
      * Instância do serviço de sistema [android.net.ConnectivityManager].
-     * Utilizado para registar callbacks de rede e consultar as capacidades ativas.
+     * Utilizado para registaar callbacks de rede e consultar as capacidades ativas.
      */
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -113,9 +113,10 @@ class NetworkConnectivityObserver @Inject constructor(
             }
         }
 
-        //Configuração do Request: Estamos interessados em qualquer rede que possua capacidade de INTERNET
         val networkRequest = NetworkRequest.Builder()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build()
 
         //Registo do callback no sistema

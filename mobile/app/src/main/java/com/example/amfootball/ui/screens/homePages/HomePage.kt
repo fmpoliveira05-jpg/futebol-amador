@@ -22,19 +22,19 @@ import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
-import com.example.amfootball.ui.actions.homePageActions.HomePageActions
 import com.example.amfootball.domains.enums.UserRole
-import com.example.amfootball.ui.previewsMocks.UiStateMock
-import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.actions.homePageActions.HomePageActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.ActionCardSection
+import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.components.notification.ToastHandler
 import com.example.amfootball.ui.components.pages.homePage.ActionCardCreateTeam
 import com.example.amfootball.ui.components.pages.homePage.ActionCardListMembershipRequests
 import com.example.amfootball.ui.components.pages.homePage.ActionCardListTeam
 import com.example.amfootball.ui.components.pages.homePage.ActionCardMyTeam
-import com.example.amfootball.ui.components.notification.OfflineBanner
-import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.HomePageMock
+import com.example.amfootball.ui.previewsMocks.UiStateMock
 import com.example.amfootball.ui.viewModel.homePages.HomePageViewModel
 
 /**
@@ -77,7 +77,7 @@ fun HomePageScreen(
             viewModel.onNavigationToRequests(
                 idPlayer = id,
                 onSuccessNavigation = {
-                    globalNavController.navigate("${Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route}/${id}") {
+                    globalNavController.navigate(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST.route) {
                         launchSingleTop = true
                     }
                 }

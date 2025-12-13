@@ -1,14 +1,13 @@
 package com.example.amfootball.ui.viewModel.homePages
 
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.UserRole
-import com.example.amfootball.data.events.GlobalEventBus
-import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.services.PlayerService
 import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -159,7 +158,7 @@ class TeamHomePageViewModel @Inject constructor(
         launchDataLoad {
             val userId = sessionManager.getUserProfile()?.loginResponseDto?.localId
 
-            if(userId == null) {
+            if (userId == null) {
                 return@launchDataLoad
             }
 

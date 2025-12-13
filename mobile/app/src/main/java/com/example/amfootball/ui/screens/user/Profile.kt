@@ -16,18 +16,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.amfootball.R
-import com.example.amfootball.data.events.UiState
-import com.example.amfootball.ui.components.LoadingPage
-import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.lists.ProfilesImageString
-import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.PlayerConst
 import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.ui.components.LoadingPage
+import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.components.lists.ProfilesImageString
 import com.example.amfootball.ui.previewsMocks.ProfileUserMock
+import com.example.amfootball.ui.theme.AMFootballTheme
+import com.example.amfootball.ui.viewModel.user.ProfilePlayerViewModel
 
 /**
  * Ecrã principal de Perfil do Jogador (Stateful).

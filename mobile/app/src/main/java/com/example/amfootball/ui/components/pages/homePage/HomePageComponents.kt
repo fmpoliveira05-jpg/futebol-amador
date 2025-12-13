@@ -58,6 +58,13 @@ fun ActionCardListMembershipRequests(onNavigationToRequests: () -> Unit) {
     )
 }
 
+/**
+ * Cartão de Ação (Action Card) específico para **Navegar para a Página Principal da Equipa**.
+ *
+ * Visível quando o utilizador já pertence a uma equipa. Utiliza o ícone [Icons.Default.Home].
+ *
+ * @param onNavigateToTeamHome Callback a executar no clique, que deve navegar para a Home Page da equipa.
+ */
 @Composable
 fun ActionCardMyTeam(onNavigateToTeamHome: () -> Unit) {
     ActionCard(

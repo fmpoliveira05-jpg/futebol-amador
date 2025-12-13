@@ -13,10 +13,7 @@ import androidx.navigation.NavHostController
  * @property showMore Ação para visualizar o perfil ou detalhes de quem enviou o pedido.
  */
 data class ItemsMemberShipRequest(
-    val acceptMemberShipRequest: (
-        idReceiver: String, idRequest: String,
-        isPlayerSender: Boolean, navHostController: NavHostController
-    ) -> Unit,
-    val rejectMemberShipRequest: (idReceiver: String, idRequest: String, isPlayerSender: Boolean) -> Unit,
-    val showMore: (idSender: String, isPlayerSender: Boolean, navHostController: NavHostController) -> Unit
+    val acceptMemberShipRequest: (idRequest: String, idSender: String, onSucess: () -> Unit) -> Unit,
+    val rejectMemberShipRequest: (idRequest: String) -> Unit,
+    val showMore: (idSender: String, navHostController: NavHostController) -> Unit
 )

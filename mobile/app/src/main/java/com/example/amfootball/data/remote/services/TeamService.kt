@@ -1,14 +1,17 @@
 package com.example.amfootball.data.remote.services
 
+import com.example.amfootball.core.utils.safeApiCallWithNotReturn
+import com.example.amfootball.core.utils.safeApiCallWithReturn
+import com.example.amfootball.data.filters.FilterMemberShipRequest
 import com.example.amfootball.data.filters.FilterMembersTeam
 import com.example.amfootball.data.filters.FiltersListTeam
 import com.example.amfootball.data.filters.toQueryMap
-import com.example.amfootball.core.utils.safeApiCallWithNotReturn
-import com.example.amfootball.core.utils.safeApiCallWithReturn
+import com.example.amfootball.data.interfaces.api.PlayerApi
 import com.example.amfootball.data.interfaces.api.TeamApi
 import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -19,26 +22,30 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Repositório responsável pela lógica de negócio e manipulação de dados de Equipas.
+ * Serviço responsável pela lógica de negócio e manipulação de dados de **Equipas**.
  *
- * Esta classe centraliza todas as operações relacionadas com equipas, desde a visualização de perfil (CRUD),
- * gestão de membros (promover, despromover, remover) até à pesquisa filtrada.
+ * Esta classe centraliza todas as interações com a [TeamApi], incluindo:
+ * - Operações CRUD (Criar, Ler, Atualizar, Apagar).
+ * - Gestão de estatísticas e visualização de perfis.
+ * - Gestão de Membros (Plantel, Staff, Promoções e Expulsões).
+ * - Gestão de Pedidos de Adesão (Membership Requests).
  *
  * A gestão de erros e validação de respostas HTTP é delegada nos utilitários [safeApiCallWithReturn]
- * e [safeApiCallWithNotReturn], garantindo um código limpo e livre de tratamento de erros repetitivo.
+ * e [safeApiCallWithNotReturn], garantindo consistência e segurança.
  *
  * @property teamApi A interface Retrofit injetada para comunicação com o backend.
  */
 @Singleton
 class TeamService @Inject constructor(
-    private val teamApi: TeamApi
+    private val teamApi: TeamApi,
+    private val playerApi: PlayerApi
 ) {
 
     /**
      * Obtém o perfil completo de uma equipa para visualização detalhada.
      *
      * @param teamId O ID da equipa.
-     * @return [ProfileTeamDto] contendo estatísticas, membros e informações gerais.
+     * @return [ProfileTeamDto] contendo estatísticas, membros, próximos jogos e histórico.
      * @throws Exception Propagada automaticamente em caso de erro de API ou rede.
      */
     suspend fun getTeamProfile(teamId: String): ProfileTeamDto {
@@ -47,25 +54,38 @@ class TeamService @Inject constructor(
         }
     }
 
+    /**
+     * Obtém os dados resumidos para a "Home Page" ou Dashboard da equipa.
+     *
+     * @param teamId O ID da equipa.
+     * @return [HomePageTeamDto] com métricas rápidas e atalhos de gestão.
+     */
     suspend fun getHomePageTeam(teamId: String): HomePageTeamDto {
         return safeApiCallWithReturn {
             teamApi.getHomePageTeam(teamId = teamId)
         }
     }
 
+    /**
+     * Obtém a tabela de classificação (Leaderboard).
+     *
+     * **Nota:** Atualmente retorna um objeto vazio/mock. Implementação pendente no backend?
+     *
+     * @return [TeamDto] representando a classificação.
+     */
     suspend fun getLeaderBoard(): TeamDto {
         return TeamDto()
     }
 
     /**
-     * Obtém os dados de uma equipa formatados para o formulário de edição.
+     * Obtém os dados de uma equipa formatados especificamente para o formulário de edição.
      *
-     * Este método demonstra um padrão eficiente:
-     * 1. Obtém o perfil completo da API de forma segura.
-     * 2. Aplica a função de extensão `.toFormTeamDto()` no resultado bem-sucedido.
+     * Fluxo:
+     * 1. Obtém o perfil completo via [getTeamProfile].
+     * 2. Converte para [FormTeamDto] usando a extensão [toFormTeamDto].
      *
      * @param teamId O ID da equipa a editar.
-     * @return [FormTeamDto] pronto para preencher os campos do formulário.
+     * @return [FormTeamDto] preenchido com os dados atuais.
      */
     suspend fun getTeamToUpdate(teamId: String): FormTeamDto {
         return safeApiCallWithReturn {
@@ -74,11 +94,12 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Obtém o nome e dados básicos de uma equipa adversária.
-     * Útil para exibir cabeçalhos ou resumos em listas de jogos.
+     * Obtém dados básicos de uma equipa (geralmente adversária).
+     *
+     * Útil para exibir cabeçalhos de jogos, listas de oponentes ou históricos simples.
      *
      * @param teamId O ID da equipa adversária.
-     * @return [TeamDto] com informações essenciais (Nome, ID, Logo).
+     * @return [TeamDto] contendo apenas informações essenciais (Nome, Logo, ID).
      */
     suspend fun getNameTeam(teamId: String): TeamDto {
         return safeApiCallWithReturn {
@@ -87,12 +108,10 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Obtém uma lista de equipas com base em critérios de filtro (Pesquisa).
+     * Pesquisa e lista equipas com base em filtros.
      *
-     * Converte o objeto de filtros em Query Map antes de invocar a API.
-     *
-     * @param filter Objeto de filtros ou `null` para listar todas.
-     * @return Lista de [ItemTeamInfoDto] resumidos.
+     * @param filter Objeto com critérios de pesquisa (Localização, Nome, Nível) ou `null` para todas.
+     * @return Lista de [ItemTeamInfoDto] com os resultados resumidos.
      */
     suspend fun getListTeam(filter: FiltersListTeam?): List<ItemTeamInfoDto> {
         val filterMap = filter?.toQueryMap() ?: emptyMap()
@@ -102,18 +121,94 @@ class TeamService @Inject constructor(
         }
     }
 
+    /**
+     * Lista equipas elegíveis para convite de jogos amigáveis.
+     *
+     * @param teamId O ID da minha equipa (para excluir da lista ou aplicar lógica de proximidade).
+     * @param filter Filtros de pesquisa.
+     * @return Lista de [ItemTeamInfoDto].
+     */
+    suspend fun getListTeamMatchInvite(teamId: String, filter: FiltersListTeam?): List<ItemTeamInfoDto> {
+        val filterMap = filter?.toQueryMap() ?: emptyMap()
+
+        return safeApiCallWithReturn {
+            teamApi.getListTeamMatchInvite(teamId = teamId, filters = filterMap)
+        }
+    }
+
+    /**
+     * Lista as equipas que têm interações de pedidos de adesão (Membership) com um jogador específico.
+     *
+     * @param playerId O ID do jogador.
+     * @param filter Filtros opcionais.
+     * @return Lista de [ItemTeamInfoDto] representando as equipas envolvidas nos pedidos.
+     */
+    suspend fun getListTeamMemberShipRequest(playerId: String, filter: FiltersListTeam?): List<ItemTeamInfoDto> {
+        val filterMap = filter?.toQueryMap() ?: emptyMap()
+
+        return safeApiCallWithReturn {
+            teamApi.getListTeamMembershipRequest(playerId = playerId, filters = filterMap)
+        }
+    }
+
+    /**
+     * Um **Jogador** envia um pedido para se juntar a uma **Equipa**.
+     *
+     * @param playerId O ID do jogador que faz o pedido.
+     * @param teamId O ID da equipa alvo.
+     * @return O objeto [MembershipRequestInfoDto] criado.
+     */
     suspend fun playerSendMembershipRequestToTeam(playerId: String, teamId: String): MembershipRequestInfoDto {
         return safeApiCallWithReturn {
             val request = InviteTeamRequest(teamId)
-            teamApi.sendMemberShipRequest(playerId = playerId, request = request)
+            playerApi.sendMemberShipRequestToTeam(playerId = playerId, request = request)
+        }
+    }
+
+    /**
+     * Lista os pedidos de adesão recebidos pela equipa (ex: Jogadores que querem entrar).
+     *
+     * @param teamId O ID da equipa (Administrador).
+     * @param filter Filtros (ex: Mostrar apenas PENDENTES).
+     * @return Lista de [MembershipRequestInfoDto].
+     */
+    suspend fun getListMemberShipRequest(teamId: String, filter: FilterMemberShipRequest?): List<MembershipRequestInfoDto> {
+        return safeApiCallWithReturn {
+            val filters = filter?.toQueryMap() ?: emptyMap()
+            teamApi.listMemberShipRequest(teamId = teamId, filters = filters)
+        }
+    }
+
+    /**
+     * A Equipa **Aceita** um pedido de adesão de um jogador.
+     *
+     * @param teamId O ID da equipa.
+     * @param requestId O ID do pedido a aceitar.
+     */
+    suspend fun acceptMemberShipRequest(teamId: String, requestId: String) {
+        safeApiCallWithNotReturn {
+            val request = RequestMemberShip(requestId = requestId)
+            teamApi.acceptMemberShipRequest(teamId = teamId, request = request)
+        }
+    }
+
+    /**
+     * A Equipa **Rejeita** um pedido de adesão.
+     *
+     * @param teamId O ID da equipa.
+     * @param requestId O ID do pedido a rejeitar.
+     */
+    suspend fun rejectMemberShipRequest(teamId: String, requestId: String) {
+        safeApiCallWithNotReturn {
+            teamApi.rejectMemberShipRequest(teamId = teamId, requestId = requestId)
         }
     }
 
     /**
      * Cria uma nova equipa na plataforma.
      *
-     * @param team O DTO com os dados do formulário de criação.
-     * @return O ID da nova equipa gerada (String).
+     * @param team O DTO contendo os dados do formulário (Nome, Emblema, Campo, etc.).
+     * @return O [FormTeamDto] retornado pelo servidor, contendo o ID gerado.
      */
     suspend fun createTeam(team: FormTeamDto): FormTeamDto {
         return safeApiCallWithReturn {
@@ -135,13 +230,9 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Envia o pedido de eliminação da equipa para a API.
+     * Elimina permanentemente uma equipa.
      *
-     * Utiliza a função [safeApiCallWithNotReturn] para envolver a chamada,
-     * garantindo que erros de rede ou da API são tratados de forma segura
-     * (e convertidos, tipicamente, para um erro UI).
-     *
-     * @param teamId O identificador único (ID) da equipa a ser eliminada.
+     * @param teamId O identificador da equipa a remover.
      */
     suspend fun deleteTeam(teamId: String) {
         safeApiCallWithNotReturn {
@@ -150,27 +241,22 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Lista os membros (jogadores/staff) de uma equipa, com filtros opcionais.
+     * Lista os membros (jogadores e staff) de uma equipa.
      *
      * @param teamId O ID da equipa.
-     * @param filter Critérios de filtragem (cargo, nome, etc.).
+     * @param filter Critérios de filtragem (ex: Por Posição, Por Nome).
      * @return Lista de [MemberTeamDto].
      */
-    suspend fun getListMembers(
-        teamId: String,
-        filter: FilterMembersTeam?
-    ): List<MemberTeamDto> {
-        val filters = filter?.toQueryMap() ?: emptyMap()
-
+    suspend fun getListMembers(teamId: String, filter: FilterMembersTeam?): List<MemberTeamDto> {
         return safeApiCallWithReturn {
+            val filters = filter?.toQueryMap() ?: emptyMap()
+
             teamApi.getListMembers(teamId = teamId, filters = filters)
         }
     }
 
     /**
-     * Promove um membro a Administrador da equipa.
-     *
-     * Utiliza [safeApiCallWithNotReturn] para uma operação sem retorno de dados.
+     * Promove um jogador a **Administrador/Capitão** da equipa.
      *
      * @param teamId O ID da equipa.
      * @param playerPromoteId O ID do jogador a promover.
@@ -182,7 +268,7 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Despromove um Administrador para membro normal.
+     * Despromove um Administrador para membro normal (remove privilégios de gestão).
      *
      * @param teamId O ID da equipa.
      * @param adminDemoteId O ID do administrador a despromover.

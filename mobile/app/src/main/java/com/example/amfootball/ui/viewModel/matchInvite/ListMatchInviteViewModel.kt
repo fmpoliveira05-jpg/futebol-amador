@@ -3,19 +3,20 @@ package com.example.amfootball.ui.viewModel.matchInvite
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.domains.errors.ErrorMessage
-import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
-import com.example.amfootball.data.filters.FilterCalendar
-import com.example.amfootball.data.filters.FilterMatchInvite
-import com.example.amfootball.data.manager.CalendarManager
-import com.example.amfootball.data.NetworkConnectivityObserver
-import com.example.amfootball.data.remote.services.MatchInviteService
-import com.example.amfootball.ui.navigation.objects.Routes
-import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import com.example.amfootball.core.extensions.toLocalDateTime
 import com.example.amfootball.core.utils.ListsSizesConst
 import com.example.amfootball.core.utils.UserConst
-import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.data.filters.FilterMatchInvite
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.manager.CalendarManager
 import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.remote.services.MatchInviteService
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,19 +44,20 @@ class ListMatchInviteViewModel @Inject constructor(
     private val matchInviteService: MatchInviteService,
     private val networkObserver: NetworkConnectivityObserver,
     private val savedStateHandle: SavedStateHandle,
-    private val calendarManager: CalendarManager
+    private val sessionManager: SessionManager,
 ) : ListsViewModels<MatchInviteDto>(networkObserver = networkObserver) {
 
     /**
      * ID da equipa atual, recuperado dos argumentos de navegação.
      * Usado em todas as chamadas à API que requerem contexto da equipa.
      */
-    private val teamId = savedStateHandle.get<String>("teamId")
+    private val teamId: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
      * Estado interno mutável (Backing Property) contendo os critérios de filtro atuais.
      */
-    private val filterState: MutableStateFlow<FilterMatchInvite> = MutableStateFlow(FilterMatchInvite())
+    private val filterState: MutableStateFlow<FilterMatchInvite> =
+        MutableStateFlow(FilterMatchInvite())
 
     /**
      * Fluxo imutável exposto para a UI que representa os filtros ativos.
@@ -66,7 +68,8 @@ class ListMatchInviteViewModel @Inject constructor(
     /**
      * Estado interno mutável contendo os erros de validação dos campos de filtro.
      */
-    private val filtersErrorState: MutableStateFlow<FilterMatchInviteError> = MutableStateFlow(FilterMatchInviteError())
+    private val filtersErrorState: MutableStateFlow<FilterMatchInviteError> =
+        MutableStateFlow(FilterMatchInviteError())
 
     /**
      * Fluxo imutável exposto para a UI contendo mensagens de erro nos filtros.
@@ -75,6 +78,7 @@ class ListMatchInviteViewModel @Inject constructor(
     val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState.asStateFlow()
 
     init {
+        teamId.value = sessionManager.getUserProfile()?.effectiveTeamId ?: ""
         loadDataList()
     }
 
@@ -89,9 +93,9 @@ class ListMatchInviteViewModel @Inject constructor(
      */
     private fun loadDataList() {
         launchDataLoad {
-            if (teamId != null) {
+            if (teamId.value.isNotBlank()) {
                 val list = matchInviteService.getListMatchInvite(
-                    teamId = teamId,
+                    teamId = teamId.value,
                     filter = filterState.value
                 )
 
@@ -191,16 +195,17 @@ class ListMatchInviteViewModel @Inject constructor(
      */
     fun acceptMatchInvite(idMatchInvite: String) {
         launchDataLoad {
-            if (teamId == null) {
+            val idTeam = teamId.value
+            if (idTeam.isBlank()) {
                 stopLoading()
                 return@launchDataLoad
             }
 
-            val match = matchInviteService.acceptMatchInvitee(teamId = teamId, matchInviteId = idMatchInvite)
+            val match = matchInviteService.acceptMatchInvitee(
+                teamId = idTeam,
+                matchInviteId = idMatchInvite
+            )
             removeItemFromList(idToRemove = idMatchInvite)
-
-            //TODO: Meter para adicionar no calendario de todos os jogadores da equipa e da equipa adversaria, de alguma forma
-            //calendarManager.addMatch(matchId = match.idMatch)
         }
     }
 
@@ -233,12 +238,14 @@ class ListMatchInviteViewModel @Inject constructor(
      */
     fun rejectMatchInvite(idMatchInvite: String) {
         launchDataLoad {
-            if (teamId == null) {
+            val idTeam = teamId.value
+
+            if (idTeam.isBlank()) {
                 stopLoading()
                 return@launchDataLoad
             }
 
-            matchInviteService.rejectMatchInivite(teamId = teamId, matchInviteId = idMatchInvite)
+            matchInviteService.rejectMatchInivite(teamId = idTeam, matchInviteId = idMatchInvite)
             removeItemFromList(idToRemove = idMatchInvite)
         }
     }
@@ -285,7 +292,10 @@ class ListMatchInviteViewModel @Inject constructor(
      * @param filter Os critérios de filtro a aplicar.
      * @return Uma nova lista contendo apenas os elementos que correspondem aos critérios.
      */
-    private fun filterOffline(originalList: List<MatchInviteDto>, filter: FilterMatchInvite): List<MatchInviteDto> {
+    private fun filterOffline(
+        originalList: List<MatchInviteDto>,
+        filter: FilterMatchInvite
+    ): List<MatchInviteDto> {
         return originalList.filter { item ->
             val name = filter.senderName.isNullOrBlank()
                     || item.opponent.name.contains(filter.senderName, ignoreCase = true)

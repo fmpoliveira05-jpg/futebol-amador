@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.previewsMocks
 
-import androidx.compose.runtime.mutableStateOf
 import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
@@ -13,7 +12,6 @@ import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
 import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
 import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
-import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 
 /**
  * Fornece dados fictícios (Mocks) e stubs de ações para o ecrã de Pesquisa/Listagem de Jogadores Globais.
@@ -178,7 +176,7 @@ object ListTeamMocks {
      */
     val mockItemActions =
         _root_ide_package_.com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction(
-            { _,_ -> }, { _ -> }, { _, _ -> }
+            { _, _ -> }, { _ -> }, { _ -> }
         )
 }
 
@@ -194,9 +192,9 @@ object ListMemberShipRequestMocks {
     )
 
     val itemsActions = ItemsMemberShipRequest(
-        acceptMemberShipRequest = { _, _, _, _ -> },
-        rejectMemberShipRequest = { _, _, _, -> },
-        showMore = { _, _, _ -> }
+        acceptMemberShipRequest = { _, _, _e -> },
+        rejectMemberShipRequest = { _ -> },
+        showMore = { _, _ -> }
     )
 
     val mockRequests = MembershipRequestInfoDto.generateMemberShipRequestPlayer()

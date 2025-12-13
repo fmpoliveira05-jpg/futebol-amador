@@ -16,7 +16,8 @@ import javax.inject.Inject
 class CalendarPreference @Inject constructor(
     @ApplicationContext context: Context
 ) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("calendar_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.getSharedPreferences("calendar_prefs", Context.MODE_PRIVATE)
 
     /**
      * Salva a associação entre uma partida e um evento do calendário.

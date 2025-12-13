@@ -185,5 +185,5 @@ dependencies {
     androidTestImplementation("org.mockito:mockito-core:5.7.0")
 
     //Signal R
-    implementation("com.microsoft.signalr:signalr:7.0.0")
+    implementation("com.microsoft.signalr:signalr:8.0.0")
 }

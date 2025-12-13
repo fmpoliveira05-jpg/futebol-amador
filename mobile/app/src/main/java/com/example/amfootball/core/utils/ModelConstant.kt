@@ -109,6 +109,8 @@ object TeamConst {
     /** Número mínimo de membros numa equipa. */
     const val MIN_MEMBERS = 1
 
+    const val MIN_MEMBERS_TO_MATCH = 11
+
     /** Lotação máxima de membros numa equipa. */
     const val MAX_MEMBERS = 32
 
@@ -205,6 +207,184 @@ object MatchConsts {
     const val MAX_HOURS_TO_POST_PONE = 48
 }
 
+/**
+ * Objeto utilitário que centraliza as constantes de rota base (Endpoints) da API REST.
+ *
+ * Estas constantes são utilizadas nas interfaces do Retrofit (`@GET`, `@POST`, etc.) para definir
+ * os caminhos dos recursos, evitando a duplicação de strings "hardcoded" e facilitando a
+ * manutenção caso a estrutura de URLs do backend sofra alterações.
+ *
+ * Exemplo de uso: `@GET("${BaseEndpoints.teamApi}/details/{id}")`
+ */
+object BaseEndpoints {
+
+    /**
+     * O prefixo raiz para todas as chamadas à API (ex: `https://dominio.com/api`).
+     */
+    const val API = "api"
+
+    /**
+     * Rota base para operações relacionadas com a conta de Utilizador genérica.
+     * Geralmente utilizada para Autenticação (Login, Registo de conta base).
+     * Valor: `api/User`
+     */
+    const val AUTH_API = "$API/User"
+
+    /**
+     * Rota base para operações relacionadas com o Calendário de Jogos.
+     * Inclui listagem de jogos, agendamento e resultados.
+     * Valor: `api/Calendar`
+     */
+    const val CALENDAR_API = "$API/Calendar"
+
+    /**
+     * Rota base para operações de Chat e Mensagens.
+     * Inclui criação de salas e histórico de mensagens.
+     * Valor: `api/Chat`
+     */
+    const val CHAT_API = "$API/Chat"
+
+    /**
+     * Rota base para consulta das Tabelas de Classificação (Leaderboards).
+     * Valor: `api/Leaderboard`
+     */
+    const val LEADBOARD_API = "$API/Leaderboard"
+
+    /**
+     * Rota base para gestão de dados de Jogadores.
+     * Utilizada para consultar perfis, editar informações e pesquisas de mercado.
+     * Valor: `api/Player`
+     */
+    const val PLAYER_API = "$API/Player"
+
+    /**
+     * Rota base para gestão de Equipas.
+     * Inclui criação, edição, consulta de detalhes e gestão de membros da equipa.
+     * Valor: `api/Team`
+     */
+    const val TEAM_API = "$API/Team"
+
+    /**
+     * Rota base para gestão de **Convites de Jogo (Match Invites)**.
+     * Utilizada para enviar, aceitar, recusar e negociar desafios de jogos entre equipas.
+     * Valor: `api/MatchInvite`
+     */
+    const val MATCH_INVITE_API = "$API/MatchInvite"
+
+    const val POSTPONED_MATCH_API = TEAM_API
+
+}
+
+/**
+ * Objeto utilitário que centraliza as constantes das chaves (Keys) de argumentos de navegação.
+ *
+ * Estas constantes são utilizadas para nomear os parâmetros nas rotas do Navigation Compose
+ * e para extrair os valores correspondentes do `BackStackEntry` nos ecrãs de destino.
+ *
+ * O uso deste objeto evita erros de digitação ("Magic Strings") e garante a consistência
+ * dos nomes dos parâmetros em toda a aplicação.
+ */
+object Arguments {
+
+    /**
+     * Chave utilizada para passar o Identificador Único (UUID) de uma **Equipa**.
+     *
+     * Usado em rotas como: Detalhes da Equipa, Edição de Equipa, Calendário da Equipa.
+     */
+    const val TEAM_ID = "teamId"
+
+    /**
+     * Chave utilizada para passar o Identificador Único (UUID) de uma **Equipa**.
+     *
+     * Alternativa ou redundância para [TEAM_ID].
+     */
+    const val ID_TEAM = "idTeam"
+
+    /**
+     * Chave utilizada para passar o Identificador Único (UUID) de um **Jogador**.
+     *
+     * Usado em rotas como: Perfil do Jogador, Chat Privado, Gestão de Membros.
+     */
+    const val PLAYER_ID = "playerId"
+
+    /**
+     * Chave utilizada para passar o Identificador Único de um **Jogo Agendado**.
+     *
+     * Usado em rotas como: Detalhes do Jogo, Resultado do Jogo.
+     */
+    const val MATCH_ID = "matchId"
+
+    /**
+     * Chave utilizada para passar o Identificador Único de um **Convite de Jogo**.
+     *
+     * Usado em rotas como: Negociação de Convite, Aceitar/Rejeitar Desafio.
+     */
+    const val MATCH_INVITE_ID = "matchInviteId"
+
+    /**
+     * Chave utilizada para passar o Identificador Único de um **Convite de Jogo**.
+     *
+     * Alternativa ou redundância para [MATCH_INVITE_ID].
+     */
+    const val ID_MATCH_INVITE = "idMatchInvite"
+
+    /**
+     * Chave utilizada para passar o Identificador Único de um **Pedido de Adesão** (Membership Request).
+     *
+     * Usado em rotas de gestão de pedidos de adesão de jogadores ou convites de equipa.
+     */
+    const val REQUEST_ID = "requestId"
+
+    /**
+     * Chave utilizada para passar o **Nome da Equipa**.
+     *
+     * Útil para exibir títulos ou informações contextuais na barra de topo, evitando
+     * a necessidade de carregar o objeto completo da equipa imediatamente.
+     */
+    const val TEAM_NAME = "teamName"
+
+    /**
+     * Chave utilizada para definir o **Modo de Operação** de um formulário.
+     *
+     * Geralmente transporta o nome de um Enum (ex: "CREATE", "EDIT", "VIEW") ou um valor inteiro,
+     * permitindo reutilizar o mesmo ecrã (Composable) para criar ou editar entidades.
+     */
+    const val FORM_MODE = "formMode"
+
+    /**
+     * Chave utilizada para definir o **Modo de Listagem de Jogadores** ([ListPlayerMode]).
+     *
+     * Determina se a lista deve exibir jogadores com equipa ou jogadores sem equipa (Free Agents).
+     */
+    const val LIST_PLAYER_MODE = "listPlayer"
+
+    /**
+     * Chave utilizada para definir o **Modo de Listagem de Equipas** ([ListTeamMode]).
+     *
+     * Determina o contexto da lista, como listar todas as equipas, equipas para convidar para jogo, etc.
+     */
+    const val LIST_TEAM_MODE = "listTeam"
+
+    /**
+     * Chave utilizada para definir o **Modo de Listagem de Pedidos de Adesão** ([ListMembershipRequestMode]).
+     *
+     * Determina se a lista deve exibir pedidos feitos por jogadores (para a equipa) ou convites feitos por equipas (para o jogador).
+     */
+    const val LIST_MEMBERSHIP_REQUEST_MODE = "listMemberShipRequest"
+}
+
+/**
+ * Objeto utilitário que armazena constantes relacionadas à configuração de notificações do Android.
+ *
+ * Estas constantes são usadas para identificar canais de notificação (Notification Channels),
+ * o que é essencial para o gerenciamento de notificações a partir do Android 8.0 (Oreo) e superior.
+ */
 object NotificationConst {
+    /**
+     * O ID único para o canal de notificação principal da equipa.
+     *
+     * Este canal é usado para notificações importantes relacionadas a mudanças no estado
+     * da equipa, jogos, convites e gestão de membros.
+     */
     const val TEAM_CHANNEL_ID = "team_channel_id"
 }

@@ -114,7 +114,7 @@ class PushNotificationService : FirebaseMessagingService() {
 
         val eventType = message.data["type"]
 
-        when(eventType) {
+        when (eventType) {
             "TEAM_DELETED" -> {
                 handleTeamDeleted(message = message)
             }
@@ -132,6 +132,9 @@ class PushNotificationService : FirebaseMessagingService() {
             }
             "ACCEPT_MATCH_INVITE" -> {
                 handleAcceptMatchInvite(message = message)
+            }
+            "ACCEPT_MEMBERSHIP_REQUEST_PLAYER_NOTIFY" -> {
+                handleAcceptMemberShipRequestByTeam(message = message)
             }
             else -> {
                 handleDefaultMessageReceiver(message = message)
@@ -180,7 +183,7 @@ class PushNotificationService : FirebaseMessagingService() {
         sessionManager.updateTeamIdUser(null)
 
         CoroutineScope(Dispatchers.Main).launch {
-            globalEventBus.emitEvent(AppEvent.TeamDeleted(message))
+            globalEventBus.emitEvent(AppEvent.UpdateHomePage(message))
         }
 
         notificationService.showNotificationTeam(
@@ -208,7 +211,7 @@ class PushNotificationService : FirebaseMessagingService() {
         sessionManager.updateRoleMemberTeam(true)
 
         CoroutineScope(Dispatchers.Main).launch {
-            globalEventBus.emitEvent(AppEvent.TeamDeleted(message))
+            globalEventBus.emitEvent(AppEvent.UpdateHomePage(message))
         }
 
         notificationService.showNotificationTeam(
@@ -236,7 +239,7 @@ class PushNotificationService : FirebaseMessagingService() {
         sessionManager.updateRoleMemberTeam(false)
 
         CoroutineScope(Dispatchers.Main).launch {
-            globalEventBus.emitEvent(AppEvent.TeamDeleted(message))
+            globalEventBus.emitEvent(AppEvent.UpdateHomePage(message))
         }
 
         notificationService.showNotificationTeam(
@@ -263,9 +266,9 @@ class PushNotificationService : FirebaseMessagingService() {
      */
     private fun handlePostPoneMatch(message: RemoteMessage) {
         val matchId = message.data["matchId"]
-        val newDateMillis = message.data["newDateMillis"]?.toLongOrNull()
+        val newDateMillisString = message.data["newDateMillis"]
+        val newDateMillis = newDateMillisString?.toLongOrNull()
 
-        // Dados opcionais para notificação visual
         val title = message.data["title"] ?: "Jogo Reagendado"
         val body = message.data["body"] ?: "A data do jogo foi alterada."
 
@@ -277,6 +280,8 @@ class PushNotificationService : FirebaseMessagingService() {
                 newStart = newDateMillis,
                 newEnd = endTime
             )
+        } else {
+            Log.e("FCM_DEBUG", "Dados inválidos recebidos para adiar jogo.")
         }
 
         notificationService.showNotificationTeam(
@@ -352,6 +357,40 @@ class PushNotificationService : FirebaseMessagingService() {
         notificationService.showNotificationTeam(
             title = notifTitle,
             message = notifBody,
+        )
+    }
+
+    /**
+     * Trata o evento de "Aceite de Pedido de Adesão" (ACCEPT_MEMBERSHIP_REQUEST_PLAYER_NOTIFY).
+     *
+     * Notifica o jogador de que o seu pedido de adesão a uma equipa foi aceite.
+     *
+     * **Ações:**
+     * 1. Extrai `teamId` e `playerId` do payload.
+     * 2. Atualiza o ID da equipa do utilizador e define o seu papel como jogador regular (`false`) no [sessionManager].
+     * 3. Emite um evento [AppEvent.UpdateHomePage] no [globalEventBus] para forçar a atualização da UI.
+     * 4. Exibe a notificação visual.
+     *
+     * @param message A [RemoteMessage] recebida.
+     */
+    private fun handleAcceptMemberShipRequestByTeam(message: RemoteMessage) {
+        val playerId = message.data["playerId"]
+        val teamId = message.data["teamId"]
+
+        val title = message.data["title"] ?: "Convite de adesão aceite"
+        val body = message.data["body"] ?: "Foi adicionado a uma nova equipa."
+
+        if (!teamId.isNullOrEmpty() && !playerId.isNullOrEmpty()) {
+            sessionManager.updateTeamIdUser(teamId = teamId)
+            sessionManager.updateRoleMemberTeam(false)
+            CoroutineScope(Dispatchers.Main).launch {
+                globalEventBus.emitEvent(AppEvent.UpdateHomePage("body"))
+            }
+        }
+
+        notificationService.showNotificationTeam(
+            title = title,
+            message = body,
         )
     }
 }

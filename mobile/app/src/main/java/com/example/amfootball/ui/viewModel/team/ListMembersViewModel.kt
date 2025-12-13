@@ -2,19 +2,19 @@ package com.example.amfootball.ui.viewModel.team
 
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.filters.FilterMembersTeam
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
+import com.example.amfootball.data.remote.services.TeamService
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.enums.TypeMember
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.filtersError.FilterMembersFilterError
-import com.example.amfootball.data.filters.FilterMembersTeam
-import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.NetworkConnectivityObserver
-import com.example.amfootball.data.remote.services.TeamService
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.core.utils.UserConst
-import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +52,8 @@ class ListMembersViewModel @Inject constructor(
     private val teamId: String = sessionManager.getUserProfile()?.effectiveTeamId ?: ""
 
     /** Estado atual dos filtros aplicados pelo utilizador. */
-    private val filterState: MutableStateFlow<FilterMembersTeam> = MutableStateFlow(FilterMembersTeam())
+    private val filterState: MutableStateFlow<FilterMembersTeam> =
+        MutableStateFlow(FilterMembersTeam())
     val uiFilter: StateFlow<FilterMembersTeam> = filterState.asStateFlow()
 
     /** Estado que contém os erros de validação dos filtros (ex: idade mínima maior que máxima). */
@@ -159,7 +160,7 @@ class ListMembersViewModel @Inject constructor(
      * @param playerId O ID do jogador a promover.
      */
     fun onPromoteMember(playerId: String) {
-        if(roleState.value != UserRole.ADMIN_TEAM) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
             updateToast(message = R.string.toast_admin_only_promote)
             return
         }
@@ -175,7 +176,7 @@ class ListMembersViewModel @Inject constructor(
      * @param adminId O ID do administrador a despromover.
      */
     fun onDemoteMember(adminId: String) {
-        if(roleState.value != UserRole.ADMIN_TEAM) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
             updateToast(message = R.string.toast_admin_only_demote)
             return
         }
@@ -191,7 +192,7 @@ class ListMembersViewModel @Inject constructor(
      * @param playerId O ID do membro a remover.
      */
     fun onRemovePlayer(playerId: String) {
-        if(roleState.value != UserRole.ADMIN_TEAM) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
             updateToast(message = R.string.toast_admin_only_remove_player)
             return
         }

@@ -63,7 +63,8 @@ class CalendarRepository @Inject constructor(
         }
 
         return try {
-            val uri: Uri? = context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
+            val uri: Uri? =
+                context.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
             uri?.lastPathSegment?.toLongOrNull()
         } catch (e: SecurityException) {
             Log.e("Calendar", "Erro de permissão: ${e.message}")
@@ -141,7 +142,8 @@ class CalendarRepository @Inject constructor(
      * @return O ID do calendário (Long) ou null se nenhum for encontrado/acessível.
      */
     private fun getPrimaryCalendarId(): Long? {
-        val projection = arrayOf(CalendarContract.Calendars._ID, CalendarContract.Calendars.IS_PRIMARY)
+        val projection =
+            arrayOf(CalendarContract.Calendars._ID, CalendarContract.Calendars.IS_PRIMARY)
 
         try {
             context.contentResolver.query(
@@ -166,10 +168,17 @@ class CalendarRepository @Inject constructor(
         return null
     }
 
+    /**
+     * Obtém os detalhes de um evento específico do calendário.
+     *
+     * Realiza uma query usando [CalendarContract.Events._ID] e mapeia os resultados para o DTO [CalendarEvent].
+     *
+     * @param eventId O ID do evento no Android a ser procurado.
+     * @return Um [CalendarEvent] se o evento for encontrado e acessível, ou `null` em caso de erro, falha de permissão ou se não for encontrado.
+     */
     fun getEvent(eventId: Long): CalendarEvent? {
         val uri = CalendarContract.Events.CONTENT_URI
 
-        // Colunas que queremos ler
         val projection = arrayOf(
             CalendarContract.Events.TITLE,
             CalendarContract.Events.DESCRIPTION,
@@ -182,17 +191,26 @@ class CalendarRepository @Inject constructor(
         val selectionArgs = arrayOf(eventId.toString())
 
         try {
-            context.contentResolver.query(uri, projection, selection, selectionArgs, null)?.use { cursor ->
-                if (cursor.moveToFirst()) {
-                    return CalendarEvent(
-                        title = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.TITLE)),
-                        description = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.DESCRIPTION)),
-                        start = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)),
-                        end = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Events.DTEND)),
-                        location = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.EVENT_LOCATION))
-                    )
+            context.contentResolver.query(uri, projection, selection, selectionArgs, null)
+                ?.use { cursor ->
+                    if (cursor.moveToFirst()) {
+                        return CalendarEvent(
+                            title = cursor.getString(cursor.getColumnIndexOrThrow(CalendarContract.Events.TITLE)),
+                            description = cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                    CalendarContract.Events.DESCRIPTION
+                                )
+                            ),
+                            start = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Events.DTSTART)),
+                            end = cursor.getLong(cursor.getColumnIndexOrThrow(CalendarContract.Events.DTEND)),
+                            location = cursor.getString(
+                                cursor.getColumnIndexOrThrow(
+                                    CalendarContract.Events.EVENT_LOCATION
+                                )
+                            )
+                        )
+                    }
                 }
-            }
         } catch (e: SecurityException) {
             Log.e("Calendar", "Erro de permissão ao ler evento: ${e.message}")
         } catch (e: Exception) {

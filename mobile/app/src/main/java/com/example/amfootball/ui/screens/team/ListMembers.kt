@@ -29,12 +29,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.filters.FilterMembersTeam
+import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.enums.TypeMember
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.domains.errors.filtersError.FilterMembersFilterError
-import com.example.amfootball.data.filters.FilterMembersTeam
-import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.ui.actions.filters.ButtonFilterActions
 import com.example.amfootball.ui.actions.filters.FilterMemberTeamAction
 import com.example.amfootball.ui.actions.itemsList.ItemsListMemberAction
@@ -60,7 +60,6 @@ import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.previewsMocks.ListMembersMocks
 import com.example.amfootball.ui.viewModel.team.ListMembersViewModel
 
-//TODO: Corrigir atualizar a ui State do user promovido e despromovido
 /**
  * Ecrã de Gestão e Listagem de Membros da Equipa.
  *
@@ -189,7 +188,12 @@ private fun ListMemberContent(
                         promote = { itemsListActions.onPromoteMember(member.id) },
                         despromote = { itemsListActions.onDemoteMember(member.id) },
                         remove = { itemsListActions.onRemovePlayer(member.id) },
-                        showMore = { itemsListActions.onShowMoreInfo(member.id, navHostController) },
+                        showMore = {
+                            itemsListActions.onShowMoreInfo(
+                                member.id,
+                                navHostController
+                            )
+                        },
                         role = role
                     )
                 },
@@ -394,7 +398,7 @@ private fun MemberTrailingButtons(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(start = 8.dp)
     ) {
-        if(role == UserRole.ADMIN_TEAM) {
+        if (role == UserRole.ADMIN_TEAM) {
             AdminItensListFields(
                 typeMember = typeMember,
                 promote = promote,

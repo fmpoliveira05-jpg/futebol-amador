@@ -4,13 +4,13 @@ import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.example.amfootball.R
-import com.example.amfootball.data.local.SettingsStore
-import com.example.amfootball.domains.enums.settings.AppLanguage
-import com.example.amfootball.domains.enums.settings.AppTheme
-import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.local.SettingsStore
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.domains.enums.settings.AppLanguage
+import com.example.amfootball.domains.enums.settings.AppTheme
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -181,11 +181,11 @@ class SettingsViewModel @Inject constructor(
         launchDataLoad(
             callApi = {
                 val player = repository.getUserProfile()
-                if(validProfile(player)) {
+                if (validProfile(player)) {
                     playerService.deletePlayerProfile(playerId = player!!.loginResponseDto!!.localId)
                     updateToast(R.string.toast_playerProfile_deleted)
                     repository.clearSession()
-                } else{
+                } else {
                     updateToast(R.string.toast_playerProfile_error)
                 }
                 finishLoading()
@@ -202,7 +202,7 @@ class SettingsViewModel @Inject constructor(
         launchDataLoad(
             callApi = {
                 val player = repository.getUserProfile()
-                if(validProfile(player)) {
+                if (validProfile(player)) {
                     playerService.updatePlayerProfile(playerProfile = player!!)
                     updateToast(R.string.toast_playerProfile_edited)
                     finishLoading()
@@ -212,8 +212,8 @@ class SettingsViewModel @Inject constructor(
         )
     }
 
-    private fun validProfile(profile: PlayerProfileDto?) : Boolean{
-        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId == null){
+    private fun validProfile(profile: PlayerProfileDto?): Boolean {
+        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId == null) {
             updateToast(R.string.toast_playerProfile_error)
             return false
         }

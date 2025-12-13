@@ -18,10 +18,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.Patterns
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
 import com.example.amfootball.data.filters.FilterMatchInvite
-import com.example.amfootball.ui.previewsMocks.ListMatchInviteMocks
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterMatchInviteActions
+import com.example.amfootball.ui.actions.itemsList.ItemListMatchIniviteActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.AcceptButton
 import com.example.amfootball.ui.components.buttons.EditButton
@@ -40,23 +44,19 @@ import com.example.amfootball.ui.components.lists.PitchAddressRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.previewsMocks.ListMatchInviteMocks
 import com.example.amfootball.ui.viewModel.matchInvite.ListMatchInviteViewModel
-import com.example.amfootball.core.utils.Patterns
-import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.ui.actions.filters.ButtonFilterActions
-import com.example.amfootball.ui.actions.filters.FilterMatchInviteActions
-import com.example.amfootball.ui.actions.itemsList.ItemListMatchIniviteActions
 import java.time.format.DateTimeFormatter
 
 /**
- * Ecrã de Listagem de Convites de Jogo Recebidos.
+ * Ecrã de Listagem de Convites de Jogo Recebidos (Stateful Screen).
  *
- * Este componente "Stateful" atua como o ponto central para a equipa gerir os desafios recebidos
+ * Este componente atua como o ponto central para a equipa gerir os desafios recebidos
  * de outras equipas. Permite filtrar a lista por remetente ou data e interagir com cada convite.
  *
- * Responsabilidades:
- * 1. Coleta o estado do ViewModel (Lista de Convites, Filtros, Erros, Estado UI).
- * 2. Configura as callbacks de ação para filtros e itens da lista.
+ * **Responsabilidades:**
+ * 1. Coleta o estado reativo do [ListMatchInviteViewModel] (Lista de Convites, Filtros, Erros, Estado UI).
+ * 2. Configura as callbacks de ação ([FilterMatchInviteActions], [ItemListMatchIniviteActions]) para filtros e itens da lista.
  * 3. Delega a renderização visual para [ListMatchInviteContent].
  *
  * @param navHostController Controlador de navegação para transitar para detalhes ou ecrã de negociação.
@@ -109,13 +109,13 @@ fun ListMatchInviteScreen(
 }
 
 /**
- * Conteúdo visual da lista de convites (Stateless).
+ * Conteúdo visual da lista de convites (Stateless Content).
  *
  * Estrutura o layout principal do ecrã, incluindo:
  * - Banner de status offline.
- * - Gestão de estado de carregamento.
- * - Secção de filtros expansível.
- * - Lista de cartões de convite.
+ * - Gestão de estado de carregamento ([LoadingPage]).
+ * - Secção de filtros ([FilterSection]) expansível.
+ * - Lista de cartões de convite ([ListSurface]).
  *
  * @param uiState Estado global da UI (Loading/Erro).
  * @param isOnline Estado da conectividade.
@@ -177,15 +177,14 @@ private fun ListMatchInviteContent(
             )
         }
     )
-
 }
 
 /**
  * Painel de conteúdo dos filtros de pesquisa para convites.
  *
  * Permite filtrar por:
- * - Nome da equipa remetente.
- * - Intervalo de datas do jogo proposto.
+ * - Nome da equipa remetente (adversário).
+ * - Intervalo de datas do jogo proposto (Mínima e Máxima).
  *
  * @param filters Valores atuais dos filtros.
  * @param filterError Erros de validação associados.
@@ -228,7 +227,7 @@ private fun FilterListMatchInvite(
                     },
                     modifier = Modifier.weight(1f),
 
-                )
+                    )
 
                 FilterMaxDatePicker(
                     value = filters.maxDate?.format(displayFormatter) ?: "",
@@ -254,11 +253,11 @@ private fun FilterListMatchInvite(
 /**
  * Item individual da lista de convites de jogo.
  *
- * Renderiza um cartão detalhado com:
+ * Renderiza um [GenericListItem] com:
  * - Nome e Logo da equipa adversária.
  * - Local do jogo (Campo e Morada).
  * - Data proposta.
- * - Ações Rápidas: Aceitar, Rejeitar, Negociar (Editar) e Ver Detalhes.
+ * - Ações Rápidas ([AcceptButton], [RejectButton], [EditButton]/Negociar e [ShowMoreInfoButton]).
  *
  * @param matchInvite O DTO com os dados do convite.
  * @param itemsListActions Ações disponíveis para este item.

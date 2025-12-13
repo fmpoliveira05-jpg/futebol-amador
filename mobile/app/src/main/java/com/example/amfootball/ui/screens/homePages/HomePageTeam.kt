@@ -39,17 +39,17 @@ import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.actions.homePageActions.HomePageTeamActions
-import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.actionCards.ActionCard
 import com.example.amfootball.ui.components.actionCards.CompactActionCard
-import com.example.amfootball.ui.components.pages.homePage.ActionCardLeaveTeam
 import com.example.amfootball.ui.components.diaglos.pages.LeaveTeamAlertDialog
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.components.pages.homePage.ActionCardLeaveTeam
 import com.example.amfootball.ui.components.pages.homePage.RecentFormSection
 import com.example.amfootball.ui.components.pages.homePage.UpcomingMatchesSection
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.HomePageTeamMock
 import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
 
@@ -139,13 +139,16 @@ fun HomePageTeamScreen(
 }
 
 /**
- * Conteúdo visual da Home Page da Equipa (Stateless).
+ * Conteúdo visual da Home Page da Equipa (Componente Stateless).
  *
- * @param team Objeto com os dados da equipa.
- * @param uiState Estado atual da UI.
- * @param isOnline Booleano indicando conectividade.
- * @param role O papel do utilizador na equipa.
- * @param homePageTeamActions Ações de navegação.
+ * Envolve o conteúdo principal num [LoadingPage] para gerir estados de carregamento e erro,
+ * e exibe um [OfflineBanner] caso a conectividade seja perdida.
+ *
+ * @param team Objeto [HomePageTeamDto] contendo os dados da equipa, histórico e próximos jogos.
+ * @param uiState Estado atual da UI (loading, erro, mensagens).
+ * @param isOnline Booleano indicando se o dispositivo tem conectividade de rede.
+ * @param role O papel do utilizador na equipa ([UserRole]), que determina a visibilidade de certas ações.
+ * @param homePageTeamActions Objeto contendo os callbacks de ação e navegação.
  */
 @Composable
 fun HomePageTeam(
@@ -175,16 +178,22 @@ fun HomePageTeam(
 }
 
 /**
- * Componente que define a estrutura de scroll e layout da página.
+ * Componente estrutural que define o layout da página com scroll.
  *
- * Organiza o ecrã em três secções principais:
- * 1. Cabeçalho ([HeaderHomePageTeam]): Identidade da equipa.
- * 2. Conteúdo de Gestão ([HomePageTeamContent]): Match Center e ferramentas.
- * 3. Zona de Saída ([ActionCardLeaveTeam]): Opção para abandonar a equipa.
+ * **Layout Refatorado:**
+ * Utiliza [Arrangement.spacedBy] no Column principal para aplicar um espaçamento base de 16dp
+ * entre todos os elementos, eliminando a necessidade de múltiplos Spacers manuais.
  *
- * @param team Objeto com os dados da equipa para exibir no cabeçalho.
- * @param role Papel do utilizador para controlo de acesso visual.
- * @param homePageTeamActions Ações de navegação a serem propagadas para os componentes filhos.
+ * Estrutura:
+ * 1. Cabeçalho ([HeaderHomePageTeam]).
+ * 2. Forma Recente ([RecentFormSection]).
+ * 3. Próximos Jogos ([UpcomingMatchesSection]).
+ * 4. Conteúdo de Gestão ([HomePageTeamContent]) - (Com espaçamento extra para separação visual).
+ * 5. Zona de Saída ([ActionCardLeaveTeam]) - (Com espaçamento extra para evitar cliques acidentais).
+ *
+ * @param teamData Dados completos da equipa.
+ * @param role Papel do utilizador.
+ * @param homePageTeamActions Callbacks de navegação.
  */
 @Composable
 private fun TeamHomePageDrawer(
@@ -206,26 +215,23 @@ private fun TeamHomePageDrawer(
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         HeaderHomePageTeam(team = teamData.team)
 
-        Spacer(modifier = Modifier.height(16.dp))
-
         RecentFormSection(history = teamData.vitorySequenceTeam)
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         UpcomingMatchesSection(matches = teamData.nextsMatch)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         HomePageTeamContent(
             role = role,
             homePageTeamActions = homePageTeamActions
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         ActionCardLeaveTeam(onClick = { showLeaveDialog = true })
 
@@ -371,7 +377,12 @@ private fun HomePageManagerTeam(homePageTeamActions: HomePageTeamActions) {
     }
 }
 
-@Preview(name = "1. Admin Full - PT", group = "Admin Full", locale = "pt-rPT", showBackground = true)
+@Preview(
+    name = "1. Admin Full - PT",
+    group = "Admin Full",
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Preview(name = "1. Admin Full - EN", group = "Admin Full", locale = "en", showBackground = true)
 @Composable
 fun PreviewAdminFullData() {
@@ -386,7 +397,12 @@ fun PreviewAdminFullData() {
     }
 }
 
-@Preview(name = "2. Member Full - PT", group = "Member Full", locale = "pt-rPT", showBackground = true)
+@Preview(
+    name = "2. Member Full - PT",
+    group = "Member Full",
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Preview(name = "2. Member Full - EN", group = "Member Full", locale = "en", showBackground = true)
 @Composable
 fun PreviewMemberFullData() {
@@ -401,7 +417,12 @@ fun PreviewMemberFullData() {
     }
 }
 
-@Preview(name = "3. Admin Empty - PT", group = "Admin Empty", locale = "pt-rPT", showBackground = true)
+@Preview(
+    name = "3. Admin Empty - PT",
+    group = "Admin Empty",
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Preview(name = "3. Admin Empty - EN", group = "Admin Empty", locale = "en", showBackground = true)
 @Composable
 fun PreviewEmptyData() {

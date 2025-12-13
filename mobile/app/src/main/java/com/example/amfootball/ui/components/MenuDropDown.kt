@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.match.MatchStatus
 import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.domains.enums.match.MatchStatus
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

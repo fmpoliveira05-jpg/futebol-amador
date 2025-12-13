@@ -1,6 +1,6 @@
 package com.example.amfootball.data.interfaces.api
 
-import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.core.utils.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.chat.CreateRoomRequest
 import com.example.amfootball.data.remote.dtos.chat.CreateRoomResponse
 import retrofit2.Response

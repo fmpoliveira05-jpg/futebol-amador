@@ -1,6 +1,7 @@
 package com.example.amfootball.data.interfaces.api
 
-import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.remote.dtos.matchInivite.SendMatchInviteDto
 import retrofit2.Response
@@ -34,9 +35,9 @@ interface MatchInviteApi {
      * @param matchInvite O DTO [SendMatchInviteDto] contendo os detalhes do desafio (ID da equipa adversária, data, local).
      * @return [Response] contendo a informação do convite criado [MatchInviteDto].
      */
-    @POST("${BaseEndpoints.MATCH_INVITE_API}/{idTeam}/match-invites")
+    @POST("${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}/match-invites")
     suspend fun sendMatchInvite(
-        @Path("idTeam") idTeam: String,
+        @Path(Arguments.ID_TEAM) idTeam: String,
         @Body dto: SendMatchInviteDto
     ): Response<MatchInviteDto>
 
@@ -52,9 +53,9 @@ interface MatchInviteApi {
      * @param matchInviteId O ID (String) do convite que está a ser aceite.
      * @return [Response] contendo o DTO [SendMatchInviteDto] (possivelmente a confirmação dos termos finais) ou um DTO de confirmação.
      */
-    @POST("${BaseEndpoints.MATCH_INVITE_API}/{idTeam}/AcceptMatchInvite")
+    @POST("${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}/AcceptMatchInvite")
     suspend fun acceptMatchInvite(
-        @Path("idTeam") idTeam: String,
+        @Path(Arguments.ID_TEAM) idTeam: String,
         @Body matchInviteId: String
     ): Response<SendMatchInviteDto>
 
@@ -71,11 +72,11 @@ interface MatchInviteApi {
      */
     @HTTP(
         method = "DELETE",
-        path = "${BaseEndpoints.MATCH_INVITE_API}/{idTeam}/RefuseMatchInvite",
+        path = "${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}/RefuseMatchInvite",
         hasBody = true
     )
     suspend fun refuseMatchInvite(
-        @Path("idTeam") idTeam: String,
+        @Path(Arguments.ID_TEAM) idTeam: String,
         @Body matchInviteId: String
     ): Response<Unit>
 
@@ -90,11 +91,11 @@ interface MatchInviteApi {
      *
      * @param idTeam O identificador da equipa que está a realizar a negociação.
      * @param matchInvite O DTO [SendMatchInviteDto] com os novos termos propostos para o jogo.
-     * @return [Response] contendo os detalhes do convite atualizado [InfoMatchInviteDto].
+     * @return [Response] contendo os detalhes do convite atualizado [MatchInviteDto].
      */
-    @PUT("${BaseEndpoints.MATCH_INVITE_API}/{idTeam}/Negociate")
+    @PUT("${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}/Negociate")
     suspend fun negotiateMatch(
-        @Path("idTeam") idTeam: String,
+        @Path(Arguments.ID_TEAM) idTeam: String,
         @Body matchInvite: SendMatchInviteDto
     ): Response<MatchInviteDto>
 
@@ -111,11 +112,11 @@ interface MatchInviteApi {
      * (ex: estado do convite, tipo de convite - enviado/recebido).
      * **Nota:** O nome do parâmetro `matchInviteId` sugere que o endpoint
      * também poderia ser usado para obter um único convite.
-     * @return [Response] contendo a lista de convites [List]<[InfoMatchInviteDto]> que satisfazem os critérios.
+     * @return [Response] contendo a lista de convites [List]<[MatchInviteDto]> que satisfazem os critérios.
      */
-    @GET("${BaseEndpoints.MATCH_INVITE_API}/{idTeam}")
+    @GET("${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}")
     suspend fun getMatchInviteList(
-        @Path("idTeam") idTeam: String,
+        @Path(Arguments.ID_TEAM) idTeam: String,
         @QueryMap fitlers: Map<String, String>
     ): Response<List<MatchInviteDto>>
 
@@ -126,11 +127,11 @@ interface MatchInviteApi {
      *
      * @param idTeam O identificador da equipa que está a consultar (para validação de acesso).
      * @param idMatchInvite O identificador único (UUID) do convite a ser recuperado.
-     * @return [Response] contendo os detalhes completos do convite [InfoMatchInviteDto].
+     * @return [Response] contendo os detalhes completos do convite [MatchInviteDto].
      */
-    @GET("${BaseEndpoints.MATCH_INVITE_API}/{idTeam}/{idMatchInvite}")
+    @GET("${BaseEndpoints.MATCH_INVITE_API}/{${Arguments.ID_TEAM}}/{${Arguments.ID_MATCH_INVITE}}")
     suspend fun getMatchInvite(
-        @Path("idTeam") idTeam: String,
-        @Path("idMatchInvite") idMatchInvite: String
+        @Path(Arguments.ID_TEAM) idTeam: String,
+        @Path(Arguments.ID_MATCH_INVITE) idMatchInvite: String
     ): Response<MatchInviteDto>
 }

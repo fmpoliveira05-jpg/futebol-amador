@@ -3,27 +3,26 @@ package com.example.amfootball.ui.viewModel.team
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.core.extensions.toLocalDate
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.remote.services.CalendarService
 import com.example.amfootball.domains.enums.match.MatchStatus
 import com.example.amfootball.domains.enums.match.TypeMatch
 import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
-import com.example.amfootball.data.filters.FilterCalendar
-import com.example.amfootball.data.NetworkConnectivityObserver
-import com.example.amfootball.data.remote.services.CalendarService
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.core.utils.ListsSizesConst
-import com.example.amfootball.core.utils.TeamConst
-import com.example.amfootball.core.extensions.toLocalDate
-import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-//TODO: Falta autorização
 //TODO: Falta Todo que precisa do signalR
 /**
  * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.
@@ -52,7 +51,8 @@ class CalendarTeamViewModel @Inject constructor(
     val filter: StateFlow<FilterCalendar> = filterState.asStateFlow()
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
-    private val listErrors: MutableStateFlow<FilterCalendarError> = MutableStateFlow(FilterCalendarError())
+    private val listErrors: MutableStateFlow<FilterCalendarError> =
+        MutableStateFlow(FilterCalendarError())
     val uiErrors: StateFlow<FilterCalendarError> = listErrors.asStateFlow()
 
     //Inicializer

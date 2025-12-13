@@ -5,6 +5,7 @@ import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+
 /**
  * Data Transfer Object (DTO) que representa os detalhes completos de um convite de partida.
  *

@@ -14,9 +14,10 @@ import com.google.gson.annotations.SerializedName
  * @property image A URI do logótipo ou imagem da equipa (pode ser null). Padrão é [Uri.EMPTY].
  */
 data class TeamDto(
-    @SerializedName("IdTeam", alternate = ["idTeam"])
+    @SerializedName("IdTeam", alternate = ["idTeam", "teamId", "TeamId"])
     val id: String = "",
     @SerializedName("Name", alternate = ["name"])
     val name: String = "",
+    @SerializedName("Image", alternate = ["image", "imageUrl"])
     val image: String? = null
 )

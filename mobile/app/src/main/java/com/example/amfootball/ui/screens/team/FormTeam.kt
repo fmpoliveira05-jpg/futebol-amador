@@ -20,23 +20,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.PitchConst
+import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.domains.errors.formErrors.TeamFormErros
-import com.example.amfootball.ui.previewsMocks.EditTeamMocks
-import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.actions.forms.FormTeamActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.EditFormButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.ImagePickerString
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.EditTeamMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
-import com.example.amfootball.core.utils.GeneralConst
-import com.example.amfootball.core.utils.PitchConst
-import com.example.amfootball.core.utils.TeamConst
-import com.example.amfootball.data.remote.dtos.team.FormTeamDto
-import com.example.amfootball.ui.actions.forms.FormTeamActions
 
 /**
  * Ecrã principal para Criação e Edição de Equipas.
@@ -215,7 +215,7 @@ private fun FieldsCreateTeam(
         }
     )
 
-    if(isEditMode) {
+    if (isEditMode) {
         EditFormButton(
             onClick = { onSubmitClick() },
             text = stringResource(id = R.string.button_edit_team),

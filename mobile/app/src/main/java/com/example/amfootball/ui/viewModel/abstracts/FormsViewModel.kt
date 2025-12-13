@@ -31,9 +31,10 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 abstract class FormsViewModel<F, E>(
     private val networkObserver: NetworkConnectivityObserver,
+    private val needObserverNetwork: Boolean = true,
     initialData: F,
     initialError: E,
-) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = needObserverNetwork) {
 
     /**
      * **Estado Interno Mutável dos Dados.**

@@ -2,16 +2,16 @@ package com.example.amfootball.ui.viewModel.team
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
-import com.example.amfootball.domains.errors.ErrorMessage
-import com.example.amfootball.domains.errors.formErrors.TeamFormErros
-import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.NetworkConnectivityObserver
-import com.example.amfootball.data.remote.services.TeamService
-import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.PitchConst
 import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.TeamFormErros
+import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -73,11 +73,6 @@ class TeamFormViewModel @Inject constructor(
         }
     }
 
-    // ============================================================================================
-    //  DATA BINDING (Setters)
-    //  Métodos chamados pela UI para atualizar o estado do formulário conforme o user digita.
-    // ============================================================================================
-
     /**
      * Atualiza o campo "Nome da Equipa".
      *
@@ -127,7 +122,8 @@ class TeamFormViewModel @Inject constructor(
      * @param address O novo endereço físico do campo.
      */
     fun onAddressPitchChange(address: String) {
-        formState.value = formState.value.copy(pitch = formState.value.pitch.copy(address = address))
+        formState.value =
+            formState.value.copy(pitch = formState.value.pitch.copy(address = address))
     }
 
     // --- MÉTODOS PÚBLICOS (Ações) ---
@@ -174,8 +170,6 @@ class TeamFormViewModel @Inject constructor(
                     if (createdTeamDto != null && !createdTeamDto.id.isNullOrBlank()) {
                         sessionManager.updateTeamIdUser(teamId = createdTeamDto.id)
                         sessionManager.updateRoleMemberTeam(isAdmin = true)
-
-                        onSucess()
                     } else {
                         updateToast(R.string.toast_error_create_team)
                     }

@@ -27,6 +27,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.PlayerConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
 import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.ui.OsmMapView
@@ -38,10 +42,6 @@ import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
-import com.example.amfootball.core.utils.GeneralConst
-import com.example.amfootball.core.utils.PlayerConst
-import com.example.amfootball.core.utils.UserConst
-import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
 
 /**
  * Ecrã de Registo de Novo Utilizador (Sign Up).
@@ -148,7 +148,12 @@ private fun ContentSignUp(
             maxLenght = UserConst.MAX_NAME_LENGTH,
             isRequired = true,
             isError = formErrors.nameError != null,
-            errorMessage = formErrors.nameError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+            errorMessage = formErrors.nameError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            }
         )
 
         // EMAIL
@@ -156,7 +161,12 @@ private fun ContentSignUp(
             value = formDto.email,
             onValueChange = viewModel::onEmailChange,
             isError = formErrors.emailError != null,
-            errorMessage = formErrors.emailError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: "",
+            errorMessage = formErrors.emailError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            } ?: "",
             textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_email_input))
         )
 
@@ -175,7 +185,12 @@ private fun ContentSignUp(
             isRequired = true,
             modifier = Modifier.fillMaxWidth(),
             isError = formErrors.phoneError != null,
-            errorMessage = formErrors.phoneError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+            errorMessage = formErrors.phoneError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            }
         )
 
         // MORADA
@@ -187,7 +202,12 @@ private fun ContentSignUp(
             onValueChange = viewModel::onAddressChange,
             isRequired = true,
             isError = formErrors.addressError != null,
-            errorMessage = formErrors.addressError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+            errorMessage = formErrors.addressError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            }
         )
 
         // ALTURA
@@ -199,7 +219,12 @@ private fun ContentSignUp(
             maxLenght = PlayerConst.MAX_HEIGHT,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             isError = formErrors.heightError != null,
-            errorMessage = formErrors.heightError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) }
+            errorMessage = formErrors.heightError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            }
         )
 
         Spacer(Modifier.height(8.dp))
@@ -221,7 +246,7 @@ private fun ContentSignUp(
             },
             modifier = Modifier.fillMaxWidth()
         )
-        if(formErrors.positionError != null) {
+        if (formErrors.positionError != null) {
             Text(text = stringResource(id = formErrors.positionError.messageId), color = Color.Red)
         }
 
@@ -238,7 +263,7 @@ private fun ContentSignUp(
             contentDescription = stringResource(R.string.date_of_birthday_description),
             isSingleLine = true,
         )
-        if(formErrors.dateError != null) {
+        if (formErrors.dateError != null) {
             Text(text = stringResource(id = formErrors.dateError.messageId), color = Color.Red)
         }
 
@@ -250,7 +275,12 @@ private fun ContentSignUp(
             value = formDto.password,
             onValueChange = viewModel::onPasswordChange,
             isError = formErrors.passwordError != null,
-            errorMessage = formErrors.passwordError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: ""
+            errorMessage = formErrors.passwordError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            } ?: ""
         )
 
         // CONFIRMAR PASSWORD
@@ -259,7 +289,12 @@ private fun ContentSignUp(
             value = passwordVerification,
             onValueChange = viewModel::onPasswordVerificationChange,
             isError = formErrors.passwordVerifyError != null,
-            errorMessage = formErrors.passwordVerifyError?.let { stringResource(id = it.messageId, *it.args.toTypedArray()) } ?: ""
+            errorMessage = formErrors.passwordVerifyError?.let {
+                stringResource(
+                    id = it.messageId,
+                    *it.args.toTypedArray()
+                )
+            } ?: ""
         )
 
         Spacer(Modifier.height(16.dp))
@@ -285,7 +320,6 @@ private fun ContentSignUp(
         }
     }
 }
-
 
 
 /*

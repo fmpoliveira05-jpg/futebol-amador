@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,11 +40,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.amfootball.R
 import com.example.amfootball.data.remote.dtos.chat.MessageDto
+import com.example.amfootball.ui.previewsMocks.ChatMocks
 import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 
 /**
@@ -64,8 +67,51 @@ import com.example.amfootball.ui.viewModel.chat.ChatViewModel
 fun ChatScreen(
     chatViewModel: ChatViewModel = hiltViewModel()
 ) {
-    var messageText by remember { mutableStateOf("") }
     val roomName by chatViewModel.roomName.collectAsState()
+    val messages by chatViewModel.messages.collectAsState()
+    var messageText by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(key1 = chatViewModel.chatRoomId) {
+        chatViewModel.listenForMessages()
+    }
+
+    ChatContent(
+        roomName = roomName,
+        messages = messages,
+        messageText = messageText,
+        onMessageChange = { messageText = it },
+        onSendClick = {
+            if (messageText.isNotBlank()) {
+                chatViewModel.sendMessage(messageText)
+                messageText = ""
+            }
+        },
+        isSentByMe = { message -> chatViewModel.isSentByMe(message) }
+    )
+}
+
+/**
+ * Conteúdo visual do Chat (Stateless Content).
+ *
+ * Este componente é **puramente visual**. Não depende do ViewModel nem realiza chamadas de rede,
+ * o que permite que o [Preview] funcione sem erros e facilita os testes de UI.
+ *
+ * @param roomName O nome da sala ou contacto para o TopBar.
+ * @param messages A lista de mensagens a exibir.
+ * @param messageText O texto atual do campo de input.
+ * @param onMessageChange Callback para atualizar o texto.
+ * @param onSendClick Callback para enviar a mensagem.
+ * @param isSentByMe Função que determina se uma dada mensagem foi enviada pelo próprio utilizador.
+ */
+@Composable
+private fun ChatContent(
+    roomName: String,
+    messages: List<MessageDto>,
+    messageText: String,
+    onMessageChange: (String) -> Unit,
+    onSendClick: () -> Unit,
+    isSentByMe: (MessageDto) -> Boolean
+) {
     Scaffold(
         topBar = {
             ChatTopBar(contactName = roomName)
@@ -76,12 +122,6 @@ fun ChatScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                LaunchedEffect(key1 = chatViewModel.chatRoomId) {
-                    chatViewModel.listenForMessages()
-                }
-
-                val messages by chatViewModel.messages.collectAsState()
-
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -91,20 +131,15 @@ fun ChatScreen(
                     items(messages) { message ->
                         MessageBubble(
                             message = message,
-                            isSentByMe = chatViewModel.isSentByMe(message)
+                            isSentByMe = isSentByMe(message)
                         )
                     }
                 }
 
                 MessageInput(
                     message = messageText,
-                    onMessageChange = { messageText = it },
-                    onSendClick = {
-                        if (messageText.isNotBlank()) {
-                            chatViewModel.sendMessage(messageText)
-                            messageText = ""
-                        }
-                    }
+                    onMessageChange = onMessageChange,
+                    onSendClick = onSendClick
                 )
             }
         }
@@ -120,7 +155,7 @@ fun ChatScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatTopBar(contactName: String) {
+private fun ChatTopBar(contactName: String) {
     TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -148,7 +183,7 @@ fun ChatTopBar(contactName: String) {
                         fontSize = 18.sp
                     )
                     Text(
-                        text = "Online",
+                        text = stringResource(id = R.string.online_chat),
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -157,7 +192,7 @@ fun ChatTopBar(contactName: String) {
         },
         actions = {
             IconButton(onClick = { /* TODO: Ação de menu */ }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "Mais opções")
+                Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.button_view_more))
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -176,7 +211,7 @@ fun ChatTopBar(contactName: String) {
  * @param isSentByMe Booleano que indica se a mensagem pertence ao utilizador atual.
  */
 @Composable
-fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
+private fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
     val alignment = if (isSentByMe) Alignment.CenterEnd else Alignment.CenterStart
     val bubbleColor =
         if (isSentByMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
@@ -218,7 +253,7 @@ fun MessageBubble(message: MessageDto, isSentByMe: Boolean) {
  * @param onSendClick Callback disparado ao carregar no botão de envio.
  */
 @Composable
-fun MessageInput(
+private fun MessageInput(
     message: String,
     onMessageChange: (String) -> Unit,
     onSendClick: () -> Unit
@@ -235,7 +270,7 @@ fun MessageInput(
             OutlinedTextField(
                 value = message,
                 onValueChange = onMessageChange,
-                placeholder = { Text("Digite uma mensagem...") },
+                placeholder = { Text(stringResource(id = R.string.write_message)) },
                 modifier = Modifier
                     .weight(1f)
                     .testTag(stringResource(R.string.tag_field_message)),
@@ -254,7 +289,7 @@ fun MessageInput(
             ) {
                 Icon(
                     Icons.AutoMirrored.Filled.Send,
-                    contentDescription = "Enviar mensagem",
+                    contentDescription = stringResource(id = R.string.send_message),
                     tint = MaterialTheme.colorScheme.primary
                 )
             }
@@ -262,43 +297,42 @@ fun MessageInput(
     }
 }
 
-/*
-@Preview(name = "Chat Screen - English", locale = "en", showBackground = true)
-@Preview(name = "Chat Screen - Portuguese", locale = "pt", showBackground = true)
+@Preview(
+    name = "Chat Screen - PT",
+    group = "Chat",
+    locale = "pt-rPT",
+    showBackground = true
+)
 @Composable
-fun ChatScreenPreview() {
-    // Mock de dados para visualizar o layout sem ViewModel
-    val mockMessages = listOf(
-        MessageDto(text = "Olá! Tudo bem?", senderId = "other"),
-        MessageDto(text = "Tudo ótimo! E contigo?", senderId = "me"),
-        MessageDto(text = "Vamos treinar amanhã?", senderId = "other"),
-        MessageDto(text = "Claro, às 19h no campo principal.", senderId = "me")
-    )
-
+fun PreviewChatScreenPT() {
     MaterialTheme {
-        Scaffold(
-            topBar = { ChatTopBar(contactName = "Treinador João", onBackClick = {}) }
-        ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp)
-                ) {
-                    items(mockMessages) { msg ->
-                        MessageBubble(
-                            message = msg,
-                            isSentByMe = (msg.senderId == "me")
-                        )
-                    }
-                }
-                MessageInput(message = "", onMessageChange = {}, onSendClick = {})
-            }
-        }
+        ChatContent(
+            roomName = "João Silva",
+            messages = ChatMocks.mockMessagesPt,
+            messageText = "Claro!",
+            onMessageChange = {},
+            onSendClick = {},
+            isSentByMe = { it.senderId == "me" }
+        )
     }
 }
-*/
+
+@Preview(
+    name = "Chat Screen - EN",
+    group = "Chat",
+    locale = "en",
+    showBackground = true
+)
+@Composable
+fun PreviewChatScreenEN() {
+    MaterialTheme {
+        ChatContent(
+            roomName = "John Doe",
+            messages = ChatMocks.mockMessagesEn,
+            messageText = "Yes!",
+            onMessageChange = {},
+            onSendClick = {},
+            isSentByMe = { it.senderId == "me" }
+        )
+    }
+}

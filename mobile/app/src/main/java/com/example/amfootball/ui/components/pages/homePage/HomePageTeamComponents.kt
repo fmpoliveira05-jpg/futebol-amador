@@ -33,10 +33,17 @@ import com.example.amfootball.R
 import com.example.amfootball.core.utils.Patterns
 import com.example.amfootball.data.remote.dtos.homePageTeam.VitorySequenceTemDto
 import com.example.amfootball.data.remote.dtos.match.InfoMatch
+import com.example.amfootball.domains.enums.match.MatchResult
 import com.example.amfootball.ui.components.actionCards.ActionCard
 import java.time.format.DateTimeFormatter
-import com.example.amfootball.domains.enums.match.MatchResult
 
+/**
+ * Componente Composable que exibe a secção de "Forma Recente" de uma equipa.
+ *
+ * Mostra os resultados dos últimos jogos da equipa (limitado aos 5 mais recentes, se existirem).
+ *
+ * @param history A lista de DTOs ([VitorySequenceTemDto]) contendo o resultado e o adversário de jogos recentes.
+ */
 @Composable
 fun RecentFormSection(history: List<VitorySequenceTemDto>) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -52,7 +59,10 @@ fun RecentFormSection(history: List<VitorySequenceTemDto>) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             if (history.isEmpty()) {
-                Text(stringResource(id = R.string.no_game_realized), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(id = R.string.no_game_realized),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             } else {
                 history.take(5).forEach { match ->
                     MatchResultBadge(match)
@@ -62,6 +72,13 @@ fun RecentFormSection(history: List<VitorySequenceTemDto>) {
     }
 }
 
+/**
+ * Componente Composable que exibe o resultado de um único jogo numa insígnia circular colorida.
+ *
+ * A cor do círculo é determinada pelo [MatchResult]: Verde para vitória, Vermelho para derrota, Amarelo para empate.
+ *
+ * @param match O DTO [VitorySequenceTemDto] com o resultado e o nome do adversário.
+ */
 @Composable
 fun MatchResultBadge(match: VitorySequenceTemDto) {
     val color = when (match.matchResult) {
@@ -101,6 +118,13 @@ fun MatchResultBadge(match: VitorySequenceTemDto) {
     }
 }
 
+/**
+ * Componente Composable que exibe a secção de "Próximos Jogos" da equipa.
+ *
+ * Mostra uma linha horizontal de [UpcomingMatchCard] para os 3 jogos agendados mais próximos.
+ *
+ * @param matches A lista de DTOs [InfoMatch] dos jogos futuros.
+ */
 @Composable
 fun UpcomingMatchesSection(matches: List<InfoMatch>) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -116,7 +140,10 @@ fun UpcomingMatchesSection(matches: List<InfoMatch>) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             if (matches.isEmpty()) {
-                Text(stringResource(id = R.string.no_games_scheduled), style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    stringResource(id = R.string.no_games_scheduled),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             } else {
                 matches.take(3).forEach { match ->
                     UpcomingMatchCard(
@@ -129,6 +156,14 @@ fun UpcomingMatchesSection(matches: List<InfoMatch>) {
     }
 }
 
+/**
+ * Cartão de informação simplificado para um próximo jogo.
+ *
+ * Exibe a data, hora, adversário e se o jogo é "Em Casa" (C) ou "Fora" (F).
+ *
+ * @param match O DTO [InfoMatch] contendo os detalhes do jogo agendado.
+ * @param modifier Modificador de layout.
+ */
 @Composable
 fun UpcomingMatchCard(
     match: InfoMatch,
@@ -187,9 +222,12 @@ fun UpcomingMatchCard(
 }
 
 /**
- * Cartão de ação destrutiva para sair da equipa.
+ * Cartão de Ação (Action Card) estilizado para a operação de "Sair da Equipa".
  *
- * @param onClick Callback executada ao clicar.
+ * Este componente utiliza o [ActionCard] genérico para criar uma ação destrutiva
+ * que normalmente é exibida na parte inferior da página de gestão da equipa.
+ *
+ * @param onClick Callback executada ao clicar no cartão.
  */
 @Composable
 fun ActionCardLeaveTeam(onClick: () -> Unit) {

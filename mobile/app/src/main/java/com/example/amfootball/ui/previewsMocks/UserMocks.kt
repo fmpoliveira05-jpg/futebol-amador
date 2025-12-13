@@ -38,7 +38,8 @@ object ProfileUserMock {
 object LoginMocks {
     val login = LoginDto(
         email = "test@example.com",
-        password = "")
+        password = ""
+    )
 
     val loginActions = LoginActions(
         onLoginUser = { _, onResult ->

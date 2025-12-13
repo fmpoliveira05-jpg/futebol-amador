@@ -20,11 +20,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.PlayerConst
 import com.example.amfootball.data.events.UiState
-import com.example.amfootball.domains.enums.Position
-import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.data.filters.FilterListPlayer
+import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
+import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
+import com.example.amfootball.ui.actions.itemsList.ItemListPlayerActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -45,22 +53,17 @@ import com.example.amfootball.ui.components.lists.PositionRow
 import com.example.amfootball.ui.components.lists.SizeRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ListPlayersMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.lists.ListPlayerViewModel
-import com.example.amfootball.core.utils.PlayerConst
-import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
-import com.example.amfootball.domains.enums.UserRole
-import com.example.amfootball.domains.enums.pages.ListPlayerMode
-import com.example.amfootball.ui.actions.filters.ButtonFilterActions
-import com.example.amfootball.ui.actions.filters.FilterListPlayersActions
-import com.example.amfootball.ui.components.notification.ToastHandler
-import com.example.amfootball.ui.previewsMocks.ListPlayersMocks
 
 /**
- * Ecrã principal de Listagem de Jogadores.
+ * Ecrã principal de Listagem de Jogadores (Stateful Screen).
  *
- * É um contentor "Stateful" que interage com o [ListPlayerViewModel] para obter dados,
- * gerir o estado da UI e processar eventos de navegação.
+ * É um contentor que interage com o [ListPlayerViewModel] para obter dados,
+ * gerir o estado da UI e processar eventos de navegação e filtros.
  *
  * @param navHostController Controlador de navegação para transitar para o perfil do jogador.
  * @param viewModel ViewModel injetada via Hilt que contém toda a lógica de negócio e estados.
@@ -96,6 +99,11 @@ fun ListPlayersScreen(
         )
     )
 
+    val itemListPlayersActions = ItemListPlayerActions(
+        onSendMembership = { id -> viewModel.sendMembershipRequest(id) },
+        onShowMore = viewModel::showMore,
+    )
+
     ToastHandler(
         toastMessage = uiState.toastMessage,
         onToastShown = viewModel::onToastShown
@@ -114,27 +122,25 @@ fun ListPlayersScreen(
         listPosition = listPosition,
         onRetry = { viewModel.retry() },
         filterActions = filterActions,
-        onSendMembership = { id -> viewModel.sendMembershipRequest(id) },
-        onShowMore = { id ->
-            viewModel.showMore(idPlayer = id, navHostController = navHostController)
-        },
+        itemListPlayersActions = itemListPlayersActions,
         isValidShowMore = showMorePlayersVisible,
-        showMoreItems = { viewModel.loadMoreItems() }
+        showMoreItems = { viewModel.loadMoreItems() },
+        navHostController = navHostController
     )
 }
 
 /**
- * Conteúdo visual da lista de jogadores ("Stateless").
+ * Conteúdo visual da lista de jogadores (Stateless Content).
  *
- * Responsável por desenhar a estrutura da página:
- * - Banner de estado Offline.
- * - Secção de Filtros expansível.
- * - Lista de cartões de jogadores.
- * - Botão "Mostrar Mais".
+ * Responsável por desenhar a estrutura da página, gerindo os estados visuais (loading, erro, offline).
  *
  * @param isOnline Indica se o dispositivo tem conexão à rede.
  * @param uiState Estado global da UI (Loading, Error, etc).
- * @param list Lista de jogadores a exibir.
+ * @param role O papel do utilizador na aplicação.
+ * @param userId O ID do utilizador logado.
+ * @param mode O modo de visualização da lista ([ListPlayerMode]).
+ * @param sentRequests Um conjunto de IDs de jogadores para os quais já foi enviado um pedido de adesão.
+ * @param list Lista de [InfoPlayerDto] a exibir.
  * @param filters Estado atual dos campos de filtro.
  * @param filtersError Estado dos erros de validação dos filtros.
  * @param listPosition Lista de posições disponíveis para o dropdown.
@@ -142,8 +148,8 @@ fun ListPlayersScreen(
  * @param isValidShowMore Se true, mostra o botão para carregar mais jogadores.
  * @param showMoreItems Callback acionado ao clicar em "Mostrar Mais".
  * @param filterActions Ações de alteração dos inputs de filtro.
- * @param onSendMembership Callback para enviar pedido de adesão a um jogador.
- * @param onShowMore Callback para navegar para o detalhe do jogador.
+ * @param itemListPlayersActions Ações de interação com itens da lista (enviar pedido, ver mais).
+ * @param navHostController Controlador de navegação.
  */
 @Composable
 fun ListPlayersContent(
@@ -161,8 +167,8 @@ fun ListPlayersContent(
     isValidShowMore: Boolean,
     showMoreItems: () -> Unit,
     filterActions: FilterListPlayersActions,
-    onSendMembership: (String) -> Unit,
-    onShowMore: (String) -> Unit
+    itemListPlayersActions: ItemListPlayerActions,
+    navHostController: NavHostController
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
 
@@ -197,8 +203,15 @@ fun ListPlayersContent(
                         sentRequests = sentRequests,
                         role = role,
                         userId = userId,
-                        sendMemberShipRequest = { onSendMembership(player.id) },
-                        showMore = { onShowMore(player.id) }
+                        sendMemberShipRequest = { itemListPlayersActions.onSendMembership(player.id) },
+                        showMore = {
+                            itemListPlayersActions.onShowMore(
+                                {
+                                    navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${player.id}") {
+                                        launchSingleTop = true
+                                    }
+                                })
+                        }
                     )
                 },
                 isValidShowMore = isValidShowMore,
@@ -211,6 +224,14 @@ fun ListPlayersContent(
 
 /**
  * Formulário com os campos de filtro para a pesquisa de jogadores.
+ *
+ * Inclui filtros por Nome, Cidade, Posição, Idade Mínima/Máxima e Altura Mínima/Máxima.
+ *
+ * @param filters Valores atuais dos filtros.
+ * @param filtersError Erros de validação associados aos filtros.
+ * @param filterActions Callbacks para alteração dos valores dos filtros.
+ * @param listPosition Lista de posições ([Position]) disponíveis.
+ * @param modifier Modificador de layout.
  */
 @Composable
 private fun FilterListPlayerContent(
@@ -258,21 +279,21 @@ private fun FilterListPlayerContent(
 
         FilterRow(
             content = {
-                FilterMaxAgeTextField(
-                    maxAge = filters.maxAge?.toString(),
-                    onMaxAgeChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
-                    isError = filtersError.maxAgeError != null,
-                    errorMessage = filtersError.maxAgeError?.let {
-                        stringResource(it.messageId, *it.args.toTypedArray())
-                    },
-                    modifier = Modifier.weight(1f)
-                )
-
                 FilterMinAgeTextField(
                     minAge = filters.minAge?.toString(),
                     onMinAgeChange = { filterActions.onMinAgeChange(it.toIntOrNull()) },
                     isError = filtersError.minAgeError != null,
                     errorMessage = filtersError.minAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+
+                FilterMaxAgeTextField(
+                    maxAge = filters.maxAge?.toString(),
+                    onMaxAgeChange = { filterActions.onMaxAgeChange(it.toIntOrNull()) },
+                    isError = filtersError.maxAgeError != null,
+                    errorMessage = filtersError.maxAgeError?.let {
                         stringResource(it.messageId, *it.args.toTypedArray())
                     },
                     modifier = Modifier.weight(1f)
@@ -323,6 +344,17 @@ private fun FilterListPlayerContent(
 
 /**
  * Item individual da lista (Cartão do Jogador).
+ *
+ * Exibe as informações essenciais do jogador e botões de ação condicionalmente
+ * (Enviar pedido de adesão e Ver Perfil).
+ *
+ * @param player O DTO [InfoPlayerDto] do jogador.
+ * @param role O papel do utilizador logado.
+ * @param userId O ID do utilizador logado (para excluir o próprio jogador das ações).
+ * @param mode O modo de lista ([ListPlayerMode]) atual.
+ * @param sentRequests O conjunto de IDs para os quais já foram enviados pedidos.
+ * @param sendMemberShipRequest Callback para enviar um pedido de adesão.
+ * @param showMore Callback para navegar para os detalhes do jogador.
  */
 @Composable
 private fun ItemListPlayer(
@@ -381,14 +413,12 @@ private fun ItemListPlayer(
 // ----------------------------------------------------------------
 // PREVIEWS
 // ----------------------------------------------------------------
-/**
- * Preview 1: Lista Normal com dados.
- * Mostra como a lista aparece quando tudo corre bem (Online).
- */
 @Preview(name = "1. List Admin - EN", locale = "en", showBackground = true)
 @Preview(name = "1. Lista Admin - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersForAdminsPreview() {
+    val navController = rememberNavController()
+
     AMFootballTheme {
         ListPlayersContent(
             isOnline = true,
@@ -399,8 +429,11 @@ fun ListPlayersForAdminsPreview() {
             listPosition = ListPlayersMocks.Positions,
             onRetry = {},
             filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
+            itemListPlayersActions = ItemListPlayerActions(
+                onSendMembership = {},
+                onShowMore = { onSuccess -> onSuccess() }
+            ),
+            navHostController = navController,
             role = UserRole.ADMIN_TEAM,
             isValidShowMore = true,
             userId = "",
@@ -419,6 +452,8 @@ fun ListPlayersForAdminsPreview() {
 @Preview(name = "2. Lista Jogador - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersForPlayersPreview() {
+    val navController = rememberNavController()
+
     AMFootballTheme {
         ListPlayersContent(
             isOnline = true,
@@ -429,8 +464,11 @@ fun ListPlayersForPlayersPreview() {
             listPosition = ListPlayersMocks.Positions,
             onRetry = {},
             filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
+            itemListPlayersActions = ItemListPlayerActions(
+                onSendMembership = {},
+                onShowMore = { onSuccess -> onSuccess() }
+            ),
+            navHostController = navController,
             role = UserRole.PLAYER_WITHOUT_TEAM,
             isValidShowMore = true,
             userId = "",
@@ -449,6 +487,8 @@ fun ListPlayersForPlayersPreview() {
 @Preview(name = "3. Vazia - PT", locale = "pt-rPT", showBackground = true)
 @Composable
 fun ListPlayersEmptyPreview() {
+    val navController = rememberNavController()
+
     AMFootballTheme {
         ListPlayersContent(
             isOnline = true,
@@ -459,8 +499,11 @@ fun ListPlayersEmptyPreview() {
             listPosition = ListPlayersMocks.Positions,
             onRetry = {},
             filterActions = ListPlayersMocks.Actions,
-            onSendMembership = {},
-            onShowMore = {},
+            itemListPlayersActions = ItemListPlayerActions(
+                onSendMembership = {},
+                onShowMore = { onSuccess -> onSuccess() }
+            ),
+            navHostController = navController,
             isValidShowMore = false,
             role = UserRole.PLAYER_WITHOUT_TEAM,
             userId = "",

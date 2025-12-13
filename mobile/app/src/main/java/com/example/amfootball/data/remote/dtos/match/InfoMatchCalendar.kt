@@ -1,11 +1,11 @@
 package com.example.amfootball.data.remote.dtos.match
 
-import com.example.amfootball.domains.enums.match.MatchResult
-import com.example.amfootball.domains.enums.match.MatchStatus
-import com.example.amfootball.domains.enums.match.TypeMatch
 import com.example.amfootball.core.utils.Patterns
 import com.example.amfootball.data.remote.dtos.support.PitchInfo
 import com.example.amfootball.data.remote.dtos.support.TeamStatisticsDto
+import com.example.amfootball.domains.enums.match.MatchResult
+import com.example.amfootball.domains.enums.match.MatchStatus
+import com.example.amfootball.domains.enums.match.TypeMatch
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -27,7 +27,6 @@ import java.time.format.DateTimeFormatter
  * @property opponent As estatísticas e informações da equipa adversária.
  * @property isHome Indica se o jogo é em casa (true) ou fora (false).
  * @property pitchGame Informações detalhadas sobre o campo/local onde o jogo é disputado.
- *
  * @property matchStatus Propriedade computada que converte [matchStatusId] para o Enum [MatchStatus].
  * @property gameDate Propriedade computada que converte [rawGameDate] para [LocalDateTime].
  * @property formattedDate Data formatada para exibição na UI (ex: "dd/MM/yyyy HH:mm").

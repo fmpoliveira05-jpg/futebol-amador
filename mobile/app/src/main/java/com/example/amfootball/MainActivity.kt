@@ -16,12 +16,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.amfootball.core.utils.NotificationConst
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.ui.navigation.MainNavigation
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.theme.AMFootballTheme
-import com.example.amfootball.core.utils.NotificationConst
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -74,15 +74,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Composable
-    fun ObserveGlobalEvents(navController: NavHostController,
-                            eventBus: GlobalEventBus
+    fun ObserveGlobalEvents(
+        navController: NavHostController,
+        eventBus: GlobalEventBus
     ) {
         LaunchedEffect(Unit) {
             eventBus.events.collect { event ->
                 when (event) {
-                    is AppEvent.TeamDeleted -> {
+                    is AppEvent.UpdateHomePage -> {
                         navigateToHomePage(navController = navController)
                     }
+
                     is AppEvent.UserLoggedOut -> {
                         navigateToHomePage(navController = navController)
                     }
@@ -141,8 +143,14 @@ class MainActivity : AppCompatActivity() {
             permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
-        val hasReadCalendar = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
-        val hasWriteCalendar = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR) == PackageManager.PERMISSION_GRANTED
+        val hasReadCalendar = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_CALENDAR
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasWriteCalendar = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.WRITE_CALENDAR
+        ) == PackageManager.PERMISSION_GRANTED
 
         if (!hasReadCalendar) {
             permissionsToRequest.add(Manifest.permission.READ_CALENDAR)

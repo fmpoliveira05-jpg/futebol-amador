@@ -2,11 +2,12 @@ package com.example.amfootball.domains.validators
 
 import android.util.Patterns
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.Position
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.PlayerConst
 import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.domains.enums.Position
 import java.util.Calendar
+
 /**
  * Um objeto de resultado padrão para a nossa validação.
  *
@@ -25,7 +26,7 @@ data class ValidationResult(
  * Enumeração para os nomes dos campos do formulário de registo, para evitar erros de digitação.
  */
 enum class SignUpField {
-    NAME, PHONE,ADDRESS, HEIGHT, EMAIL, PASSWORD, PASSWORD_VERIFICATION, DATE_OF_BIRTH, POSITION
+    NAME, PHONE, ADDRESS, HEIGHT, EMAIL, PASSWORD, PASSWORD_VERIFICATION, DATE_OF_BIRTH, POSITION
 }
 
 /**
@@ -64,18 +65,32 @@ fun validateSignUpForm(
 // --- Funções de Validação Individuais ---
 
 private fun validateAddress(address: String): ValidationResult {
-    if (address.isBlank()){
-        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_field_cannot_be_null)
+    if (address.isBlank()) {
+        return ValidationResult(
+            false,
+            SignUpField.ADDRESS.name,
+            R.string.error_field_cannot_be_null
+        )
     }
-    if (address.length < GeneralConst.MIN_ADDRESS_LENGTH){
-        return ValidationResult(false, SignUpField.ADDRESS.name, R.string.error_min_address, args = listOf(GeneralConst.MIN_ADDRESS_LENGTH))
+    if (address.length < GeneralConst.MIN_ADDRESS_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.ADDRESS.name,
+            R.string.error_min_address,
+            args = listOf(GeneralConst.MIN_ADDRESS_LENGTH)
+        )
     }
     if (address.length > GeneralConst.MAX_ADDRESS_LENGTH) {
         return ValidationResult(
-            false, SignUpField.ADDRESS.name, R.string.error_max_address, args = listOf(GeneralConst.MAX_ADDRESS_LENGTH))
+            false,
+            SignUpField.ADDRESS.name,
+            R.string.error_max_address,
+            args = listOf(GeneralConst.MAX_ADDRESS_LENGTH)
+        )
     }
     return ValidationResult(true)
 }
+
 /**
  * Valida o campo do nome.
  *
@@ -117,8 +132,13 @@ private fun validateEmail(email: String): ValidationResult {
     if (email.isBlank()) {
         return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_field_cannot_be_null)
     }
-    if (email.length < UserConst.MIN_EMAIL_LENGTH){
-        return ValidationResult(false, SignUpField.EMAIL.name, R.string.error_min_email_length, args = listOf(UserConst.MIN_EMAIL_LENGTH))
+    if (email.length < UserConst.MIN_EMAIL_LENGTH) {
+        return ValidationResult(
+            false,
+            SignUpField.EMAIL.name,
+            R.string.error_min_email_length,
+            args = listOf(UserConst.MIN_EMAIL_LENGTH)
+        )
     }
     if (email.length > UserConst.MAX_EMAIL_LENGTH) {
         return ValidationResult(
@@ -244,11 +264,15 @@ private fun validatePasswordConfirmation(password: String, confirmation: String)
  */
 private fun validatePhone(phone: String): ValidationResult {
     if (phone.isBlank()) {
-        return ValidationResult(false, SignUpField.PHONE.name,R.string.error_field_cannot_be_null)
+        return ValidationResult(false, SignUpField.PHONE.name, R.string.error_field_cannot_be_null)
     }
     if (!phone.matches(Regex("^\\d{${UserConst.SIZE_PHONE_NUMBER}}$"))) {
-        return ValidationResult(false, SignUpField.PHONE.name, R.string.error_min_phone_length
-        , listOf(UserConst.SIZE_PHONE_NUMBER))
+        return ValidationResult(
+            false,
+            SignUpField.PHONE.name,
+            R.string.error_min_phone_length,
+            listOf(UserConst.SIZE_PHONE_NUMBER)
+        )
     }
     return ValidationResult(true)
 }
@@ -346,7 +370,11 @@ private fun validatePosition(position: Int?): ValidationResult {
     }
     val isValidPosition = position in Position.values().indices
     if (!isValidPosition) {
-        return ValidationResult(false, SignUpField.POSITION.name, R.string.error_field_cannot_be_null)
+        return ValidationResult(
+            false,
+            SignUpField.POSITION.name,
+            R.string.error_field_cannot_be_null
+        )
     }
     return ValidationResult(true)
 }

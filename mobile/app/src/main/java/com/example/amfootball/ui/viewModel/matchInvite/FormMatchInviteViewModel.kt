@@ -4,23 +4,23 @@ import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.pages.MatchFormMode
-import com.example.amfootball.domains.errors.ErrorMessage
-import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.core.extensions.toLocalDate
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.manager.CalendarManager
-import com.example.amfootball.data.NetworkConnectivityObserver
-import com.example.amfootball.data.remote.services.CalendarService
-import com.example.amfootball.data.remote.services.MatchInviteService
-import com.example.amfootball.data.remote.services.TeamService
-import com.example.amfootball.ui.navigation.objects.Arguments
-import com.example.amfootball.ui.navigation.objects.Routes
-import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
-import com.example.amfootball.core.utils.MatchConsts
-import com.example.amfootball.core.extensions.toLocalDate
 import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
 import com.example.amfootball.data.remote.dtos.matchInivite.SendMatchInviteDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.data.remote.services.CalendarService
+import com.example.amfootball.data.remote.services.MatchInviteService
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.pages.MatchFormMode
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -30,16 +30,18 @@ import javax.inject.Inject
  * Este ViewModel atua de forma polimórfica dependendo do [MatchFormMode] fornecido via navegação:
  * - **SEND:** Criação de um novo convite de jogo.
  * - **NEGOCIATE:** Negociação de um convite existente (contraproposta).
- * - **CANCEL:** Cancelamento de um jogo agendado.
+ * - **CANCEL:** Cancelamento de um jogo agendado (requer motivo).
  * - **POSTPONE:** Pedido de adiamento de um jogo.
  *
  * Gere o estado do formulário, validações de input e comunicação com os repositórios.
  *
  * @property savedStateHandle Manipulador de estado para recuperar argumentos de navegação (IDs e Modo).
- * @property calendarRepository Repositório para operações relacionadas com partidas e calendário.
+ * @property calendarRepository Repositório para operações relacionadas com partidas e calendário (cancelar/adiar).
  * @property teamRepository Repositório para obter dados das equipas (ex: Oponente).
+ * @property matchInviteRepository Repositório para operações de convite de jogo.
  * @property networkObserver Observador de conectividade para garantir operações online.
  * @property sessionManager Gestor de sessão para obter o ID da equipa do utilizador logado.
+ * @property calendarManager Gestor de calendário local para remover eventos no cancelamento.
  */
 @HiltViewModel
 class FormMatchInviteViewModel @Inject constructor(
@@ -127,11 +129,13 @@ class FormMatchInviteViewModel @Inject constructor(
     }
 
     // --- MÉTODOS DE AÇÃO (Submit) ---
+
     /**
-     * Carrega os dados iniciais do formulário com base no [mode].
+     * Carrega os dados iniciais do formulário com base no [mode] de operação.
      *
-     * - **CANCEL/POSTPONE:** Carrega os dados da partida existente via API.
-     * - **SEND:** Prepara um formulário vazio ou com dados do oponente pré-selecionado.
+     * - **SEND:** Carrega o ID e Nome do oponente a partir dos argumentos de navegação.
+     * - **NEGOCIATE:** Carrega os detalhes do convite de jogo existente.
+     * - **CANCEL/POSTPONE:** Carrega os detalhes de uma partida já agendada.
      */
     fun loadData() {
         when (modeStr) {
@@ -161,8 +165,9 @@ class FormMatchInviteViewModel @Inject constructor(
     /**
      * Submete o formulário principal (Criar, Negociar ou Adiar).
      *
-     * Valida os campos obrigatórios e direciona para a lógica específica baseada no [mode].
-     * Após sucesso, navega de volta para o Calendário.
+     * 1. Valida os campos obrigatórios via [isFormValid].
+     * 2. Direciona para a lógica de submissão específica ([sendMatchInvite], [negotiateMatchInvite], [postponeMatch]).
+     * 3. Após sucesso, navega de volta para o Calendário.
      *
      * @param navHostController Controlador para navegação após sucesso.
      */
@@ -198,12 +203,15 @@ class FormMatchInviteViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Submete um pedido de adiamento de jogo ([MatchFormMode.POSTPONE]).
+     */
     private fun postponeMatch(navHostController: NavHostController) {
         submitForm(
             apiCall = {
-                val opponentId = formState.value.opponent?.id
+                val opponentId = formState.value.opponent.id
                 val gameDate = formState.value.gameDateRaw
-                val matchInvite = getSendMatchInviteDto(opponentId!!, gameDate!!)
+                val matchInvite = getSendMatchInviteDto(opponentId, gameDate)
                 matchInvite.idMatch = matchId
 
                 calendarRepository.postPoneMatch(idMyTeam, matchInvite)
@@ -219,12 +227,15 @@ class FormMatchInviteViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Submete uma contraproposta de jogo ([MatchFormMode.NEGOCIATE]).
+     */
     private fun negotiateMatchInvite(navHostController: NavHostController) {
         submitForm(
             apiCall = {
-                val opponentId = formState.value.opponent?.id
+                val opponentId = formState.value.opponent.id
                 val gameDate = formState.value.gameDateRaw
-                val matchInvite = getSendMatchInviteDto(opponentId!!, gameDate!!)
+                val matchInvite = getSendMatchInviteDto(opponentId, gameDate)
 
                 matchInviteRepository.negociateMatchInvite(idMyTeam, matchInvite)
             },
@@ -239,10 +250,13 @@ class FormMatchInviteViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Envia um novo convite de jogo ([MatchFormMode.SEND]).
+     */
     private fun sendMatchInvite(navHostController: NavHostController) {
         submitForm(
             apiCall = {
-                val opponentId = formState.value.opponent?.id
+                val opponentId = formState.value.opponent.id
                 val gameDate = formState.value.gameDateRaw
                 val matchInvite = getSendMatchInviteDto(opponentId, gameDate)
 
@@ -298,6 +312,9 @@ class FormMatchInviteViewModel @Inject constructor(
 
     // --- MÉTODOS PRIVADOS (Lógica Interna) ---
 
+    /**
+     * Prepara o DTO de formulário para o modo SEND, preenchendo o oponente a partir dos argumentos.
+     */
     private fun loadDataSend() {
         val opponentTeamId = savedStateHandle.get<String>(Arguments.TEAM_ID)
         val opponentTeamName = savedStateHandle.get<String>(Arguments.TEAM_NAME)
@@ -306,13 +323,21 @@ class FormMatchInviteViewModel @Inject constructor(
             val teamDto = TeamDto(id = opponentTeamId, opponentTeamName)
             formState.value = formState.value.copy(opponent = teamDto)
         }
+
+        stopLoading()
     }
 
+    /**
+     * Carrega os dados de um convite de jogo existente para o modo NEGOCIATE.
+     */
     private fun loadDataNegociate() {
         launchDataLoad {
             if (matchInviteId != null) {
                 val rawMatch =
-                    matchInviteRepository.getInviteMatch(teamId = idMyTeam, matchInviteId = matchInviteId)
+                    matchInviteRepository.getInviteMatch(
+                        teamId = idMyTeam,
+                        matchInviteId = matchInviteId
+                    )
                 val processedMatch = MatchInviteDto.createFromBackend(rawMatch)
 
                 formState.value = processedMatch
@@ -323,8 +348,6 @@ class FormMatchInviteViewModel @Inject constructor(
     /**
      * Carrega os detalhes de uma partida existente a partir da API.
      * Utilizado para preencher o formulário em modos de edição (Cancel/Postpone).
-     *
-     * Converte o resultado da API num DTO de UI utilizando [MatchInviteDto.createFromBackend].
      */
     private fun loadDataMatch() {
         launchDataLoad {
@@ -337,6 +360,13 @@ class FormMatchInviteViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Converte o estado atual do formulário em [SendMatchInviteDto] para a API.
+     *
+     * @param opponentId ID do oponente.
+     * @param gameDate Data do jogo no formato `yyyy-MM-dd`.
+     * @return O DTO pronto para a API.
+     */
     private fun getSendMatchInviteDto(opponentId: String?, gameDate: String?): SendMatchInviteDto {
         val fullDateTime = "${gameDate}T${formState.value.gameTimeString}:00"
         val matchInv = SendMatchInviteDto(
@@ -371,7 +401,7 @@ class FormMatchInviteViewModel @Inject constructor(
         var errorDateGame: ErrorMessage? = null
         var errorTime: ErrorMessage? = null
 
-        if (dateGame.isNullOrBlank()) {
+        if (dateGame.isBlank()) {
             errorDateGame = ErrorMessage(
                 messageId = R.string.mandatory_field
             )

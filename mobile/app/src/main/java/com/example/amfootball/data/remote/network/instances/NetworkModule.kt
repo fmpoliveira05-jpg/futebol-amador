@@ -10,11 +10,6 @@ import com.example.amfootball.data.interfaces.api.PlayerApi
 import com.example.amfootball.data.interfaces.api.PostPoneMatchApi
 import com.example.amfootball.data.interfaces.api.TeamApi
 import com.example.amfootball.data.remote.network.AuthInterceptor
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonPrimitive
-import com.google.gson.JsonSerializer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,8 +17,6 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import javax.inject.Singleton
 
 /**
@@ -171,6 +164,11 @@ object NetworkModule {
         return retrofit.create(TeamApi::class.java)
     }
 
+    /**
+     * Fornece a implementação da interface [PostPoneMatchApi] para gestão de pedidos de adiamento de jogos.
+     * @param retrofit Instância base do Retrofit.
+     * @return Implementação da [PostPoneMatchApi].
+     */
     @Provides
     @Singleton
     fun providePostPoneMatchApi(retrofit: Retrofit): PostPoneMatchApi {

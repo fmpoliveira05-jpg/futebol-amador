@@ -2,12 +2,12 @@ package com.example.amfootball.ui.viewModel.homePages
 
 import androidx.lifecycle.viewModelScope
 import com.example.amfootball.R
-import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.events.AppEvent
 import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +40,8 @@ class HomePageViewModel @Inject constructor(
      * Estado interno mutável que armazena os dados do perfil do jogador.
      * Inicializado como `null` até que os dados sejam carregados da sessão.
      */
-    private val userData: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(sessionManager.getUserProfile())
+    private val userData: MutableStateFlow<PlayerProfileDto?> =
+        MutableStateFlow(sessionManager.getUserProfile())
 
     /**
      * Fluxo público imutável (Read-only) contendo os dados do utilizador.
@@ -149,11 +150,12 @@ class HomePageViewModel @Inject constructor(
     private fun observeEvents() {
         viewModelScope.launch {
             globalEventBus.events.collect { event ->
-                when(event) {
+                when (event) {
                     is AppEvent.UserLoggedOut -> {
                         userData.value = null
                     }
-                    is AppEvent.TeamDeleted -> {
+
+                    is AppEvent.UpdateHomePage -> {
                         loadUserData()
                     }
                 }

@@ -1,11 +1,13 @@
 package com.example.amfootball.data.interfaces.api
 
-import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.membershipRequest.InvitePlayerRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
-import com.example.amfootball.ui.navigation.objects.Arguments
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -76,8 +78,26 @@ interface PlayerApi {
     @POST("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests/send")
     suspend fun sendMemberShipRequestToTeam(
         @Path("playerId") playerId: String,
-        @Body teamId: String
+        @Body request: InviteTeamRequest
     ): Response<MembershipRequestInfoDto>
+
+    @GET("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests")
+    suspend fun listMemberShipRequest(
+        @Path(Arguments.PLAYER_ID) playerId: String,
+        @QueryMap filters: Map<String, String>
+    ): Response<List<MembershipRequestInfoDto>>
+
+    @POST("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests/accept")
+    suspend fun acceptMemberShipRequest(
+        @Path(Arguments.PLAYER_ID) playerId: String,
+        @Body request: RequestMemberShip
+    ): Response<MembershipRequestInfoDto>
+
+    @DELETE("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/membership-requests/reject/{${Arguments.REQUEST_ID}}")
+    suspend fun rejectMemberShipRequest(
+        @Path(Arguments.PLAYER_ID) playerId: String,
+        @Path(Arguments.REQUEST_ID) requestId: String,
+    ): Response<Unit>
 
     /**
      * Envia um convite de recrutamento (Recruitment Invite) de uma Equipa para um Jogador.
@@ -100,14 +120,14 @@ interface PlayerApi {
     @DELETE("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}")
     suspend fun deletePlayer(
         @Path("playerId") playerId: String,
-    ) : Response<Unit>
+    ): Response<Unit>
 
 
     @PUT("${BaseEndpoints.PLAYER_API}/update/{${Arguments.PLAYER_ID}}")
     suspend fun updatePlayer(
         @Path("playerId") playerId: String,
         @Body player: PlayerProfileDto
-    ) : Response<Unit>
+    ): Response<Unit>
 
     @PUT("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}/leave-team")
     suspend fun leaveTeam(

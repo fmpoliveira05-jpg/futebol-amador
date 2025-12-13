@@ -1,12 +1,11 @@
 package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -27,7 +26,8 @@ import kotlinx.coroutines.flow.update
  */
 abstract class ListsViewModels<T>(
     private val networkObserver: NetworkConnectivityObserver,
-) : BaseViewModel(networkObserver = networkObserver) {
+    private val needObserverNetwork: Boolean = true
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = needObserverNetwork) {
 
     /**
      * Lista completa de dados carregados (da API ou filtrados).

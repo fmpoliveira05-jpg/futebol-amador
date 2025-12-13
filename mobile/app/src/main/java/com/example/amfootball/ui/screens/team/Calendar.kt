@@ -33,11 +33,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.remote.dtos.support.TeamStatisticsDto
 import com.example.amfootball.domains.enums.match.MatchResult
 import com.example.amfootball.domains.enums.match.MatchStatus
 import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
-import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterCalendarActions
+import com.example.amfootball.ui.actions.itemsList.ItemsCalendarActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -53,15 +60,8 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
-import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
-import com.example.amfootball.core.utils.Patterns
-import com.example.amfootball.core.utils.TeamConst
-import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.remote.dtos.support.TeamStatisticsDto
-import com.example.amfootball.ui.actions.filters.ButtonFilterActions
-import com.example.amfootball.ui.actions.filters.FilterCalendarActions
-import com.example.amfootball.ui.actions.itemsList.ItemsCalendarActions
 import com.example.amfootball.ui.previewsMocks.CalendarMocks
+import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
 import java.time.format.DateTimeFormatter
 
 /**

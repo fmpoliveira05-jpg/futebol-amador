@@ -8,9 +8,9 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.domains.enums.UserRole
-import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.ui.navigation.objects.Routes
 
 //Rotas protegidas
