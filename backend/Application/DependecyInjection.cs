@@ -1,12 +1,10 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
-using Application.Interfaces.Services.Hub.ClienteService;
 using Application.Interfaces.Validators;
 using Application.Interfaces.Validators.Hub;
 using Application.Services;
 using Application.Services.Hub;
-using Application.Services.Hub.ClientService;
 using Application.Validators;
 using Application.Validators.Hubs;
 using Microsoft.Extensions.DependencyInjection;
