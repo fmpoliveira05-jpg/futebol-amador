@@ -58,7 +58,10 @@ object HomePageMock {
             name = "",
             image = "" // Adicionado campo de imagem vazio
         ),
-        isAdmin = false
+        isAdmin = false,
+        playerId = TODO(),
+        phone = TODO(),
+        idTeam = TODO()
     )
 
     /**
@@ -86,7 +89,10 @@ object HomePageMock {
             name = "Porto Renegades",
             image = "" // Adicionado campo de imagem vazio
         ),
-        isAdmin = false
+        isAdmin = false,
+        playerId = TODO(),
+        phone = TODO(),
+        idTeam = TODO()
     )
 }
 
