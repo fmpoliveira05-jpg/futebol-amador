@@ -31,7 +31,10 @@ object ProfileUserMock {
         ),
         isAdmin = false,
         email = dummyLoginResponse.email,
-        phoneNumber = dummyLoginResponse.phoneNumber.toString()
+        phoneNumber = dummyLoginResponse.phoneNumber.toString(),
+        playerId = TODO(),
+        phone = TODO(),
+        idTeam = TODO()
     )
 }
 

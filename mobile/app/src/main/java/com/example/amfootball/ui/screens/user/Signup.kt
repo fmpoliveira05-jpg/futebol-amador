@@ -14,6 +14,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,6 +43,7 @@ import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.PasswordTextField
 import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCountries
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
 
 /**
@@ -63,8 +66,10 @@ fun SignUpScreen(
     val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
-    if (profileEditMode){
-        viewModel.onEditMode()
+    LaunchedEffect(key1 = Unit) {
+        if (profileEditMode) {
+            viewModel.onEditMode()
+        }
     }
     val countryCode by viewModel.countryCode.collectAsStateWithLifecycle()
     val passwordVerification by viewModel.passwordVerification.collectAsStateWithLifecycle()
@@ -84,7 +89,12 @@ fun SignUpScreen(
         globalErrorMessage = uiState.errorMessage,
         viewModel = viewModel,
         onSubmit = {
-            viewModel.onSubmit()
+            viewModel.onSubmit(
+                isEditMode = profileEditMode,
+                onDirectSubmit = {
+                    viewModel.submitConfirmation(navHostController, profileEditMode)
+                }
+            )
         },
         submitConfirmation = {
             viewModel.submitConfirmation(navHostController, profileEditMode)
@@ -326,8 +336,6 @@ private fun ContentSignUp(
         }
     }
 }
-
-
 /*
 @Preview(
     name = "SignUp Screen - EN",
@@ -339,17 +347,41 @@ private fun ContentSignUp(
     locale = "pt-rPT",
     showBackground = true
 )
-/*
+@Preview(
+    name = "SignUp – PT",
+    locale = "pt-rPT",
+    showBackground = true,
+    showSystemUi = true
+)
+
 @Composable
-fun SignUpScreenContentPreview() {
+fun SignUpPreview() {
     AMFootballTheme {
         ContentSignUp(
-            navController = rememberNavController(),
-            onRegister = { _, onSuccess, _ ->
-                onSuccess()
-            }
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            formDto = CreateProfileDto(
+                userName = "João Silva",
+                email = "joao@email.com",
+                phone = "912345678",
+                address = "Rua Exemplo 123",
+                height = 180,
+                position = 1,
+                dateOfBirth = "2000-05-10",
+                password = "Password123"
+            ),
+            formErrors = SignUpFormErrors(),
+            countryCode = "+351",
+            passwordVerification = "Password123",
+            isLoading = false,
+            globalErrorMessage = null,
+            viewModel = ,
+            onSubmit = {},
+            submitConfirmation = {},
+            profileEditMode = false
         )
     }
-}
 
+}
  */

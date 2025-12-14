@@ -55,6 +55,11 @@ class TeamService @Inject constructor(
         }
     }
 
+    /**
+     * Obtém a tabela de classificação (Leaderboard).
+     **
+     * @return [InfoTeamLeadboard] representando a classificação.
+     */
     suspend fun getLeaderBoard(): List<InfoTeamLeadboard> {
         return safeApiCallWithReturn {
             teamApi.getLeaderBoard()
@@ -74,16 +79,7 @@ class TeamService @Inject constructor(
         }
     }
 
-    /**
-     * Obtém a tabela de classificação (Leaderboard).
-     *
-     * **Nota:** Atualmente retorna um objeto vazio/mock. Implementação pendente no backend?
-     *
-     * @return [TeamDto] representando a classificação.
-     */
-    suspend fun getLeaderBoard(): TeamDto {
-        return TeamDto()
-    }
+
 
     /**
      * Obtém os dados de uma equipa formatados especificamente para o formulário de edição.

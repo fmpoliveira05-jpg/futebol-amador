@@ -400,7 +400,7 @@ object NotificationConst {
 
 object NetworkConsts {
     //"https://amfootballapi.duckdns.org/"
-    const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    const val BASE_URL = "https://sharee-pseudosessile-karin.ngrok-free.dev/"
 
     const val BASE_URL_NGROOK = ""
 }
