@@ -61,6 +61,8 @@ namespace Application.Interfaces.Repositories
         /// <returns>A entidade [Matches] com membros da equipa carregados, ou null.</returns>
         public Task<Matches?> GetMatchWithListPlayerById(Guid idMatch);
 
+        Task<Matches?> GetMatchForFinishMatch(Guid idMatch);
+
         /// <summary>
         /// Verifica se uma equipa tem alguma partida agendada (SCHEDULED ou POST_PONED) dentro de um intervalo de 12 horas da [gameDate] fornecida.
         /// </summary>

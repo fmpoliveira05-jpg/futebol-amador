@@ -116,14 +116,16 @@ namespace Application
             services.AddScoped<ITeamValidator, TeamValidator>();
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
             services.AddScoped<ICalendarValidator, CalendarValidator>();
-            services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
-            services.AddScoped<IGeralHubValidator, GeralHubValidator>();
             services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
             services.AddScoped<IUserDataValidator, UserDataValidator>();
             services.AddScoped<IPlayerAuthorizationValidator, PlayerAuthorizationValidator>();
             services.AddScoped<IMembershipValidator, MembershipValidator>();
+
+            services.AddScoped<IGeralHubValidator, GeralHubValidator>();
+            services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
+            services.AddScoped<IHubFinshMatchValidator, HubFinshMatchValidator>();
             return services;
         }
     }

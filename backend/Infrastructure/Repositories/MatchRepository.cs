@@ -71,7 +71,31 @@ namespace Infrastructure.Repositories
         public async Task<Matches?> GetMatchWithListPlayerById(Guid idMatch)
         {
             return await context.Match
-                .Include(m => m.Teams).ThenInclude(ts => ts.Team).ThenInclude(t => t.Members)
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Members)
+                .FirstOrDefaultAsync(match => match.Id == idMatch);
+        }
+
+        public async Task<Matches?> GetMatchForFinishMatch(Guid idMatch)
+        {
+            return await context.Match
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Members)
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Rank)
+
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Rank)
+                            .ThenInclude(r => r.PreviousRank)
+
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Rank)
+                            .ThenInclude(r => r.NextRank)
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 

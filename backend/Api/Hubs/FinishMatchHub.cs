@@ -19,6 +19,7 @@ namespace Api.Hubs
         private readonly IManagerFinishMatchService managerFinishMatchService;
         private readonly IHubFinshMatchValidator validator;
         private readonly IGeralHubValidator geralValidator;
+        private readonly ILogger<FinishMatchHub> _logger; 
 
         /// <summary>
         /// Construtor do FinishMatchHub.
@@ -27,11 +28,12 @@ namespace Api.Hubs
         /// <param name="validator">Validador específico para regras de finalização de jogo.</param>
         /// <param name="geralValidator">Validador para regras gerais de Hub.</param>
         public FinishMatchHub(IManagerFinishMatchService managerFinishMatchService,
-            IHubFinshMatchValidator validator, IGeralHubValidator geralValidator)
+            IHubFinshMatchValidator validator, IGeralHubValidator geralValidator, ILogger<FinishMatchHub> logger)
         {
             this.managerFinishMatchService = managerFinishMatchService;
             this.validator = validator;
             this.geralValidator = geralValidator;
+            this._logger = logger;
         }
 
         /// <summary>
@@ -47,10 +49,12 @@ namespace Api.Hubs
         public async Task JoinFinishMatch(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Context.User.Identity.Name;
-            JoinFinishMatch result;
+            var userId = Context.UserIdentifier;
             var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
+            JoinFinishMatch result;
+
+            _logger.LogInformation($"[Hub Join] Recebido pedido para Match {idMatch} da conexão {connectionId}");
 
             try
             {
@@ -70,9 +74,15 @@ namespace Api.Hubs
             Context.Items[ModelConstants.FinishMatchHubConst.ContentMatchId] = idMatch;
             Context.Items[ModelConstants.FinishMatchHubConst.ContentTeamId] = result.IdTeam;
 
-            if (result.IsCoincides.HasValue)
+            if (result.IsCoincides.HasValue && result.IsCoincides.Value == true)
             {
+                _logger.LogInformation($"[Hub Join] Coincidência confirmada! Enviando 'ReceiveFinishMatch' para o grupo {groupName}.");
+                await Clients.Group(groupName).ReceiveFinishMatch(true);
                 await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
+            }
+            else
+            {
+                _logger.LogInformation($"[Hub Join] Aguardando oponente ou correção. (IsCoincides: {result.IsCoincides})");
             }
         }
 
@@ -84,7 +94,7 @@ namespace Api.Hubs
         public async Task EditResult(ResultMatchDto finishMatch)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Context.User.Identity.Name;
+            var userId = Context.UserIdentifier;
             var idMatch = finishMatch.IdMatch;
             var groupName = GetGroupName(idMatch);
             JoinFinishMatch result;
@@ -111,7 +121,11 @@ namespace Api.Hubs
                 throw new HubException(ex.Message);
             }
 
-            await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
+            if (result.IsCoincides.HasValue && result.IsCoincides.Value == true)
+            {
+                await Clients.Group(groupName).ReceiveFinishMatch(true);
+                await CleanHub(groupName, result.FirstAdminConnectionId, connectionId);
+            }
         }
 
         /// <summary>

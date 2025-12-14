@@ -7,6 +7,7 @@ using Domain.Constants;
 using Domain.Entities;
 using Domain.Enums;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 
 namespace Application.Services.Hub
@@ -28,6 +29,7 @@ namespace Application.Services.Hub
         private readonly IFinishMatchValidator validator;
         private readonly IGeralHubValidator geralValidator;
         private readonly IMemoryCache cache;
+        private readonly ILogger<ManagerFinishMatchService> _logger; 
 
         /// <summary>
         /// Construtor do ManagerFinishMatchService.
@@ -37,13 +39,15 @@ namespace Application.Services.Hub
         /// <param name="validator">Validador de regras de negócio específicas de finalização.</param>
         /// <param name="geralValidator">Validador genérico de Hubs.</param>
         /// <param name="cache">Cache em memória para armazenar os resultados pendentes de validação.</param>
-        public ManagerFinishMatchService(IMatchRepository matchRepository, IUnityOfWork unityOfWork, IFinishMatchValidator validator, IGeralHubValidator geralValidator, IMemoryCache cache)
+        public ManagerFinishMatchService(IMatchRepository matchRepository, IUnityOfWork unityOfWork, IFinishMatchValidator validator, 
+            IGeralHubValidator geralValidator, IMemoryCache cache, ILogger<ManagerFinishMatchService> logger)
         {
             this.matchRepository = matchRepository;
             this.unityOfWork = unityOfWork;
             this.validator = validator;
             this.geralValidator = geralValidator;
             this.cache = cache;
+            this._logger = logger;
         }
         #endregion
 
@@ -67,10 +71,12 @@ namespace Application.Services.Hub
         /// <returns>Objeto [JoinFinishMatch] com o estado da finalização.</returns>
         public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
+            _logger.LogInformation($"[JoinHubAsync] User {userId} entrou. Match: {matchId}. Goals: {finishMatch.NumGoalsTeam}-{finishMatch.NumGoalsOpponent}");
+
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
 
             EntryHubFinishMatch entry;
-            var match = await matchRepository.GetMatchWithListPlayerById(matchId);
+            var match = await matchRepository.GetMatchForFinishMatch(matchId);
             validator.ValidateMatchJoinMatch(match);
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
@@ -80,9 +86,16 @@ namespace Application.Services.Hub
             var teamId = teamMatchAdmin.IdTeam;
             var hubCacheKey = GetHubCacheKey(matchId);
 
+            _logger.LogInformation($"[JoinHubAsync] TeamID identificada: {teamId}");
+
             if (!cache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub))
             {
+                _logger.LogInformation("[JoinHubAsync] Cache vazia. Criando novo dicionário.");
                 hub = new ConcurrentDictionary<Guid, EntryHubFinishMatch>();
+            }
+            else
+            {
+                _logger.LogInformation($"[JoinHubAsync] Cache encontrada. Jogadores no lobby: {hub.Count}");
             }
 
             validator.ValidateJoinMatch(teamMatchAdmin, teamId, hub);
@@ -95,11 +108,13 @@ namespace Application.Services.Hub
 
             if (hub.Count == 0)
             {
+                _logger.LogInformation("[JoinHubAsync] É o primeiro Admin a entrar.");
                 result.IsFirstAdmin = true;
                 result.MatchFinish = false;
             }
             else
             {
+                _logger.LogInformation("[JoinHubAsync] Segundo Admin entrou. Tentando finalizar...");
                 result.IsFirstAdmin = false;
                 result.MatchFinish = true;
 
@@ -110,6 +125,7 @@ namespace Application.Services.Hub
             //Só guarda uma team em cache se o resultado das partidas não coincidirem
             if (!result.IsCoincides.GetValueOrDefault(false))
             {
+                _logger.LogInformation("[JoinHubAsync] Resultados não coincidem ou aguardando oponente. Guardando em cache.");
                 entry = new EntryHubFinishMatch
                 {
                     ConnectionId = connectionId,
@@ -119,6 +135,10 @@ namespace Application.Services.Hub
                 //Guardo em cache o id da equipa e a sua entrada
                 hub.TryAdd(teamId, entry);
                 cache.Set(hubCacheKey, hub, GetCacheOptions());
+            }
+            else
+            {
+                _logger.LogInformation("[JoinHubAsync] Jogo finalizado com sucesso! Cache será limpa.");
             }
 
             return result;
@@ -253,6 +273,10 @@ namespace Application.Services.Hub
         /// <returns><c>true</c> se os resultados coincidirem.</returns>
         private bool CoincideResults(ResultMatchDto firstResult, ResultMatchDto secondResult)
         {
+            _logger.LogInformation($"[CoincideResults] Comparando: \n" +
+                                   $"Res1 (Cache): Team {firstResult.NumGoalsTeam} - Opp {firstResult.NumGoalsOpponent} (TeamID: {firstResult.IdTeam})\n" +
+                                   $"Res2 (Atual): Team {secondResult.NumGoalsTeam} - Opp {secondResult.NumGoalsOpponent} (TeamID: {secondResult.IdTeam})");
+
             var coincide = false;
             validator.ValidateMatchResultTwoTeams(firstResult, secondResult);
 
@@ -262,6 +286,7 @@ namespace Application.Services.Hub
                 coincide = true;
             }
 
+            _logger.LogInformation($"[CoincideResults] Resultado: {coincide}");
             return coincide;
         }
 
@@ -284,6 +309,7 @@ namespace Application.Services.Hub
 
             if (opponententry == null)
             {
+                _logger.LogWarning($"[FinalizeMatch] AVISO CRÍTICO: Não foi encontrada a entrada do oponente na cache! (Hub Count: {hub?.Count}, Meu TeamId: {team.IdTeam})");
                 result.IsCoincides = false;
                 return;
             }
@@ -292,6 +318,7 @@ namespace Application.Services.Hub
 
             if (opponentResult == null)
             {
+                _logger.LogWarning("[FinalizeMatch] Oponente encontrado mas sem ResultMatchDto.");
                 result.IsCoincides = false;
                 return;
             }
@@ -313,7 +340,8 @@ namespace Application.Services.Hub
                 await unityOfWork.SaveChangesAsync();
                 result.IsCoincides = true;
 
-                cache.Remove(hubCacheKey);
+                cache.Remove(hubCacheKey); 
+                _logger.LogInformation("[FinalizeMatch] BD atualizada e Cache limpa.");
             }
         }
 
@@ -383,11 +411,11 @@ namespace Application.Services.Hub
             var nextRank = team.Rank.NextRank;
             var previousRank = team.Rank.PreviousRank;
 
-            if (team.CurrentPoints >= team.Rank.PointsToPromotion)
+            if (nextRank != null && team.CurrentPoints >= team.Rank.PointsToPromotion)
             {
                 team.Rank = nextRank;
             }
-            else if (team.CurrentPoints < previousRank.PointsToPromotion)
+            else if (previousRank != null && team.CurrentPoints < previousRank.PointsToPromotion)
             {
                 team.Rank = previousRank;
             }

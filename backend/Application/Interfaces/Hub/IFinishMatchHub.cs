@@ -18,7 +18,7 @@ namespace Application.Interfaces.Hub
         /// </remarks>
         /// <param name="finishMatch">O DTO [ResultMatchDto] contendo o número de golos da equipa e do adversário.</param>
         /// <returns>Uma tarefa assíncrona.</returns>
-        public Task JoinFinishMatch(ResultMatchDto finishMatch);
+        Task JoinFinishMatch(ResultMatchDto finishMatch);
 
         /// <summary>
         /// Método invocado pelo cliente para corrigir ou atualizar um resultado que já foi submetido.
@@ -28,7 +28,9 @@ namespace Application.Interfaces.Hub
         /// </remarks>
         /// <param name="finishMatch">O DTO [ResultMatchDto] com os novos golos corrigidos.</param>
         /// <returns>Uma tarefa assíncrona.</returns>
-        public Task EditResult(ResultMatchDto finishMatch);
+        Task EditResult(ResultMatchDto finishMatch);
+
+        Task ReceiveFinishMatch(bool success);
 
         /// <summary>
         /// Método invocado pelo cliente para sair do lobby de finalização (cancelar espera).
@@ -37,6 +39,6 @@ namespace Application.Interfaces.Hub
         /// Sinaliza ao servidor que o cliente não está mais ativo neste processo, permitindo a limpeza do estado temporário.
         /// </remarks>
         /// <returns>Uma tarefa assíncrona.</returns>
-        public Task LeaveFinishMatch();
+        Task LeaveFinishMatch();
     }
 }
