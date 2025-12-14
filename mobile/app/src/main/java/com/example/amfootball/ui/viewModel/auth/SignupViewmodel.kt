@@ -10,6 +10,8 @@ import com.example.amfootball.data.remote.dtos.player.CreateProfileDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.data.remote.services.AuthService
 import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.formErrors.SignUpFormErrors
 import com.example.amfootball.domains.validators.SignUpField
 import com.example.amfootball.domains.validators.validateSignUpForm
 import com.example.amfootball.ui.navigation.objects.Routes
