@@ -22,23 +22,15 @@ namespace Api.Controllers
         #region Inicializer
         private readonly IMatchService matchController;
         private readonly IPlayerAuthorizationService authorizationService;
-        private readonly IStartMatchHubClientService startMatchHubClientService;
-        private readonly IFinishMatchHubClientService finishMatchHubClientService;
 
         /// <summary>
         /// Construtor do CalendarController.
         /// </summary>
         /// <param name="matchController">Serviço responsável pela lógica de negócio das partidas e gestão do calendário.</param>
         /// <param name="authorizationService">Serviço responsável pela validação de permissões (ex: verificar se o utilizador pertence à equipa).</param>
-        /// <param name="startMatchHubClientService">Serviço cliente para comunicação em tempo real com o Hub de início de partida.</param>
-        /// <param name="finishMatchHubClientService">Serviço cliente para comunicação em tempo real com o Hub de finalização de partida.</param>
-        public CalendarController(IMatchService matchController, IPlayerAuthorizationService authorizationService,
-            IStartMatchHubClientService startMatchHubClientService, IFinishMatchHubClientService finishMatchHubClientService)
-        {
+        public CalendarController(IMatchService matchController, IPlayerAuthorizationService authorizationService)        {
             this.matchController = matchController;
             this.authorizationService = authorizationService;
-            this.startMatchHubClientService = startMatchHubClientService;
-            this.finishMatchHubClientService = finishMatchHubClientService;
         }
         #endregion
 
@@ -159,141 +151,6 @@ namespace Api.Controllers
             return Ok();
         }
 
-        #endregion
-
-        #region StartMatch
-
-        /// <summary>
-        /// Inicia o processo de começar uma partida em tempo real (SignalR).
-        /// </summary>
-        /// <remarks>
-        /// Conecta o cliente ao Hub 'StartMatch' para coordenar o início do jogo.
-        /// </remarks>
-        /// <param name="idTeam">O ID da equipa.</param>
-        /// <param name="idMatch">O ID da partida a iniciar.</param>
-        /// <response code="200">Conexão ao Hub de início de jogo estabelecida.</response>
-        /// <response code="400">ID da partida inválido (vazio).</response>
-        [HttpPost("StartMatch")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> StartMatch(Guid idTeam, [FromBody] Guid idMatch)
-        {
-            if (idMatch == Guid.Empty)
-            {
-                return BadRequest("O id de admin não pode estar vazio");
-            }
-
-            await startMatchHubClientService.InitializeAsync();
-            await startMatchHubClientService.JoinStartMatchAsync(idMatch, idTeam);
-            return Ok("Conseguiu entrar no hub!");
-        }
-
-        /// <summary>
-        /// Sai do processo de início de partida (SignalR).
-        /// </summary>
-        /// <remarks>
-        /// Desconecta o cliente do Hub 'StartMatch'.
-        /// </remarks>
-        /// <param name="idTeam">O ID da equipa.</param>
-        /// <response code="200">Desconexão do Hub efetuada com sucesso.</response>
-        [HttpPost("LeaveStartMatch")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> LeaveStartMatch(Guid idTeam)
-        {
-            await startMatchHubClientService.InitializeAsync();
-            await startMatchHubClientService.LeaveStartMatchAsync();
-            return Ok("Saiu do Hub com sucesso!");
-        }
-
-        #endregion
-
-        #region FinishMatch
-        /// <summary>
-        /// Submete o resultado final de uma partida via SignalR.
-        /// </summary>
-        /// <remarks>
-        /// Envia os golos e estatísticas finais para o Hub 'FinishMatch'.
-        /// </remarks>
-        /// <param name="idTeam">O ID da equipa que está a submeter o resultado.</param>
-        /// <param name="result">Objeto contendo os golos e detalhes do resultado.</param>
-        /// <response code="200">Resultado submetido com sucesso.</response>
-        /// <response code="400">ID da equipa inválido, resultado nulo ou inconsistência entre IDs.</response>
-        [HttpPost("FinishMatch")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> FinishMatch(Guid idTeam, [FromBody] ResultMatchDto result)
-        {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa está vazio");
-            }
-
-            if (result == null)
-            {
-                return BadRequest("Não foi mandado o resultado da equipa");
-            }
-
-            if (idTeam != result.IdTeam)
-            {
-                return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
-            }
-
-            await finishMatchHubClientService.InitializeAsync();
-            await finishMatchHubClientService.JoinFinishMatchAsync(result);
-
-            return Ok("Resultado submetido!");
-        }
-
-        /// <summary>
-        /// Atualiza um resultado de partida previamente submetido via SignalR.
-        /// </summary>
-        /// <param name="idTeam">O ID da equipa.</param>
-        /// <param name="result">Novos dados do resultado.</param>
-        /// <response code="200">Resultado atualizado com sucesso.</response>
-        /// <response code="400">Dados inválidos ou inconsistentes.</response>
-        [HttpPut("UpdateFinishMatch")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateFinishMatch(Guid idTeam, [FromBody] ResultMatchDto result)
-        {
-            if (idTeam == Guid.Empty)
-            {
-                return BadRequest("O id da equipa está vazio");
-            }
-
-            if (result == null)
-            {
-                return BadRequest("Não foi mandado o resultado da equipa");
-            }
-
-            if(idTeam != result.IdTeam)
-            {
-                return BadRequest("A equipa que submetu o formulário de fim de jogo não é a mesma do url");
-            }
-
-            await finishMatchHubClientService.InitializeAsync();
-            await finishMatchHubClientService.EditResultMatchAsync(result);
-  
-            return Ok("Resultado alterado com sucesso");
-        }
-
-        /// <summary>
-        /// Sai do processo de finalização de partida (SignalR).
-        /// </summary>
-        /// <remarks>
-        /// Desconecta o cliente do Hub 'FinishMatch'.
-        /// </remarks>
-        /// <param name="idTeam">O ID da equipa.</param>
-        /// <response code="200">Desconexão do Hub efetuada com sucesso.</response>
-        [HttpPost("LeaveFinishMatch")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> LeaveFinishMatch(Guid idTeam)
-        {
-            await finishMatchHubClientService.InitializeAsync();
-            await finishMatchHubClientService.LeaveFinishMatchAsync();
-
-            return Ok("Saiu do Hub com sucesso!");
-        }
         #endregion
 
         #region private Methods

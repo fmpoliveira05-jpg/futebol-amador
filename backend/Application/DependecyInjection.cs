@@ -61,25 +61,6 @@ namespace Application
             services.AddScoped<INotificationFirebaseService, NotificationFirebaseService>();
 
             services.AddManagerHubService();
-            services.AddHubServiceClients();
-
-            return services;
-        }
-
-        /// <summary>
-        /// Regista os serviços clientes dos Hubs SignalR (Hub Client Services).
-        /// </summary>
-        /// <remarks>
-        /// Estes serviços são registados como <c>Transient</c> porque geralmente mantêm estado leve ou são instanciados per-call
-        /// para interagir diretamente com o contexto do Hub.
-        /// </remarks>
-        /// <param name="services">A coleção de serviços.</param>
-        /// <returns>A coleção de serviços atualizada.</returns>
-        private static IServiceCollection AddHubServiceClients(this IServiceCollection services)
-        {
-            services.AddTransient<IStartMatchHubClientService, StartMatchHubClientService>();
-            services.AddTransient<IFinishMatchHubClientService, FinishMatchHubClientService>();
-            services.AddTransient<IRankMatchMakerHubClientService, RankMatchMakerHubClientService>();
 
             return services;
         }
