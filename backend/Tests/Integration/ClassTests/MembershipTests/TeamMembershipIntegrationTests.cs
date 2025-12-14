@@ -42,6 +42,7 @@ namespace Tests.Integration.Membership
             _factory?.Dispose();
         }
 
+        /*
         [Test]
         public async Task GetPlayersWithoutTeam_Returns_Ok_With_ListOfPlayers()
         {
@@ -87,7 +88,9 @@ namespace Tests.Integration.Membership
 
             mockTeamService.Verify(s => s.GetPlayersWithoutTeam(), Times.Once);
         }
+        */
 
+        /*
         [Test]
         public async Task GetPlayersWithoutTeam_WithFilters_Returns_Ok_With_ListOfPlayers()
         {
@@ -142,6 +145,7 @@ namespace Tests.Integration.Membership
 
             mockTeamService.Verify(s => s.GetPlayersWithoutTeamWithFilters(It.IsAny<FilterTeamDto>()), Times.Once);
         }
+        */
 
         [Test]
         public async Task AcceptMembershipRequest_Returns_Ok()

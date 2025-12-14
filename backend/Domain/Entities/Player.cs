@@ -52,6 +52,8 @@ namespace Domain.Entities
         /// </summary>
         public DateTime? IsAdminLastChangedAt { get; set; }
 
+        public string? ImageUrl { get; set; }
+
         /// <summary>
         /// Coleção de pedidos de adesão (Membership Requests) que este jogador enviou ou recebeu.
         /// </summary>
@@ -75,12 +77,13 @@ namespace Domain.Entities
         /// <param name="phoneNumber">O número de telefone.</param>
         /// <param name="position">A posição principal em campo.</param>
         /// <param name="height">A altura em centímetros.</param>
-        public Player(string userId, string name, DateOnly dateOfBirth, string address, string email, string phoneNumber, Position position, int height)
+        public Player(string userId, string name, DateOnly dateOfBirth, string address, string email, string phoneNumber, Position position, int height, string? imageUrl)
             : base(userId, name, dateOfBirth, address, email, phoneNumber)
         {
             Position = position;
             Height = height;
             IsAdmin = false;
+            ImageUrl = imageUrl;
         }
     }
 }

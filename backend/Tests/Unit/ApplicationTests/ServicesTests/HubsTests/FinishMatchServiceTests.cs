@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Moq;
 using NUnit.Framework;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Logging;
 
 namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 {
@@ -21,6 +22,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         private Mock<IUnityOfWork> mockUnitOfWork;
         private Mock<IFinishMatchValidator> mockValidator;
         private Mock<IGeralHubValidator> mockGeralValidator;
+        private Mock<ILogger<ManagerFinishMatchService>> mockLogger; 
         private IMemoryCache cache;
         private ManagerFinishMatchService service;
 
@@ -44,15 +46,15 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockUnitOfWork = new Mock<IUnityOfWork>();
             mockValidator = new Mock<IFinishMatchValidator>();
             mockGeralValidator = new Mock<IGeralHubValidator>();
-
+            mockLogger = new Mock<ILogger<ManagerFinishMatchService>>();
             cache = new MemoryCache(new MemoryCacheOptions());
-
             service = new ManagerFinishMatchService(
                 mockMatchRepository.Object,
                 mockUnitOfWork.Object,
                 mockValidator.Object,
                 mockGeralValidator.Object,
-                cache
+                cache,
+                mockLogger.Object
             );
 
             matchId = Guid.NewGuid();

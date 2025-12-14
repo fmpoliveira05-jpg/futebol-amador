@@ -94,7 +94,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Teste",
                 Description = "Equipa de teste",
-                icon = new byte[] { 1, 2, 3, 4 },
+                icon = "",
                 HomePitch = new PitchDto { Name = "Campo Central", Address = "Rua Principal" }
             };
             var unrankedRank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
@@ -126,11 +126,11 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Repetido",
                 Description = "Equipa duplicada",
-                icon = new byte[] { 1, 1, 1 },
+                icon = "",
                 HomePitch = new PitchDto { Name = "Campo Velho", Address = "Rua da Bola" }
             };
             var rank = new TestRank("Unranked");
-            var existingTeam = new Team(dto.Name, "Outra equipa", new byte[] { 9, 9 }, new Pitch("Campo Antigo", "Rua Antiga"), rank);
+            var existingTeam = new Team(dto.Name, "Outra equipa", "", new Pitch("Campo Antigo", "Rua Antiga"), rank);
             var adminPlayer = new Player { Id = "admin-id-123", IsAdmin = true };
             _teamRepoMock.Setup(r => r.GetTeamByNameAsync(dto.Name)).ReturnsAsync(existingTeam);
             _rankRepoMock.Setup(r => r.GetDefaultRankAsync()).ReturnsAsync(rank);
@@ -151,7 +151,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank("Unranked");
-            var existingTeam = new Team("FC Alpha", "Equipa atual", new byte[] { 1 }, new Pitch("Campo 1", "Rua 1"), rank);
+            var existingTeam = new Team("FC Alpha", "Equipa atual", "", new Pitch("Campo 1", "Rua 1"), rank);
             var adminPlayer = new Player
             {
                 Id = "admin-id-123",
@@ -166,7 +166,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Nova",
                 Description = "Nova equipa criada por admin indevido",
-                icon = new byte[] { 5, 5, 5 },
+                icon = "",
                 HomePitch = new PitchDto { Name = "Campo Novo", Address = "Rua Nova" }
             };
 
@@ -188,7 +188,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Antigo Nome", "Desc", new byte[] { 1, 2, 3 }, new Pitch("Campo", "Rua"), rank)
+            var team = new Team("Antigo Nome", "Desc", "", new Pitch("Campo", "Rua"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -228,7 +228,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Antigo Nome", "Desc", new byte[] { 1, 2, 3 }, new Pitch("Campo", "Rua"), rank)
+            var team = new Team("Antigo Nome", "Desc", "", new Pitch("Campo", "Rua"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -259,12 +259,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[] { 1 }, new Pitch("Campo A", "Rua A"), rank)
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var teamB = new Team("Team B", "Desc B", new byte[] { 2 }, new Pitch("Campo B", "Rua B"), rank)
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank)
             {
                 Id = Guid.NewGuid()
             };
@@ -315,12 +315,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("FC Original", "Desc A", new byte[] { 1 }, new Pitch("Campo A", "Rua A"), rank)
+            var teamA = new Team("FC Original", "Desc A", "", new Pitch("Campo A", "Rua A"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var teamB = new Team("FC Existente", "Desc B", new byte[] { 2 }, new Pitch("Campo B", "Rua B"), rank)
+            var teamB = new Team("FC Existente", "Desc B", "", new Pitch("Campo B", "Rua B"), rank)
             {
                 Id = Guid.NewGuid()
             };
@@ -352,7 +352,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("ToDelete", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("ToDelete", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true };
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(team.Id)).ReturnsAsync(team);
@@ -372,7 +372,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("FailDelete", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("FailDelete", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var player = new Player { Id = "player-id-123", IdTeam = team.Id, IsAdmin = false };
             team.Members.Add(player);
             _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(team.Id)).ReturnsAsync(team);
@@ -392,8 +392,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamX = new Team("TeamX", "Desc X", new byte[1], new Pitch("Campo X", "Rua X"), rank);
-            var teamY = new Team("TeamY", "Desc Y", new byte[1], new Pitch("Campo Y", "Rua Y"), rank);
+            var teamX = new Team("TeamX", "Desc X", "", new Pitch("Campo X", "Rua X"), rank);
+            var teamY = new Team("TeamY", "Desc Y", "", new Pitch("Campo Y", "Rua Y"), rank);
             var playerAdmin = new Player { Id = "admin-id-999", IdTeam = teamX.Id, IsAdmin = true };
             teamX.Members.Add(playerAdmin);
             _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(teamY.Id)).ReturnsAsync(teamY);
@@ -432,7 +432,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("EmptyTeam", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("EmptyTeam", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true };
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForDeletionAsync(team.Id)).ReturnsAsync(team);
@@ -452,7 +452,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("TeamToDelete", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank)
+            var team = new Team("TeamToDelete", "Desc", "", new Pitch("Campo", "Rua"), rank)
             {
                 Id = Guid.NewGuid()
             };
@@ -482,8 +482,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamX = new Team("TeamX", "Desc X", new byte[1], new Pitch("Campo X", "Rua X"), rank);
-            var teamY = new Team("TeamY", "Desc Y", new byte[1], new Pitch("Campo Y", "Rua Y"), rank);
+            var teamX = new Team("TeamX", "Desc X", "", new Pitch("Campo X", "Rua X"), rank);
+            var teamY = new Team("TeamY", "Desc Y", "", new Pitch("Campo Y", "Rua Y"), rank);
             var player = new Player
             {
                 Id = "player-id-888",
@@ -509,7 +509,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"), rank)
+            var team = new Team("FC Test", "desc", "", new Pitch("campo", "morada"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -536,7 +536,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("FC Test", "desc", new byte[] { 1, 2, 3 }, new Pitch("campo", "morada"), rank)
+            var team = new Team("FC Test", "desc", "", new Pitch("campo", "morada"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -564,12 +564,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[] { 1 }, new Pitch("Campo A", "Rua A"), rank)
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var teamB = new Team("Team B", "Desc B", new byte[] { 2 }, new Pitch("Campo B", "Rua B"), rank)
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -597,12 +597,12 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team X", "Desc X", new byte[] { 1 }, new Pitch("Campo X", "Rua X"), rank)
+            var team = new Team("Team X", "Desc X", "", new Pitch("Campo X", "Rua X"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
             };
-            var otherTeam = new Team("Team Y", "Desc Y", new byte[] { 2 }, new Pitch("Campo Y", "Rua Y"), rank)
+            var otherTeam = new Team("Team Y", "Desc Y", "", new Pitch("Campo Y", "Rua Y"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -632,7 +632,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("FC Unity", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("FC Unity", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true, Team = team};
             var member = new Player { Id = "player-id-123", IdTeam = team.Id, IsAdmin = false, Team = team};
             team.Members.Add(admin);
@@ -654,7 +654,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("Team", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var memberPromoting = new Player { Id = "non-admin-id-123", IdTeam = team.Id, IsAdmin = true, Team = team };
             var memberToPromote = new Player { Id = "user-id-123", IdTeam = team.Id, IsAdmin = true, Team = team};
             team.Members.Add(memberPromoting);
@@ -676,7 +676,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team A", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("Team A", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var adminPromoter = new Player { Id = "admin-promoter-1", IdTeam = team.Id, IsAdmin = false, Team = team};
             var playerAlreadyAdmin = new Player { Id = "already-admin-1", IdTeam = team.Id, IsAdmin = false };
             team.Members.Add(adminPromoter);
@@ -699,8 +699,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
             var adminOtherTeam = new Player { Id = "admin-other-team-1", IdTeam = teamA.Id, IsAdmin = true };
             var playerToPromote = new Player { Id = "player-to-promote-b", IdTeam = teamB.Id, IsAdmin = false };
             teamA.Members.Add(adminOtherTeam);
@@ -723,7 +723,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank)
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank)
             {
                 Id = Guid.NewGuid()
             };
@@ -759,7 +759,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team Y", "Desc Y", new byte[1], new Pitch("Campo", "Rua"), rank)
+            var team = new Team("Team Y", "Desc Y", "", new Pitch("Campo", "Rua"), rank)
             {
                 Id = Guid.NewGuid(),
                 Members = new List<Player>()
@@ -790,8 +790,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
             var admin = new Player { Id = "admin-a-2", IdTeam = teamA.Id, IsAdmin = true };
             var playerToPromote = new Player { Id = "player-b-2", IdTeam = teamB.Id, IsAdmin = false, Team = teamB};
             teamA.Members.Add(admin);
@@ -817,7 +817,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("Team", "Desc", "", new Pitch("Campo", "Rua"), rank);
 
             // CORREÇÃO: Definir datas para garantir hierarquia
             var admin1 = new Player
@@ -862,7 +862,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank);
+            var team = new Team("Team", "Desc", "", new Pitch("Campo", "Rua"), rank);
             var nonAdmin = new Player { Id = "nonadmin-id-123", IdTeam = team.Id, IsAdmin = false };
             var admin = new Player { Id = "admin-id-123", IdTeam = team.Id, IsAdmin = true };
             team.Members.Add(nonAdmin);
@@ -884,8 +884,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
             var adminOtherTeam = new Player { Id = "admin-a-3", IdTeam = teamA.Id, IsAdmin = true };
             var adminToDemote = new Player { Id = "admin-b-3", IdTeam = teamB.Id, IsAdmin = true };
             teamA.Members.Add(adminOtherTeam);
@@ -908,7 +908,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team Self", "Desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = Guid.NewGuid() };
+            var team = new Team("Team Self", "Desc", "", new Pitch("Campo", "Rua"), rank) { Id = Guid.NewGuid() };
             var admin = new Player { Id = "admin-self-1", IdTeam = team.Id, IsAdmin = true };
             team.Members.Add(admin);
             _teamRepoMock.Setup(r => r.GetTeamForMemberManagementAsync(team.Id)).ReturnsAsync(team);
@@ -928,7 +928,7 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var team = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank)
+            var team = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank)
             {
                 Id = Guid.NewGuid()
             };
@@ -966,8 +966,8 @@ namespace Unit.ApplicationTests.ServicesTests
         {
             // ARRANGE
             var rank = new TestRank();
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), rank) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), rank) { Id = Guid.NewGuid() };
             var adminTeamA = new Player { Id = "admin-a-5", IdTeam = teamA.Id, IsAdmin = true, Team = teamA };
             var playerFromOtherTeam = new Player { Id = "player-b-5", IdTeam = teamB.Id, IsAdmin = false, Team = teamB };
             teamA.Members.Add(adminTeamA);
@@ -1020,7 +1020,7 @@ namespace Unit.ApplicationTests.ServicesTests
         [Test(Description = "T1GEJ2- GetTeamPlayersAsync deve devolver a lista de jogadores da equipa")]
         public async Task GetTeamPlayersAsync_Should_Return_Player_List()
         {
-            var team = new Team("T", "Desc", new byte[1], new Pitch("Campo", "Rua"), new TestRank());
+            var team = new Team("T", "Desc", "", new Pitch("Campo", "Rua"), new TestRank());
             var p1 = new Player { Id = "player-a", Name = "A", IdTeam = team.Id };
             var p2 = new Player { Id = "player-b", Name = "B", IdTeam = team.Id };
             team.Members.Add(p1);
@@ -1052,7 +1052,7 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task GetTeamPlayersAsyncWithFilters_Should_Return_Admins_When_Team_Exists()
         {
             // ARRANGE
-            var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), new TestRank())
+            var team = new Team("Team", "Desc", "", new Pitch("Campo", "Rua"), new TestRank())
             {
                 Id = Guid.NewGuid()
             };
@@ -1102,7 +1102,7 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task GetTeamPlayersAsyncWithFilters_Should_Throw_When_Player_Is_Not_Admin()
         {
             // ARRANGE
-            var team = new Team("Team", "Desc", new byte[1], new Pitch("Campo", "Rua"), new TestRank())
+            var team = new Team("Team", "Desc", "", new Pitch("Campo", "Rua"), new TestRank())
             {
                 Id = Guid.NewGuid()
             };
@@ -1124,8 +1124,8 @@ namespace Unit.ApplicationTests.ServicesTests
         public async Task GetTeamPlayersAsyncWithFilters_Should_Throw_When_Player_Belongs_To_Other_Team()
         {
             // ARRANGE
-            var teamA = new Team("Team A", "Desc A", new byte[1], new Pitch("Campo A", "Rua A"), new TestRank()) { Id = Guid.NewGuid() };
-            var teamB = new Team("Team B", "Desc B", new byte[1], new Pitch("Campo B", "Rua B"), new TestRank()) { Id = Guid.NewGuid() };
+            var teamA = new Team("Team A", "Desc A", "", new Pitch("Campo A", "Rua A"), new TestRank()) { Id = Guid.NewGuid() };
+            var teamB = new Team("Team B", "Desc B", "", new Pitch("Campo B", "Rua B"), new TestRank()) { Id = Guid.NewGuid() };
             var playerTeamA = new Player { Id = "player-a", Name = "Player A", IdTeam = teamA.Id, IsAdmin = false };
             var filters = new FilterTeamPlayers { IsAdmin = true };
             teamA.Members.Add(playerTeamA);

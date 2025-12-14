@@ -34,7 +34,7 @@ namespace Domain.Entities
         /// <summary>
         /// O logótipo ou imagem de perfil da equipa (armazenado como um array de bytes).
         /// </summary>
-        public byte[]? Icon { get; set; }
+        public string? Icon { get; set; }
 
         /// <summary>
         /// Entidade de navegação para o Campo ([Pitch]) associado à equipa (campo da casa).
@@ -117,7 +117,7 @@ namespace Domain.Entities
         /// <param name="icon">O logótipo (opcional).</param>
         /// <param name="pitch">O campo de jogo associado.</param>
         /// <param name="defaultRank">O Rank inicial da equipa.</param>
-        public Team(string name, string? description, byte[]? icon, Pitch pitch, Rank defaultRank)
+        public Team(string name, string? description, string icon, Pitch pitch, Rank defaultRank)
         {
             this.Name = name;
             this.Description = description;

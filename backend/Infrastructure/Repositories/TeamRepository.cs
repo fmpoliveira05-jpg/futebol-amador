@@ -119,7 +119,8 @@ namespace Infrastructure.Repositories
                     .Select(t => new TeamDto
                     {
                         IdTeam = t.Id,
-                        Name = t.Name
+                        Name = t.Name,
+                        imageUrl = t.Icon
                     })        
                     .FirstOrDefaultAsync();
         }

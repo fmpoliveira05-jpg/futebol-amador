@@ -191,7 +191,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = "fake-firebase-uid-admin";
             var playerId = "player-id-abc";
             var rank = new TestRank();
-            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+            var team = new Team("FC Unity", "desc", "", new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId, teamId);
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = team.Id, IsAdmin = true };
@@ -330,7 +330,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var adminId = "admin-id-123";
             var playerId = "player-id-abc";
             var rank = new TestRank();
-            var team = new Team("FC Reject", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+            var team = new Team("FC Reject", "desc", "", new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var request = CreateMembershipRequest(requestId, playerId, teamId);
             team.MembershipRequests.Add(request);
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true };
@@ -402,7 +402,7 @@ namespace Unit.ApplicationTests.ServicesTests
 
             // Configuração das Entidades de Domínio (usadas para simular o estado da equipa/admin)
             var rank = new TestRank(); // Assumindo que TestRank existe no teu contexto de testes
-            var team = new Team("FC Requests", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+            var team = new Team("FC Requests", "desc", "", new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team };
 
             // Configuração dos DTOs de Retorno (Aqui estava o erro principal)
@@ -525,7 +525,7 @@ namespace Unit.ApplicationTests.ServicesTests
             var playerIdToInvite = "player-id-to-invite";
             var adminId = "admin-id";
             var rank = new TestRank();
-            var team = new Team("FC Unity", "desc", new byte[1], new Pitch("Campo", "Rua"), rank) { Id = teamId };
+            var team = new Team("FC Unity", "desc", "", new Pitch("Campo", "Rua"), rank) { Id = teamId };
             var admin = new Player { Id = adminId, IdTeam = teamId, IsAdmin = true, Team = team };
             team.Members.Add(admin);
             var playerToInvite = new Player { Id = playerIdToInvite, IdTeam = Guid.Empty, Team = null };

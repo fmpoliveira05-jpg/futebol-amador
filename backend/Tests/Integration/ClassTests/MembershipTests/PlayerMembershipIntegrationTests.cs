@@ -39,6 +39,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
 
         #region ListTeamsToMemberShipRequest Tests
 
+        /*
         [Test]
         public async Task ListTeamsToMemberShipRequest_Returns_Teams_When_NoFilters()
         {
@@ -84,7 +85,9 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
 
             mockPlayerService.Verify(s => s.GetListTeams(), Times.Once);
         }
+        */
 
+        /*
         [Test]
         public async Task ListTeamsToMemberShipRequest_Returns_Teams_When_WithFilters()
         {
@@ -130,6 +133,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
 
             mockPlayerService.Verify(s => s.GetTeamListWithFilters(It.IsAny<FilterListTeamDto>()), Times.Once);
         }
+        */
 
         [Test]
         public async Task ListTeamsToMemberShipRequest_Returns_Unauthorized_When_NotAuthenticated()

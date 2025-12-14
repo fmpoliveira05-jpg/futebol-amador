@@ -77,8 +77,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var senderPitch = new Pitch("Campo Central", "Rua A");
             var receiverPitch = new Pitch("Campo Secundário", "Rua B");
 
-            var senderTeam = new Team("Team A", "Descrição A", new byte[] { 1 }, senderPitch, _defaultRank);
-            var receiverTeam = new Team("Team B", "Descrição B", new byte[] { 1 }, receiverPitch, _defaultRank);
+            var senderTeam = new Team("Team A", "Descrição A", "", senderPitch, _defaultRank);
+            var receiverTeam = new Team("Team B", "Descrição B", "", receiverPitch, _defaultRank);
             receiverTeam.Members = new List<Player>
             {
                 new Player { Id = "admin-receiver", Name = "Admin B", IsAdmin = true }
@@ -198,7 +198,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 homePitch = true
             };
 
-            var senderTeam = new Team("Team Sender", "Desc", new byte[] { 1 }, new Pitch("Campo Central", "Rua X"), _defaultRank);
+            var senderTeam = new Team("Team Sender", "Desc", "", new Pitch("Campo Central", "Rua X"), _defaultRank);
 
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(idSender)).ReturnsAsync(senderTeam);
             _teamRepoMock.Setup(r => r.GetTeamByIdWithPitchAsync(dto.IdReceiver))
@@ -227,8 +227,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo Central", "Rua Principal");
 
-            var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var senderTeam = new Team("Team A", "desc", "", pitch, rank);
+            var receiverTeam = new Team("Team B", "desc", "", pitch, rank);
 
             // Inicializar listas para evitar NullReferenceException
             senderTeam.Calendar = new Calendar();
@@ -303,9 +303,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo", "Rua");
-            var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
-            var outsiderTeam = new Team("Team Outsider", "desc", new byte[] { 3 }, pitch, rank);
+            var teamA = new Team("Team A", "desc", "", pitch, rank);
+            var teamB = new Team("Team B", "desc", "", pitch, rank);
+            var outsiderTeam = new Team("Team Outsider", "desc", "", pitch, rank);
 
             var invite = new MatchInvite(teamA, teamB, DateTime.UtcNow.AddDays(1), pitch);
             teamB.ReceivedInvites.Add(invite);
@@ -337,8 +337,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo Central", "Rua A");
 
-            var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var senderTeam = new Team("Team A", "desc", "", pitch, rank);
+            var receiverTeam = new Team("Team B", "desc", "", pitch, rank);
             var matchInvite = new MatchInvite(senderTeam, receiverTeam, DateTime.UtcNow.AddDays(1), pitch);
 
             receiverTeam.ReceivedInvites.Add(matchInvite);
@@ -393,9 +393,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo", "Rua");
-            var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
-            var outsiderTeam = new Team("Team Outsider", "desc", new byte[] { 3 }, pitch, rank);
+            var teamA = new Team("Team A", "desc", "", pitch, rank);
+            var teamB = new Team("Team B", "desc", "", pitch, rank);
+            var outsiderTeam = new Team("Team Outsider", "desc", "", pitch, rank);
 
             var invite = new MatchInvite(teamA, teamB, DateTime.UtcNow.AddDays(1), pitch);
             teamB.ReceivedInvites.Add(invite);
@@ -426,10 +426,10 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo Central", "Rua A");
 
-            var senderTeam = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
+            var senderTeam = new Team("Team A", "desc", "", pitch, rank);
             senderTeam.Id = Guid.NewGuid();
 
-            var receiverTeam = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var receiverTeam = new Team("Team B", "desc", "", pitch, rank);
             receiverTeam.Id = Guid.NewGuid();
 
             var matchInvite = new MatchInvite(senderTeam, receiverTeam, DateTime.UtcNow.AddDays(1), pitch);
@@ -510,9 +510,9 @@ namespace Unit.ApplicationTests.ServicesTests
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
             var pitch = new Pitch("Campo", "Rua");
 
-            var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
-            var outsiderTeam = new Team("Team Outsider", "desc", new byte[] { 3 }, pitch, rank);
+            var teamA = new Team("Team A", "desc", "", pitch, rank);
+            var teamB = new Team("Team B", "desc", "", pitch, rank);
+            var outsiderTeam = new Team("Team Outsider", "desc", "", pitch, rank);
 
             // O convite existe entre A e B
             var invite = new MatchInvite(teamA, teamB, DateTime.UtcNow.AddDays(1), pitch);

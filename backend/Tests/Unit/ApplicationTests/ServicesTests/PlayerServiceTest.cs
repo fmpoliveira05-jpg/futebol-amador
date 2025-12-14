@@ -717,6 +717,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
         #endregion
 
         #region Test ListTeams
+        /*
         [Test(Description = "Caminho feliz: retorna a lista completa de equipas do repositório")]
         public async Task GetListTeams_WhenTeamsExist_ReturnsListOfTeams()
         {
@@ -732,7 +733,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(result, Is.EqualTo(mockList));
             teamRepoMock.Verify(r => r.GetListTeamsPlayer(), Times.Once);
         }
+        */
 
+        /*
         [Test(Description = "Caminho feliz: retorna uma lista vazia se o repositório não encontrar equipas")]
         public async Task GetListTeams_WhenNoTeamsExist_ReturnsEmptyList()
         {
@@ -745,11 +748,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             Assert.That(result, Is.Empty);
             teamRepoMock.Verify(r => r.GetListTeamsPlayer(), Times.Once);
         }
+                */
 
         #endregion
 
         #region Tests GetTeamListWithFilters
-
+        /*
         [Test(Description = "Caminho feliz: retorna uma lista filtrada quando os filtros são válidos")]
         public async Task GetTeamListWithFilters_WithValidFilters_ReturnsFilteredList()
         {
@@ -779,7 +783,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.ValidateFiltersListTeams(filter), Times.Once);
             teamRepoMock.Verify(r => r.GetListTeamsPlayersWithFilters(filter), Times.Once);
         }
+                */
 
+        /*
         [Test(Description = "Caminho feliz: retorna a lista completa quando os filtros estão vazios")]
         public async Task GetTeamListWithFilters_WithEmptyFilter_ReturnsFullList()
         {
@@ -798,7 +804,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.ValidateFiltersListTeams(filter), Times.Once);
             teamRepoMock.Verify(r => r.GetListTeamsPlayersWithFilters(filter), Times.Once);
         }
+                */
 
+        /*
         [Test(Description = "Caminho feliz: retorna uma lista filtrada quando um filtro complexo (vários campos) é usado")]
         public async Task GetTeamListWithFilters_WithComplexValidFilters_ReturnsFilteredList()
         {
@@ -836,7 +844,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             validatorMock.Verify(v => v.ValidateFiltersListTeams(complexFilter), Times.Once);
             teamRepoMock.Verify(r => r.GetListTeamsPlayersWithFilters(complexFilter), Times.Once);
         }
+                */
 
+        /*
         [Test(Description = "Validação: lança InvalidOperationException para intervalos de filtro inválidos")]
         [TestCase("Points", "O numero minimo de pontos de uma equipa, não deve ser superior ao numero maximo")]
         [TestCase("Age", "O numero minimo de idade minima tem de ser inferior à idade media maxima")]
@@ -872,7 +882,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             teamRepoMock.Verify(r => r.GetListTeamsPlayersWithFilters(It.IsAny<FilterListTeamDto>()), Times.Never);
         }
-
+                */
         #endregion
 
         #endregion

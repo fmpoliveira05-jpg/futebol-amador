@@ -11,5 +11,7 @@ namespace Application.DTOs.Team
         [Required]
         [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string Name { get; set; } = null!;
+
+        public string? imageUrl { get; set; }
     }
 }

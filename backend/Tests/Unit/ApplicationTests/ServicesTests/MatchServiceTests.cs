@@ -65,8 +65,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var pitch = new Pitch("Campo Central", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var team = new Team("Team A", "desc", "", pitch, rank);
+            var opponent = new Team("Team B", "desc", "", pitch, rank);
 
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
@@ -195,8 +195,8 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var pitch = new Pitch("Campo", "Rua");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+            var team = new Team("Team A", "desc", "", pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", "", pitch, rank) { Id = opponentId };
 
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
@@ -233,8 +233,8 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var pitch = new Pitch("Campo", "Rua");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+            var team = new Team("Team A", "desc", "", pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", "", pitch, rank) { Id = opponentId };
 
             var match = new Matches(sameDate, false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
@@ -286,8 +286,8 @@ namespace Unit.ApplicationTests.ServicesTests
 
             var pitch = new Pitch("Campo", "Rua");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank) { Id = teamId };
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank) { Id = opponentId };
+            var team = new Team("Team A", "desc", "", pitch, rank) { Id = teamId };
+            var opponent = new Team("Team B", "desc", "", pitch, rank) { Id = opponentId };
 
             var match = new Matches(DateTime.UtcNow.AddDays(1), false, Guid.NewGuid(), new List<TeamStatistics>(), new Chat())
             {
@@ -327,8 +327,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var pitch = new Pitch("Campo Central", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var team = new Team("Team A", "desc", "", pitch, rank);
+            var opponent = new Team("Team B", "desc", "", pitch, rank);
             var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.SCHEDULED
@@ -355,8 +355,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var opponent = new Team("Team B", "desc", new byte[] { 1 }, pitch, rank);
+            var team = new Team("Team A", "desc", "", pitch, rank);
+            var opponent = new Team("Team B", "desc", "", pitch, rank);
             var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
                 MatchStatus = MatchStatus.DONE
@@ -396,8 +396,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "player-nonadmin-id";
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var team = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var opponent = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var team = new Team("Team A", "desc", "", pitch, rank);
+            var opponent = new Team("Team B", "desc", "", pitch, rank);
             var player = new Player
             {
                 Id = userId,
@@ -431,8 +431,8 @@ namespace Unit.ApplicationTests.ServicesTests
             var userId = "admin-id";
             var pitch = new Pitch("Campo", "Rua X");
             var rank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
-            var teamA = new Team("Team A", "desc", new byte[] { 1 }, pitch, rank);
-            var teamB = new Team("Team B", "desc", new byte[] { 2 }, pitch, rank);
+            var teamA = new Team("Team A", "desc", "", pitch, rank);
+            var teamB = new Team("Team B", "desc", "", pitch, rank);
             var outsider = new Team("Outsider", "desc", new byte[] { 3 }, pitch, rank);
             var match = new Matches(DateTime.UtcNow.AddDays(3), false, pitch.Id, new List<TeamStatistics>(), new Chat())
             {
