@@ -46,7 +46,7 @@ class FirebaseImageUploadService @Inject constructor(
             downloadUrl.toString()
         } catch (e: Exception) {
             e.printStackTrace()
-            null // Retorna null em caso de erro
+            null
         }
     }
 

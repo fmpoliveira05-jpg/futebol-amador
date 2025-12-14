@@ -398,30 +398,83 @@ object NotificationConst {
     const val TEAM_CHANNEL_ID = "team_channel_id"
 }
 
+/**
+ * Constantes de configuração de rede global da aplicação.
+ *
+ * Este objeto centraliza os endereços base (Base URLs) utilizados por clientes HTTP (como Retrofit)
+ * para comunicar com a API backend.
+ */
 object NetworkConsts {
-    //"https://amfootballapi.duckdns.org/"
-    const val BASE_URL = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    /**
+     * URL principal da API (Ambiente de Produção ou Staging).
+     * Aponta para o domínio DNS dinâmico configurado.
+     */
+    const val BASE_URL = "https://amfootballapi.duckdns.org/"
 
-    const val BASE_URL_NGROOK = ""
+    /**
+     * URL alternativa para tunelamento via Ngrok.
+     *
+     * Utilizada frequentemente durante o desenvolvimento para expor o servidor local (localhost)
+     * à internet, permitindo testes em dispositivos físicos.
+     */
+    const val BASE_URL_NGROOK = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
 }
 
+/**
+ * Definição dos Endpoints (Rotas) dos Hubs do SignalR.
+ *
+ * Estas strings representam os caminhos relativos que são concatenados à URL base
+ * para estabelecer a conexão com os diferentes canais de comunicação em tempo real.
+ */
 object SignalRUrls {
+    /** Rota para o Hub responsável pela gestão do início de partidas. */
     const val START_MATCH_URL = "StartMatch"
 
+    /** Rota para o Hub responsável pela gestão da finalização e reporte de resultados. */
     const val FINISH_MATCH_URL = "FinishMatch"
 }
 
+/**
+ * Nomes dos métodos (Action Names) utilizados no protocolo SignalR.
+ *
+ * Contém as strings exatas que mapeiam:
+ * 1. As funções que o cliente invoca no servidor (`hubConnection.invoke`).
+ * 2. Os eventos que o cliente escuta do servidor (`hubConnection.on`).
+ */
 object SignalRMethods {
+    // --- Métodos de Start Match ---
+
+    /** Método para entrar no grupo/sessão de início de partida. */
     const val JOIN_MATCH = "JoinStartMatch"
+
+    /** Método para sair do grupo/sessão de início de partida. */
     const val LEAVE_MATCH = "LeaveStartMatch"
+
+    /** Evento disparado pelo servidor quando uma partida é iniciada/recebida. */
     const val RECEIVE_MATCH = "ReceiveStartMatch"
 
+    // --- Métodos de Finish Match ---
+
+    /** Evento disparado pelo servidor quando o resultado final é confirmado/recebido. */
     const val RECEIVE_FINISH_MATCH = "ReceiveFinishMatch"
+
+    /** Método para entrar no grupo de finalização de partida. */
     const val JOIN_FINISH_MATCH = "JoinFinishMatch"
+
+    /** Método para editar/enviar o resultado de uma partida em curso. */
     const val EDIT_RESULT = "EditResult"
+
+    /** Método para sair do grupo de finalização de partida. */
     const val LEAVE_FINISH_MATCH = "LeaveFinishMatch"
 }
 
+/**
+ * Mensagens estáticas de feedback visual para eventos do SignalR.
+ *
+ * Estas constantes são utilizadas para exibir notificações ao utilizador (Toasts, Snackbars)
+ * em resposta a eventos de tempo real.
+ */
 object SignalRMessages {
+    /** Mensagem exibida quando o servidor notifica que o jogo começou com sucesso. */
     const val MATCH_STARTED = "O jogo começou!"
 }

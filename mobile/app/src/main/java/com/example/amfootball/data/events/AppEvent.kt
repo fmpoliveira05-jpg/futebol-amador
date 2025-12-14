@@ -11,7 +11,15 @@ package com.example.amfootball.data.events
  */
 sealed interface AppEvent {
 
-
+    /**
+     * Evento disparado para solicitar a atualização dos dados na HomePage da aplicação.
+     *
+     * Normalmente é emitido após uma ação de sucesso (ex: entrar numa equipa, terminar um jogo)
+     * que requer que o ecrã inicial recarregue os seus dados.
+     *
+     * @property message Uma mensagem opcional que pode ser utilizada para fins de logging ou
+     * exibição de feedback/toast após a atualização.
+     */
     data class UpdateHomePage(val message: String) : AppEvent
 
     /**

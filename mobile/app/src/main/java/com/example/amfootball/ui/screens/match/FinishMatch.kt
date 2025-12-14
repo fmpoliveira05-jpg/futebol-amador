@@ -24,10 +24,10 @@ import com.example.amfootball.domains.errors.formErrors.FinishMatchFormErrors
 import com.example.amfootball.ui.actions.forms.FormFinishMatchActions
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.previewsMocks.FinishMatchMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 
-//TODO: Implementar o HUB (Talvez receba o matchID+ nameOpponent do load)
 /**
  * Ecrã de finalização de partida (Reportar Resultado) - (Stateful Screen).
  *
@@ -170,6 +170,11 @@ private fun TextFieldForm(
 @Composable
 fun PreviewFinishMatch() {
     AMFootballTheme {
-        FinishMatchScreen(navHostController = rememberNavController())
+        FormFinishMatch(
+            result = FinishMatchMocks.mockResult,
+            formActions = FinishMatchMocks.mockActions,
+            formErrors = FinishMatchMocks.mockErrors,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

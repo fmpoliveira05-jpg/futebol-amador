@@ -13,7 +13,6 @@ import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.navigation.objects.Routes
 
-//Rotas protegidas
 /**
  * Define uma rota protegida básica que exige apenas **Autenticação**.
  *

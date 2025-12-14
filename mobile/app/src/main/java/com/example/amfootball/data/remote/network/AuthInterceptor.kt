@@ -31,13 +31,11 @@ class AuthInterceptor @Inject constructor(
         // Tenta recuperar o token atual.
         val token = sessionManager.getAuthToken()
 
-        // Caso de uso: Login, Registo ou utilizador não autenticado.
         // Se não há token, o pedido segue "limpo" para evitar enviar cabeçalhos inválidos.
         if (token.isNullOrEmpty()) {
             return chain.proceed(originalRequest)
         }
 
-        // Caso de uso: Utilizador autenticado.
         // Cria um novo Builder (os pedidos OkHttp são imutáveis) e anexa o cabeçalho padrão OAuth2/JWT.
         val newRequestBuilder = originalRequest.newBuilder()
             .header("Authorization", "Bearer $token")
