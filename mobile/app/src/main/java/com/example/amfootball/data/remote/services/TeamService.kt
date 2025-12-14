@@ -14,7 +14,6 @@ import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipReque
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
 import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
-import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
 import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
