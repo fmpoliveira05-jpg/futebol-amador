@@ -6,7 +6,6 @@ import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
-import com.example.amfootball.data.interfaces.BaseEndpoints
 import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto

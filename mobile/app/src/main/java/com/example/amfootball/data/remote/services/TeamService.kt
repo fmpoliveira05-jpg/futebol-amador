@@ -75,17 +75,6 @@ class TeamService @Inject constructor(
     }
 
     /**
-     * Obtém a tabela de classificação (Leaderboard).
-     *
-     * **Nota:** Atualmente retorna um objeto vazio/mock. Implementação pendente no backend?
-     *
-     * @return [TeamDto] representando a classificação.
-     */
-    suspend fun getLeaderBoard(): TeamDto {
-        return TeamDto()
-    }
-
-    /**
      * Obtém os dados de uma equipa formatados especificamente para o formulário de edição.
      *
      * Fluxo:
@@ -98,20 +87,6 @@ class TeamService @Inject constructor(
     suspend fun getTeamToUpdate(teamId: String): FormTeamDto {
         return safeApiCallWithReturn {
             teamApi.getDataToUpdateTeam(teamId = teamId)
-        }
-    }
-
-    /**
-     * Obtém dados básicos de uma equipa (geralmente adversária).
-     *
-     * Útil para exibir cabeçalhos de jogos, listas de oponentes ou históricos simples.
-     *
-     * @param teamId O ID da equipa adversária.
-     * @return [TeamDto] contendo apenas informações essenciais (Nome, Logo, ID).
-     */
-    suspend fun getNameTeam(teamId: String): TeamDto {
-        return safeApiCallWithReturn {
-            teamApi.getOpponentTeam(teamId = teamId)
         }
     }
 
