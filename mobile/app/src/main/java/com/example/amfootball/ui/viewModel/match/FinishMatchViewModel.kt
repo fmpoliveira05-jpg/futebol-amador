@@ -17,12 +17,13 @@ import javax.inject.Inject
  * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Finalização de Partida (Reportar Resultado).
  *
  * Gere o estado do formulário de golos ([ResultMatchDto]), aplica validações síncronas de limites
- * e coordena a submissão para o serviço de backend.
+ * e coordena a submissão.
  *
  * Herda de [FormsViewModel] para obter funcionalidades base de gestão de estado de formulário e erros.
  *
  * @property networkObserver Observador de conectividade para garantir operações online.
  * @property sessionManager Gestor de sessão para obter dados do utilizador.
+ * @property savedStateHandle Manipulador do estado guardado, usado para ler argumentos de navegação.
  */
 @HiltViewModel
 class FinishMatchViewModel @Inject constructor(
@@ -34,15 +35,26 @@ class FinishMatchViewModel @Inject constructor(
     initialData = ResultMatchDto(),
     initialError = FinishMatchFormErrors()
 ) {
-
+    /**
+     * ID da partida a ser finalizada, recuperado dos argumentos de navegação.
+     */
     private val matchId: String = savedStateHandle.get<String>(Arguments.MATCH_ID) ?: ""
 
+    /**
+     * ID da equipa adversária, recuperado dos argumentos de navegação.
+     */
     private val opponentId: String = savedStateHandle.get<String>(Arguments.OPPONENT_ID) ?: ""
 
+    /**
+     * ID da equipa do utilizador atual, obtido através do [SessionManager].
+     */
     private val teamId = sessionManager.fetchTeamId()
 
-
-    //Initializar
+    /**
+     * Bloco de inicialização.
+     * Define o estado inicial do formulário [formState] com os IDs de contexto obtidos
+     * dos argumentos de navegação e da sessão.
+     */
     init {
         formState.value = ResultMatchDto(
             numGoalsTeam = 0,

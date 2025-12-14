@@ -93,6 +93,15 @@ fun SettingsScreen(
 
 }
 
+/**
+ * Conteúdo principal e estrutural do Ecrã de Definições (Stateless Component).
+ *
+ * Organiza as diversas secções de configurações numa lista rolável ([LazyColumn]).
+ *
+ * @param modifier Modificador de layout.
+ * @param settingsViewModel ViewModel para interações com as preferências.
+ * @param navController Controlador de navegação para interações de perfil.
+ */
 @Composable
 private fun SettingsPageContent(
     modifier: Modifier,

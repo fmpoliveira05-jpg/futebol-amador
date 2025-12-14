@@ -12,6 +12,19 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 
+/**
+ * Componente Composable que encapsula e exibe um mapa interativo utilizando a biblioteca osmdroid.
+ *
+ * Este componente utiliza [AndroidView] para integrar o widget View nativo do osmdroid ([MapView])
+ * dentro da hierarquia de Compose. O mapa é configurado para exibir uma localização específica
+ * marcada com um [Marker].
+ *
+ * **Dependência:** Requer a dependência e a configuração correta do osmdroid no projeto.
+ *
+ * @param latitude A latitude da localização a ser exibida e marcada no mapa.
+ * @param longitude A longitude da localização a ser exibida e marcada no mapa.
+ * @param modifier Modificador a ser aplicado ao container do mapa.
+ */
 @Composable
 fun OsmMapView(
     latitude: Double,

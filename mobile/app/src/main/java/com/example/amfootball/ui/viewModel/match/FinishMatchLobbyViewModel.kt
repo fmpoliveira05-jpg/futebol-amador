@@ -14,6 +14,17 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel responsável pela gestão do estado e lógica da sala de espera (Lobby)
+ * de finalização de partida.
+ *
+ * Utiliza o SignalR ([FinishMatchSockerServer]) para coordenar a confirmação do resultado
+ * reportado com o administrador da equipa adversária.
+ *
+ * @property socketService O serviço SignalR dedicado ao Hub de Finalização de Partida.
+ * @property sessionManager Gerenciador de sessão para obter o ID da equipa do utilizador.
+ * @property savedStateHandle Manipulador do estado guardado, usado para ler argumentos de navegação.
+ */
 @HiltViewModel
 class FinishMatchLobbyViewModel @Inject constructor(
     private val socketService: FinishMatchSockerServer,

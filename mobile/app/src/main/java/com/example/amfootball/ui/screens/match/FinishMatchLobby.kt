@@ -20,6 +20,22 @@ import com.example.amfootball.ui.viewModel.match.FinishMatchLobbyViewModel
 import com.example.amfootball.R
 import com.example.amfootball.ui.theme.AMFootballTheme
 
+/**
+ * Ecrã de Lobby de Finalização de Partida (Stateful Screen).
+ *
+ * Esta tela serve como um estado intermediário após o utilizador reportar um resultado.
+ * Aguarda a confirmação (via SignalR) do resultado por parte do adversário ou a finalização
+ * pelo servidor.
+ *
+ * **Responsabilidades:**
+ * 1. Coletar o estado da UI ([FinishMatchUiState]) do [FinishMatchLobbyViewModel].
+ * 2. Gerir a navegação: se o estado for [FinishMatchUiState.MatchFinished], redireciona
+ * para o Calendário.
+ * 3. Delega a renderização do estado visual para [FinishMatchLobbyContent].
+ *
+ * @param navHostController Controlador de navegação para gerir transições.
+ * @param viewModel ViewModel injetado via Hilt que gere a lógica do lobby.
+ */
 @Composable
 fun FinishMatchLobbyScreen(
     navHostController: NavHostController,
@@ -42,6 +58,15 @@ fun FinishMatchLobbyScreen(
     )
 }
 
+/**
+ * Conteúdo visual do Lobby de Finalização de Partida (Stateless Component).
+ *
+ * Renderiza o ecrã apropriado baseado no [FinishMatchUiState] atual.
+ *
+ * @param state O estado atual da UI (Conectando, Esperando, Erro).
+ * @param onEditResult Callback acionado quando o utilizador clica em editar o resultado.
+ * @param onBack Callback acionado para voltar ao ecrã anterior em caso de erro.
+ */
 @Composable
 private fun FinishMatchLobbyContent(
     state: FinishMatchUiState,
@@ -73,6 +98,9 @@ private fun FinishMatchLobbyContent(
     }
 }
 
+/**
+ * Componente que exibe um indicador de progresso e uma mensagem de carregamento/conexão.
+ */
 @Composable
 private fun LoadingView() {
     CircularProgressIndicator()
@@ -80,6 +108,13 @@ private fun LoadingView() {
     Text(stringResource(id = R.string.lobby_connecting))
 }
 
+/**
+ * Componente que exibe o estado de espera após o resultado ter sido submetido.
+ *
+ * Inclui uma opção para o utilizador editar o resultado caso tenha cometido um erro.
+ *
+ * @param onEditResult Callback para iniciar a edição do resultado.
+ */
 @Composable
 private fun WaitingView(onEditResult: () -> Unit) {
     CircularProgressIndicator()
@@ -116,6 +151,12 @@ private fun WaitingView(onEditResult: () -> Unit) {
     }
 }
 
+/**
+ * Componente que exibe uma mensagem de erro e um botão para voltar.
+ *
+ * @param message A mensagem de erro específica.
+ * @param onBack Callback para voltar ao ecrã anterior.
+ */
 @Composable
 private fun ErrorView(message: String, onBack: () -> Unit) {
     Text(

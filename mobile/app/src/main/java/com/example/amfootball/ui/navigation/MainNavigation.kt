@@ -65,6 +65,16 @@ import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.SettingsViewModel
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 
+/**
+ * Componente principal que define a estrutura de navegação da aplicação (NavHost).
+ *
+ * Utiliza [Scaffold] para fornecer a estrutura básica (TopBar, BottomBar e Content)
+ * e o [NavHost] para gerir o ecrã atual. O tema da aplicação é gerido dinamicamente
+ * com base nas preferências do utilizador obtidas do [SettingsViewModel].
+ *
+ * @param globalNavController O controlador principal de navegação que gere a pilha de ecrãs.
+ * @param startDestination A rota inicial para onde o [NavHost] deve navegar (ex: Login ou Home).
+ */
 @Composable
 fun MainNavigation(
     globalNavController: NavHostController,
@@ -143,6 +153,14 @@ fun MainNavigation(
     }
 }
 
+/**
+ * Declara as rotas das páginas iniciais (Homepage).
+ * Inclui a Homepage geral e a Homepage específica da equipa.
+ *
+ * @receiver O construtor do grafo de navegação (NavGraphBuilder).
+ * @param globalNavController O controlador de navegação.
+ * @param sessionManager O gestor de sessão para verificação de permissões.
+ */
 private fun NavGraphBuilder.homePages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -164,8 +182,13 @@ private fun NavGraphBuilder.homePages(
 }
 
 /**
- * Função que declara todas as páginas da app
- * */
+* Função que agrupa todas as demais categorias de rotas.
+*
+* @receiver O construtor do grafo de navegação (NavGraphBuilder).
+* @param globalNavController O controlador de navegação.
+* @param sessionManager O gestor de sessão.
+* @param authViewModel O ViewModel de autenticação.
+*/
 private fun NavGraphBuilder.pages(
     globalNavController: NavHostController,
     sessionManager: SessionManager,
@@ -188,8 +211,13 @@ private fun NavGraphBuilder.pages(
 }
 
 /**
- * Paginas de autentificação
- * */
+ * Rotas de Autenticação (Login e SignUp).
+ *
+ * São rotas não protegidas (`composableNotProtectedRoute`) que o utilizador autenticado
+ * não deve aceder (são redirecionados se já estiverem logados).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.autPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager,
@@ -227,8 +255,10 @@ private fun NavGraphBuilder.autPages(
 }
 
 /**
- * Paginas do Utilizador
- * */
+ * Rotas relacionadas a funcionalidades do Utilizador/Jogador.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.userPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -291,6 +321,11 @@ private fun NavGraphBuilder.userPages(
     )
 }
 
+/**
+ * Rotas do Perfil do Jogador (Perfil próprio e Perfil de outros jogadores).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.profilePlayer(
     sessionManager: SessionManager,
     navHostController: NavHostController
@@ -320,8 +355,10 @@ private fun NavGraphBuilder.profilePlayer(
 }
 
 /**
- * Paginas da Time
- * */
+ * Rotas relacionadas à gestão e atividades da Equipa.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.teamPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -370,6 +407,13 @@ private fun NavGraphBuilder.teamPages(
     hubPages(globalNavController = globalNavController, sessionManager = sessionManager)
 }
 
+/**
+ * Rotas relacionadas aos Hubs de Comunicação em Tempo Real (SignalR).
+ *
+ * Estas rotas são usadas para criar as "salas de espera" para o início e fim de jogo.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.hubPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -402,6 +446,12 @@ private fun NavGraphBuilder.hubPages(
         }
     )
 }
+
+/**
+ * Rotas relacionadas à gestão de Partidas e Calendário.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.teamMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -431,6 +481,14 @@ private fun NavGraphBuilder.teamMatch(
     )
 }
 
+/**
+ * Rotas relacionadas à gestão de partidas específicas (Adiamento, Cancelamento, Finalização).
+ *
+ * Estas rotas usam o [Arguments.FORM_MODE] para partilhar o componente de formulário
+ * [FormMatchInviteScreen] para diferentes ações.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.managementMatch(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -475,7 +533,11 @@ private fun NavGraphBuilder.managementMatch(
     )
 }
 
-
+/**
+ * Rotas relacionadas a Partidas Casuais (Amigáveis).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.casualMatches(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -532,6 +594,11 @@ private fun NavGraphBuilder.casualMatches(
     )
 }
 
+/**
+ * Rotas relacionadas a Partidas Competitivas (Ranked Matches).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.competitiveMatches(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -547,8 +614,10 @@ private fun NavGraphBuilder.competitiveMatches(
 }
 
 /**
- * Páginas do CRUD da Equipa
- * */
+ * Rotas do CRUD (Criar, Ler, Atualizar, Eliminar) da Equipa.
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.crudTeamPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -577,6 +646,11 @@ private fun NavGraphBuilder.crudTeamPages(
     profileTeam(globalNavController = globalNavController, sessionManager = sessionManager)
 }
 
+/**
+ * Rotas do Perfil da Equipa (Perfil próprio e Perfil de outras equipas).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.profileTeam(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -600,6 +674,11 @@ private fun NavGraphBuilder.profileTeam(
     }
 }
 
+/**
+ * Rotas de Chat (Lista de Chats e Chat Individual).
+ *
+ * @receiver O construtor do grafo de navegação.
+ */
 private fun NavGraphBuilder.chatPages(
     globalNavController: NavHostController,
     sessionManager: SessionManager
@@ -626,6 +705,15 @@ private fun NavGraphBuilder.chatPages(
     )
 }
 
+/**
+ * Função de utilidade para determinar se o tema deve ser escuro.
+ *
+ * Baseia-se na preferência do utilizador ([currentAppTheme]) ou no tema do sistema
+ * se a preferência for `SYSTEM_DEFAULT`.
+ *
+ * @param currentAppTheme A string que representa o tema selecionado pelo utilizador.
+ * @return [Boolean] que é `true` se o tema escuro deve ser aplicado.
+ */
 @Composable
 private fun isDarkMode(currentAppTheme: String): Boolean {
     return when (currentAppTheme) {
