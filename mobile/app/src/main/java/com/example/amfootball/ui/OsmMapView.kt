@@ -20,12 +20,8 @@ fun OsmMapView(
 ) {
     val context = LocalContext.current
 
-    // --- CONFIGURAÇÃO DO OSMDROID ---
     val osmConfig = Configuration.getInstance()
 
-    // CORREÇÃO: Em vez de PreferenceManager, usamos context.getSharedPreferences
-    // "osmdroid" é o nome do ficheiro onde as configs serão salvas (podes dar o nome que quiseres)
-    // Context.MODE_PRIVATE garante que só a tua app pode ler este ficheiro
     osmConfig.load(
         context,
         context.getSharedPreferences("osmdroid", Context.MODE_PRIVATE)

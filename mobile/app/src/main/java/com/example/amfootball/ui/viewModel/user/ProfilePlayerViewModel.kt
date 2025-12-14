@@ -30,7 +30,7 @@ import javax.inject.Inject
 class ProfilePlayerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: PlayerService,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     /**

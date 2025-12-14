@@ -55,15 +55,17 @@ import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
 @Composable
 fun SignUpScreen(
     navHostController: NavHostController,
-    viewModel: SignupViewmodel = hiltViewModel()
+    viewModel: SignupViewmodel = hiltViewModel(),
+    profileEditMode: Boolean = false
+
 ) {
-    // --- Observar Estados do ViewModel ---
     val uiFormState by viewModel.uiFormState.collectAsStateWithLifecycle()
     val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle() // Loading e Erros Globais
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
-
-    // Estados auxiliares do VM
+    if (profileEditMode){
+        viewModel.onEditMode()
+    }
     val countryCode by viewModel.countryCode.collectAsStateWithLifecycle()
     val passwordVerification by viewModel.passwordVerification.collectAsStateWithLifecycle()
 
@@ -80,13 +82,14 @@ fun SignUpScreen(
         passwordVerification = passwordVerification,
         isLoading = uiState.isLoading,
         globalErrorMessage = uiState.errorMessage,
-        viewModel = viewModel, // Passamos o VM para aceder aos setters
+        viewModel = viewModel,
         onSubmit = {
             viewModel.onSubmit()
         },
         submitConfirmation = {
-            viewModel.submitConfirmation(navHostController)
-        }
+            viewModel.submitConfirmation(navHostController, profileEditMode)
+        },
+        profileEditMode = profileEditMode
     )
 }
 
@@ -101,7 +104,8 @@ private fun ContentSignUp(
     viewModel: SignupViewmodel,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
-    submitConfirmation: () -> Unit
+    submitConfirmation: () -> Unit,
+    profileEditMode: Boolean = false
 ) {
     Column(
         modifier = modifier,
@@ -270,32 +274,34 @@ private fun ContentSignUp(
         Spacer(Modifier.height(8.dp))
 
         // PASSWORD
-        PasswordTextField(
-            label = stringResource(id = R.string.password_label),
-            value = formDto.password,
-            onValueChange = viewModel::onPasswordChange,
-            isError = formErrors.passwordError != null,
-            errorMessage = formErrors.passwordError?.let {
-                stringResource(
-                    id = it.messageId,
-                    *it.args.toTypedArray()
-                )
-            } ?: ""
-        )
+        if(!profileEditMode) {
+            PasswordTextField(
+                label = stringResource(id = R.string.password_label),
+                value = formDto.password,
+                onValueChange = viewModel::onPasswordChange,
+                isError = formErrors.passwordError != null,
+                errorMessage = formErrors.passwordError?.let {
+                    stringResource(
+                        id = it.messageId,
+                        *it.args.toTypedArray()
+                    )
+                } ?: ""
+            )
 
-        // CONFIRMAR PASSWORD
-        PasswordTextField(
-            label = stringResource(id = R.string.password_confirm),
-            value = passwordVerification,
-            onValueChange = viewModel::onPasswordVerificationChange,
-            isError = formErrors.passwordVerifyError != null,
-            errorMessage = formErrors.passwordVerifyError?.let {
-                stringResource(
-                    id = it.messageId,
-                    *it.args.toTypedArray()
-                )
-            } ?: ""
-        )
+            // CONFIRMAR PASSWORD
+            PasswordTextField(
+                label = stringResource(id = R.string.password_confirm),
+                value = passwordVerification,
+                onValueChange = viewModel::onPasswordVerificationChange,
+                isError = formErrors.passwordVerifyError != null,
+                errorMessage = formErrors.passwordVerifyError?.let {
+                    stringResource(
+                        id = it.messageId,
+                        *it.args.toTypedArray()
+                    )
+                } ?: ""
+            )
+        }
 
         Spacer(Modifier.height(16.dp))
 

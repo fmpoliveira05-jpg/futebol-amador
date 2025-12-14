@@ -2,7 +2,7 @@
     <string name="app_name">AMFootball</string>
     <string name="age">age</string>
     <string name="average_age">average age</string>
-
+    <string name="edit_profile">Edit Profile</string>
     <string name="title_login">Login Content</string>
     <string name="change_camera">Change Camera</string>
     <string name="take_pitcture">Take Picture</string>

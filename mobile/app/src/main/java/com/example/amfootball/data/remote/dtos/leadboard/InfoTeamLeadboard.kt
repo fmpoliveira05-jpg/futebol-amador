@@ -1,6 +1,7 @@
 package com.example.amfootball.data.remote.dtos.leadboard
 
 import android.net.Uri
+import com.google.gson.annotations.SerializedName
 
 /**
  * DTO que representa as informações resumidas de uma equipa na Tabela de Classificação (Leaderboard).
@@ -14,9 +15,15 @@ import android.net.Uri
  * @property logoTeam A URI do logótipo da equipa (padrão: [Uri.EMPTY]).
  */
 data class InfoTeamLeadboard(
+    @SerializedName("id", alternate = ["Id"])
     val id: String,
+    @SerializedName("position", alternate = ["Position"])
+    val position: Int,
+    @SerializedName("teamName", alternate = ["TeamName"])
     val name: String,
+    @SerializedName("currentPoints", alternate = ["CurrentPoints"])
     val currentPoints: Int,
+    @SerializedName("rankName", alternate = ["RankName"])
     val nameRank: String,
     val logoTeam: String? = null
 )
