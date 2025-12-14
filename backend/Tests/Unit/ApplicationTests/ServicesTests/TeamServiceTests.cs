@@ -94,7 +94,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Teste",
                 Description = "Equipa de teste",
-                icon = "",
+                Icon = "",
                 HomePitch = new PitchDto { Name = "Campo Central", Address = "Rua Principal" }
             };
             var unrankedRank = new Rank("Unranked", 0, 0, 0, 0, null!, null!);
@@ -126,7 +126,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Repetido",
                 Description = "Equipa duplicada",
-                icon = "",
+                Icon = "",
                 HomePitch = new PitchDto { Name = "Campo Velho", Address = "Rua da Bola" }
             };
             var rank = new TestRank("Unranked");
@@ -166,7 +166,7 @@ namespace Unit.ApplicationTests.ServicesTests
             {
                 Name = "FC Nova",
                 Description = "Nova equipa criada por admin indevido",
-                icon = "",
+                Icon = "",
                 HomePitch = new PitchDto { Name = "Campo Novo", Address = "Rua Nova" }
             };
 

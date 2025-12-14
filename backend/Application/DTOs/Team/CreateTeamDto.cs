@@ -15,7 +15,7 @@ namespace Application.DTOs.Team
         [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string? Description { get; set; }
 
-        public string? icon { get; set; }
+        public string? Icon { get; set; }
 
         [Required(ErrorMessage = "É necessario fornecer o campo principal da equipa.")]
         public PitchDto HomePitch { get; set; } = null!;

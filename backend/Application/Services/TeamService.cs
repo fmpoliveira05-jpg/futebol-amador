@@ -104,7 +104,7 @@ namespace Application.Services
             var newTeam = new Team(
                 teamDto.Name,
                 teamDto.Description,
-                teamDto.icon,
+                teamDto.Icon,
                 new Pitch(teamDto.HomePitch.Name, teamDto.HomePitch.Address),
                 rank
             );
@@ -188,7 +188,7 @@ namespace Application.Services
 
             teamToUpdate.Name = dto.Name ?? teamToUpdate.Name;
             teamToUpdate.Description = dto.Description ?? teamToUpdate.Description;
-            teamToUpdate.Icon = dto.icon ?? teamToUpdate.Icon;
+            teamToUpdate.Icon = dto.Icon ?? teamToUpdate.Icon;
             teamToUpdate.Pitch.Name = dto.HomePitch.Name ?? teamToUpdate.Pitch.Name;
             teamToUpdate.Pitch.Address = dto.HomePitch.Address ?? teamToUpdate.Pitch.Address;
 
@@ -208,6 +208,13 @@ namespace Application.Services
             var team = await TeamRepository.GetTeamDetailsDtoAsync(teamId);
 
             TeamValidator.GetTeamByIdValidation(team);
+
+            return team;
+        }
+
+        public async Task<CreateTeamDto> GetTeamToUpdate(Guid teamId)
+        {
+            var team = await TeamRepository.GetTeamToUpdate(teamId);
 
             return team;
         }

@@ -17,6 +17,8 @@ namespace Application.DTOs.Team
         [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string? Description { get; set; }
 
+        public string? Icon { get; set; }
+
         [Required]
         public DateOnly FoundationDate { get; set; }
         

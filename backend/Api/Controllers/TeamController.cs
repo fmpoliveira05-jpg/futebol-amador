@@ -109,6 +109,33 @@ namespace Api.Controllers
         }
 
         /// <summary>
+        /// Obtém os dados de uma equipa especificamente para preencher o formulário de Edição (Update).
+        /// </summary>
+        /// <remarks>
+        /// Este endpoint distingue-se do "GetById" padrão por retornar um DTO otimizado (Projeção).
+        /// Inclui apenas os dados mutáveis necessários para a UI de edição (Nome, Descrição, Ícone, Info do Campo),
+        /// excluindo coleções pesadas como a lista de jogadores, estatísticas ou histórico de jogos.
+        /// 
+        /// <para>
+        /// Utilizado no fluxo: Abrir Ecrã de Edição -> <b>GetTeamToUpdate</b> -> Preencher Campos -> Submit.
+        /// </para>
+        /// </remarks>
+        /// <param name="idTeam">O Identificador Único Global (GUID) da equipa cujos dados serão carregados.</param>
+        /// <returns>
+        /// Um <see cref="IActionResult"/> contendo o objeto de dados da equipa (Status 200 OK).
+        /// </returns>
+        /// <response code="200">Retorna o DTO da equipa com sucesso.</response>
+        /// <response code="404">Se a equipa com o ID especificado não for encontrada.</response>
+        [HttpGet("DataUpdate/{idTeam}")]
+        [ProducesResponseType(typeof(CreateTeamDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetTeamToUpdate(Guid idTeam)
+        {
+            var team = await TeamService.GetTeamToUpdate(idTeam);
+            return Ok(team);
+        }
+
+        /// <summary>
         /// Obtém as informações principais para o painel inicial (Dashboard) de uma equipa específica.
         /// </summary>
         /// <remarks>

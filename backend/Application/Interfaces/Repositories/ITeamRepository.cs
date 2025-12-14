@@ -18,6 +18,8 @@ namespace Application.Interfaces.Repositories
 
         Task<Team?> GetTeamByIdAsync(Guid id);
 
+        Task<CreateTeamDto?> GetTeamToUpdate(Guid teamId);
+
         Task<Team?> GetTeamByNameAsync(string name);
 
         void DeleteTeam(Team teamToRemove);

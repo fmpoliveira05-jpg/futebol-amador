@@ -183,6 +183,7 @@ namespace Infrastructure.Repositories
                     Id = t.Id,
                     Name = t.Name,
                     Description = t.Description,
+                    Icon = t.Icon,
                     FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
                     RankName = t.Rank.Name,
@@ -213,6 +214,26 @@ namespace Infrastructure.Repositories
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<CreateTeamDto?> GetTeamToUpdate(Guid teamId)
+        {
+            var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            return await DbContext.Team
+                .Where(t => t.Id == teamId)
+                .Include(t => t.Pitch)
+                .Select(t => new CreateTeamDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Description = t.Description,
+                    Icon = t.Icon,
+                    HomePitch = new PitchDto
+                    {
+                        Name = t.Pitch.Name,
+                        Address = t.Pitch.Address,
+                    }
+                })
+                .FirstOrDefaultAsync();
+        }
         /// <summary>
         /// Obtém uma equipa pelo ID, carregando pedidos de adesão e membros.
         /// </summary>
@@ -353,7 +374,8 @@ namespace Infrastructure.Repositories
                     PhoneNumber = player.Phone,
                     Team = new TeamDto {
                         IdTeam = team.Id,
-                        Name = team.Name
+                        Name = team.Name,
+                        imageUrl = team.Icon
                     },
                     Age = EF.Functions.DateDiffDay(player.DateOfBirth, dateNow),
                     IsAdmin = player.IsAdmin
@@ -978,12 +1000,14 @@ namespace Infrastructure.Repositories
                                   Team = new TeamDto
                                   {
                                       IdTeam = myTeam.IdTeam,
-                                      Name = myTeam.Team.Name
+                                      Name = myTeam.Team.Name,
+                                      imageUrl = myTeam.Team.Icon
                                   },
                                   Opponent = new TeamDto
                                   {
                                       IdTeam = opponentTeam.IdTeam,
-                                      Name = opponentTeam.Team.Name
+                                      Name = opponentTeam.Team.Name,
+                                      imageUrl = opponentTeam.Team.Icon
                                   },
                                   IsHome = m.idPitch == myTeam.Team.IdPitch
                               })
@@ -1010,7 +1034,8 @@ namespace Infrastructure.Repositories
                                    Opponent = new TeamDto
                                    {
                                        IdTeam = opponentTeam.IdTeam,
-                                       Name = opponentTeam.Team.Name
+                                       Name = opponentTeam.Team.Name,
+                                       imageUrl = opponentTeam.Team.Icon
                                    },
                                    Result = myTeam.NumGoals + " - " + opponentTeam.NumGoals,
                                    MatchResult = myTeam.MatchResult
