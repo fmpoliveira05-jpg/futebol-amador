@@ -40,8 +40,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.match.MatchMakerInfo
-import com.example.amfootball.data.dtos.team.InfoTeamMatchMaker
+import com.example.amfootball.data.remote.dtos.match.MatchMakerInfo
+import com.example.amfootball.data.remote.dtos.team.InfoTeamMatchMaker
 import com.example.amfootball.ui.components.Loading
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.viewModel.match.MatchMakerViewModel

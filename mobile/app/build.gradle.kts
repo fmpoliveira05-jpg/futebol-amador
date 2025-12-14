@@ -124,6 +124,7 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    implementation("org.osmdroid:osmdroid-android:6.1.20")
 
     //Dependencia para ir buscar as dependências dos prefixos de numero telefonico
     implementation("com.googlecode.libphonenumber:libphonenumber:8.13.27")
@@ -135,8 +136,14 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:24.0.1")
     implementation("com.google.firebase:firebase-firestore")
 
+    //Storage
+    implementation("com.google.firebase:firebase-storage")
+
     //Push Notification FireBase
     implementation("com.google.firebase:firebase-messaging")
+
+    //Guard Imagens cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.4.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
@@ -147,10 +154,12 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     // Google Maps Compose & Play Services
+    /*
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.maps.android:maps-compose:2.12.0")
-
+     */
     // Coil for images
     implementation("io.coil-kt:coil-compose:2.6.0")
 
@@ -179,10 +188,23 @@ dependencies {
     // MockWebServer
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")
 
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
+
     // Mockito para Testes Android (Instrumentados)
     androidTestImplementation("org.mockito:mockito-android:5.7.0")
     androidTestImplementation("org.mockito:mockito-core:5.7.0")
 
     //Signal R
-    implementation("com.microsoft.signalr:signalr:7.0.0")
+    implementation("com.microsoft.signalr:signalr:8.0.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+
+    //Camera X
+    val camerax_version = "1.3.4" // Ou a versão mais recente
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 }

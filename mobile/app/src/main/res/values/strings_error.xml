@@ -6,19 +6,28 @@
     <string name="without_internet_save_data">No internet. Showing saved data</string>
     <string name="mandatory_field">Mandatory field</string>
 
+    <string name="error_min_phone_length">Phone number must have %1$d digits</string>
+
     <string name="error_min_email_length">Email must be at least %1$d characters long</string>
     <string name="error_max_email_length">Email must not exceed %1$d characters</string>
 
     <string name="error_min_password_length">Password must be at least %1$d characters long</string>
     <string name="error_max_password_length">Password must not exceed %1$d characters</string>
     <string name="error_password_requires_uppercase">Password must contain at least one uppercase letter</string>
+    <string name="error_password_requires_lowercase">Password must contain at least one lowercase letter</string>
+    <string name="error_password_requires_no_whitespace">Password must not contain any whitespace</string>
     <string name="error_password_requires_digit">Password must contain at least one number</string>
     <string name="error_password_requires_special_char">Password must contain at least one special character</string>
+    <string name="error_password_mismatch">Passwords do not match</string>
+    <string name="error_min_height_max_height">The height must be between %1$d cm and %2$d cm</string>
 
     <string name="error_min_address">Address must have at least %1$d characters</string>
     <string name="error_max_address">Address must have at most %1$d characters</string>
     <string name="error_max_city">City name must have at most %1$d characters</string>
+    <string name="error_address_not_found">Invalid address, address not found, must have the format \"Street, City\"</string>
 
+
+    <string name="error_field_cannot_be_null">Field cannot be null</string>
     <string name="error_min_name_player">Player name must have at least %1$d characters</string>
     <string name="error_max_name_player">Player name must have at most %1$d characters</string>
     <string name="error_min_name_team">Team name must have at least %1$d characters</string>
@@ -48,6 +57,7 @@
 
     <string name="error_min_age">Player\'s minimum age must be greater than %1$d</string>
     <string name="error_max_age">Player\'s maximum age must be less than %1$d</string>
+    <string name="error_invalid_email">Invalid Email</string>
     <string name="error_min_age_greater_max">Minimum age must be less than maximum age</string>
     <string name="error_max_age_minor_min">Maximum age must be greater than minimum age</string>
 

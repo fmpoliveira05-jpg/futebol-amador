@@ -1,95 +1,151 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.navigation.NavHostController
+import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterTeamError
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.TeamService
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.rank.RankNameDto
+import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
+import com.example.amfootball.domains.enums.pages.ListTeamMode
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterTeamError
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
-import kotlin.text.ifEmpty
 
-// TODO: Falta implementar a chamada à API no método memberShipRequest (e também para a página variar para ser a lista de teams para matchInvite, geral ou pedidos de adesão)
-//TODO: Falta a parte dos erros de filtragem
 /**
  * ViewModel responsável pela gestão do ecrã de listagem de equipas.
  *
- * Gere o estado da lista (loading, erros, dados), aplica filtros de pesquisa (online e offline),
- * valida os formulários de filtro e gere a navegação para detalhes e convites.
+ * Esta classe herda de [ListsViewModels] para gerir automaticamente a paginação e o estado de carregamento,
+ * focando-se na lógica de filtragem complexa (Pontos, Idade Média, Membros) e nas regras de negócio
+ * baseadas no [ListTeamMode] (ex: listar todas as equipas vs. listar equipas para convite de jogo).
  *
- * Funcionalidades principais:
- * - Carregamento de dados da API com cache local (`allTeamOriginal`).
- * - Filtragem reativa e validação de dados (Min/Max, limites de caracteres).
- * - Gestão de conectividade (aviso de sem internet).
+ * @property networkObserver Observador de conectividade.
+ * @property teamService Serviço de API para operações relacionadas com equipas.
+ * @property savedStateHandle Fornece acesso ao estado da navegação, usado para obter o [ListTeamMode].
+ * @property sessionManager Gestor da sessão do utilizador logado.
  */
 @HiltViewModel
 class ListTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val teamRepository: TeamService,
+    private val teamService: TeamService,
+    private val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager?
 ) : ListsViewModels<ItemTeamInfoDto>(networkObserver = networkObserver) {
+
+    /** ID da equipa do utilizador logado, usado em modos como [ListTeamMode.LIST_TEAM_MATCH_INVITE]. */
+    private val teamIdState: MutableStateFlow<String> = MutableStateFlow("")
+
+    val teamId: StateFlow<String> = teamIdState.asStateFlow()
+
+    /** ID do jogador logado, usado em modos como [ListTeamMode.LIST_TEAM_MEMBERSHIP_REQUEST]. */
+    private val playerId: MutableStateFlow<String> = MutableStateFlow("")
+
+    /** Nível de permissão do utilizador logado. */
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.PLAYER_WITHOUT_TEAM)
+
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
     /** Estado atual dos valores dos filtros inseridos pelo utilizador. */
     private val filterState: MutableStateFlow<FiltersListTeam> = MutableStateFlow(FiltersListTeam())
-    val uiFilterState: StateFlow<FiltersListTeam> = filterState
+    val uiFilterState: StateFlow<FiltersListTeam> = filterState.asStateFlow()
 
     /** Estado dos erros de validação dos filtros (ex: mensagens vermelhas nos inputs). */
-    private val filterErrorState: MutableStateFlow<FilterTeamError> =
-        MutableStateFlow(FilterTeamError())
-    val filterError: StateFlow<FilterTeamError> = filterErrorState
+    private val filterErrorState: MutableStateFlow<FilterTeamError> = MutableStateFlow(FilterTeamError())
+
+    val filterError: StateFlow<FilterTeamError> = filterErrorState.asStateFlow()
 
     /** Lista de Ranks disponíveis para seleção no filtro. */
     private val listRanks: MutableStateFlow<List<RankNameDto>> = MutableStateFlow(emptyList())
-    var listRank: StateFlow<List<RankNameDto>> = listRanks
+    var listRank: StateFlow<List<RankNameDto>> = listRanks.asStateFlow()
+
+    private val modeStr = savedStateHandle.get<String>(Arguments.LIST_TEAM_MODE)
+
+    /**
+     * O modo de operação da página. Define o tipo de lista a ser carregada (Geral vs. Recrutamento).
+     * Valor por defeito: [ListPlayerMode.PLAYER_LIST].
+     */
+    val mode: ListTeamMode = try {
+        if (modeStr != null) {
+            ListTeamMode.valueOf(modeStr)
+        } else {
+            ListTeamMode.LIST_TEAM
+        }
+    } catch (e: Exception) {
+        ListTeamMode.LIST_TEAM
+    }
+
+    /**
+     * Conjunto de IDs de equipas para as quais o utilizador já enviou um pedido de adesão
+     * (durante a sessão atual).
+     */
+    private val _sentRequestIds = MutableStateFlow<Set<String>>(emptySet())
+    val sentRequestIds = _sentRequestIds.asStateFlow()
 
     init {
+        val profile = sessionManager?.getUserProfile()
+        teamIdState.value = profile?.effectiveTeamId ?: ""
+        playerId.value = profile?.loginResponseDto?.localId ?: ""
+        roleState.value = profile?.role ?: UserRole.UNAUTHORIZED
+
         loadListTeam()
 
-        //Por enquanto esta lista vai ser estatica
         listRanks.value = RankNameDto.generateExampleRanks()
     }
 
     // --- SETTERS (Atualizam o estado dos filtros) ---
+    /** Atualiza o filtro de Nome. */
     fun onNameChange(name: String) {
         filterState.value = filterState.value.copy(name = name.ifEmpty { null })
     }
 
+    /** Atualiza o filtro de Cidade. */
     fun onCityChange(city: String) {
         filterState.value = filterState.value.copy(city = city.ifEmpty { null })
     }
 
+    /** Atualiza o filtro de Rank. */
     fun onRankChange(rank: String) {
         filterState.value = filterState.value.copy(rank = rank.ifEmpty { null })
     }
 
+    /** Atualiza o filtro de Pontos Mínimos. */
     fun onMinPointChange(minPoint: Int?) {
         filterState.value = filterState.value.copy(minPoint = minPoint)
     }
 
+    /** Atualiza o filtro de Pontos Máximos. */
     fun onMaxPointChange(maxPoint: Int?) {
         filterState.value = filterState.value.copy(maxPoint = maxPoint)
     }
 
+    /** Atualiza o filtro de Idade Média Mínima. */
     fun onMinAgeChange(minAge: Int?) {
         filterState.value = filterState.value.copy(minAge = minAge)
     }
 
+    /** Atualiza o filtro de Idade Média Máxima. */
     fun onMaxAgeChange(maxAge: Int?) {
         filterState.value = filterState.value.copy(maxAge = maxAge)
     }
 
+    /** Atualiza o filtro de Número de Membros Mínimo. */
     fun onMinNumberMembersChange(minNumberMembers: Int?) {
         filterState.value = filterState.value.copy(minNumberMembers = minNumberMembers)
     }
 
+    /** Atualiza o filtro de Número de Membros Máximo. */
     fun onMaxNumberMembersChange(maxNumberMembers: Int?) {
         filterState.value = filterState.value.copy(maxNumberMembers = maxNumberMembers)
     }
@@ -131,33 +187,35 @@ class ListTeamViewModel @Inject constructor(
     }
 
     /**
-     * Navega para o ecrã de envio de convite de jogo.
+     * Envia um pedido de adesão (Membership) a uma equipa pelo jogador logado.
+     *
+     * Requer que o utilizador esteja no papel [UserRole.PLAYER_WITHOUT_TEAM].
+     *
+     * @param idTeam O ID da equipa alvo.
      */
-    fun sendMatchInvite(idTeam: String, nameTeam: String, navHostController: NavHostController) {
-        onlineFunctionality(
-            action = {
-                navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}/${nameTeam}") {
-                    launchSingleTop = true
-                }
-            },
-            toastMessage = "Não pode mandar um pedido de partida sem estar conectado há internet"
-        )
+    fun sendMemberShipRequest(idTeam: String) {
+        val userProfile = sessionManager?.getUserProfile()
 
-    }
+        if (userProfile == null) {
+            updateToast(message = R.string.toast_autenticate_people)
+            return
+        }
 
-    /**
-     * Envia um pedido de adesão (Membership) a uma equipa.
-     */
-    fun sendMemberShipRequest(idTeam: String, navHostController: NavHostController) {
-        //TODO: Executar chamada há API para o sendMemberShipRequest
-    }
+        if (roleState.value != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast(message = R.string.toast_admin_only_send_membership_request)
+            return
+        }
 
-    /**
-     * Navega para o perfil detalhado da equipa.
-     */
-    fun showMore(idTeam: String, navHostController: NavHostController) {
-        navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/${idTeam}") {
-            launchSingleTop = true
+        launchDataLoad {
+            val playerId = userProfile.loginResponseDto?.localId ?: ""
+
+            teamService.playerSendMembershipRequestToTeam(playerId = playerId, teamId = idTeam)
+
+            _sentRequestIds.update { currentSet ->
+                currentSet + idTeam
+            }
+
+            updateToast(message = R.string.toast_success_send_membershipRequest)
         }
     }
 
@@ -175,16 +233,34 @@ class ListTeamViewModel @Inject constructor(
      */
     private fun loadListTeam() {
         launchDataLoad {
-            val teams = teamRepository.getListTeam(filterState.value)
+            var teams: List<ItemTeamInfoDto>
+            val filter = filterState.value
+            when (mode) {
+                ListTeamMode.LIST_TEAM -> {
+                    teams = teamService.getListTeam(filter)
+                }
+                ListTeamMode.LIST_TEAM_MATCH_INVITE -> {
+                    teams = teamService.getListTeamMatchInvite(teamId = teamIdState.value, filter = filter)
+                }
+                ListTeamMode.LIST_TEAM_MEMBERSHIP_REQUEST -> {
+                    teams = teamService.getListTeamMemberShipRequest(playerId = playerId.value, filter = filter)
+                }
+            }
 
             listState.value = teams
-            originalList = teams
+            if (filterState.value == FiltersListTeam()) {
+                originalList = teams
+            }
         }
     }
 
     /**
      * Filtra uma lista de equipas em memória com base nos filtros fornecidos.
-     * Utiliza lógica "AND" (todos os critérios têm de ser verdadeiros).
+     * Utiliza lógica "AND" (todos os critérios de filtro têm de ser verdadeiros) nos dados em cache.
+     *
+     * @param originalList A lista completa de equipas em cache.
+     * @param filters Os critérios de filtro atuais.
+     * @return Uma lista filtrada de [ItemTeamInfoDto].
      */
     private fun offlineFilterList(
         originalList: List<ItemTeamInfoDto>,

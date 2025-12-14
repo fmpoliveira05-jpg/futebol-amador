@@ -1,14 +1,19 @@
 package com.example.amfootball.ui.viewModel.homePages
 
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
-import com.example.amfootball.data.enums.UserRole
+import androidx.lifecycle.viewModelScope
+import com.example.amfootball.R
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -28,13 +33,15 @@ import javax.inject.Inject
 @HiltViewModel
 class HomePageViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val globalEventBus: GlobalEventBus
 ) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = true) {
     /**
      * Estado interno mutável que armazena os dados do perfil do jogador.
      * Inicializado como `null` até que os dados sejam carregados da sessão.
      */
-    private val userData: MutableStateFlow<PlayerProfileDto?> = MutableStateFlow(null)
+    private val userData: MutableStateFlow<PlayerProfileDto?> =
+        MutableStateFlow(sessionManager.getUserProfile())
 
     /**
      * Fluxo público imutável (Read-only) contendo os dados do utilizador.
@@ -45,6 +52,7 @@ class HomePageViewModel @Inject constructor(
 
     init {
         loadUserData()
+        observeEvents()
     }
 
     /**
@@ -60,18 +68,13 @@ class HomePageViewModel @Inject constructor(
     fun onNavigateCreateTeam(onSuccessNavigation: () -> Unit) {
         val user = sessionManager.getUserProfile()
 
-        if (user == null) {
-            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+        if (user == null || sessionManager.getAuthToken() == null) {
+            updateToast(message = R.string.toast_autenticate_people)
             return
         }
 
-        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
-            updateToast("Apenas utilizadores sem equipa podem criar uma equipa")
-            return
-        }
-
-        if (sessionManager.getAuthToken() == null) {
-            updateToast(message = "Precisa de estar autenticado para aceder a esta funcionalidade")
+        if (user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast(R.string.toast_only_player_without_team)
             return
         }
 
@@ -94,17 +97,17 @@ class HomePageViewModel @Inject constructor(
         val user = sessionManager.getUserProfile()
 
         if (user == null || idPlayer.isNullOrBlank()) {
-            updateToast(message = "Apenas pessoas autenticadas podem aceder a esta funcionalidade")
+            updateToast(message = R.string.toast_autenticate_people)
             return
         }
 
-        if(user.role != UserRole.PLAYER_WITHOUT_TEAM) {
-            updateToast("Apenas utilizadores sem equipa podem ver os seus pedidos de adesão")
+        if (user.role != UserRole.PLAYER_WITHOUT_TEAM) {
+            updateToast(message = R.string.toast_only_player_without_team_membership)
             return
         }
 
         if (idPlayer != sessionManager.getUserProfile()?.loginResponseDto?.localId) {
-            updateToast(message = "O id enviado não é o mesmo do seu")
+            updateToast(message = R.string.toast_id_not_matching)
             return
         }
 
@@ -112,7 +115,7 @@ class HomePageViewModel @Inject constructor(
             action = {
                 onSuccessNavigation()
             },
-            toastMessage = "Precisa de estar conectado, para visualiza os pedidos de adesão recebidos"
+            toastMessage = R.string.toast_offline_membership_request
         )
     }
 
@@ -127,7 +130,7 @@ class HomePageViewModel @Inject constructor(
     fun onNavigateToListTeams(onSuccessNavigation: () -> Unit) {
         onlineFunctionality(
             action = { onSuccessNavigation() },
-            toastMessage = "Precisa de estar conectado, para visualiza a lista de equipas"
+            toastMessage = R.string.toast_offline_list_team
         )
     }
 
@@ -142,5 +145,21 @@ class HomePageViewModel @Inject constructor(
             checkOnline = false,
             callApi = { userData.value = sessionManager.getUserProfile() }
         )
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            globalEventBus.events.collect { event ->
+                when (event) {
+                    is AppEvent.UserLoggedOut -> {
+                        userData.value = null
+                    }
+
+                    is AppEvent.UpdateHomePage -> {
+                        loadUserData()
+                    }
+                }
+            }
+        }
     }
 }

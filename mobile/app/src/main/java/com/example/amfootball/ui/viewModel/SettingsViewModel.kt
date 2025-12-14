@@ -3,11 +3,15 @@ package com.example.amfootball.ui.viewModel
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import androidx.lifecycle.ViewModel
-import com.example.amfootball.data.SettingsStore
-import com.example.amfootball.data.enums.settings.AppLanguage
-import com.example.amfootball.data.enums.settings.AppTheme
+import com.example.amfootball.R
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.local.SettingsStore
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.domains.enums.settings.AppLanguage
+import com.example.amfootball.domains.enums.settings.AppTheme
+import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,8 +35,10 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val repository: SessionManager,
-    private val settingsStore: SettingsStore
-) : ViewModel() {
+    private val settingsStore: SettingsStore,
+    private val playerService: PlayerService,
+    private val networkObserver: NetworkConnectivityObserver,
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = false) {
 
     /**
      * Estado interno mutável para controlar a visibilidade do diálogo de confirmação de eliminação de perfil.
@@ -45,15 +51,16 @@ class SettingsViewModel @Inject constructor(
     val deleteProfileState = deleteProfile.asStateFlow()
 
     /**
-    * Fluxo de estado do idioma atual da aplicação.
-    * Inicializado lendo o valor persistido.
-    */
+     * Fluxo de estado do idioma atual da aplicação.
+     * Inicializado lendo o valor persistido.
+     */
     private var _isLoading = MutableStateFlow(false)
     val isLoading = _isLoading.asStateFlow()
+
     /**
-    * Fluxo de estado do idioma atual da aplicação.
-    * Inicializado lendo o valor persistido.
-    */
+     * Fluxo de estado do idioma atual da aplicação.
+     * Inicializado lendo o valor persistido.
+     */
     private var _language = MutableStateFlow(settingsStore.getLanguage())
     val language = _language.asStateFlow()
 
@@ -136,7 +143,7 @@ class SettingsViewModel @Inject constructor(
 
         val localeList = LocaleListCompat.forLanguageTags(code)
         AppCompatDelegate.setApplicationLocales(localeList)
-        _isLoading.value = false
+        finishLoading()
     }
 
     /**
@@ -151,14 +158,14 @@ class SettingsViewModel @Inject constructor(
         _theme.value = theme.name
 
         settingsStore.saveTheme(theme)
-        _isLoading.value = false
+        this.finishLoading()
     }
 
-    private fun startLoading(){
+    private fun startLoading() {
         _isLoading.value = true
     }
 
-    fun stopLoading(){
+    fun finishLoading() {
         _isLoading.value = false
     }
 
@@ -170,6 +177,47 @@ class SettingsViewModel @Inject constructor(
      * @return `true` se a eliminação for bem-sucedida, `false` caso contrário.
      */
     fun deleteProfile(): Boolean {
+        startLoading()
+        launchDataLoad(
+            callApi = {
+                val player = repository.getUserProfile()
+                if (validProfile(player)) {
+                    playerService.deletePlayerProfile(playerId = player!!.loginResponseDto!!.localId)
+                    updateToast(R.string.toast_playerProfile_deleted)
+                    repository.clearSession()
+                } else {
+                    updateToast(R.string.toast_playerProfile_error)
+                }
+                finishLoading()
+            },
+            checkOnline = true
+        )
         return false
     }
+
+    fun editProfile() {
+
+        startLoading()
+
+        launchDataLoad(
+            callApi = {
+                val player = repository.getUserProfile()
+                if (validProfile(player)) {
+                    playerService.updatePlayerProfile(playerProfile = player!!)
+                    updateToast(R.string.toast_playerProfile_edited)
+                    finishLoading()
+                }
+            },
+            checkOnline = true
+        )
+    }
+
+    private fun validProfile(profile: PlayerProfileDto?): Boolean {
+        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId.isEmpty()) {
+            updateToast(R.string.toast_playerProfile_error)
+            return false
+        }
+        return true
+    }
+
 }

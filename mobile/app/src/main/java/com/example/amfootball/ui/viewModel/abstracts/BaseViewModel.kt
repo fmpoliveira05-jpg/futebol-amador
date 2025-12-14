@@ -2,8 +2,8 @@ package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.network.NetworkConnectivityObserver
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
  * ViewModel Base Abstrato.
  *
  * Serve como fundação para todos os ViewModels da aplicação. Centraliza a lógica comum de:
- * 1. Gestão de Estado da UI ([com.example.amfootball.data.UiState]) para Loading, Erros e Mensagens (Toasts).
+ * 1. Gestão de Estado da UI ([UiState]) para Loading, Erros e Mensagens (Toasts).
  * 2. Monitorização de Conectividade de Rede em tempo real.
  * 3. Execução segura de chamadas assíncronas (Corrotinas) com tratamento de exceções automático.
  *
@@ -22,12 +22,12 @@ import kotlinx.coroutines.launch
  */
 abstract class BaseViewModel(
     private val networkObserver: NetworkConnectivityObserver,
-    private val needObserverNetwork: Boolean = true,
+    private val needObserverNetwork: Boolean = true
 ) : ViewModel() {
     /**
      * Estado global da UI.
-     * Contém informações sobre se o ecrã está a carregar ([com.example.amfootball.data.UiState.isLoading]),
-     * se ocorreu algum erro ([com.example.amfootball.data.UiState.errorMessage]) ou se há mensagens para exibir ([com.example.amfootball.data.UiState.toastMessage]).
+     * Contém informações sobre se o ecrã está a carregar ([UiState.isLoading]),
+     * se ocorreu algum erro ([UiState.errorMessage]) ou se há mensagens para exibir ([UiState.toastMessage]).
      */
     private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
@@ -59,7 +59,7 @@ abstract class BaseViewModel(
      * @param checkOnline Se `true` (padrão), impede a execução se o dispositivo estiver offline.
      * @param callApi A função suspensa (lambda) que contém a lógica de negócio ou chamada à API.
      */
-    protected fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
+    fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -103,7 +103,7 @@ abstract class BaseViewModel(
      *
      * @param message A mensagem a exibir.
      */
-    protected fun updateToast(message: String?) {
+    protected fun updateToast(message: Int?) {
         _uiState.update { it.copy(toastMessage = message) }
     }
 
@@ -116,7 +116,7 @@ abstract class BaseViewModel(
         _uiState.update { it.copy(toastMessage = null) }
     }
 
-    protected fun onlineFunctionality(action: () -> Unit, toastMessage: String) {
+    protected fun onlineFunctionality(action: () -> Unit, toastMessage: Int?) {
         if (networkObserver.isOnlineOneShot()) {
             action()
         } else {

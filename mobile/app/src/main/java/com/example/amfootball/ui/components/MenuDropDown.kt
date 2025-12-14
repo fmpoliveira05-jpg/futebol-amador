@@ -14,8 +14,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.match.MatchStatus
-import com.example.amfootball.utils.MatchConsts
+import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.domains.enums.match.MatchStatus
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -53,17 +53,16 @@ fun MatchActionsMenu(
         onDismissRequest = onDismissRequest
     ) {
         if (matchStatus == MatchStatus.SCHEDULED || matchStatus == MatchStatus.POST_PONED) {
-            if (gameDate >= now) {
-                DropdownItem(
-                    text = stringResource(id = R.string.button_start_match),
-                    onClick = {
-                        onStartMatch()
-                        onDismissRequest()
-                    },
-                    leadingIcon = Icons.Default.PlayArrow,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            DropdownItem(
+                text = stringResource(id = R.string.button_start_match),
+                onClick = {
+                    onStartMatch()
+                    onDismissRequest()
+                },
+                leadingIcon = Icons.Default.PlayArrow,
+                color = MaterialTheme.colorScheme.primary
+            )
+
 
             if (hoursUntilGame >= MatchConsts.MAX_HOURS_TO_POST_PONE) {
                 DropdownItem(

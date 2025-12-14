@@ -3,27 +3,28 @@ package com.example.amfootball.ui.viewModel.team
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.enums.match.MatchStatus
-import com.example.amfootball.data.enums.match.TypeMatch
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterCalendarError
+import com.example.amfootball.core.extensions.toLocalDate
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FilterCalendar
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.CalendarService
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.remote.services.CalendarService
+import com.example.amfootball.domains.enums.match.MatchStatus
+import com.example.amfootball.domains.enums.match.TypeMatch
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.ListsSizesConst
-import com.example.amfootball.utils.TeamConst
-import com.example.amfootball.utils.extensions.toLocalDate
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-//TODO: Falta o StartMatch
-//TODO: Talvez falte meter verificações de tempo
+//TODO: Falta Todo que precisa do signalR
 /**
  * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.
  *
@@ -41,22 +42,23 @@ import javax.inject.Inject
 class CalendarTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val calendarRepository: CalendarService,
-    private val savedStateHandle: SavedStateHandle
+    private val sessionManager: SessionManager
 ) : ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
-    private val teamId = savedStateHandle.get<String>("teamId")
+    private val teamId: MutableStateFlow<String> = MutableStateFlow(sessionManager.fetchTeamId())
 
     /** Estado atual dos filtros de pesquisa aplicados pelo utilizador. */
     private val filterState: MutableStateFlow<FilterCalendar> = MutableStateFlow(FilterCalendar())
-    val filter: StateFlow<FilterCalendar> = filterState
+    val filter: StateFlow<FilterCalendar> = filterState.asStateFlow()
 
     /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
     private val listErrors: MutableStateFlow<FilterCalendarError> =
         MutableStateFlow(FilterCalendarError())
-    val uiErrors: StateFlow<FilterCalendarError> = listErrors
+    val uiErrors: StateFlow<FilterCalendarError> = listErrors.asStateFlow()
 
     //Inicializer
     init {
+        teamId.value = sessionManager.fetchTeamId()
         loadCalendar()
     }
 
@@ -138,19 +140,21 @@ class CalendarTeamViewModel @Inject constructor(
         }
     }
 
+    fun onStartMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_start_game
+        )
+    }
     /**
      * Navega para o ecrã de cancelamento de partida.
      *
      * Requer conexão à internet. Se offline, exibe um Toast de erro via [UiState].
      */
-    fun onCancelMatch(idMatch: String, navHostController: NavHostController) {
+    fun onCancelMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
-            toastMessage = "Para cancelar o jogo é necessária conexão à internet."
+            action = onSucess,
+            toastMessage = R.string.toast_offline_cancel_game
         )
     }
 
@@ -158,28 +162,10 @@ class CalendarTeamViewModel @Inject constructor(
      * Navega para o ecrã de adiamento de partida.
      * Requer conexão à internet.
      */
-    fun onPostPoneMatch(idMatch: String, navHostController: NavHostController) {
+    fun onPostPoneMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
-            toastMessage = "Para adiar o jogo é necessária conexão à internet."
-        )
-    }
-
-    /**
-     * Inicia a partida.
-     * Requer conexão à internet.
-     */
-    fun onStartMatch(idMatch: String) {
-        onlineFunctionality(
-            action = {
-                //TODO: Chamar endPoint da API para iniciar a partida (E meter o user em loading ate algum adversario se conectar ao Hub com ele)
-                //TODO: Meter aqui verificação a ver se a hora do clique é igual ou superior há da Match
-            },
-            toastMessage = "Para iniciar o jogo é necessária conexão à internet."
+            action = onSucess,
+            toastMessage = R.string.toast_offline_postpone_game
         )
     }
 
@@ -187,14 +173,10 @@ class CalendarTeamViewModel @Inject constructor(
      * Navega para o ecrã de finalização de partida (inserção de resultados).
      * Requer conexão à internet.
      */
-    fun onFinishMatch(idMatch: String, navHostController: NavHostController) {
+    fun onFinishMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
-            toastMessage = "Para finalizar a partida é necessária conexão à internet."
+            action = onSucess,
+            toastMessage = R.string.toast_offline_finish_match
         )
     }
 
@@ -208,15 +190,13 @@ class CalendarTeamViewModel @Inject constructor(
      */
     fun loadCalendar() {
         launchDataLoad {
-            if (teamId != null) {
-                val calendar =
-                    calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
+            val calendar = calendarRepository.getCalendar(teamId = teamId.value, filter = filterState.value)
 
-                listState.value = calendar
-                if (filterState.value == FilterCalendar()) {
-                    originalList = calendar
-                }
+            listState.value = calendar
+            if (filterState.value == FilterCalendar()) {
+                originalList = calendar
             }
+
         }
     }
 

@@ -21,13 +21,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterMemberShipRequestActions
-import com.example.amfootball.data.actions.itemsList.ItemsMemberShipRequest
-import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FilterMemberShipRequest
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterMemberShipRequestActions
+import com.example.amfootball.ui.actions.itemsList.ItemsMemberShipRequest
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.inputFields.LabelTextField
@@ -41,12 +44,15 @@ import com.example.amfootball.ui.components.lists.ItemAcceptRejectAndShowMore
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
+import com.example.amfootball.ui.previewsMocks.ListMemberShipRequestMocks
+import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.memberShipRequest.ListMemberShipRequestViewModel
-import com.example.amfootball.utils.Patterns
-import com.example.amfootball.utils.UserConst
 import java.time.format.DateTimeFormatter
 
-//TODO: Falta adaptar isto para quando for admin mostrar uns memberShipRequest e se for player outros
+//TODO: Falta apenas o botão showMoreItens
 /**
  * Ecrã de Listagem de Pedidos de Adesão (Membership Requests).
  *
@@ -58,10 +64,6 @@ import java.time.format.DateTimeFormatter
  * 2. Construir as ações de filtro e de item (callbacks).
  * 3. Delegar a renderização visual para [ContentListMemberShipRequest].
  *
- * **Nota de Implementação (TODO):**
- * Atualmente exibe a mesma lista independentemente do papel do utilizador.
- * Futuramente, deve adaptar-se para diferenciar entre "Pedidos recebidos pela Equipa" (Visão Admin)
- * e "Convites recebidos pelo Jogador" (Visão Player).
  *
  * @param navHostController Controlador de navegação para transitar para detalhes ou aceitar pedidos.
  * @param viewModel ViewModel injetado via Hilt que fornece os dados e lógica de negócio.
@@ -92,6 +94,16 @@ fun ListMemberShipRequest(
         showMore = viewModel::showMore
     )
 
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
+
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
+    )
+
     ContentListMemberShipRequest(
         uiState = uiState,
         isOnline = isOnline,
@@ -100,6 +112,7 @@ fun ListMemberShipRequest(
         filterActions = filterActions,
         list = list,
         itemsActions = itemsActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -131,9 +144,11 @@ private fun ContentListMemberShipRequest(
     filterActions: FilterMemberShipRequestActions,
     list: List<MembershipRequestInfoDto>,
     itemsActions: ItemsMemberShipRequest,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController,
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -169,6 +184,8 @@ private fun ContentListMemberShipRequest(
                         navHostController = navHostController
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_membership_request_empty)
             )
         }
@@ -264,15 +281,11 @@ private fun ListMemberShipRequestContent(
     itemsActions: ItemsMemberShipRequest,
     navHostController: NavHostController
 ) {
-    var receiver = ""
-    var sender = ""
+    val requestId = membershipRequest.id
+    var senderId = membershipRequest.team.id
 
     if (membershipRequest.isPlayerSender) {
-        sender = membershipRequest.player.id
-        receiver = membershipRequest.team.id
-    } else {
-        sender = membershipRequest.team.id
-        receiver = membershipRequest.player.id
+        senderId = membershipRequest.player.id
     }
 
     GenericListItem(
@@ -310,24 +323,24 @@ private fun ListMemberShipRequestContent(
         trailing = {
             ItemAcceptRejectAndShowMore(
                 accept = {
-                    itemsActions.acceptMemberShipRequest(
-                        receiver,
-                        membershipRequest.id,
-                        membershipRequest.isPlayerSender,
-                        navHostController
-                    )
+                    itemsActions.acceptMemberShipRequest(requestId, senderId) {
+                        navHostController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+
+                            launchSingleTop = true
+                        }
+                    }
                 },
                 reject = {
                     itemsActions.rejectMemberShipRequest(
-                        receiver,
-                        membershipRequest.id,
-                        membershipRequest.isPlayerSender,
+                        requestId,
                     )
                 },
                 showMore = {
                     itemsActions.showMore(
-                        sender,
-                        membershipRequest.isPlayerSender,
+                        senderId,
                         navHostController,
                     )
                 }
@@ -336,33 +349,59 @@ private fun ListMemberShipRequestContent(
     )
 }
 
-@Preview(
-    name = "Lista de pedidos de adesão Jogador - PT",
-    locale = "pt-rPT",
-    showBackground = true
-)
-@Preview(
-    name = "List MemberShip Request player - EN",
-    locale = "en",
-    showBackground = true
-)
+@Preview(name = "Lista Pedidos Equipas - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Lista Pedidos Equipas - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMemberShipRequestPlayerScreen() {
-    ListMemberShipRequest(rememberNavController())
+fun PreviewContentListMemberShipRequestTeams() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = ListMemberShipRequestMocks.mockTeamRequests,
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+            navHostController = rememberNavController()
+        )
+    }
 }
 
-
-@Preview(
-    name = "Lista de pedidos de adesão Jogador - PT",
-    locale = "pt-rPT",
-    showBackground = true
-)
-@Preview(
-    name = "List MemberShip Request player - EN",
-    locale = "en",
-    showBackground = true
-)
+@Preview(name = "Lista Pedidos Jogadores - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Player Requests List - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListMemberShipRequestTeamScreen() {
-    ListMemberShipRequest(rememberNavController())
+fun PreviewContentListMemberShipRequestPlayers() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = ListMemberShipRequestMocks.mockPlayerRequests,
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+            navHostController = rememberNavController()
+        )
+    }
+}
+
+@Preview(name = "Lista Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Empty List - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewContentListMemberShipRequestEmpty() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = emptyList(),
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
+            navHostController = rememberNavController()
+        )
+    }
 }

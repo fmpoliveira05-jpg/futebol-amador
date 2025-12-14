@@ -33,17 +33,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterCalendarActions
-import com.example.amfootball.data.actions.itemsList.ItemsCalendarActions
-import com.example.amfootball.data.dtos.match.InfoMatchCalendar
-import com.example.amfootball.data.dtos.support.TeamStatisticsDto
-import com.example.amfootball.data.enums.match.MatchResult
-import com.example.amfootball.data.enums.match.MatchStatus
-import com.example.amfootball.data.errors.filtersError.FilterCalendarError
+import com.example.amfootball.core.utils.Patterns
+import com.example.amfootball.core.utils.SignalRUrls
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FilterCalendar
-import com.example.amfootball.data.mocks.lists.CalendarMocks
+import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.remote.dtos.support.TeamStatisticsDto
+import com.example.amfootball.domains.enums.match.MatchResult
+import com.example.amfootball.domains.enums.match.MatchStatus
+import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterCalendarActions
+import com.example.amfootball.ui.actions.itemsList.ItemsCalendarActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.MatchActionsMenu
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
@@ -59,9 +62,10 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.CalendarMocks
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
-import com.example.amfootball.utils.Patterns
-import com.example.amfootball.utils.TeamConst
 import java.time.format.DateTimeFormatter
 
 /**
@@ -78,8 +82,10 @@ fun CalendarScreen(
     navHostController: NavHostController,
     viewModel: CalendarTeamViewModel = hiltViewModel()
 ) {
-    val filters by viewModel.filter.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
+    val filters by viewModel.filter.collectAsStateWithLifecycle()
     val filterError by viewModel.uiErrors.collectAsStateWithLifecycle()
     val filterActions = FilterCalendarActions(
         onNameChange = viewModel::onNameChange,
@@ -95,14 +101,48 @@ fun CalendarScreen(
     )
 
     val itemsListAction = ItemsCalendarActions(
-        onCancelMatch = viewModel::onCancelMatch,
-        onPostPoneMatch = viewModel::onPostPoneMatch,
-        onStartMatch = viewModel::onStartMatch,
-        onFinishMatch = viewModel::onFinishMatch
+        onCancelMatch = { matchId ->
+            viewModel.onCancelMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/$matchId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        },
+        onPostPoneMatch = { matchId ->
+            viewModel.onPostPoneMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/$matchId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        },
+        onStartMatch = { matchId, opponentId ->
+            viewModel.onStartMatch(
+                {
+                    navHostController.navigate("${SignalRUrls.START_MATCH_URL}/$matchId/$opponentId"){
+                        launchSingleTop = true
+                    }
+                }
+            )
+        },
+        onFinishMatch = { matchId, opponentId ->
+            viewModel.onFinishMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/$matchId/$opponentId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     )
 
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
+    )
 
     ToastHandler(
         toastMessage = uiState.toastMessage,
@@ -118,6 +158,7 @@ fun CalendarScreen(
         retry = viewModel::loadCalendar,
         isOnline = isOnline,
         itemsListAction = itemsListAction,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -137,9 +178,11 @@ private fun CalendarContent(
     retry: () -> Unit,
     isOnline: Boolean,
     itemsListAction: ItemsCalendarActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
     var isExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -172,6 +215,8 @@ private fun CalendarContent(
                         modifier = Modifier.fillMaxWidth()
                     )
                 },
+                isValidShowMore = isShowMoreVisible,
+                showMoreItems = showMoreItensAction.onLoadMore,
                 messageEmptyList = stringResource(id = R.string.list_calendar_empty)
             )
         }
@@ -365,27 +410,15 @@ private fun OptionsMatch(
                 matchStatus = match.matchStatus,
                 gameDate = match.gameDate,
                 onDismissRequest = { isMenuExpanded = false },
-                onStartMatch = {
-                    itensListAction.onStartMatch(match.idMatch)
-                },
+                onStartMatch = { itensListAction.onStartMatch(match.idMatch, match.opponent.idTeam) },
                 onFinishMatch = {
                     itensListAction.onFinishMatch(
                         match.idMatch,
-                        navHostController
+                        match.opponent.idTeam
                     )
                 },
-                onPostPoneMatch = {
-                    itensListAction.onPostPoneMatch(
-                        match.idMatch,
-                        navHostController
-                    )
-                },
-                onCancelMatch = {
-                    itensListAction.onCancelMatch(
-                        match.idMatch,
-                        navHostController
-                    )
-                },
+                onPostPoneMatch = { itensListAction.onPostPoneMatch(match.idMatch) },
+                onCancelMatch = { itensListAction.onCancelMatch(match.idMatch) },
             )
         }
     }
@@ -496,6 +529,7 @@ fun PreviewCalendarContentNormal() {
         isOnline = true,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -513,6 +547,7 @@ fun PreviewCalendarContentEmpty() {
         isOnline = true,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -530,6 +565,7 @@ fun PreviewCalendarContentOffline() {
         isOnline = false,
         retry = {},
         itemsListAction = CalendarMocks.itemActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         navHostController = rememberNavController()
     )
 }

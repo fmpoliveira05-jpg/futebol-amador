@@ -1,10 +1,13 @@
 package com.example.amfootball.ui.viewModel.homePages
 
-import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.UserRole
+import com.example.amfootball.R
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.TeamService
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
 import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +15,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-//TODO: Meter um endPoint na API, que carrega os dados da teamDto + próximos 3 jogos da equipa + sequencia de resultados 5 próximos jogos (W, L, D), depois trocar o TeamDto, por isso
 /**
  * ViewModel responsável pela lógica de negócio e gestão de estado da Home Page da Equipa.
  *
@@ -29,9 +31,10 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class TeamHomePageViewModel @Inject constructor(
+    private val playerService: PlayerService,
     private val teamRepository: TeamService,
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) : BaseViewModel(
     networkObserver = networkObserver,
     needObserverNetwork = true
@@ -40,13 +43,13 @@ class TeamHomePageViewModel @Inject constructor(
      * Estado interno mutável contendo os dados da equipa.
      * Inicializado com um objeto [TeamDto] vazio.
      */
-    private val teamInfo: MutableStateFlow<TeamDto> = MutableStateFlow(TeamDto())
+    private val teamInfo: MutableStateFlow<HomePageTeamDto> = MutableStateFlow(HomePageTeamDto())
 
     /**
      * Fluxo público imutável com os dados da equipa (Nome, Logo, etc.).
      * Observado pela UI para renderizar o cabeçalho e informações.
      */
-    val team: StateFlow<TeamDto> = teamInfo.asStateFlow()
+    val team: StateFlow<HomePageTeamDto> = teamInfo.asStateFlow()
 
     /**
      * Estado interno mutável do Role do utilizador.
@@ -62,7 +65,6 @@ class TeamHomePageViewModel @Inject constructor(
      *
      * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
      */
-
     val role: StateFlow<UserRole> = roleState.asStateFlow()
 
     init {
@@ -77,14 +79,14 @@ class TeamHomePageViewModel @Inject constructor(
      * e capturar possíveis exceções de rede.
      */
     private fun loadInfoTeam() {
-        val teamId = sessionManager.getUserProfile()?.effectiveTeamId
+        val teamId = sessionManager.fetchTeamId()
 
-        if (teamId.isNullOrEmpty()) {
+        if (teamId.isEmpty()) {
             return
         }
 
         launchDataLoad {
-            val teamData = teamRepository.getNameTeam(teamId = teamId)
+            val teamData = teamRepository.getHomePageTeam(teamId = teamId)
 
             teamInfo.value = teamData
         }
@@ -99,13 +101,13 @@ class TeamHomePageViewModel @Inject constructor(
      */
     fun onNavigateCasualMatch(onSucess: () -> Unit) {
         if (roleState.value != UserRole.ADMIN_TEAM) {
-            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            updateToast(message = R.string.toast_admin_only_casual)
             return
         }
 
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar as equipas disponiveis para uma partida precisa estar conectado há internet"
+            toastMessage = R.string.toast_offline_casual_teams
         )
     }
 
@@ -118,13 +120,13 @@ class TeamHomePageViewModel @Inject constructor(
      */
     fun onNavigateRankedMatch(onSucess: () -> Unit) {
         if (roleState.value != UserRole.ADMIN_TEAM) {
-            updateToast("Apenas adminsitradores de equipa podem agendar partidas casuais")
+            updateToast(message = R.string.toast_admin_only_ranked)
             return
         }
 
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para marcar uma partida competitiva, necessita estar online"
+            toastMessage = R.string.toast_offline_ranked_match
         )
     }
 
@@ -136,7 +138,7 @@ class TeamHomePageViewModel @Inject constructor(
     fun onNavigateMembers(onSucess: () -> Unit) {
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar a lista de membros precisa ter internet"
+            toastMessage = R.string.toast_offline_members_list
         )
     }
 
@@ -148,8 +150,26 @@ class TeamHomePageViewModel @Inject constructor(
     fun onNavigateCalendar(onSucess: () -> Unit) {
         onlineFunctionality(
             action = onSucess,
-            toastMessage = "Para visualizar o calendário de jogo precisa de ter internet"
+            toastMessage = R.string.toast_offline_calendar
         )
+    }
+
+    fun onLeaveTeam(onSucess: () -> Unit) {
+        launchDataLoad {
+            val userId = sessionManager.getUserProfile()?.loginResponseDto?.localId
+
+            if (userId == null) {
+                return@launchDataLoad
+            }
+
+            val updatedUser = playerService.leaveTeam(playerId = userId)
+
+            if (updatedUser != null) {
+                sessionManager.updateTeamIdUser(null)
+            }
+
+            onSucess()
+        }
     }
 
     /**

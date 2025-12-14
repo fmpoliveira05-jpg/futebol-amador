@@ -1,15 +1,19 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateOf
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.leadboard.LeadboardDto
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
+import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-//TODO: Falta conexão com o Backend e extender com o ListsViewModel
 /**
  * ViewModel responsável pela lógica de negócio e gestão de estado da Tabela de Classificação (Leaderboard).
  *
@@ -18,57 +22,12 @@ import com.example.amfootball.navigation.objects.Routes
  *
  * @property listTeam Armazena a lista completa de dados do Leaderboard ([LeadboardDto]), observável via [MutableLiveData].
  */
-class LeadBoardViewModel : ViewModel() {
-    private val listTeam: MutableLiveData<List<LeadboardDto>> =
-        MutableLiveData(emptyList())
-
-    /**
-     * Estado mutável que controla quantos itens devem ser exibidos na UI (usado para paginação).
-     * Inicialmente definido como 10.
-     */
-    private val inicialSizeList = mutableStateOf(value = 10)
-
-    //Getters
-    /**
-     * Estado computado que retorna o subconjunto atual da lista de equipas.
-     *
-     * Este valor é recalculado sempre que [listTeam] ou [inicialSizeList] muda,
-     * implementando o efeito de "paginação".
-     *
-     * @return [State] contendo a porção visível da lista (ex: itens 0 a 10).
-     */
-    val inicialList: State<List<LeadboardDto>> = derivedStateOf {
-        listTeam.value!!.take(inicialSizeList.value)
-    }
-
-    /**
-     * Estado computado que determina se o botão "Carregar Mais" (Load More) deve ser exibido.
-     *
-     * O botão só é visível se o número de itens atualmente exibidos ([inicialSizeList])
-     * for menor do que o número total de equipas carregadas.
-     *
-     * @return [State] contendo `true` se houver mais itens para carregar.
-     */
-    val showMoreButton: State<Boolean> = derivedStateOf {
-        inicialSizeList.value < listTeam.value!!.size
-    }
-
-    //Inicializer
-    init {
-        //TODO: Depois adaptar para ir buscar ao FireBase
-        listTeam.value = LeadboardDto.Companion.generateLeadboardExample()
-    }
-
-    //Metodo
-    /**
-     * Aumenta o número de itens exibidos em 10.
-     *
-     * Disparado pelo evento "Carregar Mais" (Load More) da UI. Isto provoca a reavaliação
-     * de [inicialList] e [showMoreButton].
-     */
-    fun loadMoreTeams() {
-        inicialSizeList.value = inicialSizeList.value.plus(10)
-    }
+@HiltViewModel
+class LeadBoardViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver,
+    private val teamService: TeamService,
+    private val db: FirebaseFirestore
+) : ListsViewModels<InfoTeamLeadboard>(networkObserver = networkObserver) {
 
     /**
      * Navega para o ecrã de informações detalhadas da equipa.
@@ -77,8 +36,108 @@ class LeadBoardViewModel : ViewModel() {
      * @param navHostController O controlador para gerir a navegação.
      */
     fun showInfoTeam(idTeam: String, navHostController: NavHostController) {
-        navHostController.navigate(route = "${Routes.UserRoutes.PROFILE.route}/$idTeam") {
+        navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/$idTeam") {
             launchSingleTop = true
         }
     }
+
+    private val COLLECTION_NAME = "leaderboard_cache"
+
+    init {
+        loadLeaderboardData()
+    }
+
+    private fun loadLeaderboardData() {
+        launchDataLoad(
+            checkOnline = false,
+            callApi = {
+                if (networkObserver.isOnlineOneShot()) {
+                    try {
+                        val apiResult = teamService.getLeaderBoard()
+                        listState.value = apiResult
+                        saveToFirebase(apiResult)
+
+                    } catch (e: Exception) {
+                        Log.e("LeadBoardVM", "Erro na API, tentando Firebase: ${e.message}")
+                        fetchFromFirebase()
+                    }
+                } else {
+                    fetchFromFirebase()
+                }
+            }
+        )
+    }
+
+    /**
+     * Busca os dados armazenados no Firestore caso a API falhe ou não haja internet.
+     */
+    private suspend fun fetchFromFirebase() {
+        try {
+
+            val snapshot = db.collection(COLLECTION_NAME)
+                .orderBy("position")
+                .get()
+                .await()
+            if (!snapshot.isEmpty) {
+                val cachedList = snapshot.documents.mapNotNull { doc ->
+                    try {
+                        InfoTeamLeadboard(
+                            id = doc.getString("id") ?: "",
+                            position = doc.getLong("position")?.toInt() ?: 0,
+                            name = doc.getString("name") ?: "",
+                            currentPoints = doc.getLong("currentPoints")?.toInt() ?: 0,
+                            nameRank = doc.getString("nameRank") ?: "",
+                            logoTeam = doc.getString("logoTeam")
+                        )
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                listState.value = cachedList
+            } else {
+                Log.d("LeadBoardVM", "Cache vazio")
+            }
+        } catch (e: Exception) {
+            Log.e("LeadBoardVM", "Erro ao ler do Firebase: ${e.message}")
+        }
+    }
+
+    /**
+     * Guarda a lista no Firestore.
+     * Estratégia: Apagar tudo o que lá está (Batch Delete) e escrever os novos (Batch Write).
+     */
+    private suspend fun saveToFirebase(data: List<InfoTeamLeadboard>) {
+        try {
+            val batch = db.batch()
+            val collectionRef = db.collection(COLLECTION_NAME)
+            val oldDataSnapshot = collectionRef.get().await()
+
+            for (document in oldDataSnapshot) {
+                batch.delete(document.reference)
+            }
+
+            for (team in data) {
+                val docRef = collectionRef.document(team.id)
+
+                val teamMap = hashMapOf(
+                    "id" to team.id,
+                    "position" to team.position,
+                    "name" to team.name,
+                    "currentPoints" to team.currentPoints,
+                    "nameRank" to team.nameRank,
+                    "logoTeam" to team.logoTeam
+                )
+
+                batch.set(docRef, teamMap)
+            }
+
+            batch.commit().await()
+            Log.d("LeadBoardVM", "Cache atualizado com sucesso no Firebase")
+
+        } catch (e: Exception) {
+            Log.e("LeadBoardVM", "Erro ao salvar no Firebase: ${e.message}")
+        }
+    }
+
+
 }

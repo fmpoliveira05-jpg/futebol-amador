@@ -33,8 +33,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.amfootball.R
-import com.example.amfootball.utils.CountryCodeHelper
-import com.example.amfootball.utils.CountryData
+import com.example.amfootball.core.utils.CountryCodeHelper
+import com.example.amfootball.core.utils.CountryData
 
 /**
  * Componente de entrada de número de telefone com seletor dinâmico de código de país.

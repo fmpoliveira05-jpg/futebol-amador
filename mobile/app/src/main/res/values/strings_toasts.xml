@@ -1,4 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="toast_offline">No internet connection. Check your network.</string>
+    <string name="toast_invalid_filters">Invalid filters!</string>
+    <string name="toast_invalid_page">Invalid page</string>
+    <string name="toast_invalid_operation">Invalid operation</string>
+
+    <string name="toast_team_id_null">Your team ID is invalid. Please log in again.</string>
+    <string name="toast_id_not_matching">The sent ID does not match yours.</string>
+    <string name="toast_error_create_team">Error processing team creation.</string>
+
+    <string name="toast_offline">No internet connection. Please check your network.</string>
+    <string name="toast_offline_info_team">You can only view more team information if you are online.</string>
+    <string name="toast_offline_casual_teams">To view available teams for a match, you need to be connected to the internet.</string>
+    <string name="toast_offline_ranked_match">To schedule a competitive match, you need to be online.</string>
+    <string name="toast_offline_members_list">To view the member list, you need internet access.</string>
+    <string name="toast_offline_calendar">To view the match calendar, you need internet access.</string>
+    <string name="toast_offline_membership_request">You need to be connected to view received membership requests.</string>
+    <string name="toast_offline_list_team">You need to be connected to view the team list.</string>
+    <string name="toast_offline_send_match_invite">You cannot send a match invite without being connected to the internet.</string>
+    <string name="toast_offline_negotiation">You cannot start a negotiation without an internet connection.</string>
+    <string name="toast_offline_cancel_game">To cancel the game, an internet connection is required.</string>
+    <string name="toast_offline_postpone_game">To postpone the game, an internet connection is required.</string>
+    <string name="toast_offline_start_game">To start the game, an internet connection is required.</string>
+    <string name="toast_offline_finish_match">To finish the match, an internet connection is required.</string>
+    <string name="toast_offline_leave_team">To leave the team, you need to be connected to the internet</string>
+    <string name="toast_offline_edit_team">To edit your team\'s data, you need to be connected to the internet</string>
+    <string name="toast_offline_delete_team">To delete your team, you need to be connected to the internet</string>
+    <string name="toast_offline_accept_postpone">To accept the postponement, you need to be connected to the internet.</string>
+    <string name="toast_offline_reject_postpone">To reject the postponement, you need to be connected to the internet.</string>
+    <string name="toast_offline_show_data_player">To view the player\'s data, you must be connected to the internet.</string>
+
+    <string name="toast_autenticate_people">Only authenticated users can access this feature.</string>
+    <string name="toast_only_player_without_team">Only users without a team can view their membership requests.</string>
+    <string name="toast_only_player_without_team_membership">Only users without a team can view their membership requests.</string>
+
+    <string name="toast_admin_only_casual">Only team administrators can schedule casual matches.</string>
+    <string name="toast_admin_only_ranked">Only team administrators can schedule competitive matches.</string>
+    <string name="toast_admin_only_send_membership_request">Only team admins can send membership requests.</string>
+
+    <string name="toast_playerProfile_error">Error retrieving user profile, please try again.</string>
+    <string name="toast_playerProfile_deleted">User profile deleted successfully.</string>
+    <string name="toast_playerProfile_edited">User Profile Updated successfully</string>
+
+    <string name="toast_delete_profile_error">Error deleting user profile, please try again.</string>
+    <string name="toast_admin_only_edit">Only team administrators can edit team data</string>
+    <string name="toast_admin_only_delete">Only team administrators can delete the team</string>
+    <string name="toast_admin_only_promote">Only team administrators can promote players</string>
+    <string name="toast_admin_only_demote">Only team administrators can demote other administrators</string>
+    <string name="toast_admin_only_remove_player">Only team administrators can remove players from the team</string>
+    <string name="toast_admin_only_send_match_invite">Only team admins can send match invites.</string>
+
+    <string name="toast_success_accept_postpone">Postponement request accepted successfully.</string>
+    <string name="toast_success_reject_postpone">Postponement request rejected successfully.</string>
+    <string name="toast_success_send_membershipRequest">Membership request sent successfully.</string>
+
+    <string name="toast_send_match_invite_your_team">You cannot send a match invite to your own team.</string>
 </resources>

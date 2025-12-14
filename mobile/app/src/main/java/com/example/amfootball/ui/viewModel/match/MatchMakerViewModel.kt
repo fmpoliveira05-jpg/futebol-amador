@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavHostController
-import com.example.amfootball.data.dtos.match.MatchMakerInfo
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.remote.dtos.match.MatchMakerInfo
+import com.example.amfootball.ui.navigation.objects.Routes
 
 //TODO: FALTA TUDO
 /**
@@ -31,7 +31,7 @@ class MatchMakerViewModel : ViewModel() {
 
     init {
         //TODO: Não sei vem o que fazer aqui, talvez so ir buscar a equipa que entrou no lobby
-        matchMakerState.value = MatchMakerInfo.createExampleWithOneTeam()
+        //matchMakerState.value = MatchMakerInfo.createExampleWithOneTeam()
     }
 
     //TODO: Fazer pedido há API, para cancelar a procura

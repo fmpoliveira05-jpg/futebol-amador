@@ -1,17 +1,19 @@
 package com.example.amfootball.ui.viewModel.team
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.team.ProfileTeamDto
+import com.example.amfootball.R
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.AppEvent
+import com.example.amfootball.data.events.GlobalEventBus
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.services.TeamService
+import com.example.amfootball.data.remote.dtos.team.ProfileTeamDto
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
@@ -28,8 +30,10 @@ import javax.inject.Inject
 class ProfileTeamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val teamRepository: TeamService,
-    private val sessionManager: SessionManager
-) : ViewModel() {
+    private val sessionManager: SessionManager,
+    private val networkObserver: NetworkConnectivityObserver,
+    private val globalEventBus: GlobalEventBus
+) : BaseViewModel(networkObserver = networkObserver) {
     /**
      * LiveData que contém os dados da equipa ([ProfileTeamDto]) quando carregados com sucesso.
      * A UI observa esta variável para preencher os campos do perfil.
@@ -44,29 +48,74 @@ class ProfileTeamViewModel @Inject constructor(
     private var teamId: String? = savedStateHandle["teamId"]
 
     /**
-     * StateFlow que gere os estados visuais da UI:
-     * - `isLoading`: Se a app está à espera da resposta da API.
-     * - `errorMessage`: Se ocorreu algum erro (Rede ou HTTP) para mostrar ao utilizador.
+     * Estado interno mutável do Role do utilizador.
      */
-    private val _uiState: MutableStateFlow<UiState> = MutableStateFlow(UiState(isLoading = true))
-    val uiState: StateFlow<UiState> = _uiState
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.MEMBER_TEAM)
+
+    /**
+     * Fluxo público imutável que indica o nível de permissão do utilizador na equipa.
+     *
+     * A UI deve observar este estado para decidir quais cartões mostrar:
+     * - [UserRole.ADMIN_TEAM]: Mostra tudo (Agendar, Gerir).
+     * - [UserRole.MEMBER_TEAM]: Mostra apenas visualização (Calendário, Lista).
+     *
+     * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
+     */
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
 
     init {
-        val teamIdSessionManager = sessionManager.getUserProfile()?.effectiveTeamId
+        val profile = sessionManager.getUserProfile()
+        val teamIdSessionManager = profile?.effectiveTeamId
 
         if (teamId.isNullOrBlank() && !teamIdSessionManager.isNullOrBlank()) {
             teamId = teamIdSessionManager
         }
 
-        if (!teamId.isNullOrBlank()) {
-            loadTeamProfile()
+        roleState.value = profile?.role ?: UserRole.MEMBER_TEAM
+
+        loadTeamProfile()
+    }
+
+    fun updateTeam(onSucess: () -> Unit) {
+        if (sessionManager.getUserProfile()?.role != UserRole.ADMIN_TEAM) {
+            updateToast(R.string.toast_admin_only_edit)
+            return
+        }
+
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_edit_team,
+        )
+    }
+
+    fun deleteTeam(onSucess: () -> Unit) {
+        val profile = sessionManager.getUserProfile()
+        if (profile?.role != UserRole.ADMIN_TEAM) {
+            updateToast(R.string.toast_admin_only_delete)
+            return
+        }
+
+        val teamIdFinal: String?
+        if (teamId != null) {
+            teamIdFinal = teamId
+        } else if (profile.effectiveTeamId.isNotEmpty()) {
+            teamIdFinal = profile.effectiveTeamId
         } else {
-            _uiState.update {
-                it.copy(
-                    isLoading = false,
-                    errorMessage = "ID da equipa não encontrado."
-                )
-            }
+            updateToast(R.string.toast_admin_only_delete)
+            return
+        }
+
+        launchDataLoad {
+            teamRepository.deleteTeam(teamId = teamIdFinal!!)
+
+            //Atualiza a role do admin mas preciso de atualizar de todos os membros.
+            sessionManager.updateTeamIdUser(teamId = null)
+
+            //Emite o evento para remover os players todos da equipa
+            globalEventBus.emitEvent(AppEvent.UpdateHomePage(message = "Equipa eliminada com sucesso!"))
+
+            //onSucess()
         }
     }
 
@@ -90,22 +139,15 @@ class ProfileTeamViewModel @Inject constructor(
      */
     private fun loadTeamProfile() {
         val idToLoad = teamId
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            try {
-                if (!idToLoad.isNullOrBlank()) {
-                    val profile = teamRepository.getTeamProfile(teamId = idToLoad)
 
-                    infoTeam.value = profile
-                    _uiState.update { it.copy(isLoading = false) }
-                } else {
-                    _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Sem conexão: ${e.localizedMessage}")
-                }
+        launchDataLoad {
+            if (idToLoad.isNullOrBlank()) {
+                return@launchDataLoad
             }
+
+            val profile = teamRepository.getTeamProfile(teamId = idToLoad)
+
+            infoTeam.value = profile
         }
     }
 }

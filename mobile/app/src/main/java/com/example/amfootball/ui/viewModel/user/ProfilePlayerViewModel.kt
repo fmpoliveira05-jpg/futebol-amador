@@ -3,10 +3,10 @@ package com.example.amfootball.ui.viewModel.user
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.services.PlayerService
+import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import com.example.amfootball.data.remote.services.PlayerService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,7 +30,7 @@ import javax.inject.Inject
 class ProfilePlayerViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val repository: PlayerService,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     /**
@@ -64,11 +64,7 @@ class ProfilePlayerViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
             } else {
                 val myId = sessionManager.fetchUserId()
-                if (myId != null) {
-                    loadPlayerProfile(myId)
-                } else {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Sessão inválida") }
-                }
+                loadPlayerProfile(myId)
             }
         }
     }
@@ -76,7 +72,7 @@ class ProfilePlayerViewModel @Inject constructor(
     fun retry() {
         val id = playerId ?: sessionManager.fetchUserId()
 
-        if (id != null) {
+        if (id.isBlank()) {
             loadPlayerProfile(playerId = id)
         } else {
             _uiState.update {

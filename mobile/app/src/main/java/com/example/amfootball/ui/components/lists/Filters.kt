@@ -6,14 +6,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.enums.match.TypeMatch
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.enums.match.TypeMatch
 import com.example.amfootball.ui.components.inputFields.DatePickerDocked
 import com.example.amfootball.ui.components.inputFields.LabelSelectBox
 import com.example.amfootball.ui.components.inputFields.LabelTextField
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
-import com.example.amfootball.utils.UserConst
 
 /**
  * Seletor de filtro para a localização do jogo (Casa, Fora ou Ambos).

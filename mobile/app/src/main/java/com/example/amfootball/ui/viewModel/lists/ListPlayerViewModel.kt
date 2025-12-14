@@ -1,52 +1,90 @@
 package com.example.amfootball.ui.viewModel.lists
 
-import androidx.navigation.NavHostController
+import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.player.InfoPlayerDto
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterPlayersErrors
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.PlayerConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.filters.FilterListPlayer
 import com.example.amfootball.data.local.SessionManager
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.data.services.PlayerService
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
+import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterPlayersErrors
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.ListsSizesConst
-import com.example.amfootball.utils.PlayerConst
-import com.example.amfootball.utils.UserConst
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
-//TODO: Falta a parte para este viewModel permiteit com que a página deia para a lista geral e para o de mandar convites de adesão
 /**
  * ViewModel responsável pela lógica de negócio do ecrã de Listagem de Jogadores.
  *
  * Esta classe herda de [ListsViewModels] para obter automaticamente a gestão de lista (paginação,
- * cache, estado de loading), focando-se exclusivamente nas regras específicas de jogadores:
- * - Gestão de Filtros (Nome, Cidade, Idade, Posição, Altura).
- * - Validação de dados do formulário de pesquisa.
- * - Comunicação com o [PlayerplayerRepository].
- * - Navegação para detalhes do jogador.
+ * cache, estado de loading), focando-se exclusivamente nas regras específicas de jogadores.
  *
- * @property playerRepository Repositório para acesso aos dados dos jogadores via API.
+ * **Modo de Operação ([ListPlayerMode]):** O ecrã pode operar em diferentes modos, definidos por um argumento de navegação:
+ * 1. [ListPlayerMode.PLAYER_LIST] (Modo Geral): Exibe todos os jogadores.
+ * 2. [ListPlayerMode.PLAYER_WITHOU_TEAM] (Modo Recrutamento): Exibe apenas jogadores sem equipa,
+ * permitindo que o Admin da equipa logada envie pedidos de adesão.
+ *
+ * @property savedStateHandle Fornece acesso ao estado da navegação, usado para obter o [ListPlayerMode].
+ * @property networkObserver Observador de conectividade de rede para lidar com o modo offline.
+ * @property playerRepository Repositório para acesso aos dados dos jogadores e envio de pedidos de adesão via API.
+ * @property sessionManager Gestor da sessão do utilizador logado para obter [UserRole] e `teamId`.
  */
 @HiltViewModel
 class ListPlayerViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
     private val networkObserver: NetworkConnectivityObserver,
     private val playerRepository: PlayerService,
-    private val sessionManager: SessionManager?
+    private val sessionManager: SessionManager?,
 ) : ListsViewModels<InfoPlayerDto>(networkObserver = networkObserver) {
+    /**
+     * ID da equipa do utilizador logado, usado para filtrar a lista e enviar convites.
+     * É preenchido no bloco `init` via [sessionManager].
+     */
+    private val teamId: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
+     * Estado interno mutável do Role do utilizador.
+     */
+    private val roleState: MutableStateFlow<UserRole> =
+        MutableStateFlow(UserRole.PLAYER_WITHOUT_TEAM)
+
+    /**
+     * Fluxo público imutável que indica o nível de permissão do utilizador.
+     *
+     * A UI deve observar este estado para decidir quais ações mostrar:
+     * - [UserRole.ADMIN_TEAM]: Permite enviar pedidos de adesão (dependendo do [mode]).
+     * - Outros: Apenas visualização.
+     */
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
+    /**
+     * Estado interno mutável do ID do utilizador logado.
+     */
+    private val userIdState: MutableStateFlow<String> = MutableStateFlow("")
+
+    /**
+     * Fluxo público imutável que representa o ID do utilizador logado.
+     */
+    val userId: StateFlow<String> = userIdState.asStateFlow()
+
     /**
      * Estado atual dos filtros aplicados pelo utilizador.
      * Observado pela UI para manter os campos de texto e seletores sincronizados.
      */
     private val filterState: MutableStateFlow<FilterListPlayer> =
         MutableStateFlow(FilterListPlayer())
-    val uiFilters: StateFlow<FilterListPlayer> = filterState
+    val uiFilters: StateFlow<FilterListPlayer> = filterState.asStateFlow()
 
     /**
      * Estado dos erros de validação dos filtros.
@@ -54,7 +92,7 @@ class ListPlayerViewModel @Inject constructor(
      */
     private val filterErrorState: MutableStateFlow<FilterPlayersErrors> =
         MutableStateFlow(FilterPlayersErrors())
-    val filterError: StateFlow<FilterPlayersErrors> = filterErrorState
+    val filterError: StateFlow<FilterPlayersErrors> = filterErrorState.asStateFlow()
 
     /**
      * Lista de posições disponíveis para preencher o Dropdown de filtro.
@@ -63,47 +101,75 @@ class ListPlayerViewModel @Inject constructor(
     private val listPositions = MutableStateFlow(
         listOf(null, Position.FORWARD, Position.MIDFIELDER, Position.DEFENDER, Position.GOALKEEPER)
     )
-    val uiListPositions: StateFlow<List<Position?>> = listPositions
+    val uiListPositions: StateFlow<List<Position?>> = listPositions.asStateFlow()
+
+    private val modeStr = savedStateHandle.get<String>(Arguments.LIST_PLAYER_MODE)
+
+    /**
+     * O modo de operação da página. Define o tipo de lista a ser carregada (Geral vs. Recrutamento).
+     * Valor por defeito: [ListPlayerMode.PLAYER_LIST].
+     */
+    val mode: ListPlayerMode = try {
+        if (modeStr != null) {
+            ListPlayerMode.valueOf(modeStr)
+        } else {
+            ListPlayerMode.PLAYER_LIST
+        }
+    } catch (e: Exception) {
+        ListPlayerMode.PLAYER_LIST
+    }
+
+    /**
+     * Conjunto de IDs de jogadores para os quais o Admin já enviou um pedido de adesão
+     * (durante a sessão atual).
+     * Usado pela UI para desativar o botão de convite nesses jogadores.
+     */
+    private val _sentRequestIds = MutableStateFlow<Set<String>>(emptySet())
+    val sentRequestIds = _sentRequestIds.asStateFlow()
 
     init {
+        val profile = sessionManager?.getUserProfile()
+        teamId.value = profile?.effectiveTeamId ?: ""
+        roleState.value = profile?.role ?: UserRole.PLAYER_WITHOUT_TEAM
+        userIdState.value = profile?.loginResponseDto?.localId ?: ""
+
         loadingListPlayer()
     }
 
     // --- Métodos de Atualização de Filtros (Data Binding) ---
+    /** Atualiza o filtro de Nome. */
     fun onNameChange(name: String) {
         filterState.value = filterState.value.copy(name = name)
     }
 
+    /** Atualiza o filtro de Cidade. */
     fun onCityChange(city: String) {
         filterState.value = filterState.value.copy(city = city)
     }
 
+    /** Atualiza o filtro de Idade Mínima. */
     fun onMinAgeChange(minAge: Int?) {
         filterState.value = filterState.value.copy(minAge = minAge)
     }
 
+    /** Atualiza o filtro de Idade Máxima. */
     fun onMaxAgeChange(maxAge: Int?) {
         filterState.value = filterState.value.copy(maxAge = maxAge)
     }
 
+    /** Atualiza o filtro de Posição. */
     fun onPositionChange(position: Position?) {
         filterState.value = filterState.value.copy(position = position)
     }
 
+    /** Atualiza o filtro de Altura Mínima. */
     fun onMinSizeChange(minSize: Int?) {
         filterState.value = filterState.value.copy(minSize = minSize)
     }
 
+    /** Atualiza o filtro de Altura Máxima. */
     fun onMaxSizeChange(maxSize: Int?) {
         filterState.value = filterState.value.copy(maxSize = maxSize)
-    }
-
-    /**
-     * Solicita o carregamento de mais itens para a lista (Paginação).
-     * Chama o método [loadMoreItems] da classe pai [ListsViewModels].
-     */
-    fun loadMorePlayers() {
-        inicialSizeList.value = inicialSizeList.value.plus(ListsSizesConst.INCREMENT_SIZE)
     }
 
     /**
@@ -131,11 +197,11 @@ class ListPlayerViewModel @Inject constructor(
     /**
      * Limpa todos os filtros e restaura a lista original.
      *
-     * - Restaura o estado visual dos filtros para vazio.
+     * - Restaura o estado visual dos filtros para o padrão.
      * - Limpa erros de validação.
      * - Reinicia a paginação.
-     * - Se houver cache ([originalList]), restaura-a instantaneamente sem chamar a API.
-     * - Se estiver online, pode optar por recarregar dados frescos.
+     * - Se houver cache ([originalList]) e estiver Offline, restaura-a instantaneamente.
+     * - Se estiver online, recarrega a lista da API para garantir dados frescos.
      */
     fun cleanFilters() {
         filterState.value = FilterListPlayer()
@@ -150,36 +216,51 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
-     * Navega para o perfil detalhado do jogador selecionado.
+     * Prepara a navegação para o perfil detalhado do jogador.
+     *
+     * Garante que o utilizador está online antes de permitir a navegação (pois o perfil pode requerer dados em tempo real).
+     * @param onSucess Callback (função lambda) para executar a navegação se o utilizador estiver online.
      */
-    fun showMore(idPlayer: String, navHostController: NavHostController) {
-        navHostController.navigate("${Routes.UserRoutes.PROFILE.route}/${idPlayer}") {
-            launchSingleTop = true
-        }
+    fun showMore(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_show_data_player
+        )
     }
 
-    //TODO: Falta validar se o gajo é um admin, aqui e na lista
     /**
      * Envia um pedido de adesão (convite) para um jogador se juntar à equipa do utilizador.
+     *
+     * Regras de Negócio:
+     * 1. Requer um utilizador autenticado.
+     * 2. Requer que o utilizador logado seja [UserRole.ADMIN_TEAM] e tenha um `teamId` válido.
+     *
      * @param idPlayer O ID do jogador a convidar.
      */
     fun sendMembershipRequest(idPlayer: String) {
-        if (sessionManager == null) {
-            return
-        }
-        val dataUser = sessionManager.getUserProfile()
+        val dataUser = sessionManager?.getUserProfile()
 
         if (dataUser == null) {
+            updateToast(message = R.string.toast_autenticate_people)
             return
         }
-        val teamId = dataUser.effectiveTeamId
 
-        if (teamId.isEmpty()) {
+        if (teamId.value.isEmpty() || roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_send_membership_request)
             return
         }
 
         launchDataLoad {
-            playerRepository.sendMemberShipRequestToPlayer(teamId = teamId, idPlayer = idPlayer)
+            playerRepository.sendMemberShipRequestToPlayer(
+                teamId = teamId.value,
+                idPlayer = idPlayer
+            )
+
+            _sentRequestIds.update { currentSet ->
+                currentSet + idPlayer
+            }
+
+            updateToast(message = R.string.toast_success_send_membershipRequest)
         }
     }
 
@@ -191,18 +272,22 @@ class ListPlayerViewModel @Inject constructor(
     }
 
     /**
-     * Carrega a lista de jogadores da API.
+     * Carrega a lista de jogadores da API, aplicando os filtros e o modo de operação ([mode]).
      *
      * Utiliza [launchDataLoad] do BaseViewModel para gerir automaticamente:
      * - Verificação de internet.
      * - Estado de Loading (`uiState.isLoading`).
      * - Tratamento de exceções (Try-Catch).
      *
-     * Se os filtros estiverem vazios após o carregamento, atualiza a cache [originalList].
+     * Se os filtros estiverem vazios após o carregamento, a lista obtida é guardada na cache [originalList].
      */
     private fun loadingListPlayer() {
         launchDataLoad {
-            val players = playerRepository.getListPlayer(filterState.value)
+            val players = playerRepository.getListPlayer(
+                teamId = teamId.value,
+                mode = mode,
+                filter = filterState.value
+            )
 
             listState.value = players
             if (filterState.value == FilterListPlayer()) {
@@ -211,10 +296,13 @@ class ListPlayerViewModel @Inject constructor(
         }
     }
 
-    //TODO: Melhorar filtro da cidade
     /**
      * Filtra a lista de jogadores localmente (Modo Offline).
-     * Aplica lógica "AND" para todos os campos (Nome E Cidade E Idade...).
+     * Aplica lógica "AND" para todos os campos (Nome E Cidade E Idade...) nos dados em cache.
+     *
+     * @param originalList A lista completa de jogadores em cache.
+     * @param filter Os critérios de filtro atuais.
+     * @return Uma lista filtrada de [InfoPlayerDto].
      */
     private fun filterOffline(
         originalList: List<InfoPlayerDto>,
@@ -240,10 +328,10 @@ class ListPlayerViewModel @Inject constructor(
      *
      * Verifica:
      * - Tamanho máximo de strings (Nome, Cidade).
-     * - Intervalos lógicos (Idade Mínima <= Idade Máxima).
-     * - Valores dentro dos limites permitidos (ex: Idade entre 16 e 100).
+     * - Intervalos lógicos: Mínimo <= Máximo (Idade e Altura).
+     * - Valores dentro dos limites globais ([UserConst], [PlayerConst]).
      *
-     * @return `true` se todos os dados forem válidos, `false` caso contrário (atualizando [uiErrors]).
+     * @return `true` se todos os dados forem válidos, `false` caso contrário (atualizando [filterError]).
      */
     private fun validateForm(): Boolean {
         val name = filterState.value.name

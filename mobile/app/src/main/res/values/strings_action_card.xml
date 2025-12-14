@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_card_team">My Team</string>
+    <string name="action_card_team_description">Your team\'s main page</string>
+
     <string name="action_card_casual">Casual</string>
     <string name="action_card_casual_description">Schedule a casual match</string>
 
@@ -11,4 +14,7 @@
 
     <string name="action_card_members">Members</string>
     <string name="action_card_members_description">Team member list</string>
+
+    <string name="action_card_leave_team">Leave Team</string>
+    <string name="action_card_leave_team_description">Button that allows you to leave the team</string>
 </resources>

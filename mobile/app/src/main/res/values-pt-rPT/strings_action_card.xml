@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="action_card_team">Minha Equipa</string>
+    <string name="action_card_team_description">Página principal da sua equipa</string>
+
     <string name="action_card_casual">Casual</string>
     <string name="action_card_casual_description">Agendar uma partida casual</string>
 
@@ -11,4 +14,7 @@
 
     <string name="action_card_members">Membros</string>
     <string name="action_card_members_description">Lista de membros da equipa</string>
+
+    <string name="action_card_leave_team">Sair da Equipa</string>
+    <string name="action_card_leave_team_description">Botão que lhe permite abandonar a equipa</string>
 </resources>

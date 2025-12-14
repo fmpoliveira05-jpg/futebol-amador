@@ -43,6 +43,8 @@ fun NumberTextField(
     onValueChange: (Int?) -> Unit,
     min: Int = 0,
     max: Int = Int.MAX_VALUE,
+    isError: Boolean,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier
 ) {
     LabelTextField(
@@ -50,6 +52,8 @@ fun NumberTextField(
         value = value?.toString() ?: "",
         minLenght = min,
         maxLenght = max,
+        isError = isError,
+        errorMessage = errorMessage,
         onValueChange = { onValueChange(it.toIntOrNull()) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         modifier = modifier

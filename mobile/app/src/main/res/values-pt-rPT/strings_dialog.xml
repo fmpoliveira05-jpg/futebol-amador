@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_title_leave_team">Sair da Equipa</string>
+    <string name="dialog_message_leave_team">Tem a certeza que deseja abandonar a equipa? Esta ação não pode ser desfeita.</string>
+
+    <string name="dialog_title_delete_team">Apagar Equipa</string>
+    <string name="dialog_msg_delete_team">Tem a certeza que deseja apagar esta equipa permanentemente? Esta ação é irreversível.</string>
+
+    <string name="dialog_confirm">Confirmar</string>
+    <string name="dialog_cancel">Cancelar</string>
+</resources>

@@ -1,6 +1,5 @@
 package com.example.amfootball.ui.screens.homePages
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,37 +16,41 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.SportsEsports
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.UserRole
-import com.example.amfootball.data.mocks.UiStateMock
-import com.example.amfootball.data.mocks.homePages.HomePageTeamMock
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.actions.homePageActions.HomePageTeamActions
 import com.example.amfootball.ui.components.LoadingPage
-import com.example.amfootball.ui.components.cards.ActionCard
+import com.example.amfootball.ui.components.actionCards.ActionCard
+import com.example.amfootball.ui.components.actionCards.CompactActionCard
+import com.example.amfootball.ui.components.diaglos.pages.LeaveTeamAlertDialog
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.components.pages.homePage.ActionCardLeaveTeam
+import com.example.amfootball.ui.components.pages.homePage.RecentFormSection
+import com.example.amfootball.ui.components.pages.homePage.UpcomingMatchesSection
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.HomePageTeamMock
 import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
 
 /**
@@ -57,12 +59,12 @@ import com.example.amfootball.ui.viewModel.homePages.TeamHomePageViewModel
  * Este é um componente "Stateful" (com estado) que atua como o ponto de entrada para a gestão de uma equipa específica.
  *
  * Responsabilidades:
- * 1. Coletar o estado do ViewModel (Dados da equipa, Permissões de Admin, UI State).
+ * 1. Coletar o estado do ViewModel.
  * 2. Gerir feedbacks visuais (Toasts).
- * 3. Orquestrar a navegação para as sub-funcionalidades da equipa através de callbacks.
+ * 3. Orquestrar a navegação através de [HomePageTeamActions].
  *
  * @param globalNavController Controlador de navegação global da aplicação.
- * @param viewModel ViewModel injetado via Hilt contendo a lógica de negócio e estado da equipa.
+ * @param viewModel ViewModel injetado via Hilt.
  */
 @Composable
 fun HomePageTeamScreen(
@@ -74,16 +76,7 @@ fun HomePageTeamScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
-    ToastHandler(
-        toastMessage = uiState.toastMessage,
-        onToastShown = viewModel::onToastShown
-    )
-
-    HomePageTeam(
-        team = team,
-        uiState = uiState,
-        isOnline = isOnline,
-        role = role,
+    val homePageTeamActions = HomePageTeamActions(
         onNavigateCasualMatch = {
             viewModel.onNavigateCasualMatch(
                 onSucess = {
@@ -105,7 +98,7 @@ fun HomePageTeamScreen(
         onNavigateCalendar = {
             viewModel.onNavigateCalendar(
                 onSucess = {
-                    globalNavController.navigate("${Routes.TeamRoutes.CALENDAR.route}/${team.id}") {
+                    globalNavController.navigate(Routes.TeamRoutes.CALENDAR.route) {
                         launchSingleTop = true
                     }
                 }
@@ -120,36 +113,50 @@ fun HomePageTeamScreen(
                 }
             )
         },
+        onLeaveTeam = {
+            viewModel.onLeaveTeam(
+                onSucess = {
+                    globalNavController.navigate(Routes.GeralRoutes.HOMEPAGE.route) {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
+    )
+
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
+    )
+
+    HomePageTeam(
+        team = team,
+        uiState = uiState,
+        isOnline = isOnline,
+        role = role,
+        homePageTeamActions = homePageTeamActions
     )
 }
 
 /**
- * Conteúdo visual da Home Page da Equipa (Stateless).
+ * Conteúdo visual da Home Page da Equipa (Componente Stateless).
  *
- * Responsável pela estrutura visual base, incluindo:
- * - Gestão do estado de carregamento ([LoadingPage]).
- * - Exibição de banner de erro de conexão ([OfflineBanner]).
- * - Renderização do drawer principal com o conteúdo.
+ * Envolve o conteúdo principal num [LoadingPage] para gerir estados de carregamento e erro,
+ * e exibe um [OfflineBanner] caso a conectividade seja perdida.
  *
- * @param team Objeto com os dados da equipa (Nome, Logo, ID, etc.).
- * @param uiState Estado atual da UI (Loading, Erros, Mensagens).
- * @param isOnline Booleano indicando se o dispositivo tem acesso à internet.
- * @param role O papel do utilizador ([UserRole]) que determina a visibilidade de botões de gestão.
- * @param onNavigateCasualMatch Callback executada ao clicar no botão "Casual".
- * @param onNavigateRankedMatch Callback executada ao clicar no botão "Rankeada".
- * @param onNavigateCalendar Callback executada ao clicar no botão "Calendário".
- * @param onNavigateMembers Callback executada ao clicar no botão "Membros".
+ * @param team Objeto [HomePageTeamDto] contendo os dados da equipa, histórico e próximos jogos.
+ * @param uiState Estado atual da UI (loading, erro, mensagens).
+ * @param isOnline Booleano indicando se o dispositivo tem conectividade de rede.
+ * @param role O papel do utilizador na equipa ([UserRole]), que determina a visibilidade de certas ações.
+ * @param homePageTeamActions Objeto contendo os callbacks de ação e navegação.
  */
 @Composable
 fun HomePageTeam(
-    team: TeamDto,
+    team: HomePageTeamDto,
     uiState: UiState,
     isOnline: Boolean,
     role: UserRole,
-    onNavigateCasualMatch: () -> Unit,
-    onNavigateRankedMatch: () -> Unit,
-    onNavigateCalendar: () -> Unit,
-    onNavigateMembers: () -> Unit,
+    homePageTeamActions: HomePageTeamActions
 ) {
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -162,56 +169,73 @@ fun HomePageTeam(
             )
 
             TeamHomePageDrawer(
-                team = team,
+                teamData = team,
                 role = role,
-                onNavigateCasualMatch = onNavigateCasualMatch,
-                onNavigateRankedMatch = onNavigateRankedMatch,
-                onNavigateCalendar = onNavigateCalendar,
-                onNavigateMembers = onNavigateMembers
+                homePageTeamActions = homePageTeamActions
             )
         }
     )
 }
 
 /**
- * Componente que define a estrutura de scroll e layout da página.
+ * Componente estrutural que define o layout da página com scroll.
  *
- * Organiza o ecrã em:
+ * **Layout Refatorado:**
+ * Utiliza [Arrangement.spacedBy] no Column principal para aplicar um espaçamento base de 16dp
+ * entre todos os elementos, eliminando a necessidade de múltiplos Spacers manuais.
+ *
+ * Estrutura:
  * 1. Cabeçalho ([HeaderHomePageTeam]).
- * 2. Conteúdo Principal ([HomePageTeamContent]).
+ * 2. Forma Recente ([RecentFormSection]).
+ * 3. Próximos Jogos ([UpcomingMatchesSection]).
+ * 4. Conteúdo de Gestão ([HomePageTeamContent]) - (Com espaçamento extra para separação visual).
+ * 5. Zona de Saída ([ActionCardLeaveTeam]) - (Com espaçamento extra para evitar cliques acidentais).
  *
- * @param team Objeto com os dados da equipa para exibir no cabeçalho.
- * @param role Papel do utilizador para controlo de acesso visual.
- * @param onNavigateCasualMatch Ação para navegação de jogo casual.
- * @param onNavigateRankedMatch Ação para navegação de jogo rankeado.
- * @param onNavigateCalendar Ação para navegação do calendário.
- * @param onNavigateMembers Ação para navegação da lista de membros.
+ * @param teamData Dados completos da equipa.
+ * @param role Papel do utilizador.
+ * @param homePageTeamActions Callbacks de navegação.
  */
 @Composable
 private fun TeamHomePageDrawer(
-    team: TeamDto,
+    teamData: HomePageTeamDto,
     role: UserRole,
-    onNavigateCasualMatch: () -> Unit,
-    onNavigateRankedMatch: () -> Unit,
-    onNavigateCalendar: () -> Unit,
-    onNavigateMembers: () -> Unit
+    homePageTeamActions: HomePageTeamActions
 ) {
+    var showLeaveDialog by remember { mutableStateOf(false) }
+
+    if (showLeaveDialog) {
+        LeaveTeamAlertDialog(
+            onLeaveTeam = homePageTeamActions.onLeaveTeam,
+            onDismiss = { showLeaveDialog = false }
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
             .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        HeaderHomePageTeam(team = team)
+        HeaderHomePageTeam(team = teamData.team)
+
+        RecentFormSection(history = teamData.vitorySequenceTeam)
+
+        UpcomingMatchesSection(matches = teamData.nextsMatch)
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         HomePageTeamContent(
             role = role,
-            onNavigateCasualMatch = onNavigateCasualMatch,
-            onNavigateRankedMatch = onNavigateRankedMatch,
-            onNavigateCalendar = onNavigateCalendar,
-            onNavigateMembers = onNavigateMembers
+            homePageTeamActions = homePageTeamActions
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ActionCardLeaveTeam(onClick = { showLeaveDialog = true })
+
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -222,18 +246,12 @@ private fun TeamHomePageDrawer(
  * utilizando `verticalArrangement`.
  *
  * @param role Se for [UserRole.ADMIN_TEAM], exibe a secção "Match Center".
- * @param onNavigateCasualMatch Callback para criar partida casual.
- * @param onNavigateRankedMatch Callback para criar partida rankeada.
- * @param onNavigateCalendar Callback para ver calendário.
- * @param onNavigateMembers Callback para ver lista de membros.
+ * @param homePageTeamActions Ações de navegação a serem propagadas.
  */
 @Composable
 private fun HomePageTeamContent(
     role: UserRole,
-    onNavigateCasualMatch: () -> Unit,
-    onNavigateRankedMatch: () -> Unit,
-    onNavigateCalendar: () -> Unit,
-    onNavigateMembers: () -> Unit
+    homePageTeamActions: HomePageTeamActions
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -242,14 +260,12 @@ private fun HomePageTeamContent(
 
         if (role == UserRole.ADMIN_TEAM) {
             HomePageMatchCenter(
-                onNavigateCasualMatch = onNavigateCasualMatch,
-                onNavigateRankedMatch = onNavigateRankedMatch
+                homePageTeamActions = homePageTeamActions
             )
         }
 
         HomePageManagerTeam(
-            onNavigateMembers = onNavigateMembers,
-            onNavigateCalendar = onNavigateCalendar
+            homePageTeamActions = homePageTeamActions
         )
     }
 }
@@ -294,14 +310,10 @@ private fun HeaderHomePageTeam(team: TeamDto) {
  * Secção "Match Center": Contém os botões para agendar partidas.
  * Utiliza cartões compactos ([CompactActionCard]) dispostos horizontalmente.
  *
- * @param onNavigateCasualMatch Ação ao clicar no botão "Casual".
- * @param onNavigateRankedMatch Ação ao clicar no botão "Rankeada".
+ * @param homePageTeamActions Objeto contendo os callbacks de navegação.
  */
 @Composable
-private fun HomePageMatchCenter(
-    onNavigateCasualMatch: () -> Unit,
-    onNavigateRankedMatch: () -> Unit
-) {
+private fun HomePageMatchCenter(homePageTeamActions: HomePageTeamActions) {
     Text(
         text = stringResource(id = R.string.schedule_match),
         style = MaterialTheme.typography.titleMedium,
@@ -315,7 +327,7 @@ private fun HomePageMatchCenter(
         CompactActionCard(
             title = stringResource(id = R.string.action_card_casual),
             icon = Icons.Default.SportsEsports,
-            onClick = onNavigateCasualMatch,
+            onClick = homePageTeamActions.onNavigateCasualMatch,
             contentDescription = stringResource(id = R.string.action_card_casual_description),
             modifier = Modifier.weight(1f)
         )
@@ -323,7 +335,7 @@ private fun HomePageMatchCenter(
         CompactActionCard(
             title = stringResource(id = R.string.action_card_ranked),
             icon = Icons.Default.EmojiEvents,
-            onClick = onNavigateRankedMatch,
+            onClick = homePageTeamActions.onNavigateRankedMatch,
             contentDescription = stringResource(id = R.string.action_card_ranked_description),
             modifier = Modifier.weight(1f)
         )
@@ -334,14 +346,10 @@ private fun HomePageMatchCenter(
  * Secção "Gestão de Equipa": Contém botões para Calendário e Membros.
  * Utiliza cartões de ação padrão ([ActionCard]) dispostos verticalmente.
  *
- * @param onNavigateMembers Ação ao clicar no botão "Membros".
- * @param onNavigateCalendar Ação ao clicar no botão "Calendário".
+ * @param homePageTeamActions Objeto contendo os callbacks de navegação.
  */
 @Composable
-private fun HomePageManagerTeam(
-    onNavigateMembers: () -> Unit,
-    onNavigateCalendar: () -> Unit
-) {
+private fun HomePageManagerTeam(homePageTeamActions: HomePageTeamActions) {
     Text(
         text = stringResource(id = R.string.manager_team),
         style = MaterialTheme.typography.titleMedium,
@@ -356,7 +364,7 @@ private fun HomePageManagerTeam(
             title = stringResource(id = R.string.action_card_calendar),
             subtitle = stringResource(id = R.string.action_card_calendar_description),
             icon = Icons.Default.CalendarMonth,
-            onClick = onNavigateCalendar,
+            onClick = homePageTeamActions.onNavigateCalendar,
             textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_action_card_calendar))
         )
 
@@ -364,125 +372,67 @@ private fun HomePageManagerTeam(
             title = stringResource(id = R.string.action_card_members),
             subtitle = stringResource(id = R.string.action_card_members_description),
             icon = Icons.Default.Groups,
-            onClick = onNavigateMembers,
+            onClick = homePageTeamActions.onNavigateMembers,
         )
     }
 }
 
-/**
- * Cartão de ação com layout compacto (Ícone no topo, Texto em baixo).
- * Ideal para grelhas ou linhas com múltiplos botões onde o espaço horizontal é limitado.
- *
- * @param title O título a exibir no cartão.
- * @param icon O ícone vetorial ([ImageVector]) a exibir.
- * @param onClick A função lambda a executar quando o cartão é clicado.
- * @param contentDescription Texto descritivo do ícone para acessibilidade.
- * @param modifier Modificador para aplicar estilos (ex: peso na linha).
- */
+@Preview(
+    name = "1. Admin Full - PT",
+    group = "Admin Full",
+    locale = "pt-rPT",
+    showBackground = true
+)
+@Preview(name = "1. Admin Full - EN", group = "Admin Full", locale = "en", showBackground = true)
 @Composable
-private fun CompactActionCard(
-    title: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    contentDescription: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.height(100.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(32.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
-}
-
-@Preview(
-    name = "1. Admin - English",
-    group = "Admin View",
-    showBackground = true,
-    locale = "en"
-)
-@Preview(
-    name = "1. Admin - Português (PT)",
-    group = "Admin View",
-    showBackground = true,
-    locale = "pt-rPT"
-)
-@Preview(
-    name = "1. Admin - Dark Mode",
-    group = "Admin View",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
-@Composable
-fun PreviewTeamHomePageAdmin() {
+fun PreviewAdminFullData() {
     MaterialTheme {
         HomePageTeam(
-            team = HomePageTeamMock.mockTeam,
-            uiState = UiStateMock.mockUiStateContent,
+            team = HomePageTeamMock.dataWithContent,
+            uiState = UiState(),
             isOnline = true,
             role = UserRole.ADMIN_TEAM,
-            onNavigateCasualMatch = {},
-            onNavigateRankedMatch = {},
-            onNavigateMembers = {},
-            onNavigateCalendar = {}
+            homePageTeamActions = HomePageTeamMock.actions
         )
     }
 }
 
 @Preview(
-    name = "2. Member - English",
-    group = "Member View",
-    showBackground = true,
-    locale = "en"
+    name = "2. Member Full - PT",
+    group = "Member Full",
+    locale = "pt-rPT",
+    showBackground = true
 )
-@Preview(
-    name = "2. Member - Português (PT)",
-    group = "Member View",
-    showBackground = true,
-    locale = "pt-rPT"
-)
-@Preview(
-    name = "2. Member - Dark Mode",
-    group = "Member View",
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES
-)
+@Preview(name = "2. Member Full - EN", group = "Member Full", locale = "en", showBackground = true)
 @Composable
-fun PreviewTeamHomePageMember() {
+fun PreviewMemberFullData() {
     MaterialTheme {
         HomePageTeam(
-            team = HomePageTeamMock.mockTeam,
-            uiState = UiStateMock.mockUiStateContent,
+            team = HomePageTeamMock.dataWithContent,
+            uiState = UiState(),
             isOnline = true,
             role = UserRole.MEMBER_TEAM,
-            onNavigateCasualMatch = {},
-            onNavigateRankedMatch = {},
-            onNavigateMembers = {},
-            onNavigateCalendar = {}
+            homePageTeamActions = HomePageTeamMock.actions
+        )
+    }
+}
+
+@Preview(
+    name = "3. Admin Empty - PT",
+    group = "Admin Empty",
+    locale = "pt-rPT",
+    showBackground = true
+)
+@Preview(name = "3. Admin Empty - EN", group = "Admin Empty", locale = "en", showBackground = true)
+@Composable
+fun PreviewEmptyData() {
+    MaterialTheme {
+        HomePageTeam(
+            team = HomePageTeamMock.dataEmpty,
+            uiState = UiState(),
+            isOnline = true,
+            role = UserRole.ADMIN_TEAM,
+            homePageTeamActions = HomePageTeamMock.actions
         )
     }
 }

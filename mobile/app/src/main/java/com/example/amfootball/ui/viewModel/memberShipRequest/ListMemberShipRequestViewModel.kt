@@ -1,19 +1,28 @@
 package com.example.amfootball.ui.viewModel.memberShipRequest
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.membershipRequest.MembershipRequestInfoDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.filters.FilterMemberShipRequest
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
+import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.pages.ListMembershipRequestMode
+import com.example.amfootball.domains.enums.pages.ListPlayerMode
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterMemberShipRequestError
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.UserConst
-import com.example.amfootball.utils.extensions.toLocalDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 /**
@@ -28,8 +37,16 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ListMemberShipRequestViewModel @Inject constructor(
-    private val networkObserver: NetworkConnectivityObserver
+    private val networkObserver: NetworkConnectivityObserver,
+    private val teamService: TeamService,
+    private val playerService: PlayerService,
+    private val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager
 ) : ListsViewModels<MembershipRequestInfoDto>(networkObserver = networkObserver) {
+
+    private val teamId: MutableStateFlow<String> = MutableStateFlow("")
+
+    private val playerId: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
      * Estado interno mutável contendo os critérios de filtro atuais.
@@ -39,25 +56,41 @@ class ListMemberShipRequestViewModel @Inject constructor(
     /**
      * Fluxo público de leitura dos filtros observados pela UI.
      */
-    val uiFilterState: StateFlow<FilterMemberShipRequest> = filterState
+    val uiFilterState: StateFlow<FilterMemberShipRequest> = filterState.asStateFlow()
 
     /**
      * Estado interno mutável contendo os erros de validação de filtros.
      */
-    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> = MutableStateFlow(FilterMemberShipRequestError())
+    private val filterErrorState: MutableStateFlow<FilterMemberShipRequestError> =
+        MutableStateFlow(FilterMemberShipRequestError())
 
     /**
      * Fluxo público de leitura dos erros de filtro.
      */
-    val uiFilterErrorState: StateFlow<FilterMemberShipRequestError> = filterErrorState
+    val uiFilterErrorState: StateFlow<FilterMemberShipRequestError> = filterErrorState.asStateFlow()
+
+    private val modeStr = savedStateHandle.get<String>(Arguments.LIST_MEMBERSHIP_REQUEST_MODE)
+
+    /**
+     * O modo de operação da página. Define o tipo de lista a ser carregada (Geral vs. Recrutamento).
+     * Valor por defeito: [ListPlayerMode.PLAYER_LIST].
+     */
+    val mode: ListMembershipRequestMode = try {
+        if (modeStr != null) {
+            ListMembershipRequestMode.valueOf(modeStr)
+        } else {
+            ListMembershipRequestMode.MEMBERSHIP_PLAYER
+        }
+    } catch (e: Exception) {
+        ListMembershipRequestMode.MEMBERSHIP_PLAYER
+    }
 
     //Inicializador
     init {
-        // TODO: Meter aqui para logo que ele for chamado/criado o viewModel carregar os dados da lista
-        val initialValue = MembershipRequestInfoDto.generateMemberShipRequestTeam()
+        teamId.value = sessionManager.fetchTeamId() ?: ""
+        playerId.value = sessionManager.fetchUserId() ?: ""
 
-        listState.value = initialValue
-        stopLoading()
+        loadListMemberShipRequest()
     }
 
     //Metodos
@@ -67,9 +100,7 @@ class ListMemberShipRequestViewModel @Inject constructor(
      * @param newName O novo texto para o filtro de nome. Se vazio, o valor é armazenado como `null`.
      */
     fun onSenderNameChanged(newName: String) {
-        filterState.value = filterState.value.copy(
-            senderName = newName.ifEmpty { null } //Caso esteja vazio guarda null
-        )
+        filterState.value = filterState.value.copy(senderName = newName.ifEmpty { null })
     }
 
     /**
@@ -107,106 +138,73 @@ class ListMemberShipRequestViewModel @Inject constructor(
         if (!validateFilter()) {
             return
         }
-        // TODO: Quando tiver a API, é aqui que a vai chamar:
+
+        if(isNetworkAvailable()) {
+            loadListMemberShipRequest()
+        } else {
+            listState.value = offlineFilter(originalList = originalList, filter = filterState.value)
+        }
     }
 
-
-    private fun filter() {
-        /*
-               val currentFilters = filterState.value!!
-
-        println("A aplicar filtros (sem API): $currentFilters")
-
-       val masterList = listState.value
-
-       val filteredList = masterList.filter { item ->
-           val matchesName = if (currentFilters.senderName.isNullOrBlank()) {
-               true
-           } else {
-               item.sender.name.contains(currentFilters.senderName, ignoreCase = true)
-           }
-
-           val matchesMinDate =
-               if (currentFilters.minDate == null) {
-               true
-           } else {
-               !item.dateSend.isBefore(currentFilters.minDate)
-           }
-
-           val matchesMaxDate = if (currentFilters.maxDate == null) {
-               true
-           } else {
-               !item.dateSend.isAfter(currentFilters.maxDate)
-           }
-
-           matchesName && matchesMinDate && matchesMaxDate
-       }
-       listState.value = filteredList
-       * */
-    }
-
-    //TODO: Aqui seria feito um novo pedido há API com os dados atualizados
     fun clearFilters() {
         filterState.value = FilterMemberShipRequest()
-        //listState.value = originalList
+        filterErrorState.value = FilterMemberShipRequestError()
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadListMemberShipRequest()
+        } else {
+            listState.value = originalList
+        }
     }
 
-    /**
-     * TODO: O metodo recebe por parametro o recetor, emissor e o boolean que indica
-     * TODO: Depois dependendo do valor do if ou manda o pedido à API como se fosse a team ou o pedido como se fosse o player
-     * */
     /**
      * Aceita um pedido de adesão (Join Request ou Recrutamento).
      *
      * A lógica decide qual endpoint chamar (Player ou Team) com base em [isPlayerSender].
      *
-     * @param idReceiver O ID do recetor (Equipa se Jogador for o remetente, ou vice-versa).
      * @param idRequest O ID único do pedido de adesão.
-     * @param isPlayerSender `true` se o pedido partiu de um jogador (Join Request).
-     * @param navHostController Controlador para navegação pós-ação (ex: Home).
+     * @param onSucess Callback a ser executado após a operação bem-sucedida.
      */
-    fun acceptMemberShipRequest(
-        idReceiver: String,
-        idRequest: String,
-        isPlayerSender: Boolean,
-        navHostController: NavHostController,
-    ) {
-        if (isPlayerSender) {
-            //TODO: Fazer pedido ao endpoint do Player accept da API
-        } else {
-            //TODO: Fazer pedido ao endpoint da Team accept da API
-        }
+    fun acceptMemberShipRequest(idRequest: String, idSender: String, onSucess: () -> Unit) {
+        launchDataLoad {
+            when(mode) {
+                ListMembershipRequestMode.MEMBERSHIP_PLAYER -> {
+                    playerService.acceptMemberShipRequest(playerId = playerId.value, requestId = idRequest)
+                    sessionManager.updateTeamIdUser(idSender)
 
-        navHostController.navigate(Routes.TeamRoutes.HOMEPAGE.route)
+                    onSucess()
+                }
+                ListMembershipRequestMode.MEMBERSHIP_TEAM -> {
+                    teamService.acceptMemberShipRequest(teamId = teamId.value, requestId = idRequest)
+                }
+            }
+        }
     }
 
-    /**
-     * TODO: Igual ao Accept mas para reject memberShipRequest
-     * */
     /**
      * Rejeita um pedido de adesão (Join Request ou Recrutamento).
      *
      * Remove o pedido da lista local e envia o pedido de rejeição para a API.
      *
-     * @param idReceiver O ID do recetor.
      * @param idRequest O ID único do pedido de adesão.
-     * @param isPlayerSender `true` se o pedido partiu de um jogador.
      */
-    fun rejectMemberShipRequest(idReceiver: String, idRequest: String, isPlayerSender: Boolean) {
-        if (isPlayerSender) {
-            //TODO: Fazer pedido há API, ao endpoint do player
-        } else {
-            //TODO:Fazer pedido há API, ao endpoint da team
+    fun rejectMemberShipRequest(idRequest: String) {
+        launchDataLoad {
+            when(mode) {
+                ListMembershipRequestMode.MEMBERSHIP_PLAYER -> {
+                    playerService.rejectMemberShipRequest(playerId = playerId.value, requestId = idRequest)
+                }
+                ListMembershipRequestMode.MEMBERSHIP_TEAM -> {
+                    teamService.rejectMemberShipRequest(teamId = teamId.value, requestId = idRequest)
+                }
+            }
         }
 
-        val updatedList = listState.value.filterNot { it.id == idRequest }
-
-        listState.value = updatedList
+        listState.value = listState.value.filterNot { it.id == idRequest }
+        originalList = originalList.filterNot { it.id == idRequest }
     }
 
-    /**
-     * TODO: Falta apenas nas paginas de perfil carregar os dados e de seguida enviar esse dados aqui
-     * */
     /**
      * Navega para o ecrã de perfil do remetente (Equipa ou Jogador).
      *
@@ -217,19 +215,70 @@ class ListMemberShipRequestViewModel @Inject constructor(
      * @param isPlayerSender Indica se o remetente é um jogador (para decidir a rota de destino).
      * @param navHostController Controlador de navegação.
      */
-    fun showMore(idSender: String, isPlayerSender: Boolean, navHostController: NavHostController) {
+    fun showMore(idSender: String, navHostController: NavHostController) {
         var route = Routes.UserRoutes.PROFILE.route
 
-        if (isPlayerSender) {
+        if (modeStr == ListMembershipRequestMode.MEMBERSHIP_PLAYER.name) {
             route = Routes.TeamRoutes.TEAM_PROFILE.route
         }
 
-        navHostController.navigate(route) {
+        navHostController.navigate("$route/$idSender") {
             launchSingleTop = true
         }
     }
 
     //Private Methods
+    private fun loadListMemberShipRequest() {
+        launchDataLoad {
+            when(mode) {
+                ListMembershipRequestMode.MEMBERSHIP_PLAYER -> {
+                    if(playerId.value.isEmpty()) {
+                        updateToast(R.string.toast_autenticate_people)
+                        return@launchDataLoad
+                    }
+
+                    listState.value = playerService.listMemberShipRequest(playerId = playerId.value, filter = filterState.value)
+                }
+                ListMembershipRequestMode.MEMBERSHIP_TEAM -> {
+                    if(teamId.value.isEmpty()) {
+                        updateToast(R.string.toast_autenticate_people)
+                        return@launchDataLoad
+                    }
+
+                    listState.value = teamService.getListMemberShipRequest(teamId = teamId.value, filter = filterState.value)
+                }
+            }
+
+            if(filterState.value == FilterMemberShipRequest()) {
+                originalList = listState.value
+            }
+        }
+    }
+
+    private fun offlineFilter(
+        originalList: List<MembershipRequestInfoDto>,
+        filter: FilterMemberShipRequest
+    ): List<MembershipRequestInfoDto> {
+        return originalList.filter { item ->
+            val nameSender = if (mode == ListMembershipRequestMode.MEMBERSHIP_PLAYER) {
+                item.team.name
+            } else {
+                item.player.name
+            }
+
+            val senderName = filter.senderName.isNullOrBlank()
+                    || nameSender.contains(filter.senderName, ignoreCase = true)
+
+
+            val minDate = filter.minDate == null
+                    || item.requestDate.toLocalDate() >= filter.minDate.toLocalDate()
+
+            val maxDate = filter.maxDate == null
+                    || item.requestDate.toLocalDate() <= filter.maxDate.toLocalDate()
+
+            senderName && minDate && maxDate
+        }
+    }
     /**
      * Validação síncrona dos critérios de filtro.
      *

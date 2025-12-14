@@ -2,4 +2,13 @@
 <resources>
     <string name="description_logo_team">Logo da equipa %1$s</string>
     <string name="label_fields_pitch">Campo da equipa</string>
+
+    <string name="next_games">Próximos Jogos</string>
+    <string name="no_games_scheduled">Sem jogos agendados</string>
+
+    <string name="team_form">Forma da Equipa</string>
+    <string name="no_game_realized">Sem jogos realizados</string>
+
+    <string name="game_Home">C</string>
+    <string name="game_away">F</string>
 </resources>

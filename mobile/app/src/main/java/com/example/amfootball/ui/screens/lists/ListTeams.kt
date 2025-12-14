@@ -26,14 +26,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.actions.filters.ButtonFilterActions
-import com.example.amfootball.data.actions.filters.FilterTeamActions
-import com.example.amfootball.data.actions.itemsList.ItemsListTeamAction
-import com.example.amfootball.data.dtos.rank.RankNameDto
-import com.example.amfootball.data.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FiltersListTeam
-import com.example.amfootball.data.mocks.lists.ListTeamMocks
+import com.example.amfootball.data.remote.dtos.rank.RankNameDto
+import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.domains.errors.filtersError.FilterTeamError
+import com.example.amfootball.ui.actions.filters.ButtonFilterActions
+import com.example.amfootball.ui.actions.filters.FilterTeamActions
+import com.example.amfootball.ui.actions.itemsList.ItemsListTeamAction
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.LineClearFilterButtons
 import com.example.amfootball.ui.components.buttons.ListSendMemberShipRequestButton
@@ -51,32 +55,35 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.NumMembersTeamRow
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
+import com.example.amfootball.ui.previewsMocks.ListTeamMocks
 import com.example.amfootball.ui.viewModel.lists.ListTeamViewModel
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.TeamConst
 
 /**
- * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful).
+ * Ecrã principal para a listagem de equipas de Futebol Americano (Stateful Screen).
  *
  * Este Composable atua como o contentor de estado:
- * 1. Instancia e coleta os fluxos (Flows) do [ListTeamViewModel].
- * 2. Define as ações (callbacks) que ligam a UI à lógica de negócio.
+ * 1. Instancia e coleta os fluxos ([FiltersListTeam], [ItemTeamInfoDto], [UiState]) do [ListTeamViewModel].
+ * 2. Define as ações ([FilterTeamActions], [ItemsListTeamAction]) que ligam a UI à lógica de negócio.
  * 3. Passa os dados puros para o [ListTeamContent] renderizar.
  *
  * @param navHostController Controlador de navegação para transitar entre ecrãs.
  * @param viewModel O ViewModel injetado via Hilt.
  */
-//TODO: Falta filterErros
 @Composable
 fun ListTeamScreen(
     navHostController: NavHostController,
     viewModel: ListTeamViewModel = hiltViewModel()
 ) {
     val filters by viewModel.uiFilterState.collectAsStateWithLifecycle()
+    val filtersError by viewModel.filterError.collectAsStateWithLifecycle()
     val listTeams by viewModel.uiList.collectAsStateWithLifecycle()
     val listRanks by viewModel.listRank.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val role by viewModel.role.collectAsStateWithLifecycle()
+    val sentRequests by viewModel.sentRequestIds.collectAsStateWithLifecycle()
 
     // Definição das ações de atualização dos filtros
     val filtersActions = FilterTeamActions(
@@ -97,8 +104,21 @@ fun ListTeamScreen(
 
     val itemListActions = ItemsListTeamAction(
         onSendMemberShipRequest = viewModel::sendMemberShipRequest,
-        onSendMatchInvite = viewModel::sendMatchInvite,
-        onShowMore = viewModel::showMore
+        onSendMatchInvite = { idTeam, nameTeam ->
+            navHostController.navigate(route = "${Routes.TeamRoutes.SEND_MATCH_INVITE.route}/${idTeam}/${nameTeam}") {
+                launchSingleTop = true
+            }
+        },
+        onShowMore = { idTeam ->
+            navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/$idTeam") {
+                launchSingleTop = true
+            }
+        }
+    )
+
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
     )
 
     ListTeamContent(
@@ -110,15 +130,19 @@ fun ListTeamScreen(
         itemListActions = itemListActions,
         uiState = uiState,
         onRetry = { viewModel.retry() },
-        navHostController = navHostController
+        role = role,
+        filtersError = filtersError,
+        showMoreItensAction = showMoreItensAction,
+        navHostController = navHostController,
+        sentRequests = sentRequests
     )
 }
 
 /**
- * Conteúdo Visual da Lista de Equipas (Stateless).
+ * Conteúdo Visual da Lista de Equipas (Stateless Content).
  *
- * Responsável apenas pela renderização da UI. Não possui lógica de negócio ou dependência direta do ViewModel.
- * Ideal para testes e Previews.
+ * Responsável apenas pela renderização da UI. Envolve a lista com um [LoadingPage] para
+ * gerir estados de UI e um [OfflineBanner].
  *
  * @param isOnline Estado da conectividade (controla o [OfflineBanner]).
  * @param listTeams Lista de equipas a exibir.
@@ -127,20 +151,30 @@ fun ListTeamScreen(
  * @param listRanks Lista de Ranks para o dropdown.
  * @param itemListActions Ações de interação com os itens da lista.
  * @param uiState Estado de loading e erro.
+ * @param role O papel do utilizador logado.
+ * @param onRetry Callback para tentar recarregar os dados em caso de erro.
+ * @param navHostController Controlador de navegação.
+ * @param sentRequests Conjunto de IDs de equipas para as quais já existe um pedido de adesão pendente.
  */
 @Composable
 private fun ListTeamContent(
     isOnline: Boolean,
     listTeams: List<ItemTeamInfoDto>,
     filters: FiltersListTeam,
+    filtersError: FilterTeamError,
     filtersActions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     itemListActions: ItemsListTeamAction,
     uiState: UiState,
+    role: UserRole,
     onRetry: () -> Unit,
-    navHostController: NavHostController
+    showMoreItensAction: ShowMoreItensAction,
+    navHostController: NavHostController,
+    sentRequests: Set<String>
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
+
     LoadingPage(
         isLoading = uiState.isLoading,
         errorMsg = uiState.errorMessage,
@@ -160,6 +194,7 @@ private fun ListTeamContent(
                                     filters = filters,
                                     filtersActions = filtersActions,
                                     listRanks = listRanks,
+                                    filtersError = filtersError,
                                     modifier = Modifier.padding(
                                         start = 16.dp,
                                         end = 16.dp,
@@ -173,9 +208,13 @@ private fun ListTeamContent(
                         ListTeam(
                             team = team,
                             itemActions = itemListActions,
-                            navHostController = navHostController
+                            role = role,
+                            navHostController = navHostController,
+                            sentRequests = sentRequests
                         )
                     },
+                    isValidShowMore = isShowMoreVisible,
+                    showMoreItems = showMoreItensAction.onLoadMore,
                     messageEmptyList = stringResource(id = R.string.list_teams_empty)
                 )
             }
@@ -186,21 +225,19 @@ private fun ListTeamContent(
 /**
  * Conteúdo interno da secção de filtros para equipas.
  *
- * Apresenta campos para filtrar por:
- * - Nome e Cidade.
- * - Rank (via SelectBox).
- * - Intervalos de Pontos (Min/Max).
- * - Intervalos de Idade Média (Min/Max).
- * - Intervalos de Número de Membros (Min/Max).
+ * Agrupa todos os campos de filtro (Nome, Cidade, Rank, Pontos, Idade Média, Membros)
+ * e os botões de ação ([LineClearFilterButtons]).
  *
  * @param filters Estado atual dos filtros [FiltersListTeam].
  * @param filtersActions Callbacks para atualizar os valores dos filtros.
  * @param listRanks Lista de Ranks disponíveis para seleção.
+ * @param filtersError Erros de validação associados aos campos de filtro.
  * @param modifier Modificador de layout.
  */
 @Composable
 private fun FiltersListTeamContent(
     filters: FiltersListTeam,
+    filtersError: FilterTeamError,
     filtersActions: FilterTeamActions,
     listRanks: List<RankNameDto>,
     modifier: Modifier = Modifier
@@ -211,8 +248,10 @@ private fun FiltersListTeamContent(
                 FilterNameTeamTextField(
                     nameTeam = filters.name,
                     onNameTeamChange = { filtersActions.onNameChange(it) },
-                    isError = false,
-                    errorMessage = "",
+                    isError = filtersError.nameError != null,
+                    errorMessage = filtersError.nameError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -221,6 +260,10 @@ private fun FiltersListTeamContent(
                     value = filters.city,
                     maxLenght = GeneralConst.MAX_CITY_LENGTH,
                     onValueChange = { filtersActions.onCityChange(it) },
+                    isError = filtersError.cityError != null,
+                    errorMessage = filtersError.cityError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -254,6 +297,10 @@ private fun FiltersListTeamContent(
                     onValueChange = { filtersActions.onMinPointChange(it) },
                     min = TeamConst.MIN_NUMBER_POINTS,
                     max = TeamConst.MAX_NUMBER_POINTS,
+                    isError = filtersError.minPointError != null,
+                    errorMessage = filtersError.minPointError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -263,6 +310,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_NUMBER_POINTS,
                     max = TeamConst.MAX_NUMBER_POINTS,
                     onValueChange = { filtersActions.onMaxPointChange(it) },
+                    isError = filtersError.maxPointError != null,
+                    errorMessage = filtersError.maxPointError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -276,6 +327,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_AVERAGE_AGE,
                     max = TeamConst.MAX_AVERAGE_AGE,
                     onValueChange = { filtersActions.onMinAgeChange(it) },
+                    isError = filtersError.minAgeError != null,
+                    errorMessage = filtersError.minAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -285,6 +340,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_AVERAGE_AGE,
                     max = TeamConst.MAX_AVERAGE_AGE,
                     onValueChange = { filtersActions.onMaxAgeChange(it) },
+                    isError = filtersError.maxAgeError != null,
+                    errorMessage = filtersError.maxAgeError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -298,6 +357,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_MEMBERS,
                     max = TeamConst.MAX_MEMBERS,
                     onValueChange = { filtersActions.onMinNumberMembersChange(it) },
+                    isError = filtersError.minNumberMembersError != null,
+                    errorMessage = filtersError.minNumberMembersError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
 
@@ -307,6 +370,10 @@ private fun FiltersListTeamContent(
                     min = TeamConst.MIN_MEMBERS,
                     max = TeamConst.MAX_MEMBERS,
                     onValueChange = { filtersActions.onMaxNumberMembersChange(it) },
+                    isError = filtersError.maxNumberMembersError != null,
+                    errorMessage = filtersError.maxNumberMembersError?.let {
+                        stringResource(it.messageId, *it.args.toTypedArray())
+                    },
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -320,24 +387,21 @@ private fun FiltersListTeamContent(
 }
 
 /**
- * Representação individual de uma Equipa na lista.
- *
- * Utiliza [GenericListItem] para estruturar a informação:
- * - Logo (Leading)
- * - Nome (Title)
- * - Rank e Pontos (Overline)
- * - Cidade e Nº de Membros (Supporting)
- * - Botões de Ação (Trailing)
+ * Representação individual de uma Equipa na lista (GenericListItem).
  *
  * @param team DTO contendo as informações da equipa.
  * @param itemActions Ações disponíveis para este item (convidar, ver mais).
+ * @param role O papel do utilizador logado.
  * @param navHostController Controlador de navegação.
+ * @param sentRequests Conjunto de IDs de equipas para as quais já existe um pedido de adesão.
  */
 @Composable
 private fun ListTeam(
     team: ItemTeamInfoDto,
     itemActions: ItemsListTeamAction,
-    navHostController: NavHostController
+    role: UserRole,
+    navHostController: NavHostController,
+    sentRequests: Set<String>
 ) {
     GenericListItem(
         item = team,
@@ -364,6 +428,8 @@ private fun ListTeam(
             ListTeamTrailing(
                 team = team,
                 itemActions = itemActions,
+                role = role,
+                isRequestSent = sentRequests.contains(team.id),
                 navHostController = navHostController
             )
         }
@@ -373,9 +439,7 @@ private fun ListTeam(
 /**
  * Componente para exibir o texto de topo (Overline) do item da lista.
  *
- * Formata o texto usando [buildAnnotatedString]:
- * - "Rank: [Valor]" em Negrito.
- * - "([Valor] Pts)" na cor primária do tema.
+ * Formata o texto para destacar o Rank e os Pontos da equipa.
  */
 @Composable
 private fun ListTeamOverline(team: ItemTeamInfoDto) {
@@ -399,50 +463,61 @@ private fun ListTeamOverline(team: ItemTeamInfoDto) {
 /**
  * Componente lateral direito (Trailing) do item da lista.
  *
- * Contém os botões de ação rápida:
- * 1. Enviar pedido de adesão ou convite de jogo (dependendo do [typeUser]).
- * 2. Ver mais detalhes da equipa.
+ * Contém os botões de ação rápida (Enviar pedido/convite e Ver mais),
+ * com visibilidade dependente do [role] do utilizador e do estado da equipa.
  *
  * @param team A equipa associada.
  * @param itemActions As ações a serem executadas.
+ * @param role O papel do utilizador logado.
  * @param navHostController Controlador de navegação.
+ * @param isRequestSent Indica se já foi enviado um pedido de adesão a esta equipa.
  */
 @Composable
 private fun ListTeamTrailing(
     team: ItemTeamInfoDto,
     itemActions: ItemsListTeamAction,
-    navHostController: NavHostController
+    role: UserRole,
+    navHostController: NavHostController,
+    isRequestSent: Boolean,
 ) {
-    //TODO: Acrescentar o tipo de player no token e trocar ca
-    val typeUser by remember { mutableStateOf(false) }
+    val idTeam = team.id
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(start = 8.dp)
     ) {
-        ListSendMemberShipRequestButton(
-            sendMemberShipRequest = {
-                if (typeUser) {
-                    itemActions.onSendMemberShipRequest(team.id, navHostController)
-                } else {
-                    itemActions.onSendMatchInvite(team.id, team.name, navHostController)
+        val validaRolePlayerWithouTeam = role == UserRole.PLAYER_WITHOUT_TEAM && team.numberMembers < TeamConst.MAX_MEMBERS
+        val validateRoleAdminTeam = role == UserRole.ADMIN_TEAM && team.numberMembers >= TeamConst.MIN_MEMBERS_TO_MATCH
+
+        if ((validaRolePlayerWithouTeam || validateRoleAdminTeam) && !isRequestSent) {
+            ListSendMemberShipRequestButton(
+                sendMemberShipRequest = {
+                    when (role) {
+                        UserRole.PLAYER_WITHOUT_TEAM -> {
+                            itemActions.onSendMemberShipRequest(idTeam)
+                        }
+                        UserRole.ADMIN_TEAM -> {
+                            itemActions.onSendMatchInvite(idTeam, team.name)
+                        }
+                        else -> {}
+                    }
                 }
-            }
-        )
+            )
+        }
 
         ShowMoreInfoButton(
             showMoreDetails = {
-                itemActions.onShowMore(team.id, navHostController)
+                itemActions.onShowMore(idTeam)
             }
         )
     }
 }
 
-@Preview(name = "1. Normal - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "1. Normal - EN", locale = "en", showBackground = true)
+@Preview(name = "1. Administrador de Equipa - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "1. Admin Team - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListTeamContent_Normal() {
+fun PreviewListTeamContentAdmin() {
     ListTeamContent(
         isOnline = true,
         listTeams = ListTeamMocks.mockTeams,
@@ -452,14 +527,60 @@ fun PreviewListTeamContent_Normal() {
         itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
+        role = UserRole.ADMIN_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+        sentRequests = emptySet()
     )
 }
 
-@Preview(name = "2. Vazia - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "2. Empty - EN", locale = "en", showBackground = true)
+@Preview(name = "2. Jogador sem Equipa - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "2. Player Without Team - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewListTeamContent_Empty() {
+fun PreviewListTeamContentPlayerWithoutTeam() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = ListTeamMocks.mockTeams,
+        filters = FiltersListTeam(),
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
+        role = UserRole.PLAYER_WITHOUT_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+        sentRequests = emptySet()
+    )
+}
+
+@Preview(name = "3. Jogador - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "3. Player - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContentPlayer() {
+    ListTeamContent(
+        isOnline = true,
+        listTeams = ListTeamMocks.mockTeams,
+        filters = FiltersListTeam(),
+        filtersError = FilterTeamError(),
+        filtersActions = ListTeamMocks.mockFiltersActions,
+        listRanks = ListTeamMocks.mockRanks,
+        itemListActions = ListTeamMocks.mockItemActions,
+        uiState = UiState(isLoading = false),
+        onRetry = {},
+        navHostController = rememberNavController(),
+        role = UserRole.MEMBER_TEAM,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+        sentRequests = emptySet()
+    )
+}
+
+@Preview(name = "4. Vazia - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "4. Empty - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewListTeamContentEmpty() {
     ListTeamContent(
         isOnline = true,
         listTeams = emptyList(),
@@ -469,23 +590,10 @@ fun PreviewListTeamContent_Empty() {
         itemListActions = ListTeamMocks.mockItemActions,
         uiState = UiState(isLoading = false),
         onRetry = {},
-        navHostController = rememberNavController()
-    )
-}
-
-@Preview(name = "3. Offline - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "3. Offline - EN", locale = "en", showBackground = true)
-@Composable
-fun PreviewListTeamContent_Offline() {
-    ListTeamContent(
-        isOnline = false,
-        listTeams = ListTeamMocks.mockTeams,
-        filters = FiltersListTeam(),
-        filtersActions = ListTeamMocks.mockFiltersActions,
-        listRanks = ListTeamMocks.mockRanks,
-        itemListActions = ListTeamMocks.mockItemActions,
-        uiState = UiState(isLoading = false),
-        onRetry = {},
-        navHostController = rememberNavController()
+        navHostController = rememberNavController(),
+        filtersError = FilterTeamError(),
+        role = UserRole.PLAYER_WITHOUT_TEAM,
+        sentRequests = emptySet(),
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden
     )
 }

@@ -1,154 +1,260 @@
 package com.example.amfootball.ui.viewModel.matchInvite
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.dtos.matchInivite.InfoMatchInviteDto
-import com.example.amfootball.data.errors.ErrorMessage
-import com.example.amfootball.data.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.core.extensions.toLocalDateTime
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.core.utils.UserConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.filters.FilterCalendar
 import com.example.amfootball.data.filters.FilterMatchInvite
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.navigation.objects.Routes
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.manager.CalendarManager
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.remote.services.MatchInviteService
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterMatchInviteError
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
-import com.example.amfootball.utils.UserConst
-import com.example.amfootball.utils.extensions.toLocalDateTime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 /**
  * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Listagem de Convites de Jogo.
  *
- * Este componente gere o estado dos filtros (pesquisa por remetente, datas) e coordena as ações
- * de decisão (Aceitar/Rejeitar/Negociar) sobre os convites recebidos.
+ * Este componente atua como o orquestrador entre a camada de dados (API/Cache) e a UI.
+ * As suas principais responsabilidades incluem:
+ * 1. **Gestão de Dados:** Carregamento inicial, paginação e atualização da lista de convites.
+ * 2. **Filtragem:** Aplicação de filtros complexos (Nome, Data) tanto online (via API) como offline (via Cache).
+ * 3. **Ações de Decisão:** Processamento das respostas aos convites (Aceitar, Rejeitar, Negociar).
  *
- * Herda de [ListsViewModels] para obter funcionalidades de gestão de UI State, Loading, e da lista principal.
+ * Herda de [ListsViewModels] para aproveitar a infraestrutura de gestão de estado de listas (Loading, Error, Empty States).
  *
- * @property networkObserver Observador de conectividade injetado no [ListsViewModels].
+ * @property matchInviteService Serviço para comunicação com a API de convites.
+ * @property networkObserver Observador de conectividade para alternar entre lógica Online/Offline.
+ * @property savedStateHandle Manipulador de estado para recuperar argumentos de navegação (ex: teamId).
  */
 @HiltViewModel
 class ListMatchInviteViewModel @Inject constructor(
-    private val networkObserver: NetworkConnectivityObserver
-) : ListsViewModels<InfoMatchInviteDto>(networkObserver = networkObserver) {
+    private val matchInviteService: MatchInviteService,
+    private val networkObserver: NetworkConnectivityObserver,
+    private val savedStateHandle: SavedStateHandle,
+    private val sessionManager: SessionManager,
+) : ListsViewModels<MatchInviteDto>(networkObserver = networkObserver) {
 
     /**
-     * Estado interno mutável contendo os critérios de filtro atuais.
+     * ID da equipa atual, recuperado dos argumentos de navegação.
+     * Usado em todas as chamadas à API que requerem contexto da equipa.
      */
-    private val filtersState: MutableStateFlow<FilterMatchInvite> = MutableStateFlow(FilterMatchInvite())
+    private val teamId: MutableStateFlow<String> = MutableStateFlow("")
 
     /**
-     * Fluxo público de leitura dos filtros observados pela UI.
+     * Estado interno mutável (Backing Property) contendo os critérios de filtro atuais.
      */
-    val uiFilters: StateFlow<FilterMatchInvite> = filtersState
+    private val filterState: MutableStateFlow<FilterMatchInvite> =
+        MutableStateFlow(FilterMatchInvite())
 
     /**
-     * Estado interno mutável contendo os erros de validação de filtros.
+     * Fluxo imutável exposto para a UI que representa os filtros ativos.
+     * A UI deve observar este fluxo para preencher os campos de filtro.
      */
-    private val filtersErrorState: MutableStateFlow<FilterMatchInviteError> = MutableStateFlow(FilterMatchInviteError())
+    val uiFilters: StateFlow<FilterMatchInvite> = filterState.asStateFlow()
 
     /**
-     * Fluxo público de leitura dos erros de filtro.
+     * Estado interno mutável contendo os erros de validação dos campos de filtro.
      */
-    val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState
+    private val filtersErrorState: MutableStateFlow<FilterMatchInviteError> =
+        MutableStateFlow(FilterMatchInviteError())
 
-    //Initializor
+    /**
+     * Fluxo imutável exposto para a UI contendo mensagens de erro nos filtros.
+     * (Ex: Data mínima maior que data máxima, nome muito longo).
+     */
+    val filterError: StateFlow<FilterMatchInviteError> = filtersErrorState.asStateFlow()
+
     init {
-        //TODO: Carregar dados do Backend
-        val initList = InfoMatchInviteDto.generatePreviewList()
-        listState.value = initList
-        originalList = initList
+        teamId.value = sessionManager.getUserProfile()?.effectiveTeamId ?: ""
+        loadDataList()
     }
 
     /**
-     * Atualiza o campo de filtro com o nome do remetente (equipa adversária).
+     * Carrega a lista de convites de jogo.
      *
-     * @param newSenderName O novo texto para o filtro de nome.
+     * Lógica executada:
+     * 1. Verifica se o [teamId] é válido.
+     * 2. Faz o pedido à API usando os filtros atuais.
+     * 3. Atualiza o [listState] (lista visível).
+     * 4. Se não existirem filtros ativos, atualiza também a [originalList] (Cache para modo offline/limpeza de filtros).
+     */
+    private fun loadDataList() {
+        launchDataLoad {
+            if (teamId.value.isNotBlank()) {
+                val list = matchInviteService.getListMatchInvite(
+                    teamId = teamId.value,
+                    filter = filterState.value
+                )
+
+                listState.value = list
+                if (filterState.value == FilterCalendar()) {
+                    originalList = list
+                }
+            } else {
+                updateToast(message = R.string.toast_team_id_null)
+            }
+        }
+    }
+
+    /**
+     * Atualiza o estado do filtro com o novo nome do remetente (equipa adversária).
+     *
+     * @param newSenderName O texto inserido pelo utilizador.
      */
     fun onNameSenderChange(newSenderName: String) {
-        filtersState.value = filtersState.value.copy(senderName = newSenderName)
+        filterState.value = filterState.value.copy(senderName = newSenderName)
     }
 
     /**
-     * Atualiza o campo de filtro para a data mínima do jogo proposto.
+     * Atualiza o estado do filtro com a nova data mínima.
+     * Converte o timestamp (Long) para [LocalDateTime].
      *
-     * @param newMinDate Timestamp (Long) da nova data mínima.
+     * @param newMinDate Data em milissegundos selecionada no componente de calendário.
      */
     fun onMinDateChange(newMinDate: Long) {
-        filtersState.value = filtersState.value.copy(minDate = newMinDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(minDate = newMinDate.toLocalDateTime())
     }
 
     /**
-     * Atualiza o campo de filtro para a data máxima do jogo proposto.
+     * Atualiza o estado do filtro com a nova data máxima.
+     * Converte o timestamp (Long) para [LocalDateTime].
      *
-     * @param newMaxDate Timestamp (Long) da nova data máxima.
+     * @param newMaxDate Data em milissegundos selecionada no componente de calendário.
      */
     fun onMaxDateChange(newMaxDate: Long) {
-        filtersState.value = filtersState.value.copy(maxDate = newMaxDate.toLocalDateTime())
+        filterState.value = filterState.value.copy(maxDate = newMaxDate.toLocalDateTime())
     }
 
-    //TODO: Implementar
     /**
-     * Aplica os filtros atualmente definidos.
+     * Executa a lógica de aplicação dos filtros.
      *
-     * O fluxo é o seguinte:
-     * 1. Executa a validação síncrona dos filtros ([validateFitler]).
-     * 2. Se for válido: Faz uma chamada assíncrona para o backend para obter a lista filtrada.
-     *
+     * Processo:
+     * 1. Valida os dados inseridos ([validateFitler]). Se inválido, aborta.
+     * 2. Verifica a conectividade:
+     * - **Online:** Solicita uma nova lista filtrada à API ([loadDataList]).
+     * - **Offline:** Filtra a lista localmente usando a [originalList] ([filterOffline]).
      */
     fun onApplyFilter() {
         if (!validateFitler()) {
+            updateToast(message = R.string.toast_invalid_filters)
             return
         }
-    }
 
-    //TODO: Implementar
-    /**
-     * Limpa todos os filtros e recarrega a lista original.
-     *
-     * Reinicia o estado dos filtros para o valor inicial ([FilterMatchInvite]) e atualiza a lista.
-     */
-    fun onFilterClear() {
-        filtersState.value = FilterMatchInvite()
-        listState.value = originalList
-    }
-
-    /**
-     * Aceita um convite de jogo.
-     *
-     * @param idMatchInvite O ID do convite a ser aceite.
-     */
-    fun acceptMatchInvite(idMatchInvite: String) {
-        //TODO: Remover da lista e fazer pedido há API para aceitar
-    }
-
-    /**
-     * Inicia o fluxo de negociação (contra-proposta) para um convite de jogo.
-     *
-     * @param idMatchInvite O ID do convite a ser negociado.
-     * @param navHostController Controlador de navegação para transição para o ecrã de negociação.
-     */
-    //TODO: Passar o idMatch por parametro (Importante para teste de sistema)
-    fun negociateMatchInvite(idMatchInvite: String, navHostController: NavHostController) {
-        navHostController.navigate(route = Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route) {
-            launchSingleTop = true
+        if (isNetworkAvailable()) {
+            loadDataList()
+        } else {
+            listState.value = filterOffline(
+                originalList = originalList,
+                filter = filterState.value
+            )
         }
     }
 
     /**
-     * Rejeita um convite de jogo.
+     * Limpa todos os critérios de filtro e restaura a lista completa.
      *
-     * @param idMatchInvite O ID do convite a ser rejeitado.
+     * Ações:
+     * 1. Reinicia [filterState] e [filtersErrorState] para os valores padrão.
+     * 2. Reinicia a paginação ([inicialSizeList]).
+     * 3. Dependendo da rede:
+     * - **Online:** Recarrega os dados "limpos" da API.
+     * - **Offline:** Restaura imediatamente os dados da [originalList].
      */
-    fun rejectMatchInvite(idMatchInvite: String) {
-        //TODO: Mandar pedido há API para rejeitar
+    fun onFilterClear() {
+        filterState.value = FilterMatchInvite()
+        filtersErrorState.value = FilterMatchInviteError()
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadDataList()
+        } else {
+            listState.value = originalList
+        }
     }
 
-    //TODO: Corrijir
     /**
-     * Navega para o ecrã de detalhes (Perfil da Equipa/Jogador) associado ao convite.
+     * Envia o pedido para aceitar um convite de jogo.
      *
-     * @param idMatchInvite O ID do convite (deve ser usado para extrair o ID do remetente).
-     * @param navHostController Controlador de navegação.
+     * Em caso de sucesso na API, remove o convite da lista local imediatamente
+     * para refletir a mudança na UI.
+     *
+     * @param idMatchInvite O identificador único do convite a aceitar.
+     */
+    fun acceptMatchInvite(idMatchInvite: String) {
+        launchDataLoad {
+            val idTeam = teamId.value
+            if (idTeam.isBlank()) {
+                stopLoading()
+                return@launchDataLoad
+            }
+
+            val match = matchInviteService.acceptMatchInvitee(
+                teamId = idTeam,
+                matchInviteId = idMatchInvite
+            )
+            removeItemFromList(idToRemove = idMatchInvite)
+        }
+    }
+
+    /**
+     * Inicia o fluxo de negociação de um convite.
+     *
+     * Verifica a conectividade antes de navegar, pois a negociação exige internet.
+     * Se online, navega para o ecrã de negociação passando o ID do convite.
+     *
+     * @param idMatchInvite O identificador do convite a negociar.
+     * @param navHostController Controlador para realizar a navegação.
+     */
+    fun negociateMatchInvite(idMatchInvite: String, navHostController: NavHostController) {
+        onlineFunctionality(
+            action = {
+                navHostController.navigate(route = "${Routes.TeamRoutes.NEGOCIATE_MATCH_INVITE.route}/$teamId/$idMatchInvite") {
+                    launchSingleTop = true
+                }
+            },
+            toastMessage = R.string.toast_offline_negotiation
+        )
+    }
+
+    /**
+     * Envia o pedido para rejeitar um convite de jogo.
+     *
+     * Em caso de sucesso na API, remove o convite da lista local imediatamente.
+     *
+     * @param idMatchInvite O identificador único do convite a rejeitar.
+     */
+    fun rejectMatchInvite(idMatchInvite: String) {
+        launchDataLoad {
+            val idTeam = teamId.value
+
+            if (idTeam.isBlank()) {
+                stopLoading()
+                return@launchDataLoad
+            }
+
+            matchInviteService.rejectMatchInivite(teamId = idTeam, matchInviteId = idMatchInvite)
+            removeItemFromList(idToRemove = idMatchInvite)
+        }
+    }
+
+    /**
+     * Navega para o perfil detalhado da equipa adversária associada ao convite.
+     *
+     * @param idMatchInvite O ID do convite (usado para resolver a equipa associada).
+     * @param navHostController Controlador para realizar a navegação.
      */
     fun showMoreDetails(idMatchInvite: String, navHostController: NavHostController) {
         navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/$idMatchInvite") {
@@ -157,16 +263,68 @@ class ListMatchInviteViewModel @Inject constructor(
     }
 
     /**
-     * Validação síncrona dos critérios de filtro.
+     * Remove um item especifico das listas de estado locais.
      *
-     * Verifica o comprimento do nome do remetente e a ordem das datas (Min Date vs Max Date).
+     * É crucial remover tanto de [listState] (o que o user vê agora)
+     * quanto de [originalList] (o cache). Se não removermos do cache,
+     * o item reapareceria ao limpar os filtros.
      *
-     * @return `true` se todos os filtros forem válidos, `false` caso contrário.
+     * @param idToRemove O ID do convite a ser removido.
+     */
+    private fun removeItemFromList(idToRemove: String) {
+        listState.update { currentList ->
+            currentList.filter { item ->
+                item.id != idToRemove
+            }
+        }
+
+        originalList = originalList.filter { item ->
+            item.id != idToRemove
+        }
+    }
+
+    /**
+     * Realiza a filtragem dos dados localmente (Modo Offline).
+     *
+     * Aplica os critérios de "Nome contém..." e "Intervalo de datas" sobre a lista original.
+     *
+     * @param originalList A lista completa de dados em cache.
+     * @param filter Os critérios de filtro a aplicar.
+     * @return Uma nova lista contendo apenas os elementos que correspondem aos critérios.
+     */
+    private fun filterOffline(
+        originalList: List<MatchInviteDto>,
+        filter: FilterMatchInvite
+    ): List<MatchInviteDto> {
+        return originalList.filter { item ->
+            val name = filter.senderName.isNullOrBlank()
+                    || item.opponent.name.contains(filter.senderName, ignoreCase = true)
+
+            val minDate = filter.minDate == null
+                    || item.gameDate.toLocalDate() >= filter.minDate.toLocalDate()
+
+            val maxDate = filter.maxDate == null
+                    || item.gameDate.toLocalDate() <= filter.maxDate.toLocalDate()
+
+            name && minDate && maxDate
+        }
+    }
+
+    /**
+     * Valida as regras de negócio dos filtros.
+     *
+     * Regras:
+     * 1. O nome do remetente não pode exceder [UserConst.MAX_NAME_LENGTH].
+     * 2. Se ambas as datas forem fornecidas, a Data Mínima não pode ser posterior à Data Máxima.
+     *
+     * Atualiza o [filtersErrorState] com as mensagens apropriadas se houver erros.
+     *
+     * @return `true` se os filtros forem válidos, `false` caso contrário.
      */
     private fun validateFitler(): Boolean {
-        val nameSender = filtersState.value.senderName
-        val minDate = filtersState.value.minDate
-        val maxDate = filtersState.value.maxDate
+        val nameSender = filterState.value.senderName
+        val minDate = filterState.value.minDate
+        val maxDate = filterState.value.maxDate
 
         var nameSenderError: ErrorMessage? = null
         var minDateError: ErrorMessage? = null
@@ -197,7 +355,7 @@ class ListMatchInviteViewModel @Inject constructor(
             maxDateError = maxDateError
         )
 
-        val isValid = listOf(nameSender, minDateError, maxDateError).all { it == null }
+        val isValid = listOf(nameSenderError, minDateError, maxDateError).all { it == null }
 
         return isValid
     }

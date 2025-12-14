@@ -1,7 +1,7 @@
 package com.example.amfootball.data.filters
 
-import com.example.amfootball.data.enums.match.MatchStatus
-import com.example.amfootball.data.enums.match.TypeMatch
+import com.example.amfootball.domains.enums.match.MatchStatus
+import com.example.amfootball.domains.enums.match.TypeMatch
 import com.google.gson.annotations.SerializedName
 import java.time.LocalDate
 
@@ -41,15 +41,15 @@ data class FilterCalendar(
  */
 fun FilterCalendar.toQueryMap(): Map<String, String> {
     val map = mutableMapOf<String, String>()
-    opponentName?.let { map["PlayerName"] = it }
-    minGameDate?.let { map["City"] = it.toString() }
-    maxGameDate?.let { map["MinAge"] = it.toString() }
-    isHome?.let { map["MaxAge"] = it.toString() }
+    opponentName?.let { map["NameOpponent"] = it }
+    minGameDate?.let { map["MinDate"] = it.toString() }
+    maxGameDate?.let { map["MaxDate"] = it.toString() }
+    isHome?.let { map["IsHome"] = it.toString() }
     typeMatch?.let {
         val isRanked = (it == TypeMatch.COMPETITIVE)
         map["IsRanqued"] = isRanked.toString()
     }
-    isFinish?.let { map["IsFinish"] = it.toString() }
+    isFinish?.let { map["IsRealized"] = it.toString() }
 
     return map
 }

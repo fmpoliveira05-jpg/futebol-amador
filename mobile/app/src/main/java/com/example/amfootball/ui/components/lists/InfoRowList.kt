@@ -24,10 +24,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.amfootball.R
-import com.example.amfootball.data.enums.Position
-import com.example.amfootball.data.enums.TypeMember
-import com.example.amfootball.utils.TeamConst
-import com.example.amfootball.utils.extensions.toOneDecimal
+import com.example.amfootball.core.extensions.toOneDecimal
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.domains.enums.Position
+import com.example.amfootball.domains.enums.TypeMember
 
 /**
  * Componente base que exibe um ícone e um texto numa linha horizontal.

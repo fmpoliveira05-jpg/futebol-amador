@@ -3,6 +3,14 @@
     <string name="app_name">AMFootball</string>
     <string name="age">anos</string>
     <string name="average_age">idade média</string>
+    <string name="edit_profile">Editar Perfil</string>
 
     <string name="title_login">Conteudo do Login</string>
+    <string name="change_camera">Trocar Câmara</string>
+    <string name="take_pitcture">Tirar Foto</string>
+    <string name="permission_camera">Permissão de câmara necessária</string>
+    <string name="select_image">Selecionar Imagem</string>
+    <string name="choose_image_source">Escolha a origem da imagem</string>
+    <string name="galery">Galeria</string>
+    <string name="chamber">Câmara</string>
 </resources>

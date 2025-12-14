@@ -1,6 +1,6 @@
 package com.example.amfootball.data.filters
 
-import com.example.amfootball.data.enums.Position
+import com.example.amfootball.domains.enums.Position
 
 /**
  * Modelo de dados que representa os filtros aplicáveis na pesquisa e listagem de jogadores.

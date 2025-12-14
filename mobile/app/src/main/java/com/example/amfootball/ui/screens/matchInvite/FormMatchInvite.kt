@@ -22,13 +22,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.actions.forms.FormMatchInviteActions
-import com.example.amfootball.data.dtos.matchInivite.MatchInviteDto
-import com.example.amfootball.data.dtos.support.TeamDto
-import com.example.amfootball.data.enums.Forms.MatchFormMode
-import com.example.amfootball.data.errors.formErrors.MatchInviteFormErros
-
+import com.example.amfootball.core.utils.MatchConsts
+import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.matchInivite.MatchInviteDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.domains.enums.pages.MatchFormMode
+import com.example.amfootball.domains.errors.formErrors.MatchInviteFormErros
+import com.example.amfootball.ui.actions.forms.FormMatchInviteActions
 import com.example.amfootball.ui.components.LoadingPage
 import com.example.amfootball.ui.components.buttons.SubmitCancelButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
@@ -36,24 +36,22 @@ import com.example.amfootball.ui.components.inputFields.DatePickerDockedFutureLi
 import com.example.amfootball.ui.components.inputFields.FieldTimePicker
 import com.example.amfootball.ui.components.inputFields.Switcher
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
+import com.example.amfootball.ui.previewsMocks.FormMatchInviteMock
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.matchInvite.FormMatchInviteViewModel
-import com.example.amfootball.utils.MatchConsts
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
 /**
- * Ecrã principal (Stateful) para gestão de convites de partidas.
+ * Ecrã principal (Stateful Screen) para gestão de convites de partidas.
  *
- * Este ecrã lida com quatro modos de operação definidos por [MatchFormMode]:
- * 1. **SEND**: Criar e enviar um novo convite.
- * 2. **NEGOTIATE**: Contra-propor uma data/hora ou local.
- * 3. **POSTPONE**: Adiar um jogo confirmado.
- * 4. **CANCEL**: Cancelar um jogo confirmado (requer motivo).
+ * Este ecrã lida com quatro modos de operação definidos por [MatchFormMode]: **SEND**, **NEGOTIATE**, **POSTPONE**, e **CANCEL**.
  *
- * Ele conecta-se ao [FormMatchInviteViewModel] para observar o estado do formulário e despachar eventos.
+ * **Responsabilidades:**
+ * 1. Conectar-se ao [FormMatchInviteViewModel] e observar os estados ([fields], [errors], [uiState]).
+ * 2. Construir e definir as ações ([FormMatchInviteActions]) que ligam a UI à lógica do ViewModel.
+ * 3. Delegar a renderização do formulário para o componente Stateless [ContentSendMatchInviteScreen].
  *
  * @param viewModel O ViewModel injetado via Hilt que gerencia a lógica de negócio.
  * @param navHostController Controlador de navegação para redirecionamentos após submissão.
@@ -64,7 +62,7 @@ fun FormMatchInviteScreen(
     navHostController: NavHostController
 ) {
     val fields by viewModel.uiFormState.collectAsStateWithLifecycle()
-    val errors by viewModel.uiErrorsForm.collectAsStateWithLifecycle()
+    val errors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
 
     val actions = FormMatchInviteActions(
         onGameDateChange = viewModel::onGameDateChange,
@@ -90,15 +88,18 @@ fun FormMatchInviteScreen(
 }
 
 /**
- * Componente de layout (Stateless) que estrutura o ecrã.
+ * Componente de layout (Stateless Content) que estrutura o ecrã.
  *
- * Responsável por centralizar o conteúdo vertical e horizontalmente e aplicar o padding base.
+ * Centraliza o conteúdo e utiliza o [LoadingPage] para gerir os estados de carregamento e erro,
+ * garantindo que o formulário só é visível quando os dados estão prontos.
  *
  * @param navHostController Controlador de navegação.
  * @param fields Estado atual dos campos do formulário (DTO).
  * @param actions Interface contendo as callbacks para interação do utilizador.
  * @param errors Estado atual dos erros de validação.
  * @param mode O modo atual do formulário (Send, Negotiate, Postpone, Cancel).
+ * @param uiState Estado da UI (loading, erro).
+ * @param retry Callback para tentar recarregar os dados em caso de erro.
  * @param modifier Modificadores de layout.
  */
 @Composable
@@ -135,13 +136,11 @@ private fun ContentSendMatchInviteScreen(
 }
 
 /**
- * Componente que contém os campos de input e a lógica de apresentação do formulário.
+ * Componente que contém os campos de input e a lógica de apresentação condicional do formulário.
  *
- * Gere a visibilidade e o estado (enabled/disabled) dos campos com base no [mode]:
- * - **Date/Time Pickers**: Editáveis em todos os modos, exceto [MatchFormMode.CANCEL].
- * - **Switcher (Home/Away)**: Editável apenas em SEND e NEGOTIATE. Bloqueado em POSTPONE e CANCEL.
- * - **Cancel Reason**: Visível apenas no modo [MatchFormMode.CANCEL].
- * - **Botões**: Alterna entre [SubmitFormButton] (padrão) e [SubmitCancelButton] (erro/vermelho) dependendo do modo.
+ * Gere a visibilidade, a editabilidade e os botões com base no [mode] de operação:
+ * - **SEND/NEGOTIATE/POSTPONE**: Permitem edição de data/hora.
+ * - **CANCEL**: Bloqueia edição e exige um campo de "motivo de cancelamento".
  *
  * @param fields Dados do formulário.
  * @param errors Erros de validação.
@@ -158,12 +157,6 @@ private fun FieldsSendMatchInvite(
     navHostController: NavHostController
 ) {
     var cancelReason by rememberSaveable { mutableStateOf("") }
-
-    val apiDateFormatter = remember {
-        SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply {
-            timeZone = TimeZone.getTimeZone("UTC")
-        }
-    }
 
     TextFieldOutline(
         label = stringResource(id = R.string.filter_opponent),
@@ -248,40 +241,8 @@ private fun FieldsSendMatchInvite(
 }
 
 // =============================================================================
-// MOCKS PARA PREVIEWS
-// =============================================================================
-val emptyFields = MatchInviteDto(
-    opponent = TeamDto(
-        id = "1",
-        name = ""
-    ),
-    gameDateString = null,
-    gameTimeString = null,
-    isHomeGame = true
-)
-
-val filledFields = MatchInviteDto(
-    opponent = TeamDto(
-        id = "2",
-        name = "Lisboa Navigators"
-    ),
-    gameDateString = "2024-12-25",
-    gameTimeString = "15:30",
-    isHomeGame = true
-)
-
-val dummyActions = FormMatchInviteActions(
-    onGameDateChange = {},
-    onTimeGameChange = {},
-    onLocalGameChange = {},
-    onSubmitForm = { _ -> },
-    onCancelForm = { _, _ -> }
-)
-
-// =============================================================================
 // PREVIEWS
 // =============================================================================
-
 /**
  * Preview do modo [MatchFormMode.SEND].
  * Apresenta o formulário vazio para iniciar um convite.
@@ -293,11 +254,10 @@ fun PreviewMatchInviteSend() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = emptyFields,
-            actions = dummyActions,
+            fields = FormMatchInviteMock.emptyFields,
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.SEND,
-            // Adicionado uiState com loading=false
             uiState = UiState(isLoading = false, errorMessage = null),
             retry = {}
         )
@@ -315,8 +275,8 @@ fun PreviewMatchInviteNegotiate() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields.copy(isHomeGame = false),
-            actions = dummyActions,
+            fields = FormMatchInviteMock.filledFields.copy(isHomeGame = false),
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.NEGOCIATE,
             uiState = UiState(isLoading = false, errorMessage = null),
@@ -336,8 +296,8 @@ fun PreviewMatchInvitePostpone() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields,
-            actions = dummyActions,
+            fields = FormMatchInviteMock.filledFields,
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.POSTPONE,
             uiState = UiState(isLoading = false, errorMessage = null),
@@ -357,8 +317,8 @@ fun PreviewMatchInviteCancel() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = filledFields,
-            actions = dummyActions,
+            fields = FormMatchInviteMock.filledFields,
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.CANCEL,
             uiState = UiState(isLoading = false, errorMessage = null),
@@ -377,8 +337,8 @@ fun PreviewMatchInviteLoading() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = emptyFields,
-            actions = dummyActions,
+            fields = FormMatchInviteMock.emptyFields,
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.SEND,
             uiState = UiState(isLoading = true, errorMessage = null),
@@ -397,8 +357,8 @@ fun PreviewMatchInviteError() {
     AMFootballTheme {
         ContentSendMatchInviteScreen(
             navHostController = rememberNavController(),
-            fields = emptyFields,
-            actions = dummyActions,
+            fields = FormMatchInviteMock.emptyFields,
+            actions = FormMatchInviteMock.dummyActions,
             errors = MatchInviteFormErros(),
             mode = MatchFormMode.SEND,
             uiState = UiState(isLoading = false, errorMessage = "Falha ao conectar ao servidor."),

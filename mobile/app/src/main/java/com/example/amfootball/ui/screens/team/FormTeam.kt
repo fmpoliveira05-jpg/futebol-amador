@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -21,22 +20,23 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
-import com.example.amfootball.data.UiState
-import com.example.amfootball.data.actions.forms.FormTeamActions
-import com.example.amfootball.data.dtos.support.PitchInfo
-import com.example.amfootball.data.dtos.team.FormTeamDto
-import com.example.amfootball.data.errors.formErrors.TeamFormErros
+import com.example.amfootball.core.utils.GeneralConst
+import com.example.amfootball.core.utils.PitchConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.remote.dtos.team.FormTeamDto
+import com.example.amfootball.domains.errors.formErrors.TeamFormErros
+import com.example.amfootball.ui.actions.forms.FormTeamActions
 import com.example.amfootball.ui.components.LoadingPage
+import com.example.amfootball.ui.components.buttons.EditFormButton
 import com.example.amfootball.ui.components.buttons.SubmitFormButton
-import com.example.amfootball.ui.components.inputFields.ImagePicker
+import com.example.amfootball.ui.components.inputFields.ImagePickerString
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
-import com.example.amfootball.ui.components.notification.OfflineBanner
-import com.example.amfootball.ui.components.notification.showOfflineToast
+import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.previewsMocks.EditTeamMocks
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.team.TeamFormViewModel
-import com.example.amfootball.utils.GeneralConst
-import com.example.amfootball.utils.PitchConst
-import com.example.amfootball.utils.TeamConst
 
 /**
  * Ecrã principal para Criação e Edição de Equipas.
@@ -54,11 +54,10 @@ fun FormTeamScreen(
     navHostController: NavHostController,
     viewModel: TeamFormViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val uiForm by viewModel.uiFormState.collectAsStateWithLifecycle()
     val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val isEditMode = viewModel.isEditMode
 
     val fieldTeamAction = FormTeamActions(
         onNameChange = viewModel::onNameChange,
@@ -68,24 +67,27 @@ fun FormTeamScreen(
         onAddressPitchChange = viewModel::onAddressPitchChange,
     )
 
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
+    )
+
     ContentCreateTeam(
         filedsTeam = uiForm,
         fieldTeamAction = fieldTeamAction,
         fieldsErrors = uiErrors,
         uiState = uiState,
-        isOnline = isOnline,
         onSubmitClick = {
-            if (isOnline) {
-                viewModel.onSubmit(navHostController = navHostController)
-            } else {
-                showOfflineToast(context = context)
-            }
+            viewModel.onSubmit(
+                onSucess = {
+                    navHostController.navigate(route = Routes.TeamRoutes.HOMEPAGE.route) {
+                        popUpTo(Routes.TeamRoutes.HOMEPAGE.route) { inclusive = true }
+                    }
+                }
+            )
         },
-        onRetry = {
-            if (viewModel.isEditMode) {
-                viewModel.loadDataTeam()
-            }
-        },
+        onRetry = { viewModel.retry() },
+        isEditMode = isEditMode,
         modifier = Modifier.padding(16.dp),
     )
 }
@@ -100,7 +102,6 @@ fun FormTeamScreen(
  * @param fieldTeamAction Ações para atualizar os campos.
  * @param fieldsErrors Erros de validação específicos de cada campo.
  * @param uiState Estado global da UI (Loading/Erro de rede).
- * @param isOnline Estado da conectividade para exibir o banner.
  * @param onRetry Callback para tentar novamente em caso de erro global.
  * @param onSubmitClick Callback para submeter o formulário.
  */
@@ -110,9 +111,9 @@ private fun ContentCreateTeam(
     fieldTeamAction: FormTeamActions,
     fieldsErrors: TeamFormErros,
     uiState: UiState,
-    isOnline: Boolean,
     onRetry: () -> Unit,
     onSubmitClick: () -> Unit,
+    isEditMode: Boolean,
     modifier: Modifier = Modifier
 ) {
     LoadingPage(
@@ -127,13 +128,12 @@ private fun ContentCreateTeam(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                OfflineBanner(isVisible = !isOnline)
-
                 FieldsCreateTeam(
                     filedTeam = filedsTeam,
                     fieldTeamAction = fieldTeamAction,
                     fieldsErrors = fieldsErrors,
-                    onSubmitClick = onSubmitClick
+                    onSubmitClick = onSubmitClick,
+                    isEditMode = isEditMode
                 )
             }
         }
@@ -148,12 +148,15 @@ private fun FieldsCreateTeam(
     filedTeam: FormTeamDto,
     fieldTeamAction: FormTeamActions,
     fieldsErrors: TeamFormErros,
-    onSubmitClick: () -> Unit
+    onSubmitClick: () -> Unit,
+    isEditMode: Boolean
 ) {
-    ImagePicker(
-        imageSelectedUri = filedTeam.image,
+    ImagePickerString(
+        model = filedTeam.image,
         onImageSelected = { fieldTeamAction.onImageChange(it) },
-        modifier = Modifier.padding(bottom = 24.dp)
+        modifier = Modifier.padding(bottom = 24.dp),
+        contentDescription = stringResource(id = R.string.logo_team),
+        contentDescriptionWithoutImage = stringResource(id = R.string.logo_team_add)
     )
 
     TextFieldOutline(
@@ -212,27 +215,21 @@ private fun FieldsCreateTeam(
         }
     )
 
-    SubmitFormButton(
-        onClick = { onSubmitClick() },
-        imageButton = Icons.Default.GroupAdd,
-        text = stringResource(id = R.string.button_create_team),
-        contentDescription = stringResource(id = R.string.button_description_create_team)
-    )
+    if (isEditMode) {
+        EditFormButton(
+            onClick = { onSubmitClick() },
+            text = stringResource(id = R.string.button_edit_team),
+            contentDescription = stringResource(id = R.string.button_description_edit_team)
+        )
+    } else {
+        SubmitFormButton(
+            onClick = { onSubmitClick() },
+            imageButton = Icons.Default.GroupAdd,
+            text = stringResource(id = R.string.button_create_team),
+            contentDescription = stringResource(id = R.string.button_description_create_team)
+        )
+    }
 }
-
-//Mocks de Dados
-private val mockEditTeam = FormTeamDto(
-    name = "Vitória SC",
-    description = "Os Conquistadores. A maior equipa do Minho.",
-    pitch = PitchInfo(
-        name = "Estádio D. Afonso Henriques",
-        address = "Praça 26 de Maio, Guimarães"
-    )
-)
-
-private val mockActions = FormTeamActions(
-    {}, {}, {}, {}, {}
-)
 
 @Preview(name = "Create Team - En", locale = "en", showBackground = true)
 @Preview(name = "Criar Equipa - PT", locale = "pt-rPT", showBackground = true)
@@ -241,12 +238,12 @@ fun PreviewFormTeamCreate() {
     AMFootballTheme {
         ContentCreateTeam(
             filedsTeam = FormTeamDto(),
-            fieldTeamAction = mockActions,
+            fieldTeamAction = EditTeamMocks.mockActions,
             fieldsErrors = TeamFormErros(),
-            uiState = UiState(isLoading = false), // Mock State
-            isOnline = true, // Mock Online
+            uiState = UiState(isLoading = false),
             onSubmitClick = {},
             onRetry = {},
+            isEditMode = false,
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -258,13 +255,13 @@ fun PreviewFormTeamCreate() {
 fun PreviewFormTeamEdit() {
     AMFootballTheme {
         ContentCreateTeam(
-            filedsTeam = mockEditTeam,
-            fieldTeamAction = mockActions,
+            filedsTeam = EditTeamMocks.mockEditTeam,
+            fieldTeamAction = EditTeamMocks.mockActions,
             fieldsErrors = TeamFormErros(),
             uiState = UiState(isLoading = false),
-            isOnline = true,
             onSubmitClick = {},
             onRetry = {},
+            isEditMode = true,
             modifier = Modifier.padding(16.dp)
         )
     }

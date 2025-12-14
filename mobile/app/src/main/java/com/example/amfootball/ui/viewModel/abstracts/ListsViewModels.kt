@@ -1,8 +1,8 @@
 package com.example.amfootball.ui.viewModel.abstracts
 
 import androidx.lifecycle.viewModelScope
-import com.example.amfootball.data.network.NetworkConnectivityObserver
-import com.example.amfootball.utils.ListsSizesConst
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.data.NetworkConnectivityObserver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,8 @@ import kotlinx.coroutines.flow.update
  */
 abstract class ListsViewModels<T>(
     private val networkObserver: NetworkConnectivityObserver,
-) : BaseViewModel(networkObserver = networkObserver) {
+    private val needObserverNetwork: Boolean = true
+) : BaseViewModel(networkObserver = networkObserver, needObserverNetwork = needObserverNetwork) {
 
     /**
      * Lista completa de dados carregados (da API ou filtrados).
@@ -43,7 +44,7 @@ abstract class ListsViewModels<T>(
 
     /**
      * Contador do número máximo de itens a exibir na UI atualmente.
-     * Inicia com [com.example.amfootball.utils.ListsSizesConst.INICIAL_SIZE] e incrementa conforme o utilizador pede "Mais".
+     * Inicia com [ListsSizesConst.INICIAL_SIZE] e incrementa conforme o utilizador pede "Mais".
      */
     protected val inicialSizeList = MutableStateFlow(value = ListsSizesConst.INICIAL_SIZE)
 
@@ -59,7 +60,7 @@ abstract class ListsViewModels<T>(
             lista.take(numero)
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = emptyList()
         )
 
@@ -74,7 +75,7 @@ abstract class ListsViewModels<T>(
             tamanhoAtual < listaCompleta.size
         }.stateIn(
             scope = viewModelScope,
-            started = SharingStarted.Companion.Lazily,
+            started = SharingStarted.Lazily,
             initialValue = false
         )
 
@@ -83,7 +84,7 @@ abstract class ListsViewModels<T>(
      * Incrementa o limite de paginação em [ListsSizesConst.INCREMENT_SIZE],
      * fazendo com que [uiList] emita uma nova lista maior.
      */
-    protected fun loadMoreItems() {
+    fun loadMoreItems() {
         inicialSizeList.update { it + ListsSizesConst.INCREMENT_SIZE }
     }
 

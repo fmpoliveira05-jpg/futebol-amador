@@ -10,6 +10,9 @@
     <string name="item_list_team">Teams</string>
     <string name="item_list_team_description">Page with the list of teams</string>
 
+    <string name="item_list_team_membership_request">Join Teams</string>
+    <string name="item_list_team_membership_request_description">Page that allows you to send membership requests to teams</string>
+
     <string name="item_list_players">Players</string>
     <string name="item_list_players_description">List of players without a club</string>
 

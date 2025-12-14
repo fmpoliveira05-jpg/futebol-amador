@@ -4,24 +4,26 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.actions.lists.LeadBoardActions
-import com.example.amfootball.data.dtos.leadboard.InfoTeamLeadboard
-import com.example.amfootball.data.dtos.leadboard.LeadboardDto
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
+import com.example.amfootball.ui.actions.lists.LeadBoardActions
+import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
 import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
+import com.example.amfootball.ui.previewsMocks.ItemActionsMock
+import com.example.amfootball.ui.previewsMocks.LeadboardMocks
 import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 
 /**
@@ -36,18 +38,23 @@ import com.example.amfootball.ui.viewModel.lists.LeadBoardViewModel
 @Composable
 fun LeaderboardScreen(
     navHostController: NavHostController,
-    viewModel: LeadBoardViewModel = viewModel()
+    viewModel: LeadBoardViewModel = hiltViewModel()
 ) {
-    val list = viewModel.inicialList.value
+    val list by viewModel.uiList.collectAsStateWithLifecycle()
+
     val leadBoardActions = LeadBoardActions(
         onShowMore = viewModel::showInfoTeam,
-        isValidShowMoreTeams = viewModel::showMoreButton,
-        onLoadMoreTeams = viewModel::loadMoreTeams
+    )
+
+    val showMoreItensAction = ShowMoreItensAction(
+        isValidShowMore = { viewModel.showMoreButtonVisible },
+        onLoadMore = { viewModel.loadMoreItems() }
     )
 
     LeadBoardContent(
         list = list,
         leadBoardActions = leadBoardActions,
+        showMoreItensAction = showMoreItensAction,
         navHostController = navHostController
     )
 }
@@ -63,10 +70,12 @@ fun LeaderboardScreen(
  */
 @Composable
 private fun LeadBoardContent(
-    list: List<LeadboardDto>,
+    list: List<InfoTeamLeadboard>,
     leadBoardActions: LeadBoardActions,
+    showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
 ) {
+    val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
 
     ListSurface(
         list = list,
@@ -75,14 +84,14 @@ private fun LeadBoardContent(
                 team = team,
                 showInfoTeam = {
                     leadBoardActions.onShowMore(
-                        team.team.id,
+                        team.id,
                         navHostController
                     )
                 }
             )
         },
-        isValidShowMore = leadBoardActions.isValidShowMoreTeams().value,
-        showMoreItems = { leadBoardActions.onLoadMoreTeams() },
+        isValidShowMore = isShowMoreVisible,
+        showMoreItems = showMoreItensAction.onLoadMore,
         messageEmptyList = stringResource(id = R.string.leadboard_empty)
     )
 }
@@ -102,7 +111,7 @@ private fun LeadBoardContent(
  */
 @Composable
 private fun LeaderBoardItems(
-    team: LeadboardDto,
+    team: InfoTeamLeadboard,
     showInfoTeam: () -> Unit
 ) {
     ListItem(
@@ -114,19 +123,19 @@ private fun LeaderBoardItems(
             )
         },
         headlineContent = {
-            Text(text = team.team.name)
+            Text(text = team.name)
         },
         supportingContent = {
             Text(
                 text = buildAnnotatedString {
                     pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append("Rank: ${team.team.nameRank}")
+                    append("Rank: ${team.nameRank}")
                     pop()
 
                     append("  ")
 
                     pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    append("(${team.team.currentPoints} Pts)")
+                    append("(${team.currentPoints} Pts)")
                     pop()
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -136,11 +145,11 @@ private fun LeaderBoardItems(
         },
         leadingContent = {
             StringImageList(
-                image = team.team.logoTeam,
+                image = team.logoTeam,
                 contentDescription = stringResource(
                     id = R.string.logo_team_name,
                     stringResource(R.string.logo_team),
-                    team.team.name
+                    team.name
                 )
             )
         },
@@ -164,49 +173,10 @@ private fun LeaderBoardItems(
 )
 @Composable
 fun PreviewLeaderboardContentPopulated() {
-    val fakeList = listOf(
-        LeadboardDto(
-            position = 1,
-            team = InfoTeamLeadboard(
-                id = "1",
-                name = "Porto Lions",
-                currentPoints = 1250,
-                nameRank = "Elite",
-                logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 2,
-            team = InfoTeamLeadboard(
-                id = "2",
-                name = "Lisboa Navigators",
-                currentPoints = 980,
-                nameRank = "Pro",
-                logoTeam = null
-            )
-        ),
-        LeadboardDto(
-            position = 3,
-            team = InfoTeamLeadboard(
-                id = "3",
-                name = "Braga Warriors",
-                currentPoints = 450,
-                nameRank = "Amateur",
-                logoTeam = null
-            )
-        )
-    )
-
-    val showMoreState = remember { mutableStateOf(true) }
-    val fakeActions = LeadBoardActions(
-        onShowMore = { _, _ -> },
-        isValidShowMoreTeams = { showMoreState },
-        onLoadMoreTeams = {}
-    )
-
     LeadBoardContent(
-        list = fakeList,
-        leadBoardActions = fakeActions,
+        list = LeadboardMocks.fakeList,
+        leadBoardActions = LeadboardMocks.fakeActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
         navHostController = rememberNavController()
     )
 }
@@ -223,16 +193,10 @@ fun PreviewLeaderboardContentPopulated() {
 )
 @Composable
 fun PreviewLeaderboardContentEmpty() {
-    val showMoreState = remember { mutableStateOf(true) }
-    val fakeActions = LeadBoardActions(
-        onShowMore = { _, _ -> },
-        isValidShowMoreTeams = { showMoreState },
-        onLoadMoreTeams = {}
-    )
-
     LeadBoardContent(
         list = emptyList(),
-        leadBoardActions = fakeActions,
+        leadBoardActions = LeadboardMocks.fakeActions,
+        showMoreItensAction = ItemActionsMock.mockShowMoreItensActionHidden,
         navHostController = rememberNavController()
     )
 }

@@ -11,7 +11,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.amfootball.MainActivity
 import com.example.amfootball.R
-import com.example.amfootball.utils.NotificationConst
+import com.example.amfootball.core.utils.NotificationConst
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,8 +19,8 @@ import javax.inject.Singleton
 /**
  * Serviço responsável por construir e exibir Notificações Push locais no sistema Android.
  *
- * Esta classe abstrai a complexidade do uso direto do [NotificationManagerCompat], tratando
- * da permissão de runtime (Android 13+) e da criação dos Intents para abrir a [MainActivity].
+ * Esta classe abstrai a complexidade do uso direto do [androidx.core.app.NotificationManagerCompat], tratando
+ * da permissão de runtime (Android 13+) e da criação dos Intents para abrir a [com.example.amfootball.MainActivity].
  *
  * É injetada como Singleton, garantindo uma única instância ao longo do ciclo de vida da aplicação.
  *
@@ -31,30 +31,35 @@ class NotificationService @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     /**
-     * Constrói e exibe uma notificação no canal de "Equipa" ([NotificationConst.TEAM_CHANNEL_ID]).
+     * Constrói e exibe uma notificação no canal de "Equipa" ([com.example.amfootball.core.utils.NotificationConst.TEAM_CHANNEL_ID]).
      *
      * Este método trata de:
-     * 1. Criar o [PendingIntent] para abrir a [MainActivity] quando a notificação é clicada.
+     * 1. Criar o [android.app.PendingIntent] para abrir a [com.example.amfootball.MainActivity] quando a notificação é clicada.
      * 2. Configurar o layout e prioridade da notificação (Prioridade Alta, ícone, título, texto).
-     * 3. Verificar a permissão de runtime [Manifest.permission.POST_NOTIFICATIONS] no Android 13 (Tiramisu) ou superior,
+     * 3. Verificar a permissão de runtime [android.Manifest.permission.POST_NOTIFICATIONS] no Android 13 (Tiramisu) ou superior,
      * retornando silenciosamente se a permissão não tiver sido concedida.
      * 4. Disparar a notificação para o sistema.
      *
      * @param title O título principal a ser exibido na notificação.
      * @param message O corpo principal da mensagem.
      *
-     * @see NotificationCompat
+     * @see androidx.core.app.NotificationCompat
      */
-    fun showNotificationTeam(title: String, message: String) {
+    fun showNotificationTeam(title: String, message: String, navigationAction: String? = null) {
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+            //Permite ao clicar na notificação navegar para algum lado
+            if (navigationAction != null) {
+                putExtra("NAVIGATION_ACTION", navigationAction)
+            }
         }
 
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
             context,
             0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val builder = NotificationCompat.Builder(context, NotificationConst.TEAM_CHANNEL_ID)
@@ -67,7 +72,11 @@ class NotificationService @Inject constructor(
 
         with(NotificationManagerCompat.from(context)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
                     return
                 }
             }
