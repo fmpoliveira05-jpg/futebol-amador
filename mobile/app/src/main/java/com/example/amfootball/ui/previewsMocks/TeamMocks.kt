@@ -141,9 +141,9 @@ object CalendarMocks {
 
     val itemActions =
         _root_ide_package_.com.example.amfootball.ui.actions.itemsList.ItemsCalendarActions(
-            onCancelMatch = { _, _ -> },
-            onPostPoneMatch = { _, _ -> },
-            onStartMatch = {},
+            onCancelMatch = { _ -> },
+            onPostPoneMatch = { _ -> },
+            onStartMatch = {_, _ ->},
             onFinishMatch = { _, _ -> }
         )
 
@@ -151,7 +151,7 @@ object CalendarMocks {
         get() = listOf(
             InfoMatchCalendar(
                 idMatch = "1",
-                matchStatusId = 2, // DONE
+                matchStatusId = 2,
                 rawGameDate = LocalDateTime.now().minusDays(3).toString(),
                 typeMatchBool = true,
                 matchResultId = 0,
@@ -162,7 +162,7 @@ object CalendarMocks {
             ),
             InfoMatchCalendar(
                 idMatch = "2",
-                matchStatusId = 0, // SCHEDULED
+                matchStatusId = 0,
                 rawGameDate = LocalDateTime.now().plusDays(5).toString(),
                 typeMatchBool = false,
                 matchResultId = -1,

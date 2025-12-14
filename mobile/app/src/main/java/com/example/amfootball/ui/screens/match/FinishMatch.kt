@@ -55,7 +55,12 @@ fun FinishMatchScreen(
         onSubmitForm = {
             viewModel.onSubmitForm(
                 onSucess = {
-                    navHostController.navigate(route = SignalRUrls.FINISH_MATCH_URL) {
+                    val matchId = result.idMatch
+                    val opponentId = result.idOpponent
+                    val myGoals = result.numGoalsTeam
+                    val opponentGoals = result.numGoalsOpponent
+
+                    navHostController.navigate(route = "${SignalRUrls.FINISH_MATCH_URL}/$matchId/$opponentId/$opponentGoals/$myGoals") {
                         launchSingleTop = true
                     }
                 }
@@ -148,7 +153,7 @@ private fun TextFieldForm(
     )
 
     SubmitFormButton(
-        onClick = { formActions.onSubmitForm }
+        onClick = { formActions.onSubmitForm() }
     )
 }
 

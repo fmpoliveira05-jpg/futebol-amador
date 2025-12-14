@@ -149,21 +149,7 @@ fun BottomSheetContent(
             NavigateButton(
                 icon = routeInfo.icon,
                 label = stringResource(id = routeInfo.labelResId),
-                onClick = {
-                    when (routeInfo) {
-                        Routes.TeamRoutes.CALENDAR -> {
-                            if (teamId != null) {
-                                navController.navigate("${routeInfo.route}/${teamId}")
-                            } else {
-                                println("Erro: Tentativa de abrir calendário sem ID de equipa")
-                            }
-                        }
-
-                        else -> {
-                            navController.navigate(routeInfo.route)
-                        }
-                    }
-                }
+                onClick = { navController.navigate(routeInfo.route) }
             )
         }
     }

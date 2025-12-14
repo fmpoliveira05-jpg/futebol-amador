@@ -39,10 +39,7 @@ class StartMatchSocketService @Inject constructor(
                         .withHeader("ngrok-skip-browser-warning", "true")
                         .build()
 
-                    hubConnection?.on(SignalRMethods.RECEIVE_MATCH, { message ->
-                        Log.d("SIGNALR", "Mensagem recebida: $message")
-                        _matchEvents.tryEmit(message)
-                    }, String::class.java)
+                    registerHandlers()
                 }
                 if (hubConnection?.connectionState != HubConnectionState.CONNECTED) {
                     hubConnection?.start()?.blockingAwait()
@@ -55,6 +52,13 @@ class StartMatchSocketService @Inject constructor(
             }
 
         }
+    }
+
+    private fun registerHandlers() {
+        hubConnection?.on(SignalRMethods.RECEIVE_MATCH, { message ->
+            Log.d("SIGNALR", "Mensagem recebida: $message")
+            _matchEvents.tryEmit(message)
+        }, String::class.java)
     }
 
     fun joinStartMatch(idMatch: String, idTeam: String) {
@@ -78,6 +82,12 @@ class StartMatchSocketService @Inject constructor(
      * Fecha a conexão quando sair do ecrã ou destruir a app
      */
     fun stopConnection() {
-        hubConnection?.stop()
+        try {
+            hubConnection?.stop()
+        } catch (e: Exception) {
+            Log.e("SIGNALR", "Erro ao parar conexão: ${e.message}")
+        } finally {
+            hubConnection = null
+        }
     }
 }

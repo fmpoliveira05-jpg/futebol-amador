@@ -46,6 +46,7 @@ import com.example.amfootball.ui.screens.lists.LeaderboardScreen
 import com.example.amfootball.ui.screens.lists.ListMemberShipRequest
 import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
+import com.example.amfootball.ui.screens.match.FinishMatchLobbyScreen
 import com.example.amfootball.ui.screens.match.FinishMatchScreen
 import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.match.StartMatchLobbyScreen
@@ -369,14 +370,30 @@ private fun NavGraphBuilder.hubPages(
     sessionManager: SessionManager
 ) {
     composableProtectedAdminTeam(
-        route = "${SignalRUrls.START_MATCH_URL}/{${Arguments.MATCH_ID}}",
+        route = "${SignalRUrls.START_MATCH_URL}/{${Arguments.MATCH_ID}}/{${Arguments.OPPONENT_ID}}",
         arguments = listOf(
-            navArgument(Arguments.MATCH_ID) { type = NavType.StringType }
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
+            navArgument(Arguments.OPPONENT_ID) { type = NavType.StringType }
         ),
         sessionManager = sessionManager,
         navController = globalNavController,
         content = {
             StartMatchLobbyScreen(navHostController = globalNavController)
+        }
+    )
+
+    composableProtectedAdminTeam(
+        route = "${SignalRUrls.FINISH_MATCH_URL}/{${Arguments.MATCH_ID}}/{${Arguments.OPPONENT_ID}}/{${Arguments.OPPONENT_GOALS}}/{${Arguments.MY_GOALS}}",
+        arguments = listOf(
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
+            navArgument(Arguments.OPPONENT_ID) { type = NavType.StringType },
+            navArgument(Arguments.OPPONENT_GOALS) { type = NavType.IntType },
+            navArgument(Arguments.MY_GOALS) { type = NavType.IntType }
+        ),
+        sessionManager = sessionManager,
+        navController = globalNavController,
+        content = {
+            FinishMatchLobbyScreen(navHostController = globalNavController)
         }
     )
 }
@@ -386,11 +403,8 @@ private fun NavGraphBuilder.teamMatch(
 ) {
     composableProtectedMemberTeam(
         navController = globalNavController,
-        route = "${Routes.TeamRoutes.CALENDAR.route}/{${Arguments.TEAM_ID}}",
+        route = Routes.TeamRoutes.CALENDAR.route,
         sessionManager = sessionManager,
-        arguments = listOf(
-            navArgument(Arguments.TEAM_ID) { type = NavType.StringType }
-        ),
         content = {
             CalendarScreen(navHostController = globalNavController)
         }
@@ -430,9 +444,10 @@ private fun NavGraphBuilder.managementMatch(
     )
 
     composableProtectedAdminTeam(
-        route = "${Routes.TeamRoutes.FINISH_MATCH.route}/{${Arguments.MATCH_ID}}",
+        route = "${Routes.TeamRoutes.FINISH_MATCH.route}/{${Arguments.MATCH_ID}}/{${Arguments.OPPONENT_ID}}",
         arguments = listOf(
-            navArgument(Arguments.MATCH_ID) { type = NavType.StringType }
+            navArgument(Arguments.MATCH_ID) { type = NavType.StringType },
+            navArgument(Arguments.OPPONENT_ID) { type = NavType.StringType },
         ),
         navController = globalNavController,
         sessionManager = sessionManager,

@@ -1,6 +1,8 @@
 package com.example.amfootball.ui.viewModel.match
 
+import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.Arguments
 import com.example.amfootball.core.utils.FinishMatchConst
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.local.SessionManager
@@ -11,7 +13,6 @@ import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-//TODO: Falta apenas carregar o opponente
 /**
  * ViewModel responsável pela lógica de negócio e gestão de estado do ecrã de Finalização de Partida (Reportar Resultado).
  *
@@ -26,22 +27,29 @@ import javax.inject.Inject
 @HiltViewModel
 class FinishMatchViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val savedStateHandle: SavedStateHandle
 ) : FormsViewModel<ResultMatchDto, FinishMatchFormErrors>(
     networkObserver = networkObserver,
     initialData = ResultMatchDto(),
     initialError = FinishMatchFormErrors()
 ) {
 
+    private val matchId: String = savedStateHandle.get<String>(Arguments.MATCH_ID) ?: ""
+
+    private val opponentId: String = savedStateHandle.get<String>(Arguments.OPPONENT_ID) ?: ""
+
+    private val teamId = sessionManager.fetchTeamId()
+
+
     //Initializar
     init {
-        //TODO: Ver como vou sacar o que falta e claro carregar o opponente
         formState.value = ResultMatchDto(
             numGoalsTeam = 0,
             numGoalsOpponent = 0,
-            idMatch = "ada",
-            idTeam = "asd",
-            idOpponent = "as",
+            idMatch = matchId,
+            idTeam = teamId,
+            idOpponent = opponentId,
         )
     }
 
@@ -101,7 +109,23 @@ class FinishMatchViewModel @Inject constructor(
         }
 
         return isValid
+    }
 
+    /**
+     * Função auxiliar que aplica limites mínimos e máximos ao número de golos (Clamping).
+     * Garante que o número de golos nunca é negativo nem excede o máximo permitido ao atualizar o estado.
+     *
+     * @param newNumGoals O valor de golos proposto.
+     * @return O valor de golos filtrado dentro dos limites definidos.
+     */
+    private fun newNumGoals(newNumGoals: Int): Int {
+        var numGoals = FinishMatchConst.MIN_GOALS
+
+        if (newNumGoals >= FinishMatchConst.MIN_GOALS && newNumGoals <= FinishMatchConst.MAX_GOALS) {
+            numGoals = newNumGoals
+        }
+
+        return numGoals
     }
 
     /**
@@ -155,22 +179,5 @@ class FinishMatchViewModel @Inject constructor(
         }
 
         return isValid
-    }
-
-    /**
-     * Função auxiliar que aplica limites mínimos e máximos ao número de golos (Clamping).
-     * Garante que o número de golos nunca é negativo nem excede o máximo permitido ao atualizar o estado.
-     *
-     * @param newNumGoals O valor de golos proposto.
-     * @return O valor de golos filtrado dentro dos limites definidos.
-     */
-    private fun newNumGoals(newNumGoals: Int): Int {
-        var numGoals = FinishMatchConst.MIN_GOALS
-
-        if (newNumGoals >= FinishMatchConst.MIN_GOALS && newNumGoals <= FinishMatchConst.MAX_GOALS) {
-            numGoals = newNumGoals
-        }
-
-        return numGoals
     }
 }

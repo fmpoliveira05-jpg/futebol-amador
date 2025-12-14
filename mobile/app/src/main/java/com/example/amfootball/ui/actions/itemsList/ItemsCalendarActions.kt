@@ -14,8 +14,8 @@ import androidx.navigation.NavHostController
  * @property onFinishMatch Callback para finalizar uma partida (registar o resultado). Recebe o ID da partida (String) e o [NavHostController] para navegação (ex: abrir formulário de resultado).
  */
 data class ItemsCalendarActions(
-    val onCancelMatch: (String, NavHostController) -> Unit,
-    val onPostPoneMatch: (String, NavHostController) -> Unit,
-    val onStartMatch: (String) -> Unit,
-    val onFinishMatch: (String, NavHostController) -> Unit,
+    val onCancelMatch: (String) -> Unit,
+    val onPostPoneMatch: (String) -> Unit,
+    val onStartMatch: (String, String) -> Unit,
+    val onFinishMatch: (String, String) -> Unit,
 )

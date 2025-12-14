@@ -62,6 +62,7 @@ import com.example.amfootball.ui.components.lists.ListSurface
 import com.example.amfootball.ui.components.lists.StringImageList
 import com.example.amfootball.ui.components.notification.OfflineBanner
 import com.example.amfootball.ui.components.notification.ToastHandler
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.previewsMocks.CalendarMocks
 import com.example.amfootball.ui.previewsMocks.ItemActionsMock
 import com.example.amfootball.ui.viewModel.team.CalendarTeamViewModel
@@ -100,12 +101,42 @@ fun CalendarScreen(
     )
 
     val itemsListAction = ItemsCalendarActions(
-        onCancelMatch = viewModel::onCancelMatch,
-        onPostPoneMatch = viewModel::onPostPoneMatch,
-        onStartMatch = { matchId ->
-            navHostController.navigate("${SignalRUrls.START_MATCH_URL}/$matchId")
+        onCancelMatch = { matchId ->
+            viewModel.onCancelMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/$matchId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
         },
-        onFinishMatch = viewModel::onFinishMatch
+        onPostPoneMatch = { matchId ->
+            viewModel.onPostPoneMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/$matchId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        },
+        onStartMatch = { matchId, opponentId ->
+            viewModel.onStartMatch(
+                {
+                    navHostController.navigate("${SignalRUrls.START_MATCH_URL}/$matchId/$opponentId"){
+                        launchSingleTop = true
+                    }
+                }
+            )
+        },
+        onFinishMatch = { matchId, opponentId ->
+            viewModel.onFinishMatch(
+                {
+                    navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/$matchId/$opponentId") {
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
     )
 
     val showMoreItensAction = ShowMoreItensAction(
@@ -379,27 +410,15 @@ private fun OptionsMatch(
                 matchStatus = match.matchStatus,
                 gameDate = match.gameDate,
                 onDismissRequest = { isMenuExpanded = false },
-                onStartMatch = {
-                    itensListAction.onStartMatch(match.idMatch)
-                },
+                onStartMatch = { itensListAction.onStartMatch(match.idMatch, match.opponent.idTeam) },
                 onFinishMatch = {
                     itensListAction.onFinishMatch(
                         match.idMatch,
-                        navHostController
+                        match.opponent.idTeam
                     )
                 },
-                onPostPoneMatch = {
-                    itensListAction.onPostPoneMatch(
-                        match.idMatch,
-                        navHostController
-                    )
-                },
-                onCancelMatch = {
-                    itensListAction.onCancelMatch(
-                        match.idMatch,
-                        navHostController
-                    )
-                },
+                onPostPoneMatch = { itensListAction.onPostPoneMatch(match.idMatch) },
+                onCancelMatch = { itensListAction.onCancelMatch(match.idMatch) },
             )
         }
     }

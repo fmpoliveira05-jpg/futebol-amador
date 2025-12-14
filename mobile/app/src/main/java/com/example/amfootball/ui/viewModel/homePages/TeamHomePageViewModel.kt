@@ -79,9 +79,9 @@ class TeamHomePageViewModel @Inject constructor(
      * e capturar possíveis exceções de rede.
      */
     private fun loadInfoTeam() {
-        val teamId = sessionManager.getUserProfile()?.effectiveTeamId
+        val teamId = sessionManager.fetchTeamId()
 
-        if (teamId.isNullOrEmpty()) {
+        if (teamId.isEmpty()) {
             return
         }
 

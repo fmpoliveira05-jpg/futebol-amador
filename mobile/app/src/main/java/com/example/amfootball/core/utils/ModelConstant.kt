@@ -297,6 +297,11 @@ object Arguments {
      */
     const val TEAM_ID = "teamId"
 
+    const val OPPONENT_ID = "opponentId"
+
+    const val MY_GOALS = "myGoals"
+    const val OPPONENT_GOALS = "opponentGoals"
+
     /**
      * Chave utilizada para passar o Identificador Único (UUID) de uma **Equipa**.
      *
@@ -409,8 +414,10 @@ object SignalRMethods {
     const val LEAVE_MATCH = "LeaveStartMatch"
     const val RECEIVE_MATCH = "ReceiveStartMatch"
 
+    const val RECEIVE_FINISH_MATCH = "ReceiveFinishMatch"
     const val JOIN_FINISH_MATCH = "JoinFinishMatch"
     const val EDIT_RESULT = "EditResult"
+    const val LEAVE_FINISH_MATCH = "LeaveFinishMatch"
 }
 
 object SignalRMessages {

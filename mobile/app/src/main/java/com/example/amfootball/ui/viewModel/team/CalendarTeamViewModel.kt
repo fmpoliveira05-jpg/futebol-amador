@@ -9,6 +9,7 @@ import com.example.amfootball.core.utils.TeamConst
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.events.UiState
 import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
 import com.example.amfootball.data.remote.services.CalendarService
 import com.example.amfootball.domains.enums.match.MatchStatus
@@ -41,10 +42,10 @@ import javax.inject.Inject
 class CalendarTeamViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val calendarRepository: CalendarService,
-    private val savedStateHandle: SavedStateHandle
+    private val sessionManager: SessionManager
 ) : ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
     /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
-    private val teamId = savedStateHandle.get<String>("teamId")
+    private val teamId: MutableStateFlow<String> = MutableStateFlow(sessionManager.fetchTeamId())
 
     /** Estado atual dos filtros de pesquisa aplicados pelo utilizador. */
     private val filterState: MutableStateFlow<FilterCalendar> = MutableStateFlow(FilterCalendar())
@@ -57,6 +58,7 @@ class CalendarTeamViewModel @Inject constructor(
 
     //Inicializer
     init {
+        teamId.value = sessionManager.fetchTeamId()
         loadCalendar()
     }
 
@@ -138,18 +140,20 @@ class CalendarTeamViewModel @Inject constructor(
         }
     }
 
+    fun onStartMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_start_game
+        )
+    }
     /**
      * Navega para o ecrã de cancelamento de partida.
      *
      * Requer conexão à internet. Se offline, exibe um Toast de erro via [UiState].
      */
-    fun onCancelMatch(idMatch: String, navHostController: NavHostController) {
+    fun onCancelMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
+            action = onSucess,
             toastMessage = R.string.toast_offline_cancel_game
         )
     }
@@ -158,13 +162,9 @@ class CalendarTeamViewModel @Inject constructor(
      * Navega para o ecrã de adiamento de partida.
      * Requer conexão à internet.
      */
-    fun onPostPoneMatch(idMatch: String, navHostController: NavHostController) {
+    fun onPostPoneMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.POST_PONE_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
+            action = onSucess,
             toastMessage = R.string.toast_offline_postpone_game
         )
     }
@@ -173,13 +173,9 @@ class CalendarTeamViewModel @Inject constructor(
      * Navega para o ecrã de finalização de partida (inserção de resultados).
      * Requer conexão à internet.
      */
-    fun onFinishMatch(idMatch: String, navHostController: NavHostController) {
+    fun onFinishMatch(onSucess: () -> Unit) {
         onlineFunctionality(
-            action = {
-                navHostController.navigate("${Routes.TeamRoutes.FINISH_MATCH.route}/${idMatch}") {
-                    launchSingleTop = true
-                }
-            },
+            action = onSucess,
             toastMessage = R.string.toast_offline_finish_match
         )
     }
@@ -194,15 +190,13 @@ class CalendarTeamViewModel @Inject constructor(
      */
     fun loadCalendar() {
         launchDataLoad {
-            if (teamId != null) {
-                val calendar =
-                    calendarRepository.getCalendar(teamId = teamId, filter = filterState.value)
+            val calendar = calendarRepository.getCalendar(teamId = teamId.value, filter = filterState.value)
 
-                listState.value = calendar
-                if (filterState.value == FilterCalendar()) {
-                    originalList = calendar
-                }
+            listState.value = calendar
+            if (filterState.value == FilterCalendar()) {
+                originalList = calendar
             }
+
         }
     }
 
