@@ -196,6 +196,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun editProfile() {
+
         startLoading()
 
         launchDataLoad(

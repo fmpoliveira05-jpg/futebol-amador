@@ -59,15 +59,13 @@ fun SignUpScreen(
     profileEditMode: Boolean = false
 
 ) {
-    // --- Observar Estados do ViewModel ---
     val uiFormState by viewModel.uiFormState.collectAsStateWithLifecycle()
     val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle() // Loading e Erros Globais
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     if (profileEditMode){
         viewModel.onEditMode()
     }
-    // Estados auxiliares do VM
     val countryCode by viewModel.countryCode.collectAsStateWithLifecycle()
     val passwordVerification by viewModel.passwordVerification.collectAsStateWithLifecycle()
 

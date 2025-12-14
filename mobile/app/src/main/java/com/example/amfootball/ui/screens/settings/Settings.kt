@@ -145,12 +145,10 @@ private fun SettingsPageContent(modifier: Modifier, settingsViewModel: SettingsV
                 SettingsSectionTitle(title = stringResource(id = R.string.profile))
                 ProfileSection(
                     onEditClick = {
-                        navController.navigate(Routes.UserRoutes.PROFILE.route)
-                        //TODO: ir para pagina de editar perfil
+                        navController.navigate(Routes.UserRoutes.EDIT_PROFILE.route)
                     },
                     onDeleteClick = {
                         settingsViewModel.showDeleteProfile()
-                        //TODO: ir para pagina de eliminar perfil
                     }
                 )
             }
@@ -338,7 +336,6 @@ private fun ProfileSection(
             Text(stringResource(id = R.string.profile_edit))
         }
 
-        // Botão Deletar (Cor de erro para destaque)
         OutlinedButton(
             onClick = onDeleteClick,
             modifier = Modifier.fillMaxWidth(),
