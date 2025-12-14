@@ -157,7 +157,7 @@ private fun FieldProfileTeam(
     profileInfo: ProfileTeamDto
 ) {
     ProfilesImageString(
-        image = profileInfo.logo,
+        image = profileInfo.icon,
         contentDescription = stringResource(id = R.string.description_logo_team, profileInfo.name),
         modifier = Modifier.fillMaxWidth()
     )

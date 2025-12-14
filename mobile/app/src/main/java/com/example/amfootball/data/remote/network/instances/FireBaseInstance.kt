@@ -4,6 +4,7 @@ import com.example.amfootball.data.interfaces.provider.FcmTokenProvider
 import com.example.amfootball.data.remote.network.FirebaseFcmTokenProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,12 +44,41 @@ object FireBaseInstance {
         return FirebaseAuth.getInstance()
     }
 
+    /**
+     * Providencia a instância padrão da base de dados NoSQL [FirebaseFirestore].
+     *
+     * Utilizada para operações de leitura e escrita de documentos e coleções em tempo real.
+     *
+     * @return A instância singleton do Firestore.
+     */
     @Provides
     @Singleton
     fun provideFirestore(): FirebaseFirestore {
         return FirebaseFirestore.getInstance()
     }
 
+    /**
+     * Providencia a instância padrão do serviço de armazenamento de ficheiros [FirebaseStorage].
+     *
+     * Este serviço é utilizado para fazer upload e download de ficheiros binários, como
+     * fotos de perfil de utilizadores e logótipos de equipas (Blobs).
+     *
+     * **Nota de Teste:** Injetar esta instância permite criar Mocks do Storage nos testes,
+     * evitando uploads reais para a cloud durante a execução dos testes automatizados.
+     *
+     * @return A instância singleton do Firebase Storage.
+     */
+    @Provides
+    @Singleton
+    fun provideFirebaseStorage(): FirebaseStorage {
+        return FirebaseStorage.getInstance()
+    }
+
+    /**
+     * Providencia a implementação do fornecedor de tokens FCM (Firebase Cloud Messaging).
+     *
+     * @return Uma instância de [FirebaseFcmTokenProvider] mascarada pela interface [FcmTokenProvider].
+     */
     @Provides
     @Singleton
     fun provideFcmTokenProvider(): FcmTokenProvider {

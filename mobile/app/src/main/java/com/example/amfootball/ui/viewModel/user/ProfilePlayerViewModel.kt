@@ -64,11 +64,7 @@ class ProfilePlayerViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = false) }
             } else {
                 val myId = sessionManager.fetchUserId()
-                if (myId != null) {
-                    loadPlayerProfile(myId)
-                } else {
-                    _uiState.update { it.copy(isLoading = false, errorMessage = "Sessão inválida") }
-                }
+                loadPlayerProfile(myId)
             }
         }
     }
@@ -76,7 +72,7 @@ class ProfilePlayerViewModel @Inject constructor(
     fun retry() {
         val id = playerId ?: sessionManager.fetchUserId()
 
-        if (id != null) {
+        if (id.isBlank()) {
             loadPlayerProfile(playerId = id)
         } else {
             _uiState.update {

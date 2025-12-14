@@ -136,8 +136,14 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:24.0.1")
     implementation("com.google.firebase:firebase-firestore")
 
+    //Storage
+    implementation("com.google.firebase:firebase-storage")
+
     //Push Notification FireBase
     implementation("com.google.firebase:firebase-messaging")
+
+    //Guard Imagens cloudinary
+    implementation("com.cloudinary:cloudinary-android:2.4.0")
 
     implementation("androidx.compose.material:material-icons-extended:1.6.7")
 
@@ -187,4 +193,12 @@ dependencies {
     //Signal R
     implementation("com.microsoft.signalr:signalr:8.0.0")
     implementation("io.reactivex.rxjava3:rxjava:3.1.8")
+
+    //Camera X
+    val camerax_version = "1.3.4" // Ou a versão mais recente
+    implementation("androidx.camera:camera-core:${camerax_version}")
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
+    implementation("androidx.compose.material:material-icons-extended:1.6.8")
 }

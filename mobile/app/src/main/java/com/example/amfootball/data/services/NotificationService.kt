@@ -1,4 +1,4 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import android.Manifest
 import android.app.PendingIntent

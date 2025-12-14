@@ -15,12 +15,13 @@ import com.google.gson.annotations.SerializedName
  * @property foundationDate A data de fundação da equipa (string formatada).
  * @property totalPoints A pontuação total atual da equipa.
  * @property rank O nível ou nome do rank atual da equipa.
- * @property logo A URL ou caminho do logótipo da equipa (pode ser null).
+ * @property icon A URL ou caminho do logótipo da equipa (pode ser null).
  * @property pitch O objeto [PitchInfo] que contém os dados do campo de jogo.
  */
 data class ProfileTeamDto(
     val id: String = "",
     val name: String = "",
+    val icon: String? = null,
     val description: String = "",
     @SerializedName("FoundationDate", alternate = ["foundationDate"])
     val foundationDate: String? = null,
@@ -28,7 +29,6 @@ data class ProfileTeamDto(
     val totalPoints: Int = 0,
     @SerializedName("RankName", alternate = ["rankName"])
     val rank: String = "",
-    val logo: String? = null,
     @SerializedName("PitchDto", alternate = ["pitchDto"])
     val pitch: PitchInfo = PitchInfo(),
 )

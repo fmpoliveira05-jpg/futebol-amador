@@ -18,6 +18,6 @@ data class TeamDto(
     val id: String = "",
     @SerializedName("Name", alternate = ["name"])
     val name: String = "",
-    @SerializedName("Image", alternate = ["image", "imageUrl"])
+    @SerializedName("Image", alternate = ["image", "imageUrl", "icon"])
     val image: String? = null
 )

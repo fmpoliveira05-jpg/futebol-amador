@@ -34,7 +34,7 @@ import javax.inject.Inject
  * 3. Configurar canais de notificação e solicitar permissões de runtime essenciais.
  *
  * Nota: Esta Activity não gere o fluxo de notificação FCM diretamente; essa tarefa é delegada
- * ao [com.example.amfootball.data.repository.PushNotificationService].
+ * ao [com.example.amfootball.data.services.PushNotificationService].
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {

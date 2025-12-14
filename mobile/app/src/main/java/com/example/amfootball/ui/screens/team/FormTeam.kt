@@ -152,7 +152,7 @@ private fun FieldsCreateTeam(
     isEditMode: Boolean
 ) {
     ImagePickerString(
-        imageSelectedUrl = filedTeam.image,
+        model = filedTeam.image,
         onImageSelected = { fieldTeamAction.onImageChange(it) },
         modifier = Modifier.padding(bottom = 24.dp),
         contentDescription = stringResource(id = R.string.logo_team),

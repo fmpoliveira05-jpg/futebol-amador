@@ -80,7 +80,7 @@ object ProfileTeamMocks {
         foundationDate = "1922",
         rank = "Ouro",
         totalPoints = 350,
-        logo = "",
+        icon = "",
         pitch = dummyPitch,
     )
 }

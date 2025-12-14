@@ -89,8 +89,8 @@ class TeamService @Inject constructor(
      */
     suspend fun getTeamToUpdate(teamId: String): FormTeamDto {
         return safeApiCallWithReturn {
-            teamApi.getTeamProfile(teamId = teamId)
-        }.toFormTeamDto()
+            teamApi.getDataToUpdateTeam(teamId = teamId)
+        }
     }
 
     /**

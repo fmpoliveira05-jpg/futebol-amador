@@ -1,6 +1,7 @@
 package com.example.amfootball
 
 import android.app.Application
+import com.example.amfootball.core.utils.CloudinaryManager
 import com.example.amfootball.data.local.SessionManager
 import dagger.hilt.android.HiltAndroidApp
 
@@ -35,5 +36,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         sessionManager = SessionManager(applicationContext)
+
+        CloudinaryManager.init(this)
     }
 }

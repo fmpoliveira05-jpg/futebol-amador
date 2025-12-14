@@ -80,6 +80,12 @@ interface TeamApi {
         @Body team: FormTeamDto
     ): Response<FormTeamDto>
 
+
+    @GET("${BaseEndpoints.TEAM_API}/DataUpdate/{${Arguments.TEAM_ID}}")
+    suspend fun getDataToUpdateTeam(
+        @Path(Arguments.TEAM_ID) teamId: String,
+    ): Response<FormTeamDto>
+
     /**
      * Ponto de acesso (Endpoint) para apagar uma equipa através do seu ID.
      *

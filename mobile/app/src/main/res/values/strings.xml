@@ -4,4 +4,11 @@
     <string name="average_age">average age</string>
 
     <string name="title_login">Login Content</string>
+    <string name="change_camera">Change Camera</string>
+    <string name="take_pitcture">Take Picture</string>
+    <string name="permission_camera">Camera permission required</string>
+    <string name="select_image">Select Image</string>
+    <string name="choose_image_source">Choose the image source</string>
+    <string name="galery">Galery</string>
+    <string name="chamber">Chamber</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.amfootball.data.repository
+package com.example.amfootball.data.services
 
 import android.util.Log
 import com.example.amfootball.R
@@ -106,7 +106,7 @@ class PushNotificationService : FirebaseMessagingService() {
      * A lógica implementada usa o valor `type` (extraído do payload de dados) para rotear
      * a mensagem para o handler específico (e.g., [handleTeamDeleted]).
      *
-     * @param message A mensagem completa recebida, encapsulada num [RemoteMessage].
+     * @param message A mensagem completa recebida, encapsulada num [com.google.firebase.messaging.RemoteMessage].
      * @see FirebaseMessagingService.onMessageReceived
      */
     override fun onMessageReceived(message: RemoteMessage) {
@@ -171,7 +171,7 @@ class PushNotificationService : FirebaseMessagingService() {
      * **Ações:**
      * 1. Usa strings localizadas (via [getString(R.string.x)] no caso do código em PT) ou o texto do payload para o título e corpo.
      * 2. Limpa o `teamId` do utilizador no [sessionManager], indicando que já não faz parte de uma equipa.
-     * 3. Emite um evento [AppEvent.TeamDeleted] no [globalEventBus] para que a UI possa reagir (e.g., navegar para a Home).
+     * 3. Emite um evento [com.example.amfootball.data.events.AppEvent.TeamDeleted] no [globalEventBus] para que a UI possa reagir (e.g., navegar para a Home).
      * 4. Exibe a notificação com uma ação de navegação.
      *
      * @param message A [RemoteMessage] recebida.

@@ -1,7 +1,10 @@
 package com.example.amfootball.ui.viewModel.team
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
+import com.example.amfootball.core.utils.Arguments
+import com.example.amfootball.core.utils.CloudinaryManager
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.PitchConst
 import com.example.amfootball.core.utils.TeamConst
@@ -13,7 +16,10 @@ import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.formErrors.TeamFormErros
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 /**
  * ViewModel responsável pela lógica de negócio do formulário de Equipas.
@@ -28,13 +34,14 @@ import javax.inject.Inject
  * @property networkObserver Observador de conectividade (injetado no Pai).
  * @property teamRepository Repositório para operações CRUD de equipas.
  * @property savedStateHandle Recupera argumentos de navegação (ex: ID da equipa).
+ * @property sessionManager Gestor de sessão local do utilizador.
  */
 @HiltViewModel
 class TeamFormViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val teamRepository: TeamService,
     private val savedStateHandle: SavedStateHandle,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
 ) : FormsViewModel<FormTeamDto, TeamFormErros>(
     networkObserver = networkObserver,
     initialData = FormTeamDto(),
@@ -47,7 +54,7 @@ class TeamFormViewModel @Inject constructor(
      * - Se for `null` ou inválido, assume-se que é uma **Criação**.
      * - Se for uma String válida, assume-se que é uma **Edição**.
      */
-    private val teamId: String? = savedStateHandle.get("teamId")
+    private val teamId: String? = savedStateHandle.get(Arguments.TEAM_ID)
 
     /**
      * Propriedade computada que determina o modo de operação do formulário.
@@ -57,7 +64,7 @@ class TeamFormViewModel @Inject constructor(
      *
      * @return `true` se estiver em modo de edição, `false` caso contrário.
      */
-    val isEditMode: Boolean = !teamId.isNullOrBlank() && teamId != "null" && teamId != "{teamId}"
+    val isEditMode: Boolean = !teamId.isNullOrBlank() && teamId != "null" && teamId != "{${Arguments.TEAM_ID}}"
 
     /**
      * Bloco de inicialização.
@@ -162,12 +169,15 @@ class TeamFormViewModel @Inject constructor(
         submitForm(
             onSuccess = onSucess,
             apiCall = {
-                if (teamId != null && isEditMode) {
-                    teamRepository.updateTeam(teamId = teamId, team = formState.value)
-                } else {
-                    val createdTeamDto = teamRepository.createTeam(team = formState.value)
+                val finalImageUrl = saveImage()
+                val finalTeamDto = formState.value.copy(image = finalImageUrl)
 
-                    if (createdTeamDto != null && !createdTeamDto.id.isNullOrBlank()) {
+                if (teamId != null && isEditMode) {
+                    teamRepository.updateTeam(teamId = teamId, team = finalTeamDto)
+                } else {
+                    val createdTeamDto = teamRepository.createTeam(team = finalTeamDto)
+
+                    if (!createdTeamDto.id.isNullOrBlank()) {
                         sessionManager.updateTeamIdUser(teamId = createdTeamDto.id)
                         sessionManager.updateRoleMemberTeam(isAdmin = true)
                     } else {
@@ -286,5 +296,44 @@ class TeamFormViewModel @Inject constructor(
         }
 
         return isValid
+    }
+
+    /**
+     * Realiza o upload da imagem para o Cloudinary se for uma imagem nova local.
+     *
+     * Utiliza [suspendCancellableCoroutine] para converter o callback do Cloudinary
+     * numa função de suspensão que pode ser aguardada pelo fluxo do ViewModel.
+     *
+     * Lógica:
+     * - Se a imagem for nula ou vazia, retorna null.
+     * - Se a imagem já for um URL (começa por "http"), não faz upload e retorna o URL atual.
+     * - Se for um URI local, faz upload e retorna o novo URL seguro (HTTPS).
+     *
+     * @return A URL da imagem hospedada ou null.
+     * @throws Exception Caso o upload falhe.
+     */
+    private suspend fun saveImage(): String? {
+        val currentImageString = formState.value.image
+
+        if (currentImageString.isNullOrBlank() || currentImageString.startsWith("http")) {
+            return currentImageString
+        }
+
+        return suspendCancellableCoroutine { continuation ->
+
+            CloudinaryManager.uploadImage(
+                uri = Uri.parse(currentImageString),
+                onSuccess = { url ->
+                    if (continuation.isActive) {
+                        continuation.resume(url)
+                    }
+                },
+                onError = { errorMsg ->
+                    if (continuation.isActive) {
+                        continuation.resumeWithException(Exception("Erro Cloudinary: $errorMsg"))
+                    }
+                }
+            )
+        }
     }
 }

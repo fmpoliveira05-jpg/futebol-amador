@@ -6,11 +6,11 @@ import com.google.gson.annotations.SerializedName
 
 data class VitorySequenceTemDto(
     @SerializedName("Opponent", alternate = ["opponent"])
-    val opponent: TeamDto,
-    @SerializedName("Result")
-    val result: String,
+    val opponent: TeamDto = TeamDto(),
+    @SerializedName("Result", alternate = ["result"])
+    val result: String = "",
     @SerializedName("MatchResult", alternate = ["matchResult"])
-    val matchResultId: Int
+    val matchResultId: Int = 0
 ) {
     val matchResult: MatchResult
         get() = when (matchResultId) {

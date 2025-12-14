@@ -21,7 +21,7 @@ data class FormTeamDto(
     val name: String = "",
     @SerializedName("description", alternate = ["Description"])
     val description: String? = null,
-    @SerializedName("icon")
+    @SerializedName("icon", alternate = ["Icon", "image", "Image"])
     val image: String? = null,
     @SerializedName("homePitch", alternate = ["HomePitch", "pitchDto", "PitchDto"])
     val pitch: PitchInfo = PitchInfo()

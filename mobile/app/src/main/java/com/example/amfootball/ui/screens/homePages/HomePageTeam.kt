@@ -76,11 +76,6 @@ fun HomePageTeamScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
-    ToastHandler(
-        toastMessage = uiState.toastMessage,
-        onToastShown = viewModel::onToastShown
-    )
-
     val homePageTeamActions = HomePageTeamActions(
         onNavigateCasualMatch = {
             viewModel.onNavigateCasualMatch(
@@ -127,6 +122,11 @@ fun HomePageTeamScreen(
                 }
             )
         }
+    )
+
+    ToastHandler(
+        toastMessage = uiState.toastMessage,
+        onToastShown = viewModel::onToastShown
     )
 
     HomePageTeam(

@@ -213,7 +213,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun validProfile(profile: PlayerProfileDto?): Boolean {
-        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId == null) {
+        if (profile == null || profile.loginResponseDto == null || profile.loginResponseDto.localId.isEmpty()) {
             updateToast(R.string.toast_playerProfile_error)
             return false
         }
