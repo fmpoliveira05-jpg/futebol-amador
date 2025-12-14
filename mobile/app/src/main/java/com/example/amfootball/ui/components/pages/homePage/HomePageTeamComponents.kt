@@ -46,6 +46,10 @@ import java.time.format.DateTimeFormatter
  */
 @Composable
 fun RecentFormSection(history: List<VitorySequenceTemDto>) {
+    val maxItems = 5
+    val displayHistory = history.take(maxItems)
+    val emptySlots = maxItems - displayHistory.size
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = stringResource(id = R.string.team_form),
@@ -56,7 +60,7 @@ fun RecentFormSection(history: List<VitorySequenceTemDto>) {
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             if (history.isEmpty()) {
                 Text(
@@ -64,8 +68,15 @@ fun RecentFormSection(history: List<VitorySequenceTemDto>) {
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                history.take(5).forEach { match ->
-                    MatchResultBadge(match)
+                displayHistory.forEach { match ->
+                    MatchResultBadge(
+                        match = match,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                repeat(emptySlots) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -80,7 +91,10 @@ fun RecentFormSection(history: List<VitorySequenceTemDto>) {
  * @param match O DTO [VitorySequenceTemDto] com o resultado e o nome do adversário.
  */
 @Composable
-fun MatchResultBadge(match: VitorySequenceTemDto) {
+fun MatchResultBadge(
+    match: VitorySequenceTemDto,
+    modifier: Modifier = Modifier
+) {
     val color = when (match.matchResult) {
         MatchResult.WIN -> Color(0xFF4CAF50)
         MatchResult.LOSE -> Color(0xFFE53935)
@@ -90,7 +104,7 @@ fun MatchResultBadge(match: VitorySequenceTemDto) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.width(50.dp)
+        modifier = modifier
     ) {
         Box(
             modifier = Modifier
@@ -185,7 +199,6 @@ fun UpcomingMatchCard(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Data
             Text(
                 text = match.gameDate.format(dateFormatter),
                 style = MaterialTheme.typography.labelMedium,
@@ -212,7 +225,7 @@ fun UpcomingMatchCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = if (match.isHome) "(C)" else "(F)",
+                    text = if (match.isHome) "(${stringResource(id = R.string.game_Home)})" else "(${stringResource(id = R.string.game_away)})",
                     style = MaterialTheme.typography.labelSmall,
                     color = if (match.isHome) Color.Gray else Color.Gray
                 )
