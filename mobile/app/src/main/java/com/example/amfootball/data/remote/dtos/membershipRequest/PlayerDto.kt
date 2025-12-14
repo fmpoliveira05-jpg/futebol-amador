@@ -24,5 +24,7 @@ data class PlayerDto(
     @SerializedName("Id", alternate = ["id"])
     val id: String,
     @SerializedName("Name", alternate = ["name"])
-    val name: String
+    val name: String,
+    @SerializedName("ImageUrl", alternate = ["imageUrl"])
+    val imageUrl: String?
 )

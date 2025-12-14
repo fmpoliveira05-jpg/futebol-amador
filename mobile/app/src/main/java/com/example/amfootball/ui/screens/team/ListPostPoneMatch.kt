@@ -306,8 +306,6 @@ private fun ItemListPosPoneMatch(
                         it.postponeDate?.toUiString()
                     }"
                 )
-                //Comentei o Dto não tem
-                //PitchAddressRow(ptichAdrress = it.)
             }
         },
         leading = {

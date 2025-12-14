@@ -81,8 +81,8 @@ data class InfoMatchCalendar(
     val matchResult: MatchResult
         get() = when (matchResultId) {
             0 -> MatchResult.WIN
-            1 -> MatchResult.DRAW
-            2 -> MatchResult.LOSE
+            1 -> MatchResult.LOSE
+            2 -> MatchResult.DRAW
             else -> MatchResult.UNDEFINED
         }
 

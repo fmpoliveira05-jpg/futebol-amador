@@ -349,10 +349,10 @@ private fun ListMemberShipRequestContent(
     )
 }
 
-@Preview(name = "Lista Preenchida - PT", locale = "pt-rPT", showBackground = true)
-@Preview(name = "Populated List - EN", locale = "en", showBackground = true)
+@Preview(name = "Lista Pedidos Equipas - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Lista Pedidos Equipas - EN", locale = "en", showBackground = true)
 @Composable
-fun PreviewContentListMemberShipRequestPopulated() {
+fun PreviewContentListMemberShipRequestTeams() {
     AMFootballTheme {
         ContentListMemberShipRequest(
             uiState = UiState(isLoading = false),
@@ -360,7 +360,26 @@ fun PreviewContentListMemberShipRequestPopulated() {
             filters = FilterMemberShipRequest(),
             filterError = FilterMemberShipRequestError(),
             filterActions = ListMemberShipRequestMocks.filterActions,
-            list = ListMemberShipRequestMocks.mockRequests,
+            list = ListMemberShipRequestMocks.mockTeamRequests,
+            itemsActions = ListMemberShipRequestMocks.itemsActions,
+            showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
+            navHostController = rememberNavController()
+        )
+    }
+}
+
+@Preview(name = "Lista Pedidos Jogadores - PT", locale = "pt-rPT", showBackground = true)
+@Preview(name = "Player Requests List - EN", locale = "en", showBackground = true)
+@Composable
+fun PreviewContentListMemberShipRequestPlayers() {
+    AMFootballTheme {
+        ContentListMemberShipRequest(
+            uiState = UiState(isLoading = false),
+            isOnline = true,
+            filters = FilterMemberShipRequest(),
+            filterError = FilterMemberShipRequestError(),
+            filterActions = ListMemberShipRequestMocks.filterActions,
+            list = ListMemberShipRequestMocks.mockPlayerRequests,
             itemsActions = ListMemberShipRequestMocks.itemsActions,
             showMoreItensAction = ItemActionsMock.mockShowMoreItensAction,
             navHostController = rememberNavController()
