@@ -6,6 +6,8 @@ import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
+import com.example.amfootball.data.interfaces.BaseEndpoints
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.support.TeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
@@ -30,6 +32,10 @@ import retrofit2.http.QueryMap
  * - Gestão de membros (Listagem, Expulsão, Promoção e Despromoção de cargos).
  */
 interface TeamApi {
+
+    @GET("api/Leaderboard")
+    suspend fun getLeaderBoard() : Response<List<InfoTeamLeadboard>>
+
     /**
      * Obtém os dados principais para o painel de controlo (Dashboard) da equipa.
      *

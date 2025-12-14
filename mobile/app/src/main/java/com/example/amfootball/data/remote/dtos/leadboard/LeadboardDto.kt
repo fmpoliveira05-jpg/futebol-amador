@@ -33,6 +33,8 @@ data class LeadboardDto(
                                 id = "t-$i",
                                 name = "Equipa Exemplo $i",
                                 currentPoints = points,
+                                logoTeam = "https://via.placeholder.com/150",
+                                position = i,
                                 nameRank = rankName
                             )
                         )

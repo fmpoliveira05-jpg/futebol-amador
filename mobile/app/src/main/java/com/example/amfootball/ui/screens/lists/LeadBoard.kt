@@ -16,7 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.amfootball.R
-import com.example.amfootball.data.remote.dtos.leadboard.LeadboardDto
+import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.ui.actions.lists.LeadBoardActions
 import com.example.amfootball.ui.actions.lists.ShowMoreItensAction
 import com.example.amfootball.ui.components.buttons.ShowMoreInfoButton
@@ -70,7 +70,7 @@ fun LeaderboardScreen(
  */
 @Composable
 private fun LeadBoardContent(
-    list: List<LeadboardDto>,
+    list: List<InfoTeamLeadboard>,
     leadBoardActions: LeadBoardActions,
     showMoreItensAction: ShowMoreItensAction,
     navHostController: NavHostController
@@ -84,7 +84,7 @@ private fun LeadBoardContent(
                 team = team,
                 showInfoTeam = {
                     leadBoardActions.onShowMore(
-                        team.team.id,
+                        team.id,
                         navHostController
                     )
                 }
@@ -111,7 +111,7 @@ private fun LeadBoardContent(
  */
 @Composable
 private fun LeaderBoardItems(
-    team: LeadboardDto,
+    team: InfoTeamLeadboard,
     showInfoTeam: () -> Unit
 ) {
     ListItem(
@@ -123,19 +123,19 @@ private fun LeaderBoardItems(
             )
         },
         headlineContent = {
-            Text(text = team.team.name)
+            Text(text = team.name)
         },
         supportingContent = {
             Text(
                 text = buildAnnotatedString {
                     pushStyle(SpanStyle(fontWeight = FontWeight.Bold))
-                    append("Rank: ${team.team.nameRank}")
+                    append("Rank: ${team.nameRank}")
                     pop()
 
                     append("  ")
 
                     pushStyle(SpanStyle(color = MaterialTheme.colorScheme.primary))
-                    append("(${team.team.currentPoints} Pts)")
+                    append("(${team.currentPoints} Pts)")
                     pop()
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -145,11 +145,11 @@ private fun LeaderBoardItems(
         },
         leadingContent = {
             StringImageList(
-                image = team.team.logoTeam,
+                image = team.logoTeam,
                 contentDescription = stringResource(
                     id = R.string.logo_team_name,
                     stringResource(R.string.logo_team),
-                    team.team.name
+                    team.name
                 )
             )
         },
