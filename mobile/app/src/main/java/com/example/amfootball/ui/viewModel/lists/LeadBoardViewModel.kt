@@ -36,7 +36,7 @@ class LeadBoardViewModel @Inject constructor(
      * @param navHostController O controlador para gerir a navegação.
      */
     fun showInfoTeam(idTeam: String, navHostController: NavHostController) {
-        navHostController.navigate(route = "${Routes.UserRoutes.PROFILE.route}/$idTeam") {
+        navHostController.navigate(route = "${Routes.TeamRoutes.TEAM_PROFILE.route}/$idTeam") {
             launchSingleTop = true
         }
     }
