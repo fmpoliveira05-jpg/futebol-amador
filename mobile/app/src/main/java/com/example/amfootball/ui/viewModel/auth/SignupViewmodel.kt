@@ -87,8 +87,6 @@ class SignupViewmodel @Inject constructor(
     }
 
     fun onHeightChange(heightStr: String) {
-        // Guardamos como string temporariamente na UI se o DTO aceitasse String,
-        // mas como é Int, tentamos converter ou guardamos 0 se vazio para evitar crash
         val heightInt = heightStr.toIntOrNull() ?: 0
         formState.value = formState.value.copy(height = heightInt)
     }
@@ -121,17 +119,20 @@ class SignupViewmodel @Inject constructor(
         _passwordVerification.value = pass
     }
 
-    fun onSubmit() {
+    fun onSubmit(isEditMode: Boolean = false, onDirectSubmit: () -> Unit = {}) {
         if (!validateForm()) return
+
+        if (isEditMode && addresDidntChanged()) {
+            onDirectSubmit()
+            return
+        }
+
         launchDataLoad {
-
             val addressQuery = "${formState.value.address}, Portugal"
-
             val results = osmService.verifyAddress(address = addressQuery)
 
             if (results.isEmpty()) {
                 val errorMsg = ErrorMessage(messageId = R.string.error_address_not_found)
-
                 formErrors.value = formErrors.value.copy(
                     addressError = errorMsg
                 )
@@ -139,21 +140,39 @@ class SignupViewmodel @Inject constructor(
             }
             _foundLat.value = results[0].lat.toDoubleOrNull()
             _foundLon.value = results[0].lon.toDoubleOrNull()
-
         }
+    }
+
+    private fun addresDidntChanged() : Boolean{
+        val userProfile = sessionManager.getUserProfile()
+        return userProfile?.address == formState.value.address
     }
 
     fun onEditMode() {
         val userProfile = sessionManager.getUserProfile()
         if (userProfile == null) return
+
         onNameChange(userProfile.name)
-        onEmailChange(userProfile.email!!)
-        onPhoneChange(userProfile.phoneNumber!!)
+        onEmailChange(userProfile.email ?: "")
+
+        val phoneFull = userProfile.phoneNumber ?: ""
+        onPhoneChange(phoneFull.replace("+351", ""))
+
         onHeightChange(userProfile.height.toString())
         onAddressChange(userProfile.address)
         onPositionChange(userProfile.position.ordinal)
-        onDateChange(userProfile.dateOfBirth?.toLong())
+        onPasswordChange("Teste123.")
+        onPasswordVerificationChange("Teste123.")
 
+        val dateMillis = userProfile.dateOfBirth?.let { dateStr ->
+            try {
+                apiDateFormatter.parse(dateStr)?.time
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+        onDateChange(dateMillis)
     }
 
 
@@ -161,23 +180,30 @@ class SignupViewmodel @Inject constructor(
         launchDataLoad {
             val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
             val finalDto = formState.value.copy(phone = fullPhoneNumber)
-            if (!profileEditMode){
+
+            if (!profileEditMode) {
                 authService.registerUser(finalDto)
-            } else{
-                PlayerService.updatePlayerProfile(playerProfile = PlayerProfileDto(
-                    name = finalDto.userName,
-                    email = finalDto.email,
-                    phoneNumber = finalDto.phone,
-                    dateOfBirth = finalDto.dateOfBirth,
-                    height = finalDto.height,
-                    address = finalDto.address,
-                    positionRaw = finalDto.position,
-                    loginResponseDto = null,
-                    icon = null,
-                    team = null,
-                    idTeam = null,
-                    isAdmin = false,
-                ))
+            } else {
+                val currentProfile = sessionManager.getUserProfile()
+
+                PlayerService.updatePlayerProfile(
+                    playerProfile = PlayerProfileDto(
+                        name = finalDto.userName,
+                        email = finalDto.email,
+                        phoneNumber = finalDto.phone,
+                        dateOfBirth = finalDto.dateOfBirth,
+                        height = finalDto.height,
+                        address = finalDto.address,
+                        positionRaw = finalDto.position,
+                        loginResponseDto = currentProfile?.loginResponseDto,
+                        icon = currentProfile?.icon,
+                        team = currentProfile?.team,
+                        idTeam = currentProfile?.idTeam ?: currentProfile?.effectiveTeamId,
+                        isAdmin = currentProfile?.isAdmin ?: false,
+                        playerId = currentProfile?.loginResponseDto?.localId,
+                        phone = finalDto.phone
+                    )
+                )
                 updateToast(R.string.toast_playerProfile_edited)
             }
 
@@ -185,11 +211,8 @@ class SignupViewmodel @Inject constructor(
                 popUpTo(navHostController.graph.startDestinationId) { inclusive = true }
                 launchSingleTop = true
             }
-
-
         }
     }
-
     override fun validateForm(): Boolean {
         val currentDto = formState.value
 

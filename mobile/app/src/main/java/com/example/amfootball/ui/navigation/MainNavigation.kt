@@ -19,6 +19,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.amfootball.App
 import com.example.amfootball.core.extensions.composableNotProtectedRoute
 import com.example.amfootball.core.extensions.composableProtected
 import com.example.amfootball.core.extensions.composableProtectedAdminTeam
@@ -84,8 +85,7 @@ fun MainNavigation(
     val settingsViewModel: SettingsViewModel = hiltViewModel()
 
     val context = LocalContext.current
-    val sessionManager by remember { mutableStateOf(SessionManager(context = context)) }
-
+    val sessionManager = App.sessionManager
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     var selectedBottomNavRoute by rememberSaveable { mutableStateOf(Routes.BottomNavBarRoutes.HOMEPAGE.route) }
 

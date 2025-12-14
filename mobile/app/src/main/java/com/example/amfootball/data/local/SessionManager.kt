@@ -2,180 +2,89 @@ package com.example.amfootball.data.local
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.amfootball.data.local.dao.SessionDao
+import com.example.amfootball.data.local.entities.UserSessionEntity
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.google.gson.Gson
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Gestor centralizado de persistência de dados de sessão local.
- *
- * Esta classe utiliza [SharedPreferences] para armazenar dados sensíveis e de configuração do utilizador
- * que devem persistir entre reinícios da aplicação (como tokens de autenticação, tokens FCM e perfil em cache).
- *
- * É anotada com [@Singleton], garantindo acesso consistente ao ficheiro de preferências durante todo o ciclo de vida
- * da aplicação.
- *
- * @property context O contexto da aplicação injetado pelo Hilt via [@ApplicationContext], garantindo que não há leaks de memória de Activities.
- */
 @Singleton
 class SessionManager @Inject constructor(
-    @ApplicationContext context: Context
+    private val sessionDao: SessionDao
 ) {
-    /**
-     * Referência para o ficheiro de preferências do Android.
-     * Inicializado em modo privado ([Context.MODE_PRIVATE]), tornando os dados acessíveis apenas por esta aplicação.
-     */
-    private val prefs: SharedPreferences
 
-    /**
-     * Instância do Gson utilizada para serializar/deserializar objetos complexos (como [PlayerProfileDto])
-     * em Strings JSON, visto que o SharedPreferences suporta apenas tipos primitivos.
-     */
-    private val gson = Gson()
-
-    // Define um nome para o ficheiro de preferências e a chave para o token
-    companion object {
-        private const val PREFS_FILENAME = "com.example.amfootball.auth_prefs"
-        private const val KEY_AUTH_TOKEN = "auth_token"
-        private const val KEY_USER_PROFILE = "user_profile_json"
-        private const val KEY_FCM_TOKEN = "fcm_device_token"
-    }
-
-    init {
-        // Inicializa o SharedPreferences
-        prefs = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
+    // Helper privado para garantir que nunca trabalhamos com nulos
+    private fun getCurrentSession(): UserSessionEntity {
+        return sessionDao.getSession() ?: UserSessionEntity()
     }
 
     /**
-     * Persiste o token de autenticação (JWT ou similar) no armazenamento local.
-     *
-     * A operação é realizada de forma assíncrona (`apply()`) para não bloquear a thread principal (UI).
-     *
-     * @param token A string do token recebida da API após login.
+     * Mantém a assinatura original.
+     * O ID do Firebase está dentro do profile, por isso continua seguro.
      */
+    fun fetchUserId(): String {
+        return getUserProfile()?.loginResponseDto?.localId!!
+    }
+
     fun saveAuthToken(token: String) {
-        prefs.edit().putString(KEY_AUTH_TOKEN, token).apply()
+        val current = getCurrentSession()
+        sessionDao.insertOrUpdateSession(current.copy(authToken = token))
     }
 
-    /**
-     * Recupera o token de autenticação armazenado.
-     *
-     * Utilizado por interceptores de rede (Interceptors) para anexar o token aos cabeçalhos dos pedidos HTTP.
-     *
-     * @return O token como [String], ou `null` se o utilizador não estiver autenticado.
-     */
     fun getAuthToken(): String? {
-        return prefs.getString(KEY_AUTH_TOKEN, null)
+        return sessionDao.getSession()?.authToken
     }
 
-    /**
-     * Guarda o Token do Firebase Cloud Messaging (FCM) localmente.
-     *
-     * Essencial para associar o token do dispositivo ao utilizador, permitindo que o [PushNotificationService]
-     * o envie para o backend.
-     *
-     * @param token A string do token FCM obtida do Firebase Messaging.
-     */
     fun saveFcmToken(token: String) {
-        prefs.edit().putString(KEY_FCM_TOKEN, token).apply()
+        val current = getCurrentSession()
+        sessionDao.insertOrUpdateSession(current.copy(fcmToken = token))
     }
 
-    /**
-     * Obtém o Token do Firebase Cloud Messaging (FCM) guardado.
-     *
-     * Utilizado para verificar o token em cache ou enviá-lo ao backend.
-     *
-     * @return O token FCM como [String], ou `null` se ainda não tiver sido guardado.
-     */
     fun getFcmToken(): String? {
-        return prefs.getString(KEY_FCM_TOKEN, null)
+        return sessionDao.getSession()?.fcmToken
     }
 
-    /**
-     * Serializa e persiste o perfil completo do utilizador.
-     *
-     * Converte o objeto [PlayerProfileDto] numa String JSON antes de salvar,
-     * permitindo armazenar estruturas de dados complexas no SharedPreferences.
-     *
-     * @param profile O DTO contendo os dados do perfil do jogador.
-     */
     fun saveUserProfile(profile: PlayerProfileDto) {
-        val jsonString = gson.toJson(profile) // Converte objeto para JSON
-        prefs.edit().putString(KEY_USER_PROFILE, jsonString).apply()
+        val current = getCurrentSession()
+        sessionDao.insertOrUpdateSession(current.copy(userProfile = profile))
     }
 
-    /**
-     * Recupera e deserializa o perfil do utilizador armazenado em cache.
-     *
-     * @return O objeto [PlayerProfileDto] reconstruído a partir do JSON, ou `null` se não houver perfil salvo.
-     */
     fun getUserProfile(): PlayerProfileDto? {
-        val jsonString = prefs.getString(KEY_USER_PROFILE, null)
-        return if (jsonString != null) {
-            gson.fromJson(jsonString, PlayerProfileDto::class.java)
-        } else {
-            null
-        }
+        return sessionDao.getSession()?.userProfile
     }
+
+    fun fetchTeamId(): String {
+        return getUserProfile()?.idTeam ?: ""
+    }
+
 
     fun updateTeamIdUser(teamId: String?) {
-        val currentProfile = getUserProfile()
+        val currentSession = getCurrentSession()
+        val currentProfile = currentSession.userProfile
+
         if (currentProfile != null) {
             val updatedProfile = currentProfile.copy(
                 idTeam = teamId,
-                team = if (teamId == null) {
-                    null
-                } else {
-                    currentProfile.team
-                },
-                isAdmin = if (teamId == null) {
-                    false
-                } else {
-                    currentProfile.isAdmin
-                }
+                team = if (teamId == null) null else currentProfile.team,
+                isAdmin = if (teamId == null) false else currentProfile.isAdmin
             )
-
-            saveUserProfile(updatedProfile)
+            sessionDao.insertOrUpdateSession(currentSession.copy(userProfile = updatedProfile))
         }
     }
 
     fun updateRoleMemberTeam(isAdmin: Boolean) {
-        val currentProfile = getUserProfile()
+        val currentSession = getCurrentSession()
+        val currentProfile = currentSession.userProfile
+
         if (currentProfile != null) {
             val updatedProfile = currentProfile.copy(isAdmin = isAdmin)
-
-            saveUserProfile(updatedProfile)
+            sessionDao.insertOrUpdateSession(currentSession.copy(userProfile = updatedProfile))
         }
     }
 
-    /**
-     * Método utilitário para obter rapidamente o ID local do utilizador autenticado.
-     *
-     * Evita a necessidade de carregar o objeto de perfil completo quando apenas o ID é necessário
-     * (ex: para verificar se o utilizador é dono de um recurso).
-     *
-     * @return O ID do utilizador (String) ou `null` se não for encontrado.
-     */
-    fun fetchUserId(): String {
-        return getUserProfile()?.loginResponseDto?.localId ?: ""
-    }
-
-    fun fetchTeamId(): String {
-        return getUserProfile()?.effectiveTeamId ?: ""
-    }
-
-    /**
-     * Limpa todos os dados de sessão do utilizador.
-     *
-     * Deve ser invocado no momento do **Logout** para garantir que tokens e dados pessoais
-     * são removidos do dispositivo.
-     */
     fun clearSession() {
-        prefs.edit()
-            .remove(KEY_AUTH_TOKEN)
-            .remove(KEY_USER_PROFILE)
-            .apply()
+        sessionDao.clearSession()
     }
 }
