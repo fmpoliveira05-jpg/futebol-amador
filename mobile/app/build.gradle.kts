@@ -154,10 +154,12 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
+    implementation("com.google.android.gms:play-services-location:21.0.1")
     // Google Maps Compose & Play Services
+    /*
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.maps.android:maps-compose:2.12.0")
-
+     */
     // Coil for images
     implementation("io.coil-kt:coil-compose:2.6.0")
 
