@@ -1,6 +1,11 @@
 package com.example.amfootball.ui.viewModel.auth
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.location.Geocoder
+import android.location.Location
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
 import com.example.amfootball.data.NetworkConnectivityObserver
@@ -16,14 +21,23 @@ import com.example.amfootball.domains.validators.SignUpField
 import com.example.amfootball.domains.validators.validateSignUpForm
 import com.example.amfootball.ui.navigation.objects.Routes
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
 @HiltViewModel
 class SignupViewmodel @Inject constructor(
@@ -32,6 +46,7 @@ class SignupViewmodel @Inject constructor(
     private val osmService: OpenStreetMapService,
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
+    @ApplicationContext private val context: Context
 
     ) : FormsViewModel<CreateProfileDto, SignUpFormErrors>(
     networkObserver = networkObserver,
@@ -53,6 +68,8 @@ class SignupViewmodel @Inject constructor(
 
     private val _passwordVerification = MutableStateFlow("")
     val passwordVerification = _passwordVerification.asStateFlow()
+
+    var isLocationLoading = mutableStateOf(false)
 
     var _foundLat = mutableStateOf<Double?>(null)
     var _foundLon = mutableStateOf<Double?>(null)
@@ -249,9 +266,91 @@ class SignupViewmodel @Inject constructor(
             }
 
         } else {
-            formErrors.value = SignUpFormErrors() // Limpa erros
+            formErrors.value = SignUpFormErrors()
         }
 
         return validationResult.isValid
+    }
+
+    /**
+     * Função que gere todo o processo: Pede localização GPS -> Converte em Morada -> Atualiza UI.
+     * Recebe o client de localização como parâmetro (vem da UI).
+     */
+    fun fetchAddressLocation(fusedLocationClient: FusedLocationProviderClient) {
+        viewModelScope.launch {
+            isLocationLoading.value = true
+            try {
+                val location = getLastLocation(fusedLocationClient)
+
+                if (location != null) {
+                    val addressText = getAddressFromCoordinates(location.latitude, location.longitude)
+
+                    if (addressText != null) {
+                        onAddressChange(addressText)
+                    } else {
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLocationLoading.value = false
+            }
+        }
+    }
+
+    /**
+     * Função suspensa auxiliar para converter a API de Callbacks do Google numa Coroutine limpa.
+     */
+    @SuppressLint("MissingPermission")
+    private suspend fun getLastLocation(client: FusedLocationProviderClient): Location? {
+        return suspendCancellableCoroutine { continuation ->
+            val cancellationTokenSource = CancellationTokenSource()
+
+            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
+                .addOnSuccessListener { location ->
+                    if (continuation.isActive) continuation.resume(
+                        location,
+                        onCancellation = {
+                            if (continuation.isActive) continuation.cancel()
+                        }
+                    )
+                }
+                .addOnFailureListener { e ->
+                    if (continuation.isActive) continuation.resumeWithException(e)
+                }
+                .addOnCanceledListener {
+                    if (continuation.isActive) continuation.cancel()
+                }
+
+            continuation.invokeOnCancellation {
+                cancellationTokenSource.cancel()
+            }
+        }
+    }
+
+    /**
+     * Lógica de Geocoder isolada
+     */
+    private suspend fun getAddressFromCoordinates(lat: Double, lon: Double): String? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val geocoder = Geocoder(context, Locale.getDefault())
+                @Suppress("DEPRECATION")
+                val addresses = geocoder.getFromLocation(lat, lon, 1)
+
+                if (!addresses.isNullOrEmpty()) {
+                    val addressObj = addresses[0]
+                    val street = addressObj.thoroughfare ?: ""
+                    val number = addressObj.subThoroughfare ?: ""
+                    val city = addressObj.locality ?: addressObj.subAdminArea ?: ""
+
+                    if (street.isNotBlank()) "$street $number, $city".trim() else addressObj.getAddressLine(0)
+                } else {
+                    null
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
 }

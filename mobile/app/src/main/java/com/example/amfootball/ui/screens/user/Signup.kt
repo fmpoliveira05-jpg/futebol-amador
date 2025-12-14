@@ -1,21 +1,37 @@
 package com.example.amfootball.ui.screens.user
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -45,6 +62,7 @@ import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCou
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
+import com.google.android.gms.location.LocationServices
 
 /**
  * Ecrã de Registo de Novo Utilizador (Sign Up).
@@ -66,6 +84,9 @@ fun SignUpScreen(
     val uiErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     LaunchedEffect(key1 = Unit) {
         if (profileEditMode) {
             viewModel.onEditMode()
@@ -74,7 +95,19 @@ fun SignUpScreen(
     val countryCode by viewModel.countryCode.collectAsStateWithLifecycle()
     val passwordVerification by viewModel.passwordVerification.collectAsStateWithLifecycle()
 
-    val context = LocalContext.current
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val isGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+
+        if (isGranted) {
+            // SUCESSO: Passamos a bola para o ViewModel
+            viewModel.fetchAddressLocation(fusedLocationClient)
+        } else {
+            Toast.makeText(context, "Permissão necessária para preencher morada", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     ContentSignUp(
         modifier = Modifier
@@ -99,6 +132,17 @@ fun SignUpScreen(
         submitConfirmation = {
             viewModel.submitConfirmation(navHostController, profileEditMode)
         },
+        onRequestLocation = {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            ) {
+                viewModel.fetchAddressLocation(fusedLocationClient)
+            } else {
+                locationPermissionLauncher.launch(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                )
+            }
+        },
         profileEditMode = profileEditMode
     )
 }
@@ -115,6 +159,7 @@ private fun ContentSignUp(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
     submitConfirmation: () -> Unit,
+    onRequestLocation: () -> Unit,
     profileEditMode: Boolean = false
 ) {
     Column(
@@ -209,20 +254,44 @@ private fun ContentSignUp(
 
         // MORADA
 
-        TextFieldOutline(
-            label = stringResource(id = R.string.address),
-            value = formDto.address,
-            maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
-            onValueChange = viewModel::onAddressChange,
-            isRequired = true,
-            isError = formErrors.addressError != null,
-            errorMessage = formErrors.addressError?.let {
-                stringResource(
-                    id = it.messageId,
-                    *it.args.toTypedArray()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                TextFieldOutline(
+                    label = stringResource(id = R.string.address),
+                    value = formDto.address,
+                    maxLenght = GeneralConst.MAX_ADDRESS_LENGTH,
+                    onValueChange = viewModel::onAddressChange,
+                    isRequired = true,
+                    isError = formErrors.addressError != null,
+                    errorMessage = formErrors.addressError?.let {
+                        stringResource(id = it.messageId, *it.args.toTypedArray())
+                    }
                 )
             }
-        )
+
+            // Lógica do Botão: Mostra Loading ou Mostra Ícone
+            if (viewModel.isLocationLoading.value) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp).padding(top = 8.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                IconButton(
+                    onClick = onRequestLocation,
+                    modifier = Modifier.padding(top = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MyLocation,
+                        contentDescription = "Usar minha localização",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
 
         // ALTURA
         TextFieldOutline(
