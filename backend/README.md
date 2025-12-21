@@ -61,6 +61,16 @@ cd LDS_25_26
 dotnet restore
 ```
 
+---
+
+### 🔗 Links
+In this repository, we provide the project report as well as links to the repositories containing our frontend and the main repository.
+
+Links to access the Backend or Frontend:
+- **Home**: https://github.com/Arturito2005/TrabalhoLDS
+- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
+- **Frontend Web**: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
+
 ## Português
 ### 📖 Descrição
 Este projeto consiste num sistema backend robusto, desenvolvido seguindo os princípios de **Clean Architecture**. O foco principal é a escalabilidade e a manutenibilidade, separando estritamente as responsabilidades entre a lógica de domínio, a orquestração da aplicação e a infraestrutura externa.
@@ -121,3 +131,11 @@ cd LDS_25_26
 # Restaurar dependências
 dotnet restore
 ```
+
+---
+### 🔗 Links
+Neste repositorio disponibilizamos o relatorio do trabalho e também os links para os repositorios com o nosso frontend e repositorio principal.
+Links para aceder ao Backend ou Frontend:
+- **Home**: https://github.com/Arturito2005/TrabalhoLDS
+- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
+- **Frontend Web**: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
