@@ -134,6 +134,16 @@ A quick look at the top-level files and directories you'll see in this project.
 └── tsconfig.json        # TypeScript configuration
 ```
 
+---
+
+### 🔗 Links
+In this repository, we provide the project report as well as links to the repositories containing our frontend and backend.
+
+Links to access the Backend or Frontend:
+- **Home**: https://github.com/Arturito2005/TrabalhoLDS
+- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
+- **Backend**: https://github.com/Btx69-jpg/Backend-LDS
+
 ## Português
 
 ![Angular](https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white)
@@ -267,3 +277,13 @@ Uma visão rápida dos ficheiros e diretorias principais deste projeto.
 ├── package.json         # Dependências e scripts
 ├── README.md            # Documentação do projeto
 └── tsconfig.json        # Configuração do TypeScript
+```
+
+---
+
+### 🔗 Links
+Neste repositorio disponibilizamos o relatorio do trabalho e também os links para os repositorios com o nosso frontend e backend.
+Links para aceder ao Backend ou Frontend:
+- **Home**: https://github.com/Arturito2005/TrabalhoLDS
+- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
+- **Backend**: https://github.com/Btx69-jpg/Backend-LDS
