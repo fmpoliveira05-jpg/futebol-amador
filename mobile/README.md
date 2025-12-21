@@ -7,7 +7,7 @@
 
 ## English
 
-> [cite_start]A complete solution to connect players and teams, facilitating the organization of casual and competitive amateur football matches.
+> A complete solution to connect players and teams, facilitating the organization of casual and competitive amateur football matches.
 
 ### 📱 Product Vision
 
@@ -52,20 +52,6 @@ This project was developed with a focus on mobility and scalability, using the f
 * **Firebase Firestore:** NoSQL database with strict security rules for private data (chats) and public data (leaderboard).
 * **Firebase Cloud Messaging (FCM):** Push notification system and background logic execution.
 * **Cloudinary:** Cloud image storage and optimization.
-
----
-
-### 📸 Screenshots
-
-| Home Page | Team Profile | Calendar |
-|:---:|:---:|:---:|
-| | | |
-| *Main Dashboard* | *Club Details* | *Match Schedule* |
-
-| Chat | Matchmaking | Map (OSM) |
-|:---:|:---:|:---:|
-| | | |
-| *Chat between Admins* | *Waiting Lobby* | *Location Selection* |
 
 ---
 
@@ -150,9 +136,9 @@ Este projeto foi desenvolvido com foco em mobilidade e escalabilidade, utilizand
 
 #### Frontend (Mobile)
 * **Android (Kotlin):** Desenvolvimento nativo.
-* [cite_start]**CameraX:** Captura de fotos para perfis e equipas diretamente na app.
-* [cite_start]**Libphonenumber:** Validação internacional de números de telemóvel no registo.
-* [cite_start]**OpenStreetMap (OSM):** Mapas interativos e validação de moradas.
+* **CameraX:** Captura de fotos para perfis e equipas diretamente na app.
+* **Libphonenumber:** Validação internacional de números de telemóvel no registo.
+* **OpenStreetMap (OSM):** Mapas interativos e validação de moradas.
 
 #### Backend & Serviços
 * **API Pública (.NET):** Backend centralizado que comunica via REST e SignalR.
@@ -161,20 +147,6 @@ Este projeto foi desenvolvido com foco em mobilidade e escalabilidade, utilizand
 * **Firebase Firestore:** Base de dados NoSQL com regras de segurança rigorosas para dados privados (chats) e públicos (leaderboard).
 * **Firebase Cloud Messaging (FCM):** Sistema de notificações Push e execução de lógica em background.
 * **Cloudinary:** Armazenamento e otimização de imagens na nuvem.
-
----
-
-### 📸 Capturas de Ecrã
-
-| Página Inicial | Perfil da Equipa | Calendário |
-|:---:|:---:|:---:|
-| | | |
-| *Dashboard Principal* | *Detalhes do Clube* | *Agenda de Jogos* |
-
-| Chat | Matchmaking | Mapa (OSM) |
-|:---:|:---:|:---:|
-| | | |
-| [cite_start]*Conversa entre Admins* | *Lobby de Espera* | *Seleção de Local* |
 
 ---
 
