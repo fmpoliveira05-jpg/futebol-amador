@@ -1,51 +1,123 @@
 # LDS_25_26
+## English
 
-## Name
-Choose a self-explaining name for your project.
+### 📖 Description
+This project is a robust backend system designed following **Clean Architecture** principles. It focuses on scalability and maintainability by strictly separating concerns between the domain logic, application orchestration, and external infrastructure.
 
-## Description
-Domain → contém as entidades centrais do sistema e regras de negócio básicas. Não tem dependência de EF Core nem de API.
+The system includes features such as match validation, ranking systems, administrator management, and real-time communication.
 
-Application → orquestra a lógica de negócio usando Domain e interfaces de infraestrutura. Ex.: validação de criação de partidas, regras de rank, gestão de administradores.
+---
 
-Infrastructure → implementação de tecnologias externas: EF Core para banco de dados, Redis para cache, Hangfire para jobs, SignalR para chat, envio de notificações (push/email).
+### 🏗 Architecture
+The solution is divided into the following layers to ensure loose coupling:
 
-Api → ponto de entrada da aplicação. Expõe endpoints REST, integra serviços de Application e Infrastructure, conecta frontends (web e mobile).
+* **Domain**
+    * Contains the core entities and enterprise business rules.
+    * **No dependencies** on external libraries (EF Core, API, etc.) or frameworks.
+    * Pure C# logic.
 
-Tests → contém testes unitários e de integração para garantir a qualidade e estabilidade da aplicação.
+* **Application**
+    * Orchestrates business logic using the Domain layer and Infrastructure interfaces.
+    * Handles Use Cases such as: Match creation validation, ranking rules, and administrator management.
 
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+* **Infrastructure**
+    * Implementation of external technologies and interfaces defined in the Application layer.
+    * **Database:** Entity Framework Core.
+    * **Caching:** Redis.
+    * **Background Jobs:** Hangfire.
+    * **Real-time:** SignalR (Chat).
+    * **Notifications:** Email and Push notifications services.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+* **Api**
+    * The entry point of the application.
+    * Exposes **REST endpoints**.
+    * Integrates Application and Infrastructure services (Dependency Injection).
+    * Connects frontends (Web and Mobile).
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+* **Tests**
+    * Contains Unit and Integration tests to ensure application quality and stability.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+---
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### 🚀 Technologies
+* **.NET Core / .NET 8+** (Assumed based on description)
+* **Entity Framework Core**
+* **Redis**
+* **Hangfire**
+* **SignalR**
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### 📦 Installation
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+```bash
+# Clone the repository
+git clone [https://github.com/your-username/LDS_25_26.git](https://github.com/your-username/LDS_25_26.git)
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+# Navigate to the project directory
+cd LDS_25_26
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+# Restore dependencies
+dotnet restore
+```
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Português
+### 📖 Descrição
+Este projeto consiste num sistema backend robusto, desenvolvido seguindo os princípios de **Clean Architecture**. O foco principal é a escalabilidade e a manutenibilidade, separando estritamente as responsabilidades entre a lógica de domínio, a orquestração da aplicação e a infraestrutura externa.
 
-## License
-For open source projects, say how it is licensed.
+O sistema inclui funcionalidades como validação de partidas, sistemas de ranking, gestão de administradores e comunicação em tempo real.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+---
+
+### 🏗 Arquitetura
+A solução está dividida nas seguintes camadas para garantir um baixo acoplamento:
+
+* **Domain (Domínio)**
+    * Contém as entidades centrais e as regras de negócio empresariais.
+    * **Sem dependências** de bibliotecas externas (EF Core, API, etc.) ou frameworks.
+    * Lógica C# pura.
+
+* **Application (Aplicação)**
+    * Orquestra a lógica de negócio utilizando o Domínio e interfaces de infraestrutura.
+    * Gere Casos de Uso como: Validação na criação de partidas, regras de ranking e gestão de administradores.
+
+* **Infrastructure (Infraestrutura)**
+    * Implementação de tecnologias externas e das interfaces definidas na camada de Aplicação.
+    * **Base de Dados:** Entity Framework Core.
+    * **Cache:** Redis.
+    * **Jobs em Background:** Hangfire.
+    * **Tempo Real:** SignalR (Chat).
+    * **Notificações:** Serviços de envio de Email e Push.
+
+* **Api**
+    * O ponto de entrada da aplicação.
+    * Expõe **endpoints REST**.
+    * Integra os serviços de Aplicação e Infraestrutura (Injeção de Dependência).
+    * Conecta os frontends (Web e Mobile).
+
+* **Tests (Testes)**
+    * Contém testes unitários e de integração para garantir a qualidade e estabilidade da aplicação.
+
+---
+
+### 🚀 Tecnologias
+* **.NET Core / .NET 8+**
+* **Entity Framework Core**
+* **Redis**
+* **Hangfire**
+* **SignalR**
+
+---
+
+### 📦 Instalação
+
+```bash
+# Clonar o repositório
+git clone [https://github.com/teu-usuario/LDS_25_26.git](https://github.com/teu-usuario/LDS_25_26.git)
+
+# Navegar para a diretoria do projeto
+cd LDS_25_26
+
+# Restaurar dependências
+dotnet restore
+```
