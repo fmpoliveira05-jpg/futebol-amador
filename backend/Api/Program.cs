@@ -7,6 +7,7 @@ using Application.Interfaces.Services.Hub;
 using Application.Services;
 using Google.Cloud.Firestore;
 using Infrastructure;
+using Infrastructure.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -68,6 +69,21 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+// Numa base de dados nova, cria as divisões (sem elas não se consegue criar equipas).
+if (!emTestes)
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AmateurFootballContext>();
+    try
+    {
+        await DivisoesIniciais.GarantirAsync(db);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Não foi possível verificar as divisões iniciais (a base de dados está acessível e com as migrações aplicadas?).");
+    }
+}
 
 // Converte as exceções em ProblemDetails com o código HTTP certo (ver GlobalExceptionHandler).
 app.UseExceptionHandler();
