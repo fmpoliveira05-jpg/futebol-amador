@@ -1,194 +1,64 @@
-# Amateur Football Management App (LDS)
+# Futebol Amador – app Android
 
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Kotlin](https://img.shields.io/badge/Kotlin-0095D5?style=for-the-badge&logo=kotlin&logoColor=white)
-![Firebase](https://img.shields.io/badge/firebase-ffca28?style=for-the-badge&logo=firebase&logoColor=black)
-![.NET](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+App Android do Futebol Amador, em Kotlin com Jetpack Compose. Visão geral do projeto no [README principal](../README.md).
 
-## English
+Foi desenvolvida por **Artur Pinto** e **Willkie Filho** para a unidade curricular de Computação Móvel e Ubíqua, sobre a mesma API do trabalho de LDS.
 
-> A complete solution to connect players and teams, facilitating the organization of casual and competitive amateur football matches.
+## Funcionalidades
 
-### 📱 Product Vision
+- **Equipas e adesões.** Criar e editar equipas (com fotografia tirada na app, via CameraX), gerir o plantel e os administradores, e enviar ou responder a pedidos de adesão.
+- **Jogos amigáveis.** Procurar adversários com filtros, enviar convites e negociar a data e o campo. Os jogos marcados podem ser adiados ou cancelados.
+- **Jogos competitivos.** Fila de *matchmaking* em tempo real (SignalR) para jogos ao domingo, com adversários de pontuação e idade média parecidas.
+- **Início e fim do jogo.** Os administradores das duas equipas entram num *lobby* para confirmar o início. No fim, cada um regista o resultado e o jogo só termina se os dois coincidirem.
+- **Chat** entre os administradores das equipas com jogo marcado (Firestore).
+- **Notificações** (Firebase Cloud Messaging): dia de jogo, convites, adesões e alterações de horário.
+- **Calendário do telemóvel.** Os jogos são sincronizados com o calendário nativo.
+- **Moradas e campos** validados e mostrados no mapa com OpenStreetMap (osmdroid).
+- **Números de telemóvel** validados com a libphonenumber.
 
-Currently, there is a recurring difficulty in organizing amateur football matches, often due to a lack of players or opposing teams.
+## Arquitetura
 
-This project aims to solve this problem by acting as an intermediary to connect groups with similar interests. The application allows:
-* **Casual Mode:** Find teams using filters and lists.
-* **Competitive Mode:** Automatic *matchmaking* based on location, age, and history.
+- MVVM:
+  - ecrãs em Compose;
+  - `ViewModel`s com `StateFlow`;
+  - repositórios e serviços que chamam a API com Retrofit.
+- Injeção de dependências com Hilt.
+- Sessão guardada localmente com Room.
+- SignalR para os hubs de início de jogo, fim de jogo e *matchmaking*.
+- Imagens guardadas no Cloudinary.
 
----
+## Configuração
 
-### ✨ Main Features
+1. Criar um projeto no Firebase, adicionar uma app Android com o *package* `com.example.amfootball` e copiar o `google-services.json` para `app/`. O ficheiro não está no repositório. Para apenas compilar, serve `app/google-services.example.json` copiado com esse nome.
+2. Em `local.properties` (também fora do repositório), além do `sdk.dir`:
 
-#### ⚽ Sports Management
-* **Team Management:** Creation and editing of teams, administrator promotion, and roster management.
-* **Membership System:** Players without a team can send requests to clubs (and vice-versa).
-* **Match Organization:** Start, finish (with cross-result validation), postpone, and cancel matches.
-* **Real-Time Matchmaking:** Use of *Lobbies* to find opponents and synchronize match start.
+   ```properties
+   API_BASE_URL=https://o-teu-servidor/
+   CLOUDINARY_CLOUD_NAME=o-teu-cloud-name
+   CLOUDINARY_UPLOAD_PRESET=android_upload
+   ```
 
-#### 🛠️ User Tools
-* **Private Chat:** Exclusive communication between team administrators with scheduled matches.
-* **Calendar Integration:** Automatic synchronization of matches with the mobile device's native calendar.
-* **Smart Notifications:** Alerts for match days, rain, invitations, and schedule changes via Firebase Cloud Messaging.
-* **Geolocation:** Address validation and field visualization via OpenStreetMap.
+   Sem `API_BASE_URL` é usado o servidor da equipa. O *upload preset* do Cloudinary tem de ser do tipo *unsigned*.
+3. Abrir a pasta `mobile/` no Android Studio, sincronizar o Gradle e correr num emulador ou num telemóvel (Android 9 ou superior).
 
----
+## Testes
 
-### 🛠 Technologies and Architecture
+```bash
+./gradlew testDebugUnitTest           # testes unitários (JVM)
+./gradlew connectedDebugAndroidTest   # testes instrumentados (precisa de emulador)
+```
 
-This project was developed with a focus on mobility and scalability, using the following tools:
+Os testes instrumentados usam Hilt e um MockWebServer em vez da API.
 
-#### Frontend (Mobile)
-* **Android (Kotlin):** Native development.
-* **CameraX:** Photo capture for profiles and teams directly in the app.
-* **Libphonenumber:** International mobile number validation during registration.
-* **OpenStreetMap (OSM):** Interactive maps and address validation.
+## Revisão de 2026
 
-#### Backend & Services
-* **Public API (.NET):** Centralized backend communicating via REST and SignalR.
-    * *Swagger Documentation:* [API Link](https://amfootballapi.duckdns.org/swagger/index.html).
-* **SignalR:** Management of *Hubs* for real-time match start and completion.
-* **Firebase Firestore:** NoSQL database with strict security rules for private data (chats) and public data (leaderboard).
-* **Firebase Cloud Messaging (FCM):** Push notification system and background logic execution.
-* **Cloudinary:** Cloud image storage and optimization.
-
----
-
-### 🚀 Installation and Setup
-
-1.  **Clone the Repository:**
-    ```bash
-    git clone [https://github.com/seu-username/mobile-lds.git](https://github.com/seu-username/mobile-lds.git)
-    ```
-
-2.  **Configure Environment Variables:**
-    * Ensure you configure the Firebase keys (google-services.json).
-    * Configure Cloudinary credentials.
-
-3.  **Compile the Project:**
-    * Open the project in Android Studio.
-    * Sync Gradle.
-    * Run on an emulator or physical device.
-
----
-
-## 📚 Documentation
-
-The Android code documentation was generated using **Dokka**, ensuring the technical structure is always accessible and up-to-date.
-
----
-
-### 👥 Authors
-
-Work developed within the scope of the Mobile and Ubiquitous Computing (CMU) Curricular Unit:
-
-* **Artur Gentil Silva Pinto** (Nº 8230138) 
-* **Willkie Bianchi Parahyba Filho** (Nº 8230127) 
-
----
-
-### 🔗 Links
-- Home: https://github.com/Arturito2005/TrabalhoLDS
-- Backend: https://github.com/Btx69-jpg/Backend-LDS
-- Frontend Web: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
-
----
-
-### 📄 License
-
-This project is developed for academic purposes.
-
-
-## Português
-
-> Uma solução completa para conectar jogadores e equipas, facilitando a organização de partidas de futebol amador casuais e competitivas.
-
-### 📱 Visão do Produto
-
-Atualmente, existe uma dificuldade recorrente na organização de jogos de futebol amador, muitas vezes devido à falta de jogadores ou equipas adversárias.
-
-Este projeto visa resolver esse problema funcionando como um intermediário para conectar grupos com interesses semelhantes. A aplicação permite:
-* **Modo Casual:** Encontrar equipas através de filtros e listas.
-* **Modo Competitivo:** *Matchmaking* automático baseado em localização, idade e histórico.
-
----
-
-### ✨ Funcionalidades Principais
-
-#### ⚽ Gestão Desportiva
-* **Gestão de Equipas:** Criação e edição de equipas, promoção de administradores e gestão de plantel.
-* **Sistema de Adesão:** Jogadores sem equipa podem enviar pedidos a clubes (e vice-versa).
-* **Organização de Partidas:** Iniciar, finalizar (com validação de resultado cruzado), adiar e cancelar jogos.
-* **Matchmaking em Tempo Real:** Utilização de *Lobbies* para encontrar adversários e sincronizar o início do jogo.
-
-#### 🛠️ Ferramentas para o Utilizador
-* **Chat Privado:** Comunicação exclusiva entre administradores de equipas com partidas agendadas.
-* **Integração com Calendário:** Sincronização automática dos jogos com o calendário nativo do dispositivo móvel.
-* **Notificações Inteligentes:** Alertas para dias de jogo, chuva, convites e alterações de horário via Firebase Cloud Messaging.
-* **Geolocalização:** Validação de moradas e visualização de campos via OpenStreetMap.
-
----
-
-### 🛠 Tecnologias e Arquitetura
-
-Este projeto foi desenvolvido com foco em mobilidade e escalabilidade, utilizando as seguintes ferramentas:
-
-#### Frontend (Mobile)
-* **Android (Kotlin):** Desenvolvimento nativo.
-* **CameraX:** Captura de fotos para perfis e equipas diretamente na app.
-* **Libphonenumber:** Validação internacional de números de telemóvel no registo.
-* **OpenStreetMap (OSM):** Mapas interativos e validação de moradas.
-
-#### Backend & Serviços
-* **API Pública (.NET):** Backend centralizado que comunica via REST e SignalR.
-    * *Documentação Swagger:* [Link da API](https://amfootballapi.duckdns.org/swagger/index.html).
-* **SignalR:** Gestão de *Hubs* para início e finalização de partidas em tempo real.
-* **Firebase Firestore:** Base de dados NoSQL com regras de segurança rigorosas para dados privados (chats) e públicos (leaderboard).
-* **Firebase Cloud Messaging (FCM):** Sistema de notificações Push e execução de lógica em background.
-* **Cloudinary:** Armazenamento e otimização de imagens na nuvem.
-
----
-
-### 🚀 Instalação e Configuração
-
-1.  **Clonar o Repositório:**
-    ```bash
-    git clone [https://github.com/seu-username/mobile-lds.git](https://github.com/seu-username/mobile-lds.git)
-    ```
-
-2.  **Configurar Variáveis de Ambiente:**
-    * Certifique-se de configurar as chaves do Firebase (google-services.json).
-    * Configurar credenciais do Cloudinary.
-
-3.  **Compilar o Projeto:**
-    * Abrir o projeto no Android Studio.
-    * Sincronizar o Gradle.
-    * Executar num emulador ou dispositivo físico.
-
----
-
-## 📚 Documentação
-
-A documentação do código Android foi gerada utilizando **Dokka**, garantindo que a estrutura técnica esteja sempre acessível e atualizada.
-
----
-
-### 👥 Autores
-
-Trabalho realizado no âmbito da Unidade Curricular de Computação Móvel e Ubíqua (CMU):
-
-* **Artur Gentil Silva Pinto** (Nº 8230138) 
-* **Willkie Bianchi Parahyba Filho** (Nº 8230127)
-
----
-
-### 🔗 Links
-- Home: https://github.com/Arturito2005/TrabalhoLDS
-- Backend: https://github.com/Btx69-jpg/Backend-LDS
-- Frontend Web: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
----
-
-### 📄 Licença
-
-Este projeto é desenvolvido para fins académicos.
+- **Crash depois de enviar, negociar ou adiar um jogo.** A app navegava para `calendar/<id>`, uma rota que não existe.
+- **Posições.** O enum `Position` estava na ordem inversa da API, e um avançado ficava registado como guarda-redes. Foi acrescentado um teste unitário para esse contrato.
+- **Registo.** Os erros eram ignorados e o ecrã avançava sem sessão.
+- **Configuração.** A API apontava para um túnel ngrok temporário e o Cloudinary estava escrito no código. Agora os dois vêm de `local.properties` (`BuildConfig`).
+- **Eventos SignalR.** Com `replay = 1`, um evento de um jogo (por exemplo, "jogo iniciado") aparecia no *lobby* do jogo seguinte.
+- **Outros erros:**
+  - o chat mostrava as 50 mensagens mais antigas;
+  - `fetchUserId` rebentava sem sessão;
+  - `allowBackup` estava ligado, com a sessão guardada na base de dados local.
+- **Testes instrumentados.** Não compilavam (importavam pacotes que já não existiam) e voltaram a compilar. A versão do Hilt nos testes foi alinhada com a da app e o Jacoco passou a apontar para `src/main/java`.

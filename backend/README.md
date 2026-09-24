@@ -1,141 +1,111 @@
-# LDS_25_26
-## English
+# Futebol Amador – API
 
-### 📖 Description
-This project is a robust backend system designed following **Clean Architecture** principles. It focuses on scalability and maintainability by strictly separating concerns between the domain logic, application orchestration, and external infrastructure.
+API REST e hubs SignalR do Futebol Amador, em ASP.NET Core 8. Serve o frontend web e a app Android. Visão geral do projeto no [README principal](../README.md).
 
-The system includes features such as match validation, ranking systems, administrator management, and real-time communication.
+## Camadas
 
----
+| Projeto | O que tem | Depende de |
+|---|---|---|
+| `Domain` | Entidades (`Team`, `Player`, `Matches`, `Rank`, ...), enums, constantes do modelo e exceções | – |
+| `Application` | Serviços (regras de negócio), validadores, DTOs e as interfaces dos repositórios | Domain |
+| `Infrastructure` | `AmateurFootballContext` (EF Core, SQL Server), migrações e repositórios | Application, Domain |
+| `Api` | Controllers REST, hubs SignalR, serviços em segundo plano, autenticação e tratamento de erros | todos |
+| `Tests` | Testes NUnit: unitários (serviços com Moq) e de integração (`WebApplicationFactory`) | todos |
 
-### 🏗 Architecture
-The solution is divided into the following layers to ensure loose coupling:
+Algumas decisões:
 
-* **Domain**
-    * Contains the core entities and enterprise business rules.
-    * **No dependencies** on external libraries (EF Core, API, etc.) or frameworks.
-    * Pure C# logic.
+- **Autorização em dois níveis.** Os controllers confirmam o papel do utilizador com o `IPlayerAuthorizationService` (membro ou administrador da equipa do URL). Os validadores voltam a confirmar as regras de cada operação, por exemplo que o pedido de adesão é mesmo dessa equipa.
+- **Erros.** Os serviços lançam exceções de domínio e o `GlobalExceptionHandler` converte-as em `ProblemDetails`:
 
-* **Application**
-    * Orchestrates business logic using the Domain layer and Infrastructure interfaces.
-    * Handles Use Cases such as: Match creation validation, ranking rules, and administrator management.
+  | Exceção | Resposta |
+  |---|---|
+  | `ValidationException`, `BusinessRuleException`, ... | 400 |
+  | sem sessão (`UnauthorizedAccessException`) | 401 |
+  | `ForbiddenException` | 403 |
+  | `NotFoundException` | 404 |
+  | tudo o resto | 500, sem mostrar a mensagem interna |
 
-* **Infrastructure**
-    * Implementation of external technologies and interfaces defined in the Application layer.
-    * **Database:** Entity Framework Core.
-    * **Caching:** Redis.
-    * **Background Jobs:** Hangfire.
-    * **Real-time:** SignalR (Chat).
-    * **Notifications:** Email and Push notifications services.
+  A distinção entre 401 e 403 importa para os clientes: um 401 termina a sessão no frontend.
+- **Dados pessoais.** O e-mail, o telefone, a morada e a data de nascimento de um jogador só são devolvidos ao próprio e aos colegas de equipa (`PlayerDetailsDto.OcultarDadosPessoais`).
+- **Tempo real.** Há quatro hubs:
 
-* **Api**
-    * The entry point of the application.
-    * Exposes **REST endpoints**.
-    * Integrates Application and Infrastructure services (Dependency Injection).
-    * Connects frontends (Web and Mobile).
+  | Hub | Para quê |
+  |---|---|
+  | `/StartMatch` | os dois administradores confirmam o início do jogo |
+  | `/FinishMatch` | cada um regista o resultado e o jogo só termina se coincidirem |
+  | `/MatchMaker` | fila de jogos competitivos |
+  | `/Notification` | notificações por equipa |
 
-* **Tests**
-    * Contains Unit and Integration tests to ensure application quality and stability.
+  O `RankMatchMakerBackGroundService` emparelha as equipas da fila a cada 5 segundos. Se não houver par, alarga os critérios aos poucos.
 
----
+## Executar localmente
 
-### 🚀 Technologies
-* **.NET Core / .NET 8+** (Assumed based on description)
-* **Entity Framework Core**
-* **Redis**
-* **Hangfire**
-* **SignalR**
+Requisitos:
 
----
+- **.NET 8 SDK**;
+- **SQL Server** (por exemplo, em Docker);
+- um **projeto Firebase** com Authentication (e-mail/palavra-passe) e Firestore, e a chave de uma conta de serviço (Admin SDK).
 
-### 📦 Installation
+1. Base de dados (em Docker):
 
-```bash
-# Clone the repository
-git clone [https://github.com/your-username/LDS_25_26.git](https://github.com/your-username/LDS_25_26.git)
+   ```bash
+   docker run -d --name futebol-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Uma-Password-Forte-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+   ```
 
-# Navigate to the project directory
-cd LDS_25_26
+2. Configuração com *user-secrets* (fica fora do repositório):
 
-# Restore dependencies
-dotnet restore
-```
+   ```bash
+   cd Api
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=FutebolAmador;User Id=sa;Password=Uma-Password-Forte-1;TrustServerCertificate=True"
+   dotnet user-secrets set "Firebase:ProjectId" "o-teu-projeto"
+   dotnet user-secrets set "Firebase:CredentialPath" "C:/caminho/para/firebase-adminsdk.json"
+   dotnet user-secrets set "Authentication:TokenUri" "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=A_WEB_API_KEY_DO_FIREBASE"
+   ```
 
----
+   Em produção usam-se variáveis de ambiente com os mesmos nomes (`ConnectionStrings__DefaultConnection`, `Firebase__ProjectId`, ...). As origens autorizadas pelo CORS ficam em `Cors:Origins`.
 
-### 🔗 Links
-In this repository, we provide the project report as well as links to the repositories containing our frontend and the main repository.
+3. Migrações e arranque:
 
-Links to access the Backend or Frontend:
-- **Home**: https://github.com/Arturito2005/TrabalhoLDS
-- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
-- **Frontend Web**: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
+   ```bash
+   dotnet tool install --global dotnet-ef
+   dotnet ef database update --project Infrastructure --startup-project Api
+   dotnet run --project Api        # http://localhost:5218/swagger
+   ```
 
-## Português
-### 📖 Descrição
-Este projeto consiste num sistema backend robusto, desenvolvido seguindo os princípios de **Clean Architecture**. O foco principal é a escalabilidade e a manutenibilidade, separando estritamente as responsabilidades entre a lógica de domínio, a orquestração da aplicação e a infraestrutura externa.
+   No primeiro arranque são criadas as quatro divisões, se ainda não existirem.
 
-O sistema inclui funcionalidades como validação de partidas, sistemas de ranking, gestão de administradores e comunicação em tempo real.
-
----
-
-### 🏗 Arquitetura
-A solução está dividida nas seguintes camadas para garantir um baixo acoplamento:
-
-* **Domain (Domínio)**
-    * Contém as entidades centrais e as regras de negócio empresariais.
-    * **Sem dependências** de bibliotecas externas (EF Core, API, etc.) ou frameworks.
-    * Lógica C# pura.
-
-* **Application (Aplicação)**
-    * Orquestra a lógica de negócio utilizando o Domínio e interfaces de infraestrutura.
-    * Gere Casos de Uso como: Validação na criação de partidas, regras de ranking e gestão de administradores.
-
-* **Infrastructure (Infraestrutura)**
-    * Implementação de tecnologias externas e das interfaces definidas na camada de Aplicação.
-    * **Base de Dados:** Entity Framework Core.
-    * **Cache:** Redis.
-    * **Jobs em Background:** Hangfire.
-    * **Tempo Real:** SignalR (Chat).
-    * **Notificações:** Serviços de envio de Email e Push.
-
-* **Api**
-    * O ponto de entrada da aplicação.
-    * Expõe **endpoints REST**.
-    * Integra os serviços de Aplicação e Infraestrutura (Injeção de Dependência).
-    * Conecta os frontends (Web e Mobile).
-
-* **Tests (Testes)**
-    * Contém testes unitários e de integração para garantir a qualidade e estabilidade da aplicação.
-
----
-
-### 🚀 Tecnologias
-* **.NET Core / .NET 8+**
-* **Entity Framework Core**
-* **Redis**
-* **Hangfire**
-* **SignalR**
-
----
-
-### 📦 Instalação
+Com Docker (a partir desta pasta):
 
 ```bash
-# Clonar o repositório
-git clone [https://github.com/teu-usuario/LDS_25_26.git](https://github.com/teu-usuario/LDS_25_26.git)
-
-# Navegar para a diretoria do projeto
-cd LDS_25_26
-
-# Restaurar dependências
-dotnet restore
+docker build -f Api/Dockerfile -t futebol-amador-api .
 ```
 
----
-### 🔗 Links
-Neste repositorio disponibilizamos o relatorio do trabalho e também os links para os repositorios com o nosso frontend e repositorio principal.
-Links para aceder ao Backend ou Frontend:
-- **Home**: https://github.com/Arturito2005/TrabalhoLDS
-- **Frontend Mobile**: https://github.com/Btx69-jpg/FrontendMobile-FutebolAmador
-- **Frontend Web**: https://github.com/Btx69-jpg/FrontendWeb-FutebolAmador
+## Testes
+
+```bash
+dotnet test
+```
+
+Os testes de integração arrancam a API no ambiente `Testing`:
+
+- a base de dados é em memória;
+- o Firebase é substituído por *mocks*;
+- a autenticação usa um esquema de teste (o cabeçalho `Authorization: Test` identifica um utilizador fixo).
+
+Por isso correm sem credenciais, também no GitHub Actions.
+
+## Endpoints principais
+
+| Recurso | Exemplos |
+|---|---|
+| Conta | `POST /api/User/login`, `GET /api/User/logout`, `PUT /api/User/password`, `POST /api/Player/create-profile` |
+| Jogadores | `GET /api/Player/details/{id}`, `PUT /api/Player/update/{id}`, `PUT /api/Player/{id}/leave-team` |
+| Equipas | `POST /api/Team`, `GET/PUT/DELETE /api/Team/{id}`, `GET /api/Team/{id}/search`, `GET /api/Team/homeTeam/{id}` |
+| Membros | `GET /api/Team/{id}/members`, `PUT /api/Team/{id}/members/promote/{playerId}`, `DELETE /api/Team/{id}/members/{playerId}` |
+| Pedidos de adesão | `GET/POST /api/Team/{id}/membership-request...`, `GET/POST /api/Player/{id}/membership-requests...` |
+| Jogos | `GET /api/Calendar/{idTeam}`, `PUT /api/Calendar/{idTeam}/PostponeMatch`, `DELETE /api/Calendar/{idTeam}/CancelMatch/{idMatch}` |
+| Convites | `GET/POST /api/MatchInvite/{idTeam}...`, `AcceptMatchInvite`, `RefuseMatchInvite`, `Negociate` |
+| Adiamentos | `GET /api/Team/{id}/PostPoneMatch`, `AcceptPostponeMatch`, `RejectPostponeMatch` |
+| Classificação | `GET /api/Leaderboard` |
+
+A lista completa, com os modelos de pedido e resposta, está no Swagger (`/swagger`, em desenvolvimento).
