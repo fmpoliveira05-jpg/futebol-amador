@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lobby_connecting">Connecting to server...</string>
+    <string name="lobby_waiting_title">Waiting for opponent...</string>
+    <string name="lobby_waiting_body">The other manager must enter this room for the match to start.</string>
+    <string name="lobby_btn_cancel">Cancel and Exit</string>
+
+    <string name="finish_match_submitted_title">Result Submitted</string>
+    <string name="finish_match_waiting_body">Waiting for opponent confirmation...</string>
+    <string name="btn_edit_result">Edit Result</string>
+
+    <string name="lobby_error_prefix">Error: %1$s</string>
+    <string name="btn_back">Back</string>
+</resources>

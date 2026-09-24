@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_navbar_homepage">Pagina Inicial</string>
+    <string name="item_home">Pagina Inicial</string>
+    <string name="item_home_description">Pagina inicial da aplicacao</string>
+
+    <string name="item_team">Minha Equipa</string>
+    <string name="item_team_description">Pagina inicial da equipa do utilizador</string>
+
+    <string name="item_list_team">Equipas</string>
+    <string name="item_list_team_description">Pagina com a lista de equipas</string>
+
+    <string name="item_list_team_membership_request">Adesão a Equipas</string>
+    <string name="item_list_team_membership_request_description">Página que lhe permite enviar pedidos de adesão a equipas</string>
+
+    <string name="item_list_players">Jogadores</string>
+    <string name="item_list_players_description">Lista de jogadores sem clube</string>
+
+    <string name="item_leadboard">Tabela de Equipas</string>
+    <string name="item_leadboard_description">Tabela de classificacao das equipas</string>
+
+    <string name="item_settings">Configurações</string>
+    <string name="item_settings_description">Configuracoes da aplicacao</string>
+
+    <string name="item_preference">Preferencias</string>
+    <string name="item_preference_description">Preferencias do utilizador</string>
+
+    <string name="signup">Registre-se</string>
+    <string name="signup_description">Registre-se para utilizar a aplicação</string>
+
+    <string name="logout">Sair</string>
+    <string name="logout_description">Sair da aplicação</string>
+
+    <string name="page_options">Opções da página</string>
+    <string name="page_options_description">Opções da página</string>
+
+    <string name="chat">Chat</string>
+    <string name="chat_description">Conversas</string>
+
+    <string name="team_homepage">Página da Equipa</string>
+    <string name="team_homepage_description">Página inicial da equipa</string>
+    <string name="team_profile">Perfil da Equipa</string>
+    <string name="team_profile_description">Ver perfil da equipa</string>
+
+    <string name="team_settings">Definições da Equipa</string>
+    <string name="team_settings_description">Definições da equipa</string>
+
+    <string name="item_list_chat">Lista de conversas</string>
+    <string name="item_list_chat_description">Lista de conversas</string>
+    <string name="single_chat">Conversa</string>
+    <string name="single_chat_description">Conversa</string>
+
+
+</resources>

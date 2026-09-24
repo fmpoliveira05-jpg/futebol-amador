@@ -1,0 +1,22 @@
+{
+  "idMatch": "2b2b2b2b-0000-1111-3333-000000000008",
+  "matchStatus": 0,
+  "gameDate": "2026-01-20T19:30:00Z",
+  "matchResult": 3,
+  "isCompetitive": false,
+  "team": {
+    "idTeam": "b5225be4-8336-4cc3-bb7a-e695a39a4fd0",
+    "name": "fc proto",
+    "numGoals": 0
+  },
+  "opponent": {
+    "idTeam": "c8888888-9999-aaaa-bbbb-cccccccccccc",
+    "name": "Os Ganhadores",
+    "numGoals": 0
+  },
+  "pitchGame": {
+    "name": "campo de batatas",
+    "address": "rua da arbitragem, olimpo"
+  },
+  "isHome": true
+}

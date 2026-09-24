@@ -1,0 +1,21 @@
+[
+  {
+    "id": "chat-room-123",
+    "name": "Grupo de Treino - 2025",
+    "members": [
+      "user-player-123",
+      "user-coach-456",
+      "user-admin-789"
+    ],
+    "createdBy": "user-coach-456"
+  },
+  {
+    "id": "chat-room-456",
+    "name": "Conversa com o Treinador",
+    "members": [
+      "user-player-123",
+      "user-coach-456"
+    ],
+    "createdBy": "user-player-123"
+  }
+]

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="player_name">Name</string>
+    <string name="player_name_description">Name of the player</string>
+
+    <string name="date_of_birthday">Date of Birth</string>
+    <string name="date_of_birthday_description">Player Date of Birth</string>
+
+    <string name="phone_number">Phone Number</string>
+    <string name="phone_number_description">Player Phone Number</string>
+
+    <string name="address">Address</string>
+    <string name="address_description">Player Address</string>
+
+    <string name="player_position">Position</string>
+    <string name="player_position_description">Player Position</string>
+
+    <string name="player_position_picker">Choose your Position</string>
+
+    <string name="player_size">Height</string>
+    <string name="player_size_description">Player Height</string>
+
+    <string name="player_team">Team</string>
+    <string name="player_team_description">Player Team</string>
+</resources>

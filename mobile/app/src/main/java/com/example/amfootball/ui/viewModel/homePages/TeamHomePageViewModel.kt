@@ -1,0 +1,183 @@
+package com.example.amfootball.ui.viewModel.homePages
+
+import com.example.amfootball.R
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
+import com.example.amfootball.data.remote.dtos.support.TeamDto
+import com.example.amfootball.data.remote.services.PlayerService
+import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.domains.enums.UserRole
+import com.example.amfootball.ui.viewModel.abstracts.BaseViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+
+/**
+ * ViewModel responsável pela lógica de negócio e gestão de estado da Home Page da Equipa.
+ *
+ * Este ViewModel atua como o controlador central para:
+ * 1. Carregar as informações da equipa do utilizador logado.
+ * 2. Determinar os privilégios do utilizador (Admin vs Membro) para exibir/ocultar funcionalidades.
+ * 3. Gerir a navegação segura, garantindo que o dispositivo tem conectividade antes de avançar.
+ *
+ * Herda de [BaseViewModel] para gestão automática de Loading, Erros e Conectividade.
+ *
+ * @property teamRepository Repositório para buscar dados da equipa à API.
+ * @property networkObserver Observador de rede para validações de conectividade.
+ * @property sessionManager Gestor de sessão local para recuperar o ID da equipa e status de admin.
+ */
+@HiltViewModel
+class TeamHomePageViewModel @Inject constructor(
+    private val playerService: PlayerService,
+    private val teamRepository: TeamService,
+    private val networkObserver: NetworkConnectivityObserver,
+    private val sessionManager: SessionManager,
+) : BaseViewModel(
+    networkObserver = networkObserver,
+    needObserverNetwork = true
+) {
+    /**
+     * Estado interno mutável contendo os dados da equipa.
+     * Inicializado com um objeto [TeamDto] vazio.
+     */
+    private val teamInfo: MutableStateFlow<HomePageTeamDto> = MutableStateFlow(HomePageTeamDto())
+
+    /**
+     * Fluxo público imutável com os dados da equipa (Nome, Logo, etc.).
+     * Observado pela UI para renderizar o cabeçalho e informações.
+     */
+    val team: StateFlow<HomePageTeamDto> = teamInfo.asStateFlow()
+
+    /**
+     * Estado interno mutável do Role do utilizador.
+     */
+    private val roleState: MutableStateFlow<UserRole> = MutableStateFlow(UserRole.MEMBER_TEAM)
+
+    /**
+     * Fluxo público imutável que indica o nível de permissão do utilizador na equipa.
+     *
+     * A UI deve observar este estado para decidir quais cartões mostrar:
+     * - [UserRole.ADMIN_TEAM]: Mostra tudo (Agendar, Gerir).
+     * - [UserRole.MEMBER_TEAM]: Mostra apenas visualização (Calendário, Lista).
+     *
+     * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
+     */
+    val role: StateFlow<UserRole> = roleState.asStateFlow()
+
+    init {
+        loadInfoTeam()
+        loadUserRole()
+    }
+
+    /**
+     * Obtém o ID da equipa da sessão local e solicita os dados atualizados à API.
+     *
+     * Utiliza [launchDataLoad] para gerir automaticamente o estado de `isLoading` na UI
+     * e capturar possíveis exceções de rede.
+     */
+    private fun loadInfoTeam() {
+        val teamId = sessionManager.fetchTeamId()
+
+        if (teamId.isEmpty()) {
+            return
+        }
+
+        launchDataLoad {
+            val teamData = teamRepository.getHomePageTeam(teamId = teamId)
+
+            teamInfo.value = teamData
+        }
+    }
+
+    /**
+     * Tenta navegar para o ecrã de agendamento de partida Casual.
+     *
+     * Verifica a conexão à internet antes de permitir a navegação.
+     *
+     * @param onSucess Callback executada se as condições (internet) forem cumpridas.
+     */
+    fun onNavigateCasualMatch(onSucess: () -> Unit) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_casual)
+            return
+        }
+
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_casual_teams
+        )
+    }
+
+    /**
+     * Tenta navegar para o ecrã de agendamento de partida Rankeada (Competitiva).
+     *
+     * Verifica a conexão à internet antes de permitir a navegação.
+     *
+     * @param onSucess Callback executada se as condições (internet) forem cumpridas.
+     */
+    fun onNavigateRankedMatch(onSucess: () -> Unit) {
+        if (roleState.value != UserRole.ADMIN_TEAM) {
+            updateToast(message = R.string.toast_admin_only_ranked)
+            return
+        }
+
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_ranked_match
+        )
+    }
+
+    /**
+     * Tenta navegar para a lista de membros da equipa.
+     *
+     * @param onSucess Callback de navegação.
+     */
+    fun onNavigateMembers(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_members_list
+        )
+    }
+
+    /**
+     * Tenta navegar para o calendário da equipa.
+     *
+     * @param onSucess Callback de navegação.
+     */
+    fun onNavigateCalendar(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_calendar
+        )
+    }
+
+    fun onLeaveTeam(onSucess: () -> Unit) {
+        launchDataLoad {
+            val userId = sessionManager.getUserProfile()?.loginResponseDto?.localId
+
+            if (userId == null) {
+                return@launchDataLoad
+            }
+
+            val updatedUser = playerService.leaveTeam(playerId = userId)
+
+            if (updatedUser != null) {
+                sessionManager.updateTeamIdUser(null)
+            }
+
+            onSucess()
+        }
+    }
+
+    /**
+     * Carrega o Role do utilizador a partir da sessão local.
+     * Deve ser chamado na inicialização para configurar a UI imediatamente.
+     */
+    private fun loadUserRole() {
+        val profile = sessionManager.getUserProfile()
+        roleState.value = profile?.role ?: UserRole.MEMBER_TEAM
+    }
+}

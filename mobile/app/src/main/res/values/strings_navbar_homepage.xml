@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_navbar_homepage">Home Page</string>
+    <string name="item_home">Home</string>
+    <string name="item_home_description">Application home page</string>
+
+    <string name="item_team">My Team</string>
+    <string name="item_team_description">User\'s team home page</string>
+
+    <string name="item_list_team">Teams</string>
+    <string name="item_list_team_description">Page with the list of teams</string>
+
+    <string name="item_list_team_membership_request">Join Teams</string>
+    <string name="item_list_team_membership_request_description">Page that allows you to send membership requests to teams</string>
+
+    <string name="item_list_players">Players</string>
+    <string name="item_list_players_description">List of players without a club</string>
+
+    <string name="item_leadboard">Team Standings</string>
+    <string name="item_leadboard_description">Team standings table</string>
+
+    <string name="item_settings">Settings</string>
+    <string name="item_settings_description">App settings</string>
+
+    <string name="item_preference">Preferences</string>
+    <string name="item_preference_description">User preferences</string>
+
+    <string name="signup">Sign Up</string>
+    <string name="signup_description">Sign up page</string>
+
+    <string name="logout">Logout</string>
+    <string name="logout_description">Logout from the application</string>
+
+    <string name="page_options">Page Options</string>
+    <string name="page_options_description">Page options</string>
+
+    <string name="chat">Chat</string>
+    <string name="chat_description">Chats</string>
+
+    <string name="team_homepage">Team Profile</string>
+    <string name="team_homepage_description">Team Homepage</string>
+    <string name="team_profile">Team Profile</string>
+    <string name="team_profile_description">Show team profile</string>
+    <string name="team_settings">Team Settings</string>
+    <string name="team_settings_description">Team settings</string>
+    <string name="item_list_chat">Chat List</string>
+    <string name="item_list_chat_description">List of chats</string>
+    <string name="single_chat">Chat</string>
+    <string name="single_chat_description">Chat</string>
+
+</resources>

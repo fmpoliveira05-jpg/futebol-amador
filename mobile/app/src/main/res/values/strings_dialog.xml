@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_title_leave_team">Leave Team</string>
+    <string name="dialog_message_leave_team">Are you sure you want to leave the team? This action cannot be undone.</string>
+
+    <string name="dialog_title_delete_team">Delete Team</string>
+    <string name="dialog_msg_delete_team">Are you sure you want to permanently delete this team? This action cannot be undone.</string>
+
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+</resources>

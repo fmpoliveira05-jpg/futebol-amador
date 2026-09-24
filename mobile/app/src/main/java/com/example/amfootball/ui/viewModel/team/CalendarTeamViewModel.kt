@@ -1,0 +1,276 @@
+package com.example.amfootball.ui.viewModel.team
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.navigation.NavHostController
+import com.example.amfootball.R
+import com.example.amfootball.core.extensions.toLocalDate
+import com.example.amfootball.core.utils.ListsSizesConst
+import com.example.amfootball.core.utils.TeamConst
+import com.example.amfootball.data.NetworkConnectivityObserver
+import com.example.amfootball.data.events.UiState
+import com.example.amfootball.data.filters.FilterCalendar
+import com.example.amfootball.data.local.SessionManager
+import com.example.amfootball.data.remote.dtos.match.InfoMatchCalendar
+import com.example.amfootball.data.remote.services.CalendarService
+import com.example.amfootball.domains.enums.match.MatchStatus
+import com.example.amfootball.domains.enums.match.TypeMatch
+import com.example.amfootball.domains.errors.ErrorMessage
+import com.example.amfootball.domains.errors.filtersError.FilterCalendarError
+import com.example.amfootball.ui.navigation.objects.Routes
+import com.example.amfootball.ui.viewModel.abstracts.ListsViewModels
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
+
+//TODO: Falta Todo que precisa do signalR
+/**
+ * ViewModel responsável pela gestão do ecrã de Calendário da Equipa.
+ *
+ * Gere o ciclo de vida dos dados de partidas (matches), incluindo carregamento da API,
+ * filtragem local/remota, validação de filtros e execução de ações de gestão de jogos
+ * (cancelar, adiar, iniciar, finalizar).
+ *
+ * Implementa lógica offline-first para filtros quando não há conexão à internet.
+ *
+ * @property networkObserver Observador para monitorizar o estado da rede em tempo real.
+ * @property calendarRepository Repositório para acesso aos dados do calendário.
+ * @property savedStateHandle Manipulador para recuperar argumentos de navegação (ex: teamId).
+ */
+@HiltViewModel
+class CalendarTeamViewModel @Inject constructor(
+    private val networkObserver: NetworkConnectivityObserver,
+    private val calendarRepository: CalendarService,
+    private val sessionManager: SessionManager
+) : ListsViewModels<InfoMatchCalendar>(networkObserver = networkObserver) {
+    /** ID da equipa recuperado dos argumentos da navegação. Essencial para carregar os dados. */
+    private val teamId: MutableStateFlow<String> = MutableStateFlow(sessionManager.fetchTeamId())
+
+    /** Estado atual dos filtros de pesquisa aplicados pelo utilizador. */
+    private val filterState: MutableStateFlow<FilterCalendar> = MutableStateFlow(FilterCalendar())
+    val filter: StateFlow<FilterCalendar> = filterState.asStateFlow()
+
+    /** Estado dos erros de validação dos inputs de filtro (ex: Data Mínima > Data Máxima). */
+    private val listErrors: MutableStateFlow<FilterCalendarError> =
+        MutableStateFlow(FilterCalendarError())
+    val uiErrors: StateFlow<FilterCalendarError> = listErrors.asStateFlow()
+
+    //Inicializer
+    init {
+        teamId.value = sessionManager.fetchTeamId()
+        loadCalendar()
+    }
+
+    // --- SETTERS DE FILTROS ---
+
+    /** Atualiza o filtro de nome do adversário. */
+    fun onNameChange(newName: String) {
+        filterState.value = filterState.value.copy(opponentName = newName)
+    }
+
+    /**
+     * Atualiza a data mínima do jogo.
+     * Converte o timestamp (Long) recebido do DatePicker para LocalDate.
+     */
+    fun onMinDateGameChange(newMinDate: Long) {
+        filterState.value = filterState.value.copy(minGameDate = newMinDate.toLocalDate())
+    }
+
+    /**
+     * Atualiza a data máxima do jogo.
+     * Converte o timestamp (Long) recebido do DatePicker para LocalDate.
+     */
+    fun onMaxDateGameChange(newMaxDate: Long) {
+        filterState.value = filterState.value.copy(maxGameDate = newMaxDate.toLocalDate())
+    }
+
+    /** Atualiza o filtro de local (Casa/Fora). */
+    fun onGameLocalChange(newLocalGame: Boolean?) {
+        filterState.value = filterState.value.copy(isHome = newLocalGame)
+    }
+
+    /** Atualiza o filtro de tipo de jogo (Competitivo/Casual). */
+    fun onTypeMatchChange(typeMatch: TypeMatch?) {
+        filterState.value = filterState.value.copy(typeMatch = typeMatch)
+    }
+
+    /** Atualiza o filtro de estado do jogo (Finalizado/Não Finalizado). */
+    fun onIsFinishedChange(isFinish: Boolean?) {
+        filterState.value = filterState.value.copy(isFinish = isFinish)
+    }
+
+    // --- AÇÕES PRINCIPAIS ---
+
+    /**
+     * Aplica os filtros definidos.
+     *
+     * 1. Valida os filtros ([validateFilters]). Se inválido, aborta.
+     * 2. Se Online: Recarrega os dados da API com os novos filtros.
+     * 3. Se Offline: Filtra a lista localmente ([filterOffline]) usando a [originalList].
+     */
+    fun onApplyFilter() {
+        if (!validateFilters()) {
+            return
+        }
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadCalendar()
+        } else {
+            listState.value = filterOffline(
+                originalList = originalList,
+                filter = filterState.value
+            )
+        }
+    }
+
+    /**
+     * Limpa todos os filtros ativos e restaura a lista original.
+     * Não realiza chamadas à API, usa a cache local [originalList] para performance instantânea.
+     */
+    fun onClearFilter() {
+        filterState.value = FilterCalendar()
+        listErrors.value = FilterCalendarError()
+        inicialSizeList.value = ListsSizesConst.INICIAL_SIZE
+
+        if (networkObserver.isOnlineOneShot()) {
+            loadCalendar()
+        } else {
+            listState.value = originalList
+        }
+    }
+
+    fun onStartMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_start_game
+        )
+    }
+    /**
+     * Navega para o ecrã de cancelamento de partida.
+     *
+     * Requer conexão à internet. Se offline, exibe um Toast de erro via [UiState].
+     */
+    fun onCancelMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_cancel_game
+        )
+    }
+
+    /**
+     * Navega para o ecrã de adiamento de partida.
+     * Requer conexão à internet.
+     */
+    fun onPostPoneMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_postpone_game
+        )
+    }
+
+    /**
+     * Navega para o ecrã de finalização de partida (inserção de resultados).
+     * Requer conexão à internet.
+     */
+    fun onFinishMatch(onSucess: () -> Unit) {
+        onlineFunctionality(
+            action = onSucess,
+            toastMessage = R.string.toast_offline_finish_match
+        )
+    }
+
+    /**
+     * Carrega a lista de jogos da API.
+     *
+     * - Verifica conectividade (exibe erro se offline).
+     * - Verifica se [teamId] existe.
+     * - Atualiza [listState] e [originalList] com os dados recebidos.
+     * - Gere o estado de Loading.
+     */
+    fun loadCalendar() {
+        launchDataLoad {
+            val calendar = calendarRepository.getCalendar(teamId = teamId.value, filter = filterState.value)
+
+            listState.value = calendar
+            if (filterState.value == FilterCalendar()) {
+                originalList = calendar
+            }
+
+        }
+    }
+
+    // --- MÉTODOS PRIVADOS ---
+    /**
+     * Filtra a lista de jogos em memória (offline).
+     * Utiliza lógica "AND" (todos os critérios devem ser verdadeiros).
+     */
+    private fun filterOffline(
+        originalList: List<InfoMatchCalendar>,
+        filter: FilterCalendar
+    ): List<InfoMatchCalendar> {
+        return originalList.filter { item ->
+            val name = filter.opponentName.isNullOrBlank()
+                    || item.opponent.name.contains(filter.opponentName, ignoreCase = true)
+            val minDate =
+                filter.minGameDate == null || item.gameDate.toLocalDate() >= filter.minGameDate
+            val maxDate =
+                filter.maxGameDate == null || item.gameDate.toLocalDate() <= filter.maxGameDate
+            val matchStatus = filter.isFinish == null || if (filter.isFinish) {
+                item.matchStatus == MatchStatus.DONE
+            } else {
+                item.matchStatus != MatchStatus.SCHEDULED
+            }
+            val gameLocal = filter.isHome == null || item.isHome == filter.isHome
+            val typeMatch = filter.typeMatch == null || item.typeMatch == filter.typeMatch
+
+            name && minDate && maxDate && matchStatus && gameLocal && typeMatch
+        }
+    }
+
+    /**
+     * Valida os filtros de pesquisa.
+     * Verifica limites de caracteres e consistência de datas (Mínima <= Máxima).
+     * @return `true` se válido, `false` se houver erros (atualizando [uiErrors]).
+     */
+    private fun validateFilters(): Boolean {
+        val opponentName = filterState.value.opponentName
+        val minDateGame = filterState.value.minGameDate
+        val maxDateGame = filterState.value.maxGameDate
+
+        var nameOpponentError: ErrorMessage? = null
+        var minDateGameError: ErrorMessage? = null
+        var maxDateGameError: ErrorMessage? = null
+
+        if (opponentName != null && opponentName.length > TeamConst.MAX_NAME_LENGTH) {
+            nameOpponentError = ErrorMessage(
+                messageId = R.string.error_max_name_team,
+                args = listOf(TeamConst.MAX_NAME_LENGTH)
+            )
+        }
+
+        if (minDateGame != null && maxDateGame != null && minDateGame > maxDateGame) {
+            minDateGameError = ErrorMessage(
+                messageId = R.string.error_min_date_after,
+                args = listOf(R.string.error_date_game)
+            )
+
+            maxDateGameError = ErrorMessage(
+                messageId = R.string.error_max_date_before,
+                args = listOf(R.string.error_date_game)
+            )
+        }
+
+        listErrors.value = FilterCalendarError(
+            opponentNameError = nameOpponentError,
+            minGameDateError = minDateGameError,
+            maxGameDateError = maxDateGameError
+        )
+
+        val isValid = listOf(nameOpponentError, minDateGameError, maxDateGameError).all {
+            it == null
+        }
+
+        return isValid
+    }
+}

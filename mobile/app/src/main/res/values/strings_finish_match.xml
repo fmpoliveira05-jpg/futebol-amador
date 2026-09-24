@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_field_num_Goals_team">Goals your Team</string>
+    <string name="label_field_num_Goals_opponent_team">Goals Opponent Team</string>
+</resources>
