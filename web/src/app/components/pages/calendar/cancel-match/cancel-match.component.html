@@ -1,14 +1,22 @@
-<section class="cancel-match-page">
-  <header>
-    <h1>Cancelar Partida</h1>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Cancelar jogo</h1>
+      <p class="page-subtitle">O adversário é avisado do cancelamento e do motivo.</p>
+    </div>
   </header>
 
-  <div class="cancel-info">
-    <textarea name="motivo-cancelamento" [(ngModel)]="cancelMatchDto.description" placeholder="Introduz o motivo do cancelamento..."></textarea>
-    <button (click)="confirmCancel()">Confirmar Cancelamento</button>
-  </div>
-
-  <div *ngIf="successMessage()" class="mensagem-confirmacao">
-    {{ successMessage() }}
-  </div>
+  <form class="card form" (ngSubmit)="confirmCancel()">
+    <div class="form-field">
+      <label for="motivo">Motivo</label>
+      <textarea id="motivo" name="motivo" rows="5" [(ngModel)]="motivo" maxlength="500" placeholder="Por exemplo: campo indisponível nesse dia"></textarea>
+    </div>
+    @if (errorMessage()) {
+      <p class="erro" role="alert">{{ errorMessage() }}</p>
+    }
+    <div class="form-actions">
+      <a class="btn btn-link" [routerLink]="['/players/calendar', idTeam()]">Voltar</a>
+      <button type="submit" class="btn btn-danger" [disabled]="aEnviar()">Confirmar cancelamento</button>
+    </div>
+  </form>
 </section>

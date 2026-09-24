@@ -1,10 +1,24 @@
-<div *ngIf="match">
-  <h2>Adiamento da Partida: {{ match.team.name }} vs {{ match.opponent.name }}</h2>
-  
-  <form (ngSubmit)="submitPostpone()">
-    <label for="newDate">Selecione a Nova Data:</label>
-    <input type="datetime-local" id="newDate" [(ngModel)]="newDate" name="newDate" required>
-    
-    <button type="submit">Confirmar Adiamento</button>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Pedir adiamento</h1>
+      @if (match(); as jogo) {
+        <p class="page-subtitle">{{ jogo.team.name }} vs {{ jogo.opponent.name }}, marcado para {{ jogo.gameDate | date: 'dd-MM-yyyy HH:mm' }}</p>
+      }
+    </div>
+  </header>
+
+  <form class="card" (ngSubmit)="enviar()">
+    <div class="form-field">
+      <label for="novaData">Nova data e hora</label>
+      <input type="datetime-local" id="novaData" name="novaData" [min]="agora" [(ngModel)]="novaData" required>
+    </div>
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="aEnviar() || !match()">Enviar pedido</button>
+      <a class="btn btn-link" [routerLink]="['/players/calendar', idTeam()]">Voltar ao calendário</a>
+    </div>
   </form>
-</div>
+</section>

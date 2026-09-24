@@ -6,7 +6,7 @@ import { MATCH_STATUS } from '../../constants/match-status-map';
 export class CalendarDto {
   idMatch!: string;
   matchStatus!: number;
-  matchResult!: string;
+  matchResult!: number;
   gameDate!: string;
   team!: {
     idTeam: string;

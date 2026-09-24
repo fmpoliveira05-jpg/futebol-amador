@@ -1,30 +1,142 @@
-<div class="main-page">
-    <div class="container">
-        <h1 class="title">Bem Vindo ao Futebol Amador!</h1>
-        <p>
-            Are you a fanatic for football and soccer like us
-            but struggle to find people to play with? <br> Do not worry! Here you'll be able to:
-        </p>
-        <ul>
-            <li>
-                Join Teams!
-            </li>
-            <li>
-                Meet new people!
-            </li>
-            <li>
-                Create your own custom Team!
-            </li>
-            <li>
-                Hone your skills in casual mode!
-            </li>
-            <li>
-                Test your experience in competitive mode!
-            </li>
-            <li>
-                Have fun!
-            </li>
-        </ul>
-        <a routerLink="/signup">Create an account and start playing TODAY!</a>
+@if (!sessao().autenticado) {
+  <section class="hero">
+    <div class="hero__texto">
+      <p class="hero__tag">Futebol amador, sem folhas de Excel nem grupos de WhatsApp</p>
+      <h1>Junta a tua equipa, marca jogos e sobe na classificação.</h1>
+      <p class="hero__sub">
+        Cria ou entra numa equipa, convida adversários para amigáveis ou jogos competitivos,
+        combina a data e o campo, e acompanha os resultados e a classificação geral.
+      </p>
+      <div class="hero__acoes">
+        <a routerLink="/signup" class="btn btn-primary">Criar conta</a>
+        <a routerLink="/login" class="btn btn-secondary">Já tenho conta</a>
+      </div>
     </div>
-</div>
+    <div class="hero__campo" aria-hidden="true">
+      <div class="campo">
+        <span class="campo__meio"></span>
+        <span class="campo__circulo"></span>
+        <span class="campo__area campo__area--esq"></span>
+        <span class="campo__area campo__area--dir"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="funcionalidades" aria-label="O que podes fazer">
+    <article class="card">
+      <h2>Equipas</h2>
+      <p>Cria a tua equipa com o campo onde jogam, aceita pedidos de adesão e convida jogadores sem equipa.</p>
+    </article>
+    <article class="card">
+      <h2>Jogos</h2>
+      <p>Envia convites a outras equipas, negocia a data e o campo, e pede adiamentos quando for preciso.</p>
+    </article>
+    <article class="card">
+      <h2>Competição</h2>
+      <p>Os jogos competitivos dão pontos. As equipas sobem de divisão e aparecem na classificação geral.</p>
+    </article>
+  </section>
+
+  <p class="rodape-home">
+    Queres ver quem está à frente? <a routerLink="/leaderboard">Consulta a classificação</a>.
+  </p>
+} @else {
+  <section class="page">
+    <header class="page-header">
+      <div class="cabecalho-home">
+        @if (dados(); as d) {
+          <img class="emblema-equipa" [src]="emblema(d.team.imageUrl)" alt="" width="64" height="64" />
+        }
+        <div>
+          <h1 class="page-title">{{ dados()?.team?.name ?? 'Olá!' }}</h1>
+          <p class="page-subtitle">
+            @switch (resumo().tipo) {
+              @case ('sem-equipa') { Ainda não tens equipa. Começa por aqui. }
+              @default { Próximos jogos e forma recente da tua equipa. }
+            }
+          </p>
+        </div>
+      </div>
+    </header>
+
+    @switch (resumo().tipo) {
+      @case ('sem-equipa') {
+        <div class="passos">
+          <a class="card passo" routerLink="/teams">
+            <span class="passo__n">1</span>
+            <h2>Procura uma equipa</h2>
+            <p>Filtra por cidade, divisão ou idade média e envia um pedido de adesão.</p>
+          </a>
+          <a class="card passo" routerLink="/players/membership-requests">
+            <span class="passo__n">2</span>
+            <h2>Responde a convites</h2>
+            <p>As equipas também te podem convidar. Os convites e os teus pedidos ficam aqui.</p>
+          </a>
+          <a class="card passo" routerLink="/createTeam">
+            <span class="passo__n">3</span>
+            <h2>Ou cria a tua</h2>
+            <p>Fica como administrador: geres os membros, os convites de jogo e o calendário.</p>
+          </a>
+        </div>
+      }
+      @case ('a-carregar') {
+        <p class="estado">A carregar…</p>
+      }
+      @case ('erro') {
+        <p class="erro" role="alert">Não foi possível carregar o resumo da equipa.</p>
+      }
+      @case ('ok') {
+        @if (dados(); as d) {
+            <div class="layout">
+              <section class="card">
+                <h2 class="card-title">Próximos jogos</h2>
+                @for (j of d.nextsMatchs ?? []; track j.idMatch) {
+                  <div class="jogo">
+                    <div>
+                      <p class="jogo__equipas">{{ j.team.name }} <span>vs</span> {{ j.opponent.name }}</p>
+                      <p class="jogo__meta">
+                        <span class="badge" [class.badge--info]="j.isCompetitive">{{ j.isCompetitive ? 'Competitivo' : 'Amigável' }}</span>
+                        <span class="badge">{{ j.isHome ? 'Em casa' : 'Fora' }}</span>
+                      </p>
+                    </div>
+                    <p class="jogo__data">{{ j.gameDate | date: "EEE, d MMM · HH:mm" }}</p>
+                  </div>
+                } @empty {
+                  <p class="estado">Sem jogos marcados.</p>
+                }
+                <a class="btn btn-link" [routerLink]="['/players/calendar', sessao().equipaId]">Ver calendário</a>
+              </section>
+
+              <aside class="card">
+                <h2 class="card-title">Últimos resultados</h2>
+                @if (d.historicPreviousGames?.length) {
+                  <ol class="forma">
+                    @for (g of d.historicPreviousGames; track $index) {
+                      <li>
+                        <span class="forma__letra {{ forma[g.matchResult]?.classe }}" [attr.title]="forma[g.matchResult]?.texto">
+                          {{ forma[g.matchResult]?.letra ?? '–' }}
+                        </span>
+                        <span class="forma__adv">{{ g.opponent.name }}</span>
+                        <span class="forma__res">{{ g.result }}</span>
+                      </li>
+                    }
+                  </ol>
+                } @else {
+                  <p class="estado">Ainda não há jogos terminados.</p>
+                }
+              </aside>
+            </div>
+
+            @if (sessao().admin) {
+              <nav class="atalhos" aria-label="Atalhos de administrador">
+                <a class="btn btn-secondary" routerLink="/teams">Procurar adversários</a>
+                <a class="btn btn-secondary" routerLink="/team/matchInvites">Convites de jogo</a>
+                <a class="btn btn-secondary" routerLink="/players">Recrutar jogadores</a>
+                <a class="btn btn-secondary" routerLink="/team/membership-requests">Pedidos de adesão</a>
+              </nav>
+            }
+        }
+      }
+    }
+  </section>
+}

@@ -1,38 +1,39 @@
-<aside class="sidebar">
-  <div class="sidebar__brand">
-    <a routerLink="/">
-      <img src="assets/football.ico" alt="Logo" class="sidebar__logo" />
-      <span class="sidebar__title">Futebol Amador</span>
-    </a>
-  </div>
+<div class="interior">
+<header class="topo">
+  <a routerLink="/" class="marca">
+    <img src="assets/football.ico" alt="" class="marca__logo" width="32" height="32" />
+    <span class="marca__nome">Futebol Amador</span>
+  </a>
+  <button
+    type="button"
+    class="topo__menu"
+    (click)="aberto.set(!aberto())"
+    [attr.aria-expanded]="aberto()"
+    aria-controls="menu-principal"
+  >
+    <span class="sr-only">{{ aberto() ? 'Fechar menu' : 'Abrir menu' }}</span>
+    <span aria-hidden="true">☰</span>
+  </button>
+</header>
 
-  <nav class="sidebar__nav">
-    <a *ngIf="isAuthenticated && isAdmin" routerLink="/players" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Jogadores
-    </a>
-
-    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Equipas
-    </a>
-
-    <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      O meu perfil
-    </a>
-
-    <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Definições
-    </a>
-
-    <a *ngIf="!isAuthenticated" routerLink="/signup" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Criar Conta
-    </a>
-
-    <a *ngIf="!isAuthenticated" routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Login
-    </a>
-
-    <a *ngIf="isAuthenticated" routerLink="/logout" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
-      Logout
-    </a>
-  </nav>
-</aside>
+<nav id="menu-principal" class="menu" [class.menu--aberto]="aberto()" aria-label="Menu principal">
+  @for (grupo of grupos(); track $index) {
+    <div class="menu__grupo">
+      @if (grupo.titulo) {
+        <p class="menu__titulo">{{ grupo.titulo }}</p>
+      }
+      @for (l of grupo.ligacoes; track l.rotulo) {
+        <a
+          class="menu__link"
+          [routerLink]="l.rota"
+          routerLinkActive="menu__link--ativo"
+          [routerLinkActiveOptions]="{ exact: l.exato ?? false }"
+          ariaCurrentWhenActive="page"
+        >
+          {{ l.rotulo }}
+        </a>
+      }
+    </div>
+  }
+</nav>
+</div>

@@ -1,0 +1,50 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Pedidos de adiamento</h1>
+      <p class="page-subtitle">Outras equipas pediram para mudar a data destes jogos.</p>
+    </div>
+    <a class="btn btn-secondary" [routerLink]="['/players/calendar', idTeam()]">Voltar ao calendário</a>
+  </header>
+
+  <div class="card">
+    @if (sucesso()) {
+      <p class="estado state--ok" role="status">{{ sucesso() }}</p>
+    }
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+
+    @if (aCarregar()) {
+      <p class="estado">A carregar…</p>
+    } @else if (pedidos().length) {
+      <div class="tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Adversário</th>
+              <th>Data marcada</th>
+              <th>Nova data proposta</th>
+              <th class="members-table__actions-col"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of pedidos(); track p.idMatch) {
+              <tr>
+                <td>{{ adversario(p) }}</td>
+                <td>{{ p.gameDate | date: 'dd-MM-yyyy HH:mm' }}</td>
+                <td><strong>{{ p.postPoneDate | date: 'dd-MM-yyyy HH:mm' }}</strong></td>
+                <td class="members-table__actions">
+                  <button type="button" class="btn btn-primary" [disabled]="ocupado() === p.idMatch" (click)="aceitar(p)">Aceitar</button>
+                  <button type="button" class="btn btn-secondary" [disabled]="ocupado() === p.idMatch" (click)="rejeitar(p)">Rejeitar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <p class="estado">Não há pedidos de adiamento por responder.</p>
+    }
+  </div>
+</section>

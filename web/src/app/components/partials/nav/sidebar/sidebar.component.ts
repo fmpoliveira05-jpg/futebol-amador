@@ -1,47 +1,108 @@
-import { Component, inject } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../..//services/auth.service';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
+import { AuthService } from '../../../../services/auth.service';
+
+interface Ligacao {
+  rotulo: string;
+  rota: string | (string | null)[];
+  exato?: boolean;
+}
+
+interface Grupo {
+  titulo?: string;
+  ligacoes: Ligacao[];
+}
 
 /**
- * Componente responsável pela exibição da barra lateral (sidebar).
- * Exibe opções de navegação baseadas no estado de autenticação e permissões do utilizador.
+ * Menu lateral. As opções dependem da sessão: visitante, jogador sem equipa, membro de uma
+ * equipa ou administrador. Em ecrãs pequenos o menu abre e fecha com o botão do topo.
  */
 @Component({
   selector: 'app-sidebar',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.css'],
+  styleUrl: './sidebar.component.css',
 })
 export class SidebarComponent {
-  
-  /**
-   * Serviço de autenticação utilizado para verificar o estado de login e permissões do utilizador.
-   */
-  private authService = inject(AuthService);
+  private readonly auth = inject(AuthService);
 
-  /**
-   * Verifica se o utilizador está autenticado.
-   * Retorna um valor booleano que indica se o utilizador está autenticado ou não.
-   */
-  get isAuthenticated(): boolean {
-    return this.authService.isAuthenticated();
-  }
+  protected readonly aberto = signal(false);
 
-  /**
-   * Verifica se o utilizador tem permissões de administrador.
-   * Retorna um valor booleano que indica se o utilizador é um administrador.
-   */
-  get isAdmin(): boolean {
-    return this.authService.isAdmin();
-  }
+  protected readonly grupos = computed<Grupo[]>(() => {
+    const s = this.auth.sessao();
 
-  /**
-   * Verifica se o utilizador está associado a uma equipa.
-   * Retorna um valor booleano que indica se o utilizador tem uma equipa associada.
-   */
-  get hasTeam(): boolean {
-    return this.authService.hasTeam();
+    if (!s.autenticado) {
+      return [
+        {
+          ligacoes: [
+            { rotulo: 'Início', rota: '/', exato: true },
+            { rotulo: 'Classificação', rota: '/leaderboard' },
+            { rotulo: 'Entrar', rota: '/login' },
+            { rotulo: 'Criar conta', rota: '/signup' },
+          ],
+        },
+      ];
+    }
+
+    const grupos: Grupo[] = [
+      {
+        ligacoes: [
+          { rotulo: 'Início', rota: '/', exato: true },
+          { rotulo: 'O meu perfil', rota: '/players/me' },
+          { rotulo: 'Classificação', rota: '/leaderboard' },
+        ],
+      },
+    ];
+
+    if (!s.equipaId) {
+      grupos.push({
+        titulo: 'Encontrar equipa',
+        ligacoes: [
+          { rotulo: 'Procurar equipas', rota: '/teams' },
+          { rotulo: 'Convites e pedidos', rota: '/players/membership-requests' },
+          { rotulo: 'Criar equipa', rota: '/createTeam' },
+        ],
+      });
+    } else {
+      const equipa: Ligacao[] = [
+        { rotulo: 'A minha equipa', rota: ['/team/details', s.equipaId] },
+        { rotulo: 'Calendário', rota: ['/players/calendar', s.equipaId], exato: true },
+      ];
+      if (s.admin) {
+        equipa.push(
+          { rotulo: 'Membros', rota: '/team/members' },
+          { rotulo: 'Pedidos de adesão', rota: '/team/membership-requests' },
+          { rotulo: 'Recrutar jogadores', rota: '/players', exato: true },
+          { rotulo: 'Adversários', rota: '/teams' },
+          { rotulo: 'Convites de jogo', rota: '/team/matchInvites' },
+          { rotulo: 'Pedidos de adiamento', rota: ['/players/calendar', s.equipaId, 'postpone-requests'] }
+        );
+      }
+      grupos.push({ titulo: 'Equipa', ligacoes: equipa });
+    }
+
+    grupos.push({
+      titulo: 'Conta',
+      ligacoes: [
+        { rotulo: 'Definições', rota: '/settings' },
+        { rotulo: 'Sair', rota: '/logout' },
+      ],
+    });
+    return grupos;
+  });
+
+  constructor() {
+    // Fecha o menu (em ecrãs pequenos) sempre que se navega para outra página.
+    inject(Router)
+      .events.pipe(
+        filter((e) => e instanceof NavigationEnd),
+        takeUntilDestroyed()
+      )
+      .subscribe(() => {
+        this.aberto.set(false);
+        this.auth.atualizarSessao();
+      });
   }
 }

@@ -1,0 +1,51 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Definições</h1>
+      <p class="page-subtitle">Segurança da tua conta.</p>
+    </div>
+  </header>
+
+  <form class="card form" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+    <h2 class="card-title">Alterar palavra-passe</h2>
+
+    <div class="form-field">
+      <label for="atual">Palavra-passe atual</label>
+      <input id="atual" type="password" formControlName="atual" autocomplete="current-password" />
+      @if (invalido('atual')) {
+        <span class="erro-campo">Indica a palavra-passe atual.</span>
+      }
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="nova">Nova palavra-passe</label>
+        <input id="nova" type="password" formControlName="nova" autocomplete="new-password" aria-describedby="regra-pp" />
+        <span id="regra-pp" class="dica">Pelo menos 8 caracteres, com letras e números.</span>
+        @if (invalido('nova')) {
+          <span class="erro-campo">A palavra-passe não cumpre as regras.</span>
+        }
+      </div>
+      <div class="form-field">
+        <label for="confirmacao">Confirmar nova palavra-passe</label>
+        <input id="confirmacao" type="password" formControlName="confirmacao" autocomplete="new-password" />
+        @if (form.hasError('diferentes') && form.controls.confirmacao.touched) {
+          <span class="erro-campo">As palavras-passe não coincidem.</span>
+        }
+      </div>
+    </div>
+
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+    @if (sucesso()) {
+      <p class="estado state--ok" role="status">Palavra-passe alterada.</p>
+    }
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="aGuardar()">
+        {{ aGuardar() ? 'A guardar…' : 'Alterar palavra-passe' }}
+      </button>
+    </div>
+  </form>
+</section>

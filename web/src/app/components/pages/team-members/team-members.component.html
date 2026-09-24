@@ -5,7 +5,9 @@
     </div>
 
     <div class="page-header__actions">
+      <label class="sr-only" for="pesquisa-membros">Procurar por nome ou posição</label>
       <input
+        id="pesquisa-membros"
         type="search"
         class="search-input"
         placeholder="Procurar por nome ou posição"
@@ -20,23 +22,27 @@
       A carregar membros da equipa…
     </div>
 
-    <div *ngIf="errorMessage()" class="state state--error">
+    <div *ngIf="successMessage()" class="state state--ok" role="status">
+      {{ successMessage() }}
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error" role="alert">
       {{ errorMessage() }}
     </div>
 
-    <div *ngIf="!isLoading() && !errorMessage()">
+    <div *ngIf="!isLoading()" class="tabela-scroll">
       <table class="members-table" *ngIf="filteredMembers().length; else noMembers">
         <thead>
           <tr>
             <th>Nome</th>
             <th>Posição</th>
             <th>Administrador</th>
-            <th class="members-table__actions-col"></th>
+            <th class="members-table__actions-col"><span class="sr-only">Ações</span></th>
           </tr>
         </thead>
         <tbody>
           <tr *ngFor="let member of filteredMembers()">
-            <td>{{ member.name }}</td>
+            <td><a [routerLink]="['/players/details', member.playerId]">{{ member.name }}</a></td>
             <td>{{ POSITION_MAP[member.position] || 'Sem posição' }}</td>
             <td>
               <span class="badge" [class.badge--admin]="member.isAdmin">
@@ -44,15 +50,15 @@
               </span>
             </td>
             <td class="members-table__actions">
-              <button *ngIf="canPromote(member)" type="button" class="btn btn-secondary" (click)="promote(member)">
+              <button *ngIf="canPromote(member)" type="button" class="btn btn-secondary" [disabled]="ocupado() === member.playerId" (click)="promote(member)">
                 Promover a admin
               </button>
 
-              <button *ngIf="canDemote(member)" type="button" class="btn btn-secondary" (click)="demote(member)">
-                Rebaixar admin
+              <button *ngIf="canDemote(member)" type="button" class="btn btn-secondary" [disabled]="ocupado() === member.playerId" (click)="demote(member)">
+                Retirar admin
               </button>
 
-              <button *ngIf="canRemove(member)" type="button" class="btn btn-danger" (click)="remove(member)">
+              <button *ngIf="canRemove(member)" type="button" class="btn btn-danger" [disabled]="ocupado() === member.playerId" (click)="remove(member)">
                 Expulsar
               </button>
             </td>

@@ -1,0 +1,57 @@
+<form class="form" [formGroup]="form" (ngSubmit)="submeter()" novalidate>
+  <div class="equipa-form">
+    <div class="emblema">
+      <img [src]="preview()" alt="Pré-visualização do emblema" width="128" height="128" />
+      <label class="btn btn-secondary" for="emblema-input">
+        {{ novoEmblema() || inicial()?.icon ? 'Mudar emblema' : 'Escolher emblema' }}
+      </label>
+      <input id="emblema-input" class="sr-only" type="file" accept="image/*" (change)="escolherEmblema($event)" />
+      @if (erroEmblema()) {
+        <span class="erro-campo">{{ erroEmblema() }}</span>
+      }
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field form-field--full">
+        <label for="eq-nome">Nome da equipa</label>
+        <input id="eq-nome" type="text" formControlName="name" maxlength="50" autocomplete="off" />
+        @if (invalido('name')) {
+          <span class="erro-campo">Entre 3 e 50 caracteres.</span>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
+        <label for="eq-descricao">Descrição <span class="opcional">(opcional)</span></label>
+        <textarea id="eq-descricao" rows="3" formControlName="description" maxlength="250"></textarea>
+        @if (invalido('description')) {
+          <span class="erro-campo">No máximo 250 caracteres.</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="eq-campo">Campo onde jogam</label>
+        <input id="eq-campo" type="text" formControlName="pitchName" maxlength="50" placeholder="Ex.: Campo da Constituição" />
+        @if (invalido('pitchName')) {
+          <span class="erro-campo">Entre 3 e 50 caracteres.</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="eq-morada">Morada do campo</label>
+        <input id="eq-morada" type="text" formControlName="pitchAddress" maxlength="250" placeholder="Rua, localidade" />
+        @if (invalido('pitchAddress')) {
+          <span class="erro-campo">Entre 5 e 250 caracteres.</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="form-actions">
+    @if (podeCancelar()) {
+      <button type="button" class="btn btn-secondary" (click)="cancelar.emit()">Cancelar</button>
+    }
+    <button type="submit" class="btn btn-primary" [disabled]="aGuardar()">
+      {{ aGuardar() ? 'A guardar…' : textoBotao() }}
+    </button>
+  </div>
+</form>

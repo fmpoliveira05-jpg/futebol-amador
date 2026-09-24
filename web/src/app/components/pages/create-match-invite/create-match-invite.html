@@ -1,38 +1,47 @@
-<section class="page">
+<section class="page page--estreita">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ isNegotiating() ? 'Fazer contraproposta' : 'Convidar para um jogo' }}</h1>
+            @if (adversario(); as a) {
+                <p class="page-subtitle">Adversário: <strong>{{ a.name }}</strong> ({{ a.rankName }}). Campo deles: {{ a.pitchDto.name }}.</p>
+            }
+        </div>
+    </header>
     <div class="card">
-        <h2 class="card-title">
-            {{ isNegotiating ? 'Negociar Convite' : 'Enviar convite de partida' }}
-        </h2>
-        
-        <form class="form" [formGroup]="form">
+        @if (original(); as c) {
+            <p class="aviso">
+                Convite de {{ c.sender.name }} para {{ c.gameDate | date: 'dd-MM-yyyy HH:mm' }} ({{ c.namePitch }}).
+                Propõe outra data ou outro campo.
+            </p>
+        }
+
+        <form class="form" [formGroup]="form" (ngSubmit)="submitAction()">
             <div class="form-grid">
-                
                 <label class="form-field">
-                    <span>Data da partida: </span>
+                    <span>Data do jogo</span>
                     <input type="datetime-local" formControlName="gameDate" [min]="minDate" />
+                    <small class="dica">Pelo menos 12 horas a partir de agora.</small>
                 </label>
 
                 <label class="form-field">
-                    <span>Localização: </span>
+                    <span>Campo</span>
                     <select formControlName="homePitch">
-                        <option [ngValue]="true">Casa</option>
-                        <option [ngValue]="false">Adversário</option>
+                        <option [ngValue]="true">O nosso campo</option>
+                        <option [ngValue]="false">O campo do adversário</option>
                     </select>
                 </label>
-
             </div>
+
+            @if (errorMessage()) {
+                <p class="error" role="alert">{{ errorMessage() }}</p>
+            }
 
             <div class="form-actions">
-                <button 
-                    type="button" 
-                    class="btn btn-primary" 
-                    (click)="submitAction()" 
-                    [disabled]="form.invalid || isLoading()">
-                    {{ isLoading() ? 'Enviando...' : (isNegotiating ? 'Enviar Contraproposta' : 'Enviar') }}
+                <button type="submit" class="btn btn-primary" [disabled]="isLoading()">
+                    {{ isLoading() ? 'A enviar…' : (isNegotiating() ? 'Enviar contraproposta' : 'Enviar convite') }}
                 </button>
+                <a class="btn btn-link" routerLink="/team/matchInvites">Cancelar</a>
             </div>
-            
-            <p *ngIf="errorMessage()" class="error">{{ errorMessage() }}</p>
         </form>
     </div>
 </section>

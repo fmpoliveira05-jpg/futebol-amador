@@ -1,30 +1,62 @@
-import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { UserService } from '../../../services/user.service';
+import { mensagemDeErro } from '../../../shared/http/erros';
 
+/** As duas palavras-passe novas têm de coincidir. */
+function confirmacaoIgual(grupo: AbstractControl): ValidationErrors | null {
+  const nova = grupo.get('nova')?.value;
+  const confirmacao = grupo.get('confirmacao')?.value;
+  return nova && confirmacao && nova !== confirmacao ? { diferentes: true } : null;
+}
+
+/** Definições da conta: alteração da palavra-passe. */
 @Component({
   selector: 'app-settings-page',
-  standalone: true,
-  imports: [CommonModule],
+  imports: [ReactiveFormsModule],
   templateUrl: './settings-page.component.html',
-  styleUrl: './settings-page.component.css',
 })
 export class SettingsPageComponent {
-  protected readonly darkMode = signal<boolean>(
-    window.matchMedia &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches,
+  private readonly users = inject(UserService);
+
+  protected readonly form = inject(FormBuilder).nonNullable.group(
+    {
+      atual: ['', Validators.required],
+      nova: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]],
+      confirmacao: ['', Validators.required],
+    },
+    { validators: confirmacaoIgual }
   );
-  protected readonly notificationsEnabled = signal<boolean>(true);
-  protected readonly language = signal<'pt' | 'en'>('pt');
 
-  protected toggleDarkMode(): void {
-    this.darkMode.set(!this.darkMode());
+  protected readonly aGuardar = signal(false);
+  protected readonly erro = signal<string | null>(null);
+  protected readonly sucesso = signal(false);
+
+  protected guardar(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const { atual, nova } = this.form.getRawValue();
+    this.aGuardar.set(true);
+    this.erro.set(null);
+    this.sucesso.set(false);
+
+    this.users.alterarPalavraPasse(atual, nova).subscribe({
+      next: () => {
+        this.aGuardar.set(false);
+        this.sucesso.set(true);
+        this.form.reset();
+      },
+      error: (e) => {
+        this.aGuardar.set(false);
+        this.erro.set(mensagemDeErro(e, 'Não foi possível alterar a palavra-passe.'));
+      },
+    });
   }
 
-  protected toggleNotifications(): void {
-    this.notificationsEnabled.set(!this.notificationsEnabled());
-  }
-
-  protected setLanguage(lang: 'pt' | 'en'): void {
-    this.language.set(lang);
+  protected invalido(campo: 'atual' | 'nova' | 'confirmacao'): boolean {
+    const c = this.form.controls[campo];
+    return c.invalid && c.touched;
   }
 }

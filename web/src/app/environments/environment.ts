@@ -1,18 +1,10 @@
 /**
- * Ambiente de configuração para a produção.
- * Define variáveis específicas para o ambiente de produção, como o estado de produção e a URL da API.
+ * Configuração de produção (`ng build`).
+ * O endereço da API é o do servidor onde o backend estiver publicado.
  */
 export const environment = {
-  
-  /**
-   * Define se o ambiente é de produção ou desenvolvimento.
-   * Neste caso, está definido como `true`, indicando que é o ambiente de produção.
-   */
   production: true,
-
-  /**
-   * A URL base para a API do backend.
-   * A URL foi configurada para um servidor local durante a produção.
-   */
+  /** Modo demonstração: responde com dados de exemplo, sem backend. */
+  demo: false,
   apiBaseUrl: 'https://amfootballapi.duckdns.org/api',
-}
+};

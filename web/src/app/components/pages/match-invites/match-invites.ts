@@ -1,118 +1,98 @@
-import { Component, computed, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Observable } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
-import { CommonModule } from '@angular/common';
 import { MatchInviteService } from '../../../services/match-invite.service';
 import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDto';
-import { Router } from '@angular/router';
+import { mensagemDeErro } from '../../../shared/http/erros';
 
 /**
- * Componente responsável pela listagem e gestão de convites de partida recebidos pela equipa.
- * Permite aceitar, recusar ou iniciar negociação de convites.
+ * Convites de jogo da equipa. Os convites recebidos podem ser aceites, recusados ou negociados;
+ * os enviados ficam à espera da resposta do adversário.
  */
 @Component({
   selector: 'app-match-invites',
-  imports: [CommonModule],
+  imports: [DatePipe, RouterLink],
   templateUrl: './match-invites.html',
   styleUrl: './match-invites.css',
 })
-export class MatchInvites {
-  teamId = signal<string | null>('');
+export class MatchInvites implements OnInit {
+  private readonly auth = inject(AuthService);
+  private readonly matchInviteService = inject(MatchInviteService);
 
-  protected readonly isLoading = signal<boolean>(false);
+  protected readonly teamId = signal<string | null>(null);
+  protected readonly isLoading = signal(true);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly searchTerm = signal<string>('');
+  protected readonly successMessage = signal<string | null>(null);
+  protected readonly matchInvites = signal<InfoMatchInviteDto[]>([]);
+  /** Convite com um pedido em curso (para desativar os botões dessa linha). */
+  protected readonly ocupado = signal<string | null>(null);
 
-  matchInvites = signal<InfoMatchInviteDto[]>([]);
-
-  constructor(
-    private auth: AuthService,
-    private matchInviteService: MatchInviteService,
-    private router: Router
-  ) {}
-
-  /**
-   * Inicializa o componente, identificando a equipa do utilizador e carregando os seus convites.
-   */
   ngOnInit(): void {
     this.auth.getCurrentTeamId().subscribe((teamId) => {
       if (!teamId) {
         this.errorMessage.set('Não foi possível identificar a tua equipa.');
         this.isLoading.set(false);
-      } else {
-        this.teamId.set(teamId);
-        this.loadMatchInvites(teamId);
+        return;
       }
+      this.teamId.set(teamId);
+      this.carregar();
     });
   }
 
-  /**
-   * Carrega a lista de convites de partida pendentes para a equipa.
-   * @param teamId ID da equipa.
-   */
-  protected loadMatchInvites(teamId: string): void {
-    this.isLoading.set(true);
-    this.errorMessage.set(null);
+  protected recebido(convite: InfoMatchInviteDto): boolean {
+    return convite.receiver.idTeam === this.teamId();
+  }
 
+  protected carregar(): void {
+    const teamId = this.teamId();
+    if (!teamId) {
+      return;
+    }
+    this.isLoading.set(true);
     this.matchInviteService.getTeamMatchInvites(teamId).subscribe({
-      next: (data) => {
-        this.matchInvites.set(data);
+      next: (convites) => {
+        this.matchInvites.set(convites);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.errorMessage.set('Não foi possível carregar os convites de partida da equipa.');
+      error: (err) => {
+        this.errorMessage.set(mensagemDeErro(err, 'Não foi possível carregar os convites.'));
         this.isLoading.set(false);
       },
     });
   }
 
-  /**
-   * Aceita um convite de partida recebido.
-   * @param invite Objeto contendo os dados do convite.
-   */
-  accept(invite: InfoMatchInviteDto) {
-    this.isLoading.set(true);
+  accept(convite: InfoMatchInviteDto): void {
+    this.responder(convite, (t) => this.matchInviteService.acceptMatchInvite(t, convite.id),
+      `Jogo com ${convite.sender.name} marcado. Já está no calendário.`);
+  }
+
+  refuse(convite: InfoMatchInviteDto): void {
+    if (!confirm(`Recusar o convite de ${convite.sender.name}?`)) {
+      return;
+    }
+    this.responder(convite, (t) => this.matchInviteService.refuseMatchInvite(t, convite.id), 'Convite recusado.');
+  }
+
+  private responder(convite: InfoMatchInviteDto, pedido: (teamId: string) => Observable<void>, sucesso: string): void {
+    const teamId = this.teamId();
+    if (!teamId) {
+      return;
+    }
+    this.ocupado.set(convite.id);
     this.errorMessage.set(null);
-
-    if (this.teamId()) {
-      this.matchInviteService.acceptMatchInvite(this.teamId()!, invite.id).subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.loadMatchInvites(this.teamId()!);
-        },
-        error: () => {
-          this.errorMessage.set('Não foi possível aceitar convite de partida.');
-          this.isLoading.set(false);
-        },
-      });
-    }
-  }
-
-  /**
-   * Recusa um convite de partida.
-   * @param invite Objeto contendo os dados do convite.
-   */
-  refuse(invite: InfoMatchInviteDto) {
-    if (this.teamId()) {
-      this.matchInviteService.refuseMatchInvite(this.teamId()!, invite.id).subscribe({
-        next: () => {
-          this.isLoading.set(false);
-          this.loadMatchInvites(this.teamId()!);
-        },
-        error: () => {
-          this.errorMessage.set('Não foi possível recusar convite de partida.');
-          this.isLoading.set(false);
-        },
-      });
-    }
-  }
-
-  /**
-   * Inicia o processo de negociação (contraproposta) para um convite.
-   * @param invite Objeto contendo os dados do convite.
-   */
-  negotiate(invite: InfoMatchInviteDto) {
-    this.router.navigate(['/team/negotiateMatchInvite', invite.sender.idTeam], {
-      state: { invite: invite },
+    this.successMessage.set(null);
+    pedido(teamId).subscribe({
+      next: () => {
+        this.ocupado.set(null);
+        this.successMessage.set(sucesso);
+        this.carregar();
+      },
+      error: (err) => {
+        this.ocupado.set(null);
+        this.errorMessage.set(mensagemDeErro(err, 'Não foi possível responder ao convite.'));
+      },
     });
   }
 }

@@ -1,16 +1,17 @@
 {
-  "name": "frontend",
-  "version": "0.0.0",
+  "name": "futebol-amador-web",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "demo": "ng serve --configuration demo",
     "build": "ng build",
+    "build:demo": "ng build --configuration demo",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "compodoc": "npx compodoc -p tsconfig.app.json -d ./documentation --disableGraph --theme readthedocs",
-    "e2e": "ng e2e",
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run"
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage",
+    "e2e": "playwright test",
+    "compodoc": "npx compodoc -p tsconfig.app.json -d ./documentation --disableGraph --theme readthedocs"
   },
   "prettier": {
     "printWidth": 100,
@@ -36,7 +37,6 @@
     "ngx-cookie-service": "^20.1.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.8.1",
-    "uuid": "^13.0.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -44,7 +44,7 @@
     "@angular/cli": "^20.3.10",
     "@angular/compiler-cli": "^20.3.0",
     "@compodoc/compodoc": "^1.1.32",
-    "@cypress/schematic": "^4.1.4",
+    "@playwright/test": "1.56",
     "@types/jasmine": "~5.1.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",
@@ -52,7 +52,6 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
-    "typescript": "~5.9.2",
-    "cypress": "15.7.0"
+    "typescript": "~5.9.2"
   }
 }

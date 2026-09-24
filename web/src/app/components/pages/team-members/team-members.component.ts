@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { TeamMembersService } from '../../../services/team-members.service';
 import { PlayerTeamDto } from '../../../shared/Dtos/Player/PlayerTeamDto';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
+import { mensagemDeErro } from '../../../shared/http/erros';
 
 /**
  * Componente responsável pela gestão dos membros de uma equipa.
@@ -12,9 +14,8 @@ import { POSITION_MAP } from '../../../shared/constants/position-map';
 @Component({
   selector: 'app-team-members-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './team-members.component.html',
-  styleUrl: './team-members.component.css',
 })
 export class TeamMembersPageComponent {
   private readonly authService = inject(AuthService);
@@ -26,6 +27,9 @@ export class TeamMembersPageComponent {
   protected readonly errorMessage = signal<string | null>(null);
 
   protected readonly searchTerm = signal<string>('');
+  protected readonly successMessage = signal<string | null>(null);
+  /** Id do jogador com uma operação em curso (desativa os botões dessa linha). */
+  protected readonly ocupado = signal<string | null>(null);
 
   /**
    * Computada: Filtra a lista de membros em tempo real com base no termo de pesquisa (nome ou posição).
@@ -44,8 +48,6 @@ export class TeamMembersPageComponent {
       return nameMatches || positionMatches;
     });
   });
-
-  constructor() {}
 
   /**
    * Inicializa o componente obtendo o ID da equipa do utilizador logado.
@@ -126,22 +128,27 @@ export class TeamMembersPageComponent {
   protected promote(member: PlayerTeamDto): void {
     const teamId = member.team.idTeam;
 
-    console.log(member);
 
     if (!teamId || !member.playerId) return;
 
     if (!confirm(`Queres promover "${member.name}" a administrador?`)) return;
 
+    this.ocupado.set(member.playerId);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.teamMembersService.promoteMember(teamId, member.playerId).subscribe({
       next: () => {
+        this.ocupado.set(null);
+        this.successMessage.set(`${member.name} passou a administrador.`);
         this.members.update((list) =>
           list.map((m) =>
             m.playerId === member.playerId ? { ...m, isAdmin: true } : m
           )
         );
       },
-      error: () => {
-        this.errorMessage.set('Não foi possível promover o jogador.');
+      error: (e) => {
+        this.ocupado.set(null);
+        this.errorMessage.set(mensagemDeErro(e, 'Não foi possível promover o jogador.'));
       },
     });
   }
@@ -157,16 +164,22 @@ export class TeamMembersPageComponent {
 
     if (!confirm(`Queres remover o estatuto de administrador de "${member.name}"?`)) return;
 
+    this.ocupado.set(member.playerId);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.teamMembersService.demoteAdmin(teamId, member.playerId).subscribe({
       next: () => {
+        this.ocupado.set(null);
+        this.successMessage.set(`${member.name} deixou de ser administrador.`);
         this.members.update((list) =>
           list.map((m) =>
             m.playerId === member.playerId ? { ...m, isAdmin: false } : m
           )
         );
       },
-      error: () => {
-        this.errorMessage.set('Não foi possível rebaixar o jogador.');
+      error: (e) => {
+        this.ocupado.set(null);
+        this.errorMessage.set(mensagemDeErro(e, 'Não foi possível retirar o estatuto de administrador.'));
       },
     });
   }
@@ -182,14 +195,20 @@ export class TeamMembersPageComponent {
 
     if (!confirm(`Queres expulsar o jogador "${member.name}" da equipa?`)) return;
 
+    this.ocupado.set(member.playerId);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
     this.teamMembersService.removeMember(teamId, member.playerId).subscribe({
       next: () => {
+        this.ocupado.set(null);
+        this.successMessage.set(`${member.name} foi removido da equipa.`);
         this.members.update((list) =>
           list.filter((m) => m.playerId !== member.playerId)
         );
       },
-      error: () => {
-        this.errorMessage.set('Não foi possível expulsar o jogador.');
+      error: (e) => {
+        this.ocupado.set(null);
+        this.errorMessage.set(mensagemDeErro(e, 'Não foi possível expulsar o jogador.'));
       },
     });
   }

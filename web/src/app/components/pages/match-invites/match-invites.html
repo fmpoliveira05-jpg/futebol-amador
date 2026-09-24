@@ -1,67 +1,54 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Convites de Partida</h1>
+      <h1 class="page-title">Convites de jogo</h1>
+      <p class="page-subtitle">Para convidar uma equipa, procura-a em <a routerLink="/teams">Adversários</a>.</p>
     </div>
-
-    <!-- <div class="page-header__actions">
-      <input
-        type="search"
-        class="search-input"
-        placeholder="Procurar por equipa"
-        [value]="searchTerm()"
-        (input)="onSearchTermChange($any($event.target).value)"
-      />
-    </div> -->
   </header>
 
   <div class="card">
-    <div *ngIf="isLoading()" class="state state--loading">
-      A carregar convites de partida…
-    </div>
+    @if (successMessage()) {
+      <div class="state state--ok" role="status">{{ successMessage() }}</div>
+    }
+    @if (errorMessage()) {
+      <div class="state state--error" role="alert">{{ errorMessage() }}</div>
+    }
 
-    <div *ngIf="errorMessage()" class="state state--error">
-      {{ errorMessage() }}
-    </div>
-
-    <div *ngIf="!isLoading() && !errorMessage()">
-      <table class="invites-table" *ngIf="matchInvites().length; else noInvites">
+    @if (isLoading()) {
+      <div class="state state--loading">A carregar convites…</div>
+    } @else if (matchInvites().length) {
+      <table class="invites-table">
         <thead>
           <tr>
-            <th>Equipa 1</th>
-            <th>Equipa 2</th>
-            <th>Game Date</th>
-            <th>Location</th>
-            <th class="invites-table__actions-col"></th>
+            <th>De</th>
+            <th>Para</th>
+            <th>Data</th>
+            <th>Campo</th>
+            <th class="invites-table__actions-col"><span class="sr-only">Ações</span></th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let invite of matchInvites()">
-            <td>{{ invite.sender.name }}</td>
-            <td>{{ invite.receiver.name }}</td>
-            <td>{{ invite.gameDate }}</td>
-            <td>{{ invite.namePitch }}</td>
-
-            <td class="members-table__actions">
-              <button type="button" class="btn btn-secondary" (click)="accept(invite)">
-                Aceitar
-              </button>
-
-              <button type="button" class="btn btn-secondary" (click)="negotiate(invite)">
-                Negociar
-              </button>
-
-              <button type="button" class="btn btn-danger" (click)="refuse(invite)">
-                Recusar
-              </button>
-            </td>
-          </tr>
+          @for (invite of matchInvites(); track invite.id) {
+            <tr>
+              <td>{{ invite.sender.name }}</td>
+              <td>{{ invite.receiver.name }}</td>
+              <td>{{ invite.gameDate | date: 'dd-MM-yyyy HH:mm' }}</td>
+              <td>{{ invite.namePitch }}</td>
+              <td class="members-table__actions">
+                @if (recebido(invite)) {
+                  <button type="button" class="btn btn-secondary" [disabled]="ocupado() === invite.id" (click)="accept(invite)">Aceitar</button>
+                  <a class="btn btn-secondary" [routerLink]="['/team/createMatchInvite', invite.sender.idTeam]" [queryParams]="{ convite: invite.id }">Negociar</a>
+                  <button type="button" class="btn btn-danger" [disabled]="ocupado() === invite.id" (click)="refuse(invite)">Recusar</button>
+                } @else {
+                  <span class="aguarda">À espera de resposta</span>
+                }
+              </td>
+            </tr>
+          }
         </tbody>
       </table>
-
-      <ng-template #noInvites>
-        <div class="state">Não há convites para apresentar.</div>
-      </ng-template>
-    </div>
+    } @else {
+      <div class="state">Não há convites pendentes.</div>
+    }
   </div>
 </section>

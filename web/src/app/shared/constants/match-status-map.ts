@@ -1,11 +1,25 @@
-/**
- * Mapeamento dos valores numéricos para os estados das partidas.
- * Utilizado para converter um valor numérico em seu nome correspondente de estado de partida.
- */
+/** Estados de um jogo, com os mesmos valores do enum `MatchStatus` da API. */
+export enum EstadoJogo {
+  Agendado = 0,
+  EmCurso = 1,
+  Terminado = 2,
+  Adiado = 3,
+  Cancelado = 4,
+}
+
+/** Texto de cada estado. */
 export const MATCH_STATUS: Record<number, string> = {
-   0: 'Scheduled',
-   1: 'In Progress',
-   2: 'Done',
-   3: 'Post Poned',
-   4: 'Cancelled'
+  [EstadoJogo.Agendado]: 'Agendado',
+  [EstadoJogo.EmCurso]: 'A decorrer',
+  [EstadoJogo.Terminado]: 'Terminado',
+  [EstadoJogo.Adiado]: 'Adiado',
+  [EstadoJogo.Cancelado]: 'Cancelado',
+};
+
+/** Resultado de um jogo terminado, com os valores do enum `MatchResult` da API. */
+export const MATCH_RESULT: Record<number, string> = {
+  0: 'Vitória',
+  1: 'Derrota',
+  2: 'Empate',
+  3: '',
 };

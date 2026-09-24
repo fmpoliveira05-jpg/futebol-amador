@@ -1,91 +1,111 @@
-<section class="calendar-page">
-  <header class="calendar-header">
+<section class="page">
+  <header class="page-header">
     <div>
-      <h1>Calendário</h1>
-      <div class="filters">
-        <button class="filter-button" (click)="toggleFilters()">
-          {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
+      <h1 class="page-title">Calendário</h1>
+      <p class="page-subtitle">Jogos marcados, realizados e cancelados da equipa.</p>
+    </div>
+    <div class="page-header__actions">
+        <button type="button" class="btn btn-secondary" (click)="toggleFilters()" [attr.aria-expanded]="showFilters()">
+          {{ showFilters() ? 'Esconder filtros' : 'Mostrar filtros' }}
         </button>
-      </div>
+        @if (isAdmin) {
+          <a class="btn btn-secondary" [routerLink]="['/players/calendar', idTeam(), 'postpone-requests']">Pedidos de adiamento</a>
+        }
     </div>
   </header>
 
-  <div *ngIf="showFilters()" class="filters-container">
-    <div>
-      <label for="nameOpponent">Nome do adversário:</label>
-      <input id="nameOpponent" [(ngModel)]="filterDto().nameOpponent" placeholder="Nome do adversário">
-    </div>
+  @if (showFilters()) {
+    <form class="card filters-container" (ngSubmit)="carregar()">
+      <div>
+        <label for="nameOpponent">Adversário</label>
+        <input id="nameOpponent" name="nameOpponent" [(ngModel)]="filtro.nameOpponent" placeholder="Nome do adversário">
+      </div>
+      <div>
+        <label for="minDate">De</label>
+        <input id="minDate" name="minDate" type="date" [(ngModel)]="filtro.minDate">
+      </div>
+      <div>
+        <label for="maxDate">Até</label>
+        <input id="maxDate" name="maxDate" type="date" [(ngModel)]="filtro.maxDate">
+      </div>
+      <div>
+        <label for="isRealized">Já realizado?</label>
+        <select id="isRealized" name="isRealized" [(ngModel)]="filtro.isRealized">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Sim</option>
+          <option [ngValue]="false">Não</option>
+        </select>
+      </div>
+      <div>
+        <label for="isHome">Em casa?</label>
+        <select id="isHome" name="isHome" [(ngModel)]="filtro.isHome">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Sim</option>
+          <option [ngValue]="false">Não</option>
+        </select>
+      </div>
+      <div>
+        <label for="isRanked">Competitivo?</label>
+        <select id="isRanked" name="isRanked" [(ngModel)]="filtro.isRanked">
+          <option [ngValue]="undefined">Todos</option>
+          <option [ngValue]="true">Sim</option>
+          <option [ngValue]="false">Não</option>
+        </select>
+      </div>
+      <div class="filters-container__acoes">
+        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
+        <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </form>
+  }
 
-    <div>
-      <label for="minDate">Data Mínima:</label>
-      <input id="minDate" type="date" [(ngModel)]="filterDto().minDate">
-    </div>
-
-    <div>
-      <label for="maxDate">Data Máxima:</label>
-      <input id="maxDate" type="date" [(ngModel)]="filterDto().maxDate">
-    </div>
-
-    <div>
-      <label for="isRealized">A partida já foi realizada?</label>
-      <select id="isRealized" [(ngModel)]="filterDto().isRealized">
-        <option [ngValue]="true">Sim</option>
-        <option [ngValue]="false">Não</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="isHome">A partida é em casa?</label>
-      <select id="isHome" [(ngModel)]="filterDto().isHome">
-        <option [ngValue]="true">Sim</option>
-        <option [ngValue]="false">Não</option>
-      </select>
-    </div>
-
-    <div>
-      <label for="isRanked">A partida é ranqueada?</label>
-      <select id="isRanked" [(ngModel)]="filterDto().isRanked">
-        <option [ngValue]="true">Sim</option>
-        <option [ngValue]="false">Não</option>
-      </select>
-    </div>
-
-    <button (click)="applyFilters()">Aplicar Filtros</button>
-    <button (click)="clearSearchResults()">Limpar Resultados</button>
-  </div>
-
-  <div *ngIf="isLoading()">Carregando...</div>
-  <div *ngIf="errorMessage()">{{ errorMessage() }}</div>
-
-  <div *ngIf="!isLoading()">
-    <div *ngFor="let match of visibleMatches()" class="match-card">
-      <div class="match-info">
-        <div class="team-info">
-          <p class="match-status">
-            <span class="status">
-              {{ match.isCompetitive ? 'Competitiva' : 'Casual' }}
-            </span>
-          </p>
-          <p class="team-name">{{ match.team.name }} - {{ match.team.numGoals }}</p>
-          <p class="team-name">{{ match.opponent.name }} - {{ match.opponent.numGoals }}</p>
+  @if (isLoading()) {
+    <p class="estado">A carregar…</p>
+  } @else if (errorMessage()) {
+    <p class="erro" role="alert">{{ errorMessage() }}</p>
+  } @else {
+    @for (match of visibleMatches(); track match.idMatch) {
+      <article class="card match-card" [class.match-card--inativo]="match.matchStatus === Estado.Cancelado">
+        <div class="match-info">
+          <div class="match-status">
+            <span class="badge {{ classeEstado(match) }}">{{ estados[match.matchStatus] }}</span>
+            <span class="badge" [class.badge--info]="match.isCompetitive">{{ match.isCompetitive ? 'Competitivo' : 'Amigável' }}</span>
+            <span class="badge">{{ match.isHome ? 'Em casa' : 'Fora' }}</span>
+          </div>
+          <p class="match-end">{{ match.gameDate | date: "EEE, d MMM y · HH:mm" }}</p>
         </div>
-        <p class="match-end">{{ match.gameDate | date: 'dd-MM-yyyy HH:mm' }}</p>
-      </div>
-      <p class="match-status">
-        <span *ngIf="match.matchStatus === MATCH_STATUS_MAP_TONUMBER['Cancelled']">Cancelada</span>
-        <span *ngIf="match.matchStatus === MATCH_STATUS_MAP_TONUMBER['Post Poned']">Adiada</span>
-        <span *ngIf="match.matchStatus === MATCH_STATUS_MAP_TONUMBER['Scheduled']">Agendada</span>
-        <span *ngIf="match.matchStatus === MATCH_STATUS_MAP_TONUMBER['Done']">Finalizada</span>
-      </p>
 
-      <div *ngIf="match.matchStatus !== MATCH_STATUS_MAP_TONUMBER['Done'] && match.matchStatus !== MATCH_STATUS_MAP_TONUMBER['Cancelled']" class="match-actions">
-        <button *ngIf="isAdmin" class="btn postpone-btn" (click)="postponeMatch(match)">Adiar partida</button>
-        <button *ngIf="isAdmin" class="btn cancel-btn" (click)="goToCancelPage(match)">Cancelar partida</button>
-      </div>
-    </div>
+        <div class="placar">
+          <span class="placar__equipa">{{ match.team.name }}</span>
+          @if (match.matchStatus === Estado.Terminado) {
+            <span class="placar__resultado resultado--{{ match.matchResult }}">{{ match.team.numGoals }} – {{ match.opponent.numGoals }}</span>
+          } @else {
+            <span class="placar__vs">vs</span>
+          }
+          <span class="placar__equipa placar__equipa--fora">{{ match.opponent.name }}</span>
+        </div>
 
-    <div class="load-more-container">
-      <button *ngIf="visibleMatches().length < filteredMatches().length" (click)="loadMoreMatches()" class="load-more-btn">Carregar mais</button>
-    </div>
-  </div>
+        @if (match.pitchGame) {
+          <p class="pitch">{{ match.pitchGame.name }} · {{ match.pitchGame.address }}</p>
+        }
+
+        @if (isAdmin && podeAlterar(match)) {
+          <div class="match-actions">
+            @if (match.matchStatus === Estado.Agendado) {
+              <a class="btn btn-warning" [routerLink]="['/players/calendar', idTeam(), 'postpone', match.idMatch]">Pedir adiamento</a>
+            }
+            <a class="btn btn-danger" [routerLink]="['/players/calendar', idTeam(), 'cancel-match', match.idMatch]">Cancelar jogo</a>
+          </div>
+        }
+      </article>
+    } @empty {
+      <p class="estado">Sem jogos para mostrar.</p>
+    }
+
+    @if (haMais()) {
+      <div class="load-more-container">
+        <button type="button" (click)="mostrarMais()" class="btn btn-secondary">Mostrar mais</button>
+      </div>
+    }
+  }
 </section>

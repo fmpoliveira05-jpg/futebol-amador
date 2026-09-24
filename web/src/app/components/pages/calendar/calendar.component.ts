@@ -1,181 +1,117 @@
-import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CalendarService } from '../../../services/calendar.service';
+import { AuthService } from '../../../services/auth.service';
 import { CalendarDto } from '../../../shared/Dtos/Calendar/CalendarDto';
 import { FilterCalendarDto } from '../../../shared/Dtos/Filters/FilterCalendarDto';
-import { AuthService } from '../../../services/auth.service';
-import { Router } from '@angular/router';
-import { MATCH_STATUS_MAP_TONUMBER } from '../../../shared/constants/match-status-map-to-number';
-import { FormsModule } from '@angular/forms';
+import { EstadoJogo, MATCH_RESULT, MATCH_STATUS } from '../../../shared/constants/match-status-map';
+import { mensagemDeErro } from '../../../shared/http/erros';
 
 /**
- * Componente responsável pela gestão do calendário de jogos.
- * Permite visualizar os jogos da equipa, aplicar filtros e carregar mais partidas.
+ * Calendário de jogos da equipa. Os filtros são aplicados pela API; a página mostra os jogos
+ * aos poucos ("Mostrar mais") sem voltar a pedir a lista.
  */
+/**
+ * Ordem do calendário: primeiro os jogos por disputar (o mais próximo no topo), depois os
+ * restantes do mais recente para o mais antigo.
+ */
+export function ordenarCalendario(jogos: CalendarDto[]): CalendarDto[] {
+  const porJogar = (j: CalendarDto) => j.matchStatus === EstadoJogo.Agendado || j.matchStatus === EstadoJogo.Adiado;
+  const tempo = (j: CalendarDto) => new Date(j.gameDate).getTime();
+  return [...jogos].sort((a, b) => {
+    if (porJogar(a) !== porJogar(b)) {
+      return porJogar(a) ? -1 : 1;
+    }
+    return porJogar(a) ? tempo(a) - tempo(b) : tempo(b) - tempo(a);
+  });
+}
+
 @Component({
   selector: 'app-calendar',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
 })
-export class CalendarComponent {
+export class CalendarComponent implements OnInit {
   private readonly calendarService = inject(CalendarService);
-  private readonly authService = inject(AuthService); 
-  private readonly router = inject(Router); 
+  private readonly auth = inject(AuthService);
+
+  /** Id da equipa (parâmetro da rota). */
+  readonly idTeam = input.required<string>();
+
+  private static readonly POR_PAGINA = 10;
 
   protected readonly matches = signal<CalendarDto[]>([]);
-  protected readonly isLoading = signal<boolean>(false);
+  protected readonly isLoading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly showFilters = signal<boolean>(false);
+  protected readonly showFilters = signal(false);
+  protected readonly quantos = signal(CalendarComponent.POR_PAGINA);
 
-  protected readonly filterDto = signal<FilterCalendarDto>(new FilterCalendarDto());
-  protected readonly matchesToShow = signal<number>(10);
-  protected readonly currentPage = signal<number>(1);
+  /** Filtros ligados ao formulário (só são enviados ao carregar em "Aplicar"). */
+  protected filtro: FilterCalendarDto = {};
 
-  protected readonly MATCH_STATUS_MAP_TONUMBER = MATCH_STATUS_MAP_TONUMBER;
+  protected readonly visibleMatches = computed(() => this.matches().slice(0, this.quantos()));
+  protected readonly haMais = computed(() => this.quantos() < this.matches().length);
 
-  // Lista de partidas visíveis com base nos filtros e na quantidade de partidas a mostrar
-  protected readonly visibleMatches = computed(() =>
-    this.filteredMatches().slice(
-      (this.currentPage() - 1) * this.matchesToShow(),
-      this.currentPage() * this.matchesToShow()
-    )
-  );
+  protected readonly estados = MATCH_STATUS;
+  protected readonly resultados = MATCH_RESULT;
+  protected readonly Estado = EstadoJogo;
 
-  // Lista de partidas filtradas
-  protected readonly filteredMatches = computed(() =>
-    this.matches().filter((match) => {
-      const { isRealized, isRanked, isHome, minDate, maxDate, nameOpponent } = this.filterDto();
-      return (
-        (isRealized !== undefined ? match.matchStatus === (isRealized ? MATCH_STATUS_MAP_TONUMBER['Done'] : MATCH_STATUS_MAP_TONUMBER['Scheduled']) : true) &&
-        (isRanked !== undefined ? match.isCompetitive === isRanked : true) &&
-        (isHome !== undefined ? match.isHome === isHome : true) &&
-        (minDate ? new Date(match.gameDate) >= new Date(minDate) : true) &&
-        (maxDate ? new Date(match.gameDate) <= new Date(maxDate) : true) &&
-        (nameOpponent ? match.opponent.name.toLowerCase().includes(nameOpponent.toLowerCase()) : true)
-      );
-    })
-  );
-
-  ngOnInit() {
-    this.authService.getCurrentTeamId().subscribe(idTeam => {
-      if (idTeam) {
-        this.loadMatches(idTeam);
-      }
-    });
+  ngOnInit(): void {
+    this.carregar();
   }
 
-  // Carregar jogos
-  private loadMatches(idTeam: string): void {
+  protected get isAdmin(): boolean {
+    return this.auth.isAdmin();
+  }
+
+  protected carregar(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-
-    this.calendarService.getMatchesForTeam(idTeam, this.filterDto()).subscribe({
-      next: (data: CalendarDto[]) => {
-        this.matches.set(data);
+    this.quantos.set(CalendarComponent.POR_PAGINA);
+    this.calendarService.getMatchesForTeam(this.idTeam(), this.filtro).subscribe({
+      next: (jogos) => {
+        this.matches.set(ordenarCalendario(jogos));
         this.isLoading.set(false);
       },
-      error: () => {
-        this.errorMessage.set('Não foi possível carregar os jogos.');
+      error: (err) => {
+        this.errorMessage.set(mensagemDeErro(err, 'Não foi possível carregar os jogos.'));
         this.isLoading.set(false);
       },
     });
   }
 
-  // Carregar mais jogos ao clicar em "Carregar mais"
-  protected loadMoreMatches(): void {
-    this.currentPage.set(this.currentPage() + 1);
-    this.authService.getCurrentTeamId().subscribe(idTeam => {
-      if (idTeam) {
-        this.loadMatches(idTeam);
-      }
-    });
+  protected mostrarMais(): void {
+    this.quantos.update((n) => n + CalendarComponent.POR_PAGINA);
   }
 
-  // Alternar visibilidade dos filtros
   protected toggleFilters(): void {
-    this.showFilters.update((value) => !value);
+    this.showFilters.update((v) => !v);
   }
 
-  // Aplicar filtros aos jogos
-  protected applyFilters(): void {
-    this.currentPage.set(1); // Reseta a página ao aplicar os filtros
-    this.authService.getCurrentTeamId().subscribe(idTeam => {
-      if (idTeam) {
-        this.loadMatches(idTeam); // Recarrega os jogos com os filtros aplicados
-      }
-    });
+  protected limparFiltros(): void {
+    this.filtro = {};
+    this.carregar();
   }
 
-  // Limpar resultados da pesquisa
-  protected clearSearchResults(): void {
-    this.filterDto.set(new FilterCalendarDto()); 
-    this.matches.set([]); 
-    this.currentPage.set(1);
-    this.applyFilters();
-  }
-
-  // Adiar uma partida
-  protected postponeMatch(match: CalendarDto): void {
-    const newDate = prompt('Introduz a nova data para adiar a partida:', match.gameDate);
-    if (newDate) {
-      this.authService.getCurrentTeamId().subscribe(idTeam => {
-        if (!idTeam) {
-          alert('Não foi possível identificar a tua equipa.');
-          return;
-        }
-        const postponedMatch = {
-          idMatch: match.idMatch,
-          postPoneDate: newDate,
-          idTeam: idTeam,
-          idOpponent: match.opponent.idTeam
-        };
-
-        this.calendarService.postponeMatch(idTeam, postponedMatch).subscribe(() => {
-          alert('Partida adiada com sucesso!');
-          this.loadMatches(idTeam);
-        });
-      });
+  /** Jogos ainda por jogar podem ser adiados ou cancelados. */
+  /** Cor da etiqueta do estado do jogo. */
+  protected classeEstado(jogo: CalendarDto): string {
+    switch (jogo.matchStatus) {
+      case EstadoJogo.Terminado:
+        return 'badge--ok';
+      case EstadoJogo.Adiado:
+        return 'badge--aviso';
+      case EstadoJogo.Cancelado:
+        return 'badge--perigo';
+      default:
+        return 'badge--info';
     }
   }
 
-  // Confirmar cancelamento de partida
-  protected confirmCancel(match: CalendarDto): void {
-    const motivoCancelamento = prompt(`Tens a certeza que queres cancelar a partida com ${match.opponent.name}? Qual é o motivo?`);
-    if (motivoCancelamento && confirm(`Confirmas que queres cancelar a partida com ${match.opponent.name}?`)) {
-      this.cancelMatch(match, motivoCancelamento);
-    }
-  }
-
-  // Cancelar partida
-  protected cancelMatch(match: CalendarDto, motivo: string): void {
-    this.authService.getCurrentTeamId().subscribe(idTeam => {
-      if (!idTeam) {
-        alert('Não foi possível identificar a tua equipa.');
-        return;
-      }
-      this.calendarService.cancelMatch(idTeam, match.idMatch, motivo).subscribe(() => {
-        alert('Partida cancelada com sucesso!');
-        this.loadMatches(idTeam);
-      });
-    });
-  }
-
-  /**
-   * Verifica se o utilizador tem permissões de administrador.
-   * Retorna um valor booleano que indica se o utilizador é um administrador.
-   */
-  get isAdmin(): boolean {
-    return this.authService.isAdmin();
-  }
-
-  protected goToCancelPage(match: CalendarDto): void {
-    this.router.navigate([
-      '/players/calendar',
-      match.team.idTeam, 
-      'cancel-match',
-      match.idMatch       
-    ]);
+  protected podeAlterar(jogo: CalendarDto): boolean {
+    return jogo.matchStatus === EstadoJogo.Agendado || jogo.matchStatus === EstadoJogo.Adiado;
   }
 }

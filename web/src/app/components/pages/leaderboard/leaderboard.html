@@ -1,0 +1,66 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Classificação geral</h1>
+      <p class="page-subtitle">Pontos ganhos em jogos competitivos. Só aparecem as 100 primeiras equipas.</p>
+    </div>
+    <div class="page-header__actions">
+      <label class="sr-only" for="pesquisa-classificacao">Procurar equipa ou divisão</label>
+      <input
+        id="pesquisa-classificacao"
+        type="search"
+        class="search-input"
+        placeholder="Procurar equipa ou divisão"
+        [value]="pesquisa()"
+        (input)="pesquisa.set($any($event.target).value)"
+      />
+    </div>
+  </header>
+
+  <div class="card">
+    @switch (estado().tipo) {
+      @case ('a-carregar') {
+        <p class="estado">A carregar…</p>
+      }
+      @case ('erro') {
+        <p class="erro" role="alert">Não foi possível carregar a classificação.</p>
+      }
+      @default {
+        @if (equipas().length) {
+          <div class="tabela-scroll">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th class="col-pos">#</th>
+                  <th>Equipa</th>
+                  <th>Divisão</th>
+                  <th class="col-num">Pontos</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of equipas(); track t.id ?? t.teamName) {
+                  <tr [class.minha]="t.id && t.id === sessao().equipaId">
+                    <td class="col-pos">
+                      <span class="posicao" [class.posicao--podio]="t.position <= 3">{{ t.position }}</span>
+                    </td>
+                    <td>
+                      @if (sessao().autenticado && t.id) {
+                        <a [routerLink]="['/team/details', t.id]">{{ t.teamName }}</a>
+                      } @else {
+                        {{ t.teamName }}
+                      }
+                    </td>
+                    <td><span class="badge">{{ t.rankName }}</span></td>
+                    <td class="col-num">{{ t.currentPoints }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="estado">Nenhuma equipa encontrada.</p>
+        }
+      }
+    }
+  </div>
+</section>

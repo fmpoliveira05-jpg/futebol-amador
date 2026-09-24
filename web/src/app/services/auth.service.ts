@@ -1,227 +1,214 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { catchError, map, Observable, of, throwError } from 'rxjs';
-import { environment } from '../environments/environment';
+import { catchError, map, Observable, of, tap } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { CookieService } from 'ngx-cookie-service';
+import { environment } from '../environments/environment';
 import { PlayerDetails } from '../shared/Dtos/player.model';
 
+/** Resposta do `POST /User/login` (só os campos usados pela aplicação). */
+export interface LoginResponse {
+  name: string;
+  idTeam?: string | null;
+  isAdmin?: boolean | null;
+  firebaseLoginResponseDto: {
+    idToken: string;
+    localId: string;
+    expiresIn: string;
+  };
+}
+
+/** Estado da sessão que os componentes (menu, página inicial) acompanham. */
+export interface EstadoSessao {
+  autenticado: boolean;
+  jogadorId: string | null;
+  equipaId: string | null;
+  admin: boolean;
+}
+
+/** Dados enviados no registo de um jogador (`POST /Player/create-profile`). */
+export interface SignupRequest {
+  name: string;
+  email: string;
+  password: string;
+  dateOfBirth: string;
+  address: string;
+  phone: string;
+  position: number;
+  height: number;
+}
+
 /**
- * Serviço responsável pela autenticação e gestão de sessões do utilizador.
- * Realiza login, registo, decodificação de token, verificação de permissões, entre outras funções relacionadas.
+ * Sessão do utilizador: login, registo, logout e as informações guardadas no browser (token,
+ * id do jogador, id da equipa e se é administrador).
+ *
+ * A sessão fica em cookies com `path=/` e `SameSite=Strict`. O token do Firebase expira ao fim
+ * de uma hora; `isAuthenticated()` verifica essa validade, e o interceptor termina a sessão quando
+ * a API responde 401.
  */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  /**
-   * Serviço HTTP utilizado para realizar requisições à API.
-   */
   private readonly http = inject(HttpClient);
+  private readonly cookies = inject(CookieService);
+  private readonly baseUrl = environment.apiBaseUrl;
 
-  /**
-   * URL base da API, definida a partir das configurações do ambiente.
-   */
-  private readonly baseUrl = `${environment.apiBaseUrl}`;
+  static readonly TOKEN = 'access_token';
+  static readonly USER = 'user_id';
+  static readonly ADMIN = 'is_admin';
+  static readonly TEAM = 'team_id';
 
-  /**
-   * Serviço para manipulação de cookies.
-   */
-  private cookieService = inject(CookieService);
+  /** Margem, em segundos, para considerar o token expirado um pouco antes da hora. */
+  private static readonly MARGEM_EXPIRACAO = 30;
 
-  /**
-   * Obtém o token de acesso armazenado nos cookies.
-   * @returns O token de acesso ou `null` se não encontrado.
-   */
+  private readonly _sessao = signal<EstadoSessao>(this.lerSessao());
+
+  /** Estado atual da sessão, como signal: muda no login, no logout e quando a equipa muda. */
+  readonly sessao = this._sessao.asReadonly();
+  readonly autenticado = computed(() => this.sessao().autenticado);
+
   getToken(): string | null {
-    return this.cookieService.get('access_token');
+    return this.cookies.get(AuthService.TOKEN) || null;
   }
 
-  /**
-   * Obtém o ID do jogador atual armazenado nos cookies.
-   * @returns O ID do jogador ou `null` se não encontrado.
-   */
   getCurrentPlayerId(): string | null {
-    return this.cookieService.get('user_id');
+    return this.cookies.get(AuthService.USER) || null;
   }
 
-  /**
-   * Verifica se o utilizador está autenticado (se existe um token de acesso válido).
-   * @returns `true` se o utilizador estiver autenticado, caso contrário `false`.
-   */
+  /** @returns se existe um token e se ainda não expirou */
   isAuthenticated(): boolean {
-    return !!this.getToken();
-  }
-
-  /**
-   * Decodifica o token de acesso JWT e retorna o seu conteúdo.
-   * @returns O conteúdo do token decodificado ou `null` se o token não existir.
-   */
-  decodeToken(): any {
     const token = this.getToken();
-    if (token) {
-      return jwtDecode(token);
+    if (!token) {
+      return false;
     }
-    return null;
+    try {
+      const { exp } = jwtDecode<{ exp?: number }>(token);
+      return !exp || exp - AuthService.MARGEM_EXPIRACAO > Date.now() / 1000;
+    } catch {
+      return false;
+    }
   }
 
-  /**
-   * Verifica se o utilizador tem permissões de administrador.
-   * @returns `true` se o utilizador for administrador, caso contrário `false`.
-   */
   isAdmin(): boolean {
-    return this.cookieService.get('is_admin') === 'true';
-  }  
-  
-  /**
-   * Verifica se o utilizador tem permissões de administrador.
-   * @returns `true` se o utilizador for administrador, caso contrário `false`.
-   */
-  isMember(): boolean {
-    return this.hasTeam() && this.cookieService.get('is_admin') === 'false';
+    return this.cookies.get(AuthService.ADMIN) === 'true';
   }
 
-  /**
-   * Verifica se o utilizador está associado a uma equipa.
-   * @returns `true` se o utilizador tiver uma equipa associada, caso contrário `false`.
-   */
   hasTeam(): boolean {
-    return this.cookieService.check('team_id');
+    return !!this.cookies.get(AuthService.TEAM);
   }
-  // hasTeam(): boolean {
-  //   return this.getCurrentTeamId != null;
-  // }
 
-  /**
-   * Realiza o login do utilizador utilizando email e senha.
-   * Se o login for bem-sucedido, os cookies de acesso e ID do utilizador são configurados.
-   * @param email O email do utilizador.
-   * @param password A senha do utilizador.
-   * @returns Um Observable com a resposta da API.
-   */
-  login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.baseUrl}/User/login`, { email, password }).pipe(
-      map((response: any) => {
-        const idToken = response?.firebaseLoginResponseDto?.idToken;
-        const localId = response?.firebaseLoginResponseDto?.localId;
-        const isAdmin = response?.isAdmin;
+  /** @returns se o utilizador pertence a uma equipa mas não a administra */
+  isMember(): boolean {
+    return this.hasTeam() && !this.isAdmin();
+  }
 
-        this.cookieService.set('access_token', idToken, 7, '/');
-        this.cookieService.set('user_id', localId, 7, '/');
-        // this.cookieService.set('is_admin', String(isAdmin), 7, '/players/details');
-        this.cookieService.set('is_admin', String(isAdmin), 7, '/');
-
-        return response;
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/User/login`, { email, password }).pipe(
+      tap((response) => {
+        this.guardar(AuthService.TOKEN, response.firebaseLoginResponseDto.idToken);
+        this.guardar(AuthService.USER, response.firebaseLoginResponseDto.localId);
+        this.setTeam(response.idTeam ?? null, response.isAdmin === true);
       })
     );
   }
 
-  /**
-   * Realiza o registo de um novo jogador.
-   * @param name Nome do jogador.
-   * @param email Email do jogador.
-   * @param password Senha do jogador.
-   * @param dateOfBirth Data de nascimento do jogador.
-   * @param address Endereço do jogador.
-   * @param phone Número de telefone do jogador.
-   * @param position Posição do jogador.
-   * @param height Altura do jogador.
-   * @returns Um Observable com a resposta da API ou erro.
-   */
-  signup(
-    name: string,
-    email: string,
-    password: string,
-    dateOfBirth: string,
-    address: string,
-    phone: string,
-    position: number,
-    height: number
-  ): Observable<any> {
-    return this.http
-      .post(`${this.baseUrl}/Player/create-profile`, {
-        name,
-        email,
-        password,
-        dateOfBirth,
-        address,
-        phone,
-        position,
-        height,
-      })
-      .pipe(
-        catchError((error) => {
-          return throwError(error);
-        })
-      );
+  signup(dados: SignupRequest): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/Player/create-profile`, dados);
   }
 
   /**
-   * Obtém os dados detalhados de um jogador pelo seu ID.
-   * @param playerId ID do jogador.
-   * @returns Um Observable com os detalhes do jogador.
+   * Termina a sessão no servidor (revoga os tokens do Firebase) e apaga os dados do browser.
+   * A sessão local é apagada mesmo que o pedido ao servidor falhe.
+   */
+  logout(): Observable<void> {
+    if (!this.getToken()) {
+      this.clearSession();
+      return of(undefined);
+    }
+    return this.http.get<void>(`${this.baseUrl}/User/logout`).pipe(
+      catchError(() => of(undefined)),
+      tap(() => this.clearSession()),
+      map(() => undefined)
+    );
+  }
+
+  /** Apaga todos os dados da sessão guardados no browser. */
+  clearSession(): void {
+    for (const chave of [AuthService.TOKEN, AuthService.USER, AuthService.ADMIN, AuthService.TEAM]) {
+      this.cookies.delete(chave, '/');
+    }
+    this.atualizarSessao();
+  }
+
+  /** Atualiza a equipa e o papel do utilizador (depois de criar, sair ou apagar uma equipa). */
+  setTeam(teamId: string | null, isAdmin: boolean): void {
+    if (teamId) {
+      this.guardar(AuthService.TEAM, teamId);
+    } else {
+      this.cookies.delete(AuthService.TEAM, '/');
+    }
+    this.guardar(AuthService.ADMIN, String(teamId !== null && isAdmin));
+    this.atualizarSessao();
+  }
+
+  /** Volta a ler os cookies (por exemplo, quando o token expira entretanto). */
+  atualizarSessao(): void {
+    this._sessao.set(this.lerSessao());
+  }
+
+  private lerSessao(): EstadoSessao {
+    const autenticado = this.isAuthenticated();
+    return {
+      autenticado,
+      jogadorId: autenticado ? this.getCurrentPlayerId() : null,
+      equipaId: autenticado ? this.cookies.get(AuthService.TEAM) || null : null,
+      admin: autenticado && this.isAdmin(),
+    };
+  }
+
+  /**
+   * Obtém os detalhes de um jogador. Se for o utilizador autenticado, aproveita para atualizar
+   * a equipa e o papel guardados na sessão.
    */
   getPlayerData(playerId: string): Observable<PlayerDetails> {
-    // return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`);
     return this.http.get<PlayerDetails>(`${this.baseUrl}/Player/details/${playerId}`).pipe(
-        // Side-effect: Sempre que carregarmos os dados, atualizamos os cookies para garantir sincronia
-        map(data => {
-            if (data.team?.idTeam) {
-                this.cookieService.set('team_id', data.team.idTeam, 7, '/');
-            }
-            // Atualiza o admin também por segurança
-            this.cookieService.set('is_admin', String(data.isAdmin), 7, '/');
-            return data;
-        })
-    );
-  }
-
-  /**
-   * Obtém o ID da equipa do jogador atual.
-   * @returns Um Observable com o ID da equipa do jogador ou `null` se não houver equipa associada.
-   */
-  getCurrentTeamId(): Observable<string | null> {
-    // const playerId = this.getCurrentPlayerId();
-    // if (!playerId) {
-    //   return of(null);
-    // }
-
-    // return this.getPlayerData(playerId).pipe(
-    //   map((playerData) => playerData?.team?.idTeam ?? null),
-    //   catchError((error) => {
-    //     console.error('Erro ao buscar dados do jogador:', error);
-    //     return of(null);
-    //   })
-    // );
-    const playerId = this.getCurrentPlayerId();
-    if (!playerId) return of(null);
-
-    // Tenta pegar do cookie primeiro para ser rápido
-    const cachedTeamId = this.cookieService.get('team_id');
-    if (cachedTeamId) return of(cachedTeamId);
-
-    return this.getPlayerData(playerId).pipe(
-      map((playerData) => playerData?.team?.idTeam ?? null),
-      catchError((error) => {
-        console.error('Erro ao buscar dados do jogador:', error);
-        return of(null);
+      tap((data) => {
+        if (playerId === this.getCurrentPlayerId()) {
+          this.setTeam(data.team?.idTeam ?? null, data.isAdmin === true);
+        }
       })
     );
   }
 
-  /**
-   * @method canUserActivateAdminRoute
-   * Obtém o ID do jogador atual e verifica, via API, se o utilizador possui permissões de administrador.
-   * Este método é o ponto de verificação assíncrono para o AuthGuard.
-   * @returns Um Observable que emite true se o utilizador for Admin, ou false caso contrário.
-   */
+  /** @returns o id da equipa do utilizador (da sessão ou, se não estiver guardado, da API) */
+  getCurrentTeamId(): Observable<string | null> {
+    const playerId = this.getCurrentPlayerId();
+    if (!playerId) {
+      return of(null);
+    }
+    const guardado = this.cookies.get(AuthService.TEAM);
+    if (guardado) {
+      return of(guardado);
+    }
+    return this.getPlayerData(playerId).pipe(
+      map((data) => data.team?.idTeam ?? null),
+      catchError(() => of(null))
+    );
+  }
+
+  /** Confirma na API se o utilizador é administrador da sua equipa (usado pelo guard). */
   canUserActivateAdminRoute(): Observable<boolean> {
     const playerId = this.getCurrentPlayerId();
     if (!playerId) {
       return of(false);
     }
-
     return this.getPlayerData(playerId).pipe(
-      map((playerData) => playerData?.isAdmin === true),
+      map((data) => data.isAdmin === true && !!data.team?.idTeam),
       catchError(() => of(false))
     );
+  }
+
+  private guardar(chave: string, valor: string): void {
+    const seguro = typeof location !== 'undefined' && location.protocol === 'https:';
+    this.cookies.set(chave, valor, { expires: 7, path: '/', sameSite: 'Strict', secure: seguro });
   }
 }

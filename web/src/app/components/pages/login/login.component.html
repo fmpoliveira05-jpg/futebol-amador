@@ -1,43 +1,50 @@
-<section class="page">
+<section class="page page--estreita">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Login</h1>
+      <h1 class="page-title">Entrar</h1>
       <p class="page-subtitle">Entra com a tua conta para aceder à plataforma.</p>
     </div>
   </header>
 
   <div class="card">
-    <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+    @if (demo) {
+      <p class="aviso" role="note">
+        Modo demonstração: os dados são fictícios e ficam só neste separador. Usa qualquer e-mail
+        (por exemplo <strong>francisco&#64;exemplo.pt</strong>) e qualquer palavra-passe com 6 ou mais caracteres.
+      </p>
+    }
+    @if (sessao() === 'expirada') {
+      <p class="aviso" role="status">A sessão expirou. Entra novamente.</p>
+    }
+    <form class="form" [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
       <div class="form-field">
         <label for="email">E-mail</label>
-        <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
-      </div>
-      <div *ngIf="loginForm.controls['email'].hasError('required') && loginForm.controls['email'].touched">
-        <small style="color: red;">E-mail é obrigatório.</small>
-      </div>
-      <div *ngIf="loginForm.controls['email'].hasError('email') && loginForm.controls['email'].touched">
-        <small style="color: red;">Por favor, introduz um e-mail válido.</small>
-      </div>
-      <div *ngIf="loginForm.controls['email'].hasError('minlength') && loginForm.controls['email'].touched">
-        <small style="color: red;">O e-mail deve ter pelo menos 4 caracteres.</small>
-      </div>
-      <div *ngIf="loginForm.controls['email'].hasError('maxlength') && loginForm.controls['email'].touched">
-        <small style="color: red;">O e-mail deve ter no máximo 256 caracteres.</small>
+        <input id="email" formControlName="email" type="email" autocomplete="email" placeholder="Introduz o teu e-mail" />
+        @if (loginForm.controls.email.touched && loginForm.controls.email.invalid) {
+          <small class="erro-campo">
+            @if (loginForm.controls.email.hasError('required')) { O e-mail é obrigatório. }
+            @else { Introduz um e-mail válido. }
+          </small>
+        }
       </div>
 
       <div class="form-field">
         <label for="password">Palavra-passe</label>
-        <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
+        <input id="password" formControlName="password" type="password" autocomplete="current-password" placeholder="Introduz a tua palavra-passe" />
+        @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
+          <small class="erro-campo">A palavra-passe tem pelo menos 6 caracteres.</small>
+        }
       </div>
-      <div *ngIf="loginForm.controls['password'].hasError('required') && loginForm.controls['password'].touched">
-          <small style="color: red;">Palavra-passe é obrigatória.</small>
-        </div>
-        <div *ngIf="loginForm.controls['password'].hasError('minlength') && loginForm.controls['password'].touched">
-          <small style="color: red;">A palavra-passe deve ter pelo menos 6 caracteres.</small>
-        </div>
+
+      @if (erro()) {
+        <p class="erro" role="alert">{{ erro() }}</p>
+      }
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="loginForm.invalid">Entrar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="aEntrar()">
+          {{ aEntrar() ? 'A entrar…' : 'Entrar' }}
+        </button>
+        <a routerLink="/signup" class="btn btn-link">Criar conta</a>
       </div>
     </form>
   </div>

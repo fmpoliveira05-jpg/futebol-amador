@@ -1,0 +1,39 @@
+.col-pos {
+  width: 3.5rem;
+}
+
+.col-num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.posicao {
+  display: inline-grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--cor-borda);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.posicao--podio {
+  background: var(--cor-marca);
+  color: #fff;
+}
+
+tr.minha {
+  background: var(--cor-marca-clara) !important;
+}
+
+a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}

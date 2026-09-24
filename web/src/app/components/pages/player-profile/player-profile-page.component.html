@@ -1,150 +1,135 @@
-<section class="page" *ngIf="player() as p">
-  <header class="page-header">
-    <div>
-      <h1 class="page-title">{{ p.name }}</h1>
-    </div>
-
-    <div class="page-header__actions">
-      <button *ngIf="isOwnProfile()" type="button" class="btn btn-secondary" (click)="toggleEdit()">
-        {{ isEditMode() ? 'Cancelar' : 'Editar perfil' }}
-      </button>
-
-      <button *ngIf="isOwnProfile()" type="button" class="btn btn-danger" (click)="deleteAccount()"
-        [disabled]="isSaving()">
-        Apagar conta
-      </button>
-    </div>
-  </header>
-
-  <div class="layout">
-    <div class="card">
-      <h2 class="card-title">Informações do jogador</h2>
-
-      <div *ngIf="isLoading()" class="state state--loading">A carregar…</div>
-      <div *ngIf="errorMessage()" class="state state--error">{{ errorMessage() }}</div>
-      <div *ngIf="successMessage()" class="state state--success">{{ successMessage() }}</div>
-
-      <dl class="details-grid" *ngIf="!isEditMode() && !isLoading()">
-        <div class="details-grid__item">
-          <dt>Nome</dt>
-          <dd>{{ p.name }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Email</dt>
-          <dd>{{ p.email }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Telemóvel</dt>
-          <dd>{{ p.phoneNumber }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Data de nascimento</dt>
-          <dd>{{ p.dateOfBirth }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Morada</dt>
-          <dd>{{ p.address }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Posição</dt>
-          <dd>{{ POSITION_MAP[p.position] }}</dd>
-        </div>
-        <div class="details-grid__item">
-          <dt>Altura</dt>
-          <dd>{{ p.height }} cm</dd>
-        </div>
-      </dl>
-
-      <form class="form" [formGroup]="form" *ngIf="isOwnProfile() && isEditMode() && !isLoading()">
-        <div class="form-grid">
-          <label class="form-field">
-            <span>Nome</span>
-            <input type="text" formControlName="name" />
-          </label>
-
-          <label class="form-field">
-            <span>Email</span>
-            <input type="email" formControlName="email" />
-          </label>
-
-          <label class="form-field">
-            <span>Telemóvel</span>
-            <input type="text" formControlName="phone" />
-          </label>
-
-          <label class="form-field">
-            <span>Data de nascimento (YYYY-MM-DD)</span>
-            <input type="text" formControlName="dateOfBirth" />
-          </label>
-
-          <label class="form-field form-field--full">
-            <span>Morada</span>
-            <input type="text" formControlName="address" />
-          </label>
-
-          <label class="form-field">
-            <span>Posição</span>
-            <select formControlName="position">
-              <option *ngFor="let position of positions" [value]="position.value">{{ position.label }}</option>
-            </select>
-          </label>
-
-          <label class="form-field">
-            <span>Altura (cm)</span>
-            <input type="number" formControlName="height" />
-          </label>
-        </div>
-
-        <div class="form-actions">
-          <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
-            Cancelar
-          </button>
-
-          <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
-            {{ isSaving() ? 'A guardar…' : 'Guardar alterações' }}
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <aside class="card side-card" *ngIf="isOwnProfile()">
-      <h2 class="card-title">Gestão de equipa</h2>
-
-      <p class="side-card__text" *ngIf="hasTeam(); else noTeamSide">
-        Estás atualmente na equipa <strong>{{ p.team?.name }}</strong>.
-      </p>
-
-      <ng-template #noTeamSide>
-        <p class="side-card__text">Atualmente não estás em nenhuma equipa.</p>
-      </ng-template>
-
-      <button *ngIf="hasTeam()" type="button" class="btn btn-secondary" (click)="goToTeamProfile()">
-        Vê a tua equipa
-      </button>
-
-      <button type="button" class="btn btn-warning" (click)="leaveTeam()" [disabled]="!hasTeam() || isSaving()">
-        Abandonar equipa
-      </button>
-
-      <hr class="divider" />
-
-      <h3 class="side-card__subtitle">Pedidos de adesão</h3>
-      <p class="side-card__text">
-        Aqui vais conseguir ver e gerir os pedidos de adesão.
-      </p>
-      <div class="side-card__actions">
-        <button *ngIf="isAdmin || !isTeamMember" type="button" class="btn btn-secondary" (click)="onViewMembershipRequests()">
-          Ver pedidos de adesão
-        </button>
+@if (aCarregar() && !jogador()) {
+  <p class="estado">A carregar…</p>
+} @else if (jogador(); as p) {
+  <section class="page">
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">{{ p.name }}</h1>
+        <p class="page-subtitle">
+          {{ POSITION_MAP[p.position] }}
+          @if (p.age) { · {{ p.age }} anos }
+          · {{ p.height }} cm
+        </p>
       </div>
-    </aside>
+      @if (meuPerfil() && !editar()) {
+        <div class="page-header__actions">
+          <button type="button" class="btn btn-secondary" (click)="abrirEdicao()">Editar perfil</button>
+        </div>
+      }
+    </header>
 
-    <button *ngIf="isOwnProfile() && isAdmin" class="btn btn-secondary" (click)="goToCalendar()">
-      Ver calendário
-    </button>
-  </div>
-</section>
+    @if (sucesso()) {
+      <p class="estado state--ok" role="status">{{ sucesso() }}</p>
+    }
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
 
-<div *ngIf="!player() && !isLoading()" class="state state--error">
-  Jogador não encontrado.
-</div>
+    <div class="layout">
+      <section class="card">
+        @if (editar()) {
+          <h2 class="card-title">Editar perfil</h2>
+          <form class="form" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+            <div class="form-grid">
+              <div class="form-field form-field--full">
+                <label for="pf-nome">Nome</label>
+                <input id="pf-nome" formControlName="name" autocomplete="name" />
+                @if (invalido('name')) { <span class="erro-campo">Entre 3 e 100 caracteres.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-email">E-mail</label>
+                <input id="pf-email" type="email" formControlName="email" autocomplete="email" />
+                @if (invalido('email')) { <span class="erro-campo">Introduz um e-mail válido.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-tel">Telemóvel</label>
+                <input id="pf-tel" type="tel" formControlName="phone" autocomplete="tel" />
+                @if (invalido('phone')) { <span class="erro-campo">Formato: +351912345678.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-nasc">Data de nascimento</label>
+                <input id="pf-nasc" type="date" formControlName="dateOfBirth" />
+                @if (invalido('dateOfBirth')) { <span class="erro-campo">É preciso ter pelo menos 18 anos.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-altura">Altura (cm)</label>
+                <input id="pf-altura" type="number" min="100" max="250" formControlName="height" />
+                @if (invalido('height')) { <span class="erro-campo">Entre 100 e 250 cm.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-pos">Posição</label>
+                <select id="pf-pos" formControlName="position">
+                  @for (pos of posicoes; track pos.value) {
+                    <option [ngValue]="pos.value">{{ pos.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-field form-field--full">
+                <label for="pf-morada">Morada</label>
+                <input id="pf-morada" formControlName="address" autocomplete="street-address" />
+                @if (invalido('address')) { <span class="erro-campo">Entre 5 e 250 caracteres.</span> }
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="editar.set(false)">Cancelar</button>
+              <button type="submit" class="btn btn-primary" [disabled]="aGuardar()">
+                {{ aGuardar() ? 'A guardar…' : 'Guardar alterações' }}
+              </button>
+            </div>
+          </form>
+        } @else {
+          <h2 class="card-title">Dados do jogador</h2>
+          <dl class="details-grid">
+            <div class="details-grid__item"><dt>Posição</dt><dd>{{ POSITION_MAP[p.position] }}</dd></div>
+            <div class="details-grid__item"><dt>Altura</dt><dd>{{ p.height }} cm</dd></div>
+            <div class="details-grid__item"><dt>Zona</dt><dd>{{ p.address }}</dd></div>
+            @if (meuPerfil()) {
+              <div class="details-grid__item"><dt>E-mail</dt><dd>{{ p.email }}</dd></div>
+              <div class="details-grid__item"><dt>Telemóvel</dt><dd>{{ p.phoneNumber }}</dd></div>
+              <div class="details-grid__item"><dt>Data de nascimento</dt><dd>{{ p.dateOfBirth | date: 'd MMMM y' }}</dd></div>
+            }
+          </dl>
+        }
+      </section>
+
+      <aside class="card side-card">
+        <h2 class="card-title">Equipa</h2>
+        @if (p.team; as equipa) {
+          <p class="side-card__text">
+            {{ meuPerfil() ? 'Jogas nos' : 'Joga nos' }} <strong>{{ equipa.name }}</strong>.
+            @if (p.isAdmin) { <span class="badge badge--admin">Administrador</span> }
+          </p>
+          <div class="side-card__actions">
+            <a class="btn btn-secondary" [routerLink]="['/team/details', equipa.idTeam]">Ver equipa</a>
+            @if (meuPerfil()) {
+              <a class="btn btn-secondary" [routerLink]="['/players/calendar', equipa.idTeam]">Calendário</a>
+            }
+          </div>
+          @if (meuPerfil()) {
+            <hr class="divider" />
+            <button type="button" class="btn btn-warning" (click)="sairDaEquipa()" [disabled]="aGuardar()">Sair da equipa</button>
+          }
+        } @else {
+          <p class="side-card__text">{{ meuPerfil() ? 'Ainda não tens equipa.' : 'Sem equipa.' }}</p>
+          @if (meuPerfil()) {
+            <div class="side-card__actions">
+              <a class="btn btn-primary" routerLink="/teams">Procurar equipa</a>
+              <a class="btn btn-secondary" routerLink="/players/membership-requests">Convites</a>
+            </div>
+          }
+        }
+
+        @if (meuPerfil()) {
+          <hr class="divider" />
+          <h3 class="side-card__subtitle">Conta</h3>
+          <div class="side-card__actions">
+            <a class="btn btn-secondary" routerLink="/settings">Alterar palavra-passe</a>
+            <button type="button" class="btn btn-danger" (click)="apagarConta()" [disabled]="aGuardar()">Apagar conta</button>
+          </div>
+        }
+      </aside>
+    </div>
+  </section>
+} @else if (erro()) {
+  <p class="erro" role="alert">{{ erro() }}</p>
+}

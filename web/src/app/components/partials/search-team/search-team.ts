@@ -1,12 +1,9 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { FilterListTeamDto } from '../../../shared/Dtos/Filters/FilterListTeamDto';
 
-/**
- * Componente responsável pela interface de pesquisa de equipas.
- * Apresenta um formulário de filtros e redireciona o utilizador para a listagem de equipas com os critérios selecionados.
- */
+/** Formulário de filtros da lista de equipas. Os filtros vão para o URL (`?NameTeam=...`). */
 @Component({
   selector: 'app-search-team',
   imports: [FormsModule],
@@ -14,25 +11,16 @@ import { FormsModule } from '@angular/forms';
   styleUrl: './search-team.css',
 })
 export class SearchTeam {
-  
-  /**
-   * Objeto DTO que armazena os critérios de pesquisa inseridos pelo utilizador (ex: nome, cidade).
-   * Os campos deste objeto são vinculados aos inputs do formulário via `[(ngModel)]`.
-   */
+  private readonly router = inject(Router);
+
   filters = new FilterListTeamDto();
 
-  /**
-   * Construtor do componente.
-   * @param router Serviço de roteamento utilizado para navegar para a página de resultados.
-   */
-  constructor(private router: Router) {}
-
-  /**
-   * Executa a ação de pesquisa.
-   * Navega para a rota de listagem de equipas (`/teams`), passando os filtros preenchidos como parâmetros de consulta (query params) na URL.
-   * Exemplo de URL gerada: `/teams?name=Benfica&city=Lisboa`
-   */
   search(): void {
-    this.router.navigate(['/teams'], { queryParams: this.filters });
+    this.router.navigate(['/teams'], { queryParams: { ...this.filters } });
+  }
+
+  limpar(): void {
+    this.filters = new FilterListTeamDto();
+    this.router.navigate(['/teams']);
   }
 }

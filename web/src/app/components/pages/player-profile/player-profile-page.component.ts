@@ -1,308 +1,161 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PlayerDetails, UpdatePlayerRequest } from '../../../shared/Dtos/player.model';
 import { PlayerService } from '../../../services/player.service';
-import { Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth.service';
-import { POSITION_MAP_TONUMBER } from '../../../shared/constants/position-map-to-number';
-import { POSITION_MAP } from '../../../shared/constants/position-map';
-import { CookieService } from 'ngx-cookie-service';
+import { POSICOES, POSITION_MAP } from '../../../shared/constants/position-map';
+import { mensagemDeErro } from '../../../shared/http/erros';
+import { idadeMinima } from '../signup/signup.component';
 
 /**
- * Componente responsável pela gestão do perfil do jogador.
- * Permite visualizar, editar, e atualizar o perfil do jogador, bem como gerir a adesão à equipa e a exclusão de conta.
+ * Perfil de um jogador. No próprio perfil mostra os contactos e permite editar os dados, sair da
+ * equipa e apagar a conta; no perfil de outra pessoa mostra só os dados desportivos.
  */
 @Component({
   selector: 'app-player-profile-page',
-  standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, DatePipe],
   templateUrl: './player-profile-page.component.html',
-  styleUrl: './player-profile-page.component.css',
 })
-export class PlayerProfilePageComponent implements OnInit, OnDestroy {
-  private readonly route = inject(ActivatedRoute); // Serviço para capturar parâmetros da rota
-  private readonly router = inject(Router); // Serviço para navegação
-  private readonly playerService = inject(PlayerService); // Serviço de jogador
-  private readonly fb = inject(FormBuilder); // Serviço para construção de formulários reativos
+export class PlayerProfilePageComponent {
+  private readonly router = inject(Router);
+  private readonly players = inject(PlayerService);
+  private readonly auth = inject(AuthService);
 
-  protected readonly isLoading = signal<boolean>(false); // Estado de carregamento
-  protected readonly isSaving = signal<boolean>(false); // Estado de salvamento
-  protected readonly errorMessage = signal<string | null>(null); // Mensagem de erro
-  protected readonly successMessage = signal<string | null>(null); // Mensagem de sucesso
-  protected readonly isEditMode = signal<boolean>(false); // Estado de edição do perfil
-  protected readonly player = signal<PlayerDetails | null>(null); // Dados do jogador
-  protected readonly POSITION_MAP_TONUMBER = POSITION_MAP_TONUMBER; // Mapeamento de posições para valores numéricos
-  protected readonly POSITION_MAP = POSITION_MAP; // Mapeamento de posições
+  /** Vem do parâmetro `:playerId` da rota. */
+  readonly playerId = input.required<string>();
 
-  private auth = inject(AuthService); // Serviço de autenticação
+  protected readonly POSITION_MAP = POSITION_MAP;
+  protected readonly posicoes = POSICOES;
+  protected readonly sessao = this.auth.sessao;
 
-  protected form!: FormGroup; // Formulário de edição de perfil
+  protected readonly jogador = signal<PlayerDetails | null>(null);
+  protected readonly aCarregar = signal(true);
+  protected readonly aGuardar = signal(false);
+  protected readonly editar = signal(false);
+  protected readonly erro = signal<string | null>(null);
+  protected readonly sucesso = signal<string | null>(null);
 
-  private sub?: Subscription; // Assinatura do parâmetro da rota
+  protected readonly meuPerfil = computed(() => this.jogador()?.playerId === this.sessao().jogadorId);
+  protected readonly temEquipa = computed(() => !!this.jogador()?.team?.idTeam);
 
-  /**
-   * Serviço para manipulação de cookies.
-   */
-  private cookieService = inject(CookieService);
+  protected readonly form = inject(FormBuilder).nonNullable.group({
+    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
+    email: ['', [Validators.required, Validators.email]],
+    phone: ['', [Validators.required, Validators.pattern(/^\+\d{3}\d{9}$/)]],
+    dateOfBirth: ['', [Validators.required, idadeMinima]],
+    address: ['', [Validators.required, Validators.minLength(5), Validators.maxLength(250)]],
+    position: [0, Validators.required],
+    height: [175, [Validators.required, Validators.min(100), Validators.max(250)]],
+  });
 
-  protected readonly hasTeam = computed(() => !!this.player()?.team?.idTeam); // Verifica se o jogador pertence a uma equipa
-  protected readonly isOwnProfile = computed(() => this.player()?.playerId === this.auth.getCurrentPlayerId()); // Verifica se o perfil é do próprio jogador
+  constructor() {
+    effect(() => this.carregar(this.playerId()));
+  }
 
-  positions = [
-    { label: 'Avançado', value: 0 },
-    { label: 'Médio', value: 1 },
-    { label: 'Defesa', value: 2 },
-    { label: 'Guarda-redes', value: 3 }
-  ];
-
-  ngOnInit(): void {
-    this.form = this.fb.group({
-      name: ['', [Validators.required]],
-      dateOfBirth: ['', [Validators.required]],
-      address: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required]],
-      position: ['', [Validators.required]],
-      height: ['', [Validators.required]],
-    });
-
-    this.sub = this.route.paramMap.subscribe((params) => {
-      const id = params.get('playerId');
-      if (!id) {
-        this.router.navigate(['/players']);
-        return;
-      }
-
-      this.loadPlayer(id);
+  private carregar(id: string): void {
+    this.aCarregar.set(true);
+    this.editar.set(false);
+    this.erro.set(null);
+    // `getPlayerData` também atualiza a sessão quando o perfil é o do próprio utilizador.
+    this.auth.getPlayerData(id).subscribe({
+      next: (p) => {
+        this.jogador.set(p);
+        this.aCarregar.set(false);
+      },
+      error: (e) => {
+        this.aCarregar.set(false);
+        this.erro.set(mensagemDeErro(e, 'Não foi possível carregar o perfil.'));
+      },
     });
   }
 
-  ngOnDestroy(): void {
-    this.sub?.unsubscribe();
-  }
-
-  /**
-   * Alterna entre o modo de visualização e edição do perfil do jogador.
-   */
-  protected toggleEdit(): void {
-    this.isEditMode.set(!this.isEditMode());
-    this.successMessage.set(null);
-    this.errorMessage.set(null);
-
-    const p = this.player();
-    if (this.isEditMode() && p) {
-      this.form.patchValue({
-        name: p.name,
-        dateOfBirth: p.dateOfBirth,
-        address: p.address,
-        email: p.email,
-        phone: p.phoneNumber,
-        position: p.position,
-        height: p.height,
-      });
+  protected abrirEdicao(): void {
+    const p = this.jogador();
+    if (!p) {
+      return;
     }
+    this.form.reset({
+      name: p.name,
+      email: p.email,
+      phone: p.phoneNumber,
+      dateOfBirth: p.dateOfBirth,
+      address: p.address,
+      position: p.position,
+      height: p.height,
+    });
+    this.sucesso.set(null);
+    this.editar.set(true);
   }
 
-  /**
-   * Salva as alterações feitas no perfil do jogador.
-   */
-  protected save(): void {
-    if (!this.player() || this.form.invalid) {
+  protected invalido(campo: keyof typeof this.form.controls): boolean {
+    const c = this.form.controls[campo];
+    return c.invalid && c.touched;
+  }
+
+  protected guardar(): void {
+    const p = this.jogador();
+    if (!p || this.form.invalid) {
       this.form.markAllAsTouched();
       return;
     }
-
-    const current = this.player()!;
-    const position = this.form.value['position'];
-
-    if (position === undefined) {
-      this.errorMessage.set('Valor de posição inválido.');
-      return;
-    }
-
-    const payload = {
-      dto: {
-        playerId: current.playerId,
-        Name: this.form.value['name'] || current.name,
-        DateOfBirth: this.form.value['dateOfBirth'] || current.dateOfBirth,
-        Address: this.form.value['address'] || current.address,
-        Email: this.form.value['email'] || current.email,
-        Phone: this.form.value['phone'] || current.phoneNumber,
-        Position: Number(position) || Number(current.position),
-        Height: Number(this.form.value['height']) || current.heigth,
-      }
+    const v = this.form.getRawValue();
+    const dados: UpdatePlayerRequest = {
+      Name: v.name.trim(),
+      Email: v.email.trim(),
+      Phone: v.phone.trim(),
+      DateOfBirth: v.dateOfBirth,
+      Address: v.address.trim(),
+      Position: Number(v.position),
+      Height: Number(v.height),
     };
+    this.executar(this.players.updatePlayer(p.playerId, dados), 'Perfil atualizado.', 'Não foi possível guardar as alterações.');
+  }
 
-    if (!payload.dto.Name || !payload.dto.Email || !payload.dto.Phone || !payload.dto.Address || !payload.dto.Height) {
-      this.errorMessage.set('Campos obrigatórios não preenchidos.');
+  protected sairDaEquipa(): void {
+    const p = this.jogador();
+    if (!p?.team || !confirm(`Sair da equipa ${p.team.name}?`)) {
       return;
     }
+    this.executar(this.players.leaveTeam(p.playerId), `Saíste da equipa ${p.team.name}.`, 'Não foi possível sair da equipa.', () =>
+      this.auth.setTeam(null, false)
+    );
+  }
 
-    this.isSaving.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
-
-    this.playerService.updatePlayer(payload.dto.playerId, payload.dto).subscribe({
+  protected apagarConta(): void {
+    const p = this.jogador();
+    if (!p || !confirm('Apagar a tua conta? Perdes o acesso e não é possível desfazer.')) {
+      return;
+    }
+    this.aGuardar.set(true);
+    this.players.deletePlayer(p.playerId).subscribe({
       next: () => {
-        this.successMessage.set('Perfil atualizado com sucesso.');
-        this.isSaving.set(false);
-        this.isEditMode.set(false);
-        this.loadPlayer(current.playerId, false);
+        this.auth.clearSession();
+        this.router.navigate(['/']);
       },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível guardar as alterações.');
-        this.isSaving.set(false);
+      error: (e) => {
+        this.aGuardar.set(false);
+        this.erro.set(mensagemDeErro(e, 'Não foi possível apagar a conta.'));
       },
     });
   }
 
-  /**
-   * Permite ao jogador abandonar a sua equipa.
-   */
-  protected leaveTeam(): void {
-    const p = this.player();
-    if (!p || !this.hasTeam) {
-      return;
-    }
-
-    if (!confirm('Tens a certeza que queres abandonar a equipa?')) {
-      return;
-    }
-
-    this.isSaving.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
-
-    this.playerService.leaveTeam(p.playerId).subscribe({
+  private executar(pedido: ReturnType<PlayerService['leaveTeam']>, ok: string, falha: string, depois?: () => void): void {
+    this.aGuardar.set(true);
+    this.erro.set(null);
+    this.sucesso.set(null);
+    pedido.subscribe({
       next: () => {
-        if (this.player()?.isAdmin) {
-          this.cookieService.set('is_admin', 'false', 7, '/players/details');
-        }
-        this.successMessage.set('Saíste da equipa com sucesso.');
-        this.isSaving.set(false);
-        this.loadPlayer(p.playerId, false);
+        this.aGuardar.set(false);
+        depois?.();
+        this.carregar(this.playerId());
+        this.sucesso.set(ok);
       },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível abandonar a equipa.');
-        this.isSaving.set(false);
+      error: (e) => {
+        this.aGuardar.set(false);
+        this.erro.set(mensagemDeErro(e, falha));
       },
     });
-  }
-
-  /**
-   * Apaga a conta do jogador de forma irreversível.
-   */
-  protected deleteAccount(): void {
-    const p = this.player();
-    if (!p) return;
-
-    if (
-      !confirm(
-        'Tens a certeza absoluta que queres apagar a tua conta? Esta ação é irreversível.',
-      )
-    ) {
-      return;
-    }
-
-    this.isSaving.set(true);
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
-
-    this.playerService.deletePlayer(p.playerId).subscribe({
-      next: () => {
-        this.isSaving.set(false);
-        alert('Conta apagada com sucesso. Serás redirecionado.');
-        this.router.navigate(['/players']);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível apagar a conta.');
-        this.isSaving.set(false);
-      },
-    });
-  }
-
-  /**
-   * Redireciona para a página de pedidos de adesão, dependendo se o jogador tem ou não equipa.
-   */
-  protected onViewMembershipRequests(): void {
-    const player = this.player();
-    
-    if (!player) {
-      return;
-    }
-
-    if (player.team?.idTeam == null) {
-      this.router.navigate(['/players/membership-requests']);
-    } else {
-      this.router.navigate(['/team/membership-requests']);
-    }
-  }
-
-  /**
-   * Método fictício para enviar um pedido de adesão a uma equipa.
-   */
-  protected onSendMembershipRequest(): void {
-    alert('Aqui, no futuro, vais enviar um pedido de adesão a uma equipa.');
-  }
-
-  goToTeamProfile(): void{
-    this.router.navigate(['/team/details', this.player()?.team?.idTeam]);
-  }
-  
-  /**
-   * Carrega os dados de um jogador a partir do ID ou carrega o perfil do jogador autenticado.
-   */
-  private loadPlayer(playerIdOrMe: string, showLoader: boolean = true): void {
-    if (showLoader) {
-      this.isLoading.set(true);
-    }
-    this.errorMessage.set(null);
-    this.successMessage.set(null);
-
-    const observable =
-      playerIdOrMe === 'me'
-        ? this.playerService.getMyProfile()
-        : this.playerService.getPlayerById(playerIdOrMe);
-
-    observable.subscribe({
-      next: (player) => {
-        this.player.set(player);
-        this.isLoading.set(false);
-      },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage.set('Não foi possível carregar o perfil do jogador.');
-        this.isLoading.set(false);
-      },
-    });
-  }
-
-  goToCalendar(): void {
-    this.auth.getCurrentTeamId().subscribe((idTeam) => {
-      if (idTeam) {
-        this.router.navigate([`/players/calendar/${idTeam}`]);
-      }
-    });
-  }
-
-  /**
-   * Verifica se o utilizador tem permissões de administrador.
-   * Retorna um valor booleano que indica se o utilizador é um administrador.
-   */
-  get isAdmin(): boolean {
-    return this.auth.isAdmin();
-  }
-
-  /**
-   * Verifica se o utilizador é membro da equipa.
-   * Retorna um valor booleano que indica se o utilizador é um membro da equipa (jogador comum).
-   */
-  get isTeamMember(): boolean {
-    return this.auth.isMember();
   }
 }

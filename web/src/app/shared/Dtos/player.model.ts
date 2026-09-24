@@ -14,6 +14,9 @@ export interface PlayerDetails {
    */
   name: string;
 
+  /** Idade em anos (calculada pela API). */
+  age?: number;
+
   /**
    * Endereço de e-mail do jogador.
    */
@@ -40,14 +43,9 @@ export interface PlayerDetails {
   position: number;
 
   /**
-   * Altura do jogador, em centímetros.
+   * A altura do jogador, em centímetros.
    */
-  heigth: number;
-
-  /**
-   * A altura do jogador (opcional). Possivelmente um campo redundante com `heigth`.
-   */
-  height?: number;
+  height: number;
 
   /**
    * A equipa do jogador (opcional).
@@ -64,15 +62,10 @@ export interface PlayerDetails {
 }
 
 /**
- * Interface utilizada para a atualização dos dados de um jogador.
- * Contém os dados que podem ser alterados no perfil do jogador.
+ * Dados enviados ao editar o perfil (`PUT /Player/update/{id}`). O id vai só no URL, e a API
+ * confirma que é o do utilizador autenticado.
  */
 export interface UpdatePlayerRequest {
-
-  /**
-   * ID único do jogador a ser atualizado.
-   */
-  playerId: string;
 
   /**
    * Nome atualizado do jogador.

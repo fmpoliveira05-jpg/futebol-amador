@@ -1,0 +1,252 @@
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: center;
+  max-width: 1100px;
+  margin: 1rem auto 2.5rem;
+}
+
+.hero__tag {
+  display: inline-block;
+  margin: 0 0 1rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--cor-marca-clara);
+  color: var(--cor-marca-escura);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+  letter-spacing: -0.02em;
+}
+
+.hero__sub {
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  color: var(--cor-texto-suave);
+}
+
+.hero__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.hero__acoes .btn {
+  padding: 0.7rem 1.3rem;
+  font-size: 1rem;
+}
+
+/* Campo de futebol desenhado só com CSS. */
+.campo {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--raio);
+  border: 3px solid rgb(255 255 255 / 0.85);
+  background: repeating-linear-gradient(90deg, #16a34a 0 12.5%, #15803d 12.5% 25%);
+  box-shadow: 0 20px 40px rgb(21 128 61 / 0.25);
+  overflow: hidden;
+}
+
+.campo span {
+  position: absolute;
+  border: 3px solid rgb(255 255 255 / 0.85);
+}
+
+.campo__meio {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  border-width: 0 0 0 3px !important;
+}
+
+.campo__circulo {
+  top: 50%;
+  left: 50%;
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.campo__area {
+  top: 25%;
+  bottom: 25%;
+  width: 16%;
+}
+
+.campo__area--esq {
+  left: -3px;
+}
+
+.campo__area--dir {
+  right: -3px;
+}
+
+.funcionalidades {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.funcionalidades h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+}
+
+.funcionalidades p,
+.passo p {
+  margin: 0;
+  color: var(--cor-texto-suave);
+}
+
+.rodape-home {
+  max-width: 1100px;
+  margin: 2rem auto 0;
+  color: var(--cor-texto-suave);
+}
+
+.passos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.passo {
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.passo:hover {
+  border-color: var(--cor-marca);
+  transform: translateY(-2px);
+}
+
+.passo h2 {
+  margin: 0.75rem 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.passo__n {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--cor-marca-clara);
+  color: var(--cor-marca-escura);
+  font-weight: 700;
+}
+
+.jogo {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.jogo p {
+  margin: 0;
+}
+
+.jogo__equipas {
+  font-weight: 600;
+}
+
+.jogo__equipas span {
+  color: var(--cor-texto-suave);
+  font-weight: 400;
+}
+
+.jogo__meta {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.3rem !important;
+}
+
+.jogo__data {
+  white-space: nowrap;
+  color: var(--cor-texto-suave);
+  text-transform: capitalize;
+}
+
+.forma {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.forma li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.forma__letra {
+  display: inline-grid;
+  place-items: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: var(--raio-pequeno);
+  font-weight: 700;
+  color: #fff;
+  background: #9ca3af;
+}
+
+.forma--v {
+  background: var(--cor-relvado);
+}
+
+.forma--d {
+  background: var(--cor-perigo);
+}
+
+.forma--e {
+  background: #6b7280;
+}
+
+.forma__adv {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.forma__res {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.atalhos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 800px) {
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    margin-top: 0;
+  }
+
+  .hero__campo {
+    display: none;
+  }
+}
+
+.cabecalho-home {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

@@ -1,22 +1,37 @@
-<div class="search-container">
+<form class="card search-container" (ngSubmit)="search()" role="search" aria-label="Procurar equipas">
     <div class="search-form">
-        <input #s type="text" placeholder="Team Name" (keyup.enter)="search()" [(ngModel)]="filters.NameTeam" />
-        <input #s type="text" placeholder="Rank Name" (keyup.enter)="search()" [(ngModel)]="filters.NameRank" />
-        <input #s type="text" placeholder="City" (keyup.enter)="search()" [(ngModel)]="filters.City" />
+        <label>Nome da equipa
+            <input type="text" name="NameTeam" [(ngModel)]="filters.NameTeam" />
+        </label>
+        <label>Divisão
+            <input type="text" name="NameRank" [(ngModel)]="filters.NameRank" />
+        </label>
+        <label>Cidade
+            <input type="text" name="City" [(ngModel)]="filters.City" />
+        </label>
     </div>
     <div class="search-form">
-        <input #s type="number" min="0" placeholder="Min Points" (keyup.enter)="search()"
-            [(ngModel)]="filters.MinNumberPoints" />
-        <input #s type="number" min="0" placeholder="Max Points" (keyup.enter)="search()"
-            [(ngModel)]="filters.MaxNumberPoints" />
-        <input #s type="number" min="18" max="80" placeholder="Min Age" (keyup.enter)="search()"
-            [(ngModel)]="filters.MinAge" />
-        <input #s type="number" min="18" max="80" placeholder="Max Age" (keyup.enter)="search()"
-            [(ngModel)]="filters.MaxAge" />
-        <input #s type="number" min="1" placeholder="Min Players" (keyup.enter)="search()"
-            [(ngModel)]="filters.MinNumberPlayers" />
-        <input #s type="number" min="1" placeholder="Max Players" (keyup.enter)="search()"
-            [(ngModel)]="filters.MaxNumberPlayers" />
+        <label>Pontos (mín.)
+            <input type="number" min="0" name="MinNumberPoints" [(ngModel)]="filters.MinNumberPoints" />
+        </label>
+        <label>Pontos (máx.)
+            <input type="number" min="0" name="MaxNumberPoints" [(ngModel)]="filters.MaxNumberPoints" />
+        </label>
+        <label>Idade média (mín.)
+            <input type="number" min="16" max="80" name="MinAge" [(ngModel)]="filters.MinAge" />
+        </label>
+        <label>Idade média (máx.)
+            <input type="number" min="16" max="80" name="MaxAge" [(ngModel)]="filters.MaxAge" />
+        </label>
+        <label>Jogadores (mín.)
+            <input type="number" min="1" name="MinNumberPlayers" [(ngModel)]="filters.MinNumberPlayers" />
+        </label>
+        <label>Jogadores (máx.)
+            <input type="number" min="1" name="MaxNumberPlayers" [(ngModel)]="filters.MaxNumberPlayers" />
+        </label>
     </div>
-    <button class="btn btn-primary" (click)="search()">Search</button>
-</div>
+    <div class="search-actions">
+        <button type="submit" class="btn btn-primary">Procurar</button>
+        <button type="button" class="btn btn-link" (click)="limpar()">Limpar filtros</button>
+    </div>
+</form>

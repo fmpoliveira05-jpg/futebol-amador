@@ -1,52 +1,63 @@
-import { Component, OnInit } from '@angular/core';
-import { CalendarService } from '../../../../services/calendar.service';
-import { ActivatedRoute } from '@angular/router';
-import { MatchDto } from '../../../../shared/Dtos/Match/MatchDto';
-import { PostponeMatchDto } from '../../../../shared/Dtos/Match/PostponeMatchDto';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { CalendarService } from '../../../../services/calendar.service';
+import { MatchDto } from '../../../../shared/Dtos/Match/MatchDto';
+import { mensagemDeErro } from '../../../../shared/http/erros';
 
+/**
+ * Pedido de adiamento de um jogo: escolhe-se a nova data e o adversário recebe o pedido
+ * (aceita ou rejeita na sua página de pedidos de adiamento).
+ */
 @Component({
   selector: 'app-postpone-match',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './postpone-match.component.html'
+  imports: [FormsModule, DatePipe, RouterLink],
+  templateUrl: './postpone-match.component.html',
 })
 export class PostponeMatchComponent implements OnInit {
-  match!: MatchDto;
-  newDate: string = '';
-  idTeam: string = '';
+  private readonly calendarService = inject(CalendarService);
+  private readonly router = inject(Router);
 
-  constructor(private calendarService: CalendarService, private route: ActivatedRoute) {}
+  readonly idTeam = input.required<string>();
+  readonly idMatch = input.required<string>();
 
-  ngOnInit() {
-    const matchId = this.route.snapshot.paramMap.get('id');
-    if (matchId) {
-      this.idTeam = this.route.snapshot.paramMap.get('idTeam') || '';
+  protected readonly match = signal<MatchDto | null>(null);
+  protected readonly erro = signal<string | null>(null);
+  protected readonly aEnviar = signal(false);
+  protected novaData = '';
+  /** Não se pode propor uma data no passado. */
+  protected readonly agora = new Date().toISOString().slice(0, 16);
 
-      this.calendarService.getMatchById(this.idTeam, matchId).subscribe((data: MatchDto) => {
-        this.match = data;
-      });
-    }
+  ngOnInit(): void {
+    this.calendarService.getMatchById(this.idTeam(), this.idMatch()).subscribe({
+      next: (jogo) => this.match.set(jogo),
+      error: (err) => this.erro.set(mensagemDeErro(err, 'Não foi possível carregar o jogo.')),
+    });
   }
 
-  submitPostpone() {
-    if (this.newDate) {
-      const postponedMatch: PostponeMatchDto = {
-        idMatch: this.match.idMatch,
-        postPoneDate: this.newDate,
-        idTeam: this.idTeam,
-        idOpponent: this.match.opponent.idTeam
-      };
-
-      this.calendarService.postponeMatch(this.idTeam, postponedMatch).subscribe(() => {
-        alert('Partida adiada com sucesso!');
-      }, error => {
-        console.error('Erro ao adiar a partida', error);
-        alert('Houve um erro ao adiar a partida.');
-      });
-    } else {
-      alert('Por favor, selecione uma nova data.');
+  protected enviar(): void {
+    const jogo = this.match();
+    if (!jogo || !this.novaData) {
+      this.erro.set('Escolhe a nova data.');
+      return;
     }
+    this.aEnviar.set(true);
+    this.erro.set(null);
+    const adversario = jogo.team.idTeam === this.idTeam() ? jogo.opponent : jogo.team;
+    this.calendarService
+      .postponeMatch(this.idTeam(), {
+        idMatch: jogo.idMatch,
+        postPoneDate: this.novaData,
+        idTeam: this.idTeam(),
+        idOpponent: adversario.idTeam,
+      })
+      .subscribe({
+        next: () => this.router.navigate(['/players/calendar', this.idTeam()]),
+        error: (err) => {
+          this.aEnviar.set(false);
+          this.erro.set(mensagemDeErro(err, 'Não foi possível pedir o adiamento.'));
+        },
+      });
   }
 }

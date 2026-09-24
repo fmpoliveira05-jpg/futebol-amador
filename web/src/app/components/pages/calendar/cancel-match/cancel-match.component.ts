@@ -1,62 +1,39 @@
-import { Component, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CalendarService } from '../../../../services/calendar.service';
-import { AuthService } from '../../../../services/auth.service';
-import { CancelMatchDto } from '../../../../shared/Dtos/Match/CancelMatchDto';
+import { Component, inject, input, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
+import { CalendarService } from '../../../../services/calendar.service';
+import { mensagemDeErro } from '../../../../shared/http/erros';
 
+/** Cancelamento de um jogo, com o motivo (que é enviado ao adversário). */
 @Component({
   selector: 'app-cancel-match',
-  standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './cancel-match.component.html',
-  styleUrl: './cancel-match.component.css'
 })
 export class CancelMatchComponent {
-  matchId!: string;
-  idTeam!: string;
+  private readonly router = inject(Router);
+  private readonly calendarService = inject(CalendarService);
 
-  cancelMatchDto: CancelMatchDto = {
-    idTeam: '',
-    idMatch: '',
-    description: ''
-  };
+  readonly idTeam = input.required<string>();
+  readonly idMatch = input.required<string>();
 
+  protected motivo = '';
   protected readonly errorMessage = signal<string | null>(null);
-  protected readonly successMessage = signal<string | null>(null);
-
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute, 
-    private authService: AuthService,
-    private calendarService: CalendarService
-  ) {
-    this.route.paramMap.subscribe(params => {
-      this.idTeam = params.get('idTeam')!;
-      this.matchId = params.get('idMatch')!;
-      
-      this.cancelMatchDto.idTeam = this.idTeam;
-      this.cancelMatchDto.idMatch = this.matchId;
-    });
-  }
+  protected readonly aEnviar = signal(false);
 
   confirmCancel(): void {
-    if (this.cancelMatchDto.description.trim() === '') {
-      alert('Por favor, insira o motivo do cancelamento.');
+    if (!this.motivo.trim()) {
+      this.errorMessage.set('Indica o motivo do cancelamento.');
       return;
     }
-
-    this.authService.getCurrentTeamId().subscribe(idTeam => {
-      if (!idTeam || idTeam !== this.idTeam) {
-        alert('Não foi possível identificar a tua equipa.');
-        return;
-      }
-
-      this.calendarService.cancelMatch(this.cancelMatchDto.idTeam, this.cancelMatchDto.idMatch, this.cancelMatchDto.description).subscribe(() => {
-        this.successMessage.set('Partida cancelada com sucesso!');
-        this.router.navigate(['/players/calendar', this.idTeam]);  
-      });
+    this.aEnviar.set(true);
+    this.errorMessage.set(null);
+    this.calendarService.cancelMatch(this.idTeam(), this.idMatch(), this.motivo.trim()).subscribe({
+      next: () => this.router.navigate(['/players/calendar', this.idTeam()]),
+      error: (err) => {
+        this.aEnviar.set(false);
+        this.errorMessage.set(mensagemDeErro(err, 'Não foi possível cancelar o jogo.'));
+      },
     });
   }
 }

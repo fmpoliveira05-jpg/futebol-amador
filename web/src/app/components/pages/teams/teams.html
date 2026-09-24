@@ -1,32 +1,44 @@
-<!-- <app-auth-header></app-auth-header> -->
-<app-search-team></app-search-team>
-<div class="container container-button" *ngIf="!hasTeam()">
-    <button class="btn btn-primary" (click)="goToCreateTeam()">
-        Crie sua Própria Equipa!
-    </button>
-</div>
-<div class="row">
-    <div class="small-container" *ngFor="let team of teams()">
-        <a routerLink="/team/details/{{team.id}}">
-            <img height="200" width="200" src="../../../../assets/placeholder.png" />
-            <div class="name">
-                {{team.name}}
-            </div>
-            <div class="rank">
-                Rank: {{team.rank.name}}
-            </div>
-            <div class="city">
-                Address: {{team.address}}
-            </div>
-            <div class="points">
-                Points: {{team.currentPoints}}
-            </div>
-            <div class="averageAge">
-                Average Age: {{math.trunc(team.averageAge)}}
-            </div>
-            <div class="playerCount">
-                Players: {{team.playerCount}}
-            </div>
-        </a>
-    </div>
-</div>
+<section class="page">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ hasTeam() ? 'Adversários' : 'Equipas' }}</h1>
+            <p class="page-subtitle">
+                @if (hasTeam()) { Encontra equipas para convidar para um jogo. }
+                @else { Encontra uma equipa para te juntares, ou cria a tua. }
+            </p>
+        </div>
+        @if (player() && !hasTeam()) {
+            <a class="btn btn-primary" routerLink="/createTeam">Criar equipa</a>
+        }
+    </header>
+
+    <app-search-team />
+
+    @if (isLoading()) {
+        <p class="estado">A carregar equipas…</p>
+    } @else if (errorMessage()) {
+        <p class="erro" role="alert">{{ errorMessage() }}</p>
+    } @else {
+        <div class="grelha-equipas">
+            @for (team of teams(); track team.id) {
+                <a class="card equipa" [routerLink]="['/team/details', team.id]">
+                    <div class="equipa__topo">
+                        <img class="emblema-equipa" [src]="emblema(team.icon)" alt="" width="64" height="64" loading="lazy" />
+                        <div>
+                            <h2 class="equipa__nome">{{ team.name }}</h2>
+                            <span class="badge badge--info">{{ team.rank.name }}</span>
+                        </div>
+                    </div>
+                    <p class="equipa__morada">{{ team.address }}</p>
+                    <dl class="equipa__numeros">
+                        <div><dt>Pontos</dt><dd>{{ team.currentPoints }}</dd></div>
+                        <div><dt>Jogadores</dt><dd>{{ team.playerCount }}</dd></div>
+                        <div><dt>Idade média</dt><dd>{{ idadeMedia(team) }}</dd></div>
+                    </dl>
+                </a>
+            } @empty {
+                <p class="estado">Nenhuma equipa encontrada com estes filtros.</p>
+            }
+        </div>
+    }
+</section>

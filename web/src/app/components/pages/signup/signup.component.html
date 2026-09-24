@@ -1,110 +1,89 @@
-<section class="page">
+<section class="page page--estreita">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Criar Conta</h1>
-      <p class="page-subtitle">Preenche com os teus dados para criar uma conta.</p>
+      <h1 class="page-title">Criar conta</h1>
+      <p class="page-subtitle">Depois de criares a conta, podes procurar uma equipa ou criar a tua.</p>
     </div>
   </header>
 
-  <div class="card">
-    <form [formGroup]="signupForm" (ngSubmit)="onSignup()">
-      <div class="form-field">
+  <form class="card form" [formGroup]="signupForm" (ngSubmit)="onSignup()" novalidate>
+    <div class="form-grid">
+      <div class="form-field form-field--full">
         <label for="name">Nome</label>
-        <input id="name" formControlName="name" type="text" placeholder="Introduz o teu nome" />
+        <input id="name" formControlName="name" type="text" autocomplete="name" />
+        @if (invalido('name')) {
+          <span class="erro-campo">Entre 3 e 100 caracteres.</span>
+        }
       </div>
-      <div *ngIf="signupForm.controls['name'].hasError('required') && signupForm.controls['name'].touched">
-          <small style="color: red;">Nome é obrigatório.</small>
-        </div>
 
       <div class="form-field">
         <label for="email">E-mail</label>
-        <input id="email" formControlName="email" type="email" placeholder="Introduz o teu e-mail" />
+        <input id="email" formControlName="email" type="email" autocomplete="email" />
+        @if (invalido('email')) {
+          <span class="erro-campo">Introduz um e-mail válido.</span>
+        }
       </div>
-      <div *ngIf="signupForm.controls['email'].hasError('required') && signupForm.controls['email'].touched">
-        <small style="color: red;">E-mail é obrigatório.</small>
-      </div>
-      <div *ngIf="signupForm.controls['email'].hasError('email') && signupForm.controls['email'].touched">
-        <small style="color: red;">Por favor, introduz um e-mail válido.</small>
-      </div>
-      <div *ngIf="signupForm.controls['email'].hasError('minlength') && signupForm.controls['email'].touched">
-        <small style="color: red;">O e-mail deve ter pelo menos 4 caracteres.</small>
-      </div>
-      <div *ngIf="signupForm.controls['email'].hasError('maxlength') && signupForm.controls['email'].touched">
-        <small style="color: red;">O e-mail deve ter no máximo 256 caracteres.</small>
-      </div>
-      
+
       <div class="form-field">
         <label for="password">Palavra-passe</label>
-        <input id="password" formControlName="password" type="password" placeholder="Introduz a tua palavra-passe" />
-        <div *ngIf="signupForm.controls['password'].hasError('required') && signupForm.controls['password'].touched">
-          <small style="color: red;">Palavra-passe é obrigatória.</small>
-        </div>
-        <div *ngIf="signupForm.controls['password'].hasError('minlength') && signupForm.controls['password'].touched">
-          <small style="color: red;">A palavra-passe deve ter pelo menos 6 caracteres.</small>
-        </div>
-        <div *ngIf="signupForm.controls['password'].hasError('maxlength') && signupForm.controls['password'].touched">
-          <small style="color: red;">A palavra-passe deve ter no máximo 32 caracteres.</small>
-        </div>
+        <input id="password" formControlName="password" type="password" autocomplete="new-password" />
+        @if (invalido('password')) {
+          <span class="erro-campo">Entre 6 e 32 caracteres.</span>
+        }
       </div>
 
       <div class="form-field">
         <label for="dateOfBirth">Data de nascimento</label>
-        <input id="dateOfBirth" formControlName="dateOfBirth" type="date" />
-        <div *ngIf="signupForm.controls['dateOfBirth'].hasError('required') && signupForm.controls['dateOfBirth'].touched">
-          <small style="color: red;">Data de nascimento é obrigatória.</small>
-        </div>
+        <input id="dateOfBirth" formControlName="dateOfBirth" type="date" autocomplete="bday" />
+        @if (invalido('dateOfBirth')) {
+          <span class="erro-campo">
+            @if (signupForm.controls.dateOfBirth.hasError('idadeMinima')) { É preciso ter pelo menos 18 anos. }
+            @else { Indica a data de nascimento. }
+          </span>
+        }
       </div>
 
       <div class="form-field">
+        <label for="phone">Telemóvel</label>
+        <input id="phone" formControlName="phone" type="tel" autocomplete="tel" placeholder="+351912345678" />
+        @if (invalido('phone')) {
+          <span class="erro-campo">Usa o indicativo e 9 dígitos, por exemplo +351912345678.</span>
+        }
+      </div>
+
+      <div class="form-field form-field--full">
         <label for="address">Morada</label>
-        <input id="address" formControlName="address" type="text" placeholder="Introduz a tua morada" />
-        <div *ngIf="signupForm.controls['address'].hasError('required') && signupForm.controls['address'].touched">
-          <small style="color: red;">Morada é obrigatória.</small>
-        </div>
+        <input id="address" formControlName="address" type="text" autocomplete="street-address" />
+        @if (invalido('address')) {
+          <span class="erro-campo">Entre 5 e 250 caracteres.</span>
+        }
       </div>
 
       <div class="form-field">
-        <label for="phone">Telefone</label>
-        <input id="phone" formControlName="phone" type="text" placeholder="Introduz o teu número de telefone/telemóvel" />
-        <div *ngIf="signupForm.controls['phone'].hasError('required') && signupForm.controls['phone'].touched">
-          <small style="color: red;">Telefone é obrigatório.</small>
-        </div>
-        <div *ngIf="signupForm.controls['phone'].hasError('pattern') && signupForm.controls['phone'].touched">
-          <small style="color: red;">Por favor, introduz um número de telefone válido.</small>
-        </div>
-      </div>
-
-      <div class="form-field">
-        <label for="position">Posição</label>
+        <label for="position">Posição preferida</label>
         <select id="position" formControlName="position">
-          <option *ngFor="let position of positions" [value]="position.value">{{ position.label }}</option>
+          @for (p of positions; track p.value) {
+            <option [ngValue]="p.value">{{ p.label }}</option>
+          }
         </select>
-        <div *ngIf="signupForm.controls['position'].hasError('required') && signupForm.controls['position'].touched">
-          <small style="color: red;">Posição é obrigatória.</small>
-        </div>
       </div>
 
       <div class="form-field">
-        <label for="height">Altura</label>
-        <input id="height" formControlName="height" type="number" placeholder="Introduz a tua altura (em cm)" />
-        <div *ngIf="signupForm.controls['height'].hasError('required') && signupForm.controls['height'].touched">
-          <small style="color: red;">Altura é obrigatória.</small>
-          <div *ngIf="signupForm.controls['height'].hasError('min') && signupForm.controls['height'].touched">
-            <small style="color: red;">Altura mínima é 100 cm.</small>
-          </div>
-          <div *ngIf="signupForm.controls['height'].hasError('max') && signupForm.controls['height'].touched">
-            <small style="color: red;">Altura máxima é 250 cm.</small>
-          </div>
-        </div>
+        <label for="height">Altura (cm)</label>
+        <input id="height" formControlName="height" type="number" min="100" max="250" />
+        @if (invalido('height')) {
+          <span class="erro-campo">Entre 100 e 250 cm.</span>
+        }
       </div>
+    </div>
 
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" [disabled]="signupForm.invalid">Criar Conta</button>
-      </div>
+    @if (errorMessage()) {
+      <p class="erro" role="alert">{{ errorMessage() }}</p>
+    }
 
-      <div *ngIf="errorMessage" style="color: red; margin-top: 10px;">
-        {{ errorMessage }}
-      </div>
-    </form>
-  </div>
+    <div class="form-actions">
+      <a routerLink="/login" class="btn btn-link">Já tenho conta</a>
+      <button type="submit" class="btn btn-primary" [disabled]="aGuardar()">{{ aGuardar() ? 'A criar…' : 'Criar conta' }}</button>
+    </div>
+  </form>
 </section>

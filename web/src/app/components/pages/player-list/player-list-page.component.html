@@ -1,74 +1,93 @@
-<div class="filters-container" *ngIf="showFilters()">
-  <div>
-    <label for="city">Cidade:</label>
-    <input id="city" type="text" [(ngModel)]="filterDto().city" placeholder="Introduz a cidade">
-  </div>
-
-  <div>
-    <label for="minAge">Idade Mínima:</label>
-    <input id="minAge" type="number" [(ngModel)]="filterDto().minAge" min="18" max="70">
-  </div>
-
-  <div>
-    <label for="maxAge">Idade Máxima:</label>
-    <input id="maxAge" type="number" [(ngModel)]="filterDto().maxAge" min="18" max="70">
-  </div>
-
-  <div>
-    <label for="minHeight">Altura Mínima (cm):</label>
-    <input id="minHeight" type="number" [(ngModel)]="filterDto().minHeight" min="100" max="250">
-  </div>
-
-  <div>
-    <label for="maxHeight">Altura Máxima (cm):</label>
-    <input id="maxHeight" type="number" [(ngModel)]="filterDto().maxHeight" min="100" max="250">
-  </div>
-
-  <div>
-    <label for="position">Posição:</label>
-    <input id="position" type="text" [(ngModel)]="filterDto().position" placeholder="Introduz a posição (Ex: Avançado)">
-  </div>
-
-  <div>
-    <label for="name">Nome do Jogador:</label>
-    <input id="name" type="text" [(ngModel)]="filterDto().name" placeholder="Introduz o nome do jogador">
-  </div>
-
-  <button (click)="applyFilters()">Aplicar Filtros</button>
-  <button (click)="clearSearchResults()">Limpar Resultados</button>
-</div>
-
-<button class="mt-4" (click)="showFilters.set(!showFilters())">
-  {{ showFilters() ? 'Esconder Filtros' : 'Mostrar Filtros' }}
-</button>
-
-<div *ngIf="isLoading()">Carregando...</div>
-<div *ngIf="errorMessage()">{{ errorMessage() }}</div>
-
-<div *ngIf="!noResults() && !isLoading()">
-  <div *ngFor="let player of visiblePlayers()">
-    <div class="player-item">
-      <h3>{{ player.name }}</h3>
-      <p>{{ player.address }}</p>
-      <p>{{ player.age }} anos, {{ player.heigth }} cm</p>
-      
-      <button *ngIf="isPlayerWithoutTeam(player)" (click)="sendMembershipRequest(player.id)">Convidar para o clube</button>
-
-      <button (click)="openPlayer(player)" class="btn btn-info">
-        Ver Detalhes
-      </button>
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Jogadores</h1>
+      <p class="page-subtitle">Convida jogadores sem equipa para a tua equipa.</p>
     </div>
-  </div>
-
-  <div class="pagination-controls">
-    <button *ngIf="hasPreviousPage()" (click)="goToPreviousPage()" class="pagination-btn previous">
-      <span>&lt;</span>
+    <button type="button" class="btn btn-secondary" (click)="showFilters.set(!showFilters())" [attr.aria-expanded]="showFilters()">
+      {{ showFilters() ? 'Esconder filtros' : 'Mostrar filtros' }}
     </button>
-    
-    <button *ngIf="hasMorePlayers()" (click)="loadMorePlayers()" class="pagination-btn">
-      <span>&gt;</span>
-    </button>
-  </div>
-</div>
+  </header>
 
-<div *ngIf="noResults() && !isLoading()" class="state--no-results">Sem resultados.</div>
+  @if (showFilters()) {
+    <form class="card filters-container" (ngSubmit)="applyFilters()">
+      <div>
+        <label for="name">Nome</label>
+        <input id="name" name="name" type="text" [(ngModel)]="formulario.name">
+      </div>
+      <div>
+        <label for="city">Cidade</label>
+        <input id="city" name="city" type="text" [(ngModel)]="formulario.city">
+      </div>
+      <div>
+        <label for="position">Posição</label>
+        <select id="position" name="position" [(ngModel)]="formulario.position">
+          <option [ngValue]="null">Todas</option>
+          @for (p of posicoes; track p.value) {
+            <option [ngValue]="p.value">{{ p.label }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label for="minAge">Idade mínima</label>
+        <input id="minAge" name="minAge" type="number" [(ngModel)]="formulario.minAge" min="16" max="80">
+      </div>
+      <div>
+        <label for="maxAge">Idade máxima</label>
+        <input id="maxAge" name="maxAge" type="number" [(ngModel)]="formulario.maxAge" min="16" max="80">
+      </div>
+      <div>
+        <label for="minHeight">Altura mínima (cm)</label>
+        <input id="minHeight" name="minHeight" type="number" [(ngModel)]="formulario.minHeight" min="100" max="250">
+      </div>
+      <div>
+        <label for="maxHeight">Altura máxima (cm)</label>
+        <input id="maxHeight" name="maxHeight" type="number" [(ngModel)]="formulario.maxHeight" min="100" max="250">
+      </div>
+      <div class="filters-container__acoes">
+        <button type="submit" class="btn btn-primary">Aplicar</button>
+        <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+      </div>
+    </form>
+  }
+
+  @if (errorMessage()) {
+    <p class="erro" role="alert">{{ errorMessage() }}</p>
+  }
+
+  @if (isLoading()) {
+    <p class="estado">A carregar…</p>
+  } @else {
+    @for (player of visiblePlayers(); track player.id) {
+      <article class="card player-item">
+        <div class="player-item__info">
+          <h2>{{ player.name }}</h2>
+          <p>{{ nomePosicao[player.position] }} · {{ player.age }} anos · {{ player.heigth }} cm</p>
+          <p>{{ player.address }}</p>
+        </div>
+        <span class="badge" [class.badge--ok]="!player.haveTeam">{{ player.haveTeam ? (player.teamName || 'Tem equipa') : 'Sem equipa' }}</span>
+        <div class="player-item__acoes">
+
+        @if (!player.haveTeam) {
+          @if (convidados().has(player.id)) {
+            <span class="badge badge--info">Convite enviado</span>
+          } @else {
+            <button type="button" class="btn btn-primary" (click)="sendMembershipRequest(player)" [disabled]="aConvidar() === player.id">Convidar para a equipa</button>
+          }
+        }
+        <a [routerLink]="['/players/details', player.id]" class="btn btn-secondary">Ver perfil</a>
+        </div>
+      </article>
+    } @empty {
+      <p class="estado state--no-results">Nenhum jogador com estes filtros.</p>
+    }
+
+    @if (totalPaginas() > 1) {
+      <nav class="pagination-controls" aria-label="Páginas">
+        <button (click)="mudarPagina(-1)" [disabled]="currentPage() === 1" class="btn btn-secondary" aria-label="Página anterior">&lt;</button>
+        <span>{{ currentPage() }} / {{ totalPaginas() }}</span>
+        <button (click)="mudarPagina(1)" [disabled]="currentPage() === totalPaginas()" class="btn btn-secondary" aria-label="Página seguinte">&gt;</button>
+      </nav>
+    }
+  }
+</section>

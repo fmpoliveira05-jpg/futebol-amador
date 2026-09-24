@@ -13,11 +13,15 @@
       A carregar pedidos de adesão…
     </div>
 
-    <div *ngIf="errorMessage()" class="state state--error">
+    <div *ngIf="successMessage()" class="state state--ok" role="status">
+      {{ successMessage() }}
+    </div>
+
+    <div *ngIf="errorMessage()" class="state state--error" role="alert">
       {{ errorMessage() }}
     </div>
 
-    <div *ngIf="!isLoading() && !errorMessage()">
+    <div *ngIf="!isLoading()">
       <table class="requests-table" *ngIf="visibleRequests().length; else noRequests">
         <thead>
           <tr>
@@ -29,7 +33,7 @@
         <tbody>
           <tr *ngFor="let request of visibleRequests()" class="requests-table__row">
             <td>{{ request.team.name }}</td>
-            <td>{{ request.requestDate | date: 'short' }}</td>
+            <td>{{ request.requestDate | date: 'dd-MM-yyyy HH:mm' }}</td>
             <td class="requests-table__actions">
               <button type="button" class="btn btn-primary" (click)="accept(request)">
                 Aceitar
@@ -43,7 +47,7 @@
       </table>
 
       <div class="load-more-container" *ngIf="visibleRequests().length < filteredRequests().length">
-        <button class="load-more-btn" (click)="loadMore()">
+        <button type="button" class="btn btn-secondary" (click)="loadMore()">
           Carregar mais
         </button>
       </div>

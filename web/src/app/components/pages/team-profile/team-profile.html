@@ -1,126 +1,110 @@
-<section class="page" *ngIf="team() as t">
+@if (aCarregar() && !equipa()) {
+  <p class="estado">A carregar…</p>
+} @else if (naoEncontrada()) {
+  <section class="page">
+    <p class="erro" role="alert">Esta equipa não existe ou foi apagada.</p>
+    <a class="btn btn-secondary" routerLink="/teams">Procurar equipas</a>
+  </section>
+} @else if (equipa(); as t) {
+  <section class="page">
     <header class="page-header">
+      <div class="cabecalho">
+        <img class="emblema-equipa" [src]="emblema()" [alt]="'Emblema de ' + t.name" width="64" height="64" />
         <div>
-            <h1 class="page-title">{{ t.name }}</h1>
+          <h1 class="page-title">{{ t.name }}</h1>
+          <p class="page-subtitle">
+            <span class="badge badge--info">{{ t.rankName }}</span>
+            {{ t.totalPoints }} pontos · {{ t.players.length }} {{ t.players.length === 1 ? 'jogador' : 'jogadores' }}
+          </p>
         </div>
+      </div>
 
-        <div *ngIf="isMember() && isAdmin()" class="page-header__actions">
-            <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
-                {{ isEditMode() ? 'Cancelar' : 'Editar Equipa' }}
-            </button>
-
-            <button type="button" class="btn btn-danger" (click)="deleteTeam()" [disabled]="isSaving()">
-                Apagar Equipa
-            </button>
-        </div>
+      <div class="page-header__actions">
+        @if (souAdmin()) {
+          <button type="button" class="btn btn-secondary" (click)="editar.set(!editar())">
+            {{ editar() ? 'Fechar edição' : 'Editar equipa' }}
+          </button>
+          <button type="button" class="btn btn-danger" (click)="apagar()" [disabled]="aGuardar()">Apagar equipa</button>
+        }
+        @if (possoConvidar()) {
+          <a class="btn btn-primary" [routerLink]="['/team/createMatchInvite', t.id]">Convidar para jogo</a>
+        }
+        @if (possoPedirAdesao()) {
+          <button type="button" class="btn btn-primary" (click)="pedirAdesao()" [disabled]="aGuardar() || pedidoEnviado()">
+            {{ pedidoEnviado() ? 'Pedido enviado' : 'Pedir para entrar' }}
+          </button>
+        }
+      </div>
     </header>
 
+    @if (sucesso()) {
+      <p class="estado state--ok" role="status">{{ sucesso() }}</p>
+    }
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+
+    @if (editar()) {
+      <div class="card">
+        <h2 class="card-title">Editar equipa</h2>
+        <app-equipa-form
+          [inicial]="dadosFormulario()"
+          [aGuardar]="aGuardar()"
+          [podeCancelar]="true"
+          textoBotao="Guardar alterações"
+          (guardar)="guardar($event)"
+          (cancelar)="editar.set(false)"
+        />
+      </div>
+    }
+
     <div class="layout">
-        <div class="card">
-            <h2 class="card-title">Informações da Equipa</h2>
+      <section class="card">
+        <h2 class="card-title">Plantel</h2>
+        <ul class="plantel">
+          @for (p of plantel(); track p.playerId) {
+            <li>
+              <a [routerLink]="['/players/details', p.playerId]">{{ p.name }}</a>
+              <span class="plantel__pos">{{ POSITION_MAP[p.position] }}</span>
+              @if (p.isAdmin) {
+                <span class="badge badge--admin">Admin</span>
+              }
+            </li>
+          }
+        </ul>
+        @if (souAdmin()) {
+          <div class="side-card__actions">
+            <a class="btn btn-secondary" routerLink="/team/members">Gerir membros</a>
+            <a class="btn btn-secondary" routerLink="/players">Recrutar jogadores</a>
+          </div>
+        }
+      </section>
 
-            <dl class="details-grid" *ngIf="!isEditMode() && !isLoading()">
-                <div class="details-grid__item">
-                    <dt>Nome</dt>
-                    <dd>{{ t.name }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Descrição</dt>
-                    <dd>{{ t.description }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Fundado em</dt>
-                    <dd>{{ t.foundationDate }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Rank</dt>
-                    <dd>{{ t.rankName }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Pontos</dt>
-                    <dd>{{ t.totalPoints }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Endereço</dt>
-                    <dd>{{ t.pitchDto.name }}</dd>
-                    <dd>{{ t.pitchDto.address }}</dd>
-                </div>
-                <div class="details-grid__item">
-                    <dt>Numero de Jogadores</dt>
-                    <dd>{{ t.players.length }}</dd>
-                </div>
-                <button *ngIf="isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="goToTeamMembers()">
-                    Gerir membros da equipa
-                </button>
-                <button *ngIf="isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="goToMatchInvites()">
-                    Gerir convites de partida
-                </button>
-                <button *ngIf="!isMember() && !isAdmin() && !hasTeam()" type="button" class="btn btn-secondary" (click)="sendMembershipRequest()">
-                    Enviar pedido de adesão
-                </button>
-                <button *ngIf="!isMember() && isAdmin()" type="button" class="btn btn-secondary" (click)="sendMatchInvite()">
-                    Enviar pedido de partida
-                </button>
-            </dl>
-
-            <form class="form" [formGroup]="form" *ngIf="isMember() && isAdmin() && isEditMode() && !isLoading()">
-                <div class="form-grid">
-                    <label class="form-field">
-                        <span>Nome</span>
-                        <input type="text" formControlName="name" />
-                    </label>
-
-                    <label class="form-field">
-                        <span>Descrição</span>
-                        <input type="text" formControlName="description" />
-                    </label>
-
-                    <label class="form-field">
-                        <span>Nome da Localização</span>
-                        <input type="text" formControlName="pitchName" />
-                    </label>
-
-                    <label class="form-field">
-                        <span>Endereço</span>
-                        <input type="text" formControlName="pitchLocation" />
-                    </label>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" (click)="toggleEdit()">
-                        Cancelar
-                    </button>
-
-                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="isSaving()">
-                        {{ isSaving() ? 'A guardar…' : 'Guardar alterações' }}
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <aside class="card img-card" [class.editable-image]="isEditMode()">
-                        <img 
-                height="250" 
-                width="250" 
-                [src]="isEditMode() && tempIcon() ? tempIcon() : '../../../../assets/placeholder.png'" 
-            />
-
-                        <div class="image-overlay" *ngIf="isMember() && isAdmin() && isEditMode()">
-                <label for="teamIconUpload" class="file-label">
-                    <span>{{ tempIcon() ? 'Alterar Imagem' : 'Carregar Imagem' }}</span>
-                </label>
-                <input 
-                    id="teamIconUpload" 
-                    type="file" 
-                    accept="image/*" 
-                    style="display: none;" 
-                    (change)="onFileSelected($event)" 
-                />
+      <aside class="card">
+        <h2 class="card-title">Sobre a equipa</h2>
+        <dl class="details-grid details-grid--coluna">
+          @if (t.description) {
+            <div class="details-grid__item">
+              <dt>Descrição</dt>
+              <dd>{{ t.description }}</dd>
             </div>
-        </aside>
+          }
+          <div class="details-grid__item">
+            <dt>Fundada em</dt>
+            <dd>{{ t.foundationDate | date: 'd MMMM y' }}</dd>
+          </div>
+          <div class="details-grid__item">
+            <dt>Campo</dt>
+            <dd>{{ t.pitchDto.name }}</dd>
+            <dd class="texto-suave">{{ t.pitchDto.address }}</dd>
+          </div>
+        </dl>
+        @if (souMembro()) {
+          <a class="btn btn-link" [routerLink]="['/players/calendar', t.id]">Ver calendário</a>
+        }
+      </aside>
     </div>
-</section>
-
-<div *ngIf="!team() && !isLoading()" class="state state--error">
-    Equipa não encontrada.
-</div>
+  </section>
+} @else if (erro()) {
+  <p class="erro" role="alert">{{ erro() }}</p>
+}
