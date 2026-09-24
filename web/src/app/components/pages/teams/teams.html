@@ -1,0 +1,32 @@
+<!-- <app-auth-header></app-auth-header> -->
+<app-search-team></app-search-team>
+<div class="container container-button" *ngIf="!hasTeam()">
+    <button class="btn btn-primary" (click)="goToCreateTeam()">
+        Crie sua Própria Equipa!
+    </button>
+</div>
+<div class="row">
+    <div class="small-container" *ngFor="let team of teams()">
+        <a routerLink="/team/details/{{team.id}}">
+            <img height="200" width="200" src="../../../../assets/placeholder.png" />
+            <div class="name">
+                {{team.name}}
+            </div>
+            <div class="rank">
+                Rank: {{team.rank.name}}
+            </div>
+            <div class="city">
+                Address: {{team.address}}
+            </div>
+            <div class="points">
+                Points: {{team.currentPoints}}
+            </div>
+            <div class="averageAge">
+                Average Age: {{math.trunc(team.averageAge)}}
+            </div>
+            <div class="playerCount">
+                Players: {{team.playerCount}}
+            </div>
+        </a>
+    </div>
+</div>

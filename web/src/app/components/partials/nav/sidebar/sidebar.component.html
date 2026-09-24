@@ -1,0 +1,38 @@
+<aside class="sidebar">
+  <div class="sidebar__brand">
+    <a routerLink="/">
+      <img src="assets/football.ico" alt="Logo" class="sidebar__logo" />
+      <span class="sidebar__title">Futebol Amador</span>
+    </a>
+  </div>
+
+  <nav class="sidebar__nav">
+    <a *ngIf="isAuthenticated && isAdmin" routerLink="/players" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Jogadores
+    </a>
+
+    <a *ngIf="isAuthenticated" routerLink="/teams" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Equipas
+    </a>
+
+    <a *ngIf="isAuthenticated" routerLink="/players/me" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      O meu perfil
+    </a>
+
+    <a routerLink="/settings" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Definições
+    </a>
+
+    <a *ngIf="!isAuthenticated" routerLink="/signup" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Criar Conta
+    </a>
+
+    <a *ngIf="!isAuthenticated" routerLink="/login" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Login
+    </a>
+
+    <a *ngIf="isAuthenticated" routerLink="/logout" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="sidebar__link">
+      Logout
+    </a>
+  </nav>
+</aside>

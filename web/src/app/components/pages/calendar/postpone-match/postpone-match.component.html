@@ -1,0 +1,10 @@
+<div *ngIf="match">
+  <h2>Adiamento da Partida: {{ match.team.name }} vs {{ match.opponent.name }}</h2>
+  
+  <form (ngSubmit)="submitPostpone()">
+    <label for="newDate">Selecione a Nova Data:</label>
+    <input type="datetime-local" id="newDate" [(ngModel)]="newDate" name="newDate" required>
+    
+    <button type="submit">Confirmar Adiamento</button>
+  </form>
+</div>
