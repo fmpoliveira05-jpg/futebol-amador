@@ -69,39 +69,26 @@ namespace Api.Controllers
             return Ok();
         }
 
-        /*
-        [HttpDelete]
-        [Route("delete")]
-        [Authorize]
-        public IActionResult DeleteUser()
-        {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            authService.DeleteUserAsync(userId);
-            return NoContent();
-        }
-        */
-
         /// <summary>
-        /// Altera a palavra-passe do utilizador autenticado.
+        /// Altera a palavra-passe do utilizador autenticado, depois de confirmar a atual.
         /// </summary>
-        /// <remarks>
-        /// Permite ao utilizador alterar a sua password fornecendo a atual e a nova.
-        /// </remarks>
-        /// <param name="currentPassword">A palavra-passe atual do utilizador.</param>
-        /// <param name="newPassword">A nova palavra-passe que o utilizador deseja definir.</param>
-        /// <response code="204">Palavra-passe alterada com sucesso.</response>
-        /// <response code="400">A password atual está incorreta ou ocorreu um erro na validação.</response>
-        /// <response code="401">Utilizador não está autenticado.</response>
-        [HttpGet]
-        [Route("ChangePassword")]
+        /// <response code="204">Palavra-passe alterada.</response>
+        /// <response code="400">Palavra-passe atual errada ou nova palavra-passe inválida.</response>
+        /// <response code="401">Sem sessão.</response>
+        [HttpPut("password")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-        public async Task<IActionResult> ChangePassword([FromQuery] string currentPassword, [FromQuery] string newPassword)
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            await authService.ChangePasswordAsync(userId, currentPassword, newPassword);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            await authService.ChangePasswordAsync(userId, dto.CurrentPassword, dto.NewPassword);
             return NoContent();
         }
 

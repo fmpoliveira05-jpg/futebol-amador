@@ -12,6 +12,10 @@ using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Nos testes de integração (ambiente "Testing") o Firebase é substituído por mocks e a
+// autenticação por um esquema de teste, por isso não se exigem credenciais.
+var emTestes = builder.Environment.IsEnvironment("Testing");
+
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
@@ -19,7 +23,6 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
 builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
-
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -28,45 +31,36 @@ builder.Services.AddSwaggerDocumentacion();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+// Os tokens do Firebase trazem o uid em "sub" e "user_id"; ficam os dois como NameIdentifier.
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["sub"] = ClaimTypes.NameIdentifier;
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap["user_id"] = ClaimTypes.NameIdentifier;
 
-var firebaseProjectId = builder.Configuration["Firebase:ProjectId"];
-var credentialPath = builder.Configuration["Firebase:CredentialPath"];
-
-if (string.IsNullOrEmpty(firebaseProjectId))
+if (!emTestes)
 {
-    throw new ArgumentNullException(nameof(firebaseProjectId), "Firebase:ProjectId não pode ser nulo.");
-}
-if (string.IsNullOrEmpty(credentialPath))
-{
-    throw new ArgumentNullException(nameof(credentialPath), "Firebase:CredentialPath não foi encontrado. Verifique se o seu 'secrets.json' está correto.");
-}
-if (!File.Exists(credentialPath))
-{
-    throw new FileNotFoundException($"O ficheiro de credenciais não foi encontrado no caminho especificado: {credentialPath}. Verifique o caminho no 'secrets.json'.");
+    builder.Services.AddFirebaseAuthentication(builder.Configuration);
+    var firebaseProjectId = builder.Configuration["Firebase:ProjectId"]!;
+    builder.Services.AddSingleton(_ => FirestoreDb.Create(firebaseProjectId));
 }
 
-Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
-
-await builder.Services.AddFirebaseAuthentication(builder.Configuration);
-
-builder.Services.AddSingleton(provider => FirestoreDb.Create(firebaseProjectId));
-
-builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, HttpClient) =>
+builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, httpClient) =>
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    HttpClient.BaseAddress = new Uri(configuration["Authentication:TokenUri"]);
+    var tokenUri = sp.GetRequiredService<IConfiguration>()["Authentication:TokenUri"];
+    if (!string.IsNullOrEmpty(tokenUri))
+    {
+        httpClient.BaseAddress = new Uri(tokenUri);
+    }
 });
 
 builder.Services.AddAuthorization();
 
+// Origens autorizadas a chamar a API a partir do browser (Cors:Origins no appsettings).
+var origens = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:4200" };
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAngular", policy =>
+    options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins(origens)
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -75,9 +69,8 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors("AllowAngular");
-
-app.MapHubs();
+// Converte as exceções em ProblemDetails com o código HTTP certo (ver GlobalExceptionHandler).
+app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
@@ -87,11 +80,15 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("Frontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHubs();
 
 app.Run();
 
+/// <summary>Exposto para os testes de integração (WebApplicationFactory).</summary>
 public partial class Program { }

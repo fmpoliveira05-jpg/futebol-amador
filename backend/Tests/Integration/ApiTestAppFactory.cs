@@ -19,6 +19,9 @@ namespace Tests.Integration
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
+            // No ambiente "Testing" o Program.cs não exige as credenciais do Firebase.
+            builder.UseEnvironment("Testing");
+
             builder.ConfigureServices(services =>
             {
                 var descriptorsToRemove = services

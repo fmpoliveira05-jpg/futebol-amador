@@ -105,10 +105,9 @@ namespace Application.Services
             superAdminValidator.DeleteSuperAdminValidator(superAdminToDelete);
 
             superAdminRepository.DeleteSuperAdmin(superAdminToDelete);
-
-            authService.DeleteUserAsync(superAdminId);
-
             await unityOfWork.SaveChangesAsync();
+
+            await authService.DeleteUserAsync(superAdminId);
         }
 
         /// <summary>

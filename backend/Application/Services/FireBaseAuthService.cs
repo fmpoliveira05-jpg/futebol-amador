@@ -50,10 +50,11 @@ namespace Application.Services
                 var user = await FirebaseAuth.DefaultInstance.GetUserAsync(userId);
                 if (string.IsNullOrEmpty(user?.Email))
                 {
-                    throw new AuthenticationException("Usuário não encontrado ou sem email.");
+                    throw new AuthenticationException("Utilizador não encontrado ou sem e-mail.");
                 }
 
 
+                // Confirma a palavra-passe atual fazendo login com ela.
                 await this.LoginAsync(user.Email, currentPassword);
 
                 var args = new UserRecordArgs
@@ -64,13 +65,14 @@ namespace Application.Services
 
                 await FirebaseAuth.DefaultInstance.UpdateUserAsync(args);
             }
-            catch (AuthenticationException ex)
+            catch (UnauthorizedAccessException ex)
             {
-                throw new AuthenticationException("A senha atual está incorreta.", ex);
+                // Não pode sair como 401: para o frontend isso significa "sessão terminada".
+                throw new AuthenticationException("A palavra-passe atual está incorreta.", ex);
             }
             catch (FirebaseAuthException ex)
             {
-                throw new Exception($"Falha ao processar a mudança de senha: {ex.Message}", ex);
+                throw new ValidationException($"Não foi possível alterar a palavra-passe: {ex.Message}");
             }
         }
 
@@ -78,7 +80,7 @@ namespace Application.Services
         /// Elimina permanentemente a conta do utilizador no Firebase.
         /// </summary>
         /// <param name="userId">O ID do utilizador a eliminar.</param>
-        public async void DeleteUserAsync(string userId)
+        public async Task DeleteUserAsync(string userId)
         {
             await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
         }
@@ -113,7 +115,7 @@ namespace Application.Services
                 var firebaseResponse = await response.Content.ReadFromJsonAsync<FirebaseLoginResponseDto>();
                 if (firebaseResponse == null)
                 {
-                    throw new AuthenticationException("Failed to parse Firebase response.");
+                    throw new AuthenticationException("Resposta inesperada do serviço de autenticação.");
                 }
 
                 var userData = await GetFullUserData(firebaseResponse.LocalId);
@@ -123,8 +125,9 @@ namespace Application.Services
             }
             else
             {
-                var errorResponse = await response.Content.ReadAsStringAsync();
-                throw new AuthenticationException(errorResponse);
+                // A resposta do Firebase (EMAIL_NOT_FOUND, INVALID_PASSWORD, ...) não é mostrada:
+                // não se revela se o e-mail existe.
+                throw new UnauthorizedAccessException("E-mail ou palavra-passe incorretos.");
             }
             
         }
@@ -183,7 +186,7 @@ namespace Application.Services
             {
                 if (ex.AuthErrorCode == AuthErrorCode.EmailAlreadyExists)
                 {
-                    throw new Exception("Este email já está em uso por outra conta.");
+                    throw new ValidationException("Este e-mail já está em uso por outra conta.");
                 }
                 throw;
             }
@@ -236,7 +239,7 @@ namespace Application.Services
                 };
             }
 
-            throw new AuthenticationException("Usuário não encontrado na base de dados.");
+            throw new AuthenticationException("Utilizador não encontrado na base de dados.");
         }
     }
 }

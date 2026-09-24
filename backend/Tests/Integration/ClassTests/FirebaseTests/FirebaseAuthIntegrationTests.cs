@@ -88,7 +88,7 @@ namespace IntegrationTests.Controllers
             var mockAuthService = new Mock<IAuthService>();
             mockAuthService
                 .Setup(x => x.LoginAsync(loginDto.Email, loginDto.Password))
-                .ThrowsAsync(new AuthenticationException("Invalid credentials"));
+                .ThrowsAsync(new UnauthorizedAccessException("E-mail ou palavra-passe incorretos."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -101,7 +101,7 @@ namespace IntegrationTests.Controllers
 
             var response = await _client.PostAsJsonAsync("/api/user/login", loginDto);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
 
         [Test]
@@ -148,7 +148,7 @@ namespace IntegrationTests.Controllers
             var currentPassword = "oldPassword123";
             var newPassword = "newPassword123";
 
-            var response = await _client.GetAsync($"/api/user/ChangePassword?currentPassword={currentPassword}&newPassword={newPassword}");
+            var response = await _client.PutAsJsonAsync("/api/user/password", new ChangePasswordDto { CurrentPassword = currentPassword, NewPassword = newPassword });
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
@@ -177,7 +177,7 @@ namespace IntegrationTests.Controllers
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.GetAsync($"/api/user/ChangePassword?currentPassword={currentPassword}&newPassword={newPassword}");
+            var response = await _client.PutAsJsonAsync("/api/user/password", new ChangePasswordDto { CurrentPassword = currentPassword, NewPassword = newPassword });
 
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
@@ -196,7 +196,7 @@ namespace IntegrationTests.Controllers
             var mockAuthService = new Mock<IAuthService>();
             mockAuthService
                 .Setup(x => x.ChangePasswordAsync(TestAuthHandler.TestUserId, currentPassword, newPassword))
-                .ThrowsAsync(new AuthenticationException("Current password is incorrect"));
+                .ThrowsAsync(new AuthenticationException("A palavra-passe atual está incorreta."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -209,9 +209,10 @@ namespace IntegrationTests.Controllers
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.GetAsync($"/api/user/ChangePassword?currentPassword={currentPassword}&newPassword={newPassword}");
+            var response = await _client.PutAsJsonAsync("/api/user/password", new ChangePasswordDto { CurrentPassword = currentPassword, NewPassword = newPassword });
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            // 400 e não 401: um 401 faria o frontend terminar a sessão.
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
     }
 }

@@ -68,18 +68,6 @@ namespace Infrastructure.Data
         }
 
         /// <summary>
-        /// Método de configuração de base de dados.
-        /// Utilizado para definir a Connection String se não for fornecida externamente via DI.
-        /// </summary>
-        /// <param name="optionsBuilder">O construtor de opções de contexto.</param>
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            //Ligação à base de dados
-            optionsBuilder.UseSqlServer(
-                @"Server=192.168.196.1,1433;Database=FutebolAmadorDbBraga;User Id=sa;Password=REMOVIDO;TrustServerCertificate=True");
-        }
-
-        /// <summary>
         /// Configuração do modelo de dados, relações e comportamentos.
         /// Este método é onde o EF Core é configurado para lidar com chaves estrangeiras, herança e regras de deleção.
         /// </summary>

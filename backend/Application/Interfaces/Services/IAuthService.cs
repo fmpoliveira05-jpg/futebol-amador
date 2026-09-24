@@ -48,11 +48,8 @@ namespace Application.Interfaces.Services
         /// <summary>
         /// Elimina permanentemente a conta de um utilizador.
         /// </summary>
-        /// <remarks>
-        /// Este método deve ser assíncrono, mas a assinatura é definida como void/Task, dependendo da necessidade de esperar a conclusão.
-        /// </remarks>
         /// <param name="userId">O ID do utilizador a eliminar.</param>
-        void DeleteUserAsync(string userId);
+        Task DeleteUserAsync(string userId);
 
         /// <summary>
         /// Cria uma nova identidade de utilizador no fornecedor de autenticação (Firebase).

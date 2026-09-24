@@ -115,10 +115,11 @@ namespace Application.Services
             playerValidator.DeletePlayerValidator(playerToDelete);
 
             playerRepository.DeletePlayer(playerToDelete);
-
-            AuthService.DeleteUserAsync(playerId);
-
             await unityOfWork.SaveChangesAsync();
+
+            // Só depois de apagar os dados: se o Firebase falhar, a conta fica sem perfil em vez de
+            // ficar um perfil sem conta.
+            await AuthService.DeleteUserAsync(playerId);
         }
 
         /// <summary>

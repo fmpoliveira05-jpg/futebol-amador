@@ -365,3 +365,6 @@ FodyWeavers.xsd
 /Domain/obj
 /Domain/obj/Debug
 
+
+# Configuração local com segredos (usar user-secrets ou variáveis de ambiente)
+Api/appsettings.Local.json
