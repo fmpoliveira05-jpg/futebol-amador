@@ -2,6 +2,7 @@ package com.example.amfootball.core.utils
 
 import android.content.Context
 import android.net.Uri
+import com.example.amfootball.BuildConfig
 import com.cloudinary.android.MediaManager
 import com.cloudinary.android.callback.ErrorInfo
 import com.cloudinary.android.callback.UploadCallback
@@ -33,7 +34,8 @@ object CloudinaryManager {
     fun init(context: Context) {
         if (!isInitialized) {
             val config = HashMap<String, String>()
-            config["cloud_name"] = "o-teu-cloud-name"
+            // Definido em local.properties (CLOUDINARY_CLOUD_NAME), fora do repositório.
+            config["cloud_name"] = BuildConfig.CLOUDINARY_CLOUD_NAME
             MediaManager.init(context, config)
             isInitialized = true
         }
@@ -55,7 +57,7 @@ object CloudinaryManager {
         onSuccess: (String) -> Unit,
         onError: (String) -> Unit
     ) {
-        val uploadPreset = "android_upload"
+        val uploadPreset = BuildConfig.CLOUDINARY_UPLOAD_PRESET
 
         MediaManager.get().upload(uri)
             .unsigned(uploadPreset)

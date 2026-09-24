@@ -60,13 +60,8 @@ class AuthService @Inject constructor(
     /**
      * Regista um novo utilizador na plataforma.
      *
-     * Este método implementa um padrão de **Transação Distribuída** (embora parte esteja comentada):
-     * Tenta criar o utilizador no Firebase e, em seguida, criar o perfil na base de dados SQL via API.
-     *
-     * **Mecanismo de Rollback:**
-     * Se a chamada à API falhar (`response.isSuccessful == false`) após o utilizador ter sido criado no Firebase,
-     * o método captura a exceção e tenta apagar o utilizador do Firebase (`createdFirebaseUser.delete()`)
-     * para evitar inconsistência de dados (Utilizador fantasma sem perfil na BD).
+     * A API cria a conta no Firebase e o perfil na base de dados, e devolve logo a sessão.
+     * Se falhar, a sessão local é limpa e o erro é propagado para o ecrã o mostrar.
      *
      * @param profile DTO com os dados do perfil (Nome, Idade, Posição, etc.).
      * @throws Exception Se ocorrer erro na API ou no Firebase, propagando a mensagem para a UI.
@@ -88,9 +83,10 @@ class AuthService @Inject constructor(
                 throw Exception(errorMsg)
             }
         } catch (e: Exception) {
-            println("Erro no registo: ${e.message}")
+            // Antes o erro era engolido aqui: o ecrã de registo julgava que tinha corrido bem e
+            // avançava sem sessão. Agora limpa-se a sessão e o erro chega ao ViewModel.
             sessionManager.clearSession()
-
+            throw e
         }
     }
 

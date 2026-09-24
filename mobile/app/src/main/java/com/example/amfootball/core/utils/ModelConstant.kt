@@ -1,5 +1,7 @@
 package com.example.amfootball.core.utils
 
+import com.example.amfootball.BuildConfig
+
 import com.example.amfootball.core.utils.Arguments.MATCH_INVITE_ID
 import com.example.amfootball.core.utils.Arguments.TEAM_ID
 
@@ -406,18 +408,10 @@ object NotificationConst {
  */
 object NetworkConsts {
     /**
-     * URL principal da API (Ambiente de Produção ou Staging).
-     * Aponta para o domínio DNS dinâmico configurado.
+     * URL da API, definido no build (`API_BASE_URL` em local.properties). Antes o Retrofit
+     * apontava para um túnel ngrok temporário e os hubs SignalR para outro endereço.
      */
-    const val BASE_URL = "https://amfootballapi.duckdns.org/"
-
-    /**
-     * URL alternativa para tunelamento via Ngrok.
-     *
-     * Utilizada frequentemente durante o desenvolvimento para expor o servidor local (localhost)
-     * à internet, permitindo testes em dispositivos físicos.
-     */
-    const val BASE_URL_NGROOK = "https://thrillful-temika-postlicentiate.ngrok-free.dev/"
+    val BASE_URL: String = BuildConfig.API_BASE_URL
 }
 
 /**

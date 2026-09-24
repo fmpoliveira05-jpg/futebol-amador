@@ -138,7 +138,9 @@ class ChatViewModel @Inject constructor(
         val query = db.collection("chatRooms").document(chatRoomId)
             .collection("messages")
             .orderBy("timestamp", Query.Direction.ASCENDING)
-            .limit(50)
+            // As 50 mensagens mais recentes, por ordem cronológica (limit(50) devolvia as 50
+            // mais antigas e as novas deixavam de aparecer).
+            .limitToLast(50)
 
         messagesListener = query.addSnapshotListener { snapshot, error ->
             if (error != null) {

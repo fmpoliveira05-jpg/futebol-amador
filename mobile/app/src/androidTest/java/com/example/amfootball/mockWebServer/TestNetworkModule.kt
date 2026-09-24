@@ -1,14 +1,15 @@
 package com.example.amfootball.mockWebServer
 
-import com.example.amfootball.data.network.instances.NetworkModule
-import com.example.amfootball.data.network.interfaces.AuthApi
-import com.example.amfootball.data.network.interfaces.CalendarApi
-import com.example.amfootball.data.network.interfaces.ChatApi
-import com.example.amfootball.data.network.interfaces.LeadBoardApi
-import com.example.amfootball.data.network.interfaces.MatchInviteApi
-import com.example.amfootball.data.network.interfaces.NotificationApi
-import com.example.amfootball.data.network.interfaces.PlayerApi
-import com.example.amfootball.data.network.interfaces.TeamApi
+import com.example.amfootball.data.remote.network.instances.NetworkModule
+import com.example.amfootball.data.interfaces.api.AuthApi
+import com.example.amfootball.data.interfaces.api.CalendarApi
+import com.example.amfootball.data.interfaces.api.ChatApi
+import com.example.amfootball.data.interfaces.api.LeadBoardApi
+import com.example.amfootball.data.interfaces.api.MatchInviteApi
+import com.example.amfootball.data.interfaces.api.NotificationApi
+import com.example.amfootball.data.interfaces.api.PlayerApi
+import com.example.amfootball.data.interfaces.api.PostPoneMatchApi
+import com.example.amfootball.data.interfaces.api.TeamApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -82,6 +83,13 @@ object TestNetworkModule {
     @Singleton
     fun provideTeamApi(retrofit: Retrofit): TeamApi {
         return retrofit.create(TeamApi::class.java)
+    }
+
+    // Sem este provider o grafo do Hilt nos testes ficava incompleto (a app usa PostPoneMatchApi).
+    @Provides
+    @Singleton
+    fun providePostPoneMatchApi(retrofit: Retrofit): PostPoneMatchApi {
+        return retrofit.create(PostPoneMatchApi::class.java)
     }
 
     @Provides

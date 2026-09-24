@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -11,6 +13,16 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
 }
+
+// Configuração local (não versionada): endereço da API e conta Cloudinary.
+// Ver o README da pasta mobile. Os valores por omissão servem para compilar sem configurar nada.
+val configLocal = Properties().apply {
+    val ficheiro = rootProject.file("local.properties")
+    if (ficheiro.exists()) ficheiro.inputStream().use { load(it) }
+}
+
+fun configuracao(nome: String, predefinido: String): String =
+    (configLocal.getProperty(nome) ?: System.getenv(nome) ?: predefinido)
 
 android {
     namespace = "com.example.amfootball"
@@ -28,6 +40,10 @@ android {
         //testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         //Runner do Dagger-Hilt
         testInstrumentationRunner = "com.example.amfootball.mockWebServer.CustomTestRunner"
+
+        buildConfigField("String", "API_BASE_URL", "\"${configuracao("API_BASE_URL", "https://amfootballapi.duckdns.org/")}\"")
+        buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${configuracao("CLOUDINARY_CLOUD_NAME", "")}\"")
+        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${configuracao("CLOUDINARY_UPLOAD_PRESET", "android_upload")}\"")
     }
 
     buildTypes {
@@ -53,6 +69,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 // Configuração da tarefa Jacoco para gerar o relatório XML
@@ -73,7 +90,7 @@ tasks.register<JacocoReport>("jacocoTestReport") {
     )
 
     // Define onde o Jacoco procura os ficheiros de código-fonte
-    sourceDirectories.setFrom(files("$projectDir/src/main/kotlin"))
+    sourceDirectories.setFrom(files("$projectDir/src/main/java"))
 
     // Define onde o Jacoco procura os resultados da execução dos testes
     executionData.setFrom(layout.buildDirectory.map { it.file("jacoco/testDebugUnitTest.exec") })
@@ -182,8 +199,9 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
     // Hilt Testing
-    androidTestImplementation("com.google.dagger:hilt-android-testing:2.57.1")
-    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.57.1")
+    // Mesma versão do Hilt da app (antes os testes usavam a 2.57.1 e a app a 2.51.1).
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.51.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.51.1")
     androidTestImplementation("androidx.test:rules:1.6.1")
     // MockWebServer
     androidTestImplementation("com.squareup.okhttp3:mockwebserver:4.11.0")

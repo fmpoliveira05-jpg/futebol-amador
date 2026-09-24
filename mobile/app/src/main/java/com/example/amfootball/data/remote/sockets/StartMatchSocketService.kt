@@ -37,8 +37,12 @@ class StartMatchSocketService @Inject constructor(
     /** Instância da conexão SignalR (HubConnection) com o backend. */
     private var hubConnection: HubConnection? = null
 
-    /** Flow mutável interno para emitir eventos de partida recebidos do SignalR. */
-    private val _matchEvents = MutableSharedFlow<String>(replay = 1)
+    /**
+     * Flow mutável interno para emitir eventos de partida recebidos do SignalR.
+     * Sem replay: com `replay = 1`, ao entrar noutro lobby o ecrã recebia o último evento do
+     * lobby anterior (por exemplo, "jogo iniciado").
+     */
+    private val _matchEvents = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
     /**
      * Flow público de eventos de partida.

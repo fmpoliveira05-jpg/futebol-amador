@@ -37,9 +37,9 @@ class FinishMatchSockerServer @Inject constructor(
 
     /**
      * Fluxo de dados mutável para emitir eventos de finalização para a UI.
-     * O `replay = 1` garante que novos subscritores recebam o último estado emitido.
+     * Sem replay, para um jogo não receber o resultado do jogo anterior.
      */
-    private val _finishEvents = MutableSharedFlow<Boolean>(replay = 1)
+    private val _finishEvents = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
     /**
      * Fluxo de dados público (somente leitura) que notifica quando a partida foi finalizada com sucesso

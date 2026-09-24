@@ -21,11 +21,11 @@ class SessionManager @Inject constructor(
     }
 
     /**
-     * Mantém a assinatura original.
-     * O ID do Firebase está dentro do profile, por isso continua seguro.
+     * ID (Firebase) do utilizador com sessão, ou uma string vazia se não houver sessão.
+     * Antes usava `!!` e a app fechava quando era chamado depois do logout.
      */
     fun fetchUserId(): String {
-        return getUserProfile()?.loginResponseDto?.localId!!
+        return getUserProfile()?.loginResponseDto?.localId ?: ""
     }
 
     fun saveAuthToken(token: String) {

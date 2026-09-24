@@ -197,10 +197,8 @@ class FormMatchInviteViewModel @Inject constructor(
                 return
             }
         }
-
-        navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
-            popUpTo(0)
-        }
+        // A navegação para o calendário acontece no onSuccess de cada pedido: navegar aqui
+        // saía do formulário antes de o pedido terminar (e perdia-se o erro, se houvesse).
     }
 
     /**
@@ -217,7 +215,7 @@ class FormMatchInviteViewModel @Inject constructor(
                 calendarRepository.postPoneMatch(idMyTeam, matchInvite)
             },
             onSuccess = {
-                navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
+                navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
                     popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
                         inclusive = false
                     }
@@ -240,7 +238,7 @@ class FormMatchInviteViewModel @Inject constructor(
                 matchInviteRepository.negociateMatchInvite(idMyTeam, matchInvite)
             },
             onSuccess = {
-                navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
+                navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
                     popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
                         inclusive = false
                     }
@@ -263,7 +261,7 @@ class FormMatchInviteViewModel @Inject constructor(
                 matchInviteRepository.sendMatchInvite(idMyTeam, matchInvite)
             },
             onSuccess = {
-                navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
+                navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
                     popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
                         inclusive = false
                     }
@@ -300,7 +298,7 @@ class FormMatchInviteViewModel @Inject constructor(
 
             },
             onSuccess = {
-                navHostController.navigate("${Routes.TeamRoutes.CALENDAR.route}/$idMyTeam") {
+                navHostController.navigate(Routes.TeamRoutes.CALENDAR.route) {
                     popUpTo(Routes.TeamRoutes.HOMEPAGE.route) {
                         inclusive = false
                     }

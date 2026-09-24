@@ -7,33 +7,28 @@ import com.google.gson.annotations.SerializedName
 /**
  * Enumeração que define as posições principais de um jogador de futebol em campo.
  *
- * Utiliza [SerializedName] para permitir a desserialização flexível a partir de diferentes
- * formatos de entrada JSON (números como String ou nomes em inglês).
+ * A ordem (e por isso o `ordinal`, que é o valor enviado à API) tem de ser a mesma do enum
+ * `Position` do backend: FORWARD = 0, MIDFIELDER = 1, DEFENDER = 2, GOALKEEPER = 3.
+ * Antes estava invertida, e um avançado ficava registado como guarda-redes.
+ *
+ * Utiliza [SerializedName] para aceitar o número (como String) ou o nome em inglês no JSON.
  *
  * @property stringId O ID do recurso de string associado à posição para exibição na UI (ex: "Guarda-Redes").
  */
 enum class Position(@StringRes val stringId: Int) {
-    /**
-     * O Guarda-Redes. Aceita os valores "0", "Goalkeeper" ou "GoalKeeper" na desserialização JSON.
-     */
-    @SerializedName("0", alternate = ["GoalKeeper", "Goalkeeper"])
-    GOALKEEPER(stringId = R.string.position_goalkeeper),
+    /** O Avançado. Aceita "0" ou "Forward". */
+    @SerializedName("0", alternate = ["Forward"])
+    FORWARD(stringId = R.string.position_forward),
 
-    /**
-     * O Defesa. Aceita os valores "1" ou "Defender" na desserialização JSON.
-     */
-    @SerializedName("1", alternate = ["Defender"])
-    DEFENDER(stringId = R.string.position_defender),
-
-    /**
-     * O Médio. Aceita os valores "2" ou "Midfielder" na desserialização JSON.
-     */
-    @SerializedName("2", alternate = ["Midfielder"])
+    /** O Médio. Aceita "1" ou "Midfielder". */
+    @SerializedName("1", alternate = ["Midfielder"])
     MIDFIELDER(stringId = R.string.position_midfields),
 
-    /**
-     * O Avançado. Aceita os valores "3" ou "Forward" na desserialização JSON.
-     */
-    @SerializedName("3", alternate = ["Forward"])
-    FORWARD(stringId = R.string.position_forward),
+    /** O Defesa. Aceita "2" ou "Defender". */
+    @SerializedName("2", alternate = ["Defender"])
+    DEFENDER(stringId = R.string.position_defender),
+
+    /** O Guarda-Redes. Aceita "3", "Goalkeeper" ou "GoalKeeper". */
+    @SerializedName("3", alternate = ["GoalKeeper", "Goalkeeper"])
+    GOALKEEPER(stringId = R.string.position_goalkeeper),
 }

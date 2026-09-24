@@ -1,7 +1,7 @@
 package com.example.amfootball.mockWebServer
 
 
-import com.example.amfootball.data.network.interfaces.provider.FcmTokenProvider
+import com.example.amfootball.data.interfaces.provider.FcmTokenProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
