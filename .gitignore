@@ -1,0 +1,15 @@
+# Segredos e configuração local (nunca versionar)
+.env
+*.env
+**/secrets/
+**/*firebase-adminsdk*.json
+mobile/app/google-services.json
+mobile/local.properties
+backend/Api/appsettings.Local.json
+
+# Sistema operativo e editores
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp

@@ -1,0 +1,39 @@
+name: Android
+
+on:
+  push:
+    paths: ["mobile/**", ".github/workflows/android.yml"]
+  pull_request:
+    paths: ["mobile/**", ".github/workflows/android.yml"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: mobile
+
+jobs:
+  build-e-testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # O plugin google-services exige o ficheiro, que não está no repositório (tem as chaves do
+      # projeto Firebase). Para compilar chega um ficheiro com valores fictícios.
+      - name: google-services.json de exemplo
+        run: cp app/google-services.example.json app/google-services.json
+
+      - name: Build e testes unitários
+        run: ./gradlew --no-daemon assembleDebug testDebugUnitTest
+
+      - name: APK de debug
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: mobile/app/build/outputs/apk/debug/*.apk

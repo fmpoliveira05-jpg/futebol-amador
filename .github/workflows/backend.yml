@@ -1,0 +1,54 @@
+name: Backend (.NET)
+
+on:
+  push:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  pull_request:
+    paths: ["backend/**", ".github/workflows/backend.yml"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: backend
+
+jobs:
+  build-e-testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Restore
+        run: dotnet restore FutebolAmador.sln
+
+      - name: Build
+        run: dotnet build FutebolAmador.sln --configuration Release --no-restore
+
+      # Os testes de integração correm no ambiente "Testing": base de dados em memória, Firebase
+      # simulado e autenticação de teste. Não precisam de segredos.
+      - name: Testes
+        run: >
+          dotnet test Tests/Tests.csproj --configuration Release --no-build
+          --logger "trx;LogFileName=resultados.trx"
+          --collect "XPlat Code Coverage"
+          --results-directory TestResults
+
+      - name: Resultados dos testes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-testes
+          path: backend/TestResults
+
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-e-testes
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construir a imagem
+        run: docker build -f Api/Dockerfile -t futebol-amador-api .
