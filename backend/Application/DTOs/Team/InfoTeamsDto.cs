@@ -16,6 +16,9 @@ namespace Application.DTOs.Team
         [MaxLength(ModelConstants.TeamConst.MaxDescriptionLength)]
         public string? Description { get; set; }
 
+        /// <summary>Emblema da equipa (URL ou data URL), se existir.</summary>
+        public string? Icon { get; set; }
+
         [Required]
         [MinLength(ModelConstants.PitchConst.MinNameLength), MaxLength(ModelConstants.PitchConst.MaxNameLength)]
         public string Address { get; set; } = null!;

@@ -580,7 +580,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests.RankMatchMakerTest
 
             cacheMock.Verify(c => c.Remove(hubCacheKey), Times.Never);
 
-            cacheMock.Verify(c => c.CreateEntry(hubCacheKey), Times.Exactly(2));
+            // A cache é atualizada uma vez (antes o hub era gravado duas vezes seguidas).
+            cacheMock.Verify(c => c.CreateEntry(hubCacheKey), Times.Once);
             cacheMock.Verify(c => c.CreateEntry(GlobalHubKeysCacheKey), Times.Once);
         }
 

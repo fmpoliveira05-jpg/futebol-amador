@@ -105,6 +105,7 @@ namespace Application
             services.AddScoped<IGeralHubValidator, GeralHubValidator>();
             services.AddScoped<IStartMatchHubValidator, StartMatchHubValidator>();
             services.AddScoped<IHubFinshMatchValidator, HubFinshMatchValidator>();
+            services.AddScoped<INotificationValidator, NotificationValidator>();
             return services;
         }
     }

@@ -46,7 +46,7 @@ namespace Api.Hubs
         public async Task JoinRankMatchMaker(StartSearchDto startSearch)
         {
             var connectionId = Context.ConnectionId;
-            var userId = Context.User.Identity.Name;
+            var userId = Context.UserIdentifier;
             EntryRankMatchMakerHub result;
             string groupName = "";
             var idTeam = startSearch.IdTeam;

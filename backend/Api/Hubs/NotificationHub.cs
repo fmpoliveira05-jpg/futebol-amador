@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
@@ -10,6 +11,7 @@ namespace Api.Hubs
     /// Este Hub permite que os utilizadores (jogadores/admins) se conectem a um canal específico da sua equipa
     /// para receber alertas instantâneos, como avisos de "Game Day" enviados pelo serviço de background.
     /// </summary>
+    [Authorize]
     public class NotificationHub : Hub
     {
         private readonly INotificationValidator notificationValidator;
@@ -37,7 +39,9 @@ namespace Api.Hubs
         /// <exception cref="HubException">Se o utilizador não tiver permissão ou não pertencer à equipa.</exception>
         public async Task JoinNotificationHub(Guid teamId)
         {
-            var userId = Context.User?.Identity?.Name;
+            // UserIdentifier vem do claim NameIdentifier (o uid do Firebase). Identity.Name era
+            // sempre nulo com os tokens do Firebase, por isso ninguém conseguia entrar no grupo.
+            var userId = Context.UserIdentifier;
             var connectionId = Context.ConnectionId;
             
             try
@@ -105,7 +109,7 @@ namespace Api.Hubs
         /// <returns><c>true</c> se a remoção foi bem-sucedida; <c>false</c> caso contrário.</returns>
         private async Task<bool> HandleLeaveHub()
         {
-            if (Context.Items.TryGetValue("TeamId", out var teamIdObj) && teamIdObj is Guid teamId)
+            if (Context.Items.TryGetValue(ModelConstants.NotificationHubConst.ContentTeamId, out var teamIdObj) && teamIdObj is Guid teamId)
             {
                 var connectionId = Context.ConnectionId;
                 await Groups.RemoveFromGroupAsync(connectionId, GetGroupName(teamId));

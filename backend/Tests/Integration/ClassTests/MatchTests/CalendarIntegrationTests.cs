@@ -4,7 +4,6 @@ using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
 using Application.Interfaces.Services;
-using Application.Interfaces.Services.Hub.ClienteService;
 using Domain.Enums;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;

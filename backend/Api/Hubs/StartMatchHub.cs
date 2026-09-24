@@ -50,7 +50,6 @@ namespace Api.Hubs
             var groupName = GetGroupName(idMatch);
             JoinStartMatchResult result;
 
-            Console.WriteLine($"DEBUG -> Match: {idMatch} | Team: {idTeam} | User: {userId}");
             try
             {
                 result = await startMatchManager.JoinHubAsync(idMatch, userId, idTeam, connectionId);

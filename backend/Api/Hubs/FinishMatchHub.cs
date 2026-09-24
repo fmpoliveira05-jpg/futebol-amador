@@ -4,6 +4,7 @@ using Application.Interfaces.Hub;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs
@@ -14,6 +15,7 @@ namespace Api.Hubs
     /// Este hub gere o processo de submissão de resultados finais por parte dos administradores das equipas.
     /// O objetivo é garantir que ambas as equipas concordam com o resultado (número de golos) antes de oficializar o fim do jogo.
     /// </summary>
+    [Authorize]
     public class FinishMatchHub : Hub<IFinishMatchHub>
     {
         private readonly IManagerFinishMatchService managerFinishMatchService;

@@ -70,10 +70,19 @@ namespace Infrastructure.Repositories
         /// <returns>A entidade [Matches] com todos os membros das equipas participantes carregados.</returns>
         public async Task<Matches?> GetMatchWithListPlayerById(Guid idMatch)
         {
+            // Inclui as divisões: é usado ao corrigir o resultado, que atualiza pontos e divisões.
             return await context.Match
                 .Include(m => m.Teams)
                     .ThenInclude(ts => ts.Team)
                         .ThenInclude(t => t.Members)
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Rank)
+                            .ThenInclude(r => r.PreviousRank)
+                .Include(m => m.Teams)
+                    .ThenInclude(ts => ts.Team)
+                        .ThenInclude(t => t.Rank)
+                            .ThenInclude(r => r.NextRank)
                 .FirstOrDefaultAsync(match => match.Id == idMatch);
         }
 

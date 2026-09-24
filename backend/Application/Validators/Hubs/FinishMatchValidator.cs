@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Match;
+﻿using Domain.Enums;
+using Application.DTOs.Match;
 using Application.Hubs;
 using Application.Interfaces.Validators.Hub;
 using Domain.Entities;
@@ -82,6 +83,13 @@ namespace Application.Validators.Hubs
             if (match == null)
             {
                 throw new ArgumentException("A match não existe ou não foi encontrada");
+            }
+
+            // Só um jogo a decorrer pode receber o resultado. Sem esta verificação, um jogo já
+            // terminado podia ser "terminado" outra vez e as equipas voltavam a receber pontos.
+            if (match.MatchStatus != MatchStatus.IN_PROGRESS || match.TimeStart == null)
+            {
+                throw new InvalidOperationException("O jogo não está a decorrer.");
             }
 
             var timeMatch = (DateTime.UtcNow - match.TimeStart.Value).TotalMinutes;

@@ -127,6 +127,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             {
                 Id = matchId,
                 MatchStatus = MatchStatus.IN_PROGRESS,
+                // Só os jogos competitivos dão pontos (e estes testes verificam os pontos).
+                IsCompetive = true,
                 Teams = new List<TeamStatistics> { teamStat1, teamStat2 }
             };
 
@@ -289,14 +291,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockValidator.Verify(v => v.ValidateMatchJoinMatch(null), Times.Once);
         }
 
-        [Test(Description = "Testa se o método falha (lança ArgumentException) quando o utilizador que tenta entrar no hub não é admin de nenhuma equipa na partida.")]
-        public void JoinHubAsync_UserIsNotAdmin_ThrowsArgumentException()
+        [Test(Description = "Quem não é administrador de nenhuma das equipas do jogo recebe um erro claro (antes era uma NullReferenceException).")]
+        public void JoinHubAsync_UserIsNotAdmin_ThrowsInvalidOperationException()
         {
-            // CORRIGIDO: nonAdminId é string
             var nonAdminId = "non-admin-id";
 
-            // CORRIGIDO: adminId é string
-            Assert.ThrowsAsync<NullReferenceException>(() =>
+            Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.JoinHubAsync(matchId, resultDtoTeam1, nonAdminId, connId1));
         }
 
@@ -437,14 +437,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             Assert.That(ex.Message, Is.EqualTo("O hub está vazio."));
         }
 
-        [Test(Description = "Testa se UpdateResult falha se o utilizador não for um admin (NullReference).")]
-        public void UpdateResult_UserIsNotAdmin_ThrowsNullReferenceException()
+        [Test(Description = "UpdateResult recusa quem não é administrador de nenhuma das equipas do jogo.")]
+        public void UpdateResult_UserIsNotAdmin_ThrowsInvalidOperationException()
         {
-            // CORRIGIDO: nonAdminId é string
             var nonAdminId = "non-admin-id-2";
 
-            // CORRIGIDO: nonAdminId é string
-            Assert.ThrowsAsync<NullReferenceException>(() =>
+            Assert.ThrowsAsync<InvalidOperationException>(() =>
                 service.UpdateResult(matchId, resultDtoTeam1, nonAdminId, connId1));
         }
         #endregion

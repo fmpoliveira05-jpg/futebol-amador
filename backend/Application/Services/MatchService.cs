@@ -234,14 +234,24 @@ namespace Application.Services
             var idOpponnent = dto.IdOpponent;
             var idMatch = dto.IdMatch;
             DateTime newDate;
-            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch);
-            var match = postPoneMatch?.Match;
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch)
+                ?? throw new NotFoundException("O pedido de adiamento não existe.");
+            var match = postPoneMatch.Match;
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
-            var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(idTeam, match.MatchDate);
+            // Os jogos próximos da NOVA data é que podem chocar com o adiamento (de qualquer das equipas).
+            var validateMatch = await MatchRepository.GetMatchProxim12HoursMatchs(idTeam, postPoneMatch.PostPoneDate);
+            var conflitoAdversario = await MatchRepository.GetMatchProxim12HoursMatchs(idOpponnent, postPoneMatch.PostPoneDate);
             
             //Validator
             MatchValidator.ValidatorAcceptPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent, validateMatch);
+
+            // O próprio jogo (na data antiga) não conta como conflito.
+            if ((validateMatch != null && validateMatch.Id != match.Id) ||
+                (conflitoAdversario != null && conflitoAdversario.Id != match.Id))
+            {
+                throw new ValidationException("Uma das equipas já tem um jogo marcado a menos de 12 horas da nova data.");
+            }
 
             //Adiamento da partida
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
@@ -284,15 +294,18 @@ namespace Application.Services
             var idMatch = dto.IdMatch;
             var idOpponnent = dto.IdOpponent;
 
-            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatch(idOpponnent, idMatch);
+            // O pedido a rejeitar é o que a OUTRA equipa fez: procura-se pelo id de quem responde
+            // (antes passava-se o do adversário e nunca se encontrava o pedido certo).
+            var postPoneMatch = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch);
             var match = postPoneMatch?.Match;
             var teamStatistic = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam);
             var opponentStatistics = match?.Teams.FirstOrDefault(ts => ts.IdTeam == idOpponnent);
 
             MatchValidator.ValidatorRejectPostPoneMatch(postPoneMatch, match, teamStatistic, idTeam, opponentStatistics, idOpponnent);
 
+            // Recusar o adiamento mantém o jogo na data original (antes o jogo era cancelado).
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
-            match.MatchStatus = MatchStatus.CANCELED;
+            match.MatchStatus = MatchStatus.SCHEDULED;
 
             await UnityOfWork.SaveChangesAsync();
         }

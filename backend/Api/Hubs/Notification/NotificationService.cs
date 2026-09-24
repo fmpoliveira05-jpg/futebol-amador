@@ -1,4 +1,5 @@
 ﻿using Application.Interfaces.Services.Hub;
+using Domain.Constants;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Api.Hubs.Notification
@@ -51,7 +52,8 @@ namespace Api.Hubs.Notification
         /// <param name="body">O corpo da mensagem.</param>
         /// <param name="data">Objeto opcional com dados extra.</param>
         public async Task SendTeamAsync(string teamId, string title, string body, object? data = null) =>
-            await hubContext.Clients.Group(teamId).SendAsync("ReceiveNotification", new { title, body, data });
+            // O nome do grupo tem o mesmo prefixo usado pelo NotificationHub ao juntar os membros.
+            await hubContext.Clients.Group(ModelConstants.NotificationHubConst.PrefixGroupName + teamId).SendAsync("ReceiveNotification", new { title, body, data });
 
         /// <summary>
         /// Envia uma notificação global para TODOS os clientes conectados (Broadcast).

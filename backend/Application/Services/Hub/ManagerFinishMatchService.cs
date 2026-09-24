@@ -81,7 +81,7 @@ namespace Application.Services.Hub
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
                 ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
-            );
+            ) ?? throw new InvalidOperationException("Só os administradores das equipas deste jogo podem registar o resultado.");
 
             var teamId = teamMatchAdmin.IdTeam;
             var hubCacheKey = GetHubCacheKey(matchId);
@@ -165,7 +165,7 @@ namespace Application.Services.Hub
 
             var teamMatchAdmin = match.Teams.FirstOrDefault(ts =>
                 ts.Team.Members.Any(p => p.Id == userId && p.IsAdmin)
-            );
+            ) ?? throw new InvalidOperationException("Só os administradores das equipas deste jogo podem registar o resultado.");
 
             var teamId = teamMatchAdmin.IdTeam;
 
@@ -334,7 +334,7 @@ namespace Application.Services.Hub
                 team.NumGoals = finishMatch.NumGoalsTeam;
                 opponent.NumGoals = finishMatch.NumGoalsOpponent;
 
-                DefineWinnerMatch(team, opponent);
+                DefineWinnerMatch(team, opponent, match.IsCompetive);
                 match.MatchStatus = MatchStatus.DONE;
 
                 await unityOfWork.SaveChangesAsync();
@@ -348,7 +348,7 @@ namespace Application.Services.Hub
         /// <summary>
         /// Define o resultado da partida (Vitória/Derrota/Empate) e atualiza os pontos.
         /// </summary>
-        private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
+        private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent, bool isCompetitive)
         {
             var numGoalsTeam = team.NumGoals;
             var numGoalsOpponent = opponent.NumGoals;
@@ -369,8 +369,13 @@ namespace Application.Services.Hub
                 opponent.MatchResult = MatchResult.DRAW;
             }
 
-            updatePointsTeams(team);
-            updatePointsTeams(opponent);
+            // Só os jogos competitivos contam para a classificação: um amigável combinado entre
+            // duas equipas não pode dar pontos.
+            if (isCompetitive)
+            {
+                updatePointsTeams(team);
+                updatePointsTeams(opponent);
+            }
         }
 
         /// <summary>

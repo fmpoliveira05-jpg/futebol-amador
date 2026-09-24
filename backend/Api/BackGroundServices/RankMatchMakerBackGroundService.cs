@@ -112,12 +112,21 @@ namespace Application.Services.BackGroundServices
 
                         minutesTaskResetCriteria.Restart();
                     }
-
-                    await Task.Delay(interval, stoppingToken);
                 }
-                catch (Exception ex)
+                catch (Exception ex) when (!(ex is OperationCanceledException && stoppingToken.IsCancellationRequested))
                 {
                     logger.LogError(ex, "Erro no RankMatchMakerBackgroundService.");
+                }
+
+                // Fora do try: se houver um erro, espera-se na mesma antes de tentar outra vez
+                // (antes o ciclo repetia sem pausa e enchia o log).
+                try
+                {
+                    await Task.Delay(interval, stoppingToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
                 }
             }
 

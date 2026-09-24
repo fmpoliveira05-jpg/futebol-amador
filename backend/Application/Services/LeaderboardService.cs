@@ -43,6 +43,7 @@ namespace Application.Services
             return teams
                 .Select((t, index) => new TeamLeaderboardDto
                 {
+                    Id = t.Id,
                     Position = index + 1,
                     TeamName = t.TeamName,
                     CurrentPoints = t.CurrentPoints,

@@ -49,21 +49,20 @@ namespace Application.Validators.Hubs
 
             if (team == null)
             {
-                throw new ArgumentException("The team does not exist.");
+                throw new ArgumentException("A equipa não existe.");
             }
 
             Player player = await playerRepository.GetPlayerByIdAsync(userId);
 
             if (player == null)
             {
-                throw new ArgumentException("The player does not exist.");
+                throw new ArgumentException("O jogador não existe.");
             }
 
-            Player playerExist = team.Members.FirstOrDefault(p => p.Id == player.Id);
-
-            if (playerExist == null)
+            // GetTeamByIdAsync não carrega os membros: compara-se a equipa do jogador.
+            if (player.IdTeam != team.Id)
             {
-                throw new ArgumentException("The player does not belong to this team.");
+                throw new ArgumentException("O jogador não pertence a esta equipa.");
             }
         }
     }

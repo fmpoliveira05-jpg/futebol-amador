@@ -199,7 +199,7 @@ namespace Infrastructure.Repositories
                         Email = player.Email,
                         PhoneNumber = player.Phone,
                         Address = player.Address,
-                        Age = EF.Functions.DateDiffDay(player.DateOfBirth, dateNow),
+                        Age = (int)(EF.Functions.DateDiffDay(player.DateOfBirth, dateNow) / 365.25),
                         DateOfBirth = player.DateOfBirth,
                         Team = new TeamDto
                         {
@@ -305,6 +305,16 @@ namespace Infrastructure.Repositories
         }
 
         /// <summary>
+        /// Idade em anos completos. Usada quando a lista já está em memória, onde as funções
+        /// SQL do <c>EF.Functions</c> não podem ser chamadas.
+        /// </summary>
+        private static int CalcularIdade(DateOnly nascimento, DateOnly hoje)
+        {
+            var idade = hoje.Year - nascimento.Year;
+            return nascimento > hoje.AddYears(-idade) ? idade - 1 : idade;
+        }
+
+        /// <summary>
         /// Obtém uma lista filtrada de jogadores de uma equipa específica.
         /// </summary>
         /// <remarks>
@@ -377,7 +387,7 @@ namespace Infrastructure.Repositories
                         Name = team.Name,
                         imageUrl = team.Icon
                     },
-                    Age = EF.Functions.DateDiffDay(player.DateOfBirth, dateNow),
+                    Age = CalcularIdade(player.DateOfBirth, dateNow),
                     IsAdmin = player.IsAdmin
                 })
                 .ToList();
@@ -413,8 +423,11 @@ namespace Infrastructure.Repositories
         {
             return await DbContext.Team
                 .Include(t => t.Members)
-                .Include (t => t.Rank)
-                .Include (t => t.Pitch)
+                .Include(t => t.Rank)
+                    .ThenInclude(r => r.NextRank)
+                .Include(t => t.Rank)
+                    .ThenInclude(r => r.PreviousRank)
+                .Include(t => t.Pitch)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
@@ -445,6 +458,7 @@ namespace Infrastructure.Repositories
                              Id = t.Id,
                              Name = t.Name,
                              Description = t.Description,
+                             Icon = t.Icon,
                              Address = pitch.Address,
                              PlayerCount = t.Members.Count,
                              AverageAge = (float)averageAge,
@@ -556,6 +570,7 @@ namespace Infrastructure.Repositories
                     Id = x.Team.Id,
                     Name = x.Team.Name,
                     Description = x.Team.Description,
+                    Icon = x.Team.Icon,
                     Address = x.Pitch.Address,
                     AverageAge = (float)x.AverageAge,
                     CurrentPoints = x.Team.CurrentPoints,
@@ -620,6 +635,7 @@ namespace Infrastructure.Repositories
                              Id = t.Id,
                              Name = t.Name,
                              Description = t.Description,
+                             Icon = t.Icon,
                              Address = pitch.Address,
                              PlayerCount = t.Members.Count,
                              AverageAge = (float)averageAge,
@@ -732,6 +748,7 @@ namespace Infrastructure.Repositories
                     Id = x.Team.Id,
                     Name = x.Team.Name,
                     Description = x.Team.Description,
+                    Icon = x.Team.Icon,
                     Address = x.Pitch.Address,
                     AverageAge = (float)x.AverageAge,
                     CurrentPoints = x.Team.CurrentPoints,
@@ -844,6 +861,7 @@ namespace Infrastructure.Repositories
                     Id = x.Team.Id,
                     Name = x.Team.Name,
                     Description = x.Team.Description,
+                    Icon = x.Team.Icon,
                     Address = x.Pitch.Address,
                     AverageAge = (float)x.AverageAge,
                     CurrentPoints = x.Team.CurrentPoints,
@@ -1024,7 +1042,7 @@ namespace Infrastructure.Repositories
                                where (m.Teams.Any(t => t.IdTeam == teamId)
                                       && (m.MatchStatus == MatchStatus.DONE))
 
-                               orderby m.MatchDate ascending
+                               orderby m.MatchDate descending
 
                                let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == teamId)
                                let opponentTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam != teamId)

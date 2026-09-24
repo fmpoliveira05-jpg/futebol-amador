@@ -84,7 +84,9 @@ namespace Application.Services.Hub
             bool haveChangeDifferenceRank = false;
             DateOnly atualDate = DateOnly.FromDateTime(GetNextSunday(DateTime.UtcNow));
             DateTime gameDate = new DateTime(atualDate, hoursGame);
-            double differenteHoursNowAndGame = (DateTime.UtcNow - gameDate).TotalHours;
+            // Horas que faltam para o jogo (antes a subtração estava invertida e dava sempre um valor
+            // negativo, por isso o validador recusava todas as entradas no matchmaking).
+            double differenteHoursNowAndGame = (gameDate - DateTime.UtcNow).TotalHours;
 
             var teamHaveMatchInThisDay = await matchRepository.GetMatchProxim12HoursMatchs(idTeam, gameDate);
             validator.ValidateHoursToMatch(differenteHoursNowAndGame, teamHaveMatchInThisDay);
@@ -117,7 +119,7 @@ namespace Application.Services.Hub
                 Rank = new InfoRankDto
                 {
                     IdRank = team.IdRank,
-                    Name = team.Name,
+                    Name = team.Rank.Name,
                 },
                 NumberPointsTeam = team.CurrentPoints,
                 AverageAge = averageAge,
@@ -154,6 +156,9 @@ namespace Application.Services.Hub
             else
             {
                 await CreateMatch(teamMatchId.Value, team, gameDate);
+
+                // A equipa encontrada sai da fila; a que acabou de entrar nunca chegou a entrar.
+                RemoverDaFila(teamMatchId.Value);
             }
 
             return entry;
@@ -204,7 +209,6 @@ namespace Application.Services.Hub
                     else
                     {
                         cache.Set(hubCacheKey, hub, GetCacheOptions());
-                        cache.Set(hubCacheKey, hub);
                     }
 
                     if (cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? globalKeys))
@@ -247,6 +251,23 @@ namespace Application.Services.Hub
                 var team2 = pair.Value.Team;
 
                 await CreateMatch(team1.IdTeam, team2.IdTeam, team2.GameDate);
+
+                // Sem isto, as duas equipas continuavam na fila e podiam ser emparelhadas outra vez.
+                RemoverDaFila(team1.IdTeam);
+                RemoverDaFila(team2.IdTeam);
+            }
+        }
+
+        /// <summary>Tira uma equipa da fila de matchmaking (cache).</summary>
+        private void RemoverDaFila(Guid idTeam)
+        {
+            var hubCacheKey = GetHubCacheKey(idTeam);
+            cache.Remove(hubCacheKey);
+
+            // O conjunto de chaves é o mesmo objeto que está na cache, por isso basta alterá-lo.
+            if (cache.TryGetValue(ModelConstants.ManagerRankMatchMakerServiceConst.GlobalHubKeysCacheKey, out HashSet<string>? globalKeys) && globalKeys != null)
+            {
+                globalKeys.Remove(hubCacheKey);
             }
         }
 
@@ -368,19 +389,23 @@ namespace Application.Services.Hub
         private static string GetPreviousOrNextRankTeam(int numberPointsTeam, Rank rankTeam)
         {
             const int differencePoints = ModelConstants.DeafultCriteriaMatchMaker.differencePoint;
-            var nextOrPreviewsRank = "";
-            var previousRankTeam = rankTeam.PreviousRank;
 
-            if (rankTeam.PointsToPromotion - numberPointsTeam <= differencePoints)
+            // Perto de subir: faltam poucos pontos para a promoção (se houver divisão acima).
+            if (rankTeam.NextRank != null && rankTeam.PointsToPromotion - numberPointsTeam <= differencePoints)
             {
-                nextOrPreviewsRank = rankTeam.NextRank.Name;
-            }
-            else if (numberPointsTeam - previousRankTeam.PreviousRank.PointsToPromotion <= differencePoints)
-            {
-                nextOrPreviewsRank = previousRankTeam.Name;
+                return rankTeam.NextRank.Name;
             }
 
-            return nextOrPreviewsRank;
+            // Perto de descer: tem poucos pontos acima do mínimo desta divisão, que é o valor de
+            // promoção da divisão anterior. (Antes lia-se PreviousRank.PreviousRank, que é nulo
+            // nas duas divisões mais baixas e fazia rebentar o pedido.)
+            var previousRank = rankTeam.PreviousRank;
+            if (previousRank != null && numberPointsTeam - previousRank.PointsToPromotion <= differencePoints)
+            {
+                return previousRank.Name;
+            }
+
+            return string.Empty;
         }
 
         /// <summary>
@@ -388,36 +413,35 @@ namespace Application.Services.Hub
         /// </summary>
         private async Task CreateMatch(Guid teamMatchId, Team team, DateTime gameDate)
         {
-            var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId);
+            var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId)
+                ?? throw new InvalidOperationException("A equipa adversária já não existe.");
 
-            var teamStatistics = new List<TeamStatistics>();
-            var team1 = new TeamStatistics(team);
-            var teamFind = new TeamStatistics(teamMatchFind);
-            teamStatistics.Add(team1);
-            teamStatistics.Add(teamFind);
-
-            var match = new Matches(gameDate, true, teamMatchFind.Pitch.Id, teamStatistics);
-
-            await matchRepository.AddMatch(match);
-            await unityOfWork.SaveChangesAsync();
+            await GuardarJogo(teamMatchFind, team, gameDate);
         }
 
-        /// <summary>
-        /// Cria uma partida na base de dados (chamado pelo Background Service).
-        /// </summary>
         private async Task CreateMatch(Guid teamMatchId, Guid idTeam2, DateTime gameDate)
         {
-            var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId);
-            var team = await teamRepository.GetTeamByIdAsync(idTeam2);
+            var teamMatchFind = await teamRepository.GetTeamByIdAsync(teamMatchId)
+                ?? throw new InvalidOperationException("A equipa já não existe.");
+            var team = await teamRepository.GetTeamByIdAsync(idTeam2)
+                ?? throw new InvalidOperationException("A equipa adversária já não existe.");
 
-            var teamStatistics = new List<TeamStatistics>();
-            var team1 = new TeamStatistics(team);
-            var teamFind = new TeamStatistics(teamMatchFind);
-            var match = new Matches(gameDate, true, teamMatchFind.Pitch.Id, teamStatistics);
+            // Antes as estatísticas nunca eram juntas ao jogo e o jogo nunca era guardado.
+            await GuardarJogo(teamMatchFind, team, gameDate);
+        }
 
-            team1.MatchesId = match.Id;
-            teamFind.MatchesId = match.Id;
+        /// <summary>Cria o jogo competitivo no campo da primeira equipa.</summary>
+        private async Task GuardarJogo(Team equipaDaCasa, Team visitante, DateTime gameDate)
+        {
+            var teamStatistics = new List<TeamStatistics>
+            {
+                new TeamStatistics(equipaDaCasa),
+                new TeamStatistics(visitante),
+            };
 
+            var match = new Matches(gameDate, true, equipaDaCasa.IdPitch, teamStatistics);
+
+            await matchRepository.AddMatch(match);
             await unityOfWork.SaveChangesAsync();
         }
 

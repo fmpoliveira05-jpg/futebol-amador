@@ -94,16 +94,10 @@ namespace Domain.Entities
             this.idPitch = idPitch;
             this.Teams = teamStatistics;
 
-            if (Chat != null)
-            {
-                this.Chat = chat;
-                this.IdChat = idPitch;
-            }
-            else
-            {
-                this.Chat = new Chat();
-                this.IdChat = this.Chat.Id;
-            }
+            // Usa o chat recebido (antes testava-se a propriedade Chat, sempre nula no construtor,
+            // e o IdChat ficava com o id do campo).
+            this.Chat = chat ?? new Chat();
+            this.IdChat = this.Chat.Id;
         }
 
         /// <summary>
@@ -120,16 +114,8 @@ namespace Domain.Entities
             this.idPitch = idPitch;
             this.Teams = teamStatistics;
 
-            if (Chat != null)
-            {
-                this.Chat = new Chat();
-                this.IdChat = idPitch;
-            }
-            else
-            {
-                this.Chat = new Chat();
-                this.IdChat = this.Chat.Id;
-            }
+            this.Chat = new Chat();
+            this.IdChat = this.Chat.Id;
         }
     }
 }
