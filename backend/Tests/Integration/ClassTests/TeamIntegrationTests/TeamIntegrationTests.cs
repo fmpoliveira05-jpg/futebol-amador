@@ -223,7 +223,7 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             var response = await _client.GetAsync($"/api/Team/{teamId}");
 
             // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
         #endregion
 
@@ -407,10 +407,15 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
 
                     services.AddSingleton<ITeamService>(mockTeamService.Object);
                     services.AddSingleton<IMembershipRequestService>(mockMembershipRequestService.Object);
+
+                    // Quem pede tem de ser membro da equipa (autorização simulada).
+                    services.RemoveAll(typeof(IPlayerAuthorizationService));
+                    services.AddSingleton(new Mock<IPlayerAuthorizationService>().Object);
                 });
             }).CreateClient();
 
             // Act
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Team/{teamId}/search");
 
             // Assert
@@ -449,10 +454,15 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
 
                     services.AddSingleton<ITeamService>(mockTeamService.Object);
                     services.AddSingleton<IMembershipRequestService>(mockMembershipRequestService.Object);
+
+                    // Quem pede tem de ser membro da equipa (autorização simulada).
+                    services.RemoveAll(typeof(IPlayerAuthorizationService));
+                    services.AddSingleton(new Mock<IPlayerAuthorizationService>().Object);
                 });
             }).CreateClient();
 
             // Act
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Team/{teamId}/search?NameTeam=Test&City=TestCity&MinNumberPoints=0&MaxNumberPoints=100");
 
             // Assert
@@ -494,10 +504,15 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
 
                     services.AddSingleton<ITeamService>(mockTeamService.Object);
                     services.AddSingleton<IMembershipRequestService>(mockMembershipRequestService.Object);
+
+                    // Quem pede tem de ser membro da equipa (autorização simulada).
+                    services.RemoveAll(typeof(IPlayerAuthorizationService));
+                    services.AddSingleton(new Mock<IPlayerAuthorizationService>().Object);
                 });
             }).CreateClient();
 
             // Act
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Team/{teamId}/members");
 
             // Assert
@@ -536,10 +551,15 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
 
                     services.AddSingleton<ITeamService>(mockTeamService.Object);
                     services.AddSingleton<IMembershipRequestService>(mockMembershipRequestService.Object);
+
+                    // Quem pede tem de ser membro da equipa (autorização simulada).
+                    services.RemoveAll(typeof(IPlayerAuthorizationService));
+                    services.AddSingleton(new Mock<IPlayerAuthorizationService>().Object);
                 });
             }).CreateClient();
 
             // Act
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Team/{teamId}/members?IsAdmin=true&Name=Player1");
 
             // Assert

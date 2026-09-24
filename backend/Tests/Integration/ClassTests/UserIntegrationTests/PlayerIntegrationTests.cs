@@ -93,6 +93,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 });
             }).CreateClient(); 
 
+            // Os detalhes de um jogador exigem sessão (antes eram públicos e incluíam os contactos).
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Player/details/{playerId}");
 
             response.EnsureSuccessStatusCode();
@@ -135,8 +137,10 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 });
             }).CreateClient();
 
+            // Os detalhes de um jogador exigem sessão (antes eram públicos e incluíam os contactos).
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.GetAsync($"/api/Player/details/{playerId}");
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
         #endregion
 
@@ -224,7 +228,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             var playerId = TestAuthHandler.TestUserId;
             var updateDto = new UpdatePlayerDto
             {
-                playerId = playerId,
                 Name = "Test Name",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-20),
                 Address = "Rua teste, teste",
@@ -236,7 +239,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             var returnedDto = new UpdatePlayerDto
             {
-                playerId = playerId,
                 Name = updateDto.Name,
             };
 
@@ -336,7 +338,6 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             var playerId = "different-player-id";
             var updateDto = new UpdatePlayerDto
             {
-                playerId = playerId,
                 Name = "Test Name",
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-20),
                 Address = "Rua teste",
@@ -352,7 +353,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             var mockMembership = new Mock<IMembershipRequestService>();
 
             mockValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                        .Throws(new UnauthorizedAccessException());
+                        .Throws(new ForbiddenException("Só podes aceder aos teus próprios dados."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -381,7 +382,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 Console.WriteLine(error);
             }
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
         }
 
         #endregion
@@ -463,7 +464,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             var mockPlayerAuthValidator = new Mock<IPlayerAuthorizationValidator>();
             mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Throws(new UnauthorizedAccessException("Not authorized to perform this action"));
+                .Throws(new ForbiddenException("Só podes aceder aos teus próprios dados."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -478,7 +479,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
 
             var response = await _client.PutAsync($"/api/Player/{playerId}/leave-team", null);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
         }
         #endregion
 

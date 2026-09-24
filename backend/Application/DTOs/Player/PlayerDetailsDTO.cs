@@ -43,5 +43,18 @@ namespace Application.DTOs.PlayerDTOs
         public TeamDto? Team { get; set; }
 
         public bool? IsAdmin { get; set; }
+
+        /// <summary>
+        /// Apaga os dados de contacto (e-mail, telefone, morada e data de nascimento) antes de o
+        /// perfil ser mostrado a alguém que não é o próprio jogador nem colega de equipa.
+        /// Mantém-se a idade, a posição e a altura, que são o que interessa para formar equipas.
+        /// </summary>
+        public void OcultarDadosPessoais()
+        {
+            Email = string.Empty;
+            PhoneNumber = string.Empty;
+            Address = string.Empty;
+            DateOfBirth = default;
+        }
     }
 }

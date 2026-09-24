@@ -105,6 +105,9 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
 
             mockSuperAdminService.Setup(s => s.GetSuperAdminByIdAsync(superAdminId))
                 .ThrowsAsync(new NotFoundException("O Super Admin não existe"));
+            // Quem pede é super administrador (pode consultar outros super administradores).
+            mockSuperAdminService.Setup(s => s.GetSuperAdminByIdAsync(TestAuthHandler.TestUserId))
+                .ReturnsAsync(new SuperAdminDetailsDTO { Name = "Quem pede" });
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -126,7 +129,7 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
             var response = await _client.GetAsync($"/api/SuperAdmin/{superAdminId}");
 
             // Assert
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
         }
 
         [Test]
@@ -369,6 +372,8 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
 
             mockSuperAdminService.Setup(s => s.CreateSuperAdminAsync(It.IsAny<CreateSuperAdminDTO>()))
                 .ReturnsAsync(expectedSuperAdminId);
+            mockSuperAdminService.Setup(s => s.GetSuperAdminByIdAsync(TestAuthHandler.TestUserId))
+                .ReturnsAsync(new SuperAdminDetailsDTO { Name = "Super administrador que cria" });
 
             mockAuthService.Setup(a => a.LoginAsync(superAdminDto.Email, superAdminDto.Password))
                 .ReturnsAsync(expectedLoginResponse);
@@ -385,6 +390,7 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
                 });
             }).CreateClient();
 
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
             var response = await _client.PostAsJsonAsync("/api/SuperAdmin", superAdminDto);
 
             Assert.That((int)response.StatusCode, Is.InRange(200, 299));
@@ -400,6 +406,39 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
 
             mockSuperAdminService.Verify(s => s.CreateSuperAdminAsync(It.IsAny<CreateSuperAdminDTO>()), Times.Once);
             mockAuthService.Verify(a => a.LoginAsync(superAdminDto.Email, superAdminDto.Password), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateSuperAdmin_Returns_Forbidden_When_CallerIsNotSuperAdmin()
+        {
+            var superAdminDto = new CreateSuperAdminDTO
+            {
+                Name = "Tentativa",
+                DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-30),
+                Address = "Rua de Teste, Porto",
+                Email = "intruso@example.com",
+                Password = "SuperAdmin123!",
+                Phone = "+351987654321"
+            };
+
+            var mockSuperAdminService = new Mock<ISuperAdminService>();
+            mockSuperAdminService.Setup(s => s.GetSuperAdminByIdAsync(TestAuthHandler.TestUserId))
+                .ThrowsAsync(new NotFoundException("O Super Admin não existe"));
+
+            _client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll(typeof(ISuperAdminService));
+                    services.AddSingleton<ISuperAdminService>(mockSuperAdminService.Object);
+                });
+            }).CreateClient();
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
+
+            var response = await _client.PostAsJsonAsync("/api/SuperAdmin", superAdminDto);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+            mockSuperAdminService.Verify(s => s.CreateSuperAdminAsync(It.IsAny<CreateSuperAdminDTO>()), Times.Never);
         }
 
         [Test]
@@ -431,6 +470,8 @@ namespace Tests.Integration.ClassTests.SuperAdminIntegrationTests
                     services.AddSingleton<IAuthService>(mockAuthService.Object);
                 });
             }).CreateClient();
+
+            _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
             var response = await _client.PostAsJsonAsync("/api/SuperAdmin", invalidDto);

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Domain.Exceptions;
+using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
@@ -389,7 +390,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", new { requestId });
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -434,7 +435,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
                 });
             }).CreateClient();
 
-            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", new { requestId });
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
@@ -599,7 +600,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/send", teamId);
+            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/send", new { teamId });
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -647,7 +648,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             // Não adicionar header de autorização
 
             // Act
-            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/send", teamId);
+            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/send", new { teamId });
 
             // Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
@@ -668,7 +669,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Throws(new UnauthorizedAccessException("O utilizador que está a tentar entrar não é o mesmo da url."));
+                .Throws(new ForbiddenException("Só podes aceder aos teus próprios dados."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -688,10 +689,10 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
 
             var response = await _client.GetAsync($"/api/Player/{playerId}/membership-requests");
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.That(content, Contains.Substring("O utilizador que está a tentar entrar não é o mesmo da url."));
+            Assert.That(content, Contains.Substring("Só podes aceder aos teus próprios dados."));
         }
 
         [Test]
@@ -705,7 +706,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Throws(new UnauthorizedAccessException("O utilizador que está a tentar entrar não é o mesmo da url."));
+                .Throws(new ForbiddenException("Só podes aceder aos teus próprios dados."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -723,12 +724,12 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Player/{playerId}/membership-requests/accept", new { requestId });
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.That(content, Contains.Substring("O utilizador que está a tentar entrar não é o mesmo da url."));
+            Assert.That(content, Contains.Substring("Só podes aceder aos teus próprios dados."));
         }
 
         #endregion

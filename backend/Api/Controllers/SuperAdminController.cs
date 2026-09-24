@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.SuperAdmin;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -52,11 +53,15 @@ namespace Api.Controllers
         /// <response code="201">Super Admin criado com sucesso.</response>
         /// <response code="400">Dados inválidos (ex: email duplicado, idade inválida).</response>
         [HttpPost]
-        [AllowAnonymous]
-        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)] // Substituir object pelo DTO de login
+        [ProducesResponseType(typeof(Application.DTOs.LoginResponseDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> CreateSuperAdmin([FromBody] CreateSuperAdminDTO createSuperAdminDTO)
         {
+            // Só um super administrador cria outro. O primeiro é criado diretamente na base de
+            // dados (antes qualquer pessoa, mesmo sem sessão, podia criar um super administrador).
+            await ExigirSuperAdminAsync();
+
             var newSadminId = await superAdminService.CreateSuperAdminAsync(createSuperAdminDTO);
             var createUserResult = await authService.LoginAsync(createSuperAdminDTO.Email, createSuperAdminDTO.Password);
             return CreatedAtAction(
@@ -77,7 +82,7 @@ namespace Api.Controllers
         /// <response code="401">Utilizador não autenticado.</response>
         /// <response code="403">Utilizador tentou eliminar uma conta que não lhe pertence.</response>
         /// <response code="404">Super Admin não encontrado.</response>
-        [HttpDelete("{sadminId}")] // Removi a constraint :required pois pode dar problemas com Swagger se não estiver configurada
+        [HttpDelete("{sadminId}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -104,6 +109,11 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetSuperAdmin(string sadminId)
         {
+            if (sadminId != GetCurrentUserId())
+            {
+                await ExigirSuperAdminAsync();
+            }
+
             var superAdminDetails = await superAdminService.GetSuperAdminByIdAsync(sadminId);
 
             return Ok(superAdminDetails);
@@ -145,6 +155,25 @@ namespace Api.Controllers
         #endregion
 
         #region Private Methods
+
+        /// <summary>Lança <see cref="ForbiddenException"/> se o utilizador não for super administrador.</summary>
+        private async Task ExigirSuperAdminAsync()
+        {
+            try
+            {
+                var superAdmin = await superAdminService.GetSuperAdminByIdAsync(GetCurrentUserId());
+                if (superAdmin != null)
+                {
+                    return;
+                }
+            }
+            catch (Exception e) when (e is NotFoundException or ValidationException or ArgumentException or InvalidOperationException)
+            {
+                // Não é super administrador.
+            }
+
+            throw new ForbiddenException("Só um super administrador pode fazer isto.");
+        }
         private string GetCurrentUserId()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

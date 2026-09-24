@@ -79,7 +79,9 @@ namespace Application.Validators
                 throw new ValidationException("A equipa não existe.");
             }
 
-            if (team.Members.Count == Domain.Constants.ModelConstants.TeamConst.MaxMembers)
+            ValidarAdministradorDaEquipa(player, team);
+
+            if (team.Members.Count >= Domain.Constants.ModelConstants.TeamConst.MaxMembers)
             {
                 throw new ValidationException("A equipa já está cheia.");
             }
@@ -89,19 +91,14 @@ namespace Application.Validators
                 throw new ValidationException("O jogador a convidar não existe.");
             }
 
-            if (invitedPlayer.Team != null && invitedPlayer.Team != player.Team)
-            {
-                throw new ValidationException("O jogador convidado já pertence a outra equipa.");
-            }
-
-            if (invitedPlayer.Team == player.Team)
+            if (invitedPlayer.IdTeam == team.Id)
             {
                 throw new ValidationException("O jogador convidado já pertence à equipa.");
             }
 
-            if (!player.IsAdmin)
+            if (invitedPlayer.IdTeam != null)
             {
-                throw new ValidationException("O jogador não é administrador da equipa.");
+                throw new ValidationException("O jogador convidado já pertence a outra equipa.");
             }
 
             if (existingRequest != null)
@@ -127,19 +124,12 @@ namespace Application.Validators
                 throw new ValidationException("A equipa não existe.");
             }
 
-            if (team.Members.Count == Domain.Constants.ModelConstants.TeamConst.MaxMembers)
+            ValidarAdministradorDaEquipa(playerAccepting, team);
+            ValidarPedidoRecebidoPelaEquipa(request, team);
+
+            if (team.Members.Count >= Domain.Constants.ModelConstants.TeamConst.MaxMembers)
             {
                 throw new ValidationException("A equipa já está cheia.");
-            }
-
-            if (request == null)
-            {
-                throw new ValidationException("O pedido de adesão não existe.");
-            }
-
-            if (!playerAccepting.IsAdmin)
-            {
-                throw new ValidationException("O jogador que tenta aceitar o pedido não é administrador da equipa.");
             }
 
             if (team.Members.Any(m => m.Id == request.IdPlayer))
@@ -165,15 +155,8 @@ namespace Application.Validators
                 throw new ValidationException("A equipa não existe.");
             }
 
-            if (!player.IsAdmin)
-            {
-                throw new ValidationException("O jogador não é administrador da equipa.");
-            }
-
-            if (request == null)
-            {
-                throw new ValidationException("O pedido de adesão não existe.");
-            }
+            ValidarAdministradorDaEquipa(player, team);
+            ValidarPedidoRecebidoPelaEquipa(request, team);
         }
 
         /// <summary>
@@ -192,15 +175,7 @@ namespace Application.Validators
                 throw new ValidationException("A equipa não existe.");
             }
 
-            if (player.Team != team)
-            {
-                throw new ValidationException("O jogador não pertence à equipa.");
-            }
-
-            if (!player.IsAdmin)
-            {
-                throw new ValidationException("O jogador não é administrador da equipa.");
-            }
+            ValidarAdministradorDaEquipa(player, team);
         }
 
         /// <summary>
@@ -237,7 +212,12 @@ namespace Application.Validators
 
             if (request.IdPlayer != player.Id)
             {
-                throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{request.Id}' ou pertence a outra equipa.");
+                throw new ForbiddenException("Este convite não é para ti.");
+            }
+
+            if (request.IsPlayerSender)
+            {
+                throw new ValidationException("Só podes aceitar convites enviados por equipas. Os teus pedidos são aceites pelos administradores da equipa.");
             }
         }
 
@@ -259,7 +239,43 @@ namespace Application.Validators
 
             if (request.IdPlayer != player.Id)
             {
-                throw new ValidationException($"O jogador não possui um pedido de adesão com Id '{request.Id}' ou pertence a outra equipa.");
+                throw new ForbiddenException("Este pedido não é teu.");
+            }
+        }
+
+        /// <summary>
+        /// Garante que quem faz a operação é administrador da equipa indicada no pedido (e não
+        /// administrador de outra equipa qualquer).
+        /// </summary>
+        private static void ValidarAdministradorDaEquipa(Player player, Team team)
+        {
+            if (player == null)
+            {
+                throw new ForbiddenException("O utilizador não existe.");
+            }
+
+            if (player.IdTeam != team.Id)
+            {
+                throw new ForbiddenException("O jogador não pertence à equipa.");
+            }
+
+            if (!player.IsAdmin)
+            {
+                throw new ForbiddenException("O jogador não é administrador da equipa.");
+            }
+        }
+
+        /// <summary>O pedido tem de existir, ser para esta equipa e ter sido feito pelo jogador.</summary>
+        private static void ValidarPedidoRecebidoPelaEquipa(MembershipRequest request, Team team)
+        {
+            if (request == null || request.IdTeam != team.Id)
+            {
+                throw new NotFoundException("O pedido de adesão não existe.");
+            }
+
+            if (!request.IsPlayerSender)
+            {
+                throw new ValidationException("Este pedido é um convite da equipa: é o jogador que o aceita ou rejeita.");
             }
         }
     }

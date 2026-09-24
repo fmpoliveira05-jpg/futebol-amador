@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Validators;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Validators
 {
@@ -22,7 +23,7 @@ namespace Application.Validators
         {
             if (string.IsNullOrEmpty(userId))
             {
-                throw new InvalidOperationException("O id do utilizador está inválido.");
+                throw new UnauthorizedAccessException("O pedido não identifica o utilizador.");
             }
         }
 
@@ -39,7 +40,7 @@ namespace Application.Validators
         {
             if (userId != userIdUrl)
             {
-                throw new UnauthorizedAccessException("O utilizador que está a tentar entrar não é o mesmo da url.");
+                throw new ForbiddenException("Só podes aceder aos teus próprios dados.");
             }
         }
         #endregion
@@ -62,7 +63,7 @@ namespace Application.Validators
             ValidateIdTeam(idTeam);
 
             if (!player.IsAdmin) {
-                throw new InvalidOperationException("Apenas administradores de equipa têm acesso a este recurso.");
+                throw new ForbiddenException("Apenas administradores de equipa têm acesso a este recurso.");
             }
 
             ValidateUserHaveTeamAndIsMember(player, idTeam);
@@ -85,7 +86,7 @@ namespace Application.Validators
 
             if (player.IsAdmin)
             {
-                throw new InvalidOperationException("Apenas utilizadores da equipa têm acesso a este recurso.");
+                throw new ForbiddenException("Apenas utilizadores da equipa têm acesso a este recurso.");
             }
 
             ValidateUserHaveTeamAndIsMember(player, idTeam);
@@ -123,7 +124,7 @@ namespace Application.Validators
 
             if (player.IdTeam != null || player.Team != null)
             {
-                throw new InvalidOperationException("Apenas jogadores sem equipa podem aceder a este recurso!");
+                throw new ForbiddenException("Apenas jogadores sem equipa podem aceder a este recurso!");
             }
         }
         #endregion
@@ -139,7 +140,7 @@ namespace Application.Validators
         {
             if (user == null)
             {
-                throw new InvalidOperationException("O Utilizador não existe!");
+                throw new ForbiddenException("O Utilizador não existe!");
             }
         }
 
@@ -152,7 +153,7 @@ namespace Application.Validators
         {
             if (idTeam == Guid.Empty)
             {
-                throw new InvalidOperationException("O id da equipa está inválido.");
+                throw new ValidationException("O id da equipa está inválido.");
             }
         }
 
@@ -169,12 +170,12 @@ namespace Application.Validators
         {
             if (player.IdTeam == null)
             {
-                throw new InvalidOperationException("Apenas jogadores com equipa podem aceder a este recurso!");
+                throw new ForbiddenException("Apenas jogadores com equipa podem aceder a este recurso!");
             }
 
             if (player.IdTeam != idTeam)
             {
-                throw new InvalidOperationException("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
+                throw new ForbiddenException("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             }
         }
 

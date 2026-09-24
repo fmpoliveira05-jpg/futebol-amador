@@ -151,6 +151,9 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetMatchInvite(Guid idTeam, Guid idMatchInvite)
         {
+            // Os convites de uma equipa só são visíveis para os seus administradores.
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+
             var matchesInvite = await matchInviteService.GetMatchInvite(idTeam, idMatchInvite);
 
             if (matchesInvite == null)
@@ -177,6 +180,8 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<IActionResult> GetAllMatchInvitesTeam(Guid idTeam, [FromQuery] FilterMatchInvitesDto filter)
         {
+            await AuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+
             IEnumerable<InfoMatchInviteDto> matchesInvite;
 
             bool hasFilter = !string.IsNullOrEmpty(filter.SenderName) ||

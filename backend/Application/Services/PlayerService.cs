@@ -156,7 +156,6 @@ namespace Application.Services
 
             var updatedDto = new UpdatePlayerDto
             {
-                playerId = player.Id,
                 Name = player.Name,
                 DateOfBirth = player.DateOfBirth,
                 Address = player.Address,

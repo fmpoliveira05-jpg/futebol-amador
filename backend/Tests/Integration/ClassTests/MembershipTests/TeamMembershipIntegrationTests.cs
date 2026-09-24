@@ -177,7 +177,7 @@ namespace Tests.Integration.Membership
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", new { requestId });
 
             response.EnsureSuccessStatusCode();
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -206,7 +206,7 @@ namespace Tests.Integration.Membership
                 });
             }).CreateClient();
 
-            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", new { requestId });
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
@@ -282,7 +282,7 @@ namespace Tests.Integration.Membership
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockMembershipRequestService.Setup(s => s.AcceptMembershipRequestTeam(teamId, requestId, It.IsAny<string>()))
-                .ThrowsAsync(new ValidationException("O jogador que tenta aceitar o pedido não é administrador da equipa."));
+                .ThrowsAsync(new ForbiddenException("O jogador não é administrador da equipa."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -298,9 +298,9 @@ namespace Tests.Integration.Membership
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", requestId);
+            var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/membership-request/accept", new { requestId });
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
         }
 
         [Test]
@@ -314,7 +314,7 @@ namespace Tests.Integration.Membership
             var mockMembershipRequestService = new Mock<IMembershipRequestService>();
 
             mockMembershipRequestService.Setup(s => s.RejectMembershipRequestTeam(teamId, requestId, It.IsAny<string>()))
-                .ThrowsAsync(new ValidationException("O jogador que tenta aceitar o pedido não é administrador da equipa."));
+                .ThrowsAsync(new ForbiddenException("O jogador não é administrador da equipa."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -332,7 +332,7 @@ namespace Tests.Integration.Membership
 
             var response = await _client.DeleteAsync($"/api/Team/{teamId}/membership-request/{requestId}/reject");
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
         }
     }
 }

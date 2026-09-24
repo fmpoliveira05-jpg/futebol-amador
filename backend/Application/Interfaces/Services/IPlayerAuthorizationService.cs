@@ -44,5 +44,8 @@
         /// <param name="userId">O ID do utilizador autenticado.</param>
         /// <returns>Uma Tarefa (<see cref="Task"/>). Lança uma exceção se o utilizador tiver uma afiliação não nula.</returns>
         Task UserAuthorizationIsPlayerWithoutTeamById(string userId);
+
+        /// <summary>Indica (sem lançar exceção) se o utilizador é membro da equipa.</summary>
+        Task<bool> IsMemberOfTeamAsync(string? userId, Guid idTeam);
     }
 }

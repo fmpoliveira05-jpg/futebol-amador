@@ -90,6 +90,17 @@ namespace Application.Services
             AuthorizationValidator.ValidatePlayerAutorizationWithoutTeam(user);
         }
 
+        public async Task<bool> IsMemberOfTeamAsync(string? userId, Guid idTeam)
+        {
+            if (string.IsNullOrEmpty(userId) || idTeam == Guid.Empty)
+            {
+                return false;
+            }
+
+            var player = await PlayerRepository.GetPlayerByIdAsync(userId);
+            return player?.IdTeam == idTeam;
+        }
+
         #endregion
 
         #region Private Methods

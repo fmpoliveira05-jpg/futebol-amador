@@ -105,6 +105,16 @@ namespace Api.Controllers
         {
             var team = await TeamService.GetTeamByIdAsync(id);
 
+            // Quem não é da equipa (ou não tem sessão) vê o plantel sem os contactos dos jogadores.
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (team?.Players != null && !await PlayerAuthorizationService.IsMemberOfTeamAsync(userId, id))
+            {
+                foreach (var player in team.Players)
+                {
+                    player.OcultarDadosPessoais();
+                }
+            }
+
             return Ok(team);
         }
 
@@ -131,6 +141,7 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTeamToUpdate(Guid idTeam)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
             var team = await TeamService.GetTeamToUpdate(idTeam);
             return Ok(team);
         }
@@ -150,6 +161,7 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(HomePageDto), StatusCodes.Status200OK)] // Ajusta 'HomePageInfoDto' para o nome real da tua classe de retorno
         public async Task<IActionResult> GetHomePageInfo(Guid idTeam)
         {
+            await PlayerAuthorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), idTeam);
             var homePageInfo = await TeamService.getHomePageInfo(idTeam);
             return Ok(homePageInfo);
         }
@@ -264,11 +276,10 @@ namespace Api.Controllers
         /// <returns>Lista de equipas.</returns>
         /// <response code="200">Resultados da pesquisa.</response>
         [HttpGet("{teamId}/search")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            await PlayerAuthorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), teamId);
 
             var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
                            !string.IsNullOrEmpty(filter.NameRank) ||
@@ -306,11 +317,13 @@ namespace Api.Controllers
         /// <response code="200">Lista de membros retornada com sucesso.</response>
         /// <response code="404">Equipa não encontrada.</response>
         [HttpGet("{teamId}/members")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<PlayerDetailsDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetTeamPlayersWithFilters(Guid teamId, [FromQuery] FilterTeamPlayers filters)
         {
+            // A lista inclui os contactos dos jogadores: só os membros da equipa a podem ver.
+            await PlayerAuthorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), teamId);
+
             IEnumerable<PlayerDetailsDto> players;
             var hasFilters = filters.IsAdmin.HasValue ||
                              !string.IsNullOrEmpty(filters.Name) ||
@@ -420,7 +433,6 @@ namespace Api.Controllers
         /// <response code="200">Lista retornada com sucesso.</response>
         /// <response code="400">Filtros inválidos.</response>
         [HttpGet("{teamId}/playersWithoutTeam")]
-        [Authorize]
         [ProducesResponseType(typeof(IEnumerable<PlayerWithoutTeamInfoDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPlayersWithouTeam(Guid teamId, [FromQuery] FilterTeamDto filter)
@@ -435,26 +447,18 @@ namespace Api.Controllers
                             filter.Position.HasValue;
 
 
-            try 
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), teamId);
+
+            if (hasFilter)
             {
-                if (hasFilter)
-                {
-                    players = await TeamService.GetPlayersWithoutTeamWithFilters(teamId, filter);
-                }
-                else
-                {
-                    players = await TeamService.GetPlayersWithoutTeam(teamId);
-                }
-                return Ok(players);
+                players = await TeamService.GetPlayersWithoutTeamWithFilters(teamId, filter);
             }
-            catch (InvalidOperationException ex)
+            else
             {
-                return BadRequest(new { message = ex.Message });
+                players = await TeamService.GetPlayersWithoutTeam(teamId);
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocorreu um erro inesperado no servidor.", details = ex.Message });
-            }
+
+            return Ok(players);
         }
 
         /// <summary>
@@ -509,7 +513,7 @@ namespace Api.Controllers
         public async Task<IActionResult> AcceptMembershipRequest(Guid teamId, [FromBody] RequestMemberShip request)
         {
             var userId = GetCurrentUserId();
-            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
             await MemberShipRequestService.AcceptMembershipRequestTeam(teamId, request.RequestId, userId);
             return Ok();
         }
@@ -527,7 +531,7 @@ namespace Api.Controllers
         public async Task<IActionResult> RejectMembershipRequest(Guid teamId, Guid requestId)
         {
             var userId = GetCurrentUserId();
-            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(userId, teamId);
             await MemberShipRequestService.RejectMembershipRequestTeam(teamId, requestId, userId);
             return Ok();
         }
@@ -551,7 +555,7 @@ namespace Api.Controllers
         public async Task<IActionResult> SendMembershipRequest(Guid teamId, [FromBody] InvitePlayerRequest request)
         {
             var senderId = GetCurrentUserId();
-            //await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
+            await PlayerAuthorizationService.UserAuthorizationIsAdminTeamById(senderId, teamId);
             var dto = await MemberShipRequestService.SendMembershipRequestTeam(teamId, request.PlayerId, senderId);
 
             return Ok(dto);
@@ -564,7 +568,6 @@ namespace Api.Controllers
         #region private Methods
         private string GetCurrentUserId()
         {
-            //validar null
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         
             if (userId == null)

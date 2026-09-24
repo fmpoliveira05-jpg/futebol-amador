@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Domain.Exceptions;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
@@ -199,7 +200,7 @@ namespace Tests.Integration.ClassTests.MatchTests
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockAuthorizationService.Setup(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId))
-                .ThrowsAsync(new InvalidOperationException("Apenas administradores de equipa têm acesso a este recurso."));
+                .ThrowsAsync(new ForbiddenException("Apenas administradores de equipa têm acesso a este recurso."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -217,7 +218,7 @@ namespace Tests.Integration.ClassTests.MatchTests
 
             var response = await _client.GetAsync($"/api/Team/{teamId}/PostPoneMatch");
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 
             var content = await response.Content.ReadAsStringAsync();
             Assert.That(content, Contains.Substring("Apenas administradores de equipa têm acesso a este recurso."));
@@ -337,7 +338,7 @@ namespace Tests.Integration.ClassTests.MatchTests
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockAuthorizationService.Setup(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId))
-                .ThrowsAsync(new InvalidOperationException("Apenas administradores de equipa têm acesso a este recurso."));
+                .ThrowsAsync(new ForbiddenException("Apenas administradores de equipa têm acesso a este recurso."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -355,7 +356,7 @@ namespace Tests.Integration.ClassTests.MatchTests
 
             var response = await _client.PostAsJsonAsync($"/api/Team/{teamId}/PostPoneMatch/AcceptPostponeMatch", acceptDto);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 
             var content = await response.Content.ReadAsStringAsync();
             Assert.That(content, Contains.Substring("Apenas administradores de equipa têm acesso a este recurso."));
@@ -471,7 +472,7 @@ namespace Tests.Integration.ClassTests.MatchTests
             var mockAuthorizationService = new Mock<IPlayerAuthorizationService>();
 
             mockAuthorizationService.Setup(s => s.UserAuthorizationIsAdminTeamById(It.IsAny<string>(), teamId))
-                .ThrowsAsync(new InvalidOperationException("Apenas administradores de equipa têm acesso a este recurso."));
+                .ThrowsAsync(new ForbiddenException("Apenas administradores de equipa têm acesso a este recurso."));
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -495,7 +496,7 @@ namespace Tests.Integration.ClassTests.MatchTests
 
             var response = await _client.SendAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
 
             var content = await response.Content.ReadAsStringAsync();
             Assert.That(content, Contains.Substring("Apenas administradores de equipa têm acesso a este recurso."));

@@ -28,6 +28,7 @@ namespace Api.Controllers
         private readonly IPlayerAuthorizationValidator playerAuthorizationValidator;
         private readonly IMembershipRequestService membershipRequestService;
         private readonly IAuthService authService;
+        private readonly IPlayerAuthorizationService playerAuthorizationService;
 
         /// <summary>
         /// Construtor do PlayerController.
@@ -36,12 +37,16 @@ namespace Api.Controllers
         /// <param name="playerAuthorizationValidator">Validador de permissões do jogador.</param>
         /// <param name="membershipRequestService">Serviço de gestão de pedidos de adesão.</param>
         /// <param name="authService">Serviço de autenticação.</param>
-        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator, IMembershipRequestService membershipRequestService, IAuthService authService)
+        /// <param name="playerAuthorizationService">Verificações de pertença a equipas.</param>
+        public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator,
+            IMembershipRequestService membershipRequestService, IAuthService authService,
+            IPlayerAuthorizationService playerAuthorizationService)
         {
             this.playerService = playerService;
             this.playerAuthorizationValidator = playerAuthorizationValidator;
             this.membershipRequestService = membershipRequestService;
             this.authService = authService;
+            this.playerAuthorizationService = playerAuthorizationService;
         }
         #endregion
 
@@ -106,7 +111,6 @@ namespace Api.Controllers
         /// <returns>Lista de jogadores encontrados.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
         [HttpGet("listPlayers")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<InfoPlayerDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetPlayerList([FromQuery] FilterTeamDto? filter)
         {
@@ -123,12 +127,21 @@ namespace Api.Controllers
         /// <response code="200">Dados do jogador retornados com sucesso.</response>
         /// <response code="404">Jogador não encontrado.</response>
         [HttpGet("details/{playerId}")]
-        [AllowAnonymous]
         [ProducesResponseType(typeof(PlayerDetailsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetPlayer(string playerId)
         {
             var playerDetails = await playerService.GetPlayerByIdAsync(playerId);
+
+            // Os contactos só aparecem ao próprio jogador e aos colegas de equipa.
+            var userId = GetCurrentUserId();
+            var podeVerContactos = userId == playerId ||
+                (playerDetails.Team != null && await playerAuthorizationService.IsMemberOfTeamAsync(userId, playerDetails.Team.IdTeam));
+
+            if (!podeVerContactos)
+            {
+                playerDetails.OcultarDadosPessoais();
+            }
 
             return Ok(playerDetails);
         }
@@ -182,20 +195,21 @@ namespace Api.Controllers
         public async Task<IActionResult> UpdateUser(string playerId, [FromBody] UpdatePlayerDto dto)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            playerAuthorizationValidator.ValidateUserIdIsSameUrl(userId, playerId);
-
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized();
             }
-            
+
+            // Só o próprio jogador pode editar o perfil: o id do URL tem de ser o do token, e é esse
+            // id (nunca um valor vindo do corpo do pedido) que chega ao serviço.
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(userId, playerId);
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            
 
-            var updatedPlayer = await playerService.UpdatePlayerAsync(dto.playerId, dto);
+            var updatedPlayer = await playerService.UpdatePlayerAsync(userId, dto);
 
             return Ok(updatedPlayer);
         }
@@ -217,6 +231,8 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListTeams(string playerId, [FromQuery] FilterListTeamDto filter)
         {
+            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
+
             var isFilter = !string.IsNullOrEmpty(filter.NameTeam) ||
                            !string.IsNullOrEmpty(filter.NameRank) ||
                            !string.IsNullOrEmpty(filter.City) ||
@@ -363,9 +379,7 @@ namespace Api.Controllers
         [HttpPut("device-token")]
         public async Task<IActionResult> UpdateDeviceToken([FromBody] DeviceTokenDto dto)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            var result = await playerService.UpdateDeviceTokenAsync(userId, dto.Token);
+            var result = await playerService.UpdateDeviceTokenAsync(GetCurrentUserId(), dto.Token);
 
             if (!result) return BadRequest("Erro ao atualizar token");
 

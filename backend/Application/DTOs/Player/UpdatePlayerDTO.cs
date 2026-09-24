@@ -4,11 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.PlayerDTOs
 {
+    /// <summary>
+    /// Dados editáveis do perfil. Não inclui o id do jogador: o controlador usa o id do token,
+    /// para ninguém conseguir editar o perfil de outra pessoa.
+    /// </summary>
     public class UpdatePlayerDto
     {
         [Required]
-        public string playerId { get; set; }
-
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string Name { get; set; } = null!;
 

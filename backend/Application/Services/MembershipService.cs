@@ -91,7 +91,7 @@ namespace Application.Services
 
             await membershipRequestRepository.AddMembershipRequest(invite);
             await unityOfWork.SaveChangesAsync();
-            await notificationService.SendUserAsync(playerIdToInvite, "New Team Invitation!", $"You've been invited to join the team {team.Name}!");
+            await notificationService.SendUserAsync(playerIdToInvite, "Novo convite", $"A equipa {team.Name} convidou-te para te juntares a ela.");
 
             return new MemberShipRequestDto
             {
@@ -142,7 +142,7 @@ namespace Application.Services
             await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(playerAccepted.Id);
             await RemoveAllMatchInviteTeam(team);
             await unityOfWork.SaveChangesAsync();
-            await notificationService.SendUserAsync(request.IdPlayer, "Membership request Accepted!", $"Your request to join the team {team.Name} has been accepted!");
+            await notificationService.SendUserAsync(request.IdPlayer, "Pedido de adesão aceite", $"Já fazes parte da equipa {team.Name}.");
 
             await SendNotificationAcceptMemberShipRequestTeam(teamId, team.Name, playerAccepted.Id, playerAccepted.Name);
         }
@@ -156,23 +156,18 @@ namespace Application.Services
         /// <param name="teamId">ID da equipa que rejeita.</param>
         /// <param name="requestId">ID do pedido a rejeitar.</param>
         /// <param name="adminId">ID do administrador que executa a ação.</param>
-        public Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
+        public async Task RejectMembershipRequestTeam(Guid teamId, Guid requestId, string adminId)
         {
-            return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
-            {
-                var request = await requestTask;
-                var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
-                var playerAccepting = await playerRepository.GetPlayerByIdAsync(adminId);
+            var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
+            var team = await teamRepository.GetTeamForMembershipRequestAsync(teamId);
+            var playerRejecting = await playerRepository.GetPlayerByIdAsync(adminId);
 
-                membershipValidator.ValidateRejectRequestByTeam(team, request, playerAccepting);
+            membershipValidator.ValidateRejectRequestByTeam(team, request, playerRejecting);
 
-                var playerAccepted = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
+            membershipRequestRepository.RemoveMembershipRequest(request);
 
-                membershipRequestRepository.RemoveMembershipRequest(request);
-
-                await unityOfWork.SaveChangesAsync();
-                await notificationService.SendUserAsync(request.IdPlayer, "Membership request rejected.", $"Your request to join the team {team.Name} has been rejected.");
-            }).Unwrap();
+            await unityOfWork.SaveChangesAsync();
+            await notificationService.SendUserAsync(request.IdPlayer, "Pedido de adesão recusado", $"O teu pedido para entrar na equipa {team.Name} foi recusado.");
         }
 
         /// <summary>
@@ -267,7 +262,9 @@ namespace Application.Services
                 throw new ValidationException("O pedido de adesão não foi encontrado.");
             }
 
-            var player = membershipRequest.Player;
+            // O jogador é quem faz o pedido (o id vem do token), não o que está guardado no convite:
+            // o validador confirma que o convite é mesmo para ele.
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
 
             authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
 
@@ -294,7 +291,7 @@ namespace Application.Services
 
             foreach (var admin in teamAdmins)
             {
-                await notificationService.SendUserAsync(admin.Id, "Membership Invite Accepted", $"{player.Name} accepted your membership invite and is now part of the team!");
+                await notificationService.SendUserAsync(admin.Id, "Convite aceite", $"{player.Name} aceitou o convite e já faz parte da equipa.");
             }
 
             await SendNotificationAcceptMemberShipRequestPlayer(team.Id, team.Name, playerId, player.Name);
@@ -321,53 +318,45 @@ namespace Application.Services
         /// </summary>
         /// <param name="playerId">ID do jogador que rejeita.</param>
         /// <param name="requestId">ID do convite a ser rejeitado.</param>
-        public Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
+        public async Task<MemberShipRequestDto> RejectMembershipRequestAsyncPlayer(string playerId, Guid requestId)
         {
-            return membershipRequestRepository.GetMembershipRequestById(requestId).ContinueWith(async requestTask =>
+            var request = await membershipRequestRepository.GetMembershipRequestById(requestId);
+            var player = await playerRepository.GetPlayerByIdAsync(playerId);
+
+            authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
+            membershipValidator.ValidateRejectRequestByPlayer(request, player);
+
+            // Remove-se pelo repositório: a coleção do jogador pode não estar carregada, e nesse
+            // caso retirá-lo só da lista não apagava nada na base de dados.
+            player.MembershipRequests?.Remove(request);
+            membershipRequestRepository.RemoveMembershipRequest(request);
+            await unityOfWork.SaveChangesAsync();
+
+            var teamAdmins = request.Team?.Members?.Where(p => p.IsAdmin).ToList() ?? new List<Player>();
+            foreach (var admin in teamAdmins)
             {
-                var request = await requestTask;
-                var player = await playerRepository.GetPlayerByIdAsync(playerId);
+                await notificationService.SendUserAsync(admin.Id, "Convite recusado", $"{player.Name} recusou o convite da equipa.");
+            }
 
-                authorizationValidator.ValidatePlayerAutorizationWithoutTeam(player);
-                membershipValidator.ValidateRejectRequestByPlayer(request, player);
+            var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
+            var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
 
-                player.MembershipRequests?.Remove(request);
-                await unityOfWork.SaveChangesAsync();
-
-                if (request?.Team != null)
+            return new MemberShipRequestDto
+            {
+                RequestId = request.Id,
+                Player = new PlayerDto
                 {
-                    var teamAdmins = request.Team.Members.Where(p => p.IsAdmin).ToList();
-
-                    foreach (var admin in teamAdmins)
-                    {
-                        await notificationService.SendUserAsync(admin.Id, "Membership Invite Rejected", $"{player.Name} rejected your membership invite.");
-                    }
-                }
-                else
+                    Id = fullPlayer.Id,
+                    Name = fullPlayer.Name
+                },
+                Team = new TeamDto
                 {
-                    throw new InvalidOperationException("A equipa associada ao pedido de adesão não foi encontrada.");
-                }
-
-                var fullPlayer = await playerRepository.GetPlayerByIdAsync(request.IdPlayer);
-                var fullTeam = await teamRepository.GetTeamByIdAsync(request.IdTeam);
-
-                return new MemberShipRequestDto
-                {
-                    RequestId = request.Id,
-                    Player = new PlayerDto
-                    {
-                        Id = fullPlayer.Id,
-                        Name = fullPlayer.Name
-                    },
-                    Team = new TeamDto
-                    {
-                        IdTeam = fullTeam.Id,
-                        Name = fullTeam.Name,
-                    },
-                    RequestDate = request.InviteDate,
-                    IsPlayerSender = request.IsPlayerSender
-                };
-            }).Unwrap();
+                    IdTeam = fullTeam.Id,
+                    Name = fullTeam.Name,
+                },
+                RequestDate = request.InviteDate,
+                IsPlayerSender = request.IsPlayerSender
+            };
         }
 
         /// <summary>
@@ -413,7 +402,7 @@ namespace Application.Services
 
             foreach (var admin in teamAdmins)
             {
-                await notificationService.SendUserAsync(admin.Id, "New Membership Request", $"Your team received a new membership request from {player.Name}.");
+                await notificationService.SendUserAsync(admin.Id, "Novo pedido de adesão", $"{player.Name} pediu para entrar na equipa.");
             }
 
             return new MemberShipRequestDto
