@@ -13,8 +13,8 @@
         <div>
           <h1 class="page-title">{{ t.name }}</h1>
           <p class="page-subtitle">
-            <span class="badge badge--info">{{ t.rankName }}</span>
-            {{ t.totalPoints }} pontos · {{ t.players.length }} {{ t.players.length === 1 ? 'jogador' : 'jogadores' }}
+            <a class="badge badge--info" routerLink="/leaderboard">{{ t.leagueName ?? t.rankName }}</a>
+            {{ t.players.length }} {{ t.players.length === 1 ? 'jogador' : 'jogadores' }}
           </p>
         </div>
       </div>
@@ -58,6 +58,23 @@
       </div>
     }
 
+    @if (t.titles?.length) {
+      <section class="card">
+        <h2 class="card-title">Títulos</h2>
+        <ul class="trofeus">
+          @for (tt of t.titles; track tt.trophyName + tt.leagueName) {
+            <li class="trofeu" [attr.title]="'Épocas: ' + tt.seasons.join(', ')">
+              <span class="trofeu__icone" aria-hidden="true">🏆</span>
+              <span>
+                <span class="trofeu__contagem">x{{ tt.count }}</span><br />
+                <span class="dica">{{ tt.trophyName }}</span>
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <div class="layout">
       <section class="card">
         <h2 class="card-title">Plantel</h2>
@@ -66,7 +83,9 @@
             <li>
               <a [routerLink]="['/players/details', p.playerId]">{{ p.name }}</a>
               <span class="plantel__pos">{{ POSITION_MAP[p.position] }}</span>
-              @if (p.isAdmin) {
+              @if (p.isCreator || p.playerId === t.creatorId) {
+                <span class="badge badge--admin" title="Criou a equipa: só ele pode despromover administradores">Administrador principal</span>
+              } @else if (p.isAdmin) {
                 <span class="badge badge--admin">Admin</span>
               }
             </li>
@@ -75,7 +94,7 @@
         @if (souAdmin()) {
           <div class="side-card__actions">
             <a class="btn btn-secondary" routerLink="/team/members">Gerir membros</a>
-            <a class="btn btn-secondary" routerLink="/players">Recrutar jogadores</a>
+            <a class="btn btn-secondary" routerLink="/mercado">Mercado</a>
           </div>
         }
       </section>

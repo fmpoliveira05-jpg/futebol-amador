@@ -64,6 +64,36 @@
                   }
                 </select>
               </div>
+              <div class="form-field">
+                <label for="pf-peso">Peso (kg)</label>
+                <input id="pf-peso" type="number" min="40" max="150" formControlName="weight" />
+                @if (invalido('weight')) { <span class="erro-campo">Entre 40 e 150 kg.</span> }
+              </div>
+              <div class="form-field">
+                <label for="pf-pe">Pé preferido</label>
+                <select id="pf-pe" formControlName="preferredFoot">
+                  <option [ngValue]="null">Não indicado</option>
+                  <option [ngValue]="0">Direito</option>
+                  <option [ngValue]="1">Esquerdo</option>
+                  <option [ngValue]="2">Ambos</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="pf-situacao">Situação</label>
+                <select id="pf-situacao" formControlName="status">
+                  <option [ngValue]="0">Ativo</option>
+                  <option [ngValue]="1">Lesionado</option>
+                  <option [ngValue]="2">Indisponível</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label for="pf-nac">Nacionalidade</label>
+                <input id="pf-nac" formControlName="nationality" autocomplete="country-name" />
+              </div>
+              <div class="form-field">
+                <label for="pf-pais">País de nascimento</label>
+                <input id="pf-pais" formControlName="countryOfBirth" />
+              </div>
               <div class="form-field form-field--full">
                 <label for="pf-morada">Morada</label>
                 <input id="pf-morada" formControlName="address" autocomplete="street-address" />
@@ -81,6 +111,25 @@
           <h2 class="card-title">Dados do jogador</h2>
           <dl class="details-grid">
             <div class="details-grid__item"><dt>Posição</dt><dd>{{ POSITION_MAP[p.position] }}</dd></div>
+            @if (perfil(); as pf) {
+              <div class="details-grid__item"><dt>Data de nascimento</dt><dd>{{ pf.dateOfBirth | date: 'd MMM y' }} ({{ pf.age }} anos)</dd></div>
+              <div class="details-grid__item"><dt>Nacionalidade</dt><dd>{{ pf.nationality ?? '—' }}</dd></div>
+              <div class="details-grid__item"><dt>País de nascimento</dt><dd>{{ pf.countryOfBirth ?? '—' }}</dd></div>
+              <div class="details-grid__item"><dt>Pé preferido</dt><dd>{{ pf.preferredFoot !== null ? pe[pf.preferredFoot] : '—' }}</dd></div>
+              <div class="details-grid__item"><dt>Peso</dt><dd>{{ pf.weight ? pf.weight + ' kg' : '—' }}</dd></div>
+              <div class="details-grid__item">
+                <dt>Situação</dt>
+                <dd>
+                  <span class="badge" [class.badge--ok]="pf.status === 0" [class.badge--perigo]="pf.status === 1" [class.badge--aviso]="pf.status === 2">
+                    {{ situacoes[pf.status] }}
+                  </span>
+                </dd>
+              </div>
+              <div class="details-grid__item"><dt>Clube atual</dt><dd>{{ pf.currentTeam?.name ?? 'Sem clube' }}</dd></div>
+              @if (pf.joinedTeamAt) {
+                <div class="details-grid__item"><dt>Na equipa desde</dt><dd>{{ pf.joinedTeamAt | date: 'd MMM y' }}</dd></div>
+              }
+            }
             <div class="details-grid__item"><dt>Altura</dt><dd>{{ p.height }} cm</dd></div>
             <div class="details-grid__item"><dt>Zona</dt><dd>{{ p.address }}</dd></div>
             @if (meuPerfil()) {
@@ -129,6 +178,71 @@
         }
       </aside>
     </div>
+
+    @if (perfil(); as pf) {
+      <section class="card">
+        <h2 class="card-title">Estatísticas</h2>
+        <ul class="totais">
+          <li><strong>{{ pf.totals.games }}</strong> jogos</li>
+          <li><strong>{{ pf.totals.goals }}</strong> golos</li>
+          <li><strong>{{ pf.totals.assists }}</strong> assistências</li>
+          <li><strong>{{ minutos(pf.totals.minutes) }}</strong> jogados</li>
+          <li><strong>{{ pf.totals.yellowCards }}</strong> 🟨</li>
+          <li><strong>{{ pf.totals.redCards }}</strong> 🟥</li>
+        </ul>
+
+        <h3 class="subtitulo">Por época</h3>
+        @if (pf.career.length) {
+          <div class="tabela-scroll">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th scope="col">Época</th>
+                  <th scope="col">Equipa</th>
+                  <th class="num" scope="col"><abbr title="Jogos">J</abbr></th>
+                  <th class="num" scope="col"><abbr title="Golos">G</abbr></th>
+                  <th class="num" scope="col"><abbr title="Assistências">A</abbr></th>
+                  <th class="num" scope="col"><abbr title="Minutos">Min</abbr></th>
+                  <th class="num" scope="col"><abbr title="Cartões amarelos">🟨</abbr></th>
+                  <th class="num" scope="col"><abbr title="Cartões vermelhos">🟥</abbr></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (c of pf.career; track c.season + c.teamId) {
+                  <tr>
+                    <td>{{ c.season }}</td>
+                    <td><a [routerLink]="['/team/details', c.teamId]">{{ c.teamName }}</a></td>
+                    <td class="num">{{ c.games }}</td>
+                    <td class="num">{{ c.goals }}</td>
+                    <td class="num">{{ c.assists }}</td>
+                    <td class="num">{{ c.minutes }}</td>
+                    <td class="num">{{ c.yellowCards }}</td>
+                    <td class="num">{{ c.redCards }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <p class="dica">Ainda sem jogos registados.</p>
+        }
+
+        <h3 class="subtitulo">Transferências</h3>
+        <ol class="transferencias">
+          @for (t of pf.transfers; track $index) {
+            <li>
+              <span class="dica">{{ t.date | date: 'd MMM y' }}</span>
+              <span>
+                {{ tipoTransferencia[t.kind] }}:
+                {{ t.fromTeamName ?? 'Livre' }} → {{ t.toTeamName ?? 'Livre' }}
+              </span>
+            </li>
+          } @empty {
+            <li class="dica">Sem transferências.</li>
+          }
+        </ol>
+      </section>
+    }
   </section>
 } @else if (erro()) {
   <p class="erro" role="alert">{{ erro() }}</p>

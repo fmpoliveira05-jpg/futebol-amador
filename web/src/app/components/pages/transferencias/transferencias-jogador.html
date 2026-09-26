@@ -1,0 +1,44 @@
+<section class="page page--estreita">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Propostas de transferência</h1>
+      <p class="page-subtitle">Equipas que te querem. O teu clube já concordou: falta a tua resposta.</p>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  }
+  @if (info()) {
+    <p class="state--ok" role="status">{{ info() }}</p>
+  }
+
+  <div class="card">
+    @if (propostas() === null) {
+      <p class="estado">A carregar…</p>
+    } @else {
+      <ul class="propostas">
+        @for (o of propostas(); track o.id) {
+          <li class="proposta">
+            <div>
+              <p class="proposta__titulo">
+                <a [routerLink]="['/team/details', o.toTeamId]">{{ o.toTeamName }}</a>
+                <span class="dica">quer-te na equipa (sais da {{ o.fromTeamName }})</span>
+              </p>
+              <p class="dica">{{ o.createdAt | date: "d MMM y, HH:mm" }}</p>
+              @if (o.message) {
+                <blockquote class="proposta__mensagem">{{ o.message }}</blockquote>
+              }
+            </div>
+            <div class="proposta__acoes">
+              <button type="button" class="btn btn-primary btn-sm" (click)="responder(o, true)" [disabled]="aTratar() === o.id">Aceitar</button>
+              <button type="button" class="btn btn-danger btn-sm" (click)="responder(o, false)" [disabled]="aTratar() === o.id">Recusar</button>
+            </div>
+          </li>
+        } @empty {
+          <li class="estado">Não tens propostas por responder.</li>
+        }
+      </ul>
+    }
+  </div>
+</section>

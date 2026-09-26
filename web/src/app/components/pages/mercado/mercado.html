@@ -1,0 +1,134 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Mercado</h1>
+      <p class="page-subtitle">
+        Jogadores de outras equipas e jogadores livres. As transferências não envolvem dinheiro: o clube do
+        jogador e o próprio jogador têm de aceitar.
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <a class="btn btn-secondary" routerLink="/transferencias">As minhas propostas</a>
+    </div>
+  </header>
+
+  <form class="card filtros" (ngSubmit)="aplicar()">
+    <label class="form-field">
+      <span>Tem equipa</span>
+      <select name="temEquipa" [(ngModel)]="formulario.temEquipa">
+        <option value="">Todos</option>
+        <option value="sim">Sim</option>
+        <option value="nao">Não (jogadores livres)</option>
+      </select>
+    </label>
+    <label class="form-field">
+      <span>Liga</span>
+      <select name="liga" [(ngModel)]="formulario.liga" [disabled]="formulario.temEquipa !== 'sim'">
+        <option value="">Todas</option>
+        @for (l of ligas(); track l.id) {
+          <option [value]="l.id">{{ l.name }}</option>
+        }
+      </select>
+    </label>
+    <label class="form-field">
+      <span>Nacionalidade</span>
+      <input name="nacionalidade" list="nacionalidades" [(ngModel)]="formulario.nacionalidade" placeholder="Por exemplo, Portugal" />
+      <datalist id="nacionalidades">
+        @for (n of nacionalidades(); track n) {
+          <option [value]="n"></option>
+        }
+      </datalist>
+    </label>
+    <label class="form-field">
+      <span>Posição</span>
+      <select name="posicao" [(ngModel)]="formulario.posicao">
+        <option value="">Todas</option>
+        @for (p of posicoes; track p.value) {
+          <option [value]="p.value">{{ p.label }}</option>
+        }
+      </select>
+    </label>
+    <label class="form-field">
+      <span>Nome</span>
+      <input name="nome" type="search" [(ngModel)]="formulario.nome" />
+    </label>
+    <label class="check">
+      <input name="soListados" type="checkbox" [(ngModel)]="formulario.soListados" />
+      Só jogadores colocados no mercado
+    </label>
+    <div class="form-actions">
+      <button type="button" class="btn btn-link" (click)="limpar()">Limpar</button>
+      <button type="submit" class="btn btn-primary">Aplicar</button>
+    </div>
+  </form>
+
+  @if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  }
+
+  <div class="card">
+    @if (aCarregar()) {
+      <p class="estado">A carregar…</p>
+    } @else {
+      <div class="tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th scope="col">Jogador</th>
+              <th scope="col">Idade</th>
+              <th scope="col">Posição</th>
+              <th scope="col">Nacionalidade</th>
+              <th scope="col">Equipa</th>
+              <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (j of jogadores(); track j.playerId) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/players/details', j.playerId]">{{ j.name }}</a>
+                  @if (j.isListed) {
+                    <span class="badge badge--ok">No mercado</span>
+                  }
+                </td>
+                <td>{{ j.age }}</td>
+                <td>{{ nomePosicao[j.position] }}</td>
+                <td>{{ j.nationality ?? '—' }}</td>
+                <td>
+                  @if (j.teamId) {
+                    <a [routerLink]="['/team/details', j.teamId]">{{ j.teamName }}</a>
+                    @if (j.leagueName) {
+                      <span class="dica"> · {{ j.leagueName }}</span>
+                    }
+                  } @else {
+                    <span class="badge">Livre</span>
+                  }
+                </td>
+                <td class="acoes">
+                  @if (feito()[j.playerId]; as texto) {
+                    <span class="badge badge--ok">{{ texto }}</span>
+                  } @else if (j.teamId) {
+                    @if (propostaAberta() === j.playerId) {
+                      <div class="proposta">
+                        <label class="sr-only" [attr.for]="'msg-' + j.playerId">Mensagem</label>
+                        <input [id]="'msg-' + j.playerId" name="mensagem" [(ngModel)]="mensagemProposta" maxlength="250" placeholder="Mensagem (opcional)" />
+                        <button type="button" class="btn btn-primary btn-sm" (click)="proporTransferencia(j)" [disabled]="aEnviar() === j.playerId">Enviar</button>
+                        <button type="button" class="btn btn-link btn-sm" (click)="propostaAberta.set(null)">Cancelar</button>
+                      </div>
+                    } @else {
+                      <button type="button" class="btn btn-secondary btn-sm" (click)="propostaAberta.set(j.playerId)">Fazer proposta</button>
+                    }
+                  } @else {
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="convidar(j)" [disabled]="aEnviar() === j.playerId">Convidar</button>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="estado">Nenhum jogador encontrado.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

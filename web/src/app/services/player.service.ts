@@ -7,6 +7,7 @@ import { PlayerListItem } from '../shared/Dtos/player-list-item.model';
 import { FilterListTeamDto } from '../shared/Dtos/Filters/FilterListTeamDto';
 import { InfoTeamDto } from '../shared/Dtos/Team/InfoTeamDto';
 import { paraHttpParams } from '../shared/http/http-params';
+import { PlayerProfileDto } from '../shared/Dtos/Competicao/competicao';
 
 /** Perfis de jogador: listagem, detalhes, edição, saída da equipa e remoção da conta. */
 @Injectable({ providedIn: 'root' })
@@ -20,6 +21,11 @@ export class PlayerService {
 
   getPlayerById(playerId: string): Observable<PlayerDetails> {
     return this.http.get<PlayerDetails>(`${this.baseUrl}/details/${playerId}`);
+  }
+
+  /** Perfil completo: estatísticas por época, totais e histórico de transferências. */
+  getPerfil(playerId: string): Observable<PlayerProfileDto> {
+    return this.http.get<PlayerProfileDto>(`${this.baseUrl}/${playerId}/profile`);
   }
 
   getMyProfile(): Observable<PlayerDetails> {

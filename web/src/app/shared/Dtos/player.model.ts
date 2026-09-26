@@ -101,4 +101,11 @@ export interface UpdatePlayerRequest {
    * Altura atualizada do jogador, em centímetros.
    */
   Height: number;
+
+  /** Campos do perfil (opcionais; nulo mantém o valor atual). */
+  Weight?: number | null;
+  PreferredFoot?: number | null;
+  Status?: number | null;
+  Nationality?: string | null;
+  CountryOfBirth?: string | null;
 }

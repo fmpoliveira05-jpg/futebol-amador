@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { Component, computed, inject, signal } from '@angular/core';
 import { AuthService } from '../../../services/auth.service';
 import { TeamMembersService } from '../../../services/team-members.service';
+import { TransferenciasService } from '../../../services/transferencias.service';
 import { PlayerTeamDto } from '../../../shared/Dtos/Player/PlayerTeamDto';
 import { POSITION_MAP } from '../../../shared/constants/position-map';
 import { mensagemDeErro } from '../../../shared/http/erros';
@@ -20,6 +21,7 @@ import { mensagemDeErro } from '../../../shared/http/erros';
 export class TeamMembersPageComponent {
   private readonly authService = inject(AuthService);
   private readonly teamMembersService = inject(TeamMembersService);
+  private readonly transferencias = inject(TransferenciasService);
   protected readonly POSITION_MAP = POSITION_MAP;
 
   protected readonly members = signal<PlayerTeamDto[]>([]);
@@ -100,25 +102,51 @@ export class TeamMembersPageComponent {
     this.searchTerm.set(value);
   }
 
-  /**
-   * Verifica se é possível promover o membro (se não for admin).
-   */
+  /** O utilizador é o administrador principal (quem criou a equipa). */
+  protected readonly souPrincipal = computed(() =>
+    this.members().some((m) => m.isCreator && m.playerId === this.authService.getCurrentPlayerId())
+  );
+
   protected canPromote(member: PlayerTeamDto): boolean {
     return !member.isAdmin;
   }
 
-  /**
-   * Verifica se é possível despromover o membro (se for admin e não for o próprio utilizador).
-   */
+  /** Só o administrador principal despromove, e ninguém o despromove a ele. */
   protected canDemote(member: PlayerTeamDto): boolean {
-    return member.playerId !== this.authService.getCurrentPlayerId() && member.isAdmin;
+    return this.souPrincipal() && member.isAdmin && !member.isCreator;
   }
 
-  /**
-   * Verifica se é possível remover o membro (se não for admin).
-   */
+  /** Um administrador só pode ser removido pelo administrador principal. */
   protected canRemove(member: PlayerTeamDto): boolean {
-    return !member.isAdmin;
+    const eu = member.playerId === this.authService.getCurrentPlayerId();
+    return !eu && !member.isCreator && (!member.isAdmin || this.souPrincipal());
+  }
+
+  /** Coloca o jogador no mercado de transferências ou retira-o. */
+  protected alternarMercado(member: PlayerTeamDto): void {
+    const teamId = member.team?.idTeam;
+    if (!teamId) return;
+    this.ocupado.set(member.playerId);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+    const pedido = member.isListed
+      ? this.transferencias.retirar(teamId, member.playerId)
+      : this.transferencias.listar(teamId, member.playerId);
+    pedido.subscribe({
+      next: () => {
+        this.ocupado.set(null);
+        this.successMessage.set(
+          member.isListed ? `${member.name} saiu do mercado.` : `${member.name} está no mercado de transferências.`
+        );
+        this.members.update((list) =>
+          list.map((m) => (m.playerId === member.playerId ? { ...m, isListed: !member.isListed } : m))
+        );
+      },
+      error: (e) => {
+        this.ocupado.set(null);
+        this.errorMessage.set(mensagemDeErro(e, 'Não foi possível atualizar o mercado.'));
+      },
+    });
   }
 
   /**

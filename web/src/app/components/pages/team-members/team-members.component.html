@@ -2,6 +2,7 @@
   <header class="page-header">
     <div>
       <h1 class="page-title">Membros da equipa</h1>
+      <p class="page-subtitle">Só o administrador principal (quem criou a equipa) pode despromover ou remover administradores.</p>
     </div>
 
     <div class="page-header__actions">
@@ -46,8 +47,9 @@
             <td>{{ POSITION_MAP[member.position] || 'Sem posição' }}</td>
             <td>
               <span class="badge" [class.badge--admin]="member.isAdmin">
-                {{ member.isAdmin ? 'Admin' : 'Jogador' }}
+                {{ member.isCreator ? 'Administrador principal' : member.isAdmin ? 'Admin' : 'Jogador' }}
               </span>
+              <span *ngIf="member.isListed" class="badge badge--ok">No mercado</span>
             </td>
             <td class="members-table__actions">
               <button *ngIf="canPromote(member)" type="button" class="btn btn-secondary" [disabled]="ocupado() === member.playerId" (click)="promote(member)">
@@ -56,6 +58,10 @@
 
               <button *ngIf="canDemote(member)" type="button" class="btn btn-secondary" [disabled]="ocupado() === member.playerId" (click)="demote(member)">
                 Retirar admin
+              </button>
+
+              <button type="button" class="btn btn-secondary" [disabled]="ocupado() === member.playerId" (click)="alternarMercado(member)">
+                {{ member.isListed ? 'Retirar do mercado' : 'Pôr no mercado' }}
               </button>
 
               <button *ngIf="canRemove(member)" type="button" class="btn btn-danger" [disabled]="ocupado() === member.playerId" (click)="remove(member)">

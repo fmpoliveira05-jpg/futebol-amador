@@ -1,0 +1,50 @@
+.propostas {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.proposta {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.proposta:last-child {
+  border-bottom: 0;
+}
+
+.proposta__titulo {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.proposta__titulo a {
+  color: inherit;
+}
+
+.proposta__mensagem {
+  margin: 0.4rem 0 0;
+  padding-left: 0.75rem;
+  border-left: 3px solid var(--cor-borda-forte);
+  color: var(--cor-texto-suave);
+  font-style: italic;
+}
+
+.proposta__acoes {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.proposta p {
+  margin: 0.15rem 0;
+}

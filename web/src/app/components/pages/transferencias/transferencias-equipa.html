@@ -1,0 +1,71 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Transferências</h1>
+      <p class="page-subtitle">
+        Propostas de outras equipas pelos teus jogadores e propostas que fizeste. O jogador tem sempre a última palavra.
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <a class="btn btn-secondary" routerLink="/mercado">Mercado</a>
+      <a class="btn btn-secondary" routerLink="/team/membership-requests">Jogadores livres</a>
+    </div>
+  </header>
+
+  <div class="separadores" role="tablist" aria-label="Propostas">
+    <button type="button" role="tab" [attr.aria-selected]="separador() === 'recebidas'" (click)="separador.set('recebidas')">
+      Recebidas @if (pendentesRecebidas()) { <span class="badge badge--aviso">{{ pendentesRecebidas() }}</span> }
+    </button>
+    <button type="button" role="tab" [attr.aria-selected]="separador() === 'enviadas'" (click)="separador.set('enviadas')">
+      Enviadas
+    </button>
+  </div>
+
+  @if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  }
+
+  <div class="card" role="tabpanel">
+    @if (!dados()) {
+      <p class="estado">A carregar…</p>
+    } @else {
+      <ul class="propostas">
+        @for (o of lista(); track o.id) {
+          <li class="proposta">
+            <div>
+              <p class="proposta__titulo">
+                <a [routerLink]="['/players/details', o.playerId]">{{ o.playerName }}</a>
+                <span class="dica">
+                  {{ o.fromTeamName }} → {{ o.toTeamName }}
+                </span>
+              </p>
+              <p class="dica">
+                {{ o.createdAt | date: "d MMM y, HH:mm" }}
+                @if (o.viaListing) { · jogador no mercado }
+              </p>
+              @if (o.message) {
+                <blockquote class="proposta__mensagem">{{ o.message }}</blockquote>
+              }
+            </div>
+            <div class="proposta__acoes">
+              <span class="badge" [class.badge--ok]="o.status === EstadoProposta.Aceite" [class.badge--aviso]="emAberto(o)" [class.badge--perigo]="o.status === EstadoProposta.Recusada">
+                {{ estados[o.status] }}
+              </span>
+              @if (separador() === 'recebidas' && o.status === EstadoProposta.AEsperaDoClube) {
+                <button type="button" class="btn btn-primary btn-sm" (click)="aceitar(o)" [disabled]="aTratar() === o.id">Aceitar</button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="recusar(o)" [disabled]="aTratar() === o.id">Recusar</button>
+              }
+              @if (separador() === 'enviadas' && emAberto(o)) {
+                <button type="button" class="btn btn-link btn-sm" (click)="recusar(o)" [disabled]="aTratar() === o.id">Retirar</button>
+              }
+            </div>
+          </li>
+        } @empty {
+          <li class="estado">
+            {{ separador() === 'recebidas' ? 'Ainda ninguém fez propostas pelos teus jogadores.' : 'Ainda não fizeste propostas. Procura jogadores no mercado.' }}
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</section>
