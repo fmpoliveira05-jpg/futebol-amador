@@ -10,7 +10,8 @@ test.describe('Administrador de equipa', () => {
   });
 
   test('aceita um pedido de adesão e o jogador passa a fazer parte do plantel', async ({ page }) => {
-    await irPeloMenu(page, 'Pedidos de adesão');
+    await irPeloMenu(page, 'Transferências');
+    await page.locator('.page-header').getByRole('link', { name: 'Jogadores livres' }).click();
     const linha = page.getByRole('row', { name: /Bruno Teixeira/ });
     await linha.getByRole('button', { name: 'Aceitar' }).click();
     await expect(page.getByRole('status')).toContainText('Bruno Teixeira');
@@ -40,13 +41,41 @@ test.describe('Administrador de equipa', () => {
     await expect(page.getByText('Não há pedidos de adiamento por responder.')).toBeVisible();
   });
 
-  test('filtra o calendário por jogos realizados', async ({ page }) => {
+  test('o calendário mostra o mês com a legenda e os detalhes de um dia', async ({ page }) => {
     await irPeloMenu(page, 'Calendário');
-    await page.getByRole('button', { name: 'Mostrar filtros' }).click();
-    await page.getByLabel('Já realizado?').selectOption({ label: 'Sim' });
-    await page.getByRole('button', { name: 'Aplicar filtros' }).click();
-    await expect(page.locator('.match-card').first()).toContainText('Terminado');
-    await expect(page.getByText('Agendado')).toHaveCount(0);
+    await expect(page.getByText('Jogo da liga marcado')).toBeVisible();
+    await expect(page.getByText('Feriado', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Mês seguinte' }).click();
+    await page.getByRole('button', { name: 'Mês anterior' }).click();
+    await page.getByRole('button', { name: 'Hoje' }).click();
+    await expect(page.getByRole('heading', { name: 'Próximos jogos' })).toBeVisible();
+  });
+
+  test('a classificação tem PD, V, E, D, GM, GS, DG, P e a forma', async ({ page }) => {
+    await irPeloMenu(page, 'Classificação');
+    for (const coluna of ['PD', 'V', 'E', 'D', 'GM', 'GS', 'DG', 'P']) {
+      await expect(page.getByRole('columnheader', { name: coluna, exact: true })).toBeVisible();
+    }
+    await expect(page.getByRole('img', { name: 'Vitória' }).first()).toBeVisible();
+  });
+
+  test('faz uma proposta no mercado', async ({ page }) => {
+    await irPeloMenu(page, 'Mercado');
+    await page.getByLabel('Tem equipa').selectOption({ label: 'Sim' });
+    await page.getByRole('button', { name: 'Aplicar' }).click();
+    const linha = page.getByRole('row', { name: /Sérgio Rocha/ });
+    await linha.getByRole('button', { name: 'Fazer proposta' }).click();
+    await linha.getByRole('button', { name: 'Enviar' }).click();
+    await expect(linha).toContainText('Proposta enviada');
+  });
+
+  test('regista o resultado e os eventos de um jogo', async ({ page }) => {
+    await page.goto('/jogos/jogo-0/resultado');
+    await page.getByLabel('Leões da Constituição').fill('2');
+    await page.getByLabel('Veteranos do Bonfim').fill('1');
+    await page.getByRole('button', { name: '+ Golo' }).click();
+    await page.getByRole('button', { name: 'Registar resultado' }).click();
+    await expect(page.getByRole('status')).toContainText('o jogo terminou');
   });
 
   test('termina a sessão', async ({ page }) => {

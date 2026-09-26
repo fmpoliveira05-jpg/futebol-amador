@@ -6,7 +6,7 @@ test.describe('Visitante', () => {
     await expect(page.getByRole('heading', { level: 1 })).toContainText('Junta a tua equipa');
 
     await page.getByRole('link', { name: 'Consulta a classificação' }).click();
-    await expect(page.getByRole('heading', { name: 'Classificação geral' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Classificação', exact: true })).toBeVisible();
     await expect(page.getByRole('row').nth(1)).toContainText('Dragões de Campanhã');
   });
 

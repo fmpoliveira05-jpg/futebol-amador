@@ -13,7 +13,7 @@ npm run demo      # http://localhost:4200
 
 O **modo demonstração** (`npm run demo`) não precisa do backend:
 
-- o `demoInterceptor` responde aos pedidos à API com dados em memória: uma pequena liga do Grande Porto, com 8 equipas, jogos, convites e pedidos;
+- o `demoInterceptor` responde aos pedidos à API com dados em memória: duas ligas do Grande Porto com 8 equipas, uma época a decorrer, jogos com onzes e eventos, propostas de transferência, convites e pedidos;
 - qualquer e-mail e palavra-passe servem para entrar como administrador dos "Leões da Constituição";
 - as alterações ficam guardadas no `sessionStorage` do separador.
 
@@ -29,10 +29,14 @@ npm start
 
 | Quem | O que pode fazer |
 |---|---|
-| Visitante | apresentação, classificação, criar conta, entrar |
+| Visitante | apresentação, classificação por liga, ligas e jornadas, criar conta, entrar |
 | Jogador sem equipa | procurar equipas e pedir para entrar, responder a convites, criar uma equipa |
-| Membro de uma equipa | página inicial com os próximos jogos e a forma recente, perfil da equipa, calendário |
-| Administrador | editar e apagar a equipa, gerir membros, aceitar pedidos, recrutar jogadores, procurar adversários, convites de jogo (aceitar, recusar, contraproposta), adiar e cancelar jogos, responder a pedidos de adiamento |
+| Membro de uma equipa | página inicial com os próximos jogos e a forma recente, perfil da equipa (com os títulos), calendário mensal, relatório dos jogos, perfil dos jogadores com estatísticas, propostas de transferência para si |
+| Administrador | editar e apagar a equipa, gerir membros (só o administrador principal despromove), mercado e transferências, jogadores livres, procurar adversários, convites de jogo, onze inicial, resultado do jogo com marcadores, cartões, substituições e faltas, adiar (com motivo) e cancelar jogos, inscrever a equipa numa liga |
+
+As funcionalidades das ligas, das transferências, do onze e das estatísticas estão descritas em
+[`docs/novas-funcionalidades.md`](../docs/novas-funcionalidades.md). A gestão das ligas e das épocas (criar,
+sortear, fechar) é feita pelo super administrador na API; a web não tem páginas para isso.
 
 O menu lateral muda com o papel. As rotas estão protegidas pelo `authGuard`, com as opções `requiresTeam`, `requiresNoTeam` e `isAdmin` (esta última confirmada na API).
 
@@ -47,7 +51,9 @@ src/app/
   shared/http/           conversão de filtros em query params e mensagens de erro da API
   shared/Dtos/           modelos dos pedidos e respostas
   components/pages/      páginas (carregadas a pedido)
-  components/partials/   menu, pesquisa de equipas, formulário de equipa
+  components/partials/   menu, pesquisa de equipas, formulário de equipa, campo (relvado do onze)
+  shared/calendario/     feriados nacionais e grelha mensal
+  shared/competicao/     forma, zonas da classificação e escolha de jogadores por posição
 ```
 
 Algumas decisões:
@@ -64,8 +70,8 @@ Algumas decisões:
 ## Testes
 
 ```bash
-npm run test:ci            # 50 testes unitários (Jasmine/Karma, Chrome headless) com cobertura
-npx playwright test        # 9 cenários de ponta a ponta, em desktop e telemóvel, contra o modo demonstração
+npm run test:ci            # 63 testes unitários (Jasmine/Karma, Chrome headless) com cobertura
+npx playwright test        # 12 cenários de ponta a ponta, em desktop e telemóvel, contra o modo demonstração
 ```
 
 Os testes unitários cobrem:
@@ -74,7 +80,8 @@ Os testes unitários cobrem:
 - interceptor e *guard*;
 - serviço de pedidos de adesão (formato dos pedidos);
 - utilitários HTTP e de imagem;
-- ordenação do calendário;
+- ordenação do calendário, feriados (incluindo os móveis) e grelha mensal;
+- forma e zonas da classificação e escolha de jogadores para o onze;
 - idade mínima no registo;
 - modo demonstração.
 
@@ -84,7 +91,10 @@ Os testes de ponta a ponta percorrem os fluxos principais:
 - aceitar um pedido de adesão;
 - convidar uma equipa para um jogo;
 - aceitar um adiamento;
-- filtrar o calendário;
+- percorrer o calendário mensal;
+- consultar a classificação com PD, V, E, D, GM, GS, DG, P e a forma;
+- fazer uma proposta no mercado;
+- registar o resultado e os eventos de um jogo;
 - sair.
 
 As capturas de ecrã do README são geradas pelo Playwright: `CAPTURAS=1 npx playwright test capturas --project=desktop`.

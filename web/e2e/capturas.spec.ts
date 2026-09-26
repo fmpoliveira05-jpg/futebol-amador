@@ -22,6 +22,13 @@ test('capturas para o README', async ({ page }) => {
     ['web-adversarios', '/teams'],
     ['web-convites', '/team/matchInvites'],
     ['web-classificacao', '/leaderboard'],
+    ['web-ligas', '/ligas'],
+    ['web-mercado', '/mercado'],
+    ['web-transferencias', '/transferencias'],
+    ['web-onze', '/jogos/jogo-8/onze'],
+    ['web-relatorio', '/jogos/jogo-6'],
+    ['web-resultado', '/jogos/jogo-0/resultado'],
+    ['web-jogador', '/players/details/demo-kiko'],
   ];
   for (const [nome, url] of paginas) {
     await page.goto(url);

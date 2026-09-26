@@ -10,6 +10,7 @@ import {
   DemoJogo,
   criarBaseDemo,
 } from './dados-demo';
+import { agruparTitulos, rotasCompeticao } from './demo-competicao';
 
 /**
  * Modo demonstração: responde aos pedidos à API com dados em memória, para a aplicação poder
@@ -19,7 +20,8 @@ import {
  * `sessionStorage`, por isso sobrevivem a um refresh mas não passam para outro separador.
  */
 
-const CHAVE = 'futebol-amador-demo';
+// A versão muda quando os dados mudam de forma (os dados antigos do sessionStorage deixam de servir).
+const CHAVE = 'futebol-amador-demo-v2';
 const LATENCIA_MS = 250;
 
 type Resposta = { corpo?: unknown; estado?: number };
@@ -137,6 +139,10 @@ function detalhesJogador(p: DemoJogador) {
     height: p.altura,
     team: e ? { idTeam: e.id, name: e.nome, imageUrl: e.emblema } : null,
     isAdmin: p.equipa ? p.admin : null,
+    isCreator: !!e && e.criador === p.id,
+    status: p.situacao,
+    nationality: p.nacionalidade,
+    isListed: base.listados.includes(p.id),
   };
 }
 
@@ -183,7 +189,18 @@ function jogoCalendario(j: DemoJogo, idEquipa: string) {
     pitchGame: { name: campo.name, address: campo.address },
     isHome: v.emCasa,
     isCompetitive: j.competitivo,
+    homeTeam: { idTeam: j.casa, name: equipa(j.casa).nome, numGoals: j.golosCasa },
+    awayTeam: { idTeam: j.fora, name: equipa(j.fora).nome, numGoals: j.golosFora },
+    leagueName: j.epoca ? nomeLiga(j.epoca) : null,
+    round: j.jornada ?? null,
+    reason: j.estado === 3 ? base.adiamentos.find((a) => a.jogo === j.id)?.motivo ?? j.motivo ?? null : j.motivo ?? null,
+    postponedFrom: j.adiadoDe ?? null,
   };
+}
+
+function nomeLiga(idEpoca: string): string | null {
+  const epoca = base.epocas.find((e) => e.id === idEpoca);
+  return epoca ? base.ligas.find((l) => l.id === epoca.liga)?.nome ?? null : null;
 }
 
 function filtrarCalendario(req: HttpRequest<unknown>, idEquipa: string, jogos: DemoJogo[]) {
@@ -248,12 +265,30 @@ function entrarNaEquipa(idJogador: string, idEquipa: string): void {
   const p = jogador(idJogador);
   p.equipa = idEquipa;
   p.admin = false;
+  p.desde = new Date().toISOString();
+  base.movimentos.push({ jogador: p.id, de: null, para: idEquipa, tipo: 'ADESAO', data: p.desde });
   base.pedidos = base.pedidos.filter((x) => x.jogador !== idJogador);
 }
 
 // ---------- Rotas ----------
 
 const rotas: Array<[string, RegExp, Handler]> = [
+  // Ligas, transferências, onzes, relatório e perfil (primeiro: algumas rotas são mais específicas
+  // do que as antigas, como Calendar/{id}/history).
+  ...rotasCompeticao({
+    base: () => base,
+    ok,
+    erro,
+    equipa,
+    jogador,
+    membros,
+    exigirAdmin,
+    novoId,
+    jsonCorpo,
+    param,
+    idade,
+  }),
+
   // Conta
   [
     'POST',
@@ -307,6 +342,12 @@ const rotas: Array<[string, RegExp, Handler]> = [
       p.nascimento = String(d['DateOfBirth'] ?? p.nascimento);
       p.posicao = Number(d['Position'] ?? p.posicao);
       p.altura = Number(d['Height'] ?? p.altura);
+      // Os campos do perfil são opcionais: nulo mantém o valor.
+      if (d['Weight'] != null) p.peso = Number(d['Weight']);
+      if (d['PreferredFoot'] != null) p.pe = Number(d['PreferredFoot']);
+      if (d['Status'] != null) p.situacao = Number(d['Status']);
+      if (d['Nationality']) p.nacionalidade = String(d['Nationality']);
+      if (d['CountryOfBirth']) p.paisNascimento = String(d['CountryOfBirth']);
       return ok();
     },
   ],
@@ -315,6 +356,14 @@ const rotas: Array<[string, RegExp, Handler]> = [
     /^Player\/([^/]+)\/leave-team$/,
     (_, [id]) => {
       const p = jogador(id);
+      if (p.equipa) {
+        base.movimentos.push({ jogador: p.id, de: p.equipa, para: null, tipo: 'SAIDA', data: new Date().toISOString() });
+        const e = equipa(p.equipa);
+        if (e.criador === p.id) {
+          e.criador = membros(e.id).find((m) => m.admin && m.id !== p.id)?.id ?? null;
+        }
+      }
+      base.listados = base.listados.filter((x) => x !== p.id);
       p.equipa = null;
       p.admin = false;
       return ok();
@@ -359,18 +408,6 @@ const rotas: Array<[string, RegExp, Handler]> = [
     },
   ],
 
-  // Classificação
-  [
-    'GET',
-    /^Leaderboard$/,
-    () =>
-      ok(
-        [...base.equipas]
-          .sort((a, b) => b.pontos - a.pontos)
-          .map((e, i) => ({ id: e.id, position: i + 1, teamName: e.nome, currentPoints: e.pontos, rankName: e.divisao }))
-      ),
-  ],
-
   // Equipas
   [
     'POST',
@@ -389,6 +426,9 @@ const rotas: Array<[string, RegExp, Handler]> = [
         fundada: new Date().toISOString().slice(0, 10),
         idadeMedia: idade(eu().nascimento),
         jogadores: 1,
+        liga: [...base.ligas].sort((a, b) => b.nivel - a.nivel)[0]?.id ?? null,
+        criador: DEMO_JOGADOR_ID,
+        titulos: [],
       });
       const me = eu();
       me.equipa = id;
@@ -452,6 +492,12 @@ const rotas: Array<[string, RegExp, Handler]> = [
     /^Team\/([^/]+)\/members\/(promote|demote)\/([^/]+)$/,
     (_, [id, acao, idJogador]) => {
       exigirAdmin(id);
+      if (acao === 'demote' && equipa(id).criador !== DEMO_JOGADOR_ID) {
+        erro(403, 'Só o administrador principal (quem criou a equipa) pode despromover administradores.');
+      }
+      if (acao === 'demote' && equipa(id).criador === idJogador) {
+        erro(400, 'O administrador principal não pode ser despromovido.');
+      }
       const admins = membros(id).filter((p) => p.admin).length;
       if (acao === 'promote' && admins >= 4) {
         erro(400, 'Uma equipa pode ter no máximo 4 administradores.');
@@ -469,6 +515,14 @@ const rotas: Array<[string, RegExp, Handler]> = [
     (_, [id, idJogador]) => {
       exigirAdmin(id);
       const p = jogador(idJogador);
+      if (equipa(id).criador === p.id) {
+        erro(400, 'O administrador principal (quem criou a equipa) não pode ser removido.');
+      }
+      if (p.admin && equipa(id).criador !== DEMO_JOGADOR_ID) {
+        erro(403, 'Só o administrador principal pode remover administradores.');
+      }
+      base.movimentos.push({ jogador: p.id, de: id, para: null, tipo: 'SAIDA', data: new Date().toISOString() });
+      base.listados = base.listados.filter((x) => x !== p.id);
       p.equipa = null;
       p.admin = false;
       return ok();
@@ -532,6 +586,7 @@ const rotas: Array<[string, RegExp, Handler]> = [
               idMatch: j.id,
               gameDate: j.data,
               postPoneDate: a.novaData,
+              reason: a.motivo ?? null,
               team: { idTeam: v.minha, name: equipa(v.minha).nome },
               opponent: { idTeam: v.outra, name: equipa(v.outra).nome },
             };
@@ -547,6 +602,9 @@ const rotas: Array<[string, RegExp, Handler]> = [
       const { idMatch } = jsonCorpo<{ idMatch: string }>(req);
       const a = base.adiamentos.find((x) => x.jogo === idMatch) ?? erro(404, 'Pedido não encontrado.');
       const j = base.jogos.find((x) => x.id === idMatch)!;
+      base.marcas.push({ jogo: j.id, data: j.data, tipo: 'POSTPONED', motivo: a.motivo ?? null, novaData: a.novaData });
+      j.adiadoDe = j.data;
+      j.motivo = a.motivo;
       j.data = a.novaData;
       j.estado = 0;
       base.adiamentos = base.adiamentos.filter((x) => x !== a);
@@ -578,6 +636,10 @@ const rotas: Array<[string, RegExp, Handler]> = [
         rankName: e.divisao,
         pitchDto: e.campo,
         players: membros(id).map(detalhesJogador),
+        creatorId: e.criador,
+        leagueId: e.liga,
+        leagueName: base.ligas.find((l) => l.id === e.liga)?.nome ?? null,
+        titles: agruparTitulos(e),
       });
     },
   ],
@@ -615,19 +677,27 @@ const rotas: Array<[string, RegExp, Handler]> = [
     /^Calendar\/([^/]+)\/PostponeMatch$/,
     (req, [id]) => {
       exigirAdmin(id);
-      const d = jsonCorpo<{ idMatch: string; postPoneDate: string }>(req);
+      const d = jsonCorpo<{ idMatch: string; postPoneDate: string; reason?: string }>(req);
       base.adiamentos = base.adiamentos.filter((a) => a.jogo !== d.idMatch);
-      base.adiamentos.push({ jogo: d.idMatch, pedidoPor: id, novaData: new Date(d.postPoneDate).toISOString() });
+      base.adiamentos.push({ jogo: d.idMatch, pedidoPor: id, novaData: new Date(d.postPoneDate).toISOString(), motivo: d.reason });
+      const j = base.jogos.find((x) => x.id === d.idMatch);
+      if (j) {
+        j.estado = 3;
+      }
       return ok();
     },
   ],
   [
     'DELETE',
     /^Calendar\/([^/]+)\/CancelMatch\/([^/]+)$/,
-    (_, [id, idMatch]) => {
+    (req, [id, idMatch]) => {
       exigirAdmin(id);
       const j = base.jogos.find((x) => x.id === idMatch) ?? erro(404, 'Jogo não encontrado.');
+      if (j.epoca) {
+        erro(400, 'Os jogos da liga não podem ficar cancelados: cancela e remarca com uma nova data.');
+      }
       j.estado = 4;
+      j.motivo = jsonCorpo<string>(req);
       return ok();
     },
   ],

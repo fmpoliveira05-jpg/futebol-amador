@@ -25,10 +25,47 @@ describe('demoInterceptor', () => {
     expect(r.idTeam).toBe(DEMO_EQUIPA_ID);
   });
 
-  it('ordena a classificação por pontos', async () => {
-    const lista = await firstValueFrom(http.get<any[]>(`${api}/Leaderboard`));
-    expect(lista[0].position).toBe(1);
-    expect(lista.map((t) => t.currentPoints)).toEqual([...lista.map((t) => t.currentPoints)].sort((a, b) => b - a));
+  it('calcula a classificação da liga (3/1/0) com a forma dos últimos 5 jogos', async () => {
+    const t = await firstValueFrom(http.get<any>(`${api}/Leaderboard`));
+    const pontos = t.rows.map((r: any) => r.points);
+    expect(pontos).toEqual([...pontos].sort((a: number, b: number) => b - a));
+    for (const r of t.rows) {
+      expect(r.points).toBe(r.won * 3 + r.drawn);
+      expect(r.played).toBe(r.won + r.drawn + r.lost);
+      expect(r.form.length).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it('transferência: o clube aceita e o jogador muda de equipa', async () => {
+    const recebidas = await firstValueFrom(http.get<any>(`${api}/transfers/offers/team/${DEMO_EQUIPA_ID}`));
+    const proposta = recebidas.received.find((o: any) => o.status === 0);
+    await firstValueFrom(http.post(`${api}/transfers/offers/${proposta.id}/accept`, {}));
+    const perfil = await firstValueFrom(http.get<any>(`${api}/Player/${proposta.playerId}/profile`));
+    expect(perfil.currentTeam.idTeam).toBe(proposta.toTeamId);
+    expect(perfil.transfers[0].kind).toBe('TRANSFERENCIA');
+  });
+
+  it('o mercado filtra por nacionalidade e não mostra a própria equipa', async () => {
+    const lista = await firstValueFrom(
+      http.get<any[]>(`${api}/transfers/market/${DEMO_EQUIPA_ID}`, { params: { nationality: 'Brasil' } })
+    );
+    expect(lista.length).toBeGreaterThan(0);
+    expect(lista.every((p) => p.nationality === 'Brasil' && p.teamId !== DEMO_EQUIPA_ID)).toBeTrue();
+  });
+
+  it('o perfil conta golos e minutos a partir dos onzes e dos eventos', async () => {
+    const perfil = await firstValueFrom(http.get<any>(`${api}/Player/demo-kiko/profile`));
+    expect(perfil.totals.goals).toBe(1);
+    expect(perfil.totals.games).toBe(2);
+    expect(perfil.totals.minutes).toBe(180);
+  });
+
+  it('não deixa cancelar um jogo da liga sem nova data', async () => {
+    await expectAsync(
+      firstValueFrom(
+        http.delete(`${api}/Calendar/${DEMO_EQUIPA_ID}/CancelMatch/jogo-8`, { body: JSON.stringify('Chuva'), headers: { 'Content-Type': 'application/json' } })
+      )
+    ).toBeRejectedWith(jasmine.any(HttpErrorResponse));
   });
 
   it('aceitar um pedido de adesão põe o jogador na equipa', async () => {
