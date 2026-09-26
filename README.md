@@ -1,6 +1,6 @@
 # Futebol Amador
 
-Plataforma para organizar futebol amador: equipas, convites de jogo, calendário, resultados e uma classificação com divisões. Tem uma API em ASP.NET Core, um frontend web em Angular e uma app Android em Kotlin, que partilham a mesma base de dados e o mesmo Firebase.
+Plataforma para organizar futebol amador: equipas, ligas com subidas e descidas, transferências, convites de jogo, calendário, onze inicial e estatísticas dos jogadores. Tem uma API em ASP.NET Core, um frontend web em Angular e uma app Android em Kotlin, que partilham a mesma base de dados e o mesmo Firebase.
 
 Trabalho de grupo de **Laboratório de Desenvolvimento de Software** (3.º ano da Licenciatura em Engenharia Informática, ESTG – Politécnico do Porto, 2025/26), revisto em 2026. A app Android foi desenvolvida em paralelo para a unidade curricular de Computação Móvel e Ubíqua.
 
@@ -42,7 +42,7 @@ Os três repositórios originais (backend, web e Android) foram juntados neste, 
   - reescrevi o frontend web com a interface nova, o modo demonstração e os testes;
   - pus os testes de integração do backend a correr no CI.
 
-A app Android é sobretudo do Artur e do Willkie; na revisão só lhe corrigi erros.
+A app Android é sobretudo do Artur e do Willkie; na revisão corrigi-lhe erros e, depois, acrescentei os ecrãs das ligas, transferências e onzes.
 
 ## O que faz
 
@@ -53,12 +53,17 @@ A app Android é sobretudo do Artur e do Willkie; na revisão só lhe corrigi er
   - Um administrador procura adversários (por divisão, cidade, pontos, idade média ou número de jogadores) e envia um convite com data e campo.
   - O adversário aceita, recusa ou faz uma contraproposta.
   - Depois de marcado, o jogo pode ser adiado (o adversário tem de aceitar) ou cancelado com um motivo.
-- **Jogos competitivos** (app Android). As equipas entram numa fila de *matchmaking* para domingo.
-  - Um serviço em segundo plano emparelha equipas com pontos e idades médias parecidas.
-  - Se não houver par, alarga os critérios aos poucos.
-- **Resultados e classificação.** No fim do jogo, os administradores das duas equipas registam o resultado em tempo real (SignalR). Só quando os dois coincidem o jogo fica terminado.
-  - Os jogos competitivos dão pontos, e as equipas sobem e descem de divisão.
-  - Há uma classificação geral das 100 melhores equipas.
+- **Ligas.** As equipas inscrevem-se numa liga e, no início da época, o calendário é sorteado a duas voltas, alternando casa e fora.
+  - Todos os jogos da liga são competitivos; os amigáveis não dão pontos.
+  - Classificação com PD, V, E, D, GM, GS, DG e P (3/1/0) e a forma dos últimos cinco jogos.
+  - A época termina ao fim de X dias: o campeão recebe o troféu (o perfil da equipa mostra "x3" por troféu) e há subidas e descidas de escalão.
+  - Um jogo da liga pode ser remarcado por acordo; se for cancelado, tem de ter nova data.
+- **Transferências, sem dinheiro.** O clube coloca um jogador no mercado e outra equipa fica com ele, ou outra equipa faz uma proposta: o jogador muda quando o clube e ele aceitam. O mercado filtra por equipa, liga, nacionalidade e posição e inclui os jogadores livres.
+- **Onze inicial.** Até duas horas antes do jogo, o administrador escolhe a tática num campo, os titulares (filtrados pela posição) e o banco. Se não o fizer, o onze é preenchido automaticamente.
+- **Resultados.** No fim do jogo, os administradores das duas equipas registam o resultado em tempo real (SignalR) e o jogo só termina quando coincidem. Cada um regista também as faltas, os golos com assistência, os cartões e as substituições da sua equipa, que dão o relatório do jogo e os minutos jogados.
+- **Perfil do jogador** ao estilo do ZeroZero: pé, peso, situação, nacionalidade, clube atual e desde quando, percurso por época (jogos, golos, assistências, minutos, cartões) e transferências.
+- **Administrador principal.** Quem cria a equipa é o único que despromove administradores, e ninguém o despromove a ele.
+- **Calendário** em grelha mensal, com feriados e bolinhas por tipo e estado do jogo; cada dia mostra os detalhes, incluindo o motivo de adiamentos e cancelamentos.
 - **Tempo real.** Chat de cada jogo (Firestore), notificações push (Firebase Cloud Messaging) e hubs SignalR para iniciar e terminar jogos.
 
 ## Arquitetura
@@ -90,7 +95,7 @@ flowchart LR
 backend/   API ASP.NET Core 8 (Clean Architecture) + testes NUnit (unitários e de integração)
 web/       frontend Angular 20 + testes Jasmine/Karma e Playwright
 mobile/    app Android (Kotlin, Jetpack Compose)
-docs/      capturas de ecrã
+docs/      capturas de ecrã e o desenho das ligas, transferências e onzes (novas-funcionalidades.md)
 ```
 
 Cada pasta tem o seu README com os detalhes e as instruções.
@@ -177,9 +182,18 @@ cd mobile && ./gradlew testDebugUnitTest
 - **Modo demonstração:** um interceptor responde à API com dados em memória. Serve para experimentar a aplicação, para os testes de ponta a ponta e para a versão publicada no GitHub Pages.
 - Testes: 50 unitários (Jasmine/Karma) e 9 de ponta a ponta com Playwright (em desktop e telemóvel), em vez dos testes Cypress que dependiam da API de produção.
 
+### Ligas, transferências e onzes
+
+Acrescentados depois da revisão, nas três partes (API, web e Android). As decisões e o contrato da API estão em [docs/novas-funcionalidades.md](docs/novas-funcionalidades.md).
+
+- As ligas substituem as divisões e o *matchmaking* (a fila de jogos competitivos e o respetivo hub deixaram de existir).
+- Migração `LigasTransferenciasEOnzes`: só acrescenta tabelas e colunas. No arranque, as equipas existentes são distribuídas por ligas a partir das divisões antigas.
+- Testes: backend com 407 testes a passar e 3 ignorados; web com 63 unitários e 12 cenários de ponta a ponta; Android com testes JUnit da lógica do calendário, do onze e dos eventos.
+
 ## Limitações conhecidas
 
 - O sistema completo precisa de um projeto Firebase próprio (Authentication, Firestore e Cloud Messaging) e de um SQL Server. Sem eles só funciona o modo demonstração do frontend.
 - A sessão da app Android é lida da base de dados local no *thread* principal (`allowMainThreadQueries`), porque é usada por interceptores síncronos.
-- A app Android não tem testes unitários além do contrato das posições. Os testes instrumentados precisam de um emulador e não correm no CI.
-- O backend e a app Android não foram compilados durante a revisão, porque o ambiente usado não tinha o SDK do .NET nem o do Android. A verificação é feita pelos workflows do GitHub Actions.
+- Na app Android, os testes unitários cobrem o contrato das posições e a lógica das ligas (feriados, grelha do mês, onze, eventos); os ecrãs não têm testes. Os testes instrumentados precisam de um emulador e não correm no CI.
+- Os ecrãs novos da app Android (ligas, mercado, onze, relatório, ficha do jogador) só têm texto em português, mesmo com o telemóvel em inglês.
+- Os eventos de cada jogo são registados por cada equipa e o adversário não os confirma (ao contrário do resultado).

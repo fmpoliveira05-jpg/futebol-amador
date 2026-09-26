@@ -8,8 +8,13 @@ Foi desenvolvida por **Artur Pinto** e **Willkie Filho** para a unidade curricul
 
 - **Equipas e adesões.** Criar e editar equipas (com fotografia tirada na app, via CameraX), gerir o plantel e os administradores, e enviar ou responder a pedidos de adesão.
 - **Jogos amigáveis.** Procurar adversários com filtros, enviar convites e negociar a data e o campo. Os jogos marcados podem ser adiados ou cancelados.
-- **Jogos competitivos.** Fila de *matchmaking* em tempo real (SignalR) para jogos ao domingo, com adversários de pontuação e idade média parecidas.
-- **Início e fim do jogo.** Os administradores das duas equipas entram num *lobby* para confirmar o início. No fim, cada um regista o resultado e o jogo só termina se os dois coincidirem.
+- **Ligas.** Classificação da liga (PD, V, E, D, GM, GS, DG, P e a forma só com ícones), com cópia no Firestore para consultar sem rede; lista de ligas com inscrição da equipa e as jornadas. Os jogos competitivos são os da liga (o *matchmaking* foi retirado).
+- **Transferências.** Mercado com filtros (com ou sem equipa, liga, nacionalidade, posição), propostas recebidas e enviadas pela equipa e as propostas à espera do jogador. Os administradores colocam jogadores no mercado a partir da lista de membros.
+- **Onze inicial** num campo desenhado: tática, titulares filtrados pela posição e banco; o relatório do jogo mostra as estatísticas, os acontecimentos e os dois onzes.
+- **Perfil do jogador** com a ficha desportiva (pé, peso, situação, nacionalidade, clube, totais, percurso por época e transferências). O próprio edita os dados desportivos.
+- **Administrador principal.** Só o criador da equipa despromove administradores; ninguém o despromove nem o expulsa.
+- **Início e fim do jogo.** Os administradores das duas equipas entram num *lobby* para confirmar o início. No fim, cada um regista o resultado e os eventos da sua equipa (faltas, golos e assistências, cartões, substituições), e o jogo só termina se os resultados coincidirem.
+- **Calendário em grelha mensal** com setas entre meses, feriados nacionais e bolinhas por dia (cinzento feriado, azul amigável, roxo liga, verde terminado, vermelho cancelado, amarelo adiado); tocar num dia mostra os jogos, o motivo de adiamentos e cancelamentos e as ações. Cancelar um jogo da liga pede nova data.
 - **Chat** entre os administradores das equipas com jogo marcado (Firestore).
 - **Notificações** (Firebase Cloud Messaging): dia de jogo, convites, adesões e alterações de horário.
 - **Calendário do telemóvel.** Os jogos são sincronizados com o calendário nativo.
@@ -24,7 +29,8 @@ Foi desenvolvida por **Artur Pinto** e **Willkie Filho** para a unidade curricul
   - repositórios e serviços que chamam a API com Retrofit.
 - Injeção de dependências com Hilt.
 - Sessão guardada localmente com Room.
-- SignalR para os hubs de início de jogo, fim de jogo e *matchmaking*.
+- SignalR para os hubs de início e fim de jogo.
+- As funcionalidades de ligas, transferências e onzes estão no pacote `competicao` (DTOs, API, ecrãs e a lógica sem Android, testada com JUnit).
 - Imagens guardadas no Cloudinary.
 
 ## Configuração

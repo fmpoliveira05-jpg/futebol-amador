@@ -33,10 +33,10 @@ Algumas decisões:
   |---|---|
   | `/StartMatch` | os dois administradores confirmam o início do jogo |
   | `/FinishMatch` | cada um regista o resultado e o jogo só termina se coincidirem |
-  | `/MatchMaker` | fila de jogos competitivos |
   | `/Notification` | notificações por equipa |
 
-  O `RankMatchMakerBackGroundService` emparelha as equipas da fila a cada 5 segundos. Se não houver par, alarga os critérios aos poucos.
+  O `CompetitionBackGroundService` abre e fecha as épocas das ligas (sorteio das jornadas, troféu, subidas e descidas) e preenche os onzes em falta quando passa o prazo.
+- **Ligas e transferências.** As regras estão em `Application/Competition` (classificação, sorteio pelo método do círculo, táticas, preenchimento do onze, estatísticas) e nos serviços de `Application/Services/Competition`. Decisões e contrato em [docs/novas-funcionalidades.md](../docs/novas-funcionalidades.md).
 
 ## Executar localmente
 
@@ -106,6 +106,10 @@ Por isso correm sem credenciais, também no GitHub Actions.
 | Jogos | `GET /api/Calendar/{idTeam}`, `PUT /api/Calendar/{idTeam}/PostponeMatch`, `DELETE /api/Calendar/{idTeam}/CancelMatch/{idMatch}` |
 | Convites | `GET/POST /api/MatchInvite/{idTeam}...`, `AcceptMatchInvite`, `RefuseMatchInvite`, `Negociate` |
 | Adiamentos | `GET /api/Team/{id}/PostPoneMatch`, `AcceptPostponeMatch`, `RejectPostponeMatch` |
-| Classificação | `GET /api/Leaderboard` |
+| Classificação | `GET /api/Leaderboard?leagueId=`, `GET /api/leagues/{id}/standings` |
+| Ligas | `GET/POST /api/leagues`, `POST /api/leagues/{id}/seasons`, `POST /api/leagues/{id}/register/{teamId}`, `GET /api/leagues/seasons/{id}/fixtures` |
+| Transferências | `GET /api/transfers/market/{teamId}`, `POST/DELETE /api/transfers/listings/{teamId}/{playerId}`, `POST /api/transfers/offers`, `.../offers/{id}/accept`, `.../reject` |
+| Onze e relatório | `GET/PUT /api/lineups/{matchId}/{teamId}`, `GET /api/lineups/formations`, `POST /api/matches/{id}/result`, `GET /api/matches/{id}/report` |
+| Perfil | `GET /api/Player/{id}/profile`, `GET /api/Team/{id}/titles` |
 
 A lista completa, com os modelos de pedido e resposta, está no Swagger (`/swagger`, em desenvolvimento).
