@@ -363,6 +363,7 @@ namespace Application.Services
             TeamValidator.GetTeamMembersValidation(team);
 
             var today = DateTime.Today;
+            var listed = transferRepository != null ? await transferRepository.GetListedPlayerIdsAsync() : new HashSet<string>();
             var playerDtos = team.Members.Select(player => new PlayerDetailsDto
             {
                 PlayerId = player.Id,
@@ -381,6 +382,7 @@ namespace Application.Services
                 } : null,
                 Address = player.Address,
                 IsCreator = TeamHierarchy.IsSupreme(team, player.Id),
+                IsListed = listed.Contains(player.Id),
                 Status = player.Status,
                 Nationality = player.Nationality,
             }).ToList();

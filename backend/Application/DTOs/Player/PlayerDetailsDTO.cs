@@ -52,6 +52,9 @@ namespace Application.DTOs.PlayerDTOs
 
         public string? Nationality { get; set; }
 
+        /// <summary>A equipa colocou o jogador no mercado de transferências.</summary>
+        public bool IsListed { get; set; }
+
         /// <summary>
         /// Apaga os dados de contacto (e-mail, telefone, morada e data de nascimento) antes de o
         /// perfil ser mostrado a alguém que não é o próprio jogador nem colega de equipa.

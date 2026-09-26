@@ -377,6 +377,8 @@ namespace Infrastructure.Repositories
             }
 
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
+            var memberIds = team.Members.Select(m => m.Id).ToList();
+            var listed = DbContext.TransferListing.Where(l => memberIds.Contains(l.PlayerId)).Select(l => l.PlayerId).ToHashSet();
 
             return playersQuery
                 .Select(player => new PlayerDetailsDto
@@ -399,6 +401,7 @@ namespace Infrastructure.Repositories
                     IsCreator = player.Id == team.CreatorId,
                     Status = player.Status,
                     Nationality = player.Nationality,
+                    IsListed = listed.Contains(player.Id),
                 })
                 .ToList();
         }
