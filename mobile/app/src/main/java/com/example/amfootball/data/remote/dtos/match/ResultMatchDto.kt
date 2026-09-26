@@ -1,5 +1,7 @@
 package com.example.amfootball.data.remote.dtos.match
 
+import com.example.amfootball.competicao.MatchEventsDto
+
 /**
  * Data Transfer Object (DTO) utilizado para registar ou transmitir o resultado final de uma partida.
  *
@@ -17,5 +19,7 @@ data class ResultMatchDto(
     val idTeam: String = "",
     val idOpponent: String = "",
     val numGoalsTeam: Int = 0,
-    val numGoalsOpponent: Int = 0
+    val numGoalsOpponent: Int = 0,
+    /** Faltas, golos, cartões e substituições da equipa que submete (opcional). */
+    val events: MatchEventsDto? = null
 )

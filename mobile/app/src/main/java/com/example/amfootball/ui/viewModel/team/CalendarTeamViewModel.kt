@@ -56,6 +56,9 @@ class CalendarTeamViewModel @Inject constructor(
         MutableStateFlow(FilterCalendarError())
     val uiErrors: StateFlow<FilterCalendarError> = listErrors.asStateFlow()
 
+    /** Todos os jogos (com os filtros aplicados, sem paginação), para a grelha mensal. */
+    val todosJogos: StateFlow<List<InfoMatchCalendar>> = listState.asStateFlow()
+
     //Inicializer
     init {
         teamId.value = sessionManager.fetchTeamId()

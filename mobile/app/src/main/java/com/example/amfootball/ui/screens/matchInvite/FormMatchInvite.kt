@@ -74,6 +74,7 @@ fun FormMatchInviteScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val mode = viewModel.mode
+    val motivoAdiamento by viewModel.motivoAdiamento.collectAsStateWithLifecycle()
 
     ContentSendMatchInviteScreen(
         navHostController = navHostController,
@@ -84,6 +85,8 @@ fun FormMatchInviteScreen(
         uiState = uiState,
         retry = viewModel::loadData,
         modifier = Modifier.padding(16.dp),
+        motivoAdiamento = motivoAdiamento,
+        aoMudarMotivoAdiamento = viewModel::onPostponeReasonChange
     )
 }
 
@@ -111,7 +114,9 @@ private fun ContentSendMatchInviteScreen(
     mode: MatchFormMode,
     uiState: UiState,
     retry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    motivoAdiamento: String = "",
+    aoMudarMotivoAdiamento: (String) -> Unit = {}
 ) {
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -128,7 +133,9 @@ private fun ContentSendMatchInviteScreen(
                     errors = errors,
                     actions = actions,
                     mode = mode,
-                    navHostController = navHostController
+                    navHostController = navHostController,
+                    motivoAdiamento = motivoAdiamento,
+                    aoMudarMotivoAdiamento = aoMudarMotivoAdiamento
                 )
             }
         }
@@ -154,7 +161,9 @@ private fun FieldsSendMatchInvite(
     errors: MatchInviteFormErros,
     actions: FormMatchInviteActions,
     mode: MatchFormMode,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    motivoAdiamento: String = "",
+    aoMudarMotivoAdiamento: (String) -> Unit = {}
 ) {
     var cancelReason by rememberSaveable { mutableStateOf("") }
 
@@ -216,6 +225,16 @@ private fun FieldsSendMatchInvite(
             textFieldModifier = Modifier.testTag(stringResource(id = R.string.tag_description_cancel))
         )
 
+    }
+
+    if (mode == MatchFormMode.POSTPONE) {
+        TextFieldOutline(
+            label = "Motivo do adiamento",
+            value = motivoAdiamento,
+            onValueChange = aoMudarMotivoAdiamento,
+            isSingleLine = false,
+            maxLenght = 50
+        )
     }
 
     if (mode != MatchFormMode.CANCEL) {

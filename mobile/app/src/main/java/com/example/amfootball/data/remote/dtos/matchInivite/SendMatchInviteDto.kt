@@ -29,5 +29,8 @@ data class SendMatchInviteDto(
     @SerializedName("PostPoneDate", alternate = ["postPoneDate"])
     val postPoneDate: String = gameDate,
     @SerializedName("HomePitch", alternate = ["homePitch"])
-    val homePitch: Boolean
+    val homePitch: Boolean,
+    /** Motivo do adiamento (mostrado no calendário das duas equipas). */
+    @SerializedName("Reason", alternate = ["reason"])
+    val reason: String? = null
 )

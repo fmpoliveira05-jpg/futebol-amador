@@ -2,6 +2,16 @@ package com.example.amfootball.ui.screens.match
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.example.amfootball.competicao.EventosJogoViewModel
+import com.example.amfootball.competicao.SeccaoEventosJogo
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
@@ -44,8 +54,10 @@ import com.example.amfootball.ui.viewModel.match.FinishMatchViewModel
 @Composable
 fun FinishMatchScreen(
     navHostController: NavHostController,
-    viewModel: FinishMatchViewModel = hiltViewModel()
+    viewModel: FinishMatchViewModel = hiltViewModel(),
+    eventosViewModel: EventosJogoViewModel = hiltViewModel()
 ) {
+    var erroEventos by remember { mutableStateOf<String?>(null) }
     val result by viewModel.uiFormState.collectAsStateWithLifecycle()
     val formErrors by viewModel.uiFormErrors.collectAsStateWithLifecycle()
     val formActions = FormFinishMatchActions(
@@ -54,6 +66,9 @@ fun FinishMatchScreen(
         onSubmitForm = {
             viewModel.onSubmitForm(
                 onSucess = {
+                    erroEventos = eventosViewModel.preparar(result.numGoalsTeam)
+                    if (erroEventos != null) return@onSubmitForm
+
                     val matchId = result.idMatch
                     val opponentId = result.idOpponent
                     val myGoals = result.numGoalsTeam
@@ -67,13 +82,26 @@ fun FinishMatchScreen(
         }
     )
 
-    FormFinishMatch(
-        result = result,
-        formActions = formActions,
-        formErrors = formErrors,
+    Column(
         modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
-    )
+    ) {
+        Text(
+            "Os dois administradores registam o resultado; o jogo fecha quando coincidirem. " +
+                "Os eventos são só os da tua equipa.",
+            style = MaterialTheme.typography.bodySmall
+        )
+        SeccaoEventosJogo(golosEquipa = result.numGoalsTeam, viewModel = eventosViewModel)
+        erroEventos?.let { Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(top = 8.dp)) }
+        FormFinishMatch(
+            result = result,
+            formActions = formActions,
+            formErrors = formErrors,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+    }
 }
 
 /**

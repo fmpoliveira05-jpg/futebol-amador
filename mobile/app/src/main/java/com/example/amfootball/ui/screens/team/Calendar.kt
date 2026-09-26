@@ -6,6 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.FilterChip
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.amfootball.competicao.AcoesJogoCalendario
+import com.example.amfootball.competicao.CalendarioMensal
+import com.example.amfootball.competicao.CalendarioMensalViewModel
+import com.example.amfootball.competicao.DialogoCancelarJogoLiga
+import com.example.amfootball.competicao.RotasCompeticao
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -80,8 +90,12 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun CalendarScreen(
     navHostController: NavHostController,
-    viewModel: CalendarTeamViewModel = hiltViewModel()
+    viewModel: CalendarTeamViewModel = hiltViewModel(),
+    mensalViewModel: CalendarioMensalViewModel = hiltViewModel()
 ) {
+    val todosJogos by viewModel.todosJogos.collectAsStateWithLifecycle()
+    var vistaMensal by rememberSaveable { mutableStateOf(true) }
+    var jogoLigaACancelar by remember { mutableStateOf<InfoMatchCalendar?>(null) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
@@ -104,8 +118,14 @@ fun CalendarScreen(
         onCancelMatch = { matchId ->
             viewModel.onCancelMatch(
                 {
-                    navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/$matchId") {
-                        launchSingleTop = true
+                    // Os jogos da liga não se cancelam sem nova data: abre o diálogo de remarcação.
+                    val jogo = todosJogos.firstOrNull { it.idMatch == matchId }
+                    if (jogo != null && jogo.typeMatchBool) {
+                        jogoLigaACancelar = jogo
+                    } else {
+                        navHostController.navigate("${Routes.TeamRoutes.CANCEL_MATCH.route}/$matchId") {
+                            launchSingleTop = true
+                        }
                     }
                 }
             )
@@ -149,13 +169,89 @@ fun CalendarScreen(
         onToastShown = viewModel::onToastShown
     )
 
+    jogoLigaACancelar?.let { jogo ->
+        DialogoCancelarJogoLiga(
+            jogo = jogo,
+            aoConfirmar = { motivo, novaData ->
+                mensalViewModel.cancelarJogoLiga(jogo.idMatch, motivo, novaData) { viewModel.loadCalendar() }
+                    .also { if (it == null) jogoLigaACancelar = null }
+            },
+            aoFechar = { jogoLigaACancelar = null }
+        )
+    }
+
+    val acoesMensais = AcoesJogoCalendario(
+        souAdmin = mensalViewModel.souAdmin,
+        aoAbrirOnze = { id -> navHostController.navigate("${RotasCompeticao.ONZE}/$id") },
+        aoAbrirRelatorio = { id -> navHostController.navigate("${RotasCompeticao.RELATORIO}/$id") },
+        aoIniciar = { id, adversario -> itemsListAction.onStartMatch(id, adversario) },
+        aoTerminar = { id, adversario -> itemsListAction.onFinishMatch(id, adversario) },
+        aoAdiar = { id -> itemsListAction.onPostPoneMatch(id) },
+        aoCancelar = { jogo -> itemsListAction.onCancelMatch(jogo.idMatch) }
+    )
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            FilterChip(selected = vistaMensal, onClick = { vistaMensal = true }, label = { Text("Mês") })
+            FilterChip(selected = !vistaMensal, onClick = { vistaMensal = false }, label = { Text("Lista") })
+        }
+        if (vistaMensal) {
+            LoadingPage(
+                isLoading = uiState.isLoading,
+                errorMsg = uiState.errorMessage,
+                retry = viewModel::loadCalendar,
+                content = {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        OfflineBanner(isVisible = !isOnline)
+                        CalendarioMensal(jogos = todosJogos, viewModel = mensalViewModel, acoes = acoesMensais)
+                    }
+                }
+            )
+        } else {
+            CalendarContentLista(
+                list = list,
+                filters = filters,
+                filterActions = filterActions,
+                filterError = filterError,
+                uiState = uiState,
+                isOnline = isOnline,
+                itemsListAction = itemsListAction,
+                showMoreItensAction = showMoreItensAction,
+                navHostController = navHostController,
+                retry = viewModel::loadCalendar
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalendarContentLista(
+    list: List<InfoMatchCalendar>,
+    filters: FilterCalendar,
+    filterActions: FilterCalendarActions,
+    filterError: FilterCalendarError,
+    uiState: UiState,
+    isOnline: Boolean,
+    itemsListAction: ItemsCalendarActions,
+    showMoreItensAction: ShowMoreItensAction,
+    navHostController: NavHostController,
+    retry: () -> Unit
+) {
     CalendarContent(
         list = list,
         filters = filters,
         filterActions = filterActions,
         filterError = filterError,
         uiState = uiState,
-        retry = viewModel::loadCalendar,
+        retry = retry,
         isOnline = isOnline,
         itemsListAction = itemsListAction,
         showMoreItensAction = showMoreItensAction,

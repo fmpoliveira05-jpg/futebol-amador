@@ -85,6 +85,14 @@ class FormMatchInviteViewModel @Inject constructor(
         MatchFormMode.SEND
     }
 
+    /** Motivo do adiamento (modo POSTPONE). */
+    private val motivoAdiamentoState = kotlinx.coroutines.flow.MutableStateFlow("")
+    val motivoAdiamento: kotlinx.coroutines.flow.StateFlow<String> = motivoAdiamentoState
+
+    fun onPostponeReasonChange(motivo: String) {
+        if (motivo.length <= 50) motivoAdiamentoState.value = motivo
+    }
+
     init {
         loadData()
     }
@@ -210,6 +218,7 @@ class FormMatchInviteViewModel @Inject constructor(
                 val opponentId = formState.value.opponent.id
                 val gameDate = formState.value.gameDateRaw
                 val matchInvite = getSendMatchInviteDto(opponentId, gameDate)
+                    .copy(reason = motivoAdiamentoState.value.trim().ifBlank { null })
                 matchInvite.idMatch = matchId
 
                 calendarRepository.postPoneMatch(idMyTeam, matchInvite)

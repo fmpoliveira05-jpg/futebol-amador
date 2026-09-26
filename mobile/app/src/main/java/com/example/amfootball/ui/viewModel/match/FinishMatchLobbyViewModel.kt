@@ -3,6 +3,7 @@ package com.example.amfootball.ui.viewModel.match
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.amfootball.competicao.ResultadoPendente
 import com.example.amfootball.core.utils.Arguments
 import com.example.amfootball.data.events.FinishMatchUiState
 import com.example.amfootball.data.local.SessionManager
@@ -29,6 +30,7 @@ import javax.inject.Inject
 class FinishMatchLobbyViewModel @Inject constructor(
     private val socketService: FinishMatchSockerServer,
     private val sessionManager: SessionManager,
+    private val resultadoPendente: ResultadoPendente,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -101,7 +103,8 @@ class FinishMatchLobbyViewModel @Inject constructor(
                     idTeam = teamId,
                     idOpponent = opponentId,
                     numGoalsTeam = myGoals,
-                    numGoalsOpponent = opGoals
+                    numGoalsOpponent = opGoals,
+                    events = resultadoPendente.obter(matchId)
                 )
                 socketService.joinFinishMatch(dto = result)
                 _uiState.value = FinishMatchUiState.WaitingForConfirmation
