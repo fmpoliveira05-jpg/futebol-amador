@@ -89,7 +89,7 @@ fun HomePageTeamScreen(
         onNavigateRankedMatch = {
             viewModel.onNavigateRankedMatch(
                 onSucess = {
-                    globalNavController.navigate(Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route) {
+                    globalNavController.navigate(Routes.GeralRoutes.LEADERBOARD.route) {
                         launchSingleTop = true
                     }
                 }

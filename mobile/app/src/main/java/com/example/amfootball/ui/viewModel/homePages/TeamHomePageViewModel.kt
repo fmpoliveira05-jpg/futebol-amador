@@ -119,15 +119,8 @@ class TeamHomePageViewModel @Inject constructor(
      * @param onSucess Callback executada se as condições (internet) forem cumpridas.
      */
     fun onNavigateRankedMatch(onSucess: () -> Unit) {
-        if (roleState.value != UserRole.ADMIN_TEAM) {
-            updateToast(message = R.string.toast_admin_only_ranked)
-            return
-        }
-
-        onlineFunctionality(
-            action = onSucess,
-            toastMessage = R.string.toast_offline_ranked_match
-        )
+        // Os jogos competitivos são os da liga: o cartão abre a classificação (que funciona offline).
+        onSucess()
     }
 
     /**

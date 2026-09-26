@@ -1,5 +1,7 @@
 package com.example.amfootball.ui.navigation
 
+import com.example.amfootball.competicao.ecrasCompeticao
+
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -49,7 +51,6 @@ import com.example.amfootball.ui.screens.lists.ListPlayersScreen
 import com.example.amfootball.ui.screens.lists.ListTeamScreen
 import com.example.amfootball.ui.screens.match.FinishMatchLobbyScreen
 import com.example.amfootball.ui.screens.match.FinishMatchScreen
-import com.example.amfootball.ui.screens.match.MatchMakerScreen
 import com.example.amfootball.ui.screens.match.StartMatchLobbyScreen
 import com.example.amfootball.ui.screens.matchInvite.FormMatchInviteScreen
 import com.example.amfootball.ui.screens.matchInvite.ListMatchInviteScreen
@@ -603,14 +604,8 @@ private fun NavGraphBuilder.competitiveMatches(
     globalNavController: NavHostController,
     sessionManager: SessionManager
 ) {
-    composableProtectedAdminTeam(
-        route = Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH.route,
-        navController = globalNavController,
-        sessionManager = sessionManager,
-        content = {
-            MatchMakerScreen(navHostController = globalNavController)
-        }
-    )
+    // Os jogos competitivos são os da liga (sorteados no início da época): já não há matchmaking.
+    ecrasCompeticao(nav = globalNavController, sessao = sessionManager)
 }
 
 /**

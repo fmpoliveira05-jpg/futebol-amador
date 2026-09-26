@@ -263,12 +263,6 @@ object Routes {
             Icons.Default.Person,
             R.string.description_navbar_teams_to_matchinvite_list
         ),
-        SEARCH_COMPETIVE_MATCH(
-            "SearchCompetitiveMatch",
-            R.string.navbar_find_competitive_match,
-            Icons.Default.EmojiEvents,
-            R.string.description_navbar_find_competitive_match
-        ),
         LIST_POST_PONE_MATCH(
             "ListPostponeMatch",
             R.string.navbar_list_post_pone_match,

@@ -12,7 +12,6 @@ import com.example.amfootball.data.remote.dtos.homePageTeam.HomePageTeamDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
-import com.example.amfootball.data.remote.dtos.leadboard.InfoTeamLeadboard
 import com.example.amfootball.data.remote.dtos.player.MemberTeamDto
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.data.remote.dtos.team.ItemTeamInfoDto
@@ -54,16 +53,6 @@ class TeamService @Inject constructor(
         }
     }
 
-    /**
-     * Obtém a tabela de classificação (Leaderboard).
-     **
-     * @return [InfoTeamLeadboard] representando a classificação.
-     */
-    suspend fun getLeaderBoard(): List<InfoTeamLeadboard> {
-        return safeApiCallWithReturn {
-            teamApi.getLeaderBoard()
-        }
-    }
 
 
     /**

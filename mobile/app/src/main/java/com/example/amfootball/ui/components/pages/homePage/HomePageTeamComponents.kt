@@ -218,18 +218,10 @@ fun UpcomingMatchCard(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = match.gameDate.format(timeFormatter),
-                    style = MaterialTheme.typography.labelSmall
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(
-                    text = if (match.isHome) "(${stringResource(id = R.string.game_Home)})" else "(${stringResource(id = R.string.game_away)})",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (match.isHome) Color.Gray else Color.Gray
-                )
-            }
+            Text(
+                text = match.gameDate.format(timeFormatter),
+                style = MaterialTheme.typography.labelSmall
+            )
         }
     }
 }

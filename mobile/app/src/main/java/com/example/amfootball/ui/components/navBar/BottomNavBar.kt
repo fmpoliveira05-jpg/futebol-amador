@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.components.navBar
 
+import com.example.amfootball.competicao.RotaCompeticao
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -107,6 +108,7 @@ fun BottomSheetContent(
                 list.add(Routes.PlayerRoutes.TEAM_LIST)
                 list.add(Routes.PlayerRoutes.PLAYER_LIST)
                 list.add(Routes.GeralRoutes.LEADERBOARD)
+                list.add(RotaCompeticao.LIGAS)
 
                 if (role == UserRole.PLAYER_WITHOUT_TEAM) {
                     list.add(Routes.PlayerRoutes.LIST_MEMBERSHIP_REQUEST)
@@ -120,16 +122,19 @@ fun BottomSheetContent(
                     list.add(Routes.TeamRoutes.CALENDAR)
                     list.add(Routes.TeamRoutes.TEAM_PROFILE)
                     list.add(Routes.TeamRoutes.MEMBERLIST)
+                    list.add(Routes.GeralRoutes.LEADERBOARD)
+                    list.add(RotaCompeticao.PROPOSTAS)
                 }
 
                 if (role == UserRole.ADMIN_TEAM) {
                     list.add(Routes.TeamRoutes.LIST_MATCH_INVITES)
                     list.add(Routes.TeamRoutes.LIST_POST_PONE_MATCH)
+                    list.add(RotaCompeticao.TRANSFERENCIAS)
+                    list.add(RotaCompeticao.MERCADO)
                     list.add(Routes.TeamRoutes.LIST_MEMBERSHIP_REQUEST)
 
                     list.add(Routes.TeamRoutes.SEARCH_PLAYERS_WITH_OUT_TEAM)
                     list.add(Routes.TeamRoutes.SEARCH_TEAMS_TO_MATCH_INVITE)
-                    list.add(Routes.TeamRoutes.SEARCH_COMPETIVE_MATCH)
 
                 }
             }

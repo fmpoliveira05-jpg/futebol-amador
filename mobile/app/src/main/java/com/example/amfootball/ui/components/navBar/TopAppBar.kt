@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.components.navBar
 
+import com.example.amfootball.competicao.RotaCompeticao
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -121,5 +122,6 @@ private fun getAllRoutes(): List<AppRouteInfo> {
             Routes.TeamRoutes.entries +
             Routes.UserRoutes.entries +
             Routes.PlayerRoutes.entries +
-            Routes.BottomNavBarRoutes.entries
+            Routes.BottomNavBarRoutes.entries +
+            RotaCompeticao.entries
 }
