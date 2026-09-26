@@ -1,5 +1,4 @@
 ﻿using Api.BackGroundServices;
-using Application.Services.BackGroundServices;
 
 namespace Api.Extensions
 {
@@ -25,8 +24,8 @@ namespace Api.Extensions
         /// <b>Serviços Registados:</b>
         /// <list type="number">
         /// <item>
-        ///     <term><see cref="RankMatchMakerBackGroundService"/></term>
-        ///     <description>Responsável pelo algoritmo contínuo de emparelhamento de equipas em jogos competitivos.</description>
+        ///     <term><see cref="CompetitionBackGroundService"/></term>
+        ///     <description>Sorteia e fecha as épocas das ligas e preenche os onzes que ficaram por definir.</description>
         /// </item>
         /// <item>
         ///     <term><see cref="NotificationBackGroundService"/></term>
@@ -38,7 +37,7 @@ namespace Api.Extensions
         /// <returns>A própria coleção de serviços atualizada, permitindo encadeamento de chamadas (Fluent API).</returns>
         public static IServiceCollection AddApiBackGroundService(this IServiceCollection services)
         {
-            services.AddHostedService<RankMatchMakerBackGroundService>();
+            services.AddHostedService<CompetitionBackGroundService>();
             services.AddHostedService<NotificationBackGroundService>();
 
             return services;

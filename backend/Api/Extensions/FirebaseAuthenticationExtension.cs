@@ -1,4 +1,4 @@
-using FirebaseAdmin;
+﻿using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +17,7 @@ namespace Api.Extensions
     public static class FirebaseAuthenticationExtensions
     {
         /// <summary>Caminhos dos hubs SignalR, onde o token chega na query string.</summary>
-        private static readonly string[] CaminhosHubs = { "/StartMatch", "/FinishMatch", "/MatchMaker", "/Notification" };
+        private static readonly string[] CaminhosHubs = { "/StartMatch", "/FinishMatch", "/Notification" };
 
         public static IServiceCollection AddFirebaseAuthentication(this IServiceCollection services, IConfiguration configuration)
         {

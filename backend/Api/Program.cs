@@ -1,4 +1,4 @@
-using Api.Extensions;
+﻿using Api.Extensions;
 using Api.Hubs.Notification;
 using Api.Middlewares;
 using Application;
@@ -23,7 +23,6 @@ builder.Services.AddMemoryCache();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
-builder.Services.AddScoped<ILeaderboardService, LeaderboardService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -70,7 +69,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Numa base de dados nova, cria as divisões (sem elas não se consegue criar equipas).
+// Numa base de dados nova, cria as divisões e as ligas; numa antiga, passa as divisões a ligas (uma vez).
 if (!emTestes)
 {
     using var scope = app.Services.CreateScope();
@@ -78,6 +77,7 @@ if (!emTestes)
     try
     {
         await DivisoesIniciais.GarantirAsync(db);
+        await LigasIniciais.GarantirAsync(db, DateTime.UtcNow);
     }
     catch (Exception ex)
     {

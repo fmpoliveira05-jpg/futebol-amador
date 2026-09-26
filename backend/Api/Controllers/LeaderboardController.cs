@@ -1,44 +1,35 @@
-﻿using Application.DTOs.Team;
+using Application.DTOs.Competition;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
 {
     /// <summary>
-    /// Controlador responsável pela consulta de classificações e rankings (Leaderboard).
+    /// Classificação de uma liga (por omissão, a do escalão mais alto, na época atual).
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Produces("application/json")]
     public class LeaderboardController : ControllerBase
     {
-        private readonly ILeaderboardService leaderboardService;
+        private readonly ILeagueService leagueService;
 
-        /// <summary>
-        /// Construtor do LeaderboardController.
-        /// </summary>
-        /// <param name="leaderboardService">Serviço responsável pela lógica de obtenção e ordenação das classificações das equipas.</param>
-        public LeaderboardController(ILeaderboardService leaderboardService)
+        public LeaderboardController(ILeagueService leagueService)
         {
-            this.leaderboardService = leaderboardService;
+            this.leagueService = leagueService;
         }
 
-        /// <summary>
-        /// Obtém a tabela de classificação global das equipas.
-        /// </summary>
-        /// <remarks>
-        /// Retorna o <b>Top 100</b> das equipas com maior pontuação na plataforma.
-        /// A lista vem ordenada pela posição (do 1º ao 100º).
-        /// Este endpoint é público e não requer autenticação.
-        /// </remarks>
-        /// <returns>Uma lista de objetos <see cref="TeamLeaderboardDto"/> contendo a posição, nome, pontos e rank da equipa.</returns>
-        /// <response code="200">Retorna a lista de classificação com sucesso.</response>
+        /// <summary>Classificação com PD, V, E, D, GM, GS, DG, P e a forma dos últimos 5 jogos.</summary>
+        /// <param name="leagueId">Liga (opcional).</param>
+        /// <response code="200">Classificação.</response>
+        /// <response code="204">Ainda não há ligas.</response>
         [HttpGet]
-        [ProducesResponseType(typeof(List<TeamLeaderboardDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetLeaderboard()
+        [ProducesResponseType(typeof(StandingsDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public async Task<IActionResult> GetLeaderboard([FromQuery] Guid? leagueId)
         {
-            var leaderboard = await leaderboardService.GetLeaderboardAsync();
-            return Ok(leaderboard);
+            var standings = await leagueService.GetStandingsAsync(leagueId, null);
+            return standings == null ? NoContent() : Ok(standings);
         }
     }
 }
