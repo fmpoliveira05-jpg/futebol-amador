@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs.Competition;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.Pitch;
 using Application.DTOs.PostPoneGame;
@@ -202,10 +203,8 @@ namespace Infrastructure.Repositories
             var query = await (from m in context.Match
                                join pitch in context.Pitch on m.idPitch equals pitch.Id
 
-                               where (m.MatchStatus == MatchStatus.SCHEDULED
-                                  || m.MatchStatus == MatchStatus.DONE
-                                  || m.MatchStatus == MatchStatus.IN_PROGRESS)
-                                  && m.Teams.Any(tm => tm.IdTeam == idTeam)
+                               // Todos os estados: o calendário mostra também os jogos adiados e cancelados (com o motivo).
+                               where m.Teams.Any(tm => tm.IdTeam == idTeam)
                                   && m.Teams.Any(tm => tm.IdTeam != idTeam)
 
                                let myTeam = m.Teams.FirstOrDefault(tm => tm.IdTeam == idTeam)
@@ -239,6 +238,7 @@ namespace Infrastructure.Repositories
                                })
                          .ToListAsync();
 
+            await EnrichCalendarAsync(query);
             return query;
         }
 
@@ -361,6 +361,7 @@ namespace Infrastructure.Repositories
                 })
                 .ToListAsync();
 
+            await EnrichCalendarAsync(list);
             return list;
         }
 
@@ -391,6 +392,7 @@ namespace Infrastructure.Repositories
                              IdMatch = m.Id,
                              GameDate = m.MatchDate,
                              PostPoneDate = ppm.PostPoneDate,
+                             Reason = ppm.Reason,
                              Team = new TeamDto
                              {
                                  IdTeam = idReceiver,
@@ -479,6 +481,7 @@ namespace Infrastructure.Repositories
                     IdMatch = x.Match.Id,
                     GameDate = x.Match.MatchDate,
                     PostPoneDate = x.PostPoneMatch.PostPoneDate,
+                    Reason = x.PostPoneMatch.Reason,
                     Team = new TeamDto
                     {
                         IdTeam = idReceiver,
@@ -533,6 +536,101 @@ namespace Infrastructure.Repositories
                     IsHome = m.idPitch == m.Teams.First().Team.IdPitch
                 })
                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// Acrescenta aos jogos do calendário a equipa da casa e a de fora, a liga e a jornada, o motivo
+        /// (cancelamento, pedido de adiamento pendente ou último adiamento aceite) e a data original.
+        /// </summary>
+        private async Task EnrichCalendarAsync(List<InfoMatchCalendar> items)
+        {
+            if (items.Count == 0)
+            {
+                return;
+            }
+
+            var ids = items.Select(i => i.IdMatch).ToList();
+            var extra = await context.Match
+                .Where(m => ids.Contains(m.Id))
+                .Select(m => new
+                {
+                    m.Id,
+                    m.IdHomeTeam,
+                    m.idPitch,
+                    m.Round,
+                    m.PostponedFrom,
+                    m.PostponeReason,
+                    LeagueName = m.Season != null ? m.Season.League.Name : null,
+                    Teams = m.Teams.Select(t => new { t.IdTeam, t.Team.Name, t.Team.IdPitch, t.NumGoals }).ToList(),
+                })
+                .ToListAsync();
+
+            var cancelReasons = await context.CancelledMatch
+                .Where(c => ids.Contains(c.IdMatch))
+                .OrderByDescending(c => c.TimeCancellation)
+                .Select(c => new { c.IdMatch, c.Description })
+                .ToListAsync();
+
+            var pendingReasons = await context.PostPoneMatch
+                .Where(p => ids.Contains(p.IdMatch))
+                .Select(p => new { p.IdMatch, p.Reason })
+                .ToListAsync();
+
+            var byId = extra.ToDictionary(e => e.Id);
+            foreach (var item in items)
+            {
+                if (!byId.TryGetValue(item.IdMatch, out var e) || e.Teams.Count != 2)
+                {
+                    continue;
+                }
+
+                var home = e.Teams.FirstOrDefault(t => t.IdTeam == e.IdHomeTeam)
+                           ?? e.Teams.FirstOrDefault(t => t.IdPitch == e.idPitch)
+                           ?? e.Teams[0];
+                var away = e.Teams.First(t => t != home);
+                item.HomeTeam = new TeamStatisticsDto { IdTeam = home.IdTeam, Name = home.Name, NumGoals = home.NumGoals };
+                item.AwayTeam = new TeamStatisticsDto { IdTeam = away.IdTeam, Name = away.Name, NumGoals = away.NumGoals };
+                item.LeagueName = e.LeagueName;
+                item.Round = e.Round;
+                item.PostponedFrom = e.PostponedFrom;
+                item.Reason = item.MatchStatus switch
+                {
+                    MatchStatus.CANCELED => cancelReasons.FirstOrDefault(c => c.IdMatch == item.IdMatch)?.Description,
+                    MatchStatus.POST_PONED => pendingReasons.FirstOrDefault(p => p.IdMatch == item.IdMatch)?.Reason,
+                    _ => e.PostponeReason,
+                };
+            }
+        }
+
+        public async Task<List<CalendarMarkerDto>> GetCalendarMarkersAsync(Guid idTeam)
+        {
+            var cancelled = await context.CancelledMatch
+                .Where(c => c.OriginalDate != null && c.NewDate != null && c.Match.Teams.Any(t => t.IdTeam == idTeam))
+                .Select(c => new CalendarMarkerDto
+                {
+                    IdMatch = c.IdMatch,
+                    Date = c.OriginalDate!.Value,
+                    Kind = "CANCELLED",
+                    Reason = c.Description,
+                    NewDate = c.NewDate,
+                    OpponentName = c.Match.Teams.Where(t => t.IdTeam != idTeam).Select(t => t.Team.Name).FirstOrDefault() ?? "",
+                })
+                .ToListAsync();
+
+            var postponed = await context.Match
+                .Where(m => m.PostponedFrom != null && m.Teams.Any(t => t.IdTeam == idTeam))
+                .Select(m => new CalendarMarkerDto
+                {
+                    IdMatch = m.Id,
+                    Date = m.PostponedFrom!.Value,
+                    Kind = "POSTPONED",
+                    Reason = m.PostponeReason,
+                    NewDate = m.MatchDate,
+                    OpponentName = m.Teams.Where(t => t.IdTeam != idTeam).Select(t => t.Team.Name).FirstOrDefault() ?? "",
+                })
+                .ToListAsync();
+
+            return cancelled.Concat(postponed).OrderBy(m => m.Date).ToList();
         }
     }
 }

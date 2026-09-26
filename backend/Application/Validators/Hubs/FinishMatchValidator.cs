@@ -85,6 +85,13 @@ namespace Application.Validators.Hubs
                 throw new ArgumentException("A match não existe ou não foi encontrada");
             }
 
+            // Um jogo marcado cuja hora já passou há mais de 90 minutos também aceita o resultado: na web
+            // não há o passo de "iniciar o jogo" com os dois administradores (só existe na app).
+            if (match.MatchStatus == MatchStatus.SCHEDULED && match.MatchDate.AddMinutes(90) <= DateTime.UtcNow)
+            {
+                return;
+            }
+
             // Só um jogo a decorrer pode receber o resultado. Sem esta verificação, um jogo já
             // terminado podia ser "terminado" outra vez e as equipas voltavam a receber pontos.
             if (match.MatchStatus != MatchStatus.IN_PROGRESS || match.TimeStart == null)

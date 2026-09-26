@@ -15,5 +15,9 @@ namespace Application.DTOs.PostPoneGame
 
         [Required(ErrorMessage = "O id do opponente tem de estar preenchido")]
         public Guid IdOpponent { get; set; }
+
+        /// <summary>Motivo do adiamento (a web exige-o; opcional na API para as apps antigas).</summary>
+        [MaxLength(Domain.Constants.ModelConstants.CancelledMatchConst.MaxReasonLength)]
+        public string? Reason { get; set; }
     }
 }

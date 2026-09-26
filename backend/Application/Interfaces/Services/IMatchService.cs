@@ -96,5 +96,11 @@ namespace Application.Interfaces.Services
         /// <param name="description">Motivo do cancelamento.</param>
         /// <returns>Uma tarefa assíncrona (<see cref="Task"/>).</returns>
         public Task CancelMatch(Guid idTeam, Guid idMatch, string description);
+
+        /// <summary>Cancela um jogo da liga e remarca-o para a nova data (com o motivo no histórico).</summary>
+        Task<MatchDto> CancelAndRescheduleMatch(Guid idTeam, Guid idMatch, Application.DTOs.Competition.CancelRescheduleDto dto);
+
+        /// <summary>Cancelamentos com nova data e adiamentos aceites, para o calendário.</summary>
+        Task<List<Application.DTOs.Competition.CalendarMarkerDto>> GetCalendarMarkers(Guid idTeam);
     }
 }

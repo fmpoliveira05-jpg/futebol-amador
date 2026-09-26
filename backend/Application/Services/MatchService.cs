@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.DTOs.Competition;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.DTOs.Team;
@@ -189,7 +190,10 @@ namespace Application.Services
             }
 
             team = teamStatistic.Team;
-            postPoneDate = new PostPoneMatch(team, match, newDate);
+            postPoneDate = new PostPoneMatch(team, match, newDate)
+            {
+                Reason = string.IsNullOrWhiteSpace(dto.Reason) ? null : dto.Reason.Trim(),
+            };
             await TeamPostPoneGameRepository.AddTeamPostPoneMatch(postPoneDate);
 
             match.MatchStatus = MatchStatus.POST_PONED;
@@ -198,6 +202,7 @@ namespace Application.Services
             {
                 IdMatch = idMatch,
                 PostPoneDate = newDate,
+                Reason = postPoneDate.Reason,
                 Team = new TeamDto
                 {
                     IdTeam = team.Id,
@@ -256,6 +261,9 @@ namespace Application.Services
             //Adiamento da partida
             TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(postPoneMatch);
             newDate = postPoneMatch.PostPoneDate;
+            // Guarda a data original e o motivo, para o calendário mostrar o adiamento no dia em que o jogo estava.
+            match.PostponedFrom = match.MatchDate;
+            match.PostponeReason = postPoneMatch.Reason;
             match.MatchDate = newDate;
             match.MatchStatus = MatchStatus.SCHEDULED;
 
@@ -364,7 +372,12 @@ namespace Application.Services
 
             MatchValidator.ValidateCancelMatch(match, team, idTeam, opponent, idOpponentTeam);
 
-            var cancelledMatch = new CancelledMatch(team.Team, match, description);
+            if (match.IdSeason != null)
+            {
+                throw new BusinessRuleException("Os jogos da liga não podem ficar cancelados: cancela e remarca com uma nova data.");
+            }
+
+            var cancelledMatch = new CancelledMatch(team.Team, match, description) { OriginalDate = match.MatchDate };
 
             await CancelledMatchRepository.AddCancelledMatch(cancelledMatch);
 
@@ -375,6 +388,79 @@ namespace Application.Services
             await notifyCancelMatch(idMatch, idTeam, team.Team.Name, idOpponentTeam, opponent.Team.Name);
         }
 
+
+        /// <summary>
+        /// Cancela um jogo da liga e remarca-o logo para outra data (um jogo da liga não pode ficar por jogar).
+        /// O cancelamento fica no histórico com o motivo e a data original.
+        /// </summary>
+        public async Task<MatchDto> CancelAndRescheduleMatch(Guid idTeam, Guid idMatch, CancelRescheduleDto dto)
+        {
+            var match = await MatchRepository.GetMatchToCancelById(idMatch);
+            MatchValidator.ExistsMatch(match);
+
+            var team = match!.Teams.FirstOrDefault(ts => ts.IdTeam == idTeam)
+                       ?? throw new BusinessRuleException("A equipa não joga este jogo.");
+            var opponent = match.Teams.FirstOrDefault(ts => ts.IdTeam != idTeam)
+                           ?? throw new BusinessRuleException("O jogo não tem adversário.");
+
+            if (match.IdSeason == null)
+            {
+                throw new BusinessRuleException("Só os jogos da liga se cancelam com nova data; os amigáveis cancelam-se normalmente.");
+            }
+
+            if (match.MatchStatus != MatchStatus.SCHEDULED && match.MatchStatus != MatchStatus.POST_PONED)
+            {
+                throw new BusinessRuleException("Só se podem remarcar jogos marcados ou com adiamento pendente.");
+            }
+
+            var newDate = DateTime.SpecifyKind(dto.NewDate, DateTimeKind.Utc);
+            if (newDate <= DateTime.UtcNow.AddHours(Domain.Constants.ModelConstants.LineupConst.DeadlineHours))
+            {
+                throw new BusinessRuleException("A nova data tem de ser daqui a mais de duas horas.");
+            }
+
+            var conflictTeam = await MatchRepository.GetMatchProxim12HoursMatchs(idTeam, newDate);
+            var conflictOpponent = await MatchRepository.GetMatchProxim12HoursMatchs(opponent.IdTeam, newDate);
+            if ((conflictTeam != null && conflictTeam.Id != match.Id) || (conflictOpponent != null && conflictOpponent.Id != match.Id))
+            {
+                throw new ValidationException("Uma das equipas já tem um jogo marcado a menos de 12 horas da nova data.");
+            }
+
+            await CancelledMatchRepository.AddCancelledMatch(new CancelledMatch(team.Team, match, dto.Reason.Trim())
+            {
+                OriginalDate = match.MatchDate,
+                NewDate = newDate,
+            });
+
+            // Um pedido de adiamento pendente deixa de fazer sentido.
+            var pending = await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(opponent.IdTeam, idMatch)
+                          ?? await TeamPostPoneGameRepository.GetTeamPostPoneMatchWithPitch(idTeam, idMatch);
+            if (pending != null)
+            {
+                TeamPostPoneGameRepository.RemoveTeamPostPoneMatch(pending);
+            }
+
+            match.MatchDate = newDate;
+            match.MatchStatus = MatchStatus.SCHEDULED;
+            await UnityOfWork.SaveChangesAsync();
+
+            await notifyAcceptPostPone(idMatch, idTeam, team.Team.Name, opponent.IdTeam, opponent.Team.Name, newDate);
+
+            return new MatchDto
+            {
+                IdMatch = match.Id,
+                GameDate = newDate,
+                NameTeam = team.Team.Name,
+                NameOpponent = opponent.Team.Name,
+                NamePitch = match.Pitch?.Name ?? "",
+            };
+        }
+
+        public async Task<List<CalendarMarkerDto>> GetCalendarMarkers(Guid idTeam)
+        {
+            MatchValidator.ValidateTeamCalendar(idTeam);
+            return await MatchRepository.GetCalendarMarkersAsync(idTeam);
+        }
 
         #endregion
 

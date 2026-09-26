@@ -59,5 +59,8 @@ namespace Application.Interfaces.Services.Hub
         /// <param name="connectionId">O ID da conexão que desconectou.</param>
         /// <returns><c>true</c> se o estado foi limpo.</returns>
         public Task<bool> HandleDisconnectAsync(Guid? maybeMatchId, Guid? maybeTeamId, string connectionId);
+
+        /// <summary>A equipa já submeteu um resultado para este jogo (ainda por confirmar pelo adversário).</summary>
+        bool HasSubmitted(Guid matchId, Guid teamId);
     }
 }

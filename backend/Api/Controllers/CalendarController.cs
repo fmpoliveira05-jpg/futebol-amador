@@ -165,5 +165,29 @@ namespace Api.Controllers
             return userId;
         }
         #endregion
+
+        /// <summary>
+        /// Cancelamentos com nova data e adiamentos aceites, na data original, com o motivo
+        /// (para marcar esses dias no calendário).
+        /// </summary>
+        [HttpGet("history")]
+        [ProducesResponseType(typeof(List<Application.DTOs.Competition.CalendarMarkerDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> History(Guid idTeam)
+        {
+            await authorizationService.UserAuthorizationIsMemberTeamById(GetCurrentUserId(), idTeam);
+            return Ok(await matchController.GetCalendarMarkers(idTeam));
+        }
+
+        /// <summary>
+        /// Cancela um jogo da liga e remarca-o para a nova data: um jogo da liga não pode ficar por jogar.
+        /// </summary>
+        [HttpPut("{idMatch:guid}/cancel-reschedule")]
+        [ProducesResponseType(typeof(MatchDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<IActionResult> CancelAndReschedule(Guid idTeam, Guid idMatch, [FromBody] Application.DTOs.Competition.CancelRescheduleDto dto)
+        {
+            await authorizationService.UserAuthorizationIsAdminTeamById(GetCurrentUserId(), idTeam);
+            return Ok(await matchController.CancelAndRescheduleMatch(idTeam, idMatch, dto));
+        }
     }
 }

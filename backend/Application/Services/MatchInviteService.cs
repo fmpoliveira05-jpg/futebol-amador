@@ -213,7 +213,11 @@ namespace Application.Services
             gameDate = matchInvite.GameDate;
             List<TeamStatistics> teamStatistics = ListTeamsStatistics(sender, receiver);
 
-            var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.Chat);
+            // Amigável: não conta para a liga. A equipa da casa é a dona do campo escolhido.
+            var match = new Matches(gameDate, false, pitch.Id, teamStatistics, matchInvite.Chat)
+            {
+                IdHomeTeam = sender.IdPitch == pitch.Id ? sender.Id : receiver.Id,
+            };
 
             MatchInviteRepository.DeleteMatchInvite(matchInvite);
 

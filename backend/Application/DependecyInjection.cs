@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Services.Competition;
+using Application.Interfaces;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
@@ -50,7 +51,11 @@ namespace Application
             services.AddScoped<IMatchInviteService, MatchInviteService>();
             services.AddScoped<IMatchService, MatchService>();
             services.AddScoped<IPlayerService, PlayerService>();
-            services.AddScoped<IMatchMakerService, MatchMakerService>();
+            services.AddScoped<ILeagueService, LeagueService>();
+            services.AddScoped<ITransferService, TransferService>();
+            services.AddScoped<IMatchDetailsService, MatchDetailsService>();
+            services.AddScoped<IPlayerProfileService, PlayerProfileService>();
+            services.AddSingleton(TimeProvider.System);
             services.AddScoped<ISuperAdminService, SuperAdminService>();
             services.AddScoped<IMembershipRequestService, MembershipService>();
             services.AddScoped<IChatRoomService, FirebaseChatService>();
@@ -75,7 +80,6 @@ namespace Application
         {
             services.AddScoped<IManagerStartMatchService, ManagerStartMatchService>();
             services.AddScoped<IManagerFinishMatchService, ManagerFinishMatchService>();
-            services.AddScoped<IManagerRankMatchMakerService, ManagerRankMatchMakerService>(); 
 
             return services;
         }
@@ -96,7 +100,6 @@ namespace Application
             services.AddScoped<IMatchInviteValidator, MatchInviteValidator>();
             services.AddScoped<ICalendarValidator, CalendarValidator>();
             services.AddScoped<IFinishMatchValidator, FinishMatchValidator>();
-            services.AddScoped<IRankMatchMakerValidator, RankMatchMakerValidator>();
             services.AddScoped<ISuperAdminValidator, SuperAdminValidator>();
             services.AddScoped<IUserDataValidator, UserDataValidator>();
             services.AddScoped<IPlayerAuthorizationValidator, PlayerAuthorizationValidator>();

@@ -20,5 +20,8 @@ namespace Application.DTOs.PostPoneGame
 
         [Required]
         public TeamDto Opponent { get; set; } = null!;
+
+        /// <summary>Motivo indicado por quem pediu o adiamento.</summary>
+        public string? Reason { get; set; }
     }
 }

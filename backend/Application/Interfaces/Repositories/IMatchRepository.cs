@@ -107,5 +107,8 @@ namespace Application.Interfaces.Repositories
         /// <param name="filter">O DTO com os critérios de filtragem (Datas de Jogo Original e Proposta).</param>
         /// <returns>Uma lista de [InfoPostPoneMatch] filtrada.</returns>
         Task<List<InfoPostPoneMatch>> GetAllMatchPostPoneReceiverByIdWithFilters(Guid idReceiver, FilterPostPoneMatchDto filter);
+
+        /// <summary>Cancelamentos com nova data e adiamentos aceites, na data original (para o calendário).</summary>
+        Task<List<Application.DTOs.Competition.CalendarMarkerDto>> GetCalendarMarkersAsync(Guid idTeam);
     }
 }

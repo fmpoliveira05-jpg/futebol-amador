@@ -63,6 +63,9 @@ namespace Infrastructure
             services.AddScoped<IUnityOfWork, UnityOfWork>();
             services.AddScoped<IMembershipRequestRepository, MembershipRequestRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICompetitionRepository, CompetitionRepository>();
+            services.AddScoped<ITransferRepository, TransferRepository>();
+            services.AddScoped<IMatchDetailsRepository, MatchDetailsRepository>();
 
             return services;
         }

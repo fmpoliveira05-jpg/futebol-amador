@@ -1,6 +1,7 @@
 ﻿using Application.DTOs.Match;
 using Application.Hubs;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators.Hub;
 using Domain.Constants;
@@ -30,6 +31,7 @@ namespace Application.Services.Hub
         private readonly IGeralHubValidator geralValidator;
         private readonly IMemoryCache cache;
         private readonly ILogger<ManagerFinishMatchService> _logger; 
+        private readonly IMatchDetailsService matchDetails;
 
         /// <summary>
         /// Construtor do ManagerFinishMatchService.
@@ -39,9 +41,12 @@ namespace Application.Services.Hub
         /// <param name="validator">Validador de regras de negócio específicas de finalização.</param>
         /// <param name="geralValidator">Validador genérico de Hubs.</param>
         /// <param name="cache">Cache em memória para armazenar os resultados pendentes de validação.</param>
+        /// <param name="matchDetails">Valida e grava os eventos do jogo (marcadores, cartões, substituições, faltas).</param>
         public ManagerFinishMatchService(IMatchRepository matchRepository, IUnityOfWork unityOfWork, IFinishMatchValidator validator, 
-            IGeralHubValidator geralValidator, IMemoryCache cache, ILogger<ManagerFinishMatchService> logger)
+            IGeralHubValidator geralValidator, IMemoryCache cache, ILogger<ManagerFinishMatchService> logger,
+            IMatchDetailsService matchDetails)
         {
+            this.matchDetails = matchDetails;
             this.matchRepository = matchRepository;
             this.unityOfWork = unityOfWork;
             this.validator = validator;
@@ -71,9 +76,10 @@ namespace Application.Services.Hub
         /// <returns>Objeto [JoinFinishMatch] com o estado da finalização.</returns>
         public async Task<JoinFinishMatch> JoinHubAsync(Guid matchId, ResultMatchDto finishMatch, string userId, string connectionId)
         {
-            _logger.LogInformation($"[JoinHubAsync] User {userId} entrou. Match: {matchId}. Goals: {finishMatch.NumGoalsTeam}-{finishMatch.NumGoalsOpponent}");
-
+            // Valida antes de registar: com um DTO nulo, o registo dava NullReferenceException em vez do erro de validação.
             validator.ValidateVariableJoinMatch(matchId, finishMatch, userId, connectionId);
+
+            _logger.LogInformation($"[JoinHubAsync] User {userId} entrou. Match: {matchId}. Goals: {finishMatch.NumGoalsTeam}-{finishMatch.NumGoalsOpponent}");
 
             EntryHubFinishMatch entry;
             var match = await matchRepository.GetMatchForFinishMatch(matchId);
@@ -87,6 +93,8 @@ namespace Application.Services.Hub
             var hubCacheKey = GetHubCacheKey(matchId);
 
             _logger.LogInformation($"[JoinHubAsync] TeamID identificada: {teamId}");
+
+            await matchDetails.ValidateEventsAsync(matchId, teamId, finishMatch.NumGoalsTeam, finishMatch.Events);
 
             if (!cache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub))
             {
@@ -168,6 +176,7 @@ namespace Application.Services.Hub
             ) ?? throw new InvalidOperationException("Só os administradores das equipas deste jogo podem registar o resultado.");
 
             var teamId = teamMatchAdmin.IdTeam;
+            await matchDetails.ValidateEventsAsync(matchId, teamId, finishMatch.NumGoalsTeam, finishMatch.Events);
 
             var hubCacheKey = GetHubCacheKey(matchId);
             if (!cache.TryGetValue(hubCacheKey, out ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub))
@@ -232,6 +241,10 @@ namespace Application.Services.Hub
 
             return await LeaveHubAsync(maybeMatchId.Value, maybeTeamId.Value, connectionId);
         }
+
+        public bool HasSubmitted(Guid matchId, Guid teamId) =>
+            cache.TryGetValue(GetHubCacheKey(matchId), out ConcurrentDictionary<Guid, EntryHubFinishMatch>? hub)
+            && hub != null && hub.ContainsKey(teamId);
         #endregion
 
         #region private Methods
@@ -334,8 +347,15 @@ namespace Application.Services.Hub
                 team.NumGoals = finishMatch.NumGoalsTeam;
                 opponent.NumGoals = finishMatch.NumGoalsOpponent;
 
-                DefineWinnerMatch(team, opponent, match.IsCompetive);
+                DefineWinnerMatch(team, opponent);
                 match.MatchStatus = MatchStatus.DONE;
+
+                // Os eventos de cada equipa (os deste administrador e os que o adversário deixou na cache).
+                await matchDetails.ApplyEventsAsync(match.Id, new Dictionary<Guid, DTOs.Competition.MatchEventsDto?>
+                {
+                    [team.IdTeam] = finishMatch.Events,
+                    [opponent.IdTeam] = opponentResult.Events,
+                });
 
                 await unityOfWork.SaveChangesAsync();
                 result.IsCoincides = true;
@@ -346,9 +366,13 @@ namespace Application.Services.Hub
         }
 
         /// <summary>
-        /// Define o resultado da partida (Vitória/Derrota/Empate) e atualiza os pontos.
+        /// Define o resultado da partida (Vitória/Derrota/Empate).
         /// </summary>
-        private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent, bool isCompetitive)
+        /// <remarks>
+        /// Os pontos já não se guardam na equipa: a classificação de cada liga é calculada a partir dos jogos
+        /// terminados da época (vitória 3, empate 1, derrota 0), e os amigáveis não entram nessa conta.
+        /// </remarks>
+        private static void DefineWinnerMatch(TeamStatistics team, TeamStatistics opponent)
         {
             var numGoalsTeam = team.NumGoals;
             var numGoalsOpponent = opponent.NumGoals;
@@ -367,62 +391,6 @@ namespace Application.Services.Hub
             {
                 team.MatchResult = MatchResult.DRAW;
                 opponent.MatchResult = MatchResult.DRAW;
-            }
-
-            // Só os jogos competitivos contam para a classificação: um amigável combinado entre
-            // duas equipas não pode dar pontos.
-            if (isCompetitive)
-            {
-                updatePointsTeams(team);
-                updatePointsTeams(opponent);
-            }
-        }
-
-        /// <summary>
-        /// Atualiza os pontos da equipa com base no resultado e verifica Promoção/Despromoção.
-        /// </summary>
-        private static void updatePointsTeams(TeamStatistics teamStatistic)
-        {
-            var team = teamStatistic.Team;
-            var rank = team.Rank;
-
-            switch (teamStatistic.MatchResult)
-            {
-                case MatchResult.WIN:
-                    {
-                        team.CurrentPoints += rank.WinPoints;
-                        break;
-                    }
-                case MatchResult.DRAW:
-                    {
-                        team.CurrentPoints += rank.DrawPoints;
-                        break;
-                    }
-                case MatchResult.LOSE:
-                    {
-                        team.CurrentPoints += rank.LosePoints;
-                        break;
-                    }
-            }
-
-            ValidatePromotionOrDepromotionTeam(team);
-        }
-
-        /// <summary>
-        /// Verifica se a equipa deve subir ou descer de Rank com base nos novos pontos.
-        /// </summary>
-        private static void ValidatePromotionOrDepromotionTeam(Team team)
-        {
-            var nextRank = team.Rank.NextRank;
-            var previousRank = team.Rank.PreviousRank;
-
-            if (nextRank != null && team.CurrentPoints >= team.Rank.PointsToPromotion)
-            {
-                team.Rank = nextRank;
-            }
-            else if (previousRank != null && team.CurrentPoints < previousRank.PointsToPromotion)
-            {
-                team.Rank = previousRank;
             }
         }
 

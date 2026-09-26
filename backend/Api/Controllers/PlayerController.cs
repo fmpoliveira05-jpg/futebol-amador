@@ -402,5 +402,18 @@ namespace Api.Controllers
         }
 
         #endregion
+
+        /// <summary>
+        /// Perfil completo do jogador: dados, estatísticas por época e equipa, totais (jogos, golos,
+        /// assistências, minutos e cartões) e histórico de transferências.
+        /// </summary>
+        /// <param name="playerId">Id do jogador.</param>
+        /// <param name="profiles">Serviço de perfis.</param>
+        [HttpGet("{playerId}/profile")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(Application.DTOs.Competition.PlayerProfileDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetProfile(string playerId, [FromServices] IPlayerProfileService profiles) =>
+            Ok(await profiles.GetProfileAsync(playerId));
     }
 }
