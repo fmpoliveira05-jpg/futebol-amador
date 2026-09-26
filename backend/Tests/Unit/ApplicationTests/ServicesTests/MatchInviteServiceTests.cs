@@ -436,11 +436,12 @@ namespace Unit.ApplicationTests.ServicesTests
             matchInvite.IdSender = senderTeam.Id;
             matchInvite.IdReceiver = receiverTeam.Id;
 
+            // Quem negoceia é a equipa que recebeu o convite (a B); o destinatário da contraproposta é a A.
             var newDate = DateTime.UtcNow.AddDays(2);
             var dto = new SendMatchInviteDto
             {
-                IdSender = senderTeam.Id,
-                IdReceiver = receiverTeam.Id,
+                IdSender = receiverTeam.Id,
+                IdReceiver = senderTeam.Id,
                 GameDate = newDate,
                 homePitch = true
             };
@@ -448,20 +449,16 @@ namespace Unit.ApplicationTests.ServicesTests
             _matchInviteRepoMock.Setup(r => r.GetMatchInviteWithPitchByTeams(senderTeam.Id, receiverTeam.Id))
                                 .ReturnsAsync(matchInvite);
 
-            _matchRepoMock.Setup(r => r.GetMatchProxim12HoursMatchs(receiverTeam.Id, newDate))
+            _matchRepoMock.Setup(r => r.GetMatchProxim12HoursMatchs(senderTeam.Id, newDate))
                           .ReturnsAsync((Matches?)null);
 
-            _validatorMock.Setup(v => v.ValidateSenderMatchInvite(dto, senderTeam.Id));
-
-            _validatorMock.Setup(v => v.ValidateNegociateMatchInvite(
-                It.IsAny<Pitch>(), matchInvite, senderTeam, receiverTeam, null));
-
-            _validatorMock.Setup(v => v.ValidateHasChangeNegociateMatchInvite(true));
+            _teamRepoMock.Setup(r => r.GetTeamByIdAsync(senderTeam.Id)).ReturnsAsync(senderTeam);
+            _teamRepoMock.Setup(r => r.GetTeamByIdAsync(receiverTeam.Id)).ReturnsAsync(receiverTeam);
 
             _unitOfWorkMock.Setup(u => u.SaveChangesAsync()).ReturnsAsync(1);
 
             // ACT
-            var result = await _sut.NegociateMatchInvite(senderTeam.Id, dto);
+            var result = await _sut.NegociateMatchInvite(receiverTeam.Id, dto);
 
             // ASSERT
             result.Should().NotBeNull();

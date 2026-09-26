@@ -271,7 +271,8 @@ namespace Tests.Integration.ClassTests.TeamIntegrationTests
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             var content = await response.Content.ReadAsStringAsync();
-            Assert.That(content, Contains.Substring("Equipa atualizada com sucesso"));
+            // O endpoint devolve a equipa atualizada (já não uma mensagem).
+            Assert.That(content, Contains.Substring("Updated Team Name"));
 
             mockTeamService.Verify(s => s.UpdateTeamInfoAsync(teamId, It.IsAny<CreateTeamDto>(), It.IsAny<string>()), Times.Once);
         }

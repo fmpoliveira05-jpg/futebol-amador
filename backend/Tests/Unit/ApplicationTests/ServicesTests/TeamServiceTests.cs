@@ -28,7 +28,7 @@ namespace Unit.ApplicationTests.ServicesTests
         private Mock<IMembershipRequestRepository> _membershipRequestRepoMock;
         private Mock<INotificationService> _notificationServiceMock;
         private Mock<INotificationFirebaseService> _notificationFireBaseServiceMock;
-        private Mock<IPlayerAuthorizationValidator> _playerAuthValidatorMock;
+        private IPlayerAuthorizationValidator _playerAuthValidator;
         private TeamValidator _teamValidator;
         private TeamService _sut;
         #endregion
@@ -44,7 +44,8 @@ namespace Unit.ApplicationTests.ServicesTests
             _membershipRequestRepoMock = new Mock<IMembershipRequestRepository>();
             _notificationServiceMock = new Mock<INotificationService>();
             _notificationFireBaseServiceMock = new Mock<INotificationFirebaseService>();
-            _playerAuthValidatorMock = new Mock<IPlayerAuthorizationValidator>();
+            // O validador real: os testes verificam as mensagens de autorização (com um mock nunca eram lançadas).
+            _playerAuthValidator = new PlayerAuthorizationValidator();
             _teamValidator = new TeamValidator();
 
             _sut = new TeamService(
@@ -53,7 +54,7 @@ namespace Unit.ApplicationTests.ServicesTests
                 _unitOfWorkMock.Object,
                 _teamValidator,
                 _rankRepoMock.Object,
-                _playerAuthValidatorMock.Object,
+                _playerAuthValidator,
                 _notificationServiceMock.Object,
                 _notificationFireBaseServiceMock.Object
             );
@@ -173,7 +174,7 @@ namespace Unit.ApplicationTests.ServicesTests
             // ACT
             Func<Task> act = async () => await _sut.CreateTeamAsync(dto, adminPlayer.Id);
 
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas jogadores sem equipa podem aceder a este recurso!");
 
             // ASSERT
@@ -249,7 +250,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.UpdateTeamInfoAsync(team.Id, dto, nonAdmin.Id);
             
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque a atualização não deve ser persistida");
         }
@@ -283,7 +284,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.UpdateTeamInfoAsync(teamB.Id, dto, adminOfTeamA.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -382,7 +383,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(team.Id, player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -403,7 +404,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, playerAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -422,7 +423,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(Guid.NewGuid(), player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                  .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -469,7 +470,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(team.Id, playerWithoutTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
             _teamRepoMock.Verify(r => r.DeleteTeam(It.IsAny<Team>()), Times.Never,
                 "porque o jogador sem equipa não deve conseguir eliminar a equipa");
@@ -497,7 +498,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DeleteTeamAsync(teamY.Id, player.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -553,7 +554,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, playerRemoving.Id);
             
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             team.Members.Should().Contain(playerToRemove, "porque o jogador não deve ser removido");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never, "porque não deve haver persistência sem permissões");
@@ -586,7 +587,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(teamB.Id, playerToRemove.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             teamB.Members.Should().Contain(playerToRemove);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -619,7 +620,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.RemovePlayerFromTeamAsync(team.Id, playerToRemove.Id, admin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             team.Members.Should().NotContain(playerToRemove);
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
@@ -689,7 +690,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.PromotePlayerToAdminAsync(team.Id, playerAlreadyAdmin.Id, adminPromoter.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -713,7 +714,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.PromotePlayerToAdminAsync(teamB.Id, playerToPromote.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -875,7 +876,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(team.Id, admin.Id, nonAdmin.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas administradores de equipa têm acesso a este recurso.");
         }
 
@@ -898,7 +899,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(teamB.Id, adminToDemote.Id, adminOtherTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("O Utilizador não tem autorização para aceder a este recurso (não faz parte da equipa).");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
@@ -955,7 +956,7 @@ namespace Unit.ApplicationTests.ServicesTests
             Func<Task> act = async () => await _sut.DemoteAdminToPlayerAsync(team.Id, adminTeam.Id, playerWithoutTeam.Id);
 
             // ASSERT
-            await act.Should().ThrowAsync<InvalidOperationException>()
+            await act.Should().ThrowAsync<ForbiddenException>()
                      .WithMessage("Apenas jogadores com equipa podem aceder a este recurso!");
             _unitOfWorkMock.Verify(u => u.SaveChangesAsync(), Times.Never,
                 "porque o jogador sem clube não deve conseguir rebaixar um administrador de equipa");

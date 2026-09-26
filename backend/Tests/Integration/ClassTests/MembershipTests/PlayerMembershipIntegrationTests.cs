@@ -74,7 +74,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             // Act
-            var response = await _client.GetAsync("/api/Player/listTeamsToMemberShipRequest");
+            var response = await _client.GetAsync("/api/Player/some-player-id/listTeamsToMemberShipRequest");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -161,7 +161,7 @@ namespace Tests.Integration.ClassTests.MembershipIntegrationTests
             // Não adicionar header de autorização
 
             // Act
-            var response = await _client.GetAsync("/api/Player/listTeamsToMemberShipRequest");
+            var response = await _client.GetAsync("/api/Player/some-player-id/listTeamsToMemberShipRequest");
 
             // Assert
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));

@@ -1,6 +1,8 @@
 ﻿using Application.DTOs.Match;
 using Application.Hubs;
+using Application.DTOs.Competition;
 using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Application.Interfaces.Validators.Hub;
 using Application.Services.Hub;
 using Domain.Constants;
@@ -23,6 +25,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         private Mock<IFinishMatchValidator> mockValidator;
         private Mock<IGeralHubValidator> mockGeralValidator;
         private Mock<ILogger<ManagerFinishMatchService>> mockLogger; 
+        private Mock<IMatchDetailsService> mockMatchDetails;
         private IMemoryCache cache;
         private ManagerFinishMatchService service;
 
@@ -47,6 +50,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             mockValidator = new Mock<IFinishMatchValidator>();
             mockGeralValidator = new Mock<IGeralHubValidator>();
             mockLogger = new Mock<ILogger<ManagerFinishMatchService>>();
+            mockMatchDetails = new Mock<IMatchDetailsService>();
             cache = new MemoryCache(new MemoryCacheOptions());
             service = new ManagerFinishMatchService(
                 mockMatchRepository.Object,
@@ -54,7 +58,8 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
                 mockValidator.Object,
                 mockGeralValidator.Object,
                 cache,
-                mockLogger.Object
+                mockLogger.Object,
+                mockMatchDetails.Object
             );
 
             matchId = Guid.NewGuid();
@@ -133,6 +138,9 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             };
 
             mockMatchRepository.Setup(r => r.GetMatchWithListPlayerById(matchId))
+                .ReturnsAsync(testMatch);
+            // O JoinHubAsync carrega o jogo por GetMatchForFinishMatch (os testes antigos só simulavam o outro método).
+            mockMatchRepository.Setup(r => r.GetMatchForFinishMatch(matchId))
                 .ReturnsAsync(testMatch);
 
             mockUnitOfWork.Setup(u => u.SaveChangesAsync())
@@ -247,11 +255,12 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
             Assert.That(teamStat1.MatchResult, Is.EqualTo(MatchResult.WIN));
             Assert.That(teamStat2.MatchResult, Is.EqualTo(MatchResult.LOSE));
 
-            Assert.That(teamStat1.Team.CurrentPoints, Is.EqualTo(32));
-            Assert.That(teamStat1.Team.Rank.Id, Is.EqualTo(goldRank.Id));
+            // Os pontos deixaram de ficar na equipa: a classificação calcula-se a partir dos jogos.
+            Assert.That(teamStat1.Team.CurrentPoints, Is.EqualTo(28));
+            Assert.That(teamStat2.Team.CurrentPoints, Is.EqualTo(21));
 
-            Assert.That(teamStat2.Team.CurrentPoints, Is.EqualTo(19));
-            Assert.That(teamStat2.Team.Rank.Id, Is.EqualTo(bronzeRank.Id));
+            mockMatchDetails.Verify(m => m.ApplyEventsAsync(matchId,
+                It.Is<IReadOnlyDictionary<Guid, MatchEventsDto?>>(d => d.ContainsKey(teamId1) && d.ContainsKey(teamId2))), Times.Once);
 
             mockValidator.Verify(v => v.ValidateOpponentTeam(teamStat1), Times.Once);
         }
@@ -277,7 +286,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
         [Test(Description = "Testa se o método falha (lança ArgumentException) se a partida (matchId) não for encontrada no repositório.")]
         public void JoinHubAsync_MatchNotFound_ThrowsArgumentException()
         {
-            mockMatchRepository.Setup(r => r.GetMatchWithListPlayerById(matchId))
+            mockMatchRepository.Setup(r => r.GetMatchForFinishMatch(matchId))
                 .ReturnsAsync((Matches)null);
 
             mockValidator.Setup(v => v.ValidateMatchJoinMatch(null))
@@ -335,7 +344,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests.HubsTests
 
             Assert.That(ex.Message, Does.StartWith(expectedMessage));
 
-            mockMatchRepository.Verify(r => r.GetMatchWithListPlayerById(matchId), Times.Once);
+            mockMatchRepository.Verify(r => r.GetMatchForFinishMatch(matchId), Times.Once);
             mockValidator.Verify(v => v.ValidateMatchJoinMatch(testMatch), Times.Once);
 
             mockUnitOfWork.Verify(u => u.SaveChangesAsync(), Times.Never);
