@@ -96,6 +96,20 @@ namespace Domain.Entities
         /// <summary>
         /// Entidade de navegação para o Calendário ([Calendar]) da equipa.
         /// </summary>
+        /// <summary>
+        /// Id do jogador que criou a equipa: o administrador principal. Só ele pode despromover administradores.
+        /// </summary>
+        [MaxLength(ModelConstants.UserConst.MaxIdLength)]
+        public string? CreatorId { get; set; }
+
+        /// <summary>Liga (escalão) em que a equipa joga. Nula enquanto não estiver inscrita em nenhuma.</summary>
+        [ForeignKey("League")]
+        public Guid? IdLeague { get; set; }
+
+        public League? League { get; set; }
+
+        public ICollection<TeamTitle> Titles { get; set; } = new List<TeamTitle>();
+
         public Calendar Calendar { get; set; }
 
         /// <summary>

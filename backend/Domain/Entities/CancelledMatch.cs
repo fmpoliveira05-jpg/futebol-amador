@@ -57,6 +57,12 @@ namespace Domain.Entities
         [Required]
         public DateTime TimeCancellation { get; set; } = DateTime.UtcNow;
 
+        /// <summary>Data em que o jogo estava marcado quando foi cancelado.</summary>
+        public DateTime? OriginalDate { get; set; }
+
+        /// <summary>Nova data, quando o jogo (da liga) foi remarcado ao cancelar.</summary>
+        public DateTime? NewDate { get; set; }
+
         /// <summary>
         /// Construtor padrão exigido pelo Entity Framework (EF).
         /// </summary>

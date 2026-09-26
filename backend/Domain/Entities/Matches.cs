@@ -1,4 +1,5 @@
-﻿using Domain.Enums;
+﻿using Domain.Constants;
+using Domain.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -65,6 +66,25 @@ namespace Domain.Entities
         /// <summary>
         /// Entidade de navegação para o Chat associado a esta partida.
         /// </summary>
+        /// <summary>Época da liga a que o jogo pertence. Nula nos amigáveis.</summary>
+        [ForeignKey("Season")]
+        public Guid? IdSeason { get; set; }
+
+        public Season? Season { get; set; }
+
+        /// <summary>Jornada da liga (1, 2, ...). Nula nos amigáveis.</summary>
+        public int? Round { get; set; }
+
+        /// <summary>Equipa da casa, quando é conhecida (jogos da liga e convites novos).</summary>
+        public Guid? IdHomeTeam { get; set; }
+
+        /// <summary>Data original, se o jogo foi adiado por acordo.</summary>
+        public DateTime? PostponedFrom { get; set; }
+
+        /// <summary>Motivo do último adiamento aceite.</summary>
+        [MaxLength(ModelConstants.CancelledMatchConst.MaxReasonLength)]
+        public string? PostponeReason { get; set; }
+
         public Chat Chat { get; set; }
 
         /// <summary>

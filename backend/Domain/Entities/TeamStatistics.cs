@@ -58,6 +58,10 @@ namespace Domain.Entities
         /// </summary>
         [Required]
         public MatchResult MatchResult { get; set; } = MatchResult.UNPLAYED;
+
+        /// <summary>Faltas cometidas pela equipa (registadas pelo seu administrador no fim do jogo).</summary>
+        [Range(0, 200)]
+        public int? Fouls { get; set; }
         
         /// <summary>
         /// Construtor padrão exigido pelo Entity Framework (EF).

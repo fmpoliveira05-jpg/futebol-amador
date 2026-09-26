@@ -47,6 +47,10 @@ namespace Domain.Entities
         [Required]
         public DateTime PostPoneDate { get; set; }
 
+        /// <summary>Motivo do pedido de adiamento.</summary>
+        [MaxLength(Domain.Constants.ModelConstants.CancelledMatchConst.MaxReasonLength)]
+        public string? Reason { get; set; }
+
         /// <summary>
         /// Construtor padrão exigido pelo Entity Framework (EF).
         /// </summary>

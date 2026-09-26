@@ -92,6 +92,15 @@
             public const int MinHeight = 100;
             /// <summary> Altura máxima permitida para um jogador (em cm). </summary>
             public const int MaxHeight = 250;
+
+            /// <summary>Peso mínimo aceite (kg).</summary>
+            public const int MinWeight = 40;
+
+            /// <summary>Peso máximo aceite (kg).</summary>
+            public const int MaxWeight = 150;
+
+            /// <summary>Comprimento máximo do nome de um país.</summary>
+            public const int MaxCountryLength = 56;
         }
 
         /// <summary>
@@ -148,6 +157,9 @@
             public const int MinDescriptionLength = 1;
             /// <summary> Comprimento máximo para o campo de descrição do cancelamento. </summary>
             public const int MaxDescriptionLength = 50;
+
+            /// <summary>Comprimento máximo do motivo de um adiamento ou de um cancelamento com nova data.</summary>
+            public const int MaxReasonLength = 250;
         }
 
         /// <summary>
@@ -177,28 +189,6 @@
         }
 
         /// <summary>
-        /// Constantes de configuração para o Hub SignalR de Matchmaker de Partidas Ranqueadas.
-        /// </summary>
-        public static class RankMatchMakerHubConst
-        {
-            /// <summary> Chave para o ID da Equipa em mensagens do Hub. </summary>
-            public const string ContentTeamId = "HubTeamId";
-            /// <summary> Prefixo para o nome do grupo de utilizadores a subscrever no Hub. </summary>
-            public const string PrefixGroupName = "RankMatchhub-";
-        }
-
-        /// <summary>
-        /// Constantes de configuração para o Serviço de Gestão do Matchmaker de Partidas Ranqueadas.
-        /// </summary>
-        public static class ManagerRankMatchMakerServiceConst
-        {
-            /// <summary> Prefixo para chaves de cache relacionadas com o Matchmaker. </summary>
-            public const string PrefixHubCache = "matchRankMaker-";
-            /// <summary> Chave de cache global que lista todas as chaves de Hubs ativos. </summary>
-            public const string GlobalHubKeysCacheKey = "RankMatchMaker:Keys";
-        }
-
-        /// <summary>
         /// Constantes de configuração para o Hub SignalR de Notificações.
         /// </summary>
         public static class NotificationHubConst
@@ -210,54 +200,6 @@
         }
 
         /// <summary>
-        /// Constantes de tempo de vida de sessões ou objetos em Hubs.
-        /// </summary>
-        public static class GeralTimeInHubConst
-        {
-            /// <summary> Tempo máximo em minutos que um utilizador pode esperar no lobby de Matchmaker. </summary>
-            public const int timeInMatchMackerHub = 30; //minutos
-        }
-
-        /// <summary>
-        /// Critérios padrão de tolerância para o algoritmo de Matchmaker de partidas ranqueadas.
-        /// </summary>
-        public static class DeafultCriteriaMatchMaker
-        {
-            /// <summary> Diferença máxima aceitável na idade média das equipas (inicial). </summary>
-            public const float differenceAverageAge = 3f;
-            /// <summary> Diferença máxima absoluta na idade média das equipas (tolerância máxima). </summary>
-            public const float maxDifferenceAverageAge = 4.5f;
-            /// <summary> Diferença máxima aceitável nos pontos de ranking das equipas (inicial). </summary>
-            public const int differencePoint = 9;
-            /// <summary> Diferença máxima absoluta nos pontos de ranking das equipas (tolerância máxima). </summary>
-            public const int maxDifferencePoint = 20;
-        }
-
-        /// <summary>
-        /// Constantes que definem os intervalos de horário válidos para agendar partidas competitivas.
-        /// </summary>
-        public static class HoursValidToCompetitiveMatch
-        {
-            /// <summary> Início do horário da manhã (10:00). </summary>
-            public static readonly TimeOnly MORNING = new TimeOnly(10, 0, 0);
-            /// <summary> Início do horário da tarde (16:00). </summary>
-            public static readonly TimeOnly AFTERNOON = new TimeOnly(16, 0, 0);
-            /// <summary> Início do horário da noite (19:00). </summary>
-            public static readonly TimeOnly NIGHT = new TimeOnly(19, 0, 0);
-        }
-
-        /// <summary>
-        /// Constantes relacionadas com a Tabela de Classificação (Leaderboard).
-        /// </summary>
-        public static class TeamLeaderBoardConst
-        {
-            /// <summary> A posição mais alta (1º lugar). </summary>
-            public const int FirstPosition = 1;
-            /// <summary> O limite de equipas exibido na tabela de classificação. </summary>
-            public const int LastPosition = 100;
-        }
-
-        /// <summary>
         /// Constantes de configuração de rotas e endereços para Hubs SignalR.
         /// </summary>
         public static class RouteHubConst
@@ -265,6 +207,41 @@
             /// <summary> Endereço base do servidor Hub SignalR. </summary>
             public const string StartRoute = "http://localhost:5218";
         }
+
+        /// <summary>
+        /// Constantes do onze inicial e do relatório do jogo.
+        /// </summary>
+        public static class LineupConst
+        {
+            /// <summary>Até quantas horas antes do jogo o administrador pode definir o onze.</summary>
+            public const int DeadlineHours = 2;
+
+            /// <summary>Número de titulares.</summary>
+            public const int Starters = 11;
+
+            /// <summary>Número máximo de suplentes.</summary>
+            public const int MaxBench = 12;
+
+            /// <summary>Duração assumida de um jogo, para calcular os minutos jogados.</summary>
+            public const int MatchMinutes = 90;
+        }
+
+        /// <summary>
+        /// Constantes das ligas e da classificação.
+        /// </summary>
+        public static class LeagueConst
+        {
+            public const int PointsWin = 3;
+
+            public const int PointsDraw = 1;
+
+            public const int PointsLoss = 0;
+
+            /// <summary>Quantos jogos entram na "forma" da classificação.</summary>
+            public const int FormLength = 5;
+
+            /// <summary>Hora de início por omissão dos jogos sorteados.</summary>
+            public const string DefaultKickoff = "15:00";
+        }
     }
 }
-

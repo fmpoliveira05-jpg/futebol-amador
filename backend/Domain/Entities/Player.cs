@@ -54,6 +54,24 @@ namespace Domain.Entities
 
         public string? ImageUrl { get; set; }
 
+        /// <summary>Peso em quilogramas (opcional).</summary>
+        [Range(ModelConstants.PlayerConst.MinWeight, ModelConstants.PlayerConst.MaxWeight)]
+        public int? Weight { get; set; }
+
+        public PreferredFoot? PreferredFoot { get; set; }
+
+        /// <summary>Ativo, lesionado ou indisponível.</summary>
+        public PlayerStatus Status { get; set; } = PlayerStatus.ACTIVE;
+
+        [MaxLength(ModelConstants.PlayerConst.MaxCountryLength)]
+        public string? Nationality { get; set; }
+
+        [MaxLength(ModelConstants.PlayerConst.MaxCountryLength)]
+        public string? CountryOfBirth { get; set; }
+
+        /// <summary>Data em que entrou na equipa atual (mostrada como "Na equipa desde").</summary>
+        public DateTime? JoinedTeamAt { get; set; }
+
         /// <summary>
         /// Coleção de pedidos de adesão (Membership Requests) que este jogador enviou ou recebeu.
         /// </summary>

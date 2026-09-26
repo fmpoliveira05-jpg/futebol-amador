@@ -57,6 +57,26 @@ namespace Infrastructure.Data
         /// <summary> Tabela para o registo de Pedidos de Adesão. </summary>
         public DbSet<MembershipRequest> MembershipRequests { get; set; } = null!;
 
+        public DbSet<League> League { get; set; } = null!;
+
+        public DbSet<Season> Season { get; set; } = null!;
+
+        public DbSet<SeasonTeam> SeasonTeam { get; set; } = null!;
+
+        public DbSet<TeamTitle> TeamTitle { get; set; } = null!;
+
+        public DbSet<TransferListing> TransferListing { get; set; } = null!;
+
+        public DbSet<TransferOffer> TransferOffer { get; set; } = null!;
+
+        public DbSet<TransferRecord> TransferRecord { get; set; } = null!;
+
+        public DbSet<MatchLineup> MatchLineup { get; set; } = null!;
+
+        public DbSet<LineupSlot> LineupSlot { get; set; } = null!;
+
+        public DbSet<MatchEvent> MatchEvent { get; set; } = null!;
+
         /// <summary>
         /// Construtor principal.
         /// Recebe as opções de configuração (ConnectionString, Provider) através da Injeção de Dependências.
@@ -158,6 +178,127 @@ namespace Infrastructure.Data
                 .HasForeignKey<Rank>(rank => rank.IdPreviousRank)
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // 🔹 Ligas e épocas
+            modelBuilder.Entity<League>()
+                .HasIndex(l => l.Level)
+                .IsUnique();
+
+            modelBuilder.Entity<Team>()
+                .HasOne(t => t.League)
+                .WithMany(l => l.Teams)
+                .HasForeignKey(t => t.IdLeague)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Season>()
+                .HasOne(s => s.League)
+                .WithMany(l => l.Seasons)
+                .HasForeignKey(s => s.IdLeague)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<SeasonTeam>()
+                .HasOne(st => st.Season)
+                .WithMany(s => s.Teams)
+                .HasForeignKey(st => st.IdSeason)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeasonTeam>()
+                .HasOne(st => st.Team)
+                .WithMany()
+                .HasForeignKey(st => st.IdTeam)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SeasonTeam>()
+                .HasIndex(st => new { st.IdSeason, st.IdTeam })
+                .IsUnique();
+
+            modelBuilder.Entity<Matches>()
+                .HasOne(m => m.Season)
+                .WithMany(s => s.Matches)
+                .HasForeignKey(m => m.IdSeason)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TeamTitle>()
+                .HasOne(t => t.Team)
+                .WithMany(t => t.Titles)
+                .HasForeignKey(t => t.IdTeam)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // 🔹 Transferências
+            modelBuilder.Entity<TransferListing>()
+                .HasIndex(l => l.PlayerId)
+                .IsUnique();
+
+            modelBuilder.Entity<TransferListing>()
+                .HasOne(l => l.Player)
+                .WithMany()
+                .HasForeignKey(l => l.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TransferListing>()
+                .HasOne(l => l.Team)
+                .WithMany()
+                .HasForeignKey(l => l.IdTeam)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TransferOffer>()
+                .HasOne(o => o.Player)
+                .WithMany()
+                .HasForeignKey(o => o.PlayerId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<TransferOffer>()
+                .HasOne(o => o.FromTeam)
+                .WithMany()
+                .HasForeignKey(o => o.IdFromTeam)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TransferOffer>()
+                .HasOne(o => o.ToTeam)
+                .WithMany()
+                .HasForeignKey(o => o.IdToTeam)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<TransferRecord>()
+                .HasIndex(r => r.PlayerId);
+
+            // 🔹 Onze inicial e eventos do jogo
+            modelBuilder.Entity<MatchLineup>()
+                .HasIndex(l => new { l.IdMatch, l.IdTeam })
+                .IsUnique();
+
+            modelBuilder.Entity<MatchLineup>()
+                .HasOne(l => l.Match)
+                .WithMany()
+                .HasForeignKey(l => l.IdMatch)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MatchLineup>()
+                .HasOne(l => l.Team)
+                .WithMany()
+                .HasForeignKey(l => l.IdTeam)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LineupSlot>()
+                .HasOne(s => s.Lineup)
+                .WithMany(l => l.Slots)
+                .HasForeignKey(s => s.IdLineup)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<LineupSlot>()
+                .HasOne(s => s.Player)
+                .WithMany()
+                .HasForeignKey(s => s.PlayerId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<MatchEvent>()
+                .HasOne(e => e.Match)
+                .WithMany()
+                .HasForeignKey(e => e.IdMatch)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MatchEvent>()
+                .HasIndex(e => e.PlayerId);
 
             // 🔹 Herança — TPT
             modelBuilder.Entity<User>()
