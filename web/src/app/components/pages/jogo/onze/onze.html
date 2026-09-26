@@ -1,0 +1,155 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Onze inicial</h1>
+      @if (relatorio(); as r) {
+        <p class="page-subtitle">
+          {{ r.home.teamName }} vs {{ r.away.teamName }} · {{ r.date | date: "EEE, d MMM · HH:mm" }}
+          @if (r.leagueName) {
+            · {{ r.leagueName }}@if (r.round) {, jornada {{ r.round }}}
+          }
+        </p>
+      }
+    </div>
+    <div class="page-header__actions">
+      <a class="btn btn-secondary" [routerLink]="['/jogos', matchId()]">Relatório do jogo</a>
+    </div>
+  </header>
+
+  @if (!carregado()) {
+    <p class="estado">A carregar…</p>
+  } @else {
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+    @if (mensagem()) {
+      <p class="state--ok" role="status">{{ mensagem() }}</p>
+    }
+
+    @if (onzeAtual(); as o) {
+      <p class="dica">
+        @if (o.isLocked) {
+          O prazo terminou a {{ o.deadline | date: "d MMM 'às' HH:mm" }}: o onze já não pode ser alterado.
+          @if (o.isAutoFilled) {
+            Foi preenchido automaticamente.
+          }
+        } @else {
+          Podes alterar o onze até {{ o.deadline | date: "d MMM 'às' HH:mm" }} (2 horas antes do jogo). Se não o
+          definires, é preenchido automaticamente com o último onze.
+        }
+      </p>
+    }
+
+    <div class="layout onze">
+      <section class="card">
+        <div class="onze__topo">
+          <h2 class="card-title">A minha equipa</h2>
+          <label class="form-field">
+            <span>Tática</span>
+            <select [value]="tatica()" (change)="mudarTatica($any($event.target).value)" [disabled]="bloqueado() || !admin()">
+              @for (t of taticas(); track t.code) {
+                <option [value]="t.code" [selected]="t.code === tatica()">{{ t.code }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <app-campo
+          [posicoes]="posicoes()"
+          [jogadores]="noCampo()"
+          [selecionavel]="!bloqueado() && admin()"
+          [selecionada]="posicaoAberta()?.slot ?? null"
+          titulo="Onze da minha equipa"
+          (escolher)="abrir($event)"
+        />
+        <p class="dica">Titulares: {{ numTitulares() }} de {{ titularesNecessarios() }}.</p>
+      </section>
+
+      <aside class="card">
+        @if (posicaoAberta(); as p) {
+          <h2 class="card-title">Escolher {{ p.positionCode }} ({{ posicaoNome[p.role] }})</h2>
+          <label class="check">
+            <input type="checkbox" [checked]="mostrarTodos()" (change)="mostrarTodos.set($any($event.target).checked)" />
+            Mostrar jogadores de outras posições
+          </label>
+          <ul class="lista-escolha">
+            @for (c of candidatos(); track c.playerId) {
+              <li>
+                <button type="button" class="btn btn-secondary btn-sm" (click)="escolher(c.playerId)">
+                  {{ c.name }} <span class="dica">· {{ posicaoNome[c.position] }}</span>
+                  @if (c.status === 1) {
+                    <span class="badge badge--perigo">Lesionado</span>
+                  } @else if (c.status === 2) {
+                    <span class="badge badge--aviso">Indisponível</span>
+                  }
+                </button>
+              </li>
+            } @empty {
+              <li class="dica">Não há jogadores livres desta posição. Ativa "outras posições".</li>
+            }
+          </ul>
+          <div class="form-actions">
+            @if (titulares()[p.slot]) {
+              <button type="button" class="btn btn-link" (click)="tirar()">Deixar a posição vazia</button>
+            }
+            <button type="button" class="btn btn-link" (click)="posicaoAberta.set(null)">Fechar</button>
+          </div>
+        } @else {
+          <h2 class="card-title">Suplentes ({{ suplentes().length }}/12)</h2>
+          @if (!bloqueado() && admin()) {
+            <p class="dica">Toca numa posição do campo para escolher o titular. Marca aqui os suplentes.</p>
+            <ul class="lista-escolha">
+              @for (p of foraDoOnze(); track p.playerId) {
+                <li>
+                  <label class="check">
+                    <input
+                      type="checkbox"
+                      [checked]="suplentes().includes(p.playerId)"
+                      (change)="alternarSuplente(p.playerId)"
+                    />
+                    {{ p.name }} <span class="dica">· {{ posicaoNome[p.position] }}</span>
+                  </label>
+                </li>
+              } @empty {
+                <li class="dica">Todos os jogadores estão no onze.</li>
+              }
+            </ul>
+          } @else {
+            <ol class="lista-simples">
+              @for (id of suplentes(); track id) {
+                <li>{{ nome(id) }}</li>
+              } @empty {
+                <li class="dica">Sem suplentes.</li>
+              }
+            </ol>
+          }
+        }
+
+        @if (!bloqueado() && admin()) {
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="guardar()"
+              [disabled]="aGuardar() || numTitulares() !== titularesNecessarios()"
+            >
+              {{ aGuardar() ? 'A guardar…' : 'Guardar onze' }}
+            </button>
+          </div>
+        }
+      </aside>
+    </div>
+
+    @if (adversario(); as adv) {
+      <section class="card">
+        <h2 class="card-title">{{ adv.teamName }}</h2>
+        @if (onzeAdversario(); as oa) {
+          <p class="dica">{{ oa.formation }}</p>
+          <app-campo [posicoes]="posicoesAdversario()" [jogadores]="adversarioNoCampo()" [titulo]="'Onze de ' + adv.teamName" />
+        } @else {
+          <p class="estado">O onze do adversário só é revelado depois do prazo.</p>
+        }
+      </section>
+    }
+  }
+</section>

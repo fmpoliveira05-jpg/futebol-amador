@@ -42,6 +42,11 @@ export const routes: Routes = [
     loadComponent: () => import('./components/pages/leaderboard/leaderboard').then((m) => m.Leaderboard),
     title: 'Classificação · Futebol Amador',
   },
+  {
+    path: 'ligas',
+    loadComponent: () => import('./components/pages/ligas/ligas').then((m) => m.Ligas),
+    title: 'Ligas · Futebol Amador',
+  },
 
   // Jogadores
   {
@@ -74,7 +79,30 @@ export const routes: Routes = [
     data: { isAdmin: true },
     loadComponent: () =>
       import('./components/pages/player-list/player-list-page.component').then((m) => m.PlayerListPageComponent),
-    title: 'Recrutar jogadores · Futebol Amador',
+    title: 'Jogadores livres · Futebol Amador',
+  },
+  {
+    path: 'mercado',
+    canActivate: [authGuard],
+    data: { isAdmin: true },
+    loadComponent: () => import('./components/pages/mercado/mercado').then((m) => m.Mercado),
+    title: 'Mercado · Futebol Amador',
+  },
+  {
+    path: 'transferencias',
+    canActivate: [authGuard],
+    data: { isAdmin: true },
+    loadComponent: () =>
+      import('./components/pages/transferencias/transferencias-equipa').then((m) => m.TransferenciasEquipa),
+    title: 'Transferências · Futebol Amador',
+  },
+  {
+    path: 'players/transferencias',
+    canActivate: [authGuard],
+    data: { requiresTeam: true },
+    loadComponent: () =>
+      import('./components/pages/transferencias/transferencias-jogador').then((m) => m.TransferenciasJogador),
+    title: 'Propostas de transferência · Futebol Amador',
   },
 
   // Equipas
@@ -113,7 +141,7 @@ export const routes: Routes = [
       import('./components/pages/membership-requests/team-membership-requests.component').then(
         (m) => m.TeamMembershipRequestsPageComponent
       ),
-    title: 'Pedidos de adesão · Futebol Amador',
+    title: 'Jogadores livres: pedidos e convites · Futebol Amador',
   },
 
   // Jogos
@@ -170,6 +198,27 @@ export const routes: Routes = [
         (m) => m.CancelMatchComponent
       ),
     title: 'Cancelar jogo · Futebol Amador',
+  },
+
+  {
+    path: 'jogos/:matchId',
+    canActivate: [authGuard],
+    loadComponent: () => import('./components/pages/jogo/relatorio/relatorio').then((m) => m.Relatorio),
+    title: 'Jogo · Futebol Amador',
+  },
+  {
+    path: 'jogos/:matchId/onze',
+    canActivate: [authGuard],
+    data: { requiresTeam: true },
+    loadComponent: () => import('./components/pages/jogo/onze/onze').then((m) => m.Onze),
+    title: 'Onze inicial · Futebol Amador',
+  },
+  {
+    path: 'jogos/:matchId/resultado',
+    canActivate: [authGuard],
+    data: { isAdmin: true },
+    loadComponent: () => import('./components/pages/jogo/resultado/resultado').then((m) => m.Resultado),
+    title: 'Resultado do jogo · Futebol Amador',
   },
 
   { path: '**', redirectTo: '' },

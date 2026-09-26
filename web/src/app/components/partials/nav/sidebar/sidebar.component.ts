@@ -39,6 +39,7 @@ export class SidebarComponent {
           ligacoes: [
             { rotulo: 'Início', rota: '/', exato: true },
             { rotulo: 'Classificação', rota: '/leaderboard' },
+            { rotulo: 'Ligas', rota: '/ligas' },
             { rotulo: 'Entrar', rota: '/login' },
             { rotulo: 'Criar conta', rota: '/signup' },
           ],
@@ -52,6 +53,7 @@ export class SidebarComponent {
           { rotulo: 'Início', rota: '/', exato: true },
           { rotulo: 'O meu perfil', rota: '/players/me' },
           { rotulo: 'Classificação', rota: '/leaderboard' },
+          { rotulo: 'Ligas', rota: '/ligas' },
         ],
       },
     ];
@@ -69,12 +71,14 @@ export class SidebarComponent {
       const equipa: Ligacao[] = [
         { rotulo: 'A minha equipa', rota: ['/team/details', s.equipaId] },
         { rotulo: 'Calendário', rota: ['/players/calendar', s.equipaId], exato: true },
+        { rotulo: 'Propostas para mim', rota: '/players/transferencias' },
       ];
       if (s.admin) {
         equipa.push(
           { rotulo: 'Membros', rota: '/team/members' },
-          { rotulo: 'Pedidos de adesão', rota: '/team/membership-requests' },
-          { rotulo: 'Recrutar jogadores', rota: '/players', exato: true },
+          { rotulo: 'Transferências', rota: '/transferencias' },
+          { rotulo: 'Mercado', rota: '/mercado' },
+          { rotulo: 'Jogadores livres', rota: '/players', exato: true },
           { rotulo: 'Adversários', rota: '/teams' },
           { rotulo: 'Convites de jogo', rota: '/team/matchInvites' },
           { rotulo: 'Pedidos de adiamento', rota: ['/players/calendar', s.equipaId, 'postpone-requests'] }

@@ -1,0 +1,49 @@
+.placar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.placar .form-field {
+  flex: 1;
+}
+
+.placar input {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.placar__x {
+  font-size: 1.6rem;
+  font-weight: 700;
+  padding-bottom: 0.4rem;
+}
+
+.subtitulo {
+  margin: 1.25rem 0 0.25rem;
+  font-size: 1rem;
+}
+
+.acoes-rapidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 0.75rem;
+}
+
+.linha-evento {
+  display: grid;
+  grid-template-columns: 1fr 1fr 6rem auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .linha-evento {
+    grid-template-columns: 1fr 1fr;
+  }
+}

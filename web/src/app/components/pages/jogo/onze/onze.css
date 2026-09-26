@@ -1,0 +1,36 @@
+.onze__topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.lista-escolha,
+.lista-simples {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+  display: grid;
+  gap: 0.4rem;
+  max-height: 28rem;
+  overflow-y: auto;
+}
+
+.lista-simples {
+  list-style: decimal inside;
+}
+
+.lista-escolha .btn {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}

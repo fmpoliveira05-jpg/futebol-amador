@@ -1,0 +1,40 @@
+<div class="campo" role="group" [attr.aria-label]="titulo()">
+  <div class="campo__linhas" aria-hidden="true">
+    <span class="campo__meio"></span>
+    <span class="campo__circulo"></span>
+    <span class="campo__area campo__area--cima"></span>
+    <span class="campo__area campo__area--baixo"></span>
+    <span class="campo__pequena campo__pequena--cima"></span>
+    <span class="campo__pequena campo__pequena--baixo"></span>
+  </div>
+
+  @for (p of posicoes(); track p.slot) {
+    @let j = jogadores()[p.slot];
+    @if (selecionavel()) {
+      <button
+        type="button"
+        class="posicao"
+        [class.posicao--vazia]="!j"
+        [class.posicao--selecionada]="selecionada() === p.slot"
+        [style.left.%]="p.x"
+        [style.top.%]="p.y"
+        [attr.aria-label]="p.positionCode + ': ' + (j ? j.nome : 'por escolher')"
+        (click)="escolher.emit(p)"
+      >
+        <span class="posicao__bola">{{ j ? iniciais(j.nome) : p.positionCode }}</span>
+        <span class="posicao__nome">{{ j ? primeiroNome(j.nome) : p.positionCode }}</span>
+        @if (j?.detalhe) {
+          <span class="posicao__detalhe">{{ j?.detalhe }}</span>
+        }
+      </button>
+    } @else {
+      <div class="posicao" [class.posicao--vazia]="!j" [style.left.%]="p.x" [style.top.%]="p.y">
+        <span class="posicao__bola" [attr.title]="p.positionCode">{{ j ? iniciais(j.nome) : p.positionCode }}</span>
+        <span class="posicao__nome">{{ j ? primeiroNome(j.nome) : '—' }}</span>
+        @if (j?.detalhe) {
+          <span class="posicao__detalhe">{{ j?.detalhe }}</span>
+        }
+      </div>
+    }
+  }
+</div>

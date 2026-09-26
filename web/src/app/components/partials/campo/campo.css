@@ -1,0 +1,138 @@
+:host {
+  display: block;
+}
+
+.campo {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 68 / 90;
+  margin: 0 auto;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: repeating-linear-gradient(
+    to bottom,
+    #2f8f46 0,
+    #2f8f46 10%,
+    #2a8240 10%,
+    #2a8240 20%
+  );
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.85);
+}
+
+.campo__linhas span {
+  position: absolute;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.campo__meio {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 0;
+  border-width: 2px 0 0 0 !important;
+}
+
+.campo__circulo {
+  left: 50%;
+  top: 50%;
+  width: 26%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.campo__area {
+  left: 20%;
+  width: 60%;
+  height: 16%;
+}
+
+.campo__area--cima {
+  top: -2px;
+}
+
+.campo__area--baixo {
+  bottom: -2px;
+}
+
+.campo__pequena {
+  left: 36%;
+  width: 28%;
+  height: 6%;
+}
+
+.campo__pequena--cima {
+  top: -2px;
+}
+
+.campo__pequena--baixo {
+  bottom: -2px;
+}
+
+.posicao {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: #fff;
+  cursor: default;
+  width: 5.2rem;
+}
+
+button.posicao {
+  cursor: pointer;
+}
+
+.posicao__bola {
+  display: grid;
+  place-items: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #14532d;
+  font-weight: 800;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  text-transform: uppercase;
+}
+
+.posicao--vazia .posicao__bola {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  border: 2px dashed rgba(255, 255, 255, 0.9);
+}
+
+.posicao--selecionada .posicao__bola {
+  outline: 3px solid var(--cor-marca);
+  outline-offset: 2px;
+}
+
+button.posicao:focus-visible .posicao__bola {
+  outline: 3px solid #fde68a;
+  outline-offset: 2px;
+}
+
+.posicao__nome {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.posicao__detalhe {
+  font-size: 0.65rem;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 0.4rem;
+  padding: 0 0.3rem;
+}

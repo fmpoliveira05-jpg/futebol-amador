@@ -1,0 +1,192 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Resultado do jogo</h1>
+      @if (relatorio(); as r) {
+        <p class="page-subtitle">{{ r.home.teamName }} vs {{ r.away.teamName }} · {{ r.date | date: "EEE, d MMM · HH:mm" }}</p>
+      }
+    </div>
+    <div class="page-header__actions">
+      <a class="btn btn-secondary" [routerLink]="['/jogos', matchId()]">Relatório do jogo</a>
+    </div>
+  </header>
+
+  @if (!carregado()) {
+    <p class="estado">A carregar…</p>
+  } @else if (nossa() && deles()) {
+    <p class="dica">
+      Regista o resultado e os eventos da tua equipa. O jogo só termina quando o administrador da outra equipa
+      registar o mesmo resultado.
+    </p>
+
+    @if (resposta(); as r) {
+      <p [class]="r.terminado ? 'state--ok' : 'aviso'" role="status">{{ r.texto }}</p>
+    }
+    @if (erro()) {
+      <p class="erro" role="alert">{{ erro() }}</p>
+    }
+
+    <div class="layout">
+      <section class="card">
+        <h2 class="card-title">Resultado</h2>
+        <div class="placar">
+          <label class="form-field">
+            <span>{{ nossa()!.teamName }}</span>
+            <input type="number" min="0" max="100" [value]="golosNossos()" (input)="golosNossos.set(numero($any($event.target).value) ?? 0)" />
+          </label>
+          <span class="placar__x" aria-hidden="true">–</span>
+          <label class="form-field">
+            <span>{{ deles()!.teamName }}</span>
+            <input type="number" min="0" max="100" [value]="golosDeles()" (input)="golosDeles.set(numero($any($event.target).value) ?? 0)" />
+          </label>
+        </div>
+        <label class="form-field">
+          <span>Faltas cometidas pela tua equipa</span>
+          <input type="number" min="0" max="200" [value]="faltas() ?? ''" (input)="faltas.set(numero($any($event.target).value))" />
+        </label>
+
+        @if (onze()?.exists) {
+          <h3 class="subtitulo">Onze</h3>
+          <p class="dica">Toca num jogador para registar um golo, um cartão ou a saída.</p>
+          <app-campo
+            [posicoes]="posicoes()"
+            [jogadores]="noCampo()"
+            [selecionavel]="true"
+            [selecionada]="selecionado()?.slot ?? null"
+            titulo="Onze da minha equipa"
+            (escolher)="escolherNoCampo($event)"
+          />
+          @if (selecionado()) {
+            <div class="acoes-rapidas" role="group" aria-label="Ações para o jogador escolhido">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="golo()">⚽ Golo</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="cartao(0)">🟨 Amarelo</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="cartao(1)">🟥 Vermelho</button>
+              <button type="button" class="btn btn-secondary btn-sm" (click)="substituir()">↔ Substituir</button>
+            </div>
+          }
+        } @else {
+          <p class="dica">Esta equipa não tem onze registado: escolhe os jogadores nas listas.</p>
+        }
+      </section>
+
+      <aside class="card">
+        <h2 class="card-title">Totais</h2>
+        <dl class="details-grid">
+          <div class="details-grid__item"><dt>Golos com marcador</dt><dd>{{ golos().length }} de {{ golosNossos() }}</dd></div>
+          <div class="details-grid__item"><dt>Faltas</dt><dd>{{ faltas() ?? '—' }}</dd></div>
+          <div class="details-grid__item"><dt>Amarelos</dt><dd>{{ totalAmarelos() }}</dd></div>
+          <div class="details-grid__item"><dt>Vermelhos</dt><dd>{{ totalVermelhos() }}</dd></div>
+          <div class="details-grid__item"><dt>Substituições</dt><dd>{{ substituicoes().length }}</dd></div>
+        </dl>
+      </aside>
+    </div>
+
+    <section class="card">
+      <h2 class="card-title">Golos</h2>
+      @for (g of golos(); track $index; let i = $index) {
+        <div class="linha-evento">
+          <label class="form-field">
+            <span>Marcador</span>
+            <select [value]="g.scorerId ?? ''" (change)="alterarGolo(i, 'scorerId', $any($event.target).value)">
+              <option value="">Não indicado</option>
+              @for (o of todos(); track o.id) {
+                <option [value]="o.id">{{ o.nome }}</option>
+              }
+            </select>
+          </label>
+          <label class="form-field">
+            <span>Assistência</span>
+            <select [value]="g.assistId ?? ''" (change)="alterarGolo(i, 'assistId', $any($event.target).value)">
+              <option value="">Sem assistência</option>
+              @for (o of todos(); track o.id) {
+                <option [value]="o.id">{{ o.nome }}</option>
+              }
+            </select>
+          </label>
+          <label class="form-field form-field--minuto">
+            <span>Minuto</span>
+            <input type="number" min="0" max="130" [value]="g.minute ?? ''" (input)="alterarGolo(i, 'minute', $any($event.target).value)" />
+          </label>
+          <button type="button" class="btn btn-link" (click)="remover('golos', i)" aria-label="Remover golo">Remover</button>
+        </div>
+      } @empty {
+        <p class="dica">Sem golos registados.</p>
+      }
+      <button type="button" class="btn btn-secondary btn-sm" (click)="acrescentarGolo()" [disabled]="golos().length >= golosNossos()">
+        + Golo
+      </button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Cartões</h2>
+      @for (c of cartoes(); track $index; let i = $index) {
+        <div class="linha-evento">
+          <label class="form-field">
+            <span>Jogador</span>
+            <select [value]="c.playerId" (change)="alterarCartao(i, 'playerId', $any($event.target).value)">
+              @for (o of todos(); track o.id) {
+                <option [value]="o.id">{{ o.nome }}</option>
+              }
+            </select>
+          </label>
+          <label class="form-field">
+            <span>Cartão</span>
+            <select [value]="c.type" (change)="alterarCartao(i, 'type', $any($event.target).value)">
+              <option [value]="0">Amarelo</option>
+              <option [value]="1">Vermelho</option>
+            </select>
+          </label>
+          <label class="form-field form-field--minuto">
+            <span>Minuto</span>
+            <input type="number" min="0" max="130" [value]="c.minute ?? ''" (input)="alterarCartao(i, 'minute', $any($event.target).value)" />
+          </label>
+          <button type="button" class="btn btn-link" (click)="remover('cartoes', i)" aria-label="Remover cartão">Remover</button>
+        </div>
+      } @empty {
+        <p class="dica">Sem cartões.</p>
+      }
+      <button type="button" class="btn btn-secondary btn-sm" (click)="acrescentarCartao()">+ Cartão</button>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Substituições</h2>
+      @for (s of substituicoes(); track $index; let i = $index) {
+        <div class="linha-evento">
+          <label class="form-field">
+            <span>Sai</span>
+            <select [value]="s.playerOutId" (change)="alterarSubstituicao(i, 'playerOutId', $any($event.target).value)">
+              @for (o of todos(); track o.id) {
+                <option [value]="o.id">{{ o.nome }}</option>
+              }
+            </select>
+          </label>
+          <label class="form-field">
+            <span>Entra</span>
+            <select [value]="s.playerInId" (change)="alterarSubstituicao(i, 'playerInId', $any($event.target).value)">
+              <option value="">Escolher…</option>
+              @for (o of suplentes(); track o.id) {
+                <option [value]="o.id">{{ o.nome }}</option>
+              }
+            </select>
+          </label>
+          <label class="form-field form-field--minuto">
+            <span>Minuto</span>
+            <input type="number" min="0" max="130" [value]="s.minute ?? ''" (input)="alterarSubstituicao(i, 'minute', $any($event.target).value)" />
+          </label>
+          <button type="button" class="btn btn-link" (click)="remover('substituicoes', i)" aria-label="Remover substituição">Remover</button>
+        </div>
+      } @empty {
+        <p class="dica">Sem substituições.</p>
+      }
+      <button type="button" class="btn btn-secondary btn-sm" (click)="acrescentarSubstituicao()">+ Substituição</button>
+    </section>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" (click)="enviar()" [disabled]="aEnviar()">
+        {{ aEnviar() ? 'A enviar…' : 'Registar resultado' }}
+      </button>
+    </div>
+  } @else {
+    <p class="erro" role="alert">{{ erro() ?? 'A tua equipa não joga este jogo.' }}</p>
+  }
+</section>

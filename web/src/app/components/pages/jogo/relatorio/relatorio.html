@@ -1,0 +1,84 @@
+<section class="page">
+  @if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  } @else if (relatorio(); as r) {
+    <header class="page-header">
+      <div>
+        <h1 class="page-title">{{ r.home.teamName }} vs {{ r.away.teamName }}</h1>
+        <p class="page-subtitle">
+          {{ r.date | date: "EEEE, d 'de' MMMM 'de' y · HH:mm" }}
+          @if (r.pitchName) {
+            · {{ r.pitchName }}
+          }
+        </p>
+      </div>
+      <div class="page-header__actions">
+        @if (minhaEquipaJoga() && sessao().admin) {
+          @if (r.status === 0) {
+            <a class="btn btn-secondary" [routerLink]="['/jogos', r.matchId, 'onze']">Onze inicial</a>
+          }
+          @if (r.status === 0 || r.status === 1) {
+            <a class="btn btn-primary" [routerLink]="['/jogos', r.matchId, 'resultado']">Registar resultado</a>
+          }
+        }
+      </div>
+    </header>
+
+    <div class="card marcador">
+      <span class="badge" [class.badge--info]="r.isCompetitive">
+        {{ r.leagueName ? r.leagueName : 'Amigável' }}@if (r.round) { · jornada {{ r.round }} }
+      </span>
+      <div class="marcador__linha">
+        <span class="marcador__equipa">{{ r.home.teamName }}</span>
+        <span class="marcador__golos">
+          @if (r.home.goals !== null && r.away.goals !== null) {
+            {{ r.home.goals }} – {{ r.away.goals }}
+          } @else {
+            vs
+          }
+        </span>
+        <span class="marcador__equipa">{{ r.away.teamName }}</span>
+      </div>
+      <span class="badge">{{ estados[r.status] }}</span>
+    </div>
+
+    <div class="layout duas-colunas">
+      @for (e of [r.home, r.away]; track e.teamId) {
+        <section class="card">
+          <h2 class="card-title">{{ e.teamName }}</h2>
+          <dl class="totais">
+            <div><dt>Faltas</dt><dd>{{ e.fouls ?? '—' }}</dd></div>
+            <div><dt>Amarelos</dt><dd>{{ e.yellowCards }}</dd></div>
+            <div><dt>Vermelhos</dt><dd>{{ e.redCards }}</dd></div>
+            <div><dt>Substituições</dt><dd>{{ e.substitutions }}</dd></div>
+          </dl>
+
+          @if (e.lineup?.exists) {
+            <p class="dica">{{ e.lineup?.formation }}@if (e.lineup?.isAutoFilled) { · preenchido automaticamente }</p>
+            <app-campo [posicoes]="posicoes(e)" [jogadores]="noCampo(e)" [titulo]="'Onze de ' + e.teamName" />
+            @if (e.lineup?.bench?.length) {
+              <p class="dica">Suplentes: @for (b of e.lineup?.bench ?? []; track b.playerId; let ultimo = $last) {{{ b.playerName }}@if (!ultimo) {, }}</p>
+            }
+          } @else {
+            <p class="dica">Onze ainda não conhecido.</p>
+          }
+
+          <h3 class="subtitulo">Eventos</h3>
+          <ol class="eventos">
+            @for (ev of e.events; track $index) {
+              <li>
+                <span class="eventos__minuto">{{ ev.minute !== null ? ev.minute + "'" : '—' }}</span>
+                <span aria-hidden="true">{{ icone[ev.type] }}</span>
+                <span>{{ descricao(ev.type, ev.playerName, ev.relatedPlayerName) }}</span>
+              </li>
+            } @empty {
+              <li class="dica">Sem eventos registados.</li>
+            }
+          </ol>
+        </section>
+      }
+    </div>
+  } @else {
+    <p class="estado">A carregar…</p>
+  }
+</section>
