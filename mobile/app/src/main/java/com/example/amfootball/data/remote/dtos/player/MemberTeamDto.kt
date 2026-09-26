@@ -32,8 +32,14 @@ data class MemberTeamDto(
     val age: Int = 0,
     @SerializedName("Height", alternate = ["height"])
     val height: Int = 0,
-    @SerializedName("Position")
+    @SerializedName("Position", alternate = ["position"])
     val positionId: Int = 0,
+    /** Criou a equipa: é o administrador principal (só ele despromove administradores). */
+    @SerializedName("IsCreator", alternate = ["isCreator"])
+    val isCreator: Boolean = false,
+    /** O clube colocou-o no mercado de transferências. */
+    @SerializedName("IsListed", alternate = ["isListed"])
+    val isListed: Boolean = false,
 ) {
     /**
      * Propriedade calculada que converte o [positionId] (Int) para o Enum [Position].

@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.screens.user
 
+import com.example.amfootball.competicao.FichaDesportivaJogador
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,7 +53,8 @@ fun ProfileScreen(
         profileData = profile,
         uiState = uiState,
         retry = { viewModel.retry() },
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
+        fichaDesportiva = { FichaDesportivaJogador() }
     )
 }
 
@@ -72,7 +74,8 @@ private fun ProfileScreenContent(
     profileData: PlayerProfileDto?,
     uiState: UiState,
     retry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    fichaDesportiva: @Composable () -> Unit = {}
 ) {
     LoadingPage(
         isLoading = uiState.isLoading,
@@ -88,6 +91,7 @@ private fun ProfileScreenContent(
                     verticalArrangement = Arrangement.Center
                 ) {
                     TextFieldProfile(profileData = profileData)
+                    fichaDesportiva()
                 }
             }
         }

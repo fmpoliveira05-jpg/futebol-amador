@@ -1,6 +1,7 @@
 package com.example.amfootball.data.remote.dtos.team
 
 import com.example.amfootball.data.remote.dtos.support.PitchInfo
+import com.example.amfootball.competicao.TeamTitleDto
 import com.google.gson.annotations.SerializedName
 
 /**
@@ -31,6 +32,16 @@ data class ProfileTeamDto(
     val rank: String = "",
     @SerializedName("PitchDto", alternate = ["pitchDto"])
     val pitch: PitchInfo = PitchInfo(),
+    /** Quem criou a equipa (administrador principal). */
+    @SerializedName("CreatorId", alternate = ["creatorId"])
+    val creatorId: String? = null,
+    @SerializedName("LeagueId", alternate = ["leagueId"])
+    val leagueId: String? = null,
+    @SerializedName("LeagueName", alternate = ["leagueName"])
+    val leagueName: String? = null,
+    /** Troféus ganhos, agrupados por tipo ("x3"). */
+    @SerializedName("Titles", alternate = ["titles"])
+    val titles: List<TeamTitleDto>? = null,
 )
 
 fun ProfileTeamDto.toFormTeamDto(): FormTeamDto {

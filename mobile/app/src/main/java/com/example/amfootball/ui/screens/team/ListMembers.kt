@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RemoveShoppingCart
+import androidx.compose.material.icons.filled.Storefront
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.filled.Upgrade
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -81,6 +84,7 @@ fun ListMembersScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
     val role by viewModel.role.collectAsStateWithLifecycle()
+    val souCriador by viewModel.souCriador.collectAsStateWithLifecycle()
     val list by viewModel.uiList.collectAsStateWithLifecycle()
     val listTypeMember by viewModel.uiListTypeMember.collectAsStateWithLifecycle()
     val listPosition by viewModel.uiListPositions.collectAsStateWithLifecycle()
@@ -122,7 +126,9 @@ fun ListMembersScreen(
         listPosition = listPosition,
         itemsListActions = itemsListActions,
         showMoreItensAction = showMoreItensAction,
-        navHostController = navHostController
+        navHostController = navHostController,
+        souCriador = souCriador,
+        onToggleListing = viewModel::onToggleListing
     )
 }
 
@@ -156,7 +162,9 @@ private fun ListMemberContent(
     listPosition: List<Position?>,
     itemsListActions: ItemsListMemberAction,
     showMoreItensAction: ShowMoreItensAction,
-    navHostController: NavHostController
+    navHostController: NavHostController,
+    souCriador: Boolean = false,
+    onToggleListing: (MemberTeamDto) -> Unit = {}
 ) {
     var filtersExpanded by remember { mutableStateOf(false) }
     val isShowMoreVisible by showMoreItensAction.isValidShowMore().collectAsStateWithLifecycle()
@@ -203,7 +211,9 @@ private fun ListMemberContent(
                                 navHostController
                             )
                         },
-                        role = role
+                        role = role,
+                        souCriador = souCriador,
+                        aoMercado = { onToggleListing(member) }
                     )
                 },
                 isValidShowMore = isShowMoreVisible,
@@ -335,7 +345,9 @@ private fun ListMemberItem(
     despromote: () -> Unit,
     remove: () -> Unit,
     showMore: () -> Unit,
-    role: UserRole
+    role: UserRole,
+    souCriador: Boolean = false,
+    aoMercado: () -> Unit = {}
 ) {
     GenericListItem(
         item = member,
@@ -355,12 +367,14 @@ private fun ListMemberItem(
         },
         trailing = {
             MemberTrailingButtons(
-                typeMember = member.typeMember,
+                member = member,
                 promote = promote,
                 despromote = despromote,
                 remove = remove,
                 showMore = showMore,
-                role = role
+                role = role,
+                souCriador = souCriador,
+                aoMercado = aoMercado
             )
         }
     )
@@ -378,6 +392,20 @@ private fun MemberSupportingInfo(member: MemberTeamDto) {
         PositionRow(position = member.position)
         TypeMemberRow(typeMember = member.typeMember)
         SizeRow(height = member.height)
+        if (member.isCreator) {
+            Text(
+                "Administrador principal",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+        if (member.isListed) {
+            Text(
+                "No mercado de transferências",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.tertiary
+            )
+        }
     }
 }
 
@@ -397,12 +425,14 @@ private fun MemberSupportingInfo(member: MemberTeamDto) {
  */
 @Composable
 private fun MemberTrailingButtons(
-    typeMember: TypeMember,
+    member: MemberTeamDto,
     promote: () -> Unit,
     despromote: () -> Unit,
     remove: () -> Unit,
     showMore: () -> Unit,
-    role: UserRole
+    role: UserRole,
+    souCriador: Boolean,
+    aoMercado: () -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -411,10 +441,12 @@ private fun MemberTrailingButtons(
     ) {
         if (role == UserRole.ADMIN_TEAM) {
             AdminItensListFields(
-                typeMember = typeMember,
+                member = member,
+                souCriador = souCriador,
                 promote = promote,
                 despromote = despromote,
-                remove = remove
+                remove = remove,
+                aoMercado = aoMercado
             )
         }
 
@@ -427,12 +459,25 @@ private fun MemberTrailingButtons(
 
 @Composable
 private fun AdminItensListFields(
-    typeMember: TypeMember,
+    member: MemberTeamDto,
+    souCriador: Boolean,
     promote: () -> Unit,
     despromote: () -> Unit,
     remove: () -> Unit,
+    aoMercado: () -> Unit,
 ) {
-    when (typeMember) {
+    // Hierarquia: só o administrador principal despromove, e ninguém o despromove nem expulsa.
+    if (member.isCreator) return
+
+    IconButton(onClick = aoMercado) {
+        Icon(
+            imageVector = if (member.isListed) Icons.Filled.RemoveShoppingCart else Icons.Filled.Storefront,
+            contentDescription = if (member.isListed) "Retirar do mercado" else "Colocar no mercado",
+            tint = MaterialTheme.colorScheme.tertiary
+        )
+    }
+
+    when (member.typeMember) {
         TypeMember.PLAYER -> {
             IconButton(onClick = promote) {
                 Icon(
@@ -443,7 +488,7 @@ private fun AdminItensListFields(
             }
         }
 
-        TypeMember.ADMIN_TEAM -> {
+        TypeMember.ADMIN_TEAM -> if (souCriador) {
             IconButton(onClick = despromote) {
                 Icon(
                     imageVector = Icons.Filled.ArrowDownward,

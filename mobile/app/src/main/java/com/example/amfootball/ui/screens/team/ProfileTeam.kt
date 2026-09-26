@@ -1,5 +1,6 @@
 package com.example.amfootball.ui.screens.team
 
+import com.example.amfootball.competicao.TitulosEquipa
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -187,18 +188,13 @@ private fun FieldProfileTeam(
     )
 
     TextFieldOutline(
-        label = "Rank",
-        value = profileInfo.rank,
+        label = stringResource(id = R.string.item_ligas),
+        value = profileInfo.leagueName ?: profileInfo.rank,
         isSingleLine = true,
         isReadOnly = true,
     )
 
-    TextFieldOutline(
-        label = stringResource(id = R.string.label_field_total_points),
-        value = profileInfo.totalPoints.toString(),
-        isSingleLine = true,
-        isReadOnly = true,
-    )
+    TitulosEquipa(titulos = profileInfo.titles.orEmpty())
 
     Text(text = stringResource(id = R.string.label_fields_pitch))
     TextFieldOutline(

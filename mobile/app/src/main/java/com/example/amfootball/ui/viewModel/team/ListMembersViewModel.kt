@@ -2,6 +2,7 @@ package com.example.amfootball.ui.viewModel.team
 
 import androidx.navigation.NavHostController
 import com.example.amfootball.R
+import com.example.amfootball.competicao.CompeticaoService
 import com.example.amfootball.core.utils.UserConst
 import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.filters.FilterMembersTeam
@@ -40,7 +41,8 @@ import javax.inject.Inject
 class ListMembersViewModel @Inject constructor(
     private val networkObserver: NetworkConnectivityObserver,
     private val sessionManager: SessionManager,
-    private val teamRepository: TeamService
+    private val teamRepository: TeamService,
+    private val competicaoService: CompeticaoService
 ) : ListsViewModels<MemberTeamDto>(networkObserver = networkObserver) {
 
     /**
@@ -84,6 +86,12 @@ class ListMembersViewModel @Inject constructor(
      * Valor por defeito seguro: [UserRole.MEMBER_TEAM].
      */
     val role: StateFlow<UserRole> = roleState.asStateFlow()
+
+    private val meuId: String = sessionManager.fetchUserId()
+
+    /** Sou o administrador principal (criador): só ele despromove administradores. */
+    private val souCriadorState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val souCriador: StateFlow<Boolean> = souCriadorState.asStateFlow()
 
 
     //Init
@@ -167,6 +175,7 @@ class ListMembersViewModel @Inject constructor(
 
         launchDataLoad {
             teamRepository.promotePlayer(teamId = teamId, playerPromoteId = playerId)
+            atualizarLista()
         }
     }
 
@@ -176,14 +185,38 @@ class ListMembersViewModel @Inject constructor(
      * @param adminId O ID do administrador a despromover.
      */
     fun onDemoteMember(adminId: String) {
-        if (roleState.value != UserRole.ADMIN_TEAM) {
+        val alvo = originalList.firstOrNull { it.id == adminId }
+        if (roleState.value != UserRole.ADMIN_TEAM || !souCriadorState.value || alvo?.isCreator == true) {
             updateToast(message = R.string.toast_admin_only_demote)
             return
         }
 
         launchDataLoad {
             teamRepository.demoteAdmin(teamId = teamId, adminDemoteId = adminId)
+            atualizarLista()
         }
+    }
+
+    /** Coloca ou retira o jogador do mercado de transferências. */
+    fun onToggleListing(member: MemberTeamDto) {
+        if (roleState.value != UserRole.ADMIN_TEAM) return
+        launchDataLoad {
+            if (member.isListed) {
+                competicaoService.retirarDoMercado(teamId, member.id)
+            } else {
+                competicaoService.colocarNoMercado(teamId, member.id)
+            }
+            atualizarLista()
+        }
+    }
+
+    private suspend fun atualizarLista() {
+        val membros = teamRepository.getListMembers(teamId = teamId, filterState.value)
+        listState.value = membros
+        if (filterState.value == FilterMembersTeam()) {
+            originalList = membros
+        }
+        souCriadorState.value = membros.any { it.id == meuId && it.isCreator }
     }
 
     /**
@@ -229,12 +262,7 @@ class ListMembersViewModel @Inject constructor(
      */
     private fun loadListMember() {
         launchDataLoad {
-            val teams = teamRepository.getListMembers(teamId = teamId, filterState.value)
-
-            listState.value = teams
-            if (filterState.value == FilterMembersTeam()) {
-                originalList = teams
-            }
+            atualizarLista()
         }
     }
 
