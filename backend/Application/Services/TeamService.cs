@@ -7,7 +7,9 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
 using Application.Interfaces.Validators;
+using Application.Services.Competition;
 using Domain.Entities;
+using Domain.Enums;
 
 namespace Application.Services
 {
@@ -28,6 +30,8 @@ namespace Application.Services
         private readonly IPlayerAuthorizationValidator AuthorizationValidator;
         private readonly INotificationService notificationService;
         private readonly INotificationFirebaseService notificationFirebaseService;
+        private readonly ITransferRepository? transferRepository;
+        private readonly ICompetitionRepository? competitionRepository;
 
         /// <summary>
         /// Construtor do TeamService.
@@ -47,8 +51,14 @@ namespace Application.Services
             IRankRepository rankRepository,
             IPlayerAuthorizationValidator authorizationValidator,
             INotificationService notificationService,
-            INotificationFirebaseService notificationFirebaseService)
+            INotificationFirebaseService notificationFirebaseService,
+            ITransferRepository? transferRepository = null,
+            ICompetitionRepository? competitionRepository = null)
         {
+            // Os dois últimos são opcionais para os testes antigos, que constroem o serviço sem eles;
+            // na aplicação vêm sempre da injeção de dependências.
+            this.transferRepository = transferRepository;
+            this.competitionRepository = competitionRepository;
             TeamRepository = teamRepository;
             PlayerRepository = playerRepository;
             UnityOfWork = unityOfWork;
@@ -113,10 +123,39 @@ namespace Application.Services
             playerCreating.IdTeam = newTeam.Id;
             playerCreating.Team = newTeam;
             playerCreating.IsAdminLastChangedAt = DateTime.UtcNow;
+            playerCreating.JoinedTeamAt = DateTime.UtcNow;
+            newTeam.CreatorId = playerCreating.Id;
             newTeam.Members ??= new List<Player>();
             newTeam.Members.Add(playerCreating);
 
             await TeamRepository.AddAsync(newTeam);
+
+            // Uma equipa nova começa na liga mais baixa e entra nas inscrições abertas, se houver.
+            if (competitionRepository != null)
+            {
+                var leagues = await competitionRepository.GetLeaguesAsync();
+                var lowest = leagues.OrderByDescending(l => l.Level).FirstOrDefault();
+                if (lowest != null)
+                {
+                    newTeam.IdLeague = lowest.Id;
+                    var open = await competitionRepository.GetOpenSeasonAsync(lowest.Id);
+                    if (open != null && open.Status == SeasonStatus.REGISTRATION)
+                    {
+                        await competitionRepository.AddSeasonTeamAsync(new SeasonTeam { IdSeason = open.Id, IdTeam = newTeam.Id });
+                    }
+                }
+            }
+
+            if (transferRepository != null)
+            {
+                await transferRepository.AddRecordAsync(new TransferRecord
+                {
+                    PlayerId = playerCreating.Id,
+                    IdToTeam = newTeam.Id,
+                    ToTeamName = newTeam.Name,
+                    Kind = TransferKind.JOINED,
+                });
+            }
 
             PlayerRepository.UpdatePlayer(playerCreating);
 
@@ -144,8 +183,14 @@ namespace Application.Services
 
             TeamValidator.DeleteTeamValidation(teamToDelete);
             
+            if (transferRepository != null)
+            {
+                await transferRepository.RemoveOffersOfTeamAsync(teamId);
+            }
+
             foreach (var member in teamToDelete.Members)
             {
+                await RecordLeftAsync(member, teamToDelete);
                 member.IdTeam = null;
                 if (member.IsAdmin)
                 {
@@ -208,6 +253,11 @@ namespace Application.Services
             var team = await TeamRepository.GetTeamDetailsDtoAsync(teamId);
 
             TeamValidator.GetTeamByIdValidation(team);
+
+            if (competitionRepository != null)
+            {
+                team.Titles = LeagueService.GroupTitles(await competitionRepository.GetTitlesAsync(teamId));
+            }
 
             return team;
         }
@@ -330,6 +380,9 @@ namespace Application.Services
                     Name = player.Team?.Name
                 } : null,
                 Address = player.Address,
+                IsCreator = TeamHierarchy.IsSupreme(team, player.Id),
+                Status = player.Status,
+                Nationality = player.Nationality,
             }).ToList();
 
             return playerDtos;
@@ -376,7 +429,9 @@ namespace Application.Services
             TeamValidator.RemovePlayerFromTeamValidation(existingTeam, playerRemoving, playerToRemove);
 
             existingTeam.Members.Remove(playerToRemove);
+            await RecordLeftAsync(playerToRemove, existingTeam);
             playerToRemove.IdTeam = null;
+            playerToRemove.JoinedTeamAt = null;
             if (playerToRemove.IsAdmin)
             {
                 playerToRemove.IsAdmin = false;
@@ -509,5 +564,29 @@ namespace Application.Services
         }
 
         #endregion
+
+        /// <summary>Regista no histórico de transferências que o jogador saiu da equipa e ficou livre.</summary>
+        private async Task RecordLeftAsync(Player player, Team team)
+        {
+            if (transferRepository == null)
+            {
+                return;
+            }
+
+            await transferRepository.AddRecordAsync(new TransferRecord
+            {
+                PlayerId = player.Id,
+                IdFromTeam = team.Id,
+                FromTeamName = team.Name,
+                Kind = TransferKind.LEFT,
+            });
+
+            // Um jogador livre não fica no mercado da equipa que deixou.
+            var listing = await transferRepository.GetListingAsync(player.Id);
+            if (listing != null)
+            {
+                transferRepository.RemoveListing(listing);
+            }
+        }
     }
 }

@@ -44,6 +44,14 @@ namespace Application.DTOs.PlayerDTOs
 
         public bool? IsAdmin { get; set; }
 
+        /// <summary>É o administrador principal da equipa (quem a criou).</summary>
+        public bool IsCreator { get; set; }
+
+        /// <summary>Ativo, lesionado ou indisponível.</summary>
+        public PlayerStatus Status { get; set; }
+
+        public string? Nationality { get; set; }
+
         /// <summary>
         /// Apaga os dados de contacto (e-mail, telefone, morada e data de nascimento) antes de o
         /// perfil ser mostrado a alguém que não é o próprio jogador nem colega de equipa.

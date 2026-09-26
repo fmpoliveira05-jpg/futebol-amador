@@ -35,5 +35,15 @@ namespace Application.DTOs.Team
 
         [Required]
         public List<PlayerDetailsDto> Players { get; set; } = null!;
+
+        /// <summary>Id de quem criou a equipa (o administrador principal).</summary>
+        public string? CreatorId { get; set; }
+
+        public Guid? LeagueId { get; set; }
+
+        public string? LeagueName { get; set; }
+
+        /// <summary>Títulos ganhos, agrupados por troféu.</summary>
+        public List<Competition.TeamTitleDto> Titles { get; set; } = new();
     }
 }

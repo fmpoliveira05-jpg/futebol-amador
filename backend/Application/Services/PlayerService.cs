@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Filters;
+﻿using Domain.Enums;
+using Application.Services.Competition;
+using Application.DTOs.Filters;
 using Application.DTOs.Player;
 using Application.DTOs.PlayerDTOs;
 using Application.DTOs.Team;
@@ -28,6 +30,7 @@ namespace Application.Services
         private readonly IUserDataValidator UserDataValidator;
         private readonly IPlayerValidator playerValidator;
         private readonly ITeamValidator teamValidator;
+        private readonly ITransferRepository? transferRepository;
 
         /// <summary>
         /// Construtor do PlayerService.
@@ -36,8 +39,11 @@ namespace Application.Services
             IUnityOfWork unitOfWork, IMembershipRequestRepository membershipRequestRepository,
             IPlayerValidator playerValidator, IUserRepository userRepository, 
             ITeamService teamService, IUserDataValidator userDataValidator,
-            IAuthService authService, ITeamValidator teamValidator)
+            IAuthService authService, ITeamValidator teamValidator,
+            ITransferRepository? transferRepository = null)
         {
+            // Opcional para os testes antigos; na aplicação vem da injeção de dependências.
+            this.transferRepository = transferRepository;
             this.playerRepository = playerRepository;
             this.teamRepository = teamRepository;
             this.unityOfWork = unitOfWork;
@@ -163,7 +169,12 @@ namespace Application.Services
                 Email = player.Email,
                 Phone = player.Phone,
                 Position = player.Position,
-                Height = player.Height
+                Height = player.Height,
+                Weight = player.Weight,
+                PreferredFoot = player.PreferredFoot,
+                Status = player.Status,
+                Nationality = player.Nationality,
+                CountryOfBirth = player.CountryOfBirth,
             };
 
             return updatedDto;
@@ -197,6 +208,9 @@ namespace Application.Services
                     Name = player.Team?.Name
                 } : null,
                 IsAdmin = player.IsAdmin,
+                IsCreator = player.Team != null && player.Team.CreatorId == player.Id,
+                Status = player.Status,
+                Nationality = player.Nationality,
             };
 
             return playerDetails;
@@ -257,6 +271,7 @@ namespace Application.Services
                         var oldestDate = otherMembers.Min(p => p.CreationDate);
                         Player newAdmin = otherMembers.First(p => p.CreationDate == oldestDate);
                         newAdmin.IsAdmin = true;
+                        newAdmin.IsAdminLastChangedAt = DateTime.UtcNow;
                     }
 
                     existingPlayer.IsAdmin = false;
@@ -265,9 +280,33 @@ namespace Application.Services
 
             string teamName = team.Name;
 
+            // O administrador principal que sai passa o estatuto ao administrador mais antigo.
+            if (TeamHierarchy.IsSupreme(team, existingPlayer.Id))
+            {
+                team.CreatorId = TeamHierarchy.NextSupremeAdmin(team, existingPlayer.Id)?.Id;
+            }
+
+            if (transferRepository != null && team.Members.Count > 1)
+            {
+                await transferRepository.AddRecordAsync(new TransferRecord
+                {
+                    PlayerId = existingPlayer.Id,
+                    IdFromTeam = team.Id,
+                    FromTeamName = team.Name,
+                    Kind = TransferKind.LEFT,
+                });
+
+                var listing = await transferRepository.GetListingAsync(existingPlayer.Id);
+                if (listing != null)
+                {
+                    transferRepository.RemoveListing(listing);
+                }
+            }
+
             team.Members.Remove(existingPlayer);
             existingPlayer.Team = null;
             existingPlayer.IdTeam = null;
+            existingPlayer.JoinedTeamAt = null;
 
             playerRepository.UpdatePlayer(existingPlayer);
 
@@ -388,6 +427,36 @@ namespace Application.Services
             if (dto.Height != player.Height)
             {
                 player.Height = dto.Height;
+                hasChange = true;
+            }
+
+            if (dto.Weight.HasValue && dto.Weight != player.Weight)
+            {
+                player.Weight = dto.Weight;
+                hasChange = true;
+            }
+
+            if (dto.PreferredFoot.HasValue && dto.PreferredFoot != player.PreferredFoot)
+            {
+                player.PreferredFoot = dto.PreferredFoot;
+                hasChange = true;
+            }
+
+            if (dto.Status.HasValue && dto.Status != player.Status)
+            {
+                player.Status = dto.Status.Value;
+                hasChange = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Nationality) && dto.Nationality.Trim() != player.Nationality)
+            {
+                player.Nationality = dto.Nationality.Trim();
+                hasChange = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.CountryOfBirth) && dto.CountryOfBirth.Trim() != player.CountryOfBirth)
+            {
+                player.CountryOfBirth = dto.CountryOfBirth.Trim();
                 hasChange = true;
             }
 

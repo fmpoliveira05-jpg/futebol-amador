@@ -1,4 +1,4 @@
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
@@ -578,5 +578,14 @@ namespace Api.Controllers
             return userId;
         }
         #endregion
+
+        /// <summary>Títulos da equipa, agrupados por troféu (por exemplo, "x3").</summary>
+        /// <param name="teamId">Id da equipa.</param>
+        /// <param name="leagues">Serviço das ligas.</param>
+        [HttpGet("{teamId:guid}/titles")]
+        [AllowAnonymous]
+        [ProducesResponseType(typeof(List<Application.DTOs.Competition.TeamTitleDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetTitles(Guid teamId, [FromServices] ILeagueService leagues) =>
+            Ok(await leagues.GetTitlesAsync(teamId));
     }
 }

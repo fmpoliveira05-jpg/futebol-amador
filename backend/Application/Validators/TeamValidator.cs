@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Application.Services.Competition;
+using Application.DTOs.Filters;
 using Application.DTOs.Team;
 using Application.Interfaces.Validators;
 using Domain.Constants;
@@ -173,12 +174,15 @@ namespace Application.Validators
                 throw new ValidationException("Um administrador não pode expulsar-se a si próprio.");
             }
 
-            if (playerRemoved.IsAdmin)
+            var creatorId = TeamHierarchy.EffectiveCreatorId(team);
+            if (playerRemoved.Id == creatorId)
             {
-                if (!AdminOlderThanSecondAdmin(playerRemoving, playerRemoved))
-                {
-                    throw new ValidationException($"O Player?? de id '{playerRemoving.Id}' não pode expulsar o jogador com id '{playerRemoved.Id}' porque este é administrador há mais tempo.");
-                }
+                throw new ValidationException("O administrador principal (quem criou a equipa) não pode ser removido.");
+            }
+
+            if (playerRemoved.IsAdmin && playerRemoving.Id != creatorId)
+            {
+                throw new ForbiddenException("Só o administrador principal (quem criou a equipa) pode remover administradores.");
             }
         }
 
@@ -295,7 +299,7 @@ namespace Application.Validators
         /// <list type="bullet">
         ///     <item>As entidades devem existir e pertencer à mesma equipa.</item>
         ///     <item>Um admin não pode despromover-se a si próprio.</item>
-        ///     <item>O admin que despromove deve ser o admin "mais antigo" (regra de antiguidade).</item>
+        ///     <item>Só o administrador principal (quem criou a equipa) despromove, e ninguém o despromove a ele.</item>
         /// </list>
         /// </remarks>
         /// <param name="team">A equipa.</param>
@@ -320,9 +324,20 @@ namespace Application.Validators
                 throw new ValidationException("Um administrador não pode rebaixar-se a si próprio.");
             }
 
-            if (!AdminOlderThanSecondAdmin(adminToDemote, adminDemoting))
+            if (!adminToDemote.IsAdmin)
             {
-                throw new ValidationException($"O Player? de id '{adminDemoting.Id}' não pode demitir o administrador com id '{adminToDemote.Id}' porque este é administrador há mais tempo.");
+                throw new ValidationException("O jogador não é administrador.");
+            }
+
+            var creatorId = TeamHierarchy.EffectiveCreatorId(team);
+            if (adminToDemote.Id == creatorId)
+            {
+                throw new ValidationException("O administrador principal (quem criou a equipa) não pode ser despromovido.");
+            }
+
+            if (adminDemoting.Id != creatorId)
+            {
+                throw new ForbiddenException("Só o administrador principal (quem criou a equipa) pode despromover administradores.");
             }
         }
 

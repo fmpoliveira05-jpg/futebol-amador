@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Domain.Enums;
+using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Team;
@@ -22,6 +23,7 @@ namespace Application.Services
     /// </summary>
     public class MembershipService : IMembershipRequestService
     {
+        private readonly ITransferRepository? transferRepository;
         private readonly ITeamRepository teamRepository;
         private readonly IPlayerRepository playerRepository;
         private readonly IMembershipRequestRepository membershipRequestRepository;
@@ -45,8 +47,11 @@ namespace Application.Services
             IPlayerAuthorizationValidator authorizationValidator,
             IMembershipValidator membershipValidator,
             INotificationService notificationService,
-            INotificationFirebaseService notificationFirebaseService)
+            INotificationFirebaseService notificationFirebaseService,
+            ITransferRepository? transferRepository = null)
         {
+            // Opcional para os testes antigos; na aplicação vem da injeção de dependências.
+            this.transferRepository = transferRepository;
             this.teamRepository = teamRepository;
             this.playerRepository = playerRepository;
             this.membershipRequestRepository = membershipRequestRepository;
@@ -137,7 +142,9 @@ namespace Application.Services
             membershipRequestRepository.RemoveMembershipRequest(request);
 
             playerAccepted.IdTeam = teamId;
+            playerAccepted.JoinedTeamAt = DateTime.UtcNow;
             team.Members.Add(playerAccepted);
+            await RecordJoinedAsync(playerAccepted.Id, team);
 
             await membershipRequestRepository.RemoveAllMemberShipRequestsOfPlayer(playerAccepted.Id);
             await RemoveAllMatchInviteTeam(team);
@@ -273,7 +280,9 @@ namespace Application.Services
             membershipValidator.ValidateAcceptRequestByPlayer(player, membershipRequest, team);
 
             player.IdTeam = team.Id;
+            player.JoinedTeamAt = DateTime.UtcNow;
             team.Members.Add(player);
+            await RecordJoinedAsync(player.Id, team);
 
             player.MembershipRequests?.Remove(membershipRequest);
             team.MembershipRequests?.Remove(membershipRequest);
@@ -495,5 +504,22 @@ namespace Application.Services
             await notificationFirebaseService.SendNotificationToUser(playerId, dataPayloadPlayer, title, textPlayer);
         }
         #endregion
+
+        /// <summary>Regista no histórico de transferências a entrada de um jogador livre na equipa.</summary>
+        private async Task RecordJoinedAsync(string playerId, Team team)
+        {
+            if (transferRepository == null)
+            {
+                return;
+            }
+
+            await transferRepository.AddRecordAsync(new TransferRecord
+            {
+                PlayerId = playerId,
+                IdToTeam = team.Id,
+                ToTeamName = team.Name,
+                Kind = TransferKind.JOINED,
+            });
+        }
     }
-} 
+}

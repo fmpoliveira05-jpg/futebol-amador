@@ -1,4 +1,4 @@
-using Application.DTOs.Filters;
+﻿using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.Pitch;
 using Application.DTOs.Player;
@@ -186,7 +186,11 @@ namespace Infrastructure.Repositories
                     Icon = t.Icon,
                     FoundationDate = DateOnly.FromDateTime(t.DataFoundation),
                     TotalPoints = t.CurrentPoints,
-                    RankName = t.Rank.Name,
+                    // A "divisão" mostrada pelas apps passa a ser a liga (as divisões antigas deixaram de se usar).
+                    RankName = t.League != null ? t.League.Name : t.Rank.Name,
+                    CreatorId = t.CreatorId,
+                    LeagueId = t.IdLeague,
+                    LeagueName = t.League != null ? t.League.Name : null,
                     PitchDto = new PitchDto
                     {
                         Name = t.Pitch.Name,
@@ -208,7 +212,10 @@ namespace Infrastructure.Repositories
                         },
                         Height = player.Height,
                         Position = player.Position,
-                        IsAdmin = player.IsAdmin
+                        IsAdmin = player.IsAdmin,
+                        IsCreator = player.Id == t.CreatorId,
+                        Status = player.Status,
+                        Nationality = player.Nationality,
                     }).ToList()
                 })
                 .FirstOrDefaultAsync();
@@ -388,30 +395,12 @@ namespace Infrastructure.Repositories
                         imageUrl = team.Icon
                     },
                     Age = CalcularIdade(player.DateOfBirth, dateNow),
-                    IsAdmin = player.IsAdmin
+                    IsAdmin = player.IsAdmin,
+                    IsCreator = player.Id == team.CreatorId,
+                    Status = player.Status,
+                    Nationality = player.Nationality,
                 })
                 .ToList();
-        }
-
-        /// <summary>
-        /// Obtém a tabela de classificação das equipas por pontuação, limitada ao Top N.
-        /// </summary>
-        /// <param name="top">O número máximo de equipas a retornar (ex: 100).</param>
-        /// <returns>Uma lista de [TeamLeaderboardDto] ordenada por pontos.</returns>
-        public async Task<List<TeamLeaderboardDto>> GetTopTeamsAsync(int top)
-        {
-            return await DbContext.Team
-                .Include(t => t.Rank)
-                .OrderByDescending(t => t.CurrentPoints)
-                .Take(top)
-                .Select(t => new TeamLeaderboardDto
-                {
-                    Id = t.Id,
-                    TeamName = t.Name,
-                    CurrentPoints = t.CurrentPoints,
-                    RankName = t.Rank.Name
-                })
-                .ToListAsync();
         }
 
         /// <summary>

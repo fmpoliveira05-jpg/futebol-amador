@@ -29,5 +29,20 @@ namespace Application.DTOs.PlayerDTOs
 
         [Range(ModelConstants.PlayerConst.MinHeight, ModelConstants.PlayerConst.MaxHeight)]
         public int Height { get; set; }
+
+        // Campos do perfil (opcionais: nulo mantém o valor atual, para as apps que não os enviam).
+
+        [Range(ModelConstants.PlayerConst.MinWeight, ModelConstants.PlayerConst.MaxWeight)]
+        public int? Weight { get; set; }
+
+        public PreferredFoot? PreferredFoot { get; set; }
+
+        public PlayerStatus? Status { get; set; }
+
+        [MaxLength(ModelConstants.PlayerConst.MaxCountryLength)]
+        public string? Nationality { get; set; }
+
+        [MaxLength(ModelConstants.PlayerConst.MaxCountryLength)]
+        public string? CountryOfBirth { get; set; }
     }
 }
