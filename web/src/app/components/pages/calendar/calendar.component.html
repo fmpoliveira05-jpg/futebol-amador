@@ -2,110 +2,165 @@
   <header class="page-header">
     <div>
       <h1 class="page-title">Calendário</h1>
-      <p class="page-subtitle">Jogos marcados, realizados e cancelados da equipa.</p>
+      <p class="page-subtitle">Jogos da equipa, feriados e o motivo dos jogos adiados ou cancelados.</p>
     </div>
-    <div class="page-header__actions">
-        <button type="button" class="btn btn-secondary" (click)="toggleFilters()" [attr.aria-expanded]="showFilters()">
-          {{ showFilters() ? 'Esconder filtros' : 'Mostrar filtros' }}
-        </button>
-        @if (isAdmin) {
-          <a class="btn btn-secondary" [routerLink]="['/players/calendar', idTeam(), 'postpone-requests']">Pedidos de adiamento</a>
-        }
-    </div>
+    @if (isAdmin) {
+      <div class="page-header__actions">
+        <a class="btn btn-secondary" [routerLink]="['/players/calendar', idTeam(), 'postpone-requests']">Pedidos de adiamento</a>
+      </div>
+    }
   </header>
 
-  @if (showFilters()) {
-    <form class="card filters-container" (ngSubmit)="carregar()">
-      <div>
-        <label for="nameOpponent">Adversário</label>
-        <input id="nameOpponent" name="nameOpponent" [(ngModel)]="filtro.nameOpponent" placeholder="Nome do adversário">
-      </div>
-      <div>
-        <label for="minDate">De</label>
-        <input id="minDate" name="minDate" type="date" [(ngModel)]="filtro.minDate">
-      </div>
-      <div>
-        <label for="maxDate">Até</label>
-        <input id="maxDate" name="maxDate" type="date" [(ngModel)]="filtro.maxDate">
-      </div>
-      <div>
-        <label for="isRealized">Já realizado?</label>
-        <select id="isRealized" name="isRealized" [(ngModel)]="filtro.isRealized">
-          <option [ngValue]="undefined">Todos</option>
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Não</option>
-        </select>
-      </div>
-      <div>
-        <label for="isHome">Em casa?</label>
-        <select id="isHome" name="isHome" [(ngModel)]="filtro.isHome">
-          <option [ngValue]="undefined">Todos</option>
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Não</option>
-        </select>
-      </div>
-      <div>
-        <label for="isRanked">Competitivo?</label>
-        <select id="isRanked" name="isRanked" [(ngModel)]="filtro.isRanked">
-          <option [ngValue]="undefined">Todos</option>
-          <option [ngValue]="true">Sim</option>
-          <option [ngValue]="false">Não</option>
-        </select>
-      </div>
-      <div class="filters-container__acoes">
-        <button type="submit" class="btn btn-primary">Aplicar filtros</button>
-        <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
-      </div>
-    </form>
-  }
-
-  @if (isLoading()) {
-    <p class="estado">A carregar…</p>
-  } @else if (errorMessage()) {
+  @if (errorMessage()) {
     <p class="erro" role="alert">{{ errorMessage() }}</p>
-  } @else {
-    @for (match of visibleMatches(); track match.idMatch) {
-      <article class="card match-card" [class.match-card--inativo]="match.matchStatus === Estado.Cancelado">
-        <div class="match-info">
-          <div class="match-status">
-            <span class="badge {{ classeEstado(match) }}">{{ estados[match.matchStatus] }}</span>
-            <span class="badge" [class.badge--info]="match.isCompetitive">{{ match.isCompetitive ? 'Competitivo' : 'Amigável' }}</span>
-            <span class="badge">{{ match.isHome ? 'Em casa' : 'Fora' }}</span>
-          </div>
-          <p class="match-end">{{ match.gameDate | date: "EEE, d MMM y · HH:mm" }}</p>
-        </div>
-
-        <div class="placar">
-          <span class="placar__equipa">{{ match.team.name }}</span>
-          @if (match.matchStatus === Estado.Terminado) {
-            <span class="placar__resultado resultado--{{ match.matchResult }}">{{ match.team.numGoals }} – {{ match.opponent.numGoals }}</span>
-          } @else {
-            <span class="placar__vs">vs</span>
-          }
-          <span class="placar__equipa placar__equipa--fora">{{ match.opponent.name }}</span>
-        </div>
-
-        @if (match.pitchGame) {
-          <p class="pitch">{{ match.pitchGame.name }} · {{ match.pitchGame.address }}</p>
-        }
-
-        @if (isAdmin && podeAlterar(match)) {
-          <div class="match-actions">
-            @if (match.matchStatus === Estado.Agendado) {
-              <a class="btn btn-warning" [routerLink]="['/players/calendar', idTeam(), 'postpone', match.idMatch]">Pedir adiamento</a>
-            }
-            <a class="btn btn-danger" [routerLink]="['/players/calendar', idTeam(), 'cancel-match', match.idMatch]">Cancelar jogo</a>
-          </div>
-        }
-      </article>
-    } @empty {
-      <p class="estado">Sem jogos para mostrar.</p>
-    }
-
-    @if (haMais()) {
-      <div class="load-more-container">
-        <button type="button" (click)="mostrarMais()" class="btn btn-secondary">Mostrar mais</button>
-      </div>
-    }
   }
+
+  <div class="layout calendario-layout">
+    <section class="card">
+      <div class="mes">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="mudarMes(-1)" aria-label="Mês anterior">‹</button>
+        <h2 class="mes__titulo" aria-live="polite">{{ titulo() }}</h2>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="mudarMes(1)" aria-label="Mês seguinte">›</button>
+        <button type="button" class="btn btn-link btn-sm" (click)="irParaHoje()">Hoje</button>
+      </div>
+
+      @if (isLoading()) {
+        <p class="estado">A carregar…</p>
+      }
+
+      <table class="grelha" role="grid" [attr.aria-label]="titulo()">
+        <thead>
+          <tr>
+            @for (d of diasSemana; track d) {
+              <th scope="col">{{ d }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (semana of semanas(); track semana[0].chave) {
+            <tr>
+              @for (dia of semana; track dia.chave) {
+                <td>
+                  <button
+                    type="button"
+                    class="dia"
+                    [class.dia--fora]="!dia.doMes"
+                    [class.dia--hoje]="dia.chave === chaveHoje"
+                    [class.dia--escolhido]="dia.chave === diaEscolhido()"
+                    [attr.aria-pressed]="dia.chave === diaEscolhido()"
+                    [attr.aria-label]="rotuloDia(dia.chave, dia.data)"
+                    (click)="escolherDia(dia.chave, dia.doMes, dia.data)"
+                  >
+                    <span class="dia__numero">{{ dia.data.getDate() }}</span>
+                    <span class="dia__marcas" aria-hidden="true">
+                      @for (m of marcas(dia.chave); track m) {
+                        <span class="bolinha" [class]="'bolinha bolinha--' + m"></span>
+                      }
+                    </span>
+                  </button>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <ul class="legenda">
+        @for (l of legenda; track l.tipo) {
+          <li><span class="bolinha" [class]="'bolinha bolinha--' + l.tipo"></span> {{ l.texto }}</li>
+        }
+      </ul>
+    </section>
+
+    <aside class="card">
+      <h2 class="card-title">{{ dataEscolhida() | date: "EEEE, d 'de' MMMM" }}</h2>
+      @if (feriadoEscolhido(); as f) {
+        <p class="feriado"><span class="bolinha bolinha--feriado"></span> Feriado: {{ f }}</p>
+      }
+
+      @for (j of conteudoEscolhido()?.jogos ?? []; track j.idMatch) {
+        <article class="jogo" [class]="'jogo jogo--' + tipoDoJogo(j)">
+          <p class="jogo__equipas">
+            {{ casa(j).name }}
+            @if (j.matchStatus === Estado.Terminado) {
+              <strong>{{ casa(j).numGoals }} – {{ fora(j).numGoals }}</strong>
+            } @else {
+              <span>vs</span>
+            }
+            {{ fora(j).name }}
+          </p>
+          <p class="jogo__meta">
+            <span class="badge">{{ estados[j.matchStatus] }}</span>
+            <span class="badge" [class.badge--info]="j.isCompetitive">
+              {{ j.leagueName ?? (j.isCompetitive ? 'Liga' : 'Amigável') }}@if (j.round) { · J{{ j.round }} }
+            </span>
+          </p>
+          <dl class="jogo__detalhes">
+            <div><dt>Hora</dt><dd>{{ j.gameDate | date: 'HH:mm' }}</dd></div>
+            <div><dt>Campo</dt><dd>{{ j.pitchGame.name }}<br /><span class="dica">{{ j.pitchGame.address }}</span></dd></div>
+            @if (j.postponedFrom) {
+              <div><dt>Data original</dt><dd>{{ j.postponedFrom | date: 'd MMM, HH:mm' }}</dd></div>
+            }
+            @if (j.reason) {
+              <div>
+                <dt>{{ j.matchStatus === Estado.Cancelado ? 'Motivo do cancelamento' : 'Motivo do adiamento' }}</dt>
+                <dd>{{ j.reason }}</dd>
+              </div>
+            }
+          </dl>
+          <div class="jogo__acoes">
+            <a class="btn btn-link btn-sm" [routerLink]="['/jogos', j.idMatch]">Relatório</a>
+            @if (isAdmin && j.matchStatus === Estado.Agendado) {
+              <a class="btn btn-link btn-sm" [routerLink]="['/jogos', j.idMatch, 'onze']">Onze</a>
+              <a class="btn btn-link btn-sm" [routerLink]="['/jogos', j.idMatch, 'resultado']">Resultado</a>
+            }
+            @if (isAdmin && podeAlterar(j)) {
+              <a class="btn btn-link btn-sm" [routerLink]="['/players/calendar', idTeam(), 'postpone', j.idMatch]">Adiar</a>
+              @if (j.isCompetitive) {
+                <a class="btn btn-link btn-sm" [routerLink]="['/players/calendar', idTeam(), 'cancel-match', j.idMatch]" [queryParams]="{ liga: 1 }">Cancelar e remarcar</a>
+              } @else {
+                <a class="btn btn-link btn-sm" [routerLink]="['/players/calendar', idTeam(), 'cancel-match', j.idMatch]">Cancelar</a>
+              }
+            }
+          </div>
+        </article>
+      }
+
+      @for (m of conteudoEscolhido()?.historico ?? []; track m.idMatch + m.kind) {
+        <article class="jogo" [class]="'jogo jogo--' + (m.kind === 'CANCELLED' ? 'cancelado' : 'adiado')">
+          <p class="jogo__equipas">Jogo com {{ m.opponentName }}</p>
+          <p class="jogo__meta">
+            <span class="badge" [class.badge--perigo]="m.kind === 'CANCELLED'" [class.badge--aviso]="m.kind === 'POSTPONED'">
+              {{ m.kind === 'CANCELLED' ? 'Cancelado e remarcado' : 'Adiado' }}
+            </span>
+          </p>
+          <dl class="jogo__detalhes">
+            <div><dt>Estava marcado</dt><dd>{{ m.date | date: 'HH:mm' }}</dd></div>
+            @if (m.newDate) {
+              <div><dt>Nova data</dt><dd>{{ m.newDate | date: "d MMM 'às' HH:mm" }}</dd></div>
+            }
+            <div><dt>Motivo</dt><dd>{{ m.reason ?? 'Não indicado' }}</dd></div>
+          </dl>
+          <a class="btn btn-link btn-sm" [routerLink]="['/jogos', m.idMatch]">Ver jogo</a>
+        </article>
+      }
+
+      @if (!conteudoEscolhido()?.jogos?.length && !conteudoEscolhido()?.historico?.length) {
+        <p class="estado">Sem jogos neste dia.</p>
+      }
+
+      <hr class="divider" />
+      <h3 class="subtitulo">Próximos jogos</h3>
+      <ul class="proximos">
+        @for (j of proximos(); track j.idMatch) {
+          <li>
+            <button type="button" class="btn btn-link btn-sm" (click)="irPara(j)">{{ j.gameDate | date: 'd MMM' }}</button>
+            {{ casa(j).name }} vs {{ fora(j).name }}
+          </li>
+        } @empty {
+          <li class="dica">Sem jogos marcados.</li>
+        }
+      </ul>
+    </aside>
+  </div>
 </section>

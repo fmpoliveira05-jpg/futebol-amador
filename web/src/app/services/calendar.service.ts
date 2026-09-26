@@ -7,6 +7,7 @@ import { FilterCalendarDto } from '../shared/Dtos/Filters/FilterCalendarDto';
 import { MatchDto } from '../shared/Dtos/Match/MatchDto';
 import { PostponeMatchDto } from '../shared/Dtos/Match/PostponeMatchDto';
 import { paraHttpParams } from '../shared/http/http-params';
+import { CalendarMarkerDto } from '../shared/Dtos/Competicao/competicao';
 
 /** Calendário de jogos de uma equipa: consultar, pedir adiamento e cancelar. */
 @Injectable({ providedIn: 'root' })
@@ -34,6 +35,16 @@ export class CalendarService {
   /** Pede ao adversário para adiar o jogo; o adversário aceita ou rejeita na página de adiamentos. */
   postponeMatch(idTeam: string, pedido: PostponeMatchDto): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/${idTeam}/PostponeMatch`, pedido);
+  }
+
+  /** Cancelamentos com nova data e adiamentos aceites, na data original. */
+  getHistorico(idTeam: string): Observable<CalendarMarkerDto[]> {
+    return this.http.get<CalendarMarkerDto[]>(`${this.baseUrl}/${idTeam}/history`);
+  }
+
+  /** Jogos da liga: cancela e remarca logo para a nova data. */
+  cancelarERemarcar(idTeam: string, idMatch: string, reason: string, newDate: string): Observable<MatchDto> {
+    return this.http.put<MatchDto>(`${this.baseUrl}/${idTeam}/${idMatch}/cancel-reschedule`, { reason, newDate });
   }
 
   /** O corpo é o motivo, em JSON (a API recebe uma `string` simples). */

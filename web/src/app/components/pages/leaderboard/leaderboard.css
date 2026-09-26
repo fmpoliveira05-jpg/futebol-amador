@@ -37,3 +37,52 @@ a {
 a:hover {
   text-decoration: underline;
 }
+
+.col-pontos {
+  font-weight: 800;
+}
+
+tr.zona-subida td:first-child {
+  box-shadow: inset 4px 0 0 var(--cor-relvado);
+}
+
+tr.zona-descida td:first-child {
+  box-shadow: inset 4px 0 0 var(--cor-perigo);
+}
+
+abbr {
+  text-decoration: none;
+  cursor: help;
+}
+
+.legenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: var(--cor-texto-suave);
+}
+
+.legenda li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legenda__cor {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 0.2rem;
+}
+
+.legenda__cor--subida {
+  background: var(--cor-relvado);
+}
+
+.legenda__cor--descida {
+  background: var(--cor-perigo);
+}

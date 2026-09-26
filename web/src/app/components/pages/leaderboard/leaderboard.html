@@ -1,64 +1,123 @@
 <section class="page">
   <header class="page-header">
     <div>
-      <h1 class="page-title">Classificação geral</h1>
-      <p class="page-subtitle">Pontos ganhos em jogos competitivos. Só aparecem as 100 primeiras equipas.</p>
+      <h1 class="page-title">Classificação</h1>
+      <p class="page-subtitle">Jogos da liga: vitória 3 pontos, empate 1, derrota 0. Os amigáveis não contam.</p>
     </div>
-    <div class="page-header__actions">
-      <label class="sr-only" for="pesquisa-classificacao">Procurar equipa ou divisão</label>
-      <input
-        id="pesquisa-classificacao"
-        type="search"
-        class="search-input"
-        placeholder="Procurar equipa ou divisão"
-        [value]="pesquisa()"
-        (input)="pesquisa.set($any($event.target).value)"
-      />
-    </div>
+    @if (listaLigas().length > 1) {
+      <div class="page-header__actions">
+        <label class="sr-only" for="liga">Liga</label>
+        <select id="liga" class="search-input" [value]="ligaEscolhida()" (change)="ligaEscolhida.set($any($event.target).value)">
+          @for (l of listaLigas(); track l.id) {
+            <option [value]="l.id" [selected]="l.id === ligaEscolhida()">{{ l.name }}</option>
+          }
+        </select>
+      </div>
+    }
   </header>
 
   <div class="card">
-    @switch (estado().tipo) {
+    @switch (ligas().tipo) {
       @case ('a-carregar') {
         <p class="estado">A carregar…</p>
       }
       @case ('erro') {
-        <p class="erro" role="alert">Não foi possível carregar a classificação.</p>
+        <p class="erro" role="alert">Não foi possível carregar as ligas.</p>
       }
       @default {
-        @if (equipas().length) {
-          <div class="tabela-scroll">
-            <table class="tabela">
-              <thead>
-                <tr>
-                  <th class="col-pos">#</th>
-                  <th>Equipa</th>
-                  <th>Divisão</th>
-                  <th class="col-num">Pontos</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (t of equipas(); track t.id ?? t.teamName) {
-                  <tr [class.minha]="t.id && t.id === sessao().equipaId">
-                    <td class="col-pos">
-                      <span class="posicao" [class.posicao--podio]="t.position <= 3">{{ t.position }}</span>
-                    </td>
-                    <td>
-                      @if (sessao().autenticado && t.id) {
-                        <a [routerLink]="['/team/details', t.id]">{{ t.teamName }}</a>
-                      } @else {
-                        {{ t.teamName }}
-                      }
-                    </td>
-                    <td><span class="badge">{{ t.rankName }}</span></td>
-                    <td class="col-num">{{ t.currentPoints }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
+        @if (!listaLigas().length) {
+          <p class="estado">Ainda não há ligas.</p>
         } @else {
-          <p class="estado">Nenhuma equipa encontrada.</p>
+          @switch (tabela().tipo) {
+            @case ('a-carregar') {
+              <p class="estado">A carregar…</p>
+            }
+            @case ('erro') {
+              <p class="erro" role="alert">Não foi possível carregar a classificação.</p>
+            }
+            @case ('ok') {
+              @if (dadosTabela(); as t) {
+                <p class="dica">
+                  {{ t.league.name }}
+                  @if (t.season) {
+                    · época {{ t.season.name }} · {{ estadoEpoca[t.season.status] }}
+                  }
+                  · <a routerLink="/ligas">ver ligas e jornadas</a>
+                </p>
+                @if (t.rows.length) {
+                  <div class="tabela-scroll">
+                    <table class="tabela classificacao">
+                      <thead>
+                        <tr>
+                          <th class="col-pos" scope="col">#</th>
+                          <th scope="col">Equipa</th>
+                          <th class="col-num" scope="col"><abbr title="Partidas disputadas">PD</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Vitórias">V</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Empates">E</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Derrotas">D</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Golos marcados">GM</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Golos sofridos">GS</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Diferença de golos">DG</abbr></th>
+                          <th class="col-num" scope="col"><abbr title="Pontos">P</abbr></th>
+                          <th scope="col">Últimos 5</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (r of t.rows; track r.teamId) {
+                          <tr
+                            [class.minha]="r.teamId === sessao().equipaId"
+                            [class.zona-subida]="r.zone === 'PROMOTION'"
+                            [class.zona-descida]="r.zone === 'RELEGATION'"
+                          >
+                            <td class="col-pos">
+                              <span class="posicao" [attr.title]="textoZona(r.zone)">{{ r.position }}</span>
+                            </td>
+                            <td>
+                              @if (sessao().autenticado) {
+                                <a [routerLink]="['/team/details', r.teamId]">{{ r.teamName }}</a>
+                              } @else {
+                                {{ r.teamName }}
+                              }
+                            </td>
+                            <td class="col-num">{{ r.played }}</td>
+                            <td class="col-num">{{ r.won }}</td>
+                            <td class="col-num">{{ r.drawn }}</td>
+                            <td class="col-num">{{ r.lost }}</td>
+                            <td class="col-num">{{ r.goalsFor }}</td>
+                            <td class="col-num">{{ r.goalsAgainst }}</td>
+                            <td class="col-num">{{ comSinal(r.goalDifference) }}</td>
+                            <td class="col-num col-pontos">{{ r.points }}</td>
+                            <td>
+                              <span class="forma-icones">
+                                @for (f of r.form; track $index) {
+                                  <span class="forma-icone" [class]="'forma-icone ' + forma[f].classe" [attr.title]="forma[f].titulo" role="img" [attr.aria-label]="forma[f].titulo">{{ forma[f].simbolo }}</span>
+                                } @empty {
+                                  <span class="dica">—</span>
+                                }
+                              </span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                  <ul class="legenda">
+                    @if (t.league.promotionSpots) {
+                      <li><span class="legenda__cor legenda__cor--subida"></span> Subida de divisão</li>
+                    }
+                    @if (t.league.relegationSpots) {
+                      <li><span class="legenda__cor legenda__cor--descida"></span> Descida de divisão</li>
+                    }
+                    <li><span class="forma-icone forma--v">✓</span> Vitória</li>
+                    <li><span class="forma-icone forma--e">–</span> Empate</li>
+                    <li><span class="forma-icone forma--d">✕</span> Derrota</li>
+                  </ul>
+                } @else {
+                  <p class="estado">Esta liga ainda não tem equipas.</p>
+                }
+              }
+            }
+          }
         }
       }
     }

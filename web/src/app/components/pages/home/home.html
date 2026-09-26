@@ -25,7 +25,7 @@
   <section class="funcionalidades" aria-label="O que podes fazer">
     <article class="card">
       <h2>Equipas</h2>
-      <p>Cria a tua equipa com o campo onde jogam, aceita pedidos de adesão e convida jogadores sem equipa.</p>
+      <p>Cria a tua equipa com o campo onde jogam, contrata jogadores no mercado e joga na liga.</p>
     </article>
     <article class="card">
       <h2>Jogos</h2>
@@ -93,10 +93,20 @@
                 @for (j of d.nextsMatchs ?? []; track j.idMatch) {
                   <div class="jogo">
                     <div>
-                      <p class="jogo__equipas">{{ j.team.name }} <span>vs</span> {{ j.opponent.name }}</p>
+                      <!-- A equipa da casa aparece sempre primeiro: "B vs A" já diz que se joga fora. -->
+                      <p class="jogo__equipas">
+                        @if (j.isHome) {
+                          {{ j.team.name }} <span>vs</span> {{ j.opponent.name }}
+                        } @else {
+                          {{ j.opponent.name }} <span>vs</span> {{ j.team.name }}
+                        }
+                      </p>
                       <p class="jogo__meta">
-                        <span class="badge" [class.badge--info]="j.isCompetitive">{{ j.isCompetitive ? 'Competitivo' : 'Amigável' }}</span>
-                        <span class="badge">{{ j.isHome ? 'Em casa' : 'Fora' }}</span>
+                        <span class="badge" [class.badge--info]="j.isCompetitive">{{ j.isCompetitive ? 'Liga' : 'Amigável' }}</span>
+                        <a class="btn btn-link btn-sm" [routerLink]="['/jogos', j.idMatch]">Detalhes</a>
+                        @if (sessao().admin) {
+                          <a class="btn btn-link btn-sm" [routerLink]="['/jogos', j.idMatch, 'onze']">Onze</a>
+                        }
                       </p>
                     </div>
                     <p class="jogo__data">{{ j.gameDate | date: "EEE, d MMM · HH:mm" }}</p>
@@ -131,8 +141,8 @@
               <nav class="atalhos" aria-label="Atalhos de administrador">
                 <a class="btn btn-secondary" routerLink="/teams">Procurar adversários</a>
                 <a class="btn btn-secondary" routerLink="/team/matchInvites">Convites de jogo</a>
-                <a class="btn btn-secondary" routerLink="/players">Recrutar jogadores</a>
-                <a class="btn btn-secondary" routerLink="/team/membership-requests">Pedidos de adesão</a>
+                <a class="btn btn-secondary" routerLink="/mercado">Mercado</a>
+                <a class="btn btn-secondary" routerLink="/transferencias">Transferências</a>
               </nav>
             }
         }

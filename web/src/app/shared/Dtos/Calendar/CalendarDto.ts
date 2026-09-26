@@ -24,4 +24,12 @@ export class CalendarDto {
   };
   isHome!: boolean;
   isCompetitive!: boolean;
+  /** Equipa da casa e de fora (a API envia-as a partir das ligas). */
+  homeTeam?: { idTeam: string; name: string; numGoals: number } | null;
+  awayTeam?: { idTeam: string; name: string; numGoals: number } | null;
+  leagueName?: string | null;
+  round?: number | null;
+  /** Motivo do cancelamento, do adiamento pendente ou do último adiamento aceite. */
+  reason?: string | null;
+  postponedFrom?: string | null;
 }

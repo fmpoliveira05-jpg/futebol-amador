@@ -588,3 +588,99 @@ textarea {
 .page--estreita {
   max-width: 640px;
 }
+
+/* ---------- Ligas, onze e calendário ---------- */
+
+.btn-sm {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+/* Separadores (tabs) simples. */
+.separadores {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.separadores button {
+  border: 0;
+  background: none;
+  padding: 0.6rem 0.9rem;
+  font: inherit;
+  color: var(--cor-texto-suave);
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.separadores button[aria-selected='true'] {
+  color: var(--cor-texto);
+  font-weight: 600;
+  border-bottom-color: var(--cor-marca);
+}
+
+/* Forma (últimos 5 jogos): só ícones. */
+.forma-icones {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.forma-icone {
+  display: inline-grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.forma--v {
+  background: var(--cor-relvado);
+}
+
+.forma--e {
+  background: #9ca3af;
+}
+
+.forma--d {
+  background: var(--cor-perigo);
+}
+
+/* Troféus no perfil da equipa. */
+.trofeus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.trofeu {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--cor-borda);
+  border-radius: 0.75rem;
+  background: #fffbeb;
+}
+
+.trofeu__icone {
+  font-size: 1.6rem;
+}
+
+a.badge {
+  text-decoration: none;
+}
+
+.trofeu__contagem {
+  font-weight: 700;
+  font-size: 1.1rem;
+}

@@ -9,6 +9,8 @@ export interface InfoPostPoneMatchDto {
   postPoneDate: string;
   team: TeamDto;
   opponent: TeamDto;
+  /** Motivo indicado por quem pediu o adiamento. */
+  reason?: string | null;
 }
 
 /** Resposta a um pedido de adiamento. */

@@ -3,4 +3,6 @@ export class PostponeMatchDto {
   postPoneDate!: string;
   idTeam!: string;
   idOpponent!: string;
+  /** Motivo do adiamento. */
+  reason?: string;
 }

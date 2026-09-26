@@ -13,6 +13,10 @@
       <label for="novaData">Nova data e hora</label>
       <input type="datetime-local" id="novaData" name="novaData" [min]="agora" [(ngModel)]="novaData" required>
     </div>
+    <div class="form-field">
+      <label for="motivo">Motivo</label>
+      <textarea id="motivo" name="motivo" rows="3" [(ngModel)]="motivo" maxlength="250" required placeholder="Por exemplo: metade da equipa está de férias"></textarea>
+    </div>
     @if (erro()) {
       <p class="erro" role="alert">{{ erro() }}</p>
     }

@@ -26,6 +26,7 @@ export class PostponeMatchComponent implements OnInit {
   protected readonly erro = signal<string | null>(null);
   protected readonly aEnviar = signal(false);
   protected novaData = '';
+  protected motivo = '';
   /** Não se pode propor uma data no passado. */
   protected readonly agora = new Date().toISOString().slice(0, 16);
 
@@ -42,6 +43,10 @@ export class PostponeMatchComponent implements OnInit {
       this.erro.set('Escolhe a nova data.');
       return;
     }
+    if (this.motivo.trim().length < 3) {
+      this.erro.set('Indica o motivo do adiamento.');
+      return;
+    }
     this.aEnviar.set(true);
     this.erro.set(null);
     const adversario = jogo.team.idTeam === this.idTeam() ? jogo.opponent : jogo.team;
@@ -51,6 +56,7 @@ export class PostponeMatchComponent implements OnInit {
         postPoneDate: this.novaData,
         idTeam: this.idTeam(),
         idOpponent: adversario.idTeam,
+        reason: this.motivo.trim(),
       })
       .subscribe({
         next: () => this.router.navigate(['/players/calendar', this.idTeam()]),

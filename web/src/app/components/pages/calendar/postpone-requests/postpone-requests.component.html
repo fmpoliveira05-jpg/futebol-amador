@@ -25,6 +25,7 @@
               <th>Adversário</th>
               <th>Data marcada</th>
               <th>Nova data proposta</th>
+              <th>Motivo</th>
               <th class="members-table__actions-col"><span class="sr-only">Ações</span></th>
             </tr>
           </thead>
@@ -34,6 +35,7 @@
                 <td>{{ adversario(p) }}</td>
                 <td>{{ p.gameDate | date: 'dd-MM-yyyy HH:mm' }}</td>
                 <td><strong>{{ p.postPoneDate | date: 'dd-MM-yyyy HH:mm' }}</strong></td>
+                <td>{{ p.reason ?? '—' }}</td>
                 <td class="members-table__actions">
                   <button type="button" class="btn btn-primary" [disabled]="ocupado() === p.idMatch" (click)="aceitar(p)">Aceitar</button>
                   <button type="button" class="btn btn-secondary" [disabled]="ocupado() === p.idMatch" (click)="rejeitar(p)">Rejeitar</button>

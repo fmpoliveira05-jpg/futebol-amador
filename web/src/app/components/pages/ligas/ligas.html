@@ -1,0 +1,100 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Ligas</h1>
+      <p class="page-subtitle">
+        Cada liga é um escalão. Os primeiros sobem, os últimos descem e o campeão leva o troféu. Os jogos são
+        sorteados a duas voltas quando a época começa.
+      </p>
+    </div>
+    <div class="page-header__actions">
+      <a class="btn btn-secondary" routerLink="/leaderboard">Classificação</a>
+    </div>
+  </header>
+
+  @if (erro()) {
+    <p class="erro" role="alert">{{ erro() }}</p>
+  }
+  @if (info()) {
+    <p class="state--ok" role="status">{{ info() }}</p>
+  }
+
+  @if (ligas() === null) {
+    <p class="estado">A carregar…</p>
+  } @else if (!ligas()!.length) {
+    <p class="estado">Ainda não há ligas.</p>
+  } @else {
+    <div class="separadores" role="tablist" aria-label="Ligas">
+      @for (l of ligas(); track l.id) {
+        <button type="button" role="tab" [attr.aria-selected]="escolhida() === l.id" (click)="escolhida.set(l.id)">
+          {{ l.name }}
+        </button>
+      }
+    </div>
+
+    @if (liga(); as l) {
+      <div class="layout">
+        <section class="card">
+          <h2 class="card-title">Jornadas</h2>
+          @if (!l.currentSeason) {
+            <p class="estado">Esta liga ainda não tem épocas.</p>
+          } @else if (l.currentSeason.status === EstadoEpoca.Inscricoes) {
+            <p class="estado">
+              O calendário é sorteado uma semana antes do início ({{ l.currentSeason.startDate | date: "d 'de' MMMM" }}).
+            </p>
+          } @else if (jornadas() === null) {
+            <p class="estado">A carregar…</p>
+          } @else {
+            @for (j of jornadas(); track j.round) {
+              <h3 class="jornada">Jornada {{ j.round }}</h3>
+              <ul class="jogos">
+                @for (m of j.matches; track m.idMatch) {
+                  <li>
+                    <span class="jogos__data">{{ m.date | date: "d MMM, HH:mm" }}</span>
+                    <span class="jogos__casa" [class.minha]="m.homeTeamId === sessao().equipaId">{{ m.homeTeamName }}</span>
+                    <span class="jogos__resultado">
+                      @if (m.homeGoals !== null) {
+                        {{ m.homeGoals }} – {{ m.awayGoals }}
+                      } @else if (m.status !== 0) {
+                        <span class="badge">{{ estadoJogo[m.status] }}</span>
+                      } @else {
+                        vs
+                      }
+                    </span>
+                    <span class="jogos__fora" [class.minha]="m.awayTeamId === sessao().equipaId">{{ m.awayTeamName }}</span>
+                    @if (sessao().autenticado) {
+                      <a class="btn btn-link btn-sm" [routerLink]="['/jogos', m.idMatch]" [attr.aria-label]="'Relatório de ' + m.homeTeamName + ' contra ' + m.awayTeamName">Ver</a>
+                    }
+                  </li>
+                }
+              </ul>
+            } @empty {
+              <p class="estado">Sem jogos.</p>
+            }
+          }
+        </section>
+
+        <aside class="card">
+          <h2 class="card-title">{{ l.name }}</h2>
+          <dl class="details-grid">
+            <div class="details-grid__item"><dt>Escalão</dt><dd>{{ l.level }}</dd></div>
+            <div class="details-grid__item"><dt>Equipas</dt><dd>{{ l.teamCount }}</dd></div>
+            <div class="details-grid__item"><dt>Sobem</dt><dd>{{ l.promotionSpots }}</dd></div>
+            <div class="details-grid__item"><dt>Descem</dt><dd>{{ l.relegationSpots }}</dd></div>
+            <div class="details-grid__item"><dt>Duração da época</dt><dd>{{ l.seasonDurationDays }} dias</dd></div>
+            <div class="details-grid__item"><dt>Troféu</dt><dd>🏆 {{ l.trophyName }}</dd></div>
+          </dl>
+          @if (l.currentSeason; as e) {
+            <p>
+              Época <strong>{{ e.name }}</strong> · {{ estados[e.status] }}<br />
+              <span class="dica">{{ e.startDate | date: "d MMM y" }} a {{ e.endDate | date: "d MMM y" }} · {{ e.teamCount }} equipas</span>
+            </p>
+            @if (e.status === EstadoEpoca.Inscricoes && sessao().admin) {
+              <button type="button" class="btn btn-primary" (click)="inscrever(l)">Inscrever a minha equipa</button>
+            }
+          }
+        </aside>
+      </div>
+    }
+  }
+</section>

@@ -1,0 +1,55 @@
+.jornada {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 0.95rem;
+  color: var(--cor-texto-suave);
+}
+
+.jornada:first-of-type {
+  margin-top: 0;
+}
+
+.jogos {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.jogos li {
+  display: grid;
+  grid-template-columns: 7rem 1fr 4.5rem 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.jogos__data {
+  color: var(--cor-texto-suave);
+  font-size: 0.85rem;
+}
+
+.jogos__casa {
+  text-align: right;
+}
+
+.jogos__resultado {
+  text-align: center;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.minha {
+  font-weight: 700;
+  color: var(--cor-marca-escura);
+}
+
+@media (max-width: 640px) {
+  .jogos li {
+    grid-template-columns: 1fr 3.5rem 1fr;
+  }
+
+  .jogos__data,
+  .jogos li .btn {
+    display: none;
+  }
+}
