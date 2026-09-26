@@ -50,7 +50,18 @@ data class InfoMatchCalendar(
     @SerializedName("IsHome", alternate = ["isHome"])
     val isHome: Boolean = false,
     @SerializedName("PitchGame", alternate = ["pitchGame"])
-    val pitchGame: PitchInfo
+    val pitchGame: PitchInfo,
+    /** Liga e jornada (só nos jogos da liga). */
+    @SerializedName("LeagueName", alternate = ["leagueName"])
+    val leagueName: String? = null,
+    @SerializedName("Round", alternate = ["round"])
+    val round: Int? = null,
+    /** Motivo do cancelamento ou do adiamento pendente. */
+    @SerializedName("Reason", alternate = ["reason"])
+    val reason: String? = null,
+    /** Data original, se o jogo foi adiado. */
+    @SerializedName("PostponedFrom", alternate = ["postponedFrom"])
+    val postponedFrom: String? = null
 ) {
     /**
      * Converte a String bruta da API para um objeto [LocalDateTime].

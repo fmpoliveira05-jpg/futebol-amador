@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="item_ligas">Leagues</string>
+    <string name="item_ligas_descricao">Leagues, seasons and fixtures</string>
+    <string name="item_mercado">Market</string>
+    <string name="item_mercado_descricao">Find players from other teams and free agents</string>
+    <string name="item_transferencias">Transfers</string>
+    <string name="item_transferencias_descricao">Offers received and sent by the team</string>
+    <string name="item_propostas">Offers for me</string>
+    <string name="item_propostas_descricao">Transfer offers waiting for your answer</string>
+    <string name="item_onze">Starting eleven</string>
+    <string name="item_relatorio">Match report</string>
+</resources>

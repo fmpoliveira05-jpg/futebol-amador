@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="item_ligas">Ligas</string>
+    <string name="item_ligas_descricao">Ligas, épocas e jornadas</string>
+    <string name="item_mercado">Mercado</string>
+    <string name="item_mercado_descricao">Procurar jogadores de outras equipas e jogadores livres</string>
+    <string name="item_transferencias">Transferências</string>
+    <string name="item_transferencias_descricao">Propostas recebidas e enviadas pela equipa</string>
+    <string name="item_propostas">Propostas para mim</string>
+    <string name="item_propostas_descricao">Propostas de transferência à espera da tua resposta</string>
+    <string name="item_onze">Onze inicial</string>
+    <string name="item_relatorio">Relatório do jogo</string>
+</resources>
