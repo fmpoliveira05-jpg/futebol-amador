@@ -28,7 +28,6 @@
     <string name="toast_offline_accept_postpone">Para aceitar a adiamento, precisa estar conectado há internet</string>
     <string name="toast_offline_reject_postpone">Para rejeitar a adiamento, precisa estar conectado há internet</string>
     <string name="toast_offline_show_data_player">Para ver os dados do jogador precisa estar conectado há internet</string>
-    <string name="toast_offline_send_membership_request">Para mandar um pedido de adesão tem de estar conectado há internet</string>
 
     <string name="toast_autenticate_people">Apenas pessoas autenticadas podem aceder a esta funcionalidade</string>
     <string name="toast_only_player_without_team">Apenas utilizadores sem equipa podem ver os seus pedidos de adesão</string>
