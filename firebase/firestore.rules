@@ -1,0 +1,68 @@
+rules_version = '2';
+
+// Regras do Cloud Firestore do Futebol Amador.
+//
+// Coleções usadas pelos clientes:
+//   chatRooms/{sala}                  criadas só pela API (SDK Admin, que ignora estas regras):
+//                                     { name, createdBy, members: [uid], createdAt }
+//   chatRooms/{sala}/messages/{id}    escritas pela app Android: { text, senderId, timestamp }
+//   classificacao_cache/{liga}        cópia da classificação para ver sem rede: { json, ordem }
+// Tudo o resto está fechado. Publicação: ver docs/SEGURANCA.md (firebase deploy --only firestore:rules).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    // A API também exige o e-mail confirmado.
+    function verificado() {
+      return autenticado() && request.auth.token.email_verified == true;
+    }
+
+    function membroDaSala(sala) {
+      return request.auth.uid in get(/databases/$(database)/documents/chatRooms/$(sala)).data.members;
+    }
+
+    match /chatRooms/{sala} {
+      // Só os membros veem a sala (a consulta whereArrayContains("members", uid) cumpre esta regra).
+      allow read: if verificado() && request.auth.uid in resource.data.members;
+      // Salas e membros só pela API, que valida quem pode estar em cada sala.
+      allow create, update, delete: if false;
+
+      match /messages/{mensagem} {
+        allow read: if verificado() && membroDaSala(sala);
+
+        // Cada um só escreve em seu nome, com os campos esperados e a hora do servidor.
+        allow create: if verificado()
+          && membroDaSala(sala)
+          && request.resource.data.keys().hasOnly(['text', 'senderId', 'timestamp'])
+          && request.resource.data.keys().hasAll(['text', 'senderId', 'timestamp'])
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.timestamp == request.time;
+
+        // Mensagens não se editam nem apagam (nem as próprias, nem as dos outros).
+        allow update, delete: if false;
+      }
+    }
+
+    // Cache partilhada da classificação (dados públicos da API). Qualquer utilizador confirmado a
+    // pode atualizar, por isso só guarda o formato esperado e com tamanho limitado.
+    match /classificacao_cache/{liga} {
+      allow read: if autenticado();
+      allow create, update: if verificado()
+        && request.resource.data.keys().hasOnly(['json', 'ordem'])
+        && request.resource.data.json is string
+        && request.resource.data.json.size() <= 200000
+        && request.resource.data.ordem is int;
+      allow delete: if false;
+    }
+
+    match /{documento=**} {
+      allow read, write: if false;
+    }
+  }
+}
