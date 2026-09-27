@@ -21,7 +21,7 @@
       <div class="form-field">
         <label for="nova">Nova palavra-passe</label>
         <input id="nova" type="password" formControlName="nova" autocomplete="new-password" aria-describedby="regra-pp" />
-        <span id="regra-pp" class="dica">Pelo menos 8 caracteres, com letras e números.</span>
+        <span id="regra-pp" class="dica">{{ regraPalavraPasse }}</span>
         @if (invalido('nova')) {
           <span class="erro-campo">A palavra-passe não cumpre as regras.</span>
         }

@@ -41,6 +41,13 @@
                 <input id="pf-email" type="email" formControlName="email" autocomplete="email" />
                 @if (invalido('email')) { <span class="erro-campo">Introduz um e-mail válido.</span> }
               </div>
+              @if (emailMudou()) {
+                <div class="form-field">
+                  <label for="pf-pp-atual">Palavra-passe atual</label>
+                  <input id="pf-pp-atual" type="password" formControlName="palavraPasseAtual" autocomplete="current-password" aria-describedby="pf-pp-dica" />
+                  <span id="pf-pp-dica" class="dica">Para mudar o e-mail confirma a palavra-passe. Depois tens de confirmar o e-mail novo e voltar a entrar.</span>
+                </div>
+              }
               <div class="form-field">
                 <label for="pf-tel">Telemóvel</label>
                 <input id="pf-tel" type="tel" formControlName="phone" autocomplete="tel" />
@@ -112,7 +119,11 @@
           <dl class="details-grid">
             <div class="details-grid__item"><dt>Posição</dt><dd>{{ POSITION_MAP[p.position] }}</dd></div>
             @if (perfil(); as pf) {
-              <div class="details-grid__item"><dt>Data de nascimento</dt><dd>{{ pf.dateOfBirth | date: 'd MMM y' }} ({{ pf.age }} anos)</dd></div>
+              @if (pf.dateOfBirth) {
+                <div class="details-grid__item"><dt>Data de nascimento</dt><dd>{{ pf.dateOfBirth | date: 'd MMM y' }} ({{ pf.age }} anos)</dd></div>
+              } @else {
+                <div class="details-grid__item"><dt>Idade</dt><dd>{{ pf.age }} anos</dd></div>
+              }
               <div class="details-grid__item"><dt>Nacionalidade</dt><dd>{{ pf.nationality ?? '—' }}</dd></div>
               <div class="details-grid__item"><dt>País de nascimento</dt><dd>{{ pf.countryOfBirth ?? '—' }}</dd></div>
               <div class="details-grid__item"><dt>Pé preferido</dt><dd>{{ pf.preferredFoot !== null ? pe[pf.preferredFoot] : '—' }}</dd></div>

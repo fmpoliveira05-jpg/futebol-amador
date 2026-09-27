@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { mensagemDeErro } from '../../../shared/http/erros';
+import { PALAVRA_PASSE_MAX, REGRA_PALAVRA_PASSE, palavraPasseSegura } from '../../../shared/auth/palavra-passe';
 
 /** As duas palavras-passe novas têm de coincidir. */
 function confirmacaoIgual(grupo: AbstractControl): ValidationErrors | null {
@@ -22,12 +23,13 @@ export class SettingsPageComponent {
   protected readonly form = inject(FormBuilder).nonNullable.group(
     {
       atual: ['', Validators.required],
-      nova: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*[A-Za-z])(?=.*\d).+$/)]],
+      nova: ['', [Validators.required, Validators.maxLength(PALAVRA_PASSE_MAX), palavraPasseSegura]],
       confirmacao: ['', Validators.required],
     },
     { validators: confirmacaoIgual }
   );
 
+  protected readonly regraPalavraPasse = REGRA_PALAVRA_PASSE;
   protected readonly aGuardar = signal(false);
   protected readonly erro = signal<string | null>(null);
   protected readonly sucesso = signal(false);

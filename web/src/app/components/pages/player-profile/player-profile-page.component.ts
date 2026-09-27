@@ -67,7 +67,15 @@ export class PlayerProfilePageComponent {
     status: [0],
     nationality: ['', Validators.maxLength(56)],
     countryOfBirth: ['', Validators.maxLength(56)],
+    /** Só pedida quando o e-mail muda. */
+    palavraPasseAtual: ['', Validators.maxLength(128)],
   });
+
+  /** O e-mail do formulário é diferente do atual (a API exige a palavra-passe). */
+  protected emailMudou(): boolean {
+    const atual = this.jogador()?.email ?? '';
+    return this.editar() && this.form.controls.email.value.trim().toLowerCase() !== atual.toLowerCase();
+  }
 
   constructor() {
     effect(() => this.carregar(this.playerId()));
@@ -114,6 +122,7 @@ export class PlayerProfilePageComponent {
       status: this.perfil()?.status ?? 0,
       nationality: this.perfil()?.nationality ?? '',
       countryOfBirth: this.perfil()?.countryOfBirth ?? '',
+      palavraPasseAtual: '',
     });
     this.sucesso.set(null);
     this.editar.set(true);
@@ -131,7 +140,13 @@ export class PlayerProfilePageComponent {
       return;
     }
     const v = this.form.getRawValue();
+    const mudaEmail = this.emailMudou();
+    if (mudaEmail && !v.palavraPasseAtual) {
+      this.erro.set('Para mudar o e-mail indica a palavra-passe atual.');
+      return;
+    }
     const dados: UpdatePlayerRequest = {
+      CurrentPassword: mudaEmail ? v.palavraPasseAtual : null,
       Name: v.name.trim(),
       Email: v.email.trim(),
       Phone: v.phone.trim(),
@@ -145,7 +160,13 @@ export class PlayerProfilePageComponent {
       Nationality: v.nationality.trim() || null,
       CountryOfBirth: v.countryOfBirth.trim() || null,
     };
-    this.executar(this.players.updatePlayer(p.playerId, dados), 'Perfil atualizado.', 'Não foi possível guardar as alterações.');
+    this.executar(this.players.updatePlayer(p.playerId, dados), 'Perfil atualizado.', 'Não foi possível guardar as alterações.', () => {
+      if (mudaEmail) {
+        // A API terminou as sessões: é preciso confirmar o e-mail novo e voltar a entrar.
+        this.auth.clearSession();
+        this.router.navigate(['/login'], { queryParams: { registo: 'pendente' } });
+      }
+    });
   }
 
   protected sairDaEquipa(): void {

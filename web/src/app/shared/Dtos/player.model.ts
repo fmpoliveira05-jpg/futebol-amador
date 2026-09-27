@@ -68,6 +68,11 @@ export interface PlayerDetails {
 export interface UpdatePlayerRequest {
 
   /**
+   * Palavra-passe atual. A API só a exige quando o e-mail muda (reautenticação).
+   */
+  CurrentPassword?: string | null;
+
+  /**
    * Nome atualizado do jogador.
    */
   Name: string;

@@ -181,7 +181,8 @@ export interface PlayerProfileDto {
   id: string;
   name: string;
   imageUrl: string | null;
-  dateOfBirth: string;
+  /** Só vem quando o perfil é do próprio utilizador (os outros veem a idade). */
+  dateOfBirth: string | null;
   age: number;
   position: number;
   height: number;

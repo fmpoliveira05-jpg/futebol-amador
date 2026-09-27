@@ -10,11 +10,14 @@
     @if (demo) {
       <p class="aviso" role="note">
         Modo demonstração: os dados são fictícios e ficam só neste separador. Usa qualquer e-mail
-        (por exemplo <strong>francisco&#64;exemplo.pt</strong>) e qualquer palavra-passe com 6 ou mais caracteres.
+        (por exemplo <strong>francisco&#64;exemplo.pt</strong>) e qualquer palavra-passe.
       </p>
     }
     @if (sessao() === 'expirada') {
       <p class="aviso" role="status">A sessão expirou. Entra novamente.</p>
+    }
+    @if (registo() === 'pendente') {
+      <p class="aviso" role="status">Conta criada. Confirma o teu e-mail (vê a caixa de entrada) e depois entra.</p>
     }
     <form class="form" [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate>
       <div class="form-field">
@@ -32,19 +35,34 @@
         <label for="password">Palavra-passe</label>
         <input id="password" formControlName="password" type="password" autocomplete="current-password" placeholder="Introduz a tua palavra-passe" />
         @if (loginForm.controls.password.touched && loginForm.controls.password.invalid) {
-          <small class="erro-campo">A palavra-passe tem pelo menos 6 caracteres.</small>
+          <small class="erro-campo">A palavra-passe é obrigatória.</small>
         }
       </div>
 
+      <!-- Campo-armadilha: escondido das pessoas e dos leitores de ecrã; só robôs o preenchem. -->
+      <div class="armadilha" aria-hidden="true">
+        <label for="website">Não preenchas este campo</label>
+        <input id="website" formControlName="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <app-turnstile (token)="tokenTurnstile.set($event)" />
+
       @if (erro()) {
         <p class="erro" role="alert">{{ erro() }}</p>
+      }
+      @if (info()) {
+        <p class="aviso" role="status">{{ info() }}</p>
       }
 
       <div class="form-actions">
         <button type="submit" class="btn btn-primary" [disabled]="aEntrar()">
           {{ aEntrar() ? 'A entrar…' : 'Entrar' }}
         </button>
+        @if (porConfirmar()) {
+          <button type="button" class="btn" (click)="reenviarConfirmacao()" [disabled]="aEntrar()">Reenviar confirmação</button>
+        }
         <a routerLink="/signup" class="btn btn-link">Criar conta</a>
+        <a routerLink="/recuperar" class="btn btn-link">Esqueci-me da palavra-passe</a>
       </div>
     </form>
   </div>

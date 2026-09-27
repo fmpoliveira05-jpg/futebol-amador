@@ -26,9 +26,10 @@
 
       <div class="form-field">
         <label for="password">Palavra-passe</label>
-        <input id="password" formControlName="password" type="password" autocomplete="new-password" />
+        <input id="password" formControlName="password" type="password" autocomplete="new-password" aria-describedby="regra-pp" />
+        <small id="regra-pp">{{ regraPalavraPasse }}</small>
         @if (invalido('password')) {
-          <span class="erro-campo">Entre 6 e 32 caracteres.</span>
+          <span class="erro-campo">{{ regraPalavraPasse }}</span>
         }
       </div>
 
@@ -76,6 +77,14 @@
         }
       </div>
     </div>
+
+    <!-- Campo-armadilha: escondido das pessoas e dos leitores de ecrã; só robôs o preenchem. -->
+    <div class="armadilha" aria-hidden="true">
+      <label for="website">Não preenchas este campo</label>
+      <input id="website" formControlName="website" type="text" tabindex="-1" autocomplete="off" />
+    </div>
+
+    <app-turnstile (token)="tokenTurnstile.set($event)" />
 
     @if (errorMessage()) {
       <p class="erro" role="alert">{{ errorMessage() }}</p>

@@ -27,6 +27,11 @@ export const routes: Routes = [
     title: 'Criar conta · Futebol Amador',
   },
   {
+    path: 'recuperar',
+    loadComponent: () => import('./components/pages/login/recuperar.component').then((m) => m.RecuperarComponent),
+    title: 'Recuperar a palavra-passe · Futebol Amador',
+  },
+  {
     path: 'logout',
     loadComponent: () => import('./components/pages/login/logout.component').then((m) => m.LogoutComponent),
   },
