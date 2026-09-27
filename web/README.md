@@ -109,3 +109,21 @@ npm run build:demo         # versão de demonstração
 O endereço da API de produção está em `environment.ts`. Para desenvolvimento local, `environment.development.ts` aponta para `http://localhost:5218/api`.
 
 A sessão fica em cookies `HttpOnly` definidos pela API (o JavaScript não vê os tokens); os pedidos levam `withCredentials` e o cabeçalho `X-Requested-With: FutebolAmador`. A *site key* do Cloudflare Turnstile vai em `turnstileSiteKey` (vazia = desligado). Para publicar, `deploy/nginx.conf` tem os cabeçalhos de segurança e a CSP; a demonstração do GitHub Pages usa `src/index.demo.html`, com a CSP numa meta tag. Detalhes em [docs/SEGURANCA.md](../docs/SEGURANCA.md).
+
+## Produção
+
+- **Pedidos:** tempo máximo de 15 s com mensagem própria e uma nova tentativa só em `GET` com falha de rede
+  (`core/interceptors/pedidos.interceptor.ts`); `Idempotency-Key` ao criar equipas, convites, pedidos de adesão e
+  propostas; botões desativados enquanto o pedido está em curso.
+- **Erros:** página 404 (rota `**`) e `/erro` (parte da aplicação que não carregou, normalmente uma versão nova).
+- **RGPD:** `/privacidade` (rodapé e registo), caixa obrigatória no registo, "Descarregar os meus dados" e "Eliminar
+  conta" nas Definições. Contacto em `contactoPrivacidade` nos `environment*.ts`.
+- **Source maps:** desligados nas configurações `production` e `demo`; o nginx recusa `*.map`.
+- **Testes de ponta a ponta:** o projeto Playwright `armazenamento` corre a build de produção (configuração `e2e`)
+  com a API simulada e verifica que o `localStorage`/`sessionStorage` não têm tokens nem dados pessoais, que os
+  cookies da sessão são `HttpOnly`, `Secure` e `SameSite=Strict` e que o logout os apaga.
+
+```bash
+npx playwright test                         # demonstração (desktop e telemóvel) + armazenamento
+npx playwright test --project=armazenamento
+```

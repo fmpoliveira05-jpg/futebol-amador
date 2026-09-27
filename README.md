@@ -95,7 +95,9 @@ flowchart LR
 backend/   API ASP.NET Core 8 (Clean Architecture) + testes NUnit (unitários e de integração)
 web/       frontend Angular 20 + testes Jasmine/Karma e Playwright
 mobile/    app Android (Kotlin, Jetpack Compose)
-docs/      capturas de ecrã e o desenho das ligas, transferências e onzes (novas-funcionalidades.md)
+docs/      segurança, RGPD, operação, custos, capturas e o desenho das ligas (novas-funcionalidades.md)
+operacao/  cópias de segurança do SQL Server e exportação do Firestore (com testes de restauro)
+firebase/  regras do Firestore e configuração dos emuladores
 ```
 
 Cada pasta tem o seu README com os detalhes e as instruções.
@@ -116,8 +118,13 @@ npm run demo        # abre em http://localhost:4200
 
 ```bash
 cd backend && dotnet test               # unitários e de integração (base de dados em memória, sem Firebase)
-cd web && npm run test:ci && npx playwright test
+FA_TESTES_SQLSERVER="Server=localhost,1433;User Id=sa;Password=...;TrustServerCertificate=True" \
+  dotnet test --filter Category=SqlServer   # concorrência e restrições únicas num SQL Server real
+cd firebase && firebase emulators:exec --only firestore --project demo-futebol-amador \
+  "dotnet test ../backend/Tests --filter Category=Firestore"   # chat (RGPD) no emulador
+cd web && npm run test:ci && npx playwright test   # inclui cookies e armazenamento do browser
 cd mobile && ./gradlew testDebugUnitTest
+./operacao/sqlserver/testar-restauro.sh            # cópia de segurança e restauro
 ```
 
 ## O que mudou na revisão de 2026
@@ -148,6 +155,23 @@ cd mobile && ./gradlew testDebugUnitTest
 ### Segurança (revisão de setembro de 2026)
 
 Limitação de pedidos, confirmação do e-mail obrigatória, sessão web em cookies `HttpOnly` com proteção CSRF, logout com revogação, cabeçalhos de segurança (API e web), Turnstile, uploads do Cloudinary assinados pela API, regras do Firestore no repositório, menos dados pessoais nas listas e na app Android sessão cifrada e build de release reduzida. Configuração, riscos em aberto e passos de publicação em [docs/SEGURANCA.md](docs/SEGURANCA.md).
+
+### Pronto para produção (setembro de 2026)
+
+- **Erros:** páginas 404 e de erro na web; API com ProblemDetails em português para 404/405/409/413/503.
+- **Tempos máximos e resiliência:** 15 s na web (uma nova tentativa só em GET), OkHttp com limites na app,
+  Polly nos serviços externos, limites do Kestrel e do SQL.
+- **Duplicados e concorrência:** `Idempotency-Key`, botões bloqueados durante os pedidos, restrições únicas e
+  `rowversion` (testados com SQL Server real: aceitar o mesmo convite 4 vezes em simultâneo cria um só jogo).
+- **Desempenho:** paginação, índices, consultas sem N+1, cache das consultas públicas; teste de carga com 100
+  utilizadores virtuais: p95 137 ms, 0 erros.
+- **Monitorização e cópias:** `/health/live` e `/health/ready`, workflow `uptime.yml`, scripts de backup/restauro do
+  SQL Server testados e exportação do Firestore testada com o emulador.
+- **RGPD:** Política de Privacidade, consentimento no registo, exportação e eliminação da conta (web e app),
+  retenção automática, cookies só essenciais, testes do armazenamento do browser.
+- **Quotas e custos:** limites por utilizador nas operações caras e guia de orçamentos.
+
+Detalhes em [docs/OPERACAO.md](docs/OPERACAO.md), [docs/RGPD.md](docs/RGPD.md) e [docs/CUSTOS.md](docs/CUSTOS.md).
 
 ### Erros corrigidos
 

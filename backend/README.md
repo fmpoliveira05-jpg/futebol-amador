@@ -23,7 +23,12 @@ Algumas decisões:
   | sem sessão (`UnauthorizedAccessException`) | 401 |
   | `ForbiddenException` | 403 |
   | `NotFoundException` | 404 |
+  | concorrência (`DbUpdateConcurrencyException`) ou restrição única | 409 |
+  | corpo demasiado grande | 413 |
+  | serviço externo lento (Polly) | 503 |
   | tudo o resto | 500, sem mostrar a mensagem interna |
+
+  Rotas inexistentes e métodos errados também respondem em ProblemDetails (404/405).
 
   A distinção entre 401 e 403 importa para os clientes: um 401 termina a sessão no frontend.
 - **Dados pessoais.** O e-mail, o telefone, a morada e a data de nascimento de um jogador só são devolvidos ao próprio e aos colegas de equipa (`PlayerDetailsDto.OcultarDadosPessoais`).
@@ -102,6 +107,25 @@ Os testes de integração arrancam a API no ambiente `Testing`:
 
 Por isso correm sem credenciais, também no GitHub Actions.
 
+Testes que precisam de serviços reais (ignorados sem a variável de ambiente, também correm no CI):
+
+```bash
+# SQL Server (concorrência otimista, restrições únicas, RGPD de ponta a ponta)
+docker run -d --name fa-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Uma-Password-Forte-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+FA_TESTES_SQLSERVER="Server=localhost,1433;User Id=sa;Password=Uma-Password-Forte-1;TrustServerCertificate=True" dotnet test --filter Category=SqlServer
+
+# Emulador do Firestore (exportação e eliminação das mensagens do chat)
+cd ../firebase && firebase emulators:exec --only firestore --project demo-futebol-amador "dotnet test ../backend/Tests --filter Category=Firestore"
+```
+
+Migrações novas sem arrancar a API (o `AmateurFootballContextFactory` dispensa o Firebase):
+
+```bash
+dotnet ef migrations add Nome --project Infrastructure --startup-project Infrastructure
+```
+
+Teste de carga: `Ferramentas/Carga` (ver [docs/OPERACAO.md](../docs/OPERACAO.md)).
+
 ## Endpoints principais
 
 | Recurso | Exemplos |
@@ -120,5 +144,7 @@ Por isso correm sem credenciais, também no GitHub Actions.
 | Transferências | `GET /api/transfers/market/{teamId}`, `POST/DELETE /api/transfers/listings/{teamId}/{playerId}`, `POST /api/transfers/offers`, `.../offers/{id}/accept`, `.../reject` |
 | Onze e relatório | `GET/PUT /api/lineups/{matchId}/{teamId}`, `GET /api/lineups/formations`, `POST /api/matches/{id}/result`, `GET /api/matches/{id}/report` |
 | Perfil | `GET /api/Player/{id}/profile`, `GET /api/Team/{id}/titles` |
+| Dados pessoais (RGPD) | `GET /api/User/me/export`, `DELETE /api/User/me`, `GET /api/User/privacy-policy` |
+| Monitorização | `GET /health/live`, `GET /health/ready` |
 
 A lista completa, com os modelos de pedido e resposta, está no Swagger (`/swagger`, em desenvolvimento).
