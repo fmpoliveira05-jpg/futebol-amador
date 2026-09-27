@@ -107,3 +107,5 @@ npm run build:demo         # versão de demonstração
 ```
 
 O endereço da API de produção está em `environment.ts`. Para desenvolvimento local, `environment.development.ts` aponta para `http://localhost:5218/api`.
+
+A sessão fica em cookies `HttpOnly` definidos pela API (o JavaScript não vê os tokens); os pedidos levam `withCredentials` e o cabeçalho `X-Requested-With: FutebolAmador`. A *site key* do Cloudflare Turnstile vai em `turnstileSiteKey` (vazia = desligado). Para publicar, `deploy/nginx.conf` tem os cabeçalhos de segurança e a CSP; a demonstração do GitHub Pages usa `src/index.demo.html`, com a CSP numa meta tag. Detalhes em [docs/SEGURANCA.md](../docs/SEGURANCA.md).

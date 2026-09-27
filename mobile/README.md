@@ -41,10 +41,9 @@ Foi desenvolvida por **Artur Pinto** e **Willkie Filho** para a unidade curricul
    ```properties
    API_BASE_URL=https://o-teu-servidor/
    CLOUDINARY_CLOUD_NAME=o-teu-cloud-name
-   CLOUDINARY_UPLOAD_PRESET=android_upload
    ```
 
-   Sem `API_BASE_URL` é usado o servidor da equipa. O *upload preset* do Cloudinary tem de ser do tipo *unsigned*.
+   Sem `API_BASE_URL` é usado o servidor da equipa. Os emblemas são enviados para o Cloudinary com uma assinatura pedida à API (`POST api/uploads/signature`); o preset e o segredo ficam só no servidor (ver [docs/SEGURANCA.md](../docs/SEGURANCA.md)).
 3. Abrir a pasta `mobile/` no Android Studio, sincronizar o Gradle e correr num emulador ou num telemóvel (Android 9 ou superior).
 
 ## Testes

@@ -60,9 +60,16 @@ Requisitos:
    dotnet user-secrets set "Firebase:ProjectId" "o-teu-projeto"
    dotnet user-secrets set "Firebase:CredentialPath" "C:/caminho/para/firebase-adminsdk.json"
    dotnet user-secrets set "Authentication:TokenUri" "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=A_WEB_API_KEY_DO_FIREBASE"
+   dotnet user-secrets set "Firebase:ApiKey" "A_WEB_API_KEY_DO_FIREBASE"
+   # Opcionais: Turnstile, Cloudinary (uploads assinados) e, só em desenvolvimento, sem confirmação do e-mail
+   dotnet user-secrets set "Turnstile:SecretKey" "0x..."
+   dotnet user-secrets set "Cloudinary:CloudName" "o-teu-cloud-name"
+   dotnet user-secrets set "Cloudinary:ApiKey" "..."
+   dotnet user-secrets set "Cloudinary:ApiSecret" "..."
+   dotnet user-secrets set "Auth:RequireVerifiedEmail" "false"
    ```
 
-   Em produção usam-se variáveis de ambiente com os mesmos nomes (`ConnectionStrings__DefaultConnection`, `Firebase__ProjectId`, ...). As origens autorizadas pelo CORS ficam em `Cors:Origins`.
+   Em produção usam-se variáveis de ambiente com os mesmos nomes (`ConnectionStrings__DefaultConnection`, `Firebase__ProjectId`, ...). As origens autorizadas pelo CORS ficam em `Cors:Origins`; atrás de um proxy, os IPs dele vão em `ForwardedHeaders:KnownProxies`. Todas as chaves de segurança (limites de pedidos, cookies, revogação, Turnstile, Cloudinary) estão em [docs/SEGURANCA.md](../docs/SEGURANCA.md).
 
 3. Migrações e arranque:
 
@@ -90,7 +97,8 @@ Os testes de integração arrancam a API no ambiente `Testing`:
 
 - a base de dados é em memória;
 - o Firebase é substituído por *mocks*;
-- a autenticação usa um esquema de teste (o cabeçalho `Authorization: Test` identifica um utilizador fixo).
+- a autenticação usa um esquema de teste (o cabeçalho `Authorization: Test` identifica um utilizador fixo, com o e-mail confirmado; `Authorization: Test-NaoVerificado` simula um e-mail por confirmar);
+- os limites de pedidos são altos, exceto nos testes que os verificam.
 
 Por isso correm sem credenciais, também no GitHub Actions.
 
@@ -98,7 +106,8 @@ Por isso correm sem credenciais, também no GitHub Actions.
 
 | Recurso | Exemplos |
 |---|---|
-| Conta | `POST /api/User/login`, `GET /api/User/logout`, `PUT /api/User/password`, `POST /api/Player/create-profile` |
+| Conta | `POST /api/User/login`, `POST /api/User/logout`, `POST /api/User/refresh`, `PUT /api/User/password`, `POST /api/User/resend-verification`, `POST /api/User/forgot-password`, `POST /api/Player/create-profile` |
+| Uploads | `POST /api/uploads/signature` (assinatura para o Cloudinary) |
 | Jogadores | `GET /api/Player/details/{id}`, `PUT /api/Player/update/{id}`, `PUT /api/Player/{id}/leave-team` |
 | Equipas | `POST /api/Team`, `GET/PUT/DELETE /api/Team/{id}`, `GET /api/Team/{id}/search`, `GET /api/Team/homeTeam/{id}` |
 | Membros | `GET /api/Team/{id}/members`, `PUT /api/Team/{id}/members/promote/{playerId}`, `DELETE /api/Team/{id}/members/{playerId}` |

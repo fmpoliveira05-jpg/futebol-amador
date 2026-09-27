@@ -145,6 +145,10 @@ cd mobile && ./gradlew testDebugUnitTest
 - A alteração da palavra-passe era um `GET` com as palavras-passe no URL.
 - O `GlobalExceptionHandler` nunca chegava a ser usado. Todos os erros de negócio saíam como 500, com a mensagem interna. Agora há 400, 401, 403 e 404 e os 500 não mostram detalhes.
 
+### Segurança (revisão de setembro de 2026)
+
+Limitação de pedidos, confirmação do e-mail obrigatória, sessão web em cookies `HttpOnly` com proteção CSRF, logout com revogação, cabeçalhos de segurança (API e web), Turnstile, uploads do Cloudinary assinados pela API, regras do Firestore no repositório, menos dados pessoais nas listas e na app Android sessão cifrada e build de release reduzida. Configuração, riscos em aberto e passos de publicação em [docs/SEGURANCA.md](docs/SEGURANCA.md).
+
 ### Erros corrigidos
 
 - **Backend:**
@@ -197,3 +201,4 @@ Acrescentados depois da revisão, nas três partes (API, web e Android). As deci
 - Na app Android, os testes unitários cobrem o contrato das posições e a lógica das ligas (feriados, grelha do mês, onze, eventos); os ecrãs não têm testes. Os testes instrumentados precisam de um emulador e não correm no CI.
 - Os ecrãs novos da app Android (ligas, mercado, onze, relatório, ficha do jogador) só têm texto em português, mesmo com o telemóvel em inglês.
 - Os eventos de cada jogo são registados por cada equipa e o adversário não os confirma (ao contrário do resultado).
+- A app Android não tem Turnstile nem App Check: os pedidos sem `Origin` só estão protegidos pela limitação de pedidos (ver [docs/SEGURANCA.md](docs/SEGURANCA.md)).
