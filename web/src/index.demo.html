@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <!--
+    CSP da demonstração publicada no GitHub Pages, que não permite cabeçalhos HTTP próprios (por isso
+    vai numa meta tag, onde frame-ancestors não é suportado). A demonstração não fala com a API: os
+    pedidos são respondidos em memória. Em produção a CSP vem do servidor (deploy/nginx.conf).
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://res.cloudinary.com; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+  <meta name="referrer" content="no-referrer">
+  <title>Futebol Amador</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Plataforma para organizar jogos de futebol amador: equipas, convites, calendário e ranking.">
+  <link rel="icon" type="image/x-icon" href="assets/football.ico">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>
