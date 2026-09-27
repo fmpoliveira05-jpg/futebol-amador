@@ -1,4 +1,6 @@
-﻿using Api.Operacao;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Api.Seguranca;
+using Api.Operacao;
 using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
@@ -79,6 +81,7 @@ namespace Api.Controllers
         /// <response code="401">
         /// O utilizador não está autenticado e, portanto, não pode realizar a criação da equipa.
         /// </response>
+        [EnableRateLimiting(LimitacaoPedidos.Equipas)]
         [HttpPost]
         [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -553,6 +556,7 @@ namespace Api.Controllers
         /// <response code="200">Convite enviado com sucesso.</response>
         /// <response code="400">Jogador já tem equipa ou convite duplicado.</response>
         /// <response code="403">Permissão negada.</response>
+        [EnableRateLimiting(LimitacaoPedidos.Convites)]
         [HttpPost("{teamId}/membership-requests/send")]
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

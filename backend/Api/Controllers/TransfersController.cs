@@ -1,3 +1,5 @@
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Api.Seguranca;
 using Application.DTOs.Competition;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -47,6 +49,7 @@ namespace Api.Controllers
         }
 
         /// <summary>Faz uma proposta por um jogador de outra equipa.</summary>
+        [EnableRateLimiting(LimitacaoPedidos.Convites)]
         [HttpPost("offers")]
         [ProducesResponseType(typeof(TransferOfferDto), StatusCodes.Status200OK)]
         public async Task<IActionResult> Offer([FromBody] CreateTransferOfferDto dto) =>

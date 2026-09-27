@@ -381,6 +381,7 @@ namespace Api.Controllers
         /// <response code="200">Pedido enviado com sucesso.</response>
         /// <response code="400">Jogador já tem equipa ou pedido inválido.</response>
         /// <response code="403">Permissão negada.</response>
+        [EnableRateLimiting(LimitacaoPedidos.Convites)]
         [HttpPost("{playerId}/membership-requests/send")]
         [ProducesResponseType(typeof(MemberShipRequestDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

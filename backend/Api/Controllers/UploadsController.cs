@@ -1,3 +1,4 @@
+﻿using Microsoft.AspNetCore.RateLimiting;
 using Api.Seguranca;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -24,6 +25,7 @@ namespace Api.Controllers
         /// <response code="200">Assinatura válida durante 1 hora.</response>
         /// <response code="401">Sem sessão.</response>
         /// <response code="503">O Cloudinary não está configurado no servidor.</response>
+        [EnableRateLimiting(LimitacaoPedidos.Uploads)]
         [HttpPost("signature")]
         [ProducesResponseType(typeof(AssinaturaUploadDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Globalization;
 using System.Security.Claims;
@@ -29,6 +29,14 @@ namespace Api.Seguranca
         public const string Email = "email";
         /// <summary>Operações que confirmam a palavra-passe atual (por utilizador e IP).</summary>
         public const string PalavraPasse = "palavra-passe";
+        /// <summary>Quota por utilizador: assinaturas de upload para o Cloudinary.</summary>
+        public const string Uploads = "uploads";
+        /// <summary>Quota por utilizador: salas de chat criadas.</summary>
+        public const string SalasChat = "salas-chat";
+        /// <summary>Quota por utilizador: convites de jogo, contrapropostas, pedidos/convites de adesão e propostas de transferência.</summary>
+        public const string Convites = "convites";
+        /// <summary>Quota por utilizador: equipas criadas.</summary>
+        public const string Equipas = "equipas";
 
         /// <summary>Limite de uma política: pedidos permitidos por janela.</summary>
         public sealed record Limite(int Pedidos, int JanelaSegundos);
@@ -46,6 +54,11 @@ namespace Api.Seguranca
             ["Registo"] = new(5, 3600),
             ["Email"] = new(5, 900),
             ["PalavraPasse"] = new(5, 900),
+            // Quotas por utilizador para operações que custam dinheiro ou incomodam terceiros.
+            ["Uploads"] = new(20, 3600),
+            ["SalasChat"] = new(10, 86400),
+            ["Convites"] = new(30, 3600),
+            ["Equipas"] = new(3, 86400),
         };
 
         public static IServiceCollection AddLimitacaoPedidos(this IServiceCollection services, IConfiguration configuration)
@@ -65,6 +78,13 @@ namespace Api.Seguranca
             var registo = Ler("Registo");
             var email = Ler("Email");
             var palavraPasse = Ler("PalavraPasse");
+            var quotas = new Dictionary<string, Limite>
+            {
+                [Uploads] = Ler("Uploads"),
+                [SalasChat] = Ler("SalasChat"),
+                [Convites] = Ler("Convites"),
+                [Equipas] = Ler("Equipas"),
+            };
 
             services.AddRateLimiter(options =>
             {
@@ -92,6 +112,18 @@ namespace Api.Seguranca
                     var utilizador = ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "anonimo";
                     return RateLimitPartition.GetSlidingWindowLimiter($"{utilizador}|{EnderecoCliente(ctx)}", _ => JanelaDeslizante(palavraPasse));
                 });
+
+                // Quotas por utilizador (janela fixa): o mesmo utilizador não passa o limite trocando de
+                // IP. Sem sessão, a partição é o IP (o pedido é recusado depois pela autorização).
+                foreach (var (nome, limite) in quotas)
+                {
+                    options.AddPolicy(nome, ctx =>
+                    {
+                        var utilizador = ctx.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        var particao = utilizador != null ? $"u:{utilizador}" : $"ip:{EnderecoCliente(ctx)}";
+                        return RateLimitPartition.GetFixedWindowLimiter(particao, _ => Janela(limite));
+                    });
+                }
 
                 options.OnRejected = async (contexto, cancellationToken) =>
                 {

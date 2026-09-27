@@ -1,4 +1,6 @@
-﻿using Application.DTOs.Chat; 
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Api.Seguranca;
+using Application.DTOs.Chat; 
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -38,6 +40,7 @@ namespace Api.Controllers
         /// <response code="200">Sala criada com sucesso.</response>
         /// <response code="401">Utilizador não autenticado.</response>
         /// <response code="400">Dados da sala inválidos.</response>
+        [EnableRateLimiting(LimitacaoPedidos.SalasChat)]
         [HttpPost("create-room")]
         [ProducesResponseType(typeof(object), StatusCodes.Status200OK)] // Retorna { roomId = "..." }
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

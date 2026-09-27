@@ -1,4 +1,6 @@
-﻿using Api.Operacao;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Api.Seguranca;
+using Api.Operacao;
 using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
@@ -54,6 +56,7 @@ namespace Api.Controllers
         /// <response code="400">Dados inválidos (ex: mesma equipa, data passada, conflito de horário).</response>
         /// <response code="401">Utilizador não autenticado.</response>
         /// <response code="403">Utilizador não é administrador da equipa.</response>
+        [EnableRateLimiting(LimitacaoPedidos.Convites)]
         [HttpPost("match-invites")]
         [ProducesResponseType(typeof(InfoMatchInviteDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -123,6 +126,7 @@ namespace Api.Controllers
         /// <response code="200">Negociação enviada com sucesso.</response>
         /// <response code="400">Dados inválidos ou sem alterações em relação à proposta anterior.</response>
         /// <response code="403">Utilizador não é administrador da equipa.</response>
+        [EnableRateLimiting(LimitacaoPedidos.Convites)]
         [HttpPut("Negociate")]
         [ProducesResponseType(typeof(InfoMatchInviteDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
