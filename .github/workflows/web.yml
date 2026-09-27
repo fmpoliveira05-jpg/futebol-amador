@@ -32,13 +32,21 @@ jobs:
       - name: Build de produção
         run: npm run build
 
+      # As builds de produção e de demonstração não podem publicar o código-fonte original.
+      - name: Sem source maps na build
+        run: |
+          test -z "$(find dist -name '*.map')"
+          ! grep -rl "sourceMappingURL" dist
+
       - name: Testes unitários (Karma, Chrome headless)
         run: npm run test:ci
 
       - name: Instalar o Chromium do Playwright
         run: npx playwright install --with-deps chromium
 
-      - name: Testes de ponta a ponta (modo demonstração)
+      # Modo demonstração (desktop e telemóvel) e build de produção com a API simulada (armazenamento
+      # do browser e cookies da sessão).
+      - name: Testes de ponta a ponta
         run: npx playwright test
 
       - name: Relatório do Playwright
