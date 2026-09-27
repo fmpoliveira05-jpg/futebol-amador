@@ -23,11 +23,13 @@ namespace Api.Controllers
 
         /// <summary>Táticas disponíveis, com as coordenadas de cada posição no campo.</summary>
         [HttpGet("formations")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<FormationDto>), StatusCodes.Status200OK)]
         public IActionResult Formations() => Ok(details.GetFormations());
 
         /// <summary>Onze de uma equipa (o do adversário só depois do prazo).</summary>
         [HttpGet("{matchId:guid}/{teamId:guid}")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(LineupDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         public async Task<IActionResult> Get(Guid matchId, Guid teamId) => Ok(await details.GetLineupAsync(UserId, matchId, teamId));

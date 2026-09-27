@@ -1,9 +1,11 @@
-﻿using Application.DTOs.SuperAdmin;
+﻿using Api.Seguranca;
+using Application.DTOs.SuperAdmin;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -133,6 +135,7 @@ namespace Api.Controllers
         /// <response code="403">Utilizador tentou atualizar uma conta que não lhe pertence.</response>
         /// <response code="404">Super Admin não encontrado.</response>
         [HttpPut("{sadminId}")]
+        [EnableRateLimiting(LimitacaoPedidos.PalavraPasse)]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

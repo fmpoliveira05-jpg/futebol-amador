@@ -26,11 +26,13 @@ namespace Api.Controllers
 
         /// <summary>Todas as ligas, do escalão mais alto para o mais baixo, com a época atual.</summary>
         [HttpGet]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<LeagueDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetLeagues() => Ok(await leagues.GetLeaguesAsync());
 
         /// <summary>Classificação de uma liga (época atual, ou a indicada).</summary>
         [HttpGet("{leagueId:guid}/standings")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(StandingsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetStandings(Guid leagueId, [FromQuery] Guid? seasonId) =>
@@ -38,6 +40,7 @@ namespace Api.Controllers
 
         /// <summary>Calendário da época, por jornadas.</summary>
         [HttpGet("seasons/{seasonId:guid}/fixtures")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(List<FixtureRoundDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetFixtures(Guid seasonId) => Ok(await leagues.GetFixturesAsync(seasonId));

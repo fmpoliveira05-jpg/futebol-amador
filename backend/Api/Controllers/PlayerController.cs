@@ -1,4 +1,5 @@
-﻿using Application.DTOs;
+﻿using Api.Seguranca;
+using Application.DTOs;
 using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
@@ -10,6 +11,7 @@ using Application.Interfaces.Validators;
 using Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 
 namespace Api.Controllers
@@ -29,6 +31,8 @@ namespace Api.Controllers
         private readonly IMembershipRequestService membershipRequestService;
         private readonly IAuthService authService;
         private readonly IPlayerAuthorizationService playerAuthorizationService;
+        private readonly SessaoWeb sessaoWeb;
+        private readonly IRevogacaoTokens revogacao;
 
         /// <summary>
         /// Construtor do PlayerController.
@@ -38,10 +42,14 @@ namespace Api.Controllers
         /// <param name="membershipRequestService">Serviço de gestão de pedidos de adesão.</param>
         /// <param name="authService">Serviço de autenticação.</param>
         /// <param name="playerAuthorizationService">Verificações de pertença a equipas.</param>
+        /// <param name="sessaoWeb">Sessão do frontend web em cookies.</param>
+        /// <param name="revogacao">Cache da revogação das sessões.</param>
         public PlayerController(IPlayerService playerService, IPlayerAuthorizationValidator playerAuthorizationValidator,
             IMembershipRequestService membershipRequestService, IAuthService authService,
-            IPlayerAuthorizationService playerAuthorizationService)
+            IPlayerAuthorizationService playerAuthorizationService, SessaoWeb sessaoWeb, IRevogacaoTokens revogacao)
         {
+            this.sessaoWeb = sessaoWeb;
+            this.revogacao = revogacao;
             this.playerService = playerService;
             this.playerAuthorizationValidator = playerAuthorizationValidator;
             this.membershipRequestService = membershipRequestService;
@@ -57,25 +65,52 @@ namespace Api.Controllers
         /// Regista um novo jogador na aplicação.
         /// </summary>
         /// <remarks>
-        /// Este endpoint é público. Cria o perfil do jogador na base de dados e realiza o login automático no Firebase/AuthService, retornando o token.
+        /// Este endpoint é público. Cria a conta no Firebase e o perfil na base de dados e envia a
+        /// mensagem de confirmação do e-mail. Com <c>Auth:RequireVerifiedEmail</c> (por omissão), a
+        /// resposta é um <see cref="RegistoPendenteDto"/> sem sessão: o utilizador entra depois de
+        /// confirmar o e-mail. Sem essa exigência, devolve logo a sessão (como o login).
         /// </remarks>
         /// <param name="playerDto">Dados de registo do jogador (Nome, Email, Password, etc.).</param>
-        /// <returns>Dados de login (Token) e ID do novo jogador.</returns>
+        /// <returns>Registo pendente de confirmação, ou dados de login.</returns>
         /// <response code="201">Jogador criado com sucesso.</response>
-        /// <response code="400">Dados inválidos (ex: email já existente, idade inválida).</response>
+        /// <response code="400">Dados inválidos (mensagem genérica se o e-mail ou o telefone já existirem).</response>
+        /// <response code="429">Demasiados registos a partir deste endereço.</response>
         [HttpPost]
         [Route("create-profile")]
         [AllowAnonymous]
-        [ProducesResponseType(typeof(object), StatusCodes.Status201Created)] // Retorna LoginResponseDto (ou similar)
+        [EnableRateLimiting(LimitacaoPedidos.Registo)]
+        [ExigirTurnstile]
+        [ProducesResponseType(typeof(RegistoPendenteDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
         public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
         {
             var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
-            var createPlayerResult = await authService.LoginAsync(playerDto.Email, playerDto.Password);
+            var sessao = await authService.IniciarSessaoAposRegistoAsync(playerDto.Email, playerDto.Password);
+
+            object resposta;
+            if (sessao == null)
+            {
+                resposta = new RegistoPendenteDto
+                {
+                    PlayerId = newPlayerId,
+                    Mensagem = "Conta criada. Enviámos-te um e-mail: confirma o endereço antes de entrar.",
+                };
+            }
+            else if (sessaoWeb.EhPedidoWeb(Request) && sessao.FirebaseLoginResponseDto != null)
+            {
+                sessaoWeb.EscreverCookies(Response, sessao.FirebaseLoginResponseDto);
+                resposta = SessaoWeb.SemTokens(sessao);
+            }
+            else
+            {
+                resposta = sessao;
+            }
+
             return CreatedAtAction(
                     nameof(GetPlayer),
                     new { playerId = newPlayerId },
-                    createPlayerResult 
+                    resposta
                     );
         }
 
@@ -98,6 +133,8 @@ namespace Api.Controllers
             playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
             await playerService.DeletePlayerAsync(playerId);
 
+            revogacao.Invalidar(playerId);
+            sessaoWeb.ApagarCookies(Response);
             return NoContent();
         }
 
@@ -177,7 +214,9 @@ namespace Api.Controllers
         /// Atualiza os dados do perfil de um jogador.
         /// </summary>
         /// <remarks>
-        /// O utilizador autenticado só pode atualizar o seu próprio perfil.
+        /// O utilizador autenticado só pode atualizar o seu próprio perfil. Para mudar o e-mail é
+        /// preciso enviar a palavra-passe atual (<c>CurrentPassword</c>); o e-mail novo fica por
+        /// confirmar e as sessões abertas terminam.
         /// </remarks>
         /// <param name="playerId">ID do jogador a atualizar.</param>
         /// <param name="dto">Novos dados do jogador.</param>
@@ -187,7 +226,7 @@ namespace Api.Controllers
         /// <response code="401">Utilizador não autenticado.</response>
         /// <response code="403">Utilizador tentou atualizar outro perfil.</response>
         [HttpPut("update/{playerId}")]
-        [Authorize]
+        [EnableRateLimiting(LimitacaoPedidos.PalavraPasse)]
         [ProducesResponseType(typeof(UpdatePlayerDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -210,6 +249,9 @@ namespace Api.Controllers
             }
 
             var updatedPlayer = await playerService.UpdatePlayerAsync(userId, dto);
+
+            // Se o e-mail mudou, as sessões foram revogadas: esquece o estado guardado da conta.
+            revogacao.Invalidar(userId);
 
             return Ok(updatedPlayer);
         }
@@ -414,6 +456,6 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(Application.DTOs.Competition.PlayerProfileDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProfile(string playerId, [FromServices] IPlayerProfileService profiles) =>
-            Ok(await profiles.GetProfileAsync(playerId));
+            Ok(await profiles.GetProfileAsync(playerId, User.FindFirst(ClaimTypes.NameIdentifier)?.Value));
     }
 }

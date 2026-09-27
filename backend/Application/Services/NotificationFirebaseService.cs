@@ -1,6 +1,8 @@
 ﻿using Application.Interfaces;
 using Application.Interfaces.Repositories;
 using FirebaseAdmin.Messaging;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Application.Services
 {
@@ -11,14 +13,17 @@ namespace Application.Services
     public class NotificationFirebaseService: INotificationFirebaseService
     {
         private readonly IPlayerRepository playerRepository;
+        private readonly ILogger<NotificationFirebaseService> logger;
 
         /// <summary>
         /// Inicializa uma nova instância do serviço de notificação.
         /// </summary>
         /// <param name="playerRepository">Repositório para acesso aos dados dos jogadores, incluindo o DeviceToken.</param>
-        public NotificationFirebaseService(IPlayerRepository playerRepository)
+        /// <param name="logger">Log. Nunca recebe tokens de dispositivo nem conteúdo das mensagens.</param>
+        public NotificationFirebaseService(IPlayerRepository playerRepository, ILogger<NotificationFirebaseService>? logger = null)
         {
             this.playerRepository = playerRepository;
+            this.logger = logger ?? NullLogger<NotificationFirebaseService>.Instance;
         }
 
         /// <summary>
@@ -54,12 +59,13 @@ namespace Application.Services
 
             try
             {
-                string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-                Console.WriteLine($"Mensagem enviada: {response}");
+                await FirebaseMessaging.DefaultInstance.SendAsync(message);
+                logger.LogDebug("Notificação enviada a um utilizador.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro Firebase: {ex.Message}");
+                // Só o código/tipo do erro: a mensagem pode trazer o token do dispositivo.
+                logger.LogWarning("O Firebase não entregou a notificação ({Codigo}).", CodigoErro(ex));
             }
         }
 
@@ -101,12 +107,12 @@ namespace Application.Services
                 var response = await FirebaseMessaging.DefaultInstance.SendEachForMulticastAsync(message);
                 if (response.FailureCount > 0)
                 {
-                    Console.WriteLine($"Sucesso: {response.SuccessCount}, Falhas: {response.FailureCount}");
+                    logger.LogWarning("Notificação à equipa: {Sucesso} entregues, {Falhas} falhadas.", response.SuccessCount, response.FailureCount);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro crítico Firebase Multicast: {ex.Message}");
+                logger.LogWarning("O Firebase não entregou a notificação à equipa ({Codigo}).", CodigoErro(ex));
             }
         }
 
@@ -177,5 +183,9 @@ namespace Application.Services
             return tokens.Where(token => !string.IsNullOrEmpty(token)).ToList();
         }
         #endregion
+
+        /// <summary>Código do erro do FCM (ou o tipo da exceção), sem a mensagem.</summary>
+        private static string CodigoErro(Exception ex) =>
+            ex is FirebaseMessagingException fcm ? fcm.MessagingErrorCode?.ToString() ?? "desconhecido" : ex.GetType().Name;
     }
 }

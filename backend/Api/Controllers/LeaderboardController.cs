@@ -1,5 +1,6 @@
 using Application.DTOs.Competition;
 using Application.Interfaces.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers
@@ -8,6 +9,7 @@ namespace Api.Controllers
     /// Classificação de uma liga (por omissão, a do escalão mais alto, na época atual).
     /// </summary>
     [ApiController]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [Produces("application/json")]
     public class LeaderboardController : ControllerBase

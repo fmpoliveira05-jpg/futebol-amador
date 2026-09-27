@@ -2,6 +2,7 @@
 using Application.DTOs.Match;
 using Application.Interfaces.Services;
 using Application.Interfaces.Services.Hub;
+using Domain.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -16,15 +17,18 @@ namespace Api.Controllers
     {
         private readonly IMatchDetailsService details;
         private readonly IManagerFinishMatchService finish;
+        private readonly IPlayerService players;
 
-        public MatchesController(IMatchDetailsService details, IManagerFinishMatchService finish)
+        public MatchesController(IMatchDetailsService details, IManagerFinishMatchService finish, IPlayerService players)
         {
             this.details = details;
             this.finish = finish;
+            this.players = players;
         }
 
         /// <summary>Resultado, onzes, marcadores, cartões, substituições e faltas das duas equipas.</summary>
         [HttpGet("{matchId:guid}/report")]
+        [AllowAnonymous]
         [ProducesResponseType(typeof(MatchReportDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Report(Guid matchId) => Ok(await details.GetReportAsync(matchId));
@@ -42,6 +46,12 @@ namespace Api.Controllers
                          ?? throw new UnauthorizedAccessException("O pedido não identifica o utilizador.");
             dto.IdMatch = matchId;
             var connection = $"rest:{userId}";
+
+            // A equipa é a do utilizador autenticado, nunca a que vem no corpo do pedido (o serviço
+            // confirma depois que é administrador de uma das equipas do jogo).
+            var jogador = await players.GetPlayerByIdAsync(userId);
+            dto.IdTeam = jogador.Team?.IdTeam
+                         ?? throw new ForbiddenException("Só os administradores das equipas deste jogo podem registar o resultado.");
 
             // Se a equipa já tinha submetido, é uma correção.
             var state = finish.HasSubmitted(matchId, dto.IdTeam)
