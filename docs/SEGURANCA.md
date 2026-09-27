@@ -18,7 +18,10 @@ a configuração que exigem e os riscos que ficam em aberto.
 | Cabeçalhos | API: CSP `default-src 'none'`, `frame-ancestors 'none'`, `nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, COOP/CORP, `Cache-Control: no-store`, HSTS fora de desenvolvimento, sem `Server`. Web: os mesmos em `web/deploy/nginx.conf`, com CSP compatível com a aplicação. |
 | Uploads | Emblemas enviados para o Cloudinary com assinatura da API (preset assinado, pasta do utilizador, JPG/PNG/WebP, 2 MB). A API só aceita emblemas do Cloudinary por HTTPS ou imagens PNG/JPEG/WebP embebidas (até ~150 KB). |
 | Firestore | Regras em `firebase/firestore.rules`: salas só para membros, mensagens só em nome próprio, sem edição/remoção, resto fechado. |
-| Erros | Mensagens das exceções da framework nunca chegam ao cliente; logs sem e-mails, tokens nem conteúdo de notificações. |
+| Erros | Mensagens das exceções da framework nunca chegam ao cliente; 404/405/401/409/413/503 em ProblemDetails; logs sem e-mails, tokens nem conteúdo de notificações. |
+| Quotas | Por utilizador nas operações caras (uploads, salas de chat, convites, equipas, exportações). |
+| Segredos | `gitleaks` em todo o histórico no CI (`segredos.yml`); um achado conhecido e documentado abaixo. |
+| Dados pessoais | Exportação e eliminação da conta, consentimento no registo, retenção automática ([RGPD.md](RGPD.md)). |
 
 ## Configuração da API
 
@@ -39,7 +42,10 @@ Valores sensíveis por *user-secrets* em desenvolvimento e por variáveis de amb
 | `Turnstile:SecretKey` | não | Chave secreta do Cloudflare Turnstile. Vazia = verificação desligada. |
 | `Cloudinary:CloudName`, `Cloudinary:ApiKey`, `Cloudinary:ApiSecret` (ou `CLOUDINARY_API_SECRET`), `Cloudinary:UploadPreset` | para uploads | Sem elas, `POST /api/uploads/signature` responde 503. |
 | `ForwardedHeaders:KnownProxies` / `KnownNetworks` / `ForwardLimit` | atrás de proxy | IPs/redes do proxy reverso (ex.: `["10.0.0.0/8"]`). Sem isto o IP visto é o do proxy e a limitação de pedidos junta todos os clientes. |
-| `LimitacaoPedidos:{Global,Autenticacao,Sessao,Registo,Email,PalavraPasse}:{Pedidos,JanelaSegundos}` | não | Limites (por omissão 300/60 s, 10/300 s, 30/300 s, 5/3600 s, 5/900 s, 5/900 s). |
+| `LimitacaoPedidos:{Global,Autenticacao,Sessao,Registo,Email,PalavraPasse}:{Pedidos,JanelaSegundos}` | não | Limites por IP (por omissão 300/60 s, 10/300 s, 30/300 s, 5/3600 s, 5/900 s, 5/900 s). |
+| `LimitacaoPedidos:{Uploads,SalasChat,Convites,Equipas,Exportacao}:{Pedidos,JanelaSegundos}` | não | Quotas por utilizador (20/h, 10/dia, 30/h, 3/dia, 5/h). Ver [CUSTOS.md](CUSTOS.md). |
+| `Limites:*`, `BaseDados:*`, `Idempotencia:HorasRetencao`, `Cache:PublicaSegundos` | não | Tempos máximos, corpo máximo, SQL, idempotência e cache. Ver [OPERACAO.md](OPERACAO.md). |
+| `Rgpd:VersaoPolitica`, `Rgpd:RetencaoAtiva`, `Rgpd:Dias*` | não | Versão da Política de Privacidade exigida no registo e prazos de retenção. Ver [RGPD.md](RGPD.md). |
 
 Exemplo (desenvolvimento):
 
@@ -63,7 +69,11 @@ dotnet user-secrets set "Auth:RequireVerifiedEmail" "false"   # opcional, só em
 | `POST /api/User/logout` | Revoga os refresh tokens no Firebase (todas as sessões) e apaga os cookies. Deixou de ser `GET`. |
 | `PUT /api/User/password` | Palavra-passe atual + nova (política). Termina as outras sessões; na web os cookies passam para a sessão nova. |
 | `PUT /api/Player/update/{id}` | Mudar o e-mail exige `CurrentPassword`; o e-mail novo fica por confirmar e as sessões terminam. |
-| `POST /api/uploads/signature` | Assinatura para upload direto no Cloudinary. |
+| `POST /api/uploads/signature` | Assinatura para upload direto no Cloudinary. Quota: 20 por hora por utilizador. |
+| `GET /api/User/me/export` | Todos os dados pessoais em JSON (RGPD). |
+| `DELETE /api/User/me` | `{ password }`; elimina (anonimiza) a conta, apaga o utilizador no Firebase e os cookies. `DELETE /api/Player/{id}` responde 410. |
+| `GET /api/User/privacy-policy` | Versão atual da Política de Privacidade. |
+| `GET /health/live`, `GET /health/ready` | Anónimos, sem limitação de pedidos. |
 
 ## Sessão web (cookies)
 
@@ -142,8 +152,8 @@ utilizador é recusada. Recomenda-se também ativar o App Check no Firestore.
 - O logout chama `POST /api/User/logout`.
 - Testes instrumentados: as credenciais da conta de teste passam como argumentos
   (`-Pandroid.testInstrumentationRunnerArguments.testEmail=...` e `...testPassword=...`).
-- **Estas alterações não foram compiladas neste ambiente** (sem Android SDK): compilar a release e testar
-  login, registo, chat, hubs e criação de equipa com emblema antes de publicar.
+- Debug e release compilados e testes unitários a passar (setembro de 2026); testar login, registo, chat, hubs e
+  criação de equipa com emblema num aparelho antes de publicar (não testado em aparelho).
 - Limitação: o ecrã de edição do perfil na app ainda não pede a palavra-passe atual; mudar o e-mail na
   app devolve o erro da API ("indica a palavra-passe atual"). Fazê-lo na web.
 
