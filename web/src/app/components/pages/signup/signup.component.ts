@@ -1,4 +1,5 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
+import { VERSAO_POLITICA_PRIVACIDADE } from '../../../shared/rgpd/politica';
 import { mensagemDeErro } from '../../../shared/http/erros';
 import { POSICOES } from '../../../shared/constants/position-map';
 import { Router, RouterLink } from '@angular/router';
@@ -55,6 +56,8 @@ export class SignupComponent {
     phone: ['', [Validators.required, Validators.pattern(/^\+\d{3}\d{9}$/)]],
     position: [0, [Validators.required]],
     height: [175, [Validators.required, Validators.min(100), Validators.max(250)]],
+    /** Aceitação da Política de Privacidade (obrigatória; a API guarda a versão e a data). */
+    aceitaPolitica: [false, [Validators.requiredTrue]],
     /** Campo-armadilha, escondido das pessoas. */
     website: [''],
   });
@@ -70,7 +73,7 @@ export class SignupComponent {
       this.signupForm.markAllAsTouched();
       return;
     }
-    const dados = this.signupForm.getRawValue();
+    const { aceitaPolitica, ...dados } = this.signupForm.getRawValue();
     if (dados.website) {
       // Só um robô preenche o campo escondido: não se chama a API.
       return;
@@ -82,7 +85,16 @@ export class SignupComponent {
     this.aGuardar.set(true);
     this.errorMessage.set(null);
     this.authService
-      .signup({ ...dados, position: Number(dados.position), height: Number(dados.height) }, this.tokenTurnstile())
+      .signup(
+        {
+          ...dados,
+          position: Number(dados.position),
+          height: Number(dados.height),
+          aceitaPoliticaPrivacidade: aceitaPolitica,
+          versaoPoliticaPrivacidade: VERSAO_POLITICA_PRIVACIDADE,
+        },
+        this.tokenTurnstile()
+      )
       .subscribe({
         next: (resposta) => {
           if ('verificacaoEmailPendente' in resposta && resposta.verificacaoEmailPendente) {

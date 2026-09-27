@@ -92,7 +92,7 @@ describe('AuthService', () => {
 
   it('no registo com confirmação pendente não fica autenticado', () => {
     auth
-      .signup({ name: 'X', email: 'a@b.pt', password: 'Futebol#2026', dateOfBirth: '2000-01-01', address: 'Rua, Braga', phone: '+351912345678', position: 0, height: 180 })
+      .signup({ name: 'X', email: 'a@b.pt', password: 'Futebol#2026', dateOfBirth: '2000-01-01', address: 'Rua, Braga', phone: '+351912345678', position: 0, height: 180, aceitaPoliticaPrivacidade: true, versaoPoliticaPrivacidade: '2026-09-27' })
       .subscribe();
     http.expectOne(`${api}/Player/create-profile`).flush({ playerId: 'p', verificacaoEmailPendente: true, mensagem: 'ok' });
     expect(auth.isAuthenticated()).toBeFalse();

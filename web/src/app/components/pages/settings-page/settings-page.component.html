@@ -2,7 +2,7 @@
   <header class="page-header">
     <div>
       <h1 class="page-title">Definições</h1>
-      <p class="page-subtitle">Segurança da tua conta.</p>
+      <p class="page-subtitle">Segurança e dados da tua conta.</p>
     </div>
   </header>
 
@@ -45,6 +45,55 @@
     <div class="form-actions">
       <button type="submit" class="btn btn-primary" [disabled]="aGuardar()">
         {{ aGuardar() ? 'A guardar…' : 'Alterar palavra-passe' }}
+      </button>
+    </div>
+  </form>
+
+  <div class="card">
+    <h2 class="card-title">Os meus dados</h2>
+    <p>
+      Descarrega uma cópia de todos os teus dados (perfil, equipa, pedidos, transferências, eventos dos jogos e mensagens do
+      chat) num ficheiro JSON. Ver a <a routerLink="/privacidade">Política de Privacidade</a>.
+    </p>
+    @if (erroExportar()) {
+      <p class="erro" role="alert">{{ erroExportar() }}</p>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="exportar()" [disabled]="aExportar()">
+        {{ aExportar() ? 'A preparar…' : 'Descarregar os meus dados' }}
+      </button>
+    </div>
+  </div>
+
+  <form class="card form" [formGroup]="formEliminar" (ngSubmit)="eliminar()" novalidate>
+    <h2 class="card-title">Eliminar conta</h2>
+    <p>
+      A conta é eliminada de imediato e não pode ser recuperada. Sais da tua equipa (se fores o único membro, a equipa também é
+      apagada; se não, a administração passa ao membro seguinte), as tuas mensagens do chat são apagadas e, nas estatísticas
+      dos jogos já disputados, o teu nome passa a "Jogador removido".
+    </p>
+    <div class="form-field">
+      <label for="pp-eliminar">Palavra-passe atual</label>
+      <input id="pp-eliminar" type="password" formControlName="palavraPasse" autocomplete="current-password" />
+      @if (formEliminar.controls.palavraPasse.invalid && formEliminar.controls.palavraPasse.touched) {
+        <span class="erro-campo">Indica a palavra-passe para confirmar.</span>
+      }
+    </div>
+    <div class="form-field form-field--check">
+      <label>
+        <input type="checkbox" formControlName="confirmo" />
+        Percebo que a eliminação é definitiva.
+      </label>
+      @if (formEliminar.controls.confirmo.invalid && formEliminar.controls.confirmo.touched) {
+        <span class="erro-campo">Confirma que queres eliminar a conta.</span>
+      }
+    </div>
+    @if (erroEliminar()) {
+      <p class="erro" role="alert">{{ erroEliminar() }}</p>
+    }
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger" [disabled]="aEliminar()">
+        {{ aEliminar() ? 'A eliminar…' : 'Eliminar a minha conta' }}
       </button>
     </div>
   </form>

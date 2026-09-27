@@ -78,6 +78,16 @@
       </div>
     </div>
 
+    <div class="form-field form-field--check">
+      <label>
+        <input type="checkbox" formControlName="aceitaPolitica" />
+        Li e aceito a <a routerLink="/privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.
+      </label>
+      @if (invalido('aceitaPolitica')) {
+        <span class="erro-campo">Para criar a conta tens de aceitar a Política de Privacidade.</span>
+      }
+    </div>
+
     <!-- Campo-armadilha: escondido das pessoas e dos leitores de ecrã; só robôs o preenchem. -->
     <div class="armadilha" aria-hidden="true">
       <label for="website">Não preenchas este campo</label>

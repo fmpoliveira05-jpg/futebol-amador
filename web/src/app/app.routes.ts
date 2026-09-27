@@ -226,5 +226,20 @@ export const routes: Routes = [
     title: 'Resultado do jogo · Futebol Amador',
   },
 
-  { path: '**', redirectTo: '' },
+  // Informação e erros
+  {
+    path: 'privacidade',
+    loadComponent: () => import('./components/pages/privacidade/privacidade').then((m) => m.Privacidade),
+    title: 'Política de Privacidade · Futebol Amador',
+  },
+  {
+    path: 'erro',
+    loadComponent: () => import('./components/pages/erros/erro-generico').then((m) => m.ErroGenerico),
+    title: 'Erro · Futebol Amador',
+  },
+  {
+    path: '**',
+    loadComponent: () => import('./components/pages/erros/nao-encontrada').then((m) => m.NaoEncontrada),
+    title: 'Página não encontrada · Futebol Amador',
+  },
 ];

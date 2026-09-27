@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { SidebarComponent } from './components/partials/nav/sidebar/sidebar.component';
 
-/** Componente raiz: menu lateral e a página da rota atual. */
+/** Componente raiz: menu lateral, a página da rota atual e o rodapé (Política de Privacidade). */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SidebarComponent],
+  imports: [RouterOutlet, RouterLink, SidebarComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

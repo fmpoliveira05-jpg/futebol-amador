@@ -25,4 +25,22 @@ test.describe('Visitante', () => {
     await page.getByRole('button', { name: 'Entrar' }).click();
     await expect(page.getByText('O e-mail é obrigatório.')).toBeVisible();
   });
+
+  test('um endereço inexistente mostra a página 404', async ({ page }) => {
+    await page.goto('/isto-nao-existe');
+    await expect(page.getByRole('heading', { level: 1, name: 'Página não encontrada' })).toBeVisible();
+    await page.getByRole('link', { name: 'Voltar à página inicial' }).click();
+    await expect(page).toHaveURL(/\/$/);
+  });
+
+  test('a Política de Privacidade está no rodapé e o registo exige aceitá-la', async ({ page }) => {
+    await page.goto('/signup');
+    await page.locator('footer.rodape').getByRole('link', { name: 'Política de Privacidade' }).click();
+    await expect(page.getByRole('heading', { level: 1, name: 'Política de Privacidade' })).toBeVisible();
+    await expect(page.getByText('__Host-fa_session').first()).toBeVisible();
+
+    await page.goto('/signup');
+    await page.getByRole('button', { name: 'Criar conta' }).click();
+    await expect(page.getByText('Para criar a conta tens de aceitar a Política de Privacidade.')).toBeVisible();
+  });
 });

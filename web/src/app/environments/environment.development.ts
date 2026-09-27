@@ -11,4 +11,9 @@ export const environment = {
    * exige (a chave secreta, Turnstile:SecretKey, também fica vazia).
    */
   turnstileSiteKey: '',
+  /**
+   * Contacto para pedidos sobre dados pessoais (Política de Privacidade). Pôr o endereço real do
+   * responsável antes de publicar.
+   */
+  contactoPrivacidade: 'privacidade@futebol-amador.example',
 };

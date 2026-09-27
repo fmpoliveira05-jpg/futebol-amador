@@ -304,6 +304,31 @@ const rotas: Array<[string, RegExp, Handler]> = [
     estado: 202,
   })],
   ['PUT', /^User\/password$/, () => ok()],
+  ['GET', /^User\/privacy-policy$/, () => ok({ versao: '2026-09-27' })],
+  [
+    'GET',
+    /^User\/me\/export$/,
+    () => {
+      const me = eu();
+      return ok({
+        geradoEm: new Date().toISOString(),
+        formato: 'futebol-amador/exportacao-v1',
+        conta: {
+          id: me.id,
+          nome: me.nome,
+          email: me.email,
+          telefone: me.telefone,
+          morada: me.morada,
+          dataNascimento: me.nascimento,
+          posicao: me.posicao,
+          altura: me.altura,
+        },
+        equipa: me.equipa ? { id: me.equipa, nome: equipa(me.equipa).nome } : null,
+        notas: ['Modo demonstração: dados fictícios.'],
+      });
+    },
+  ],
+  ['DELETE', /^User\/me$/, () => ({ estado: 204 })],
   ['POST', /^Player\/create-profile$/, () => ({
     corpo: {
       playerId: DEMO_JOGADOR_ID,

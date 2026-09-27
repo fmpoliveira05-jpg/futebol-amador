@@ -40,6 +40,9 @@ export interface SignupRequest {
   phone: string;
   position: number;
   height: number;
+  /** Aceitação da Política de Privacidade e a versão aceite (RGPD). */
+  aceitaPoliticaPrivacidade: boolean;
+  versaoPoliticaPrivacidade: string;
   /** Campo-armadilha: tem de ir vazio (só um robô o preenche). */
   website?: string;
 }

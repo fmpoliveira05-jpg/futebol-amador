@@ -698,3 +698,43 @@ a.badge {
 .turnstile {
   margin-block: 0.5rem;
 }
+
+/* ---------- Caixa de confirmação (aceitar a Política de Privacidade) ---------- */
+
+.form-field--check label {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-weight: 400;
+}
+
+.form-field--check input[type='checkbox'] {
+  width: auto;
+  margin-top: 0.2rem;
+}
+
+/* ---------- Rodapé ---------- */
+
+.rodape {
+  margin-top: 2rem;
+  padding: 1rem 0;
+  border-top: 1px solid var(--cor-borda);
+  font-size: 0.875rem;
+  color: var(--cor-texto-suave);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.politica h2 {
+  font-size: 1.1rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.politica ul {
+  padding-left: 1.25rem;
+}
+
+.politica li {
+  margin-bottom: 0.35rem;
+}

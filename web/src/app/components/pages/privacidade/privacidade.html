@@ -1,0 +1,86 @@
+<section class="page">
+  <header class="page-header">
+    <div>
+      <h1 class="page-title">Política de Privacidade</h1>
+      <p class="page-subtitle">Versão {{ versao }}</p>
+    </div>
+  </header>
+
+  <article class="card politica">
+    <h2>Quem trata os teus dados</h2>
+    <p>
+      O Futebol Amador é uma plataforma para organizar equipas, jogos e ligas de futebol amador. O responsável pelo
+      tratamento dos dados é quem gere esta instalação da plataforma. Para qualquer pedido sobre os teus dados escreve para
+      <a [href]="'mailto:' + contacto">{{ contacto }}</a>.
+    </p>
+
+    <h2>Que dados tratamos</h2>
+    <ul>
+      <li><strong>Conta:</strong> nome, e-mail, palavra-passe (guardada só pelo Firebase Authentication, cifrada), telefone, morada (usamos a localidade para mostrar a zona), data de nascimento.</li>
+      <li><strong>Perfil desportivo:</strong> posição, altura e, se os indicares, peso, pé preferido, nacionalidade, país de nascimento e fotografia.</li>
+      <li><strong>Atividade:</strong> equipa, pedidos de adesão, convites, transferências, onzes, golos, cartões e outros eventos dos jogos.</li>
+      <li><strong>Chat:</strong> as mensagens que envias nas salas da tua equipa.</li>
+      <li><strong>Técnicos:</strong> endereço IP (limitação de pedidos e segurança, não guardado em base de dados), token de notificações do telemóvel (se as autorizares).</li>
+    </ul>
+    <p>Não usamos publicidade, perfis de marketing nem ferramentas de análise de terceiros.</p>
+
+    <h2>Para quê e com que fundamento</h2>
+    <ul>
+      <li><strong>Prestar o serviço</strong> (conta, equipas, jogos, ligas, chat, notificações) — execução do contrato que aceitas ao registar-te (RGPD, art. 6.º, n.º 1, al. b).</li>
+      <li><strong>Segurança e prevenção de abusos</strong> (confirmação do e-mail, limitação de pedidos, verificação anti-robô) — interesse legítimo (al. f).</li>
+      <li><strong>Estatísticas dos jogos disputados</strong> depois de eliminares a conta, já sem o teu nome — interesse legítimo das outras equipas em manter os resultados (al. f), com anonimização.</li>
+    </ul>
+
+    <h2>Quem vê os teus dados</h2>
+    <p>
+      Os outros utilizadores veem o teu nome, posição, zona (localidade), equipa e estatísticas. O e-mail, o telefone, a morada
+      e a data de nascimento só são vistos por ti e pelos colegas da tua equipa.
+    </p>
+    <p>Usamos estes subcontratantes, com contratos de tratamento de dados:</p>
+    <ul>
+      <li><strong>Google (Firebase)</strong> — autenticação, chat (Firestore) e notificações; pode haver transferência para os EUA ao abrigo do Quadro de Privacidade de Dados UE-EUA e de cláusulas contratuais-tipo.</li>
+      <li><strong>Cloudinary</strong> — alojamento dos emblemas e fotografias que carregas.</li>
+      <li><strong>Cloudflare (Turnstile)</strong> — verificação anti-robô nos formulários de entrada e registo.</li>
+      <li><strong>Fornecedor de alojamento</strong> da API e da base de dados (na União Europeia).</li>
+    </ul>
+
+    <h2>Durante quanto tempo</h2>
+    <ul>
+      <li>Conta e perfil: enquanto a conta existir. Ao eliminá-la, os dados pessoais são apagados ou anonimizados de imediato.</li>
+      <li>Contas que nunca confirmaram o e-mail: apagadas ao fim de 30 dias.</li>
+      <li>Pedidos de adesão sem resposta: 90 dias. Convites de jogo: 30 dias depois da data proposta.</li>
+      <li>Cópias de segurança: até 14 dias (e até 90 dias nas cópias do chat), depois são substituídas.</li>
+    </ul>
+
+    <h2>Cookies e armazenamento no navegador</h2>
+    <p>Só usamos o estritamente necessário para a sessão, por isso não pedimos consentimento para cookies:</p>
+    <ul>
+      <li><code>__Host-fa_session</code> e <code>__Secure-fa_refresh</code> — cookies de sessão, inacessíveis ao JavaScript (<code>HttpOnly</code>), só por HTTPS; apagados ao terminar a sessão.</li>
+      <li><code>fa_sessao</code> (armazenamento local) — o identificador interno da conta, da equipa e se és administrador, para mostrar o menu certo. Não tem dados pessoais nem dá acesso à conta; é apagado ao terminar a sessão.</li>
+    </ul>
+    <p>Não há cookies de publicidade nem de análise. Os tipos de letra e os scripts da aplicação são servidos pelo próprio site.</p>
+
+    <h2>Os teus direitos</h2>
+    <ul>
+      <li><strong>Acesso e portabilidade:</strong> em <a routerLink="/settings">Definições</a> → "Descarregar os meus dados" recebes um ficheiro JSON com todos os teus dados.</li>
+      <li><strong>Retificação:</strong> no teu perfil.</li>
+      <li><strong>Apagamento:</strong> em <a routerLink="/settings">Definições</a> → "Eliminar conta" (pede a palavra-passe). Se fores o único membro da equipa, a equipa também é apagada; se não, a administração passa ao membro seguinte.</li>
+      <li><strong>Oposição e limitação:</strong> pelo contacto acima.</li>
+      <li><strong>Reclamação:</strong> à Comissão Nacional de Proteção de Dados (<a href="https://www.cnpd.pt" rel="noopener noreferrer" target="_blank">www.cnpd.pt</a>).</li>
+    </ul>
+    <p>Respondemos aos pedidos no prazo de um mês.</p>
+
+    <h2>Segurança e incidentes</h2>
+    <p>
+      Ligações cifradas (HTTPS), palavras-passe geridas pelo Firebase, sessão em cookies protegidos, controlo de acesso por
+      equipa e cópias de segurança. Se houver uma violação de dados com risco para ti, avisamos a CNPD em 72 horas e, quando o
+      risco for elevado, avisamos-te diretamente.
+    </p>
+
+    <h2>Menores</h2>
+    <p>Se tiveres menos de 13 anos, só podes criar conta com autorização dos teus pais ou representantes legais (Lei n.º 58/2019, art. 16.º).</p>
+
+    <h2>Alterações</h2>
+    <p>Se esta política mudar, a versão acima muda e o registo passa a pedir a aceitação da versão nova.</p>
+  </article>
+</section>
