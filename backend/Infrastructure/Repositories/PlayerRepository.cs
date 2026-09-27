@@ -132,7 +132,7 @@ namespace Infrastructure.Repositories
         public async Task<List<InfoPlayerDto?>> GetPlayersList(FilterTeamDto? filters)
         {
             var dateNow = DateOnly.FromDateTime(DateTime.UtcNow);
-            var query = context.Player.AsQueryable();
+            var query = context.Player.Where(p => p.EliminadoEm == null);
 
             if (filters != null)
             {

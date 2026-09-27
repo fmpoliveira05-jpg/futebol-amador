@@ -84,8 +84,18 @@ namespace Api.Controllers
         [ProducesResponseType(typeof(RegistoPendenteDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
-        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto)
+        public async Task<IActionResult> CreatePlayer([FromBody] CreatePlayerDto playerDto, [FromServices] IContaService contas)
         {
+            // RGPD: sem a aceitação da versão atual da Política de Privacidade não se cria a conta.
+            if (!playerDto.AceitaPoliticaPrivacidade)
+            {
+                throw new Domain.Exceptions.ValidationException("Para criar a conta tens de ler e aceitar a Política de Privacidade.");
+            }
+            if (!string.Equals(playerDto.VersaoPoliticaPrivacidade, contas.VersaoPoliticaAtual, StringComparison.Ordinal))
+            {
+                throw new Domain.Exceptions.ValidationException("A Política de Privacidade foi atualizada. Recarrega a página, lê a versão atual e aceita-a.");
+            }
+
             var newPlayerId = await playerService.CreatePlayerAsync(playerDto);
             var sessao = await authService.IniciarSessaoAposRegistoAsync(playerDto.Email, playerDto.Password);
 
@@ -129,14 +139,13 @@ namespace Api.Controllers
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<IActionResult> DeletePlayer(string playerId) 
+        [Obsolete("Usar DELETE /api/User/me (com a palavra-passe).")]
+        public IActionResult DeletePlayer(string playerId)
         {
-            playerAuthorizationValidator.ValidateUserIdIsSameUrl(GetCurrentUserId(), playerId);
-            await playerService.DeletePlayerAsync(playerId);
-
-            revogacao.Invalidar(playerId);
-            sessaoWeb.ApagarCookies(Response);
-            return NoContent();
+            // Substituído por DELETE /api/User/me, que pede a palavra-passe e anonimiza em vez de
+            // falhar quando o jogador tem histórico de jogos.
+            return Problem(statusCode: StatusCodes.Status410Gone, title: "Endpoint descontinuado",
+                detail: "Para eliminar a conta usa DELETE /api/User/me com a palavra-passe atual.");
         }
 
         /// <summary>

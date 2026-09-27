@@ -62,6 +62,7 @@ namespace Application
             services.AddScoped<IPlayerAuthorizationService, PlayerAuthorizationService>();
             services.AddScoped<IAuthService, FireBaseAuthService>();
             services.AddScoped<INotificationFirebaseService, NotificationFirebaseService>();
+            services.AddScoped<IContaService, ContaService>();
 
             services.AddManagerHubService();
 

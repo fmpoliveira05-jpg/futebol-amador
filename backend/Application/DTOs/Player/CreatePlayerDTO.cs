@@ -40,6 +40,16 @@ namespace Application.DTOs.PlayerDTOs
         /// Campo-armadilha (honeypot): o formulário web esconde-o, por isso só um robô o preenche.
         /// Um pedido com este campo preenchido é recusado.
         /// </summary>
+        /// <summary>
+        /// O utilizador leu e aceitou a Política de Privacidade (obrigatório: sem isto a conta não
+        /// é criada).
+        /// </summary>
+        public bool AceitaPoliticaPrivacidade { get; set; }
+
+        /// <summary>Versão da Política de Privacidade mostrada ao utilizador (tem de ser a atual).</summary>
+        [MaxLength(ModelConstants.RgpdConst.MaxVersaoPolitica)]
+        public string? VersaoPoliticaPrivacidade { get; set; }
+
         [CampoArmadilha]
         public string? Website { get; set; }
     }

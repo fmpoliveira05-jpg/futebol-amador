@@ -497,6 +497,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 Address = "Street Test, Test",
                 Email = "test@example.com",
                 Password = "Teste#Seguro123",
+                AceitaPoliticaPrivacidade = true,
+                VersaoPoliticaPrivacidade = Application.Services.ContaService.VersaoPoliticaPredefinida,
                 Phone = "+351123456789",
                 Position = 0,
                 Height = 160
@@ -637,43 +639,52 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             Password = "Teste#Seguro123",
             Phone = "+351912345678",
             Position = 0,
-            Height = 175
+            Height = 175,
+            AceitaPoliticaPrivacidade = true,
+            VersaoPoliticaPrivacidade = Application.Services.ContaService.VersaoPoliticaPredefinida,
         };
 
-        [Test]
-        public async Task DeletePlayer_Returns_Deleted()
+        [TestCase(false, Application.Services.ContaService.VersaoPoliticaPredefinida)]
+        [TestCase(true, "2020-01-01")]
+        [TestCase(true, null)]
+        public async Task CreatePlayer_Sem_Aceitar_A_Politica_Atual_Responde_400(bool aceita, string? versao)
         {
-            var mockPlayerAuthValidator = new Mock<IPlayerAuthorizationValidator>();
             var mockPlayerService = new Mock<IPlayerService>();
+            _client = _factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+            {
+                services.RemoveAll(typeof(IPlayerService));
+                services.AddSingleton(mockPlayerService.Object);
+            })).CreateClient();
 
-            var playerId = Guid.NewGuid().ToString();
+            var dto = CreatePlayerDtoValido();
+            dto.AceitaPoliticaPrivacidade = aceita;
+            dto.VersaoPoliticaPrivacidade = versao;
 
-            mockPlayerAuthValidator.Setup(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId))
-                .Verifiable();
-            mockPlayerService.Setup(s => s.DeletePlayerAsync(playerId))
-                .Returns(Task.CompletedTask);
+            var response = await _client.PostAsJsonAsync("/api/Player/create-profile", dto);
 
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            Assert.That(await response.Content.ReadAsStringAsync(), Does.Contain("Política de Privacidade"));
+            mockPlayerService.Verify(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>()), Times.Never);
+        }
+
+        [Test]
+        public async Task DeletePlayer_Antigo_Responde_410_E_Nao_Apaga()
+        {
+            var mockPlayerService = new Mock<IPlayerService>();
             _client = _factory.WithWebHostBuilder(builder =>
             {
                 builder.ConfigureServices(services =>
                 {
-                    services.RemoveAll(typeof(IPlayerAuthorizationValidator));
                     services.RemoveAll(typeof(IPlayerService));
-
-                    services.AddSingleton(mockPlayerAuthValidator.Object);
                     services.AddSingleton(mockPlayerService.Object);
                 });
             }).CreateClient();
-
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.DeleteAsync($"/api/Player/{playerId}");
+            var response = await _client.DeleteAsync($"/api/Player/{TestAuthHandler.TestUserId}");
 
-            response.EnsureSuccessStatusCode();
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
-
-            mockPlayerService.Verify(s => s.DeletePlayerAsync(playerId), Times.Once);
-            mockPlayerAuthValidator.Verify(v => v.ValidateUserIdIsSameUrl(It.IsAny<string>(), playerId), Times.Once);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Gone));
+            mockPlayerService.Verify(s => s.DeletePlayerAsync(It.IsAny<string>()), Times.Never);
         }
         #endregion
 

@@ -114,6 +114,8 @@ else
     builder.Services.AddSingleton<IRevogacaoTokens, RevogacaoTokensFirebase>();
 }
 builder.Services.AddSingleton<IAssinaturaCloudinary, AssinaturaCloudinary>();
+// Apagar as imagens de quem elimina a conta (RGPD). DELETE e GET são idempotentes: há novas tentativas.
+builder.Services.AddHttpClient<IImagensUtilizador, ImagensCloudinary>().AddResilienciaExterna(builder.Configuration);
 
 // Origens autorizadas a chamar a API a partir do browser (Cors:Origins no appsettings).
 var origens = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? new[] { "http://localhost:4200" };

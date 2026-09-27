@@ -37,6 +37,8 @@ namespace Api.Seguranca
         public const string Convites = "convites";
         /// <summary>Quota por utilizador: equipas criadas.</summary>
         public const string Equipas = "equipas";
+        /// <summary>Quota por utilizador: exportações dos dados pessoais (RGPD).</summary>
+        public const string Exportacao = "exportacao";
 
         /// <summary>Limite de uma política: pedidos permitidos por janela.</summary>
         public sealed record Limite(int Pedidos, int JanelaSegundos);
@@ -59,6 +61,7 @@ namespace Api.Seguranca
             ["SalasChat"] = new(10, 86400),
             ["Convites"] = new(30, 3600),
             ["Equipas"] = new(3, 86400),
+            ["Exportacao"] = new(5, 3600),
         };
 
         public static IServiceCollection AddLimitacaoPedidos(this IServiceCollection services, IConfiguration configuration)
@@ -84,6 +87,7 @@ namespace Api.Seguranca
                 [SalasChat] = Ler("SalasChat"),
                 [Convites] = Ler("Convites"),
                 [Equipas] = Ler("Equipas"),
+                [Exportacao] = Ler("Exportacao"),
             };
 
             services.AddRateLimiter(options =>

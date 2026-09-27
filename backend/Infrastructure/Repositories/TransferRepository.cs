@@ -33,7 +33,7 @@ namespace Infrastructure.Repositories
         {
             var query = db.Player
                 .Include(p => p.Team).ThenInclude(t => t!.League)
-                .Where(p => p.IdTeam != excludeTeamId);
+                .Where(p => p.IdTeam != excludeTeamId && p.EliminadoEm == null);
 
             if (filter.HasTeam == true)
             {

@@ -889,6 +889,7 @@ namespace Infrastructure.Repositories
             var query = await DbContext.Player
                 .Where(p => !p.IsAdmin 
                     && p.IdTeam == null
+                    && p.EliminadoEm == null
                     && !p.MembershipRequests.Any(ms => ms.IdTeam == idTeam && ms.IsPlayerSender == false))
                 .Select(p => new PlayerWithoutTeamInfoDto
                 {
@@ -925,6 +926,7 @@ namespace Infrastructure.Repositories
             var query = DbContext.Player
                 .Where(p => !p.IsAdmin 
                     && p.IdTeam == null
+                    && p.EliminadoEm == null
                     && !p.MembershipRequests.Any(ms => ms.IdTeam == idTeam && ms.IsPlayerSender == false));
 
             if (!string.IsNullOrEmpty(filters.PlayerName))

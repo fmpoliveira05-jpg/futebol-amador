@@ -79,6 +79,7 @@ namespace Infrastructure
             services.AddScoped<ICompetitionRepository, CompetitionRepository>();
             services.AddScoped<ITransferRepository, TransferRepository>();
             services.AddScoped<IMatchDetailsRepository, MatchDetailsRepository>();
+            services.AddScoped<IContaRepository, ContaRepository>();
 
             return services;
         }

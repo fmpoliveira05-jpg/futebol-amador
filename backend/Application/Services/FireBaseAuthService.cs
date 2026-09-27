@@ -1,4 +1,4 @@
-using Application.DTOs;
+﻿using Application.DTOs;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Exceptions;
@@ -232,6 +232,42 @@ namespace Application.Services
         public async Task DeleteUserAsync(string userId)
         {
             await FirebaseAuth.DefaultInstance.DeleteUserAsync(userId);
+        }
+
+        /// <inheritdoc />
+        public async Task ConfirmarPalavraPasseAsync(string userId, string password)
+        {
+            await ConfirmarPalavraPasseAtualAsync(userId, password);
+        }
+
+        /// <inheritdoc />
+        public async Task<HashSet<string>> ContasPorConfirmarAsync(IReadOnlyCollection<string> userIds)
+        {
+            var porConfirmar = new HashSet<string>(StringComparer.Ordinal);
+
+            // O SDK Admin aceita no máximo 100 identificadores por pedido.
+            foreach (var bloco in userIds.Chunk(100))
+            {
+                var resultado = await FirebaseAuth.DefaultInstance.GetUsersAsync(
+                    bloco.Select(uid => (UserIdentifier)new UidIdentifier(uid)).ToList());
+
+                foreach (var utilizador in resultado.Users)
+                {
+                    if (!utilizador.EmailVerified)
+                    {
+                        porConfirmar.Add(utilizador.Uid);
+                    }
+                }
+
+                // Perfis sem conta no Firebase (a conta foi apagada na consola, por exemplo).
+                var existentes = resultado.Users.Select(u => u.Uid).ToHashSet(StringComparer.Ordinal);
+                foreach (var uid in bloco.Where(uid => !existentes.Contains(uid)))
+                {
+                    porConfirmar.Add(uid);
+                }
+            }
+
+            return porConfirmar;
         }
 
         /// <summary>

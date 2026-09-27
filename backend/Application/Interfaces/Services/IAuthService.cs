@@ -1,4 +1,4 @@
-using Application.DTOs;
+﻿using Application.DTOs;
 
 namespace Application.Interfaces.Services
 {
@@ -88,6 +88,15 @@ namespace Application.Interfaces.Services
         /// </summary>
         /// <param name="userId">O ID do utilizador a eliminar.</param>
         Task DeleteUserAsync(string userId);
+
+        /// <summary>
+        /// Confirma a palavra-passe atual do utilizador (reautenticação antes de operações
+        /// irreversíveis, como eliminar a conta). Lança <c>AuthenticationException</c> se estiver errada.
+        /// </summary>
+        Task ConfirmarPalavraPasseAsync(string userId, string password);
+
+        /// <summary>Dos utilizadores indicados, os que ainda não confirmaram o e-mail (ou já não existem no Firebase).</summary>
+        Task<HashSet<string>> ContasPorConfirmarAsync(IReadOnlyCollection<string> userIds);
 
         /// <summary>
         /// Cria uma nova identidade de utilizador no fornecedor de autenticação (Firebase).

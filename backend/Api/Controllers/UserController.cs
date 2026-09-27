@@ -1,4 +1,4 @@
-using Api.Seguranca;
+﻿using Api.Seguranca;
 using Application.DTOs;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -233,6 +233,69 @@ namespace Api.Controllers
             var playerDetails = await authService.GetFullUserData(userId);
             return Ok(playerDetails);
         }
+
+        #region RGPD
+
+        /// <summary>Versão atual da Política de Privacidade (a que o registo tem de aceitar).</summary>
+        [HttpGet("privacy-policy")]
+        [AllowAnonymous]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public IActionResult PoliticaPrivacidade([FromServices] IContaService contas) =>
+            Ok(new { versao = contas.VersaoPoliticaAtual });
+
+        /// <summary>
+        /// Descarrega uma cópia de todos os dados pessoais do utilizador em JSON (RGPD: direito de
+        /// acesso, art. 15.º, e de portabilidade, art. 20.º).
+        /// </summary>
+        /// <response code="200">Ficheiro JSON com os dados.</response>
+        [HttpGet("me/export")]
+        [EnableRateLimiting(LimitacaoPedidos.Exportacao)]
+        [ProducesResponseType(typeof(ExportacaoDadosDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ExportarDados([FromServices] IContaService contas)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var dados = await contas.ExportarAsync(userId);
+            Response.Headers.ContentDisposition = "attachment; filename=\"futebol-amador-os-meus-dados.json\"";
+            return Ok(dados);
+        }
+
+        /// <summary>
+        /// Elimina a conta (RGPD: direito ao apagamento, art. 17.º). Exige a palavra-passe atual.
+        /// </summary>
+        /// <remarks>
+        /// Sai da equipa (a administração passa ao membro seguinte; se era o único membro, a equipa é
+        /// apagada), anonimiza os dados pessoais (o nome passa a "Jogador removido" nas estatísticas
+        /// dos jogos disputados), apaga as mensagens do chat, as imagens no Cloudinary e a conta no
+        /// Firebase, e termina a sessão. Irreversível.
+        /// </remarks>
+        /// <response code="204">Conta eliminada.</response>
+        /// <response code="400">Palavra-passe errada, ou a equipa não pode ficar sem o jogador (por exemplo, jogos marcados).</response>
+        [HttpDelete("me")]
+        [EnableRateLimiting(LimitacaoPedidos.PalavraPasse)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> EliminarConta([FromBody] EliminarContaDto dto, [FromServices] IContaService contas)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            await contas.EliminarContaAsync(userId, dto.Password);
+            revogacao.Invalidar(userId);
+            sessaoWeb.ApagarCookies(Response);
+            return NoContent();
+        }
+
+        #endregion
 
         /// <summary>
         /// Entrega a sessão ao cliente: no browser vai para cookies e sai do corpo; na app fica no corpo.

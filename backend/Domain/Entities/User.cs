@@ -62,6 +62,19 @@ namespace Domain.Entities
 
         public string? DeviceToken { get; set; }
 
+        /// <summary>Versão da Política de Privacidade aceite no registo (RGPD, prova do consentimento).</summary>
+        [MaxLength(ModelConstants.RgpdConst.MaxVersaoPolitica)]
+        public string? PoliticaPrivacidadeVersao { get; set; }
+
+        /// <summary>Quando a Política de Privacidade foi aceite (UTC).</summary>
+        public DateTime? PoliticaPrivacidadeAceiteEm { get; set; }
+
+        /// <summary>
+        /// Quando a conta foi eliminada a pedido do titular (UTC). Os dados pessoais foram
+        /// anonimizados; a linha fica só para as estatísticas dos jogos já disputados.
+        /// </summary>
+        public DateTime? EliminadoEm { get; set; }
+
         /// <summary>
         /// Construtor protegido exigido pelo Entity Framework (EF) para inicialização.
         /// Utilizado apenas pelas classes que herdam de [User].

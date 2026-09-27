@@ -205,5 +205,50 @@ namespace Application.Services
 
             return chatRoomsList;
         }
+    
+        /// <inheritdoc />
+        public async Task<List<Application.DTOs.MensagemExportadaDto>> ExportarMensagensAsync(string userId)
+        {
+            // Consulta de grupo de coleções: precisa da isenção de índice de campo único em
+            // messages.senderId com âmbito "grupo de coleções" (ver docs/RGPD.md).
+            var mensagens = await DbContext.CollectionGroup("messages").WhereEqualTo("senderId", userId).GetSnapshotAsync();
+
+            return mensagens.Documents.Select(d => new Application.DTOs.MensagemExportadaDto
+            {
+                Sala = d.Reference.Parent.Parent?.Id ?? "",
+                Texto = d.TryGetValue<string>("text", out var texto) ? texto : "",
+                EnviadaEm = d.TryGetValue<Timestamp>("timestamp", out var hora) ? hora.ToDateTime() : null,
+            }).ToList();
+        }
+
+        /// <inheritdoc />
+        public async Task EliminarDadosUtilizadorAsync(string userId)
+        {
+            var mensagens = await DbContext.CollectionGroup("messages").WhereEqualTo("senderId", userId).GetSnapshotAsync();
+            foreach (var bloco in mensagens.Documents.Chunk(400))
+            {
+                var lote = DbContext.StartBatch();
+                foreach (var mensagem in bloco)
+                {
+                    lote.Delete(mensagem.Reference);
+                }
+                await lote.CommitAsync();
+            }
+
+            var salas = await DbContext.Collection("chatRooms").WhereArrayContains("members", userId).GetSnapshotAsync();
+            foreach (var bloco in salas.Documents.Chunk(400))
+            {
+                var lote = DbContext.StartBatch();
+                foreach (var sala in bloco)
+                {
+                    lote.Update(sala.Reference, "members", FieldValue.ArrayRemove(userId));
+                    if (sala.TryGetValue<string>("createdBy", out var criador) && criador == userId)
+                    {
+                        lote.Update(sala.Reference, "createdBy", "removido");
+                    }
+                }
+                await lote.CommitAsync();
+            }
+        }
     }
 }

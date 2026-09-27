@@ -96,7 +96,10 @@ namespace Application.Services
                 Phone = playerDto.Phone,
                 Position = playerDto.Position,
                 Height = playerDto.Height,
-                CreationDate = DateTime.UtcNow
+                CreationDate = DateTime.UtcNow,
+                // Prova do consentimento (RGPD): versão da política e momento (validados no controller).
+                PoliticaPrivacidadeVersao = playerDto.AceitaPoliticaPrivacidade ? playerDto.VersaoPoliticaPrivacidade : null,
+                PoliticaPrivacidadeAceiteEm = playerDto.AceitaPoliticaPrivacidade ? DateTime.UtcNow : null,
             };
 
             await playerRepository.AddAsync(player);
@@ -251,6 +254,10 @@ namespace Application.Services
             playerValidator.LeaveTeamValidator(existingPlayer);
 
             var team = await teamRepository.GetTeamByIdAsync((Guid)existingPlayer.IdTeam);
+            // Carrega os membros na mesma instância (o EF liga-os à equipa já carregada). Sem isto a
+            // coleção só tinha o próprio jogador e, quando um administrador saía, a equipa era apagada
+            // mesmo tendo outros membros.
+            await teamRepository.GetTeamForMemberManagementAsync((Guid)existingPlayer.IdTeam);
 
             if (existingPlayer.IsAdmin)
             {

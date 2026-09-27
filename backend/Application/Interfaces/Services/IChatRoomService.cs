@@ -39,5 +39,14 @@ namespace Application.Interfaces.Services
         /// <param name="userId">O ID do utilizador (o membro) cujas salas se pretende consultar.</param>
         /// <returns>Uma tarefa assíncrona que retorna uma lista de [ChatRoomDto] com os detalhes das salas.</returns>
         Task<List<ChatRoomDto>> GetMyRoomsAsync(string userId);
+
+        /// <summary>Mensagens enviadas pelo utilizador em todas as salas (exportação RGPD).</summary>
+        Task<List<Application.DTOs.MensagemExportadaDto>> ExportarMensagensAsync(string userId);
+
+        /// <summary>
+        /// Apaga as mensagens enviadas pelo utilizador e retira-o das salas (eliminação da conta).
+        /// Salas que ficam só com um membro são apagadas.
+        /// </summary>
+        Task EliminarDadosUtilizadorAsync(string userId);
     }
 }

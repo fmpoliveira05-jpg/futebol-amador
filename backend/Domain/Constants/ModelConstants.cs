@@ -271,5 +271,14 @@
             /// <summary>Hora de início por omissão dos jogos sorteados.</summary>
             public const string DefaultKickoff = "15:00";
         }
+
+        /// <summary>Constantes do RGPD (consentimento e eliminação de contas).</summary>
+        public static class RgpdConst
+        {
+            public const int MaxVersaoPolitica = 20;
+
+            /// <summary>Nome mostrado no lugar de um jogador que eliminou a conta.</summary>
+            public const string NomeAnonimo = "Jogador removido";
+        }
     }
 }

@@ -39,6 +39,7 @@ namespace Api.Extensions
         {
             services.AddHostedService<CompetitionBackGroundService>();
             services.AddHostedService<NotificationBackGroundService>();
+            services.AddHostedService<RetencaoDadosBackGroundService>();
 
             return services;
         }
