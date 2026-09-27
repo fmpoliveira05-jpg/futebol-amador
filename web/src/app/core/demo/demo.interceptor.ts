@@ -116,13 +116,6 @@ function param(req: HttpRequest<unknown>, nome: string): string | null {
   return chave ? req.params.get(chave) : null;
 }
 
-/** Token com o formato de um JWT (só o `exp` é lido pela aplicação). */
-function tokenDemo(): string {
-  const b64 = (o: object) => btoa(JSON.stringify(o)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
-  const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 3600;
-  return `${b64({ alg: 'none', typ: 'JWT' })}.${b64({ sub: DEMO_JOGADOR_ID, exp })}.demo`;
-}
-
 // ---------- Conversão para os DTOs da API ----------
 
 function detalhesJogador(p: DemoJogador) {
@@ -299,13 +292,26 @@ const rotas: Array<[string, RegExp, Handler]> = [
         name: me.nome,
         idTeam: me.equipa,
         isAdmin: me.admin,
-        firebaseLoginResponseDto: { idToken: tokenDemo(), localId: me.id, expiresIn: '3600' },
+        // Como na API real para o browser: sem tokens no corpo (ficariam em cookies HttpOnly).
+        firebaseLoginResponseDto: { localId: me.id, expiresIn: '3600' },
       });
     },
   ],
-  ['GET', /^User\/logout$/, () => ok()],
+  ['POST', /^User\/logout$/, () => ok()],
+  ['POST', /^User\/refresh$/, () => ok()],
+  ['POST', /^User\/(resend-verification|forgot-password)$/, () => ({
+    corpo: { mensagem: 'Se os dados estiverem certos, vais receber um e-mail dentro de alguns minutos.' },
+    estado: 202,
+  })],
   ['PUT', /^User\/password$/, () => ok()],
-  ['POST', /^Player\/create-profile$/, () => ok()],
+  ['POST', /^Player\/create-profile$/, () => ({
+    corpo: {
+      playerId: DEMO_JOGADOR_ID,
+      verificacaoEmailPendente: true,
+      mensagem: 'Conta criada. Enviámos-te um e-mail: confirma o endereço antes de entrar.',
+    },
+    estado: 201,
+  })],
 
   // Jogadores
   ['GET', /^Player\/details\/([^/]+)$/, (_, [id]) => ok(detalhesJogador(jogador(id)))],

@@ -18,10 +18,10 @@ describe('demoInterceptor', () => {
     http = TestBed.inject(HttpClient);
   });
 
-  it('faz login com qualquer credencial e devolve um token com exp', async () => {
+  it('faz login com qualquer credencial e, como a API real, não põe tokens no corpo', async () => {
     const r = await firstValueFrom(http.post<any>(`${api}/User/login`, { email: 'x@y.pt', password: '123456' }));
-    const payload = JSON.parse(atob(r.firebaseLoginResponseDto.idToken.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    expect(payload.exp).toBeGreaterThan(Date.now() / 1000);
+    expect(r.firebaseLoginResponseDto.localId).toBeTruthy();
+    expect(r.firebaseLoginResponseDto.idToken).toBeUndefined();
     expect(r.idTeam).toBe(DEMO_EQUIPA_ID);
   });
 
