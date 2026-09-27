@@ -1,6 +1,7 @@
 ﻿using Api.Extensions;
 using Api.Hubs.Notification;
 using Api.Middlewares;
+using Api.Operacao;
 using Api.Seguranca;
 using Application;
 using Application.Interfaces.Services;
@@ -53,6 +54,7 @@ builder.Services.AddHsts(options =>
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
+builder.Services.AddSaude();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
@@ -171,6 +173,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHubs();
+// /health/live e /health/ready: anónimos e fora da limitação de pedidos (monitorização).
+app.MapSaude();
 
 app.Run();
 
