@@ -178,8 +178,10 @@ class SignupViewmodel @Inject constructor(
         onHeightChange(userProfile.height.toString())
         onAddressChange(userProfile.address)
         onPositionChange(userProfile.position.ordinal)
-        onPasswordChange("Teste123.")
-        onPasswordVerificationChange("Teste123.")
+        // Valor fictício só para passar a validação do formulário: a edição do perfil não envia a
+        // palavra-passe.
+        onPasswordChange("Ficticia#Edicao1")
+        onPasswordVerificationChange("Ficticia#Edicao1")
 
         val dateMillis = userProfile.dateOfBirth?.let { dateStr ->
             try {
@@ -199,7 +201,16 @@ class SignupViewmodel @Inject constructor(
             val finalDto = formState.value.copy(phone = fullPhoneNumber)
 
             if (!profileEditMode) {
-                authService.registerUser(finalDto)
+                val comSessao = authService.registerUser(finalDto)
+                if (!comSessao) {
+                    // É preciso confirmar o e-mail antes de entrar.
+                    updateToast(R.string.toast_confirm_email)
+                    navHostController.navigate(Routes.UserRoutes.LOGIN.route) {
+                        popUpTo(navHostController.graph.startDestinationId) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                    return@launchDataLoad
+                }
             } else {
                 val currentProfile = sessionManager.getUserProfile()
 

@@ -60,21 +60,31 @@ class AuthService @Inject constructor(
     /**
      * Regista um novo utilizador na plataforma.
      *
-     * A API cria a conta no Firebase e o perfil na base de dados, e devolve logo a sessão.
+     * A API cria a conta no Firebase e o perfil na base de dados e envia a mensagem de confirmação
+     * do e-mail. Normalmente a resposta não traz sessão (é preciso confirmar o e-mail antes de
+     * entrar); só quando a API não exige a confirmação é que a sessão começa logo.
      * Se falhar, a sessão local é limpa e o erro é propagado para o ecrã o mostrar.
      *
      * @param profile DTO com os dados do perfil (Nome, Idade, Posição, etc.).
+     * @return `true` se ficou com sessão; `false` se falta confirmar o e-mail.
      * @throws Exception Se ocorrer erro na API ou no Firebase, propagando a mensagem para a UI.
      */
-    suspend fun registerUser(profile: CreateProfileDto) {
+    suspend fun registerUser(profile: CreateProfileDto): Boolean {
         try {
             val response = authApiService.createProfile(profile)
 
-            if (response.isSuccessful && response.body() != null) {
-                val userProfile = response.body()!!
+            if (response.isSuccessful) {
+                val userProfile = response.body()
+                val sessao = userProfile?.loginResponseDto
+                if (userProfile == null || sessao == null || sessao.idToken.isNullOrBlank()) {
+                    // Registo pendente: não se guarda nada até o utilizador confirmar o e-mail e entrar.
+                    sessionManager.clearSession()
+                    return false
+                }
 
                 sessionManager.saveUserProfile(userProfile)
-                sessionManager.saveAuthToken(userProfile.loginResponseDto!!.idToken)
+                sessionManager.saveAuthToken(sessao.idToken)
+                return true
             } else {
                 val errorMsg =
                     response.errorBody()?.string() ?: "Erro desconhecido na API: ${response.code()}"
@@ -93,12 +103,21 @@ class AuthService @Inject constructor(
     /**
      * Encerra a sessão do utilizador.
      *
-     * Executa o logout no SDK do Firebase e limpa todos os dados locais
+     * Pede à API que revogue a sessão (POST api/User/logout; se falhar, por exemplo sem rede,
+     * continua), faz o logout no SDK do Firebase e limpa todos os dados locais
      * (tokens e perfil) do [SessionManager].
      */
-    fun logout() {
-        firebaseAuth.signOut()
-        sessionManager.clearSession()
+    suspend fun logout() {
+        try {
+            if (!sessionManager.getAuthToken().isNullOrBlank()) {
+                authApiService.logout()
+            }
+        } catch (e: Exception) {
+            // Sem rede ou sessão já expirada: o logout local continua.
+        } finally {
+            firebaseAuth.signOut()
+            sessionManager.clearSession()
+        }
     }
 
     /**

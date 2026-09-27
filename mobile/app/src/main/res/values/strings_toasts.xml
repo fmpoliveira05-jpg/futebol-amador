@@ -54,4 +54,5 @@
     <string name="toast_success_send_membershipRequest">Membership request sent successfully.</string>
 
     <string name="toast_send_match_invite_your_team">You cannot send a match invite to your own team.</string>
+    <string name="toast_confirm_email">Account created. Confirm your e-mail (check your inbox) and then sign in.</string>
 </resources>

@@ -4,7 +4,6 @@ import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.example.amfootball.R
 import com.example.amfootball.core.utils.Arguments
-import com.example.amfootball.core.utils.CloudinaryManager
 import com.example.amfootball.core.utils.GeneralConst
 import com.example.amfootball.core.utils.PitchConst
 import com.example.amfootball.core.utils.TeamConst
@@ -12,14 +11,12 @@ import com.example.amfootball.data.NetworkConnectivityObserver
 import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.data.remote.dtos.team.FormTeamDto
 import com.example.amfootball.data.remote.services.TeamService
+import com.example.amfootball.data.services.CloudinaryUploader
 import com.example.amfootball.domains.errors.ErrorMessage
 import com.example.amfootball.domains.errors.formErrors.TeamFormErros
 import com.example.amfootball.ui.viewModel.abstracts.FormsViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 /**
  * ViewModel responsável pela lógica de negócio do formulário de Equipas.
@@ -42,6 +39,7 @@ class TeamFormViewModel @Inject constructor(
     private val teamRepository: TeamService,
     private val savedStateHandle: SavedStateHandle,
     private val sessionManager: SessionManager,
+    private val cloudinaryUploader: CloudinaryUploader,
 ) : FormsViewModel<FormTeamDto, TeamFormErros>(
     networkObserver = networkObserver,
     initialData = FormTeamDto(),
@@ -301,8 +299,7 @@ class TeamFormViewModel @Inject constructor(
     /**
      * Realiza o upload da imagem para o Cloudinary se for uma imagem nova local.
      *
-     * Utiliza [suspendCancellableCoroutine] para converter o callback do Cloudinary
-     * numa função de suspensão que pode ser aguardada pelo fluxo do ViewModel.
+     * O upload é assinado pela API ([CloudinaryUploader]); a app já não usa o preset não assinado.
      *
      * Lógica:
      * - Se a imagem for nula ou vazia, retorna null.
@@ -319,21 +316,6 @@ class TeamFormViewModel @Inject constructor(
             return currentImageString
         }
 
-        return suspendCancellableCoroutine { continuation ->
-
-            CloudinaryManager.uploadImage(
-                uri = Uri.parse(currentImageString),
-                onSuccess = { url ->
-                    if (continuation.isActive) {
-                        continuation.resume(url)
-                    }
-                },
-                onError = { errorMsg ->
-                    if (continuation.isActive) {
-                        continuation.resumeWithException(Exception("Erro Cloudinary: $errorMsg"))
-                    }
-                }
-            )
-        }
+        return cloudinaryUploader.enviar(Uri.parse(currentImageString))
     }
 }

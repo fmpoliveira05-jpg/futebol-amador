@@ -1,11 +1,8 @@
 package com.example.amfootball.core.utils
 
 import android.content.Context
-import android.net.Uri
 import com.example.amfootball.BuildConfig
 import com.cloudinary.android.MediaManager
-import com.cloudinary.android.callback.ErrorInfo
-import com.cloudinary.android.callback.UploadCallback
 
 /**
  * Gerenciador responsável pela interação com o serviço de Cloudinary.
@@ -41,79 +38,5 @@ object CloudinaryManager {
         }
     }
 
-    /**
-     * Realiza o upload de uma imagem para o Cloudinary utilizando um Preset não assinado (Unsigned).
-     *
-     * @param uri O URI do ficheiro de imagem a ser enviado (geralmente obtido via Picker ou Galeria).
-     * @param onSuccess Callback invocado quando o upload é concluído com sucesso.
-     * Recebe a URL pública (HTTPS) da imagem hospedada.
-     * @param onError Callback invocado quando ocorre uma falha no upload.
-     * Recebe uma String com a descrição do erro.
-     *
-     * @throws IllegalArgumentException Se o URI fornecido for inválido (gerido internamente pela lib).
-     */
-    fun uploadImage(
-        uri: Uri,
-        onSuccess: (String) -> Unit,
-        onError: (String) -> Unit
-    ) {
-        val uploadPreset = BuildConfig.CLOUDINARY_UPLOAD_PRESET
-
-        MediaManager.get().upload(uri)
-            .unsigned(uploadPreset)
-            .option("resource_type", "image")
-            .callback(object : UploadCallback {
-
-                /**
-                 * Chamado quando o upload inicia.
-                 * @param requestId O ID único da requisição.
-                 */
-                override fun onStart(requestId: String) {
-                    // Opcional: Iniciar loading na UI
-                }
-
-                /**
-                 * Chamado durante o progresso do upload.
-                 * @param requestId O ID único da requisição.
-                 * @param bytes O número de bytes já enviados.
-                 * @param totalBytes O tamanho total do ficheiro.
-                 */
-                override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
-                    // Opcional: Atualizar barra de progresso
-                }
-
-                /**
-                 * Chamado quando o upload é concluído com sucesso.
-                 * @param requestId O ID único da requisição.
-                 * @param resultData Um mapa contendo os dados da resposta do servidor.
-                 */
-                override fun onSuccess(requestId: String, resultData: Map<*, *>) {
-                    val publicUrl = resultData["secure_url"] as? String
-                    if (publicUrl != null) {
-                        onSuccess(publicUrl)
-                    } else {
-                        onError("Upload concluído, mas URL vazia.")
-                    }
-                }
-
-                /**
-                 * Chamado quando ocorre um erro no upload.
-                 * @param requestId O ID único da requisição.
-                 * @param errorInfo Informações detalhadas sobre o erro.
-                 */
-                override fun onError(requestId: String, errorInfo: ErrorInfo) {
-                    onError(errorInfo.description)
-                }
-
-                /**
-                 * Chamado quando o upload é reagendado (ex: perda de conexão).
-                 * @param requestId O ID único da requisição.
-                 * @param errorInfo Motivo do reagendamento.
-                 */
-                override fun onReschedule(requestId: String, errorInfo: ErrorInfo) {
-                    // Lógica de retry automática da lib
-                }
-            })
-            .dispatch()
-    }
+    // O upload passou a ser assinado pela API: ver data/services/CloudinaryUploader.kt.
 }

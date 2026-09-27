@@ -28,13 +28,14 @@ class SessionManager @Inject constructor(
         return getUserProfile()?.loginResponseDto?.localId ?: ""
     }
 
+    /** Guarda o token cifrado com uma chave do Android Keystore (ver [CifraLocal]). */
     fun saveAuthToken(token: String) {
         val current = getCurrentSession()
-        sessionDao.insertOrUpdateSession(current.copy(authToken = token))
+        sessionDao.insertOrUpdateSession(current.copy(authToken = CifraLocal.cifrar(token)))
     }
 
     fun getAuthToken(): String? {
-        return sessionDao.getSession()?.authToken
+        return CifraLocal.decifrar(sessionDao.getSession()?.authToken)
     }
 
     fun saveFcmToken(token: String) {

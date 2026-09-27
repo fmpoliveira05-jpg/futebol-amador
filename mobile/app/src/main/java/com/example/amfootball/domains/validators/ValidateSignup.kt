@@ -157,7 +157,7 @@ private fun validateEmail(email: String): ValidationResult {
 /**
  * Valida o campo da palavra-passe (Password).
  *
- * Verifica vários critérios de segurança: comprimento mínimo (8), letras maiúsculas, minúsculas,
+ * Verifica vários critérios de segurança: comprimento entre 10 e 128 (a mesma política da API), letras maiúsculas, minúsculas,
  * números, caracteres especiais e ausência de espaços.
  *
  * @param password A palavra-passe a ser validada.

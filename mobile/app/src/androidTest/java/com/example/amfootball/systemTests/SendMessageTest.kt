@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import com.example.amfootball.MainActivity
 import com.example.amfootball.R
@@ -19,6 +20,7 @@ import com.example.amfootball.data.local.SessionManager
 import com.example.amfootball.ui.navigation.objects.Routes
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,8 +56,15 @@ class SendMessageTest {
         composeRule.waitForIdle()
 
         val context = composeRule.activity.applicationContext
-        val email = "player@player.com"
-        val password = "Teste123."
+        // Credenciais de uma conta de testes, passadas na linha de comandos e nunca guardadas no
+        // repositório: ./gradlew connectedAndroidTest \
+        //   -Pandroid.testInstrumentationRunnerArguments.testEmail=... \
+        //   -Pandroid.testInstrumentationRunnerArguments.testPassword=...
+        // Sem elas, o teste é ignorado.
+        val argumentos = InstrumentationRegistry.getArguments()
+        val email = argumentos.getString("testEmail").orEmpty()
+        val password = argumentos.getString("testPassword").orEmpty()
+        assumeTrue("Faltam os argumentos testEmail e testPassword.", email.isNotBlank() && password.isNotBlank())
         val message = "Mensagem de Teste"
 
         checkHomePageAndNavigateChatList(context = context)

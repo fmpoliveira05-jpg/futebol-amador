@@ -87,7 +87,8 @@ class AuthViewModel @Inject constructor(
      * Coordena o processo de criação de conta assíncrono.
      *
      * @param profile DTO contendo os dados pessoais do utilizador (nome, idade, posição, etc.).
-     * @param onSuccess Callback executado apenas se o registo for concluído com sucesso.
+     * @param onSuccess Callback executado apenas se o registo for concluído com sucesso (com sessão
+     * ou à espera da confirmação do e-mail).
      * @param onError Callback executado se ocorrer alguma falha (rede, validação, etc.), fornecendo a mensagem de erro.
      */
     fun registerUser(
@@ -98,9 +99,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
 
             try {
-                repository.registerUser(profile)
-
-                _isUserLoggedIn.value = true
+                _isUserLoggedIn.value = repository.registerUser(profile)
 
                 onSuccess()
             } catch (e: Exception) {

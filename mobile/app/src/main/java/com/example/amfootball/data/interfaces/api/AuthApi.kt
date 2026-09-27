@@ -49,4 +49,13 @@ interface AuthApi {
     suspend fun loginUser(
         @Body request: LoginDto
     ): Response<PlayerProfileDto>
+
+    /**
+     * Termina a sessão no servidor: revoga os refresh tokens do utilizador no Firebase, para o
+     * token guardado no telemóvel deixar de ser aceite pela API.
+     *
+     * Endpoint: POST api/User/logout
+     */
+    @POST("${BaseEndpoints.AUTH_API}/logout")
+    suspend fun logout(): Response<Unit>
 }

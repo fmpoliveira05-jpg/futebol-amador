@@ -76,10 +76,10 @@ object UserConst {
     const val MAX_EMAIL_LENGTH = 256
 
     /** Comprimento mínimo exigido para a palavra-passe (segurança). */
-    const val MIN_PASSWORD_LENGTH = 8
+    const val MIN_PASSWORD_LENGTH = 10
 
     /** Comprimento máximo permitido para a palavra-passe. */
-    const val MAX_PASSWORD_LENGTH = 18
+    const val MAX_PASSWORD_LENGTH = 128
 
     /** Tamanho fixo esperado para um número de telemóvel (excluindo indicativo). */
     const val SIZE_PHONE_NUMBER = 9

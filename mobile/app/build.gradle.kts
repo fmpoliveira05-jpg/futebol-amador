@@ -43,7 +43,6 @@ android {
 
         buildConfigField("String", "API_BASE_URL", "\"${configuracao("API_BASE_URL", "https://amfootballapi.duckdns.org/")}\"")
         buildConfigField("String", "CLOUDINARY_CLOUD_NAME", "\"${configuracao("CLOUDINARY_CLOUD_NAME", "")}\"")
-        buildConfigField("String", "CLOUDINARY_UPLOAD_PRESET", "\"${configuracao("CLOUDINARY_UPLOAD_PRESET", "android_upload")}\"")
     }
 
     buildTypes {
@@ -53,7 +52,9 @@ android {
             enableAndroidTestCoverage = true // Para quando tivermos testes da UI
         }
         release {
-            isMinifyEnabled = false
+            // R8: remove código e recursos não usados e ofusca o resto (regras em proguard-rules.pro).
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
