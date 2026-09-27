@@ -1,5 +1,7 @@
-using Domain.Exceptions;
+﻿using Domain.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Middlewares
@@ -15,6 +17,9 @@ namespace Api.Middlewares
     /// <item>401 — pedido sem utilizador identificado (<see cref="UnauthorizedAccessException"/>).</item>
     /// <item>403 — utilizador sem permissão (<see cref="ForbiddenException"/>).</item>
     /// <item>404 — recurso inexistente (<see cref="NotFoundException"/>).</item>
+    /// <item>409 — conflito: concorrência otimista (<see cref="DbUpdateConcurrencyException"/>) ou
+    /// violação de uma restrição única do SQL Server (erros 2601/2627), por exemplo dois pedidos
+    /// iguais em simultâneo.</item>
     /// <item>500 — tudo o resto. A mensagem original fica só no log, para não expor detalhes
     /// internos (SQL, caminhos, stack traces) ao cliente.</item>
     /// </list>
@@ -35,7 +40,16 @@ namespace Api.Middlewares
             var (status, titulo) = Classificar(exception);
 
             string detalhe;
-            if (status == StatusCodes.Status500InternalServerError)
+            if (status == StatusCodes.Status409Conflict)
+            {
+                // Concorrência otimista ou restrição única: outro pedido alterou ou criou o mesmo
+                // registo primeiro. Não se mostra a mensagem do EF/SQL Server (tem nomes de tabelas).
+                logger.LogInformation("Conflito ({Tipo}) em {Metodo} {Caminho}.", exception.GetType().Name, httpContext.Request.Method, httpContext.Request.Path);
+                detalhe = exception is DbUpdateConcurrencyException
+                    ? "Os dados foram alterados por outro pedido entretanto. Atualiza e tenta outra vez."
+                    : "Já existe um registo igual (por exemplo, um pedido repetido). Atualiza e confirma.";
+            }
+            else if (status == StatusCodes.Status500InternalServerError)
             {
                 logger.LogError(exception, "Erro não tratado em {Metodo} {Caminho}", httpContext.Request.Method, httpContext.Request.Path);
                 detalhe = "Ocorreu um erro inesperado. Tenta novamente mais tarde.";
@@ -108,6 +122,9 @@ namespace Api.Middlewares
         /// <summary>Código HTTP e título para cada tipo de exceção.</summary>
         internal static (int Status, string Titulo) Classificar(Exception exception) => exception switch
         {
+            // Antes dos restantes: são exceções da framework que significam "conflito", não erro interno.
+            DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Conflito de edição"),
+            DbUpdateException { InnerException: SqlException { Number: 2601 or 2627 } } => (StatusCodes.Status409Conflict, "Registo duplicado"),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Sem permissão"),
             EmailNaoVerificadoException => (StatusCodes.Status403Forbidden, "E-mail por confirmar"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Não autenticado"),

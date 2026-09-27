@@ -61,7 +61,9 @@ builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerDocumentacion();
 
-builder.Services.AddProblemDetails();
+// Todas as respostas de erro (exceções, 404 de rotas inexistentes, 405, 401/403 sem corpo) saem
+// como ProblemDetails em português, sem detalhes internos (ver RespostasErro).
+builder.Services.AddProblemDetails(RespostasErro.Configurar);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Os tokens do Firebase trazem o uid em "sub" e "user_id"; ficam os dois como NameIdentifier.
@@ -141,6 +143,9 @@ app.UseMiddleware<CabecalhosSeguranca>();
 
 // Converte as exceções em ProblemDetails com o código HTTP certo (ver GlobalExceptionHandler).
 app.UseExceptionHandler();
+// Respostas de erro sem corpo (rota inexistente, método errado, 401/403 da autenticação) passam a
+// ProblemDetails, como as outras.
+app.UseStatusCodePages();
 
 if (app.Environment.IsDevelopment())
 {
