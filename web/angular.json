@@ -70,7 +70,8 @@
                   "inlineCritical": false
                 },
                 "fonts": true
-              }
+              },
+              "sourceMap": false
             },
             "development": {
               "optimization": false,
@@ -114,7 +115,26 @@
               "index": {
                 "input": "src/index.demo.html",
                 "output": "index.html"
-              }
+              },
+              "sourceMap": false
+            },
+            "e2e": {
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": false
+                },
+                "fonts": true
+              },
+              "sourceMap": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/environments/environment.ts",
+                  "with": "src/app/environments/environment.e2e.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -130,6 +150,9 @@
             },
             "demo": {
               "buildTarget": "frontend:build:demo"
+            },
+            "e2e": {
+              "buildTarget": "frontend:build:e2e"
             }
           },
           "defaultConfiguration": "development"
