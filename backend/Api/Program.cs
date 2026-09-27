@@ -57,6 +57,9 @@ builder.Services.AddSignalR();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddSaude();
+// Respostas guardadas dos pedidos com Idempotency-Key. Com várias instâncias da API, trocar por
+// uma cache distribuída (AddStackExchangeRedisCache ou AddDistributedSqlServerCache).
+builder.Services.AddDistributedMemoryCache();
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
@@ -117,7 +120,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         policy.WithOrigins(origens)
-              .WithHeaders("Content-Type", "Authorization", SessaoWeb.CabecalhoCsrf, ExigirTurnstileAttribute.Cabecalho)
+              .WithHeaders("Content-Type", "Authorization", SessaoWeb.CabecalhoCsrf, ExigirTurnstileAttribute.Cabecalho, Idempotencia.Cabecalho)
               .WithMethods("GET", "POST", "PUT", "DELETE")
               .AllowCredentials()
               .SetPreflightMaxAge(TimeSpan.FromHours(1));
@@ -175,6 +178,8 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 app.UseRequestTimeouts();
+// POST com Idempotency-Key repetido devolve a resposta do primeiro (duplo clique, novas tentativas).
+app.UseMiddleware<Idempotencia>();
 
 app.MapControllers();
 app.MapHubs();
