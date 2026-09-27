@@ -10,10 +10,16 @@ import com.example.amfootball.data.interfaces.api.NotificationApi
 import com.example.amfootball.data.interfaces.api.PlayerApi
 import com.example.amfootball.data.interfaces.api.PostPoneMatchApi
 import com.example.amfootball.data.interfaces.api.TeamApi
+import android.content.Context
 import com.example.amfootball.data.remote.network.AuthInterceptor
+import com.example.amfootball.data.remote.network.IdempotenciaInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
+import okhttp3.Cache
+import java.io.File
+import java.util.concurrent.TimeUnit
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -32,32 +38,40 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+    /** Tempos máximos dos pedidos à API (segundos). */
+    const val TEMPO_LIGACAO_S = 10L
+    const val TEMPO_LEITURA_S = 20L
+    const val TEMPO_ESCRITA_S = 20L
+    const val TEMPO_TOTAL_S = 30L
+
+    /** Cache HTTP em disco (10 MB), só para as respostas públicas que a API marca como cacheáveis. */
+    const val TAMANHO_CACHE = 10L * 1024 * 1024
+
     /**
-     * Providencia e configura o cliente HTTP [OkHttpClient].
-     *
-     * Este cliente é configurado com:
-     * 1. Um interceptor de autenticação ([AuthInterceptor]) para injetar o token JWT nos pedidos.
-     * 2. Um interceptor customizado para adicionar o header `ngrok-skip-browser-warning`,
-     * necessário para evitar crashes de parsing de JSON devido à página de aviso do Ngrok.
-     *
-     * @param authInterceptor A instância do interceptor de autenticação injetada.
-     * @return Uma instância configurada e [Singleton] de [OkHttpClient].
+     * Providencia e configura o cliente HTTP [OkHttpClient]:
+     * 1. tempos máximos de ligação, leitura, escrita e total ([TEMPO_TOTAL_S]);
+     * 2. cache HTTP em disco para as respostas públicas;
+     * 3. [AuthInterceptor] (token do Firebase) e [IdempotenciaInterceptor] (Idempotency-Key nos POST).
      */
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        authInterceptor: AuthInterceptor
+        authInterceptor: AuthInterceptor,
+        idempotenciaInterceptor: IdempotenciaInterceptor,
+        @ApplicationContext context: Context,
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            // Sem estes limites, um servidor que não responde deixa o ecrã a carregar para sempre;
+            // o erro chega ao ecrã como "O servidor demorou demasiado a responder" (MensagensErro).
+            .connectTimeout(TEMPO_LIGACAO_S, TimeUnit.SECONDS)
+            .readTimeout(TEMPO_LEITURA_S, TimeUnit.SECONDS)
+            .writeTimeout(TEMPO_ESCRITA_S, TimeUnit.SECONDS)
+            .callTimeout(TEMPO_TOTAL_S, TimeUnit.SECONDS)
+            // A API só deixa guardar as consultas públicas (ligas, classificação: "public, max-age=60");
+            // as respostas com dados pessoais levam "no-store" e nunca vão para esta cache.
+            .cache(Cache(File(context.cacheDir, "http"), TAMANHO_CACHE))
             .addInterceptor(authInterceptor)
-            .addInterceptor { chain ->
-                val original = chain.request()
-                val request = original.newBuilder()
-                    .header("ngrok-skip-browser-warning", "true")
-                    .method(original.method, original.body)
-                    .build()
-                chain.proceed(request)
-            }
+            .addInterceptor(idempotenciaInterceptor)
             .build()
     }
 

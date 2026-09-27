@@ -101,10 +101,18 @@ abstract class FormsViewModel<F, E>(
      * @param onSuccess Callback executado apenas se a chamada à API for bem-sucedida.
      * @param apiCall Bloco suspenso que contém a lógica de rede (ex: `repository.createTeam(dto)`).
      */
+    private val _aSubmeter = MutableStateFlow(false)
+
+    /** `true` enquanto o formulário está a ser enviado: o botão deve ficar desativado. */
+    val aSubmeter: StateFlow<Boolean> = _aSubmeter.asStateFlow()
+
     protected fun submitForm(onSuccess: () -> Unit = {}, apiCall: suspend () -> Unit) {
+        // Um envio de cada vez: toques repetidos no botão não repetem o pedido (evita duplicados).
+        if (_aSubmeter.value) return
         if (!validateForm()) return
 
-        launchDataLoad {
+        _aSubmeter.value = true
+        launchDataLoadComFim(aoTerminar = { _aSubmeter.value = false }) {
             apiCall()
 
             onSuccess()

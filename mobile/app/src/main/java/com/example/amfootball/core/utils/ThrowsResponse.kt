@@ -16,7 +16,13 @@ import retrofit2.Response
 fun <T> handleApiError(response: Response<T>): Nothing {
     val errorRaw = response.errorBody()?.string()
     val errorMsg = NetworkUtils.parseBackendError(errorRaw)
-        ?: "Erro desconhecido: ${response.code()}"
+        ?: when (response.code()) {
+            408, 504 -> MensagensErro.TEMPO_ESGOTADO
+            429 -> "Fizeste demasiados pedidos seguidos. Espera um pouco e tenta outra vez."
+            in 500..599 -> "O servidor está com problemas. Tenta outra vez dentro de momentos."
+            else -> MensagensErro.GENERICA
+        }
 
-    throw Exception(errorMsg)
+    // ErroApi é uma Exception: quem apanha Exception continua a funcionar.
+    throw ErroApi(errorMsg, response.code())
 }

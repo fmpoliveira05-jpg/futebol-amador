@@ -60,6 +60,18 @@ abstract class BaseViewModel(
      * @param callApi A função suspensa (lambda) que contém a lógica de negócio ou chamada à API.
      */
     fun launchDataLoad(checkOnline: Boolean = true, callApi: suspend () -> Unit) {
+        carregar(checkOnline, {}, callApi)
+    }
+
+    /**
+     * Como [launchDataLoad], mas chama [aoTerminar] no fim (com sucesso, erro ou sem rede). Usado
+     * pelos formulários para desbloquear o botão de enviar.
+     */
+    protected fun launchDataLoadComFim(aoTerminar: () -> Unit, callApi: suspend () -> Unit) {
+        carregar(true, aoTerminar, callApi)
+    }
+
+    private fun carregar(checkOnline: Boolean, aoTerminar: () -> Unit, callApi: suspend () -> Unit) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
@@ -70,6 +82,7 @@ abstract class BaseViewModel(
                         errorMessage = "Sem internet. Verifique a sua conexão."
                     )
                 }
+                aoTerminar()
                 return@launch
             }
 
@@ -77,11 +90,15 @@ abstract class BaseViewModel(
                 callApi()
 
                 _uiState.update { it.copy(isLoading = false) }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
-                e.printStackTrace()
+                // Mensagem para o utilizador, sem detalhes técnicos (tempo esgotado, sem rede, erro da API).
                 _uiState.update {
-                    it.copy(isLoading = false, errorMessage = "Erro: ${e.localizedMessage}")
+                    it.copy(isLoading = false, errorMessage = com.example.amfootball.core.utils.MensagensErro.paraUtilizador(e))
                 }
+            } finally {
+                aoTerminar()
             }
         }
     }

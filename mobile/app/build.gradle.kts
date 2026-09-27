@@ -136,6 +136,8 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.appcompat)
     testImplementation(libs.junit)
+    // Servidor HTTP falso para os testes unitários dos interceptores do OkHttp.
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
