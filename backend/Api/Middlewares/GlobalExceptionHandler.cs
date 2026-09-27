@@ -40,7 +40,14 @@ namespace Api.Middlewares
             var (status, titulo) = Classificar(exception);
 
             string detalhe;
-            if (status == StatusCodes.Status409Conflict)
+            if (exception is BadHttpRequestException)
+            {
+                logger.LogInformation("Pedido recusado pelo servidor ({Estado}) em {Caminho}.", status, httpContext.Request.Path);
+                detalhe = status == StatusCodes.Status413PayloadTooLarge
+                    ? "O pedido excede o tamanho máximo permitido."
+                    : "O pedido não pôde ser lido. Tenta outra vez.";
+            }
+            else if (status == StatusCodes.Status409Conflict)
             {
                 // Concorrência otimista ou restrição única: outro pedido alterou ou criou o mesmo
                 // registo primeiro. Não se mostra a mensagem do EF/SQL Server (tem nomes de tabelas).
@@ -130,6 +137,8 @@ namespace Api.Middlewares
             // Antes dos restantes: são exceções da framework que significam "conflito", não erro interno.
             DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Conflito de edição"),
             DbUpdateException { InnerException: SqlException { Number: 2601 or 2627 } } => (StatusCodes.Status409Conflict, "Registo duplicado"),
+            // Corpo demasiado grande (413), cabeçalhos ou pedido lento (408), ...: o Kestrel já decidiu o código.
+            BadHttpRequestException pedido => (pedido.StatusCode, pedido.StatusCode == StatusCodes.Status413PayloadTooLarge ? "Pedido demasiado grande" : "Pedido inválido"),
             // Serviço externo (Firebase, Turnstile, Cloudinary) lento ou com o disjuntor aberto.
             Polly.ExecutionRejectedException => (StatusCodes.Status503ServiceUnavailable, "Serviço temporariamente indisponível"),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Sem permissão"),

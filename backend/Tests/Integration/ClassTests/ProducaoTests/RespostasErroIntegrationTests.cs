@@ -89,6 +89,13 @@ namespace IntegrationTests.Producao
         }
 
         [Test]
+        public void Corpo_Demasiado_Grande_E_413()
+        {
+            var (estado, _) = GlobalExceptionHandler.Classificar(new Microsoft.AspNetCore.Http.BadHttpRequestException("grande", 413));
+            Assert.That(estado, Is.EqualTo(413));
+        }
+
+        [Test]
         public void Erro_Desconhecido_Continua_500_Sem_Mensagem()
         {
             var (estado, titulo) = GlobalExceptionHandler.Classificar(new NullReferenceException("detalhe interno"));

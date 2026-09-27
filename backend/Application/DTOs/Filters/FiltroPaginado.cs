@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Filters
 {
@@ -12,11 +12,11 @@ namespace Application.DTOs.Filters
         public const int TamanhoMaximo = 100;
 
         /// <summary>Página (a partir de 1).</summary>
-        [Range(1, 100_000)]
+        [Range(1, 100_000, ErrorMessage = "A página tem de ser um número entre {1} e {2}.")]
         public int? Page { get; set; }
 
         /// <summary>Elementos por página (1 a 100).</summary>
-        [Range(1, TamanhoMaximo)]
+        [Range(1, TamanhoMaximo, ErrorMessage = "O tamanho da página tem de estar entre {1} e {2}.")]
         public int? PageSize { get; set; }
 
         /// <summary>Número de elementos a saltar e a devolver, já com os limites aplicados.</summary>

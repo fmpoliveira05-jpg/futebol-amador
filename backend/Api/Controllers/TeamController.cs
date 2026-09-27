@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
+﻿using Microsoft.AspNetCore.OutputCaching;
+using Microsoft.AspNetCore.RateLimiting;
 using Api.Seguranca;
 using Api.Operacao;
 using Application.DTOs.Filters;
@@ -262,6 +263,7 @@ namespace Api.Controllers
         /// <param name="filter">Filtros de pesquisa (Nome, Rank, Cidade, etc.).</param>
         /// <returns>Lista de equipas encontradas.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet("listTeams")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
@@ -591,6 +593,7 @@ namespace Api.Controllers
         /// <summary>Títulos da equipa, agrupados por troféu (por exemplo, "x3").</summary>
         /// <param name="teamId">Id da equipa.</param>
         /// <param name="leagues">Serviço das ligas.</param>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet("{teamId:guid}/titles")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<Application.DTOs.Competition.TeamTitleDto>), StatusCodes.Status200OK)]
