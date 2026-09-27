@@ -1,4 +1,5 @@
-﻿using Domain.Constants;
+﻿using Application.Validators.Atributos;
+using Domain.Constants;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,6 +19,8 @@ namespace Application.DTOs.SuperAdmin
         [Required]
         [MinLength(ModelConstants.UserConst.MinEmailLength), MaxLength(ModelConstants.UserConst.MaxEmailLength)]
         public string Email { get; set; } = null!;
+        [Required]
+        [PalavraPasseSegura]
         public string Password { get; set; } = null!;
         public string Phone { get; set; } = null!;
     }

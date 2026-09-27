@@ -56,14 +56,9 @@ namespace Application.Validators
         /// <exception cref="ValidationException">Se o email/telefone já estiver em uso ou a data de nascimento for inválida.</exception>
         public void CreateSuperAdminValidator(CreateSuperAdminDTO dto, User[] sadmins)
         {
-            if (sadmins[0] != null)
+            if (sadmins[0] != null || sadmins[1] != null)
             {
-                throw new ValidationException($"The email '{sadmins[0].Email}' is already in use.");
-            }
-
-            if (sadmins[1] != null)
-            {
-                throw new ValidationException($"The phone number '{sadmins[1].Phone}' is already in use.");
+                throw new ValidationException(PlayerValidator.MensagemDadosIndisponiveis);
             }
 
             emailValidator.EmailValidation(dto.Email);
@@ -109,20 +104,10 @@ namespace Application.Validators
         {
             SuperAdminExists(sadmin);
 
-            if (dto.Email != sadmin.Email)
+            if ((dto.Email != sadmin.Email && sadmins[0] != null) ||
+                (dto.Phone != sadmin.Phone && sadmins[1] != null))
             {
-                if (sadmins[0] != null)
-                {
-                    throw new ValidationException($"The email '{sadmins[0].Email}' is already in use.");
-                }
-            }
-
-            if (dto.Phone != sadmin.Phone)
-            {
-                if (sadmins[1] != null)
-                {
-                    throw new ValidationException($"The phone number '{sadmins[1].Phone}' is already in use.");
-                }
+                throw new ValidationException(PlayerValidator.MensagemDadosIndisponiveis);
             }
 
             emailValidator.EmailValidation(dto.Email);

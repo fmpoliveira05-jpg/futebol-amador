@@ -19,6 +19,13 @@ namespace Application.Validators
     public class PlayerValidator : IPlayerValidator
     {
         /// <summary>
+        /// Mensagem para e-mail ou telefone já usados por outra conta. É genérica de propósito
+        /// (não diz qual dos dois nem o repete), para a API não servir para descobrir contas.
+        /// </summary>
+        public const string MensagemDadosIndisponiveis =
+            "Não foi possível usar estes dados. Se já tens conta, entra ou recupera a palavra-passe.";
+
+        /// <summary>
         /// Validador delegado para operações de validação de formato de baixo nível.
         /// </summary>
         private readonly IUserDataValidator UserDatalValidator;
@@ -64,14 +71,11 @@ namespace Application.Validators
         /// <exception cref="ValidationException">Se a altura, idade, posição, email ou telefone forem inválidos.</exception>
         public void CreatePlayerValidator(CreatePlayerDto CreatePlayerDto, User? phoneUser, User? emailUser)
         {
-            if (emailUser != null)
+            // Mensagem única para e-mail e telefone repetidos e sem os ecoar: não confirma a quem
+            // tenta registar-se que um dado pertence a uma conta existente.
+            if (emailUser != null || phoneUser != null)
             {
-                throw new ValidationException($"The email '{emailUser.Email}' is already in use.");
-            }
-
-            if (phoneUser  != null)
-            {
-                throw new ValidationException($"The phone number '{phoneUser.Phone}' is already in use.");
+                throw new ValidationException(MensagemDadosIndisponiveis);
             }
 
             
@@ -116,21 +120,11 @@ namespace Application.Validators
         {
             PlayerExists(player);
 
-            if (UpdatePlayerDto.Email != player.Email)
+            var emailOcupado = UpdatePlayerDto.Email != player.Email && players[0] != null;
+            var telefoneOcupado = UpdatePlayerDto.Phone != player.Phone && players[1] != null;
+            if (emailOcupado || telefoneOcupado)
             {
-                if (players[0] != null)
-                {
-                    throw new ValidationException($"The email '{players[0].Email}' is already in use.");
-                }
-
-            }
-
-            if (UpdatePlayerDto.Phone != player.Phone)
-            {
-                if (players[1] != null)
-                {
-                    throw new ValidationException($"The phone number '{players[1].Phone}' is already in use.");
-                }
+                throw new ValidationException(MensagemDadosIndisponiveis);
             }
 
             UserDatalValidator.EmailValidation(UpdatePlayerDto.Email);

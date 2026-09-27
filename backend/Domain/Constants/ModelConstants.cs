@@ -56,6 +56,34 @@
             public const float MinAverageAge = UserConst.MinAge;
             /// <summary> Idade média máxima permitida para uma equipa (igual à idade máxima do utilizador). </summary>
             public const float MaxAverageAge = UserConst.MaxAge;
+            /// <summary> Comprimento máximo do emblema quando é um URL (Cloudinary). </summary>
+            public const int MaxIconUrlLength = 512;
+            /// <summary> Comprimento máximo do emblema quando é uma imagem embebida (data URL de ~256x256 px). </summary>
+            public const int MaxIconDataUrlLength = 200_000;
+            /// <summary> Anfitriões de onde se aceitam emblemas por URL (só HTTPS). </summary>
+            public static readonly string[] AllowedIconHosts = { "res.cloudinary.com" };
+        }
+
+        /// <summary>
+        /// Regras das palavras-passe (registo, alteração e criação de super administradores).
+        /// </summary>
+        public static class PasswordConst
+        {
+            /// <summary> Comprimento mínimo. </summary>
+            public const int MinLength = 10;
+            /// <summary> Comprimento máximo (o Firebase Authentication não aceita mais de 128). </summary>
+            public const int MaxLength = 128;
+        }
+
+        /// <summary>
+        /// Limites das salas de chat criadas pela API.
+        /// </summary>
+        public static class ChatConst
+        {
+            /// <summary> Número máximo de membros de uma sala (inclui quem a cria). </summary>
+            public const int MaxMembers = 40;
+            /// <summary> Comprimento máximo do nome da sala. </summary>
+            public const int MaxRoomNameLength = 80;
         }
 
         /// <summary>

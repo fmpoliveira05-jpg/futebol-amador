@@ -1,3 +1,5 @@
+using Application.Validators.Atributos;
+using Domain.Constants;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs
@@ -9,10 +11,11 @@ namespace Application.DTOs
     public class ChangePasswordDto
     {
         [Required]
+        [MaxLength(ModelConstants.PasswordConst.MaxLength)]
         public string CurrentPassword { get; set; } = null!;
 
         [Required]
-        [MinLength(6), MaxLength(32)]
+        [PalavraPasseSegura]
         public string NewPassword { get; set; } = null!;
     }
 }
