@@ -9,6 +9,7 @@ import {
   TransferOfferDto,
 } from '../shared/Dtos/Competicao/competicao';
 import { paraHttpParams } from '../shared/http/http-params';
+import { comIdempotencia } from '../shared/http/idempotencia';
 
 /** Mercado de transferências: jogadores, listagens e propostas. */
 @Injectable({ providedIn: 'root' })
@@ -29,7 +30,11 @@ export class TransferenciasService {
   }
 
   proporTransferencia(teamId: string, playerId: string, message?: string): Observable<TransferOfferDto> {
-    return this.http.post<TransferOfferDto>(`${this.base}/offers`, { teamId, playerId, message: message || null });
+    return this.http.post<TransferOfferDto>(
+      `${this.base}/offers`,
+      { teamId, playerId, message: message || null },
+      comIdempotencia()
+    );
   }
 
   getPropostasEquipa(teamId: string): Observable<TeamTransferOffersDto> {

@@ -8,6 +8,7 @@ import { FilterListTeamDto } from '../shared/Dtos/Filters/FilterListTeamDto';
 import { InfoTeamDto } from '../shared/Dtos/Team/InfoTeamDto';
 import { paraHttpParams } from '../shared/http/http-params';
 import { HomePageDto } from '../shared/Dtos/Home/HomePageDto';
+import { comIdempotencia } from '../shared/http/idempotencia';
 
 /** Equipas: criar, consultar, editar, apagar e procurar adversários. */
 @Injectable({ providedIn: 'root' })
@@ -25,8 +26,9 @@ export class TeamService {
   }
 
   /** @returns a equipa criada, já com o id */
-  createTeam(data: CreateTeamDto): Observable<CreateTeamDto> {
-    return this.http.post<CreateTeamDto>(this.baseUrl, data);
+  /** `chave`: Idempotency-Key da operação (a mesma ao repetir depois de um erro de rede). */
+  createTeam(data: CreateTeamDto, chave?: string): Observable<CreateTeamDto> {
+    return this.http.post<CreateTeamDto>(this.baseUrl, data, comIdempotencia(chave));
   }
 
   updateTeam(teamId: string, data: CreateTeamDto): Observable<void> {

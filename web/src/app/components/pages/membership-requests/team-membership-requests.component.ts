@@ -75,7 +75,10 @@ export class TeamMembershipRequestsPageComponent {
    * Exibe uma confirmação antes de aceitar o pedido.
    */
   protected accept(request: MembershipRequest): void {
-
+    // Um pedido de cada vez: ignora cliques repetidos enquanto o anterior não termina.
+    if (this.isLoading()) {
+      return;
+    }
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);
@@ -102,7 +105,10 @@ export class TeamMembershipRequestsPageComponent {
    * Exibe uma confirmação antes de rejeitar o pedido.
    */
   protected reject(request: MembershipRequest): void {
-
+    // Um pedido de cada vez: ignora cliques repetidos enquanto o anterior não termina.
+    if (this.isLoading()) {
+      return;
+    }
     this.isLoading.set(true);
     this.errorMessage.set(null);
     this.successMessage.set(null);

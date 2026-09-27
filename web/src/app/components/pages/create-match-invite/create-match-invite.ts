@@ -9,6 +9,7 @@ import { InfoMatchInviteDto } from '../../../shared/Dtos/Match/InfoMatchInviteDt
 import { mensagemDeErro } from '../../../shared/http/erros';
 import { TeamService } from '../../../services/team.service';
 import { TeamDetailsDto } from '../../../shared/Dtos/Team/TeamDetailsDto';
+import { novaChaveIdempotencia } from '../../../shared/http/idempotencia';
 
 /**
  * Enviar um convite de jogo a outra equipa, ou fazer uma contraproposta a um convite recebido.
@@ -67,8 +68,14 @@ export class CreateMatchInvite implements OnInit {
     return new Date(data.getTime() - data.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
 
+  /** A mesma chave até o convite ser enviado: repetir depois de um erro de rede não o duplica. */
+  private chave = novaChaveIdempotencia();
+
   submitAction(): void {
     const minhaEquipa = this.currentTeamId();
+    if (this.isLoading()) {
+      return;
+    }
     if (this.form.invalid || !minhaEquipa) {
       this.form.markAllAsTouched();
       return;
@@ -84,7 +91,7 @@ export class CreateMatchInvite implements OnInit {
     this.errorMessage.set(null);
     const pedido = this.isNegotiating()
       ? this.matchInviteService.negotiateMatchInvite(minhaEquipa, payload)
-      : this.matchInviteService.sendMatchInvite(minhaEquipa, payload);
+      : this.matchInviteService.sendMatchInvite(minhaEquipa, payload, this.chave);
     pedido.subscribe({
       next: () => this.router.navigate(['/team/matchInvites']),
       error: (err) => {

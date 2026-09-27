@@ -6,6 +6,7 @@ import { MembershipRequest } from '../shared/Dtos/membership-request.model';
 import { FilterMembershipRequestsPlayer } from '../shared/Dtos/Filters/FilterMembershipRequestPlayer';
 import { paraHttpParams } from '../shared/http/http-params';
 import { AuthService } from './auth.service';
+import { comIdempotencia } from '../shared/http/idempotencia';
 
 /**
  * Pedidos de adesão entre jogadores e equipas.
@@ -45,7 +46,7 @@ export class MembershipRequestService {
   /** O jogador pede para entrar numa equipa. */
   sendMembershipRequestPlayer(teamId: string): Observable<void> {
     return this.comJogador((playerId) =>
-      this.http.post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/send`, { teamId })
+      this.http.post<void>(`${this.baseUrlPlayer}/${playerId}/membership-requests/send`, { teamId }, comIdempotencia())
     );
   }
 
@@ -72,7 +73,7 @@ export class MembershipRequestService {
   /** A equipa convida um jogador. */
   sendMembershipRequestTeam(playerId: string): Observable<void> {
     return this.comEquipa((teamId) =>
-      this.http.post<void>(`${this.baseUrlTeam}/${teamId}/membership-requests/send`, { playerId })
+      this.http.post<void>(`${this.baseUrlTeam}/${teamId}/membership-requests/send`, { playerId }, comIdempotencia())
     );
   }
 

@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
   LOCALE_ID,
   provideBrowserGlobalErrorListeners,
   provideZonelessChangeDetection,
@@ -9,7 +10,9 @@ import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt-PT';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
+import { TratadorErros } from './core/erros/tratador-erros';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { pedidosInterceptor } from './core/interceptors/pedidos.interceptor';
 import { environment } from './environments/environment';
 import { demoInterceptor } from './core/demo/demo.interceptor';
 
@@ -30,8 +33,13 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'top' })
     ),
     { provide: LOCALE_ID, useValue: 'pt-PT' },
+    { provide: ErrorHandler, useClass: TratadorErros },
     provideHttpClient(
-      withInterceptors(environment.demo ? [authInterceptor, demoInterceptor] : [authInterceptor])
+      withInterceptors(
+        environment.demo
+          ? [authInterceptor, pedidosInterceptor, demoInterceptor]
+          : [authInterceptor, pedidosInterceptor]
+      )
     ),
   ],
 };

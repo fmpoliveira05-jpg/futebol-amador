@@ -11,7 +11,15 @@ export function mensagemDeErro(erro: unknown, predefinida = 'Ocorreu um erro. Te
     return erro instanceof Error && erro.message ? erro.message : predefinida;
   }
   if (erro.status === 0) {
-    return 'Não foi possível contactar o servidor. Verifica a ligação.';
+    return erro.error && typeof erro.error === 'object' && (erro.error as { tipo?: string }).tipo === 'timeout'
+      ? 'O servidor demorou demasiado a responder. Tenta outra vez dentro de momentos.'
+      : 'Não foi possível contactar o servidor. Verifica a ligação.';
+  }
+  if (erro.status === 429) {
+    return 'Fizeste demasiados pedidos seguidos. Espera um pouco e tenta outra vez.';
+  }
+  if (erro.status === 503) {
+    return 'O serviço está temporariamente indisponível. Tenta outra vez dentro de momentos.';
   }
   const corpo = erro.error;
   if (corpo && typeof corpo === 'object') {

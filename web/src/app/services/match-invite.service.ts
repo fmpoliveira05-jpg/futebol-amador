@@ -6,6 +6,7 @@ import { SendMatchInviteDto } from '../shared/Dtos/Match/SendMatchInviteDto';
 import { InfoMatchInviteDto } from '../shared/Dtos/Match/InfoMatchInviteDto';
 import { FilterMatchInviteDto } from '../shared/Dtos/Filters/FilterMatchInviteDto';
 import { paraHttpParams } from '../shared/http/http-params';
+import { comIdempotencia } from '../shared/http/idempotencia';
 
 /**
  * Convites para jogos entre equipas. Uma equipa convida outra para uma data; a outra aceita,
@@ -24,8 +25,9 @@ export class MatchInviteService {
     return this.http.get<InfoMatchInviteDto>(`${this.baseUrl}/${teamId}/${idMatchInvite}`);
   }
 
-  sendMatchInvite(teamId: string, data: SendMatchInviteDto): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${teamId}/match-invites`, data);
+  /** `chave`: Idempotency-Key da operação (a mesma ao repetir depois de um erro de rede). */
+  sendMatchInvite(teamId: string, data: SendMatchInviteDto, chave?: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${teamId}/match-invites`, data, comIdempotencia(chave));
   }
 
   /** O corpo é o id do convite em JSON (a API recebe um `Guid` simples). */
