@@ -387,6 +387,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var player = BuildValidPlayer(playerId); 
             var dto = BuildValidUpdateDto();
             dto.Email = "novo.email@example.com"; 
+            dto.CurrentPassword = "Atual#Palavra1";
 
             playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
 
@@ -401,6 +402,30 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             Assert.That(player.Email, Is.EqualTo(dto.Email));
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+            // A mudança de e-mail passa a palavra-passe atual ao Firebase (reautenticação).
+            authService.Verify(a => a.UpdateEmailAsync(playerId, "Atual#Palavra1", dto.Email), Times.Once);
+        }
+
+        [Test(Description = "Segurança: mudar o e-mail sem a palavra-passe atual é recusado")]
+        public void UpdatePlayerAsync_NewEmailWithoutCurrentPassword_ThrowsValidationException()
+        {
+            var playerId = "player-to-update-sem-pp";
+            var player = BuildValidPlayer(playerId);
+            var emailOriginal = player.Email;
+            var dto = BuildValidUpdateDto();
+            dto.Email = "novo.email@example.com";
+            dto.CurrentPassword = null;
+
+            playerRepoMock.Setup(r => r.GetPlayerByIdAsync(playerId)).ReturnsAsync(player);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((Player)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(player);
+
+            var ex = Assert.ThrowsAsync<ValidationException>(async () => await service.UpdatePlayerAsync(playerId, dto));
+
+            Assert.That(ex!.Message, Does.Contain("palavra-passe atual"));
+            Assert.That(player.Email, Is.EqualTo(emailOriginal));
+            authService.Verify(a => a.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
         [Test(Description = "Validação: lança exceção quando o jogador a atualizar não existe")]

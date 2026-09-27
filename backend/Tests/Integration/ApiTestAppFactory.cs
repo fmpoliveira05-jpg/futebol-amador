@@ -22,6 +22,13 @@ namespace Tests.Integration
             // No ambiente "Testing" o Program.cs não exige as credenciais do Firebase.
             builder.UseEnvironment("Testing");
 
+            // Limites altos: os testes fazem muitos pedidos do mesmo "IP". Os testes da limitação
+            // de pedidos baixam-nos com UseSetting.
+            foreach (var politica in Api.Seguranca.LimitacaoPedidos.Predefinidos.Keys)
+            {
+                builder.UseSetting($"LimitacaoPedidos:{politica}:Pedidos", "100000");
+            }
+
             builder.ConfigureServices(services =>
             {
                 var descriptorsToRemove = services
@@ -125,7 +132,7 @@ namespace Tests.Integration
                 .ReturnsAsync(new Application.DTOs.LoginResponseDto());
             mockAuthService.Setup(x => x.DeleteUserAsync(It.IsAny<string>())).Verifiable();
                 
-            mockAuthService.Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            mockAuthService.Setup(x => x.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
             
 

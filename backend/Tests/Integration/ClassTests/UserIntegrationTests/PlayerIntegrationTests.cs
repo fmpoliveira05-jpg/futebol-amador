@@ -496,7 +496,7 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
                 DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-20),
                 Address = "Street Test, Test",
                 Email = "test@example.com",
-                Password = "Test123!",
+                Password = "Teste#Seguro123",
                 Phone = "+351123456789",
                 Position = 0,
                 Height = 160
@@ -516,7 +516,8 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             mockPlayerService.Setup(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>()))
                 .ReturnsAsync(expectedPlayerId);
 
-            mockAuthService.Setup(a => a.LoginAsync(playerDto.Email, playerDto.Password))
+            // Sem Auth:RequireVerifiedEmail o serviço devolve logo a sessão.
+            mockAuthService.Setup(a => a.IniciarSessaoAposRegistoAsync(playerDto.Email, playerDto.Password))
                 .ReturnsAsync(expectedLoginResponse);
 
             _client = _factory.WithWebHostBuilder(builder =>
@@ -545,8 +546,99 @@ namespace Tests.Integration.ClassTests.UserIntegrationTests
             });
 
             mockPlayerService.Verify(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>()), Times.Once);
-            mockAuthService.Verify(a => a.LoginAsync(playerDto.Email, playerDto.Password), Times.Once);
+            mockAuthService.Verify(a => a.IniciarSessaoAposRegistoAsync(playerDto.Email, playerDto.Password), Times.Once);
         }
+
+        [Test]
+        public async Task CreatePlayer_Returns_PendingVerification_Without_Session()
+        {
+            var mockPlayerService = new Mock<IPlayerService>();
+            var mockAuthService = new Mock<IAuthService>();
+            var playerDto = CreatePlayerDtoValido();
+
+            mockPlayerService.Setup(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>())).ReturnsAsync("novo-jogador");
+            // Com a confirmação do e-mail exigida, não há sessão depois do registo.
+            mockAuthService.Setup(a => a.IniciarSessaoAposRegistoAsync(playerDto.Email, playerDto.Password))
+                .ReturnsAsync((LoginResponseDto?)null);
+
+            _client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll(typeof(IPlayerService));
+                    services.RemoveAll(typeof(IAuthService));
+                    services.AddSingleton<IPlayerService>(mockPlayerService.Object);
+                    services.AddSingleton<IAuthService>(mockAuthService.Object);
+                });
+            }).CreateClient();
+
+            var response = await _client.PostAsJsonAsync("/api/Player/create-profile", playerDto);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            var corpo = await response.Content.ReadAsStringAsync();
+            Assert.That(corpo, Does.Contain("\"verificacaoEmailPendente\":true"));
+            Assert.That(corpo, Does.Not.Contain("idToken"));
+        }
+
+        [TestCase("curta#1A")]
+        [TestCase("semsimbolos1234A")]
+        [TestCase("SEM#MINUSCULAS123")]
+        [TestCase("sem#maiusculas123")]
+        [TestCase("Sem#Algarismos!!")]
+        public async Task CreatePlayer_Returns_BadRequest_When_Password_Is_Weak(string password)
+        {
+            var mockPlayerService = new Mock<IPlayerService>();
+            var playerDto = CreatePlayerDtoValido();
+            playerDto.Password = password;
+
+            _client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll(typeof(IPlayerService));
+                    services.AddSingleton<IPlayerService>(mockPlayerService.Object);
+                });
+            }).CreateClient();
+
+            var response = await _client.PostAsJsonAsync("/api/Player/create-profile", playerDto);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            mockPlayerService.Verify(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreatePlayer_Returns_BadRequest_When_Honeypot_Is_Filled()
+        {
+            var mockPlayerService = new Mock<IPlayerService>();
+            var playerDto = CreatePlayerDtoValido();
+            playerDto.Website = "http://spam.example";
+
+            _client = _factory.WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    services.RemoveAll(typeof(IPlayerService));
+                    services.AddSingleton<IPlayerService>(mockPlayerService.Object);
+                });
+            }).CreateClient();
+
+            var response = await _client.PostAsJsonAsync("/api/Player/create-profile", playerDto);
+
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+            mockPlayerService.Verify(s => s.CreatePlayerAsync(It.IsAny<CreatePlayerDto>()), Times.Never);
+        }
+
+        private static CreatePlayerDto CreatePlayerDtoValido() => new()
+        {
+            Name = "Teste",
+            DateOfBirth = DateOnly.FromDateTime(DateTime.UtcNow).AddYears(-20),
+            Address = "Rua de Teste, Guimarães",
+            Email = "novo@example.com",
+            Password = "Teste#Seguro123",
+            Phone = "+351912345678",
+            Position = 0,
+            Height = 175
+        };
 
         [Test]
         public async Task DeletePlayer_Returns_Deleted()

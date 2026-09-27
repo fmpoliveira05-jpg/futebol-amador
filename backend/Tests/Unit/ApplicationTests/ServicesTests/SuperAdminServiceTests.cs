@@ -273,6 +273,7 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
             var superAdmin = BuildValidSuperAdmin(sAdminId);
             var dto = BuildValidUpdateDto();
             dto.Email = "novo.email@example.com";
+            dto.CurrentPassword = "Atual#Palavra1";
 
             sAdminRepoMock.Setup(r => r.GetSuperAdminByIdAsync(sAdminId)).ReturnsAsync(superAdmin);
 
@@ -286,6 +287,24 @@ namespace Tests.Unit.ApplicationTests.ServicesTests
 
             Assert.That(superAdmin.Email, Is.EqualTo(dto.Email));
             uowMock.Verify(u => u.SaveChangesAsync(), Times.Once);
+            authServiceMock.Verify(a => a.UpdateEmailAsync(sAdminId, "Atual#Palavra1", dto.Email), Times.Once);
+        }
+
+        [Test(Description = "Segurança: mudar o e-mail do super administrador exige a palavra-passe atual")]
+        public void UpdateSuperAdminAsync_NewEmailWithoutCurrentPassword_ThrowsValidationException()
+        {
+            var sAdminId = "superAdmin-sem-pp";
+            var superAdmin = BuildValidSuperAdmin(sAdminId);
+            var dto = BuildValidUpdateDto();
+            dto.Email = "novo.email@example.com";
+
+            sAdminRepoMock.Setup(r => r.GetSuperAdminByIdAsync(sAdminId)).ReturnsAsync(superAdmin);
+            userRepoMock.Setup(r => r.GetUserByEmailAsync(dto.Email)).ReturnsAsync((SuperAdmin)null);
+            userRepoMock.Setup(r => r.GetUserByPhoneAsync(dto.Phone)).ReturnsAsync(superAdmin);
+
+            Assert.ThrowsAsync<ValidationException>(async () => await service.UpdateSuperAdminAsync(sAdminId, dto));
+            authServiceMock.Verify(a => a.UpdateEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            uowMock.Verify(u => u.SaveChangesAsync(), Times.Never);
         }
 
         [Test(Description = "Validação: lança exceção quando o jogador a atualizar não existe")]

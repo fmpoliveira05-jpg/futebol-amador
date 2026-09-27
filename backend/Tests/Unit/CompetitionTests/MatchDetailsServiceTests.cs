@@ -157,6 +157,7 @@ namespace Tests.Unit.CompetitionTests
             var report = await sut.GetReportAsync(match.Id);
             var profile = await new PlayerProfileService(t.Players, t.Details, t.Transfers, t.Teams, t.Clock).GetProfileAsync("casa-a1");
             var sub = await new PlayerProfileService(t.Players, t.Details, t.Transfers, t.Teams, t.Clock).GetProfileAsync("casa-m4");
+            var proprio = await new PlayerProfileService(t.Players, t.Details, t.Transfers, t.Teams, t.Clock).GetProfileAsync("casa-a1", "casa-a1");
 
             Assert.Multiple(() =>
             {
@@ -170,6 +171,11 @@ namespace Tests.Unit.CompetitionTests
                 Assert.That((profile.Totals.Games, profile.Totals.Goals, profile.Totals.Minutes), Is.EqualTo((1, 1, 70)));
                 Assert.That(profile.Career.Single().TeamName, Is.EqualTo("Casa"));
                 Assert.That((sub.Totals.Games, sub.Totals.Minutes), Is.EqualTo((1, 20)));
+
+                // O perfil é público: a data de nascimento só vai para o próprio (os outros veem a idade).
+                Assert.That(profile.DateOfBirth, Is.Null);
+                Assert.That(profile.Age, Is.GreaterThan(0));
+                Assert.That(proprio.DateOfBirth, Is.Not.Null);
             });
         }
     }

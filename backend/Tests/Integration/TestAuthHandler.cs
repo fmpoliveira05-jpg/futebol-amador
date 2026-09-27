@@ -12,6 +12,12 @@ namespace Tests.Integration
     {
         public const string TestUserId = "test-user-id-12345";
 
+        /// <summary>
+        /// Valor do cabeçalho Authorization para um utilizador com o e-mail ainda por confirmar
+        /// (sem a claim email_verified=true).
+        /// </summary>
+        public const string EmailNaoVerificado = "Test-NaoVerificado";
+
         public TestAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options, 
             ILoggerFactory logger, 
@@ -33,11 +39,17 @@ namespace Tests.Integration
                 return Task.FromResult(AuthenticateResult.NoResult());
             }
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, TestUserId),
                 new Claim(ClaimTypes.Name, "TestUser")
             };
+
+            // Como nos ID tokens do Firebase: a política por omissão exige email_verified=true.
+            if (authorizationHeader != EmailNaoVerificado)
+            {
+                claims.Add(new Claim("email_verified", "true"));
+            }
             var identity = new ClaimsIdentity(claims, "Test");
             var principal = new ClaimsPrincipal(identity);
             var ticket = new AuthenticationTicket(principal, "Test");

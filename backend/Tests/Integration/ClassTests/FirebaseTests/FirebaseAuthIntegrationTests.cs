@@ -107,7 +107,7 @@ namespace IntegrationTests.Controllers
         [Test]
         public async Task Logout_ReturnsUnauthorized_WhenUserNotAuthenticated()
         {
-            var response = await _client.GetAsync("/api/user/logout");
+            var response = await _client.PostAsync("/api/user/logout", null);
 
             Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
@@ -134,10 +134,10 @@ namespace IntegrationTests.Controllers
 
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
-            var response = await _client.GetAsync("/api/user/logout");
+            var response = await _client.PostAsync("/api/user/logout", null);
 
             response.EnsureSuccessStatusCode();
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
 
             mockAuthService.Verify(x => x.LogoutAsync(TestAuthHandler.TestUserId), Times.Once);
         }
@@ -159,12 +159,12 @@ namespace IntegrationTests.Controllers
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             var currentPassword = "oldPassword123";
-            var newPassword = "newPassword123";
+            var newPassword = "NovaPalavra#2026";
 
             var mockAuthService = new Mock<IAuthService>();
             mockAuthService
                 .Setup(x => x.ChangePasswordAsync(TestAuthHandler.TestUserId, currentPassword, newPassword))
-                .Returns(Task.CompletedTask);
+                .ReturnsAsync((FirebaseLoginResponseDto?)null);
 
             _client = _factory.WithWebHostBuilder(builder =>
             {
@@ -191,7 +191,7 @@ namespace IntegrationTests.Controllers
             _client.DefaultRequestHeaders.Add("Authorization", "Test");
 
             var currentPassword = "wrongPassword";
-            var newPassword = "newPassword123";
+            var newPassword = "NovaPalavra#2026";
 
             var mockAuthService = new Mock<IAuthService>();
             mockAuthService
