@@ -11,5 +11,10 @@
         public string Email { get; set; } = null!;
 
         public string Phone { get; set; } = null!;
+
+        /// <summary>
+        /// Palavra-passe atual. Só é obrigatória quando o e-mail muda (reautenticação).
+        /// </summary>
+        public string? CurrentPassword { get; set; }
     }
 }

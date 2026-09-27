@@ -407,8 +407,15 @@ namespace Application.Services
 
             if (dto.Email != player.Email)
             {
+                // Mudar o e-mail exige a palavra-passe atual; o e-mail novo fica por confirmar e as
+                // sessões abertas são terminadas (ver IAuthService.UpdateEmailAsync).
+                if (string.IsNullOrEmpty(dto.CurrentPassword))
+                {
+                    throw new Domain.Exceptions.ValidationException("Para alterar o e-mail indica a palavra-passe atual.");
+                }
+
+                await AuthService.UpdateEmailAsync(player.Id, dto.CurrentPassword, dto.Email);
                 player.Email = dto.Email;
-                 await AuthService.UpdateEmailAsync(player.Id, dto.Email);
                 hasChange = true;
             }
 

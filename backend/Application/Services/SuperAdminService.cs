@@ -3,6 +3,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Application.Interfaces.Validators;
 using Domain.Entities;
+using Domain.Exceptions;
 
 namespace Application.Services
 {
@@ -149,12 +150,23 @@ namespace Application.Services
 
             superAdminValidator.UpdateSuperAdminValidator(dto, superAdmin, existingSadmin);
 
+            var emailMudou = !string.Equals(superAdmin.Email, dto.Email, StringComparison.OrdinalIgnoreCase);
+
             superAdmin.Name = dto.Name;
             superAdmin.DateOfBirth = dto.DateOfBirth;
             superAdmin.Address = dto.Address;
             superAdmin.Phone = dto.Phone;
             superAdmin.Email = dto.Email;
-            await authService.UpdateEmailAsync(superAdminId, dto.Email);
+
+            // Mudar o e-mail exige a palavra-passe atual e deixa o e-mail novo por confirmar.
+            if (emailMudou)
+            {
+                if (string.IsNullOrEmpty(dto.CurrentPassword))
+                {
+                    throw new ValidationException("Para alterar o e-mail indica a palavra-passe atual.");
+                }
+                await authService.UpdateEmailAsync(superAdminId, dto.CurrentPassword, dto.Email);
+            }
 
             superAdminRepository.UpdateSuperAdmin(superAdmin);
             

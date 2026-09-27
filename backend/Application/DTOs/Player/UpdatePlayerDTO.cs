@@ -44,5 +44,12 @@ namespace Application.DTOs.PlayerDTOs
 
         [MaxLength(ModelConstants.PlayerConst.MaxCountryLength)]
         public string? CountryOfBirth { get; set; }
+
+        /// <summary>
+        /// Palavra-passe atual. Só é obrigatória quando o e-mail muda: a alteração do e-mail exige
+        /// reautenticação, para uma sessão roubada não chegar para tomar a conta.
+        /// </summary>
+        [MaxLength(ModelConstants.PasswordConst.MaxLength)]
+        public string? CurrentPassword { get; set; }
     }
 }
