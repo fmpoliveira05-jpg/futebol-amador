@@ -5,3 +5,5 @@
 # Falsos positivos: tokens fictícios usados nos testes (a assinatura é literalmente "assinatura").
 e6259bd85df02544d35ca40ca733e1758b1c85de:mobile/app/src/test/java/com/example/amfootball/data/local/CifraAesGcmTest.kt:generic-api-key:19
 7571fbeeeaf1571c52f7e0352ae64a4cc8437e0f:web/e2e/armazenamento.spec.ts:jwt:24
+mobile/app/src/test/java/com/example/amfootball/data/local/CifraAesGcmTest.kt:generic-api-key:19
+web/e2e/armazenamento.spec.ts:jwt:24
