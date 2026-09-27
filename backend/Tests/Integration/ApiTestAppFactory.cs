@@ -59,10 +59,7 @@ namespace Tests.Integration
 
                 AddFirebaseServiceMocks(services);
 
-                services.AddDbContext<AmateurFootballContext>(options =>
-                {
-                    options.UseInMemoryDatabase("InMemoryDbForTesting");
-                });
+                services.AddDbContext<AmateurFootballContext>(ConfigurarBaseDados);
 
                 services.AddMemoryCache();
 
@@ -83,6 +80,12 @@ namespace Tests.Integration
                 services.AddSingleton<IHubFinshMatchValidator>(mockHubFinshValidator.Object);
                 services.AddSingleton<IGeralHubValidator>(mockGeralValidator.Object);
             });
+        }
+
+        /// <summary>Base de dados dos testes: em memória (ver <see cref="ApiSqlServerFactory"/>).</summary>
+        protected virtual void ConfigurarBaseDados(DbContextOptionsBuilder options)
+        {
+            options.UseInMemoryDatabase("InMemoryDbForTesting");
         }
 
         private void RemoveFirebaseServices(IServiceCollection services)

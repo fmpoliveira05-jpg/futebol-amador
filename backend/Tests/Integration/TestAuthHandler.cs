@@ -18,6 +18,12 @@ namespace Tests.Integration
         /// </summary>
         public const string EmailNaoVerificado = "Test-NaoVerificado";
 
+        /// <summary>
+        /// Prefixo para autenticar outro utilizador: <c>Authorization: Test-Uid outro-uid</c>
+        /// (testes com vários utilizadores, por exemplo pedidos simultâneos).
+        /// </summary>
+        public const string PrefixoUid = "Test-Uid ";
+
         public TestAuthHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options, 
             ILoggerFactory logger, 
@@ -39,9 +45,13 @@ namespace Tests.Integration
                 return Task.FromResult(AuthenticateResult.NoResult());
             }
 
+            var uid = authorizationHeader.StartsWith(PrefixoUid, StringComparison.Ordinal)
+                ? authorizationHeader.Substring(PrefixoUid.Length).Trim()
+                : TestUserId;
+
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, TestUserId),
+                new Claim(ClaimTypes.NameIdentifier, uid),
                 new Claim(ClaimTypes.Name, "TestUser")
             };
 

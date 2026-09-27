@@ -304,6 +304,102 @@ namespace Infrastructure.Data
             modelBuilder.Entity<User>()
                 .UseTptMappingStrategy()
                 .ToTable("User");
+
+            ConfigurarConcorrenciaEIndices(modelBuilder);
+        }
+
+        /// <summary>Nome da coluna <c>rowversion</c> usada na concorrência otimista.</summary>
+        public const string ColunaVersao = "Versao";
+
+        /// <summary>Data da última alteração de um jogador (ver <see cref="MarcarAlteracoes"/>).</summary>
+        public const string ColunaAlteradoEm = "AlteradoEm";
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            MarcarAlteracoes();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+        {
+            MarcarAlteracoes();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
+        /// <summary>
+        /// Cada jogador alterado recebe <see cref="ColunaAlteradoEm"/>, para que a tabela Player seja
+        /// sempre atualizada e o rowversion verificado, mesmo quando só mudam colunas da tabela User.
+        /// </summary>
+        private void MarcarAlteracoes()
+        {
+            var agora = DateTime.UtcNow;
+            foreach (var entrada in ChangeTracker.Entries<Player>())
+            {
+                if (entrada.State == EntityState.Modified)
+                {
+                    entrada.Property(ColunaAlteradoEm).CurrentValue = agora;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Concorrência otimista, restrições únicas e índices para as consultas mais usadas.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>Concorrência otimista.</b> As entidades alteradas por pedidos que podem colidir
+        /// (entrada/saída de equipas e promoções, aceitar convites e contrapropostas, resultados,
+        /// adiamentos, transferências) têm uma coluna <c>rowversion</c> (<see cref="ColunaVersao"/>,
+        /// propriedade sombra). O SQL Server muda-a em cada UPDATE; se dois pedidos lerem a mesma
+        /// versão, o segundo a gravar recebe <see cref="DbUpdateConcurrencyException"/> e a API
+        /// responde 409. Apagar uma linha que outro pedido já apagou dá a mesma exceção.</para>
+        /// <para><b>Restrições únicas.</b> Seguram os duplicados que a validação da aplicação não
+        /// consegue evitar com dois pedidos simultâneos (duplo clique, duas abas): e-mail da conta,
+        /// nome da equipa, um pedido de adesão por jogador e equipa, um convite por equipas e hora,
+        /// uma linha de estatísticas por equipa e jogo, uma proposta pendente por jogador e equipa.</para>
+        /// </remarks>
+        private static void ConfigurarConcorrenciaEIndices(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Player>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            // Player usa TPT (tabelas User e Player). Mudar só colunas da tabela User (nome, e-mail)
+            // não faria UPDATE à tabela Player e o rowversion não era verificado: esta coluna muda
+            // em cada gravação (ver SaveChanges) e obriga ao UPDATE com a verificação.
+            modelBuilder.Entity<Player>().Property<DateTime?>(ColunaAlteradoEm);
+            modelBuilder.Entity<Team>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<Matches>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<MatchInvite>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<TeamStatistics>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<PostPoneMatch>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<TransferOffer>().Property<byte[]>(ColunaVersao).IsRowVersion();
+            modelBuilder.Entity<Season>().Property<byte[]>(ColunaVersao).IsRowVersion();
+
+            // Login e registo procuram a conta pelo e-mail.
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
+
+            // Pesquisa e validação do nome ao criar/editar a equipa.
+            modelBuilder.Entity<Team>().HasIndex(t => t.Name).IsUnique();
+
+            modelBuilder.Entity<MembershipRequest>().HasIndex(m => new { m.IdPlayer, m.IdTeam }).IsUnique();
+
+            modelBuilder.Entity<MatchInvite>().HasIndex(i => new { i.IdSender, i.IdReceiver, i.GameDate }).IsUnique();
+
+            modelBuilder.Entity<TeamStatistics>().HasIndex(ts => new { ts.MatchesId, ts.IdTeam }).IsUnique();
+
+            // Uma proposta em aberto (à espera do clube ou do jogador) por jogador e equipa compradora.
+            modelBuilder.Entity<TransferOffer>()
+                .HasIndex(o => new { o.PlayerId, o.IdToTeam })
+                .IsUnique()
+                .HasFilter($"[Status] IN ({(int)Domain.Enums.TransferOfferStatus.PENDING_CLUB}, {(int)Domain.Enums.TransferOfferStatus.PENDING_PLAYER})");
+
+            // Jogos por data e estado: notificações do dia de jogo, calendário, próximos jogos,
+            // conflito de 12 horas ao marcar um jogo.
+            modelBuilder.Entity<Matches>().HasIndex(m => new { m.MatchStatus, m.MatchDate });
+            modelBuilder.Entity<Matches>().HasIndex(m => m.MatchDate);
+
+            // Épocas a abrir/fechar pelo serviço em segundo plano.
+            modelBuilder.Entity<Season>().HasIndex(s => new { s.Status, s.StartDate });
+
+            // Classificação geral por pontos.
+            modelBuilder.Entity<Team>().HasIndex(t => t.CurrentPoints);
         }
     }
 }

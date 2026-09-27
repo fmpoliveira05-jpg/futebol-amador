@@ -49,6 +49,35 @@ jobs:
           name: backend-testes
           path: backend/TestResults
 
+  # Concorrência otimista (rowversion), restrições únicas e transações precisam de um SQL Server
+  # real: a base de dados em memória não os simula. Cada teste cria e apaga a sua base de dados.
+  testes-sql-server:
+    runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "Ci-Testes-2026!"
+        ports: ["1433:1433"]
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Ci-Testes-2026!' -Q 'SELECT 1'"
+          --health-interval 10s --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+
+      - name: Testes com SQL Server
+        env:
+          # Palavra-passe só deste contentor efémero do CI (não é um segredo).
+          FA_TESTES_SQLSERVER: "Server=localhost,1433;User Id=sa;Password=Ci-Testes-2026!;TrustServerCertificate=True"
+        run: dotnet test Tests/Tests.csproj --configuration Release --filter "Category=SqlServer"
+
   docker:
     runs-on: ubuntu-latest
     needs: build-e-testes
