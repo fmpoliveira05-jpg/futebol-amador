@@ -21,8 +21,10 @@ var builder = WebApplication.CreateBuilder(args);
 // autenticação por um esquema de teste, por isso não se exigem credenciais.
 var emTestes = builder.Environment.IsEnvironment("Testing");
 
-// Sem o cabeçalho "Server: Kestrel" (não se anuncia o servidor).
-builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+// Kestrel sem o cabeçalho "Server", com corpo máximo de 1 MB e tempo máximo para os cabeçalhos
+// (ver Api/Operacao/Limites.cs e a secção "Limites" da configuração).
+builder.WebHost.ConfigurarKestrel(builder.Configuration);
+builder.Services.AddTimeoutsPedidos(builder.Configuration);
 
 // Atrás de um proxy (nginx, Caddy, ...), o IP do cliente e o esquema vêm em X-Forwarded-For e
 // X-Forwarded-Proto. Só se confia nesses cabeçalhos quando vêm de proxies conhecidos
@@ -80,6 +82,8 @@ if (!emTestes)
     builder.Services.AddSingleton(_ => FirestoreDb.Create(firebaseProjectId));
 }
 
+// Pedidos REST ao Firebase e ao Turnstile com tempo máximo, disjuntor e novas tentativas só em
+// métodos idempotentes (ver Limites.AddResilienciaExterna).
 builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, httpClient) =>
 {
     var tokenUri = sp.GetRequiredService<IConfiguration>()["Authentication:TokenUri"];
@@ -87,14 +91,14 @@ builder.Services.AddHttpClient<IAuthService, FireBaseAuthService>((sp, httpClien
     {
         httpClient.BaseAddress = new Uri(tokenUri);
     }
-});
+}).AddResilienciaExterna(builder.Configuration);
 
 // Por omissão todos os endpoints exigem sessão (e e-mail confirmado): os públicos têm [AllowAnonymous].
 builder.Services.AddPoliticasAutorizacao(builder.Configuration);
 builder.Services.AddLimitacaoPedidos(builder.Configuration);
 
 builder.Services.AddSingleton<SessaoWeb>();
-builder.Services.AddHttpClient<IVerificadorTurnstile, VerificadorTurnstile>();
+builder.Services.AddHttpClient<IVerificadorTurnstile, VerificadorTurnstile>().AddResilienciaExterna(builder.Configuration);
 builder.Services.AddScoped<ExigirTurnstileAttribute>();
 if (emTestes || !builder.Configuration.GetValue("Auth:VerificarRevogacao", true))
 {
@@ -170,6 +174,7 @@ app.UseMiddleware<ProtecaoCsrf>();
 app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
+app.UseRequestTimeouts();
 
 app.MapControllers();
 app.MapHubs();

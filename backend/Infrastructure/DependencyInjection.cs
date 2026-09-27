@@ -34,8 +34,21 @@ namespace Infrastructure
         /// <returns>A coleção de serviços atualizada.</returns>
         private static IServiceCollection AddDbContext(this IServiceCollection services, IConfiguration configuration)
         {
+            // Tempo máximo de cada comando SQL (BaseDados:CommandTimeoutSegundos, 30 s) e novas tentativas
+            // em falhas transitórias do SQL Server (BaseDados:TentativasFalhaTransitoria, 3), por exemplo
+            // um failover ou a base de dados do Azure a acordar.
+            var timeoutComando = configuration.GetValue("BaseDados:CommandTimeoutSegundos", 30);
+            var tentativas = configuration.GetValue("BaseDados:TentativasFalhaTransitoria", 3);
+
             services.AddDbContext<AmateurFootballContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"), sql =>
+                {
+                    sql.CommandTimeout(timeoutComando);
+                    if (tentativas > 0)
+                    {
+                        sql.EnableRetryOnFailure(tentativas, TimeSpan.FromSeconds(5), null);
+                    }
+                }));
 
             return services;
         }

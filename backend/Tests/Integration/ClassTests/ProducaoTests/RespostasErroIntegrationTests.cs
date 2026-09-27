@@ -82,6 +82,13 @@ namespace IntegrationTests.Producao
         }
 
         [Test]
+        public void Servico_Externo_Lento_E_Classificado_Como_503()
+        {
+            var (estado, _) = GlobalExceptionHandler.Classificar(new Polly.Timeout.TimeoutRejectedException());
+            Assert.That(estado, Is.EqualTo(503));
+        }
+
+        [Test]
         public void Erro_Desconhecido_Continua_500_Sem_Mensagem()
         {
             var (estado, titulo) = GlobalExceptionHandler.Classificar(new NullReferenceException("detalhe interno"));

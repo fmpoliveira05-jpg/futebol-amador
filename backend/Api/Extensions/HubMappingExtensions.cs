@@ -1,4 +1,5 @@
 ﻿using Api.Hubs;
+using Api.Operacao;
 
 namespace Api.Extensions
 {
@@ -41,9 +42,9 @@ namespace Api.Extensions
         /// <returns>A instância da aplicação atualizada, permitindo o encadeamento de chamadas (Fluent API).</returns>
         public static WebApplication MapHubs(this WebApplication app)
         {
-            app.MapHub<StartMatchHub>("/StartMatch");
-            app.MapHub<FinishMatchHub>("/FinishMatch");
-            app.MapHub<NotificationHub>("/Notification");
+            app.MapHub<StartMatchHub>("/StartMatch").WithRequestTimeout(Limites.SemTimeout);
+            app.MapHub<FinishMatchHub>("/FinishMatch").WithRequestTimeout(Limites.SemTimeout);
+            app.MapHub<NotificationHub>("/Notification").WithRequestTimeout(Limites.SemTimeout);
 
             return app;
         }

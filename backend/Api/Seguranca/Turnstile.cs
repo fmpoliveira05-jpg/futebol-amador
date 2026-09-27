@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text.Json.Serialization;
 
@@ -64,7 +64,7 @@ namespace Api.Seguranca
                 }
                 return resultado?.Sucesso == true;
             }
-            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+            catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException or Polly.ExecutionRejectedException)
             {
                 // Falha fechada: sem confirmação, o formulário web não passa (a app Android não usa Turnstile).
                 logger.LogWarning("Não foi possível contactar o Turnstile ({Tipo}).", ex.GetType().Name);

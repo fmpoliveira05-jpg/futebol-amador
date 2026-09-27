@@ -49,6 +49,11 @@ namespace Api.Middlewares
                     ? "Os dados foram alterados por outro pedido entretanto. Atualiza e tenta outra vez."
                     : "Já existe um registo igual (por exemplo, um pedido repetido). Atualiza e confirma.";
             }
+            else if (status == StatusCodes.Status503ServiceUnavailable)
+            {
+                logger.LogWarning("Serviço externo indisponível ({Tipo}) em {Caminho}.", exception.GetType().Name, httpContext.Request.Path);
+                detalhe = "Um serviço de que dependemos não respondeu a tempo. Tenta outra vez dentro de momentos.";
+            }
             else if (status == StatusCodes.Status500InternalServerError)
             {
                 logger.LogError(exception, "Erro não tratado em {Metodo} {Caminho}", httpContext.Request.Method, httpContext.Request.Path);
@@ -125,6 +130,8 @@ namespace Api.Middlewares
             // Antes dos restantes: são exceções da framework que significam "conflito", não erro interno.
             DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Conflito de edição"),
             DbUpdateException { InnerException: SqlException { Number: 2601 or 2627 } } => (StatusCodes.Status409Conflict, "Registo duplicado"),
+            // Serviço externo (Firebase, Turnstile, Cloudinary) lento ou com o disjuntor aberto.
+            Polly.ExecutionRejectedException => (StatusCodes.Status503ServiceUnavailable, "Serviço temporariamente indisponível"),
             ForbiddenException => (StatusCodes.Status403Forbidden, "Sem permissão"),
             EmailNaoVerificadoException => (StatusCodes.Status403Forbidden, "E-mail por confirmar"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Não autenticado"),
