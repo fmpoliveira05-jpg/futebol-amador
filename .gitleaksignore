@@ -1,0 +1,4 @@
+# Achados conhecidos do gitleaks (ver docs/SEGURANCA.md, "Segredo antigo no histórico").
+# JwtSettings:Secret obsoleto no commit 2d910d5f: a API já não emite JWT próprios; o valor está
+# comprometido e nunca deve ser reutilizado. O histórico não foi reescrito.
+2d910d5fd77db6b5eb47918fbb795b9143c22253:backend/Api/appsettings.json:generic-api-key:7
