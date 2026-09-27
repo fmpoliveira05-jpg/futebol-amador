@@ -1,3 +1,5 @@
+﻿using Microsoft.AspNetCore.OutputCaching;
+using Api.Operacao;
 using Application.DTOs.Competition;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -22,6 +24,7 @@ namespace Api.Controllers
         private string? UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         /// <summary>Táticas disponíveis, com as coordenadas de cada posição no campo.</summary>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet("formations")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<FormationDto>), StatusCodes.Status200OK)]

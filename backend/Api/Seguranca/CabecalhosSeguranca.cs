@@ -1,4 +1,4 @@
-namespace Api.Seguranca
+﻿namespace Api.Seguranca
 {
     /// <summary>
     /// Cabeçalhos de segurança em todas as respostas da API (incluindo erros).
@@ -57,8 +57,19 @@ namespace Api.Seguranca
 
             if (caminho.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
             {
-                cabecalhos.CacheControl = "no-store";
-                cabecalhos.Pragma = "no-cache";
+                // Só as consultas públicas em cache no servidor (ligas, classificação) podem ficar em
+                // cache no cliente; tudo o resto (dados pessoais, sessão) é no-store.
+                if (context.Response.StatusCode == StatusCodes.Status200OK && Api.Operacao.CachePublica.Usa(context.GetEndpoint()))
+                {
+                    var segundos = Api.Operacao.CachePublica.Segundos(context.RequestServices.GetRequiredService<IConfiguration>());
+                    cabecalhos.CacheControl = $"public, max-age={segundos}";
+                    cabecalhos.Remove("Pragma");
+                }
+                else
+                {
+                    cabecalhos.CacheControl = "no-store";
+                    cabecalhos.Pragma = "no-cache";
+                }
             }
 
             cabecalhos.Remove("Server");

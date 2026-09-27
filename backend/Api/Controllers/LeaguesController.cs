@@ -1,3 +1,5 @@
+﻿using Microsoft.AspNetCore.OutputCaching;
+using Api.Operacao;
 using Application.DTOs.Competition;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -25,12 +27,14 @@ namespace Api.Controllers
         private string? UserId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
         /// <summary>Todas as ligas, do escalão mais alto para o mais baixo, com a época atual.</summary>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<LeagueDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetLeagues() => Ok(await leagues.GetLeaguesAsync());
 
         /// <summary>Classificação de uma liga (época atual, ou a indicada).</summary>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet("{leagueId:guid}/standings")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(StandingsDto), StatusCodes.Status200OK)]
@@ -39,6 +43,7 @@ namespace Api.Controllers
             Ok(await leagues.GetStandingsAsync(leagueId, seasonId));
 
         /// <summary>Calendário da época, por jornadas.</summary>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet("seasons/{seasonId:guid}/fixtures")]
         [AllowAnonymous]
         [ProducesResponseType(typeof(List<FixtureRoundDto>), StatusCodes.Status200OK)]

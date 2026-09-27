@@ -1,3 +1,5 @@
+﻿using Microsoft.AspNetCore.OutputCaching;
+using Api.Operacao;
 using Application.DTOs.Competition;
 using Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +27,7 @@ namespace Api.Controllers
         /// <param name="leagueId">Liga (opcional).</param>
         /// <response code="200">Classificação.</response>
         /// <response code="204">Ainda não há ligas.</response>
+        [OutputCache(PolicyName = CachePublica.Politica)]
         [HttpGet]
         [ProducesResponseType(typeof(StandingsDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

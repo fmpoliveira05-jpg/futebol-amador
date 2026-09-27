@@ -60,6 +60,8 @@ builder.Services.AddSaude();
 // Respostas guardadas dos pedidos com Idempotency-Key. Com várias instâncias da API, trocar por
 // uma cache distribuída (AddStackExchangeRedisCache ou AddDistributedSqlServerCache).
 builder.Services.AddDistributedMemoryCache();
+// Cache das consultas públicas (ligas, classificação, jornadas), ver Api/Operacao/CachePublica.cs.
+builder.Services.AddCachePublica(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApiBackGroundService();
@@ -181,6 +183,8 @@ app.UseAuthorization();
 app.UseRequestTimeouts();
 // POST com Idempotency-Key repetido devolve a resposta do primeiro (duplo clique, novas tentativas).
 app.UseMiddleware<Idempotencia>();
+app.UseInvalidacaoCachePublica();
+app.UseOutputCache();
 
 app.MapControllers();
 app.MapHubs();
