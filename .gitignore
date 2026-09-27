@@ -16,3 +16,6 @@ Thumbs.db
 
 # Emuladores do Firebase
 firebase/*-debug.log
+
+# Visual Studio
+.vs/
