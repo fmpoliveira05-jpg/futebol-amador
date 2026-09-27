@@ -7,6 +7,10 @@ on:
     paths: ["mobile/**", ".github/workflows/android.yml"]
   workflow_dispatch:
 
+# Privilégio mínimo: os jobs só precisam de ler o repositório.
+permissions:
+  contents: read
+
 defaults:
   run:
     working-directory: mobile
