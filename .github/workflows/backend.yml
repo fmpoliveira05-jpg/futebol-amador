@@ -2,9 +2,9 @@ name: Backend (.NET)
 
 on:
   push:
-    paths: ["backend/**", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "firebase/**", "operacao/**", ".github/workflows/backend.yml"]
   pull_request:
-    paths: ["backend/**", ".github/workflows/backend.yml"]
+    paths: ["backend/**", "firebase/**", "operacao/**", ".github/workflows/backend.yml"]
   workflow_dispatch:
 
 # Privilégio mínimo: os jobs só precisam de ler o repositório.
@@ -77,6 +77,36 @@ jobs:
           # Palavra-passe só deste contentor efémero do CI (não é um segredo).
           FA_TESTES_SQLSERVER: "Server=localhost,1433;User Id=sa;Password=Ci-Testes-2026!;TrustServerCertificate=True"
         run: dotnet test Tests/Tests.csproj --configuration Release --filter "Category=SqlServer"
+
+  # Exportação e eliminação das mensagens do chat (RGPD) contra o emulador do Firestore.
+  testes-firestore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: backend/**/*.csproj
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: firebase-tools
+        run: npm install -g firebase-tools@15
+      - name: Build dos testes
+        run: dotnet build Tests/Tests.csproj --configuration Release
+      - name: Testes com o emulador
+        working-directory: firebase
+        run: >
+          firebase emulators:exec --only firestore --project demo-futebol-amador
+          "dotnet test ../backend/Tests/Tests.csproj --configuration Release --no-build --filter Category=Firestore"
+      - name: Exportação e importação com o emulador
+        run: ../operacao/firestore/testar-exportacao-emulador.sh
+        working-directory: firebase
 
   docker:
     runs-on: ubuntu-latest
