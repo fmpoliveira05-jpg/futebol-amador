@@ -7,10 +7,13 @@ import com.example.amfootball.data.remote.dtos.membershipRequest.InviteTeamReque
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
+import com.example.amfootball.data.remote.dtos.player.EliminarContaDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
+import retrofit2.http.HTTP
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -117,10 +120,16 @@ interface PlayerApi {
         @Body request: InvitePlayerRequest
     ): Response<MembershipRequestInfoDto>
 
-    @DELETE("${BaseEndpoints.PLAYER_API}/{${Arguments.PLAYER_ID}}")
-    suspend fun deletePlayer(
-        @Path("playerId") playerId: String,
-    ): Response<Unit>
+    /**
+     * Elimina a conta do utilizador autenticado (RGPD, apagamento). Exige a palavra-passe atual.
+     * Substitui o antigo `DELETE /api/Player/{id}`, que a API deixou de aceitar (410).
+     */
+    @HTTP(method = "DELETE", path = "${BaseEndpoints.AUTH_API}/me", hasBody = true)
+    suspend fun eliminarConta(@Body pedido: EliminarContaDto): Response<Unit>
+
+    /** Cópia de todos os dados pessoais do utilizador autenticado, em JSON (RGPD, acesso e portabilidade). */
+    @GET("${BaseEndpoints.AUTH_API}/me/export")
+    suspend fun exportarDados(): Response<ResponseBody>
 
 
     @PUT("${BaseEndpoints.PLAYER_API}/update/{${Arguments.PLAYER_ID}}")

@@ -125,19 +125,14 @@ class MainActivity : AppCompatActivity() {
      * Verifica as permissões de runtime da aplicação e solicita-as ao utilizador.
      *
      * Permissões solicitadas:
-     * 1. [Manifest.permission.ACCESS_FINE_LOCATION] (Opcional, se necessário para a app).
-     * 2. [Manifest.permission.POST_NOTIFICATIONS] (Essencial para FCM a partir do Android 13/Tiramisu).
+     * 1. [Manifest.permission.POST_NOTIFICATIONS] (Essencial para FCM a partir do Android 13/Tiramisu).
+     * 2. Calendário (sincronizar os jogos com o calendário do telemóvel).
+     *
+     * A localização já não é pedida no arranque (minimização de dados, RGPD): só no registo, quando
+     * o utilizador pede para preencher a morada com a localização.
      */
     private fun requestPermissions() {
         val permissionsToRequest = mutableListOf<String>()
-
-        if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)

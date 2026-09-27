@@ -63,6 +63,20 @@ class SignupViewmodel @Inject constructor(
     initialError = SignUpFormErrors()
 ) {
 
+    /** RGPD: aceitação da Política de Privacidade (só no registo, não na edição do perfil). */
+    private val _aceitaPolitica = MutableStateFlow(false)
+    val aceitaPolitica = _aceitaPolitica.asStateFlow()
+
+    private val _erroPolitica = MutableStateFlow(false)
+    val erroPolitica = _erroPolitica.asStateFlow()
+
+    private var modoEdicao = false
+
+    fun onAceitaPoliticaChange(aceita: Boolean) {
+        _aceitaPolitica.value = aceita
+        if (aceita) _erroPolitica.value = false
+    }
+
     private val _countryCode = MutableStateFlow("+351")
     val countryCode = _countryCode.asStateFlow()
 
@@ -166,6 +180,7 @@ class SignupViewmodel @Inject constructor(
     }
 
     fun onEditMode() {
+        modoEdicao = true
         val userProfile = sessionManager.getUserProfile()
         if (userProfile == null) return
 
@@ -198,7 +213,11 @@ class SignupViewmodel @Inject constructor(
     fun submitConfirmation(navHostController: NavHostController, profileEditMode: Boolean) {
         launchDataLoad {
             val fullPhoneNumber = "${_countryCode.value}${formState.value.phone}"
-            val finalDto = formState.value.copy(phone = fullPhoneNumber)
+            val finalDto = formState.value.copy(
+                phone = fullPhoneNumber,
+                aceitaPoliticaPrivacidade = _aceitaPolitica.value,
+                versaoPoliticaPrivacidade = com.example.amfootball.ui.screens.privacidade.VERSAO_POLITICA_PRIVACIDADE,
+            )
 
             if (!profileEditMode) {
                 val comSessao = authService.registerUser(finalDto)
@@ -280,6 +299,11 @@ class SignupViewmodel @Inject constructor(
             formErrors.value = SignUpFormErrors()
         }
 
+        if (validationResult.isValid && !modoEdicao && !_aceitaPolitica.value) {
+            _erroPolitica.value = true
+            return false
+        }
+
         return validationResult.isValid
     }
 
@@ -317,7 +341,8 @@ class SignupViewmodel @Inject constructor(
         return suspendCancellableCoroutine { continuation ->
             val cancellationTokenSource = CancellationTokenSource()
 
-            client.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationTokenSource.token)
+            // Precisão ao nível do bairro/cidade: chega para a morada e só exige a localização aproximada.
+            client.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, cancellationTokenSource.token)
                 .addOnSuccessListener { location ->
                     if (continuation.isActive) continuation.resume(
                         location,

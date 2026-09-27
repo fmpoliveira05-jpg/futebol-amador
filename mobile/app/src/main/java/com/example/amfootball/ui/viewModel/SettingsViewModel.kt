@@ -16,6 +16,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.Locale
+import androidx.lifecycle.viewModelScope
+import com.example.amfootball.core.utils.MensagensErro
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 /**
@@ -169,30 +174,89 @@ class SettingsViewModel @Inject constructor(
         _isLoading.value = false
     }
 
+    // ---------- RGPD: eliminar a conta e exportar os dados ----------
+
+    private val _aEliminar = MutableStateFlow(false)
+    /** `true` enquanto o pedido de eliminação está em curso (botão desativado). */
+    val aEliminar = _aEliminar.asStateFlow()
+
+    private val _erroEliminar = MutableStateFlow<String?>(null)
+    val erroEliminar = _erroEliminar.asStateFlow()
+
+    private val _contaEliminada = MutableStateFlow(false)
+    val contaEliminada = _contaEliminada.asStateFlow()
+
+    private val _aExportar = MutableStateFlow(false)
+    val aExportar = _aExportar.asStateFlow()
+
+    private val _erroExportar = MutableStateFlow<String?>(null)
+    val erroExportar = _erroExportar.asStateFlow()
+
+    private val _ficheiroExportado = MutableStateFlow<File?>(null)
+    /** Ficheiro JSON pronto a partilhar/guardar (consumir com [ficheiroPartilhado]). */
+    val ficheiroExportado = _ficheiroExportado.asStateFlow()
+
     /**
-     * Executa a lógica de eliminação permanente do perfil do utilizador.
-     *
-     * **TODO:** A ser implementado. Deve fazer a chamada à API/Firebase e limpar a sessão local.
-     *
-     * @return `true` se a eliminação for bem-sucedida, `false` caso contrário.
+     * Elimina a conta (RGPD, apagamento). A API confirma a palavra-passe; só depois de a API
+     * responder com sucesso se apaga a sessão local. Toques repetidos são ignorados.
      */
-    fun deleteProfile(): Boolean {
-        startLoading()
-        launchDataLoad(
-            callApi = {
-                val player = repository.getUserProfile()
-                if (validProfile(player)) {
-                    playerService.deletePlayerProfile(playerId = player!!.loginResponseDto!!.localId)
-                    updateToast(R.string.toast_playerProfile_deleted)
-                    repository.clearSession()
-                } else {
-                    updateToast(R.string.toast_playerProfile_error)
+    fun deleteProfile(palavraPasse: String) {
+        if (_aEliminar.value || palavraPasse.isBlank()) return
+        _aEliminar.value = true
+        _erroEliminar.value = null
+        viewModelScope.launch {
+            try {
+                playerService.eliminarConta(palavraPasse)
+                repository.clearSession()
+                _isUserLoggedIn.value = false
+                deleteProfile.value = false
+                updateToast(R.string.toast_playerProfile_deleted)
+                _contaEliminada.value = true
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _erroEliminar.value = MensagensErro.paraUtilizador(e)
+            } finally {
+                _aEliminar.value = false
+            }
+        }
+    }
+
+    fun hideDeleteProfileAndErrors() {
+        _erroEliminar.value = null
+        hideDeleteProfile()
+    }
+
+    /**
+     * Descarrega os dados pessoais (RGPD, acesso e portabilidade) para um ficheiro na cache privada
+     * da app, que o ecrã partilha com o seletor do Android (guardar em Ficheiros, enviar por e-mail).
+     */
+    fun exportarDados(pastaCache: File) {
+        if (_aExportar.value) return
+        _aExportar.value = true
+        _erroExportar.value = null
+        viewModelScope.launch {
+            try {
+                val json = playerService.exportarDados()
+                val pasta = File(pastaCache, "exportacoes").apply {
+                    deleteRecursively()
+                    mkdirs()
                 }
-                finishLoading()
-            },
-            checkOnline = true
-        )
-        return false
+                val ficheiro = File(pasta, "futebol-amador-os-meus-dados.json")
+                ficheiro.writeText(json)
+                _ficheiroExportado.value = ficheiro
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _erroExportar.value = MensagensErro.paraUtilizador(e)
+            } finally {
+                _aExportar.value = false
+            }
+        }
+    }
+
+    fun ficheiroPartilhado() {
+        _ficheiroExportado.value = null
     }
 
     fun editProfile() {

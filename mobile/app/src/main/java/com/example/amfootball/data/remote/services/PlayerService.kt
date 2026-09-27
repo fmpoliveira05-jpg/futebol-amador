@@ -9,6 +9,7 @@ import com.example.amfootball.data.interfaces.api.PlayerApi
 import com.example.amfootball.data.remote.dtos.membershipRequest.InvitePlayerRequest
 import com.example.amfootball.data.remote.dtos.membershipRequest.MembershipRequestInfoDto
 import com.example.amfootball.data.remote.dtos.membershipRequest.RequestMemberShip
+import com.example.amfootball.data.remote.dtos.player.EliminarContaDto
 import com.example.amfootball.data.remote.dtos.player.InfoPlayerDto
 import com.example.amfootball.data.remote.dtos.player.PlayerProfileDto
 import com.example.amfootball.domains.enums.pages.ListPlayerMode
@@ -147,15 +148,20 @@ class PlayerService @Inject constructor(
     }
 
     /**
-     * Apaga permanentemente o perfil do jogador.
+     * Elimina a conta (RGPD, apagamento): a API confirma a palavra-passe, retira o jogador da equipa,
+     * anonimiza os dados e apaga a conta no Firebase.
      *
-     * @param playerId O ID do jogador a eliminar.
+     * @param palavraPasse A palavra-passe atual.
      */
-    suspend fun deletePlayerProfile(playerId: String) {
+    suspend fun eliminarConta(palavraPasse: String) {
         safeApiCallWithNotReturn {
-            playerApi.deletePlayer(playerId = playerId)
+            playerApi.eliminarConta(EliminarContaDto(password = palavraPasse))
         }
     }
+
+    /** Todos os dados pessoais do utilizador, em JSON (RGPD, acesso e portabilidade). */
+    suspend fun exportarDados(): String =
+        safeApiCallWithReturn { playerApi.exportarDados() }.use { it.string() }
 
     /**
      * Remove o jogador da equipa atual (Sair da Equipa).

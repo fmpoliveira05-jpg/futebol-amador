@@ -65,6 +65,7 @@ import com.example.amfootball.ui.screens.user.ProfileScreen
 import com.example.amfootball.ui.screens.user.SignUpScreen
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.SettingsViewModel
+import com.example.amfootball.ui.screens.privacidade.PoliticaPrivacidadeScreen
 import com.example.amfootball.ui.viewModel.auth.AuthViewModel
 
 /**
@@ -131,6 +132,11 @@ fun MainNavigation(
                         navController = globalNavController,
                         settingsViewModel = settingsViewModel
                     )
+                }
+
+                // Pública (sem sessão): tem de poder ser lida antes do registo.
+                composable(Routes.GeralRoutes.PRIVACY.route) {
+                    PoliticaPrivacidadeScreen()
                 }
             }
 

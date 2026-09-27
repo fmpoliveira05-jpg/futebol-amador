@@ -50,5 +50,11 @@ data class CreateProfileDto(
     @SerializedName("Position")
     val position: Int,
     @SerializedName("Height")
-    val height: Int
+    val height: Int,
+    /** RGPD: o utilizador aceitou a Política de Privacidade (obrigatório para a API criar a conta). */
+    @SerializedName("AceitaPoliticaPrivacidade")
+    val aceitaPoliticaPrivacidade: Boolean = false,
+    /** Versão da política aceite (tem de ser a atual da API). */
+    @SerializedName("VersaoPoliticaPrivacidade")
+    val versaoPoliticaPrivacidade: String? = null
 )

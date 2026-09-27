@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AccessibilityNew
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.ArrowCircleUp
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Dashboard
@@ -90,6 +91,14 @@ object Routes {
             R.string.item_leadboard,
             Icons.Default.EmojiEvents,
             R.string.item_leadboard_description
+        ),
+        /** Política de Privacidade: pública, abre antes do registo. */
+        PRIVACY(
+            "privacidade",
+            R.string.rgpd_titulo_politica,
+            Icons.Default.PrivacyTip,
+            R.string.rgpd_titulo_politica,
+            true
         ),
     }
 

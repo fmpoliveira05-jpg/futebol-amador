@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Privacidade (RGPD): política, consentimento no registo, exportação e eliminação da conta. -->
+    <string name="rgpd_titulo_politica">Política de Privacidade</string>
+    <string name="rgpd_versao">Versão %1$s</string>
+    <string name="rgpd_aceito">Li e aceito a Política de Privacidade</string>
+    <string name="rgpd_ver_politica">Ler a Política de Privacidade</string>
+    <string name="rgpd_erro_aceitar">Para criar a conta tens de aceitar a Política de Privacidade.</string>
+    <string name="rgpd_meus_dados">Os meus dados</string>
+    <string name="rgpd_exportar">Descarregar os meus dados</string>
+    <string name="rgpd_exportar_descricao">Um ficheiro JSON com todos os teus dados (perfil, equipa, pedidos, transferências, eventos dos jogos e mensagens do chat).</string>
+    <string name="rgpd_exportar_partilhar">Guardar ou partilhar os meus dados</string>
+    <string name="rgpd_eliminar_texto">A conta é eliminada de imediato e não pode ser recuperada. Sais da tua equipa (se fores o único membro, a equipa também é apagada; se não, a administração passa ao membro seguinte), as tuas mensagens do chat são apagadas e, nas estatísticas dos jogos já disputados, o teu nome passa a \"Jogador removido\".</string>
+    <string name="rgpd_palavra_passe">Palavra-passe atual</string>
+    <string name="rgpd_indicar_palavra_passe">Indica a palavra-passe para confirmar.</string>
+
+    <string name="rgpd_p_responsavel_titulo">Quem trata os teus dados</string>
+    <string name="rgpd_p_responsavel">O Futebol Amador é gerido por quem administra esta instalação da plataforma. Para qualquer pedido sobre os teus dados, usa o contacto indicado na Política de Privacidade do site.</string>
+    <string name="rgpd_p_dados_titulo">Que dados tratamos</string>
+    <string name="rgpd_p_dados">Conta: nome, e-mail, palavra-passe (guardada só pelo Firebase Authentication), telefone, morada (mostramos só a localidade), data de nascimento. Perfil desportivo: posição, altura e, se os indicares, peso, pé preferido, nacionalidade e fotografia. Atividade: equipa, pedidos, convites, transferências, onzes e eventos dos jogos. Mensagens do chat. Técnicos: endereço IP (prevenção de abusos, não guardado) e o token de notificações, se as autorizares. A localização só é usada quando tocas em \"usar a minha localização\" no registo, para preencher a morada, e só a localização aproximada.</string>
+    <string name="rgpd_p_fins_titulo">Para quê e com que fundamento</string>
+    <string name="rgpd_p_fins">Prestar o serviço (conta, equipas, jogos, ligas, chat, notificações): execução do contrato. Segurança e prevenção de abusos: interesse legítimo. Estatísticas dos jogos disputados depois de eliminares a conta, já sem o teu nome: interesse legítimo, com anonimização. Sem publicidade, perfis de marketing nem ferramentas de análise de terceiros.</string>
+    <string name="rgpd_p_partilha_titulo">Quem vê os teus dados</string>
+    <string name="rgpd_p_partilha">Os outros utilizadores veem o teu nome, posição, localidade, equipa e estatísticas. O e-mail, o telefone, a morada e a data de nascimento só são vistos por ti e pelos colegas de equipa. Subcontratantes: Google Firebase (autenticação, chat, notificações; possível transferência para os EUA ao abrigo do Quadro de Privacidade de Dados UE-EUA e de cláusulas contratuais-tipo), Cloudinary (imagens), Cloudflare (verificação anti-robô no site) e o fornecedor de alojamento da API e da base de dados (UE).</string>
+    <string name="rgpd_p_prazos_titulo">Durante quanto tempo</string>
+    <string name="rgpd_p_prazos">Enquanto a conta existir; ao eliminá-la, os dados pessoais são apagados ou anonimizados de imediato. Contas que nunca confirmaram o e-mail: 30 dias. Pedidos de adesão sem resposta: 90 dias. Convites de jogo: 30 dias depois da data proposta. Cópias de segurança: até 14 dias (90 dias no chat).</string>
+    <string name="rgpd_p_direitos_titulo">Os teus direitos</string>
+    <string name="rgpd_p_direitos">Acesso e portabilidade: Definições → \"Descarregar os meus dados\". Retificação: no teu perfil. Apagamento: Definições → \"Apagar Perfil\" (pede a palavra-passe). Oposição e limitação: pelo contacto acima. Reclamação: Comissão Nacional de Proteção de Dados (www.cnpd.pt). Respondemos no prazo de um mês.</string>
+    <string name="rgpd_p_seguranca_titulo">Segurança</string>
+    <string name="rgpd_p_seguranca">Ligações cifradas (HTTPS), sessão cifrada no telemóvel com uma chave do Android Keystore, sem cópias de segurança dos dados da app, controlo de acesso por equipa. Se houver uma violação de dados com risco para ti, avisamos a CNPD em 72 horas e, se o risco for elevado, avisamos-te diretamente.</string>
+</resources>

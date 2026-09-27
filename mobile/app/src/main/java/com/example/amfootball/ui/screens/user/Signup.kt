@@ -62,6 +62,9 @@ import com.example.amfootball.ui.components.inputFields.PhoneInputWithDynamicCou
 import com.example.amfootball.ui.components.inputFields.TextFieldOutline
 import com.example.amfootball.ui.theme.AMFootballTheme
 import com.example.amfootball.ui.viewModel.auth.SignupViewmodel
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.TextButton
+import com.example.amfootball.ui.navigation.objects.Routes
 import com.google.android.gms.location.LocationServices
 
 /**
@@ -98,8 +101,7 @@ fun SignUpScreen(
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val isGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        val isGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
         if (isGranted) {
             // SUCESSO: Passamos a bola para o ViewModel
@@ -133,17 +135,20 @@ fun SignUpScreen(
             viewModel.submitConfirmation(navHostController, profileEditMode)
         },
         onRequestLocation = {
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
             ) {
                 viewModel.fetchAddressLocation(fusedLocationClient)
             } else {
                 locationPermissionLauncher.launch(
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                    arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION)
                 )
             }
         },
-        profileEditMode = profileEditMode
+        profileEditMode = profileEditMode,
+        aceitaPolitica = viewModel.aceitaPolitica.collectAsStateWithLifecycle().value,
+        erroPolitica = viewModel.erroPolitica.collectAsStateWithLifecycle().value,
+        onAceitaPoliticaChange = viewModel::onAceitaPoliticaChange,
+        onVerPolitica = { navHostController.navigate(Routes.GeralRoutes.PRIVACY.route) }
     )
 }
 
@@ -160,7 +165,11 @@ private fun ContentSignUp(
     modifier: Modifier = Modifier,
     submitConfirmation: () -> Unit,
     onRequestLocation: () -> Unit,
-    profileEditMode: Boolean = false
+    profileEditMode: Boolean = false,
+    aceitaPolitica: Boolean = false,
+    erroPolitica: Boolean = false,
+    onAceitaPoliticaChange: (Boolean) -> Unit = {},
+    onVerPolitica: () -> Unit = {}
 ) {
     Column(
         modifier = modifier,
@@ -383,6 +392,24 @@ private fun ContentSignUp(
         }
 
         Spacer(Modifier.height(16.dp))
+
+        // RGPD: aceitação da Política de Privacidade, obrigatória para criar a conta.
+        if (!profileEditMode) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                Checkbox(checked = aceitaPolitica, onCheckedChange = onAceitaPoliticaChange)
+                Text(stringResource(R.string.rgpd_aceito), modifier = Modifier.weight(1f))
+            }
+            TextButton(onClick = onVerPolitica) {
+                Text(stringResource(R.string.rgpd_ver_politica))
+            }
+            if (erroPolitica) {
+                Text(
+                    text = stringResource(R.string.rgpd_erro_aceitar),
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+        }
 
         if (globalErrorMessage != null) {
             Text(

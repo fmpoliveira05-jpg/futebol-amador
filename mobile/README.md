@@ -67,3 +67,21 @@ Os testes instrumentados usam Hilt e um MockWebServer em vez da API.
   - `fetchUserId` rebentava sem sessão;
   - `allowBackup` estava ligado, com a sessão guardada na base de dados local.
 - **Testes instrumentados.** Não compilavam (importavam pacotes que já não existiam) e voltaram a compilar. A versão do Hilt nos testes foi alinhada com a da app e o Jacoco passou a apontar para `src/main/java`.
+
+## Produção
+
+- **Rede:** OkHttp com tempos máximos (ligação 10 s, leitura/escrita 20 s, total 30 s), mensagens de erro para o
+  utilizador sem detalhes técnicos (`MensagensErro`), `Idempotency-Key` em todos os `POST` e cache HTTP só para as
+  respostas públicas.
+- **Duplicados:** os formulários ignoram envios repetidos enquanto o anterior não termina (`FormsViewModel.aSubmeter`).
+- **RGPD:** ecrã "Política de Privacidade" (acessível a partir do registo, antes de haver conta), aceitação
+  obrigatória no registo, "Descarregar os meus dados" (JSON partilhado pelo seletor do Android) e eliminação da conta
+  com a palavra-passe nas Definições. A localização é só a aproximada e só quando o utilizador a pede no registo.
+- **Sessão:** cifra AES-GCM com chave do Android Keystore (`CifraLocal`); a parte criptográfica (`CifraAesGcm`) tem
+  testes unitários.
+- **Release:** R8 ativo; o `mapping.txt` fica em `app/build/outputs/mapping/release/` e não vai no APK — guardar o de
+  cada versão publicada.
+
+```bash
+./gradlew --no-daemon --max-workers=1 assembleDebug assembleRelease testDebugUnitTest
+```

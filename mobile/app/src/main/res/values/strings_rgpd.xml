@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Privacy (GDPR): policy, consent at sign-up, data export and account deletion. -->
+    <string name="rgpd_titulo_politica">Privacy Policy</string>
+    <string name="rgpd_versao">Version %1$s</string>
+    <string name="rgpd_aceito">I have read and accept the Privacy Policy</string>
+    <string name="rgpd_ver_politica">Read the Privacy Policy</string>
+    <string name="rgpd_erro_aceitar">To create an account you must accept the Privacy Policy.</string>
+    <string name="rgpd_meus_dados">My data</string>
+    <string name="rgpd_exportar">Download my data</string>
+    <string name="rgpd_exportar_descricao">A JSON file with all your data (profile, team, requests, transfers, match events and chat messages).</string>
+    <string name="rgpd_exportar_partilhar">Save or share my data</string>
+    <string name="rgpd_eliminar_texto">Your account is deleted immediately and cannot be recovered. You leave your team (if you are its only member the team is deleted too; otherwise the admin role passes to the next member), your chat messages are deleted and, in the statistics of past matches, your name becomes \"Removed player\".</string>
+    <string name="rgpd_palavra_passe">Current password</string>
+    <string name="rgpd_indicar_palavra_passe">Enter your password to confirm.</string>
+
+    <string name="rgpd_p_responsavel_titulo">Who processes your data</string>
+    <string name="rgpd_p_responsavel">Futebol Amador is managed by whoever runs this installation of the platform. For any request about your data, use the contact in the Privacy Policy on the website.</string>
+    <string name="rgpd_p_dados_titulo">What data we process</string>
+    <string name="rgpd_p_dados">Account: name, e-mail, password (kept only by Firebase Authentication), phone, address (we show only the town), date of birth. Sports profile: position, height and, if you add them, weight, preferred foot, nationality and photo. Activity: team, requests, invitations, transfers, line-ups and match events. Chat messages. Technical: IP address (abuse prevention, not stored) and the notification token, if you allow notifications. Location is only used when you tap \"use my location\" at sign-up, to fill in the address, and only the approximate location.</string>
+    <string name="rgpd_p_fins_titulo">Why, and on what legal basis</string>
+    <string name="rgpd_p_fins">Providing the service (account, teams, matches, leagues, chat, notifications): performance of the contract. Security and abuse prevention: legitimate interest. Statistics of past matches after you delete your account, already without your name: legitimate interest, with anonymisation. No advertising, marketing profiles or third-party analytics.</string>
+    <string name="rgpd_p_partilha_titulo">Who sees your data</string>
+    <string name="rgpd_p_partilha">Other users see your name, position, town, team and statistics. E-mail, phone, address and date of birth are only visible to you and your teammates. Processors: Google Firebase (authentication, chat, notifications; possible transfer to the USA under the EU-US Data Privacy Framework and standard contractual clauses), Cloudinary (images), Cloudflare (anti-bot check on the website) and the hosting provider of the API and database (EU).</string>
+    <string name="rgpd_p_prazos_titulo">For how long</string>
+    <string name="rgpd_p_prazos">While the account exists; when you delete it, your personal data is deleted or anonymised immediately. Accounts that never confirmed the e-mail: 30 days. Unanswered join requests: 90 days. Match invitations: 30 days after the proposed date. Backups: up to 14 days (90 days for chat).</string>
+    <string name="rgpd_p_direitos_titulo">Your rights</string>
+    <string name="rgpd_p_direitos">Access and portability: Settings → \"Download my data\". Rectification: your profile. Erasure: Settings → \"Delete Profile\" (asks for your password). Objection and restriction: through the contact above. Complaints: Comissão Nacional de Proteção de Dados (www.cnpd.pt). We reply within one month.</string>
+    <string name="rgpd_p_seguranca_titulo">Security</string>
+    <string name="rgpd_p_seguranca">Encrypted connections (HTTPS), session encrypted on the phone with a key from the Android Keystore, no backups of app data, access control per team. In case of a data breach with risk to you, we notify the CNPD within 72 hours and, if the risk is high, you directly.</string>
+</resources>
