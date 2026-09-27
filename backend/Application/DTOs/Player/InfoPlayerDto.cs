@@ -13,8 +13,10 @@ namespace Application.DTOs.Player
         [MinLength(ModelConstants.TeamConst.MinNameLength), MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string Name { get; set; } = null!;
 
-        [Required]
-        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MinAddressLength)]
+        /// <summary>
+        /// Só a zona (localidade) da morada — ver <see cref="Zona.DaMorada"/>. A morada completa
+        /// nunca sai nas listas de jogadores.
+        /// </summary>
         public string Address { get; set; } = null!;
 
         [Required]

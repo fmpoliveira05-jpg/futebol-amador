@@ -27,7 +27,7 @@ namespace Application.Services.Competition
             this.clock = clock;
         }
 
-        public async Task<PlayerProfileDto> GetProfileAsync(string playerId)
+        public async Task<PlayerProfileDto> GetProfileAsync(string playerId, string? viewerId = null)
         {
             var player = await players.GetPlayerByIdAsync(playerId) ?? throw new NotFoundException("O jogador não existe.");
             var team = player.IdTeam.HasValue ? await teams.GetTeamByIdAsync(player.IdTeam.Value) : null;
@@ -74,7 +74,8 @@ namespace Application.Services.Competition
                 Id = player.Id,
                 Name = player.Name,
                 ImageUrl = player.ImageUrl,
-                DateOfBirth = player.DateOfBirth,
+                // O perfil é público: a data de nascimento só aparece ao próprio (os outros veem a idade).
+                DateOfBirth = viewerId == player.Id ? player.DateOfBirth : null,
                 Age = Age(player.DateOfBirth, today),
                 Position = player.Position,
                 Height = player.Height,

@@ -57,6 +57,8 @@ namespace Application.Interfaces.Services
     /// <summary>Perfil completo do jogador (estatísticas, histórico e transferências).</summary>
     public interface IPlayerProfileService
     {
-        Task<PlayerProfileDto> GetProfileAsync(string playerId);
+        /// <param name="playerId">Jogador.</param>
+        /// <param name="viewerId">Quem pede (pode ser anónimo). A data de nascimento só vai para o próprio.</param>
+        Task<PlayerProfileDto> GetProfileAsync(string playerId, string? viewerId = null);
     }
 }

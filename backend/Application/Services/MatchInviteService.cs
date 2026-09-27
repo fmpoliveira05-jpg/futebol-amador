@@ -79,12 +79,14 @@ namespace Application.Services
                 return null;
             }
 
-            var team = matchInvite.Sender;
-
-            if (team.Id != idTeam)
+            // Só as duas equipas do convite o podem ver: com o id de outro convite, a equipa do URL
+            // (de que o utilizador é administrador) não serve para o ler.
+            if (matchInvite.Sender.Id != idTeam && matchInvite.Receiver.Id != idTeam)
             {
-                team = matchInvite.Receiver;
+                return null;
             }
+
+            var team = matchInvite.Sender.Id == idTeam ? matchInvite.Sender : matchInvite.Receiver;
 
             var infoMatchInvite = new InfoMatchInviteDto
             {

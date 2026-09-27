@@ -896,6 +896,12 @@ namespace Infrastructure.Repositories
                 })
                 .ToListAsync();
 
+            // Os administradores de outras equipas só veem a zona, nunca a morada completa.
+            foreach (var jogador in query)
+            {
+                jogador.Address = Zona.DaMorada(jogador.Address);
+            }
+
             return query;
         }
 
@@ -967,6 +973,11 @@ namespace Infrastructure.Repositories
                 Position = p.Position
             })
                 .ToListAsync();
+
+            foreach (var jogador in list)
+            {
+                jogador.Address = Zona.DaMorada(jogador.Address);
+            }
 
             return list;
         }

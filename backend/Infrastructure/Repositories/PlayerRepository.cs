@@ -191,6 +191,12 @@ namespace Infrastructure.Repositories
                 })
                 .ToListAsync();
 
+            // A lista é vista por outros utilizadores: só a zona, nunca a morada completa.
+            foreach (var jogador in list)
+            {
+                jogador.Address = Zona.DaMorada(jogador.Address);
+            }
+
             return list!; 
         }
 

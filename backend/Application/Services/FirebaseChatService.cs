@@ -1,6 +1,8 @@
 ﻿using Application.DTOs.Chat;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
+using Domain.Constants;
+using Domain.Exceptions;
 using Google.Cloud.Firestore;
 
 namespace Application.Services
@@ -76,26 +78,28 @@ namespace Application.Services
         /// Cria uma sala de chat genérica com uma lista explícita de membros (jogadores).
         /// </summary>
         /// <remarks>
-        /// Valida a existência dos jogadores através do [PlayerRepository] antes de adicionar ao chat.
-        /// **Nota:** A lógica atual não impede a criação se alguns IDs forem inválidos, apenas os ignora silenciosamente ou falha dependendo da implementação do repositório.
+        /// Regras (antes aceitava quaisquer ids, e qualquer pessoa podia ser metida numa sala):
+        /// <list type="bullet">
+        /// <item>quem cria a sala entra sempre nela e tem de pertencer a uma equipa;</item>
+        /// <item>os outros membros têm de existir e ser colegas da mesma equipa;</item>
+        /// <item>no máximo <see cref="ModelConstants.ChatConst.MaxMembers"/> membros e nome com até
+        /// <see cref="ModelConstants.ChatConst.MaxRoomNameLength"/> caracteres.</item>
+        /// </list>
+        /// As salas dos jogos (administradores das duas equipas) são criadas pelo servidor em
+        /// <see cref="CreateMatchRoomAsync"/>.
         /// </remarks>
         /// <param name="request">DTO com o nome da sala e lista de IDs de jogadores.</param>
         /// <param name="createdByUserId">ID do utilizador criador.</param>
         /// <returns>O ID (string) da sala criada.</returns>
+        /// <exception cref="ValidationException">Nome ou lista de membros inválidos.</exception>
+        /// <exception cref="ForbiddenException">Algum membro não é colega de equipa de quem cria a sala.</exception>
         public async Task<string> CreateRoomAsync(CreateChatRoomDto request, string createdByUserId)
         {
-            var memberIds = new HashSet<string> { createdByUserId };
-            var playersIds = await PlayerRepository.GetPlayersListByIdListAsync(request.MemberIds);
-            //Quando for fazer as validações validar se todos os ids no request estão nos playersIds retornados, caso não estejam
-            //O codigo corre a mesma e cria o chat, mas não adiciona os ids inválidos e no fim retorna uma lista dos ids inválidos
-            foreach (var participantId in request.MemberIds)
-            {
-                memberIds.Add(participantId.ToString());
-            }
+            var memberIds = await ValidarMembrosAsync(request, createdByUserId);
 
             var roomData = new Dictionary<string, object>
             {
-                { "name", request.RoomName },
+                { "name", request.RoomName.Trim() },
                 { "createdBy", createdByUserId },
                 { "members", memberIds.ToList() },
                 { "createdAt", Timestamp.GetCurrentTimestamp() }
@@ -103,6 +107,49 @@ namespace Application.Services
 
             DocumentReference roomRef = await DbContext.Collection("chatRooms").AddAsync(roomData);
             return roomRef.Id;
+        }
+
+        /// <summary>
+        /// Aplica as regras de <see cref="CreateRoomAsync"/> e devolve os membros finais da sala
+        /// (sem repetidos e com quem a cria). Não toca no Firestore.
+        /// </summary>
+        internal async Task<List<string>> ValidarMembrosAsync(CreateChatRoomDto request, string createdByUserId)
+        {
+            if (string.IsNullOrWhiteSpace(request.RoomName) ||
+                request.RoomName.Trim().Length > ModelConstants.ChatConst.MaxRoomNameLength)
+            {
+                throw new ValidationException("O nome da sala é obrigatório e tem no máximo 80 caracteres.");
+            }
+
+            var outros = (request.MemberIds ?? new List<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Select(id => id.Trim())
+                .Where(id => id != createdByUserId)
+                .Distinct()
+                .ToList();
+
+            if (outros.Count == 0 || outros.Count > ModelConstants.ChatConst.MaxMembers - 1 ||
+                outros.Any(id => id.Length > ModelConstants.UserConst.MaxIdLength))
+            {
+                throw new ValidationException("Indica entre 1 e 39 membros para a sala.");
+            }
+
+            var criador = await PlayerRepository.GetPlayerByIdAsync(createdByUserId);
+            if (criador?.IdTeam == null)
+            {
+                throw new ForbiddenException("Só quem pertence a uma equipa pode criar salas de chat.");
+            }
+
+            var jogadores = await PlayerRepository.GetPlayersListByIdListAsync(outros);
+            var colegas = jogadores.Where(p => p.IdTeam == criador.IdTeam).Select(p => p.Id).ToHashSet();
+
+            // A mesma resposta para ids inexistentes e para jogadores de outras equipas.
+            if (outros.Any(id => !colegas.Contains(id)))
+            {
+                throw new ForbiddenException("Só podes criar salas com colegas da tua equipa.");
+            }
+
+            return outros.Prepend(createdByUserId).ToList();
         }
 
         /// <summary>

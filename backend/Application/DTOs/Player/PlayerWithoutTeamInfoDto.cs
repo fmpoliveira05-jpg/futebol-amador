@@ -17,8 +17,10 @@ namespace Application.DTOs.Player
         [Range(ModelConstants.UserConst.MinAge, ModelConstants.UserConst.MaxAge)]
         public int Age { get; set; }
 
-        [Required]
-        [MinLength(ModelConstants.GeneralConst.MinAddressLength), MaxLength(ModelConstants.GeneralConst.MaxAddressLength)]
+        /// <summary>
+        /// Só a zona (localidade) da morada — ver <see cref="Zona.DaMorada"/>. A morada completa
+        /// nunca sai nas listas de jogadores.
+        /// </summary>
         public string Address { get; set; } = null!;
 
         [Required]

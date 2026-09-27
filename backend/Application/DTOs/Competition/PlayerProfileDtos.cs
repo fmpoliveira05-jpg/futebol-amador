@@ -25,7 +25,8 @@ namespace Application.DTOs.Competition
         public string Id { get; set; } = null!;
         public string Name { get; set; } = null!;
         public string? ImageUrl { get; set; }
-        public DateOnly DateOfBirth { get; set; }
+        /// <summary>Só preenchida quando é o próprio jogador a pedir o perfil.</summary>
+        public DateOnly? DateOfBirth { get; set; }
         public int Age { get; set; }
         public Position Position { get; set; }
         public int Height { get; set; }
