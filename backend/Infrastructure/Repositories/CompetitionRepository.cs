@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
@@ -91,7 +91,7 @@ namespace Infrastructure.Repositories
         public async Task AddTitleAsync(TeamTitle title) => await db.TeamTitle.AddAsync(title);
 
         public Task<List<TeamTitle>> GetTitlesAsync(Guid teamId) =>
-            db.TeamTitle.Where(t => t.IdTeam == teamId).OrderBy(t => t.WonAt).ToListAsync();
+            db.TeamTitle.AsNoTracking().Where(t => t.IdTeam == teamId).OrderBy(t => t.WonAt).ToListAsync();
 
         public async Task<bool> IsSuperAdminAsync(string? userId) =>
             !string.IsNullOrEmpty(userId) && await db.SuperAdmin.AnyAsync(s => s.Id == userId);

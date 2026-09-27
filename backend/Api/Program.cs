@@ -122,6 +122,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(origens)
               .WithHeaders("Content-Type", "Authorization", SessaoWeb.CabecalhoCsrf, ExigirTurnstileAttribute.Cabecalho, Idempotencia.Cabecalho)
               .WithMethods("GET", "POST", "PUT", "DELETE")
+              .WithExposedHeaders(PaginarListaAttribute.CabecalhoTotal)
               .AllowCredentials()
               .SetPreflightMaxAge(TimeSpan.FromHours(1));
     });

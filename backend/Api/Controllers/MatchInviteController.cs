@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Api.Operacao;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.MatchInvites;
 using Application.Interfaces.Services;
@@ -175,6 +176,7 @@ namespace Api.Controllers
         /// <returns>Lista de convites recebidos.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
         /// <response code="401">Utilizador não autenticado.</response>
+        [PaginarLista]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<InfoMatchInviteDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

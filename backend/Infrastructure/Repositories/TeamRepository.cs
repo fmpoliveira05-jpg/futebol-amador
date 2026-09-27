@@ -837,7 +837,12 @@ namespace Infrastructure.Repositories
                 }
             }
 
+            // Ordem estável e paginação na base de dados: os emblemas podem ser imagens embebidas, por
+            // isso a lista completa ficaria pesada.
             var list = await query
+                .OrderBy(t => t.Name).ThenBy(t => t.Id)
+                .Paginar(filters)
+                .AsNoTracking()
                 .Select(t => new
                 {
                     Team = t,

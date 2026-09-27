@@ -1,4 +1,4 @@
-using Application.Interfaces.Repositories;
+﻿using Application.Interfaces.Repositories;
 using Domain.Entities;
 using Domain.Enums;
 using Infrastructure.Data;
@@ -59,7 +59,9 @@ namespace Infrastructure.Repositories
 
         public async Task<(List<Matches> Matches, List<MatchEvent> Events, List<LineupSlot> Slots)> GetPlayerMatchDataAsync(string playerId)
         {
+            // Só leitura (perfil do jogador): sem tracking.
             var slots = await db.LineupSlot
+                .AsNoTracking()
                 .Include(s => s.Lineup)
                 .Where(s => s.PlayerId == playerId && s.Lineup.Match.MatchStatus == MatchStatus.DONE)
                 .ToListAsync();
@@ -74,12 +76,14 @@ namespace Infrastructure.Repositories
             var matchIds = slots.Select(s => s.Lineup.IdMatch).Concat(eventMatchIds).Distinct().ToList();
 
             var matches = await db.Match
+                .AsNoTracking()
                 .Include(m => m.Teams).ThenInclude(ts => ts.Team)
                 .Include(m => m.Season)
                 .Where(m => matchIds.Contains(m.Id))
+                .AsSplitQuery()
                 .ToListAsync();
 
-            var events = await db.MatchEvent.Where(e => matchIds.Contains(e.IdMatch)).ToListAsync();
+            var events = await db.MatchEvent.AsNoTracking().Where(e => matchIds.Contains(e.IdMatch)).ToListAsync();
 
             return (matches, events, slots);
         }
@@ -87,7 +91,10 @@ namespace Infrastructure.Repositories
         public async Task<Dictionary<string, string>> GetPlayerNamesAsync(IEnumerable<string> ids)
         {
             var list = ids.Where(i => !string.IsNullOrEmpty(i)).Distinct().ToList();
-            return await db.Player.Where(p => list.Contains(p.Id)).ToDictionaryAsync(p => p.Id, p => p.Name);
+            // Só o id e o nome (antes carregava os jogadores inteiros, com dados pessoais).
+            return await db.Player.Where(p => list.Contains(p.Id))
+                .Select(p => new { p.Id, p.Name })
+                .ToDictionaryAsync(p => p.Id, p => p.Name);
         }
     }
 }

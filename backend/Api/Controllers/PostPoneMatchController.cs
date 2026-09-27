@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Api.Operacao;
+using Application.DTOs.Filters;
 using Application.DTOs.Match;
 using Application.DTOs.PostPoneGame;
 using Application.Interfaces.Services;
@@ -50,6 +51,7 @@ namespace Api.Controllers
         /// <response code="200">Lista retornada com sucesso.</response>
         /// <response code="401">Utilizador não autenticado.</response>
         /// <response code="403">Utilizador não é administrador da equipa.</response>
+        [PaginarLista]
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<InfoPostPoneMatch>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]

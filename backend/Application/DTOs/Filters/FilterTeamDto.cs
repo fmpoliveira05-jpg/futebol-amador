@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Filters
 {
-    public class FilterTeamDto
+    public class FilterTeamDto : FiltroPaginado
     {
         [MinLength(ModelConstants.UserConst.MinNameLength), MaxLength(ModelConstants.UserConst.MaxNameLength)]
         public string? PlayerName { get; set; }

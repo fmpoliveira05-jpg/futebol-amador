@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.DTOs.Filters
 {
-    public class FilterListTeamDto
+    public class FilterListTeamDto : FiltroPaginado
     {
         [MaxLength(ModelConstants.TeamConst.MaxNameLength)]
         public string? NameTeam { get; set; }

@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Filters;
+﻿using Api.Operacao;
+using Application.DTOs.Filters;
 using Application.DTOs.Membership;
 using Application.DTOs.MemberShip;
 using Application.DTOs.Player;
@@ -275,6 +276,7 @@ namespace Api.Controllers
         /// <param name="filter">Filtros de pesquisa.</param>
         /// <returns>Lista de equipas.</returns>
         /// <response code="200">Resultados da pesquisa.</response>
+        [PaginarLista]
         [HttpGet("{teamId}/search")]
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> SearchTeams(Guid teamId, [FromQuery] FilterListTeamDto filter)
@@ -316,6 +318,7 @@ namespace Api.Controllers
         /// <returns>Lista de jogadores da equipa.</returns>
         /// <response code="200">Lista de membros retornada com sucesso.</response>
         /// <response code="404">Equipa não encontrada.</response>
+        [PaginarLista]
         [HttpGet("{teamId}/members")]
         [ProducesResponseType(typeof(IEnumerable<PlayerDetailsDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -432,6 +435,7 @@ namespace Api.Controllers
         /// <returns>Lista de jogadores disponíveis.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
         /// <response code="400">Filtros inválidos.</response>
+        [PaginarLista]
         [HttpGet("{teamId}/playersWithoutTeam")]
         [ProducesResponseType(typeof(IEnumerable<PlayerWithoutTeamInfoDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -472,6 +476,7 @@ namespace Api.Controllers
         /// <returns>Lista de pedidos de adesão.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
         /// <response code="403">Utilizador não é administrador.</response>
+        [PaginarLista]
         [HttpGet("{teamId}/membership-request")]
         [ProducesResponseType(typeof(IEnumerable<MemberShipRequestDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

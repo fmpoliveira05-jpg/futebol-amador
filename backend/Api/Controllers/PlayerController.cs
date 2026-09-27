@@ -1,4 +1,5 @@
-﻿using Api.Seguranca;
+﻿using Api.Operacao;
+using Api.Seguranca;
 using Application.DTOs;
 using Application.DTOs.Filters;
 using Application.DTOs.Membership;
@@ -269,6 +270,7 @@ namespace Api.Controllers
         /// <param name="filter">Filtros de pesquisa de equipas.</param>
         /// <returns>Lista de equipas.</returns>
         /// <response code="200">Lista retornada com sucesso.</response>
+        [PaginarLista]
         [HttpGet("{playerId}/listTeamsToMemberShipRequest")]
         [ProducesResponseType(typeof(IEnumerable<InfoTeamsDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> ListTeams(string playerId, [FromQuery] FilterListTeamDto filter)
@@ -307,6 +309,7 @@ namespace Api.Controllers
         /// <returns>Lista de pedidos de adesão.</returns>
         /// <response code="200">Lista de pedidos retornada.</response>
         /// <response code="403">Utilizador não tem permissão para ver estes pedidos.</response>
+        [PaginarLista]
         [HttpGet("{playerId}/membership-requests")]
         [ProducesResponseType(typeof(IEnumerable<MemberShipRequestDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

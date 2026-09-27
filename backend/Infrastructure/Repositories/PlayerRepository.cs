@@ -154,12 +154,13 @@ namespace Infrastructure.Repositories
 
                 if (filters.MinAge.HasValue)
                 {
-                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) >= filters.MinAge);
+                    // A idade é em anos (antes comparava dias com anos).
+                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) / 365 >= filters.MinAge);
                 }
 
                 if (filters.MaxAge.HasValue)
                 {
-                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) <= filters.MaxAge);
+                    query = query.Where(p => EF.Functions.DateDiffDay(p.DateOfBirth, dateNow) / 365 <= filters.MaxAge);
                 }
 
                 if (filters.MinHeight.HasValue)
@@ -179,6 +180,9 @@ namespace Infrastructure.Repositories
             }
 
             var list = await query
+                .OrderBy(p => p.Name).ThenBy(p => p.Id)
+                .Paginar(filters)
+                .AsNoTracking()
                 .Select(p => new InfoPlayerDto
                 {
                     Id = p.Id,
