@@ -1,0 +1,45 @@
+name: Disponibilidade
+
+# Verifica a API a cada 15 minutos em /health/ready. O endereço vem da variável do repositório
+# FA_HEALTH_URL (Settings → Secrets and variables → Actions → Variables), por exemplo
+# https://api.exemplo.pt/health/ready. Sem a variável, o workflow não faz nada.
+# Uma falha deixa o workflow a vermelho e o GitHub avisa por e-mail quem o ativou.
+# Não substitui um monitor externo (UptimeRobot, Better Stack): ver docs/OPERACAO.md.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disponibilidade
+  cancel-in-progress: true
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verificar /health/ready
+        env:
+          URL: ${{ vars.FA_HEALTH_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "FA_HEALTH_URL não definida: nada a verificar."
+            exit 0
+          fi
+          for tentativa in 1 2 3; do
+            codigo=$(curl -s -o resposta.json -w "%{http_code}" --max-time 20 "$URL" || echo "000")
+            if [ "$codigo" = "200" ] && grep -q '"estado":"Healthy"' resposta.json; then
+              echo "OK ($codigo): $(cat resposta.json)"
+              exit 0
+            fi
+            echo "Tentativa $tentativa falhou (HTTP $codigo)."
+            sleep 20
+          done
+          echo "::error::A API não está saudável em $URL"
+          cat resposta.json 2>/dev/null || true
+          exit 1
