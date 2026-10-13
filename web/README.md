@@ -1,129 +1,105 @@
-# Futebol Amador – frontend web
+# Futebol Amador — Web Frontend
 
-Frontend em Angular 20 do Futebol Amador. Visão geral do projeto no [README principal](../README.md).
+Angular 20 frontend for Futebol Amador. See the [main README](../README.md) for the project overview.
 
-![Calendário de uma equipa](../docs/capturas/web-calendario.png)
+![Team calendar](../docs/capturas/web-calendario.png)
 
-## Experimentar
+## Try it locally
 
 ```bash
 npm ci
 npm run demo      # http://localhost:4200
 ```
 
-O **modo demonstração** (`npm run demo`) não precisa do backend:
+**Demo mode** needs no backend:
 
-- o `demoInterceptor` responde aos pedidos à API com dados em memória: duas ligas do Grande Porto com 8 equipas, uma época a decorrer, jogos com onzes e eventos, propostas de transferência, convites e pedidos;
-- qualquer e-mail e palavra-passe servem para entrar como administrador dos "Leões da Constituição";
-- as alterações ficam guardadas no `sessionStorage` do separador.
+- `demoInterceptor` responds with in-memory data: two Greater Porto leagues with eight teams, an active season, matches with lineups/events, transfer offers, invitations, and membership requests.
+- Any email and password sign in as an administrator of “Leões da Constituição”.
+- Changes are saved in the tab's `sessionStorage`.
 
-A mesma versão está publicada no GitHub Pages.
+The same version is published on GitHub Pages.
 
-Contra a API a correr localmente (`http://localhost:5218`, ver o [README do backend](../backend/README.md)):
+To use the local API at `http://localhost:5218`, follow the [backend README](../backend/README.md), then run:
 
 ```bash
 npm start
 ```
 
-## Páginas
+## Pages and permissions
 
-| Quem | O que pode fazer |
+| User | Available actions |
 |---|---|
-| Visitante | apresentação, classificação por liga, ligas e jornadas, criar conta, entrar |
-| Jogador sem equipa | procurar equipas e pedir para entrar, responder a convites, criar uma equipa |
-| Membro de uma equipa | página inicial com os próximos jogos e a forma recente, perfil da equipa (com os títulos), calendário mensal, relatório dos jogos, perfil dos jogadores com estatísticas, propostas de transferência para si |
-| Administrador | editar e apagar a equipa, gerir membros (só o administrador principal despromove), mercado e transferências, jogadores livres, procurar adversários, convites de jogo, onze inicial, resultado do jogo com marcadores, cartões, substituições e faltas, adiar (com motivo) e cancelar jogos, inscrever a equipa numa liga |
+| Visitor | Landing page, league standings and fixtures, registration, login |
+| Player without a team | Search teams, request membership, respond to invitations, create a team |
+| Team member | Upcoming matches/recent form, team profile and trophies, monthly calendar, match reports, player statistics, personal transfer offers |
+| Administrator | Edit/delete team, manage members, transfer market, free agents, opponent search, invitations, lineups, scores/events, postponement/cancellation, league registration |
 
-As funcionalidades das ligas, das transferências, do onze e das estatísticas estão descritas em
-[`docs/novas-funcionalidades.md`](../docs/novas-funcionalidades.md). A gestão das ligas e das épocas (criar,
-sortear, fechar) é feita pelo super administrador na API; a web não tem páginas para isso.
+Only the principal administrator can demote other administrators. League, transfer, lineup, and statistics details are in [docs/novas-funcionalidades.md](../docs/novas-funcionalidades.md). Super administrators manage leagues and seasons (creation, scheduling, closing) through the API; the web frontend has no management pages for these operations.
 
-O menu lateral muda com o papel. As rotas estão protegidas pelo `authGuard`, com as opções `requiresTeam`, `requiresNoTeam` e `isAdmin` (esta última confirmada na API).
+The sidebar adapts to the user's role. `authGuard` protects routes using `requiresTeam`, `requiresNoTeam`, and `isAdmin`; administrator privileges are also checked by the API.
 
-## Organização do código
+## Code organisation
 
-```
+```text
 src/app/
-  core/interceptors/     authInterceptor: token só para a API; 401 termina a sessão
-  core/demo/             modo demonstração (interceptor + dados)
-  services/              um serviço por recurso da API
-  shared/auth/           authGuard (funcional)
-  shared/http/           conversão de filtros em query params e mensagens de erro da API
-  shared/Dtos/           modelos dos pedidos e respostas
-  components/pages/      páginas (carregadas a pedido)
-  components/partials/   menu, pesquisa de equipas, formulário de equipa, campo (relvado do onze)
-  shared/calendario/     feriados nacionais e grelha mensal
-  shared/competicao/     forma, zonas da classificação e escolha de jogadores por posição
+  core/interceptors/     Authentication and request handling; 401 ends the session
+  core/demo/             Demo interceptor and data
+  services/              One service per API resource
+  shared/auth/           Functional authGuard
+  shared/http/           Query filters and API error messages
+  shared/Dtos/           Request and response models
+  components/pages/      Lazy-loaded pages
+  components/partials/   Navigation, team search/forms, lineup pitch
+  shared/calendario/     National holidays and month grid
+  shared/competicao/     Form, standings zones, position-based player selection
 ```
 
-Algumas decisões:
+Design decisions:
 
-- **Sem zone.js.** O estado dos componentes está em *signals* e a deteção de alterações é *zoneless*.
-- **Componentes *standalone*** com *control flow* (`@if`, `@for`) e parâmetros de rota como `input()` (`withComponentInputBinding`).
-- **Sessão em cookies** (`SameSite=Strict`, `Secure` em HTTPS).
-  - O `AuthService` expõe o estado da sessão como *signal*.
-  - O `isAuthenticated()` verifica a expiração do JWT.
-- **Erros da API** (`ProblemDetails`, erros de validação do ASP.NET, falta de ligação) são convertidos em mensagens para o utilizador por `mensagemDeErro`.
-- **Emblemas** das equipas: são reduzidos no browser a 256×256 antes do envio, para ocuparem poucos KB.
-- **Lazy loading** de todas as páginas: o bundle inicial tem cerca de 340 kB (96 kB comprimido).
+- **Zoneless:** component state uses signals; no zone.js.
+- **Standalone components:** `@if`/`@for` control flow and route parameters exposed through `input()` with `withComponentInputBinding`.
+- **Cookie sessions:** `SameSite=Strict` and `Secure` over HTTPS. `AuthService` exposes session state as a signal; `isAuthenticated()` checks expiry.
+- **Error handling:** `mensagemDeErro` converts ProblemDetails, ASP.NET validation errors, and connection failures into user-facing messages.
+- **Team badges:** resized to 256×256 in the browser before upload.
+- **Lazy loading:** all pages are loaded on demand; the recorded initial bundle is approximately 340 kB (96 kB compressed).
 
-## Testes
+## Tests
 
 ```bash
-npm run test:ci            # 63 testes unitários (Jasmine/Karma, Chrome headless) com cobertura
-npx playwright test        # 12 cenários de ponta a ponta, em desktop e telemóvel, contra o modo demonstração
+npm run test:ci       # 63 Jasmine/Karma unit tests, headless Chrome, coverage
+npx playwright test   # 12 demo end-to-end scenarios on desktop/mobile, plus storage checks
 ```
 
-Os testes unitários cobrem:
+Unit tests cover session/expiry, interceptor/guard, membership-request payloads, HTTP/image utilities, calendar ordering and movable holidays, monthly grids, form/standings zones, lineups, registration minimum age, and demo mode.
 
-- `AuthService` (sessão e expiração do token);
-- interceptor e *guard*;
-- serviço de pedidos de adesão (formato dos pedidos);
-- utilitários HTTP e de imagem;
-- ordenação do calendário, feriados (incluindo os móveis) e grelha mensal;
-- forma e zonas da classificação e escolha de jogadores para o onze;
-- idade mínima no registo;
-- modo demonstração.
+End-to-end scenarios exercise login and intended-route return, membership approval, match invitations, postponement acceptance, calendar navigation, standings, transfer offers, match scores/events, and logout. Portuguese standings abbreviations correspond to played, wins, draws, losses, goals for, goals against, goal difference, and points.
 
-Os testes de ponta a ponta percorrem os fluxos principais:
+README screenshots are generated with Playwright:
 
-- entrar e voltar à página pedida;
-- aceitar um pedido de adesão;
-- convidar uma equipa para um jogo;
-- aceitar um adiamento;
-- percorrer o calendário mensal;
-- consultar a classificação com PD, V, E, D, GM, GS, DG, P e a forma;
-- fazer uma proposta no mercado;
-- registar o resultado e os eventos de um jogo;
-- sair.
-
-As capturas de ecrã do README são geradas pelo Playwright: `CAPTURAS=1 npx playwright test capturas --project=desktop`.
+```bash
+CAPTURAS=1 npx playwright test capturas --project=desktop
+```
 
 ## Build
 
 ```bash
-npm run build              # produção, usa src/app/environments/environment.ts
-npm run build:demo         # versão de demonstração
+npm run build       # Production, src/app/environments/environment.ts
+npm run build:demo  # Demo build
 ```
 
-O endereço da API de produção está em `environment.ts`. Para desenvolvimento local, `environment.development.ts` aponta para `http://localhost:5218/api`.
+Production API configuration is in `environment.ts`; `environment.development.ts` uses `http://localhost:5218/api`.
 
-A sessão fica em cookies `HttpOnly` definidos pela API (o JavaScript não vê os tokens); os pedidos levam `withCredentials` e o cabeçalho `X-Requested-With: FutebolAmador`. A *site key* do Cloudflare Turnstile vai em `turnstileSiteKey` (vazia = desligado). Para publicar, `deploy/nginx.conf` tem os cabeçalhos de segurança e a CSP; a demonstração do GitHub Pages usa `src/index.demo.html`, com a CSP numa meta tag. Detalhes em [docs/SEGURANCA.md](../docs/SEGURANCA.md).
+The API sets `HttpOnly` session cookies, so JavaScript cannot read tokens. Requests use `withCredentials` and `X-Requested-With: FutebolAmador`. Set `turnstileSiteKey` for Cloudflare Turnstile; an empty value disables it. `deploy/nginx.conf` provides security headers and CSP; GitHub Pages uses a CSP meta tag in `src/index.demo.html`. See [security documentation](../docs/SEGURANCA.md).
 
-## Produção
+## Production-related controls
 
-- **Pedidos:** tempo máximo de 15 s com mensagem própria e uma nova tentativa só em `GET` com falha de rede
-  (`core/interceptors/pedidos.interceptor.ts`); `Idempotency-Key` ao criar equipas, convites, pedidos de adesão e
-  propostas; botões desativados enquanto o pedido está em curso.
-- **Erros:** página 404 (rota `**`) e `/erro` (parte da aplicação que não carregou, normalmente uma versão nova).
-- **RGPD:** `/privacidade` (rodapé e registo), caixa obrigatória no registo, "Descarregar os meus dados" e "Eliminar
-  conta" nas Definições. Contacto em `contactoPrivacidade` nos `environment*.ts`.
-- **Source maps:** desligados nas configurações `production` e `demo`; o nginx recusa `*.map`.
-- **Testes de ponta a ponta:** o projeto Playwright `armazenamento` corre a build de produção (configuração `e2e`)
-  com a API simulada e verifica que o `localStorage`/`sessionStorage` não têm tokens nem dados pessoais, que os
-  cookies da sessão são `HttpOnly`, `Secure` e `SameSite=Strict` e que o logout os apaga.
+- **Requests:** 15-second timeout, a specific timeout message, and one retry only for GET network failures (`core/interceptors/pedidos.interceptor.ts`). `Idempotency-Key` for team, invitation, membership-request, and offer creation; buttons disabled during submission.
+- **Errors:** 404 catch-all route `**` and `/erro` for a failed application-chunk load, often following a deployment.
+- **GDPR:** `/privacidade` linked from footer/registration, mandatory policy acceptance, and data download/account deletion in settings. Privacy contact is `contactoPrivacidade` in `environment*.ts`.
+- **Source maps:** disabled in production/demo; nginx rejects `*.map`.
+- **Browser storage:** Playwright's `armazenamento` project uses the production build with `e2e` configuration and a simulated API. It checks that storage has no tokens/personal data, cookies are `HttpOnly`, `Secure`, and `SameSite=Strict`, and logout removes them.
 
 ```bash
-npx playwright test                         # demonstração (desktop e telemóvel) + armazenamento
+npx playwright test
 npx playwright test --project=armazenamento
 ```

@@ -1,150 +1,140 @@
-# Futebol Amador – API
+# Futebol Amador — API
 
-API REST e hubs SignalR do Futebol Amador, em ASP.NET Core 8. Serve o frontend web e a app Android. Visão geral do projeto no [README principal](../README.md).
+ASP.NET Core 8 REST API and SignalR hubs serving the web frontend and Android app. See the [main README](../README.md) for the project overview.
 
-## Camadas
+## Layers
 
-| Projeto | O que tem | Depende de |
+| Project | Contents | Dependencies |
 |---|---|---|
-| `Domain` | Entidades (`Team`, `Player`, `Matches`, `Rank`, ...), enums, constantes do modelo e exceções | – |
-| `Application` | Serviços (regras de negócio), validadores, DTOs e as interfaces dos repositórios | Domain |
-| `Infrastructure` | `AmateurFootballContext` (EF Core, SQL Server), migrações e repositórios | Application, Domain |
-| `Api` | Controllers REST, hubs SignalR, serviços em segundo plano, autenticação e tratamento de erros | todos |
-| `Tests` | Testes NUnit: unitários (serviços com Moq) e de integração (`WebApplicationFactory`) | todos |
+| `Domain` | Entities (`Team`, `Player`, `Matches`, `Rank`, etc.), enums, model constants, exceptions | — |
+| `Application` | Business services, validators, DTOs, repository interfaces | Domain |
+| `Infrastructure` | `AmateurFootballContext`, EF Core/SQL Server, migrations, repositories | Application, Domain |
+| `Api` | REST controllers, SignalR hubs, background services, authentication, error handling | All application layers |
+| `Tests` | NUnit unit tests with Moq and integration tests with `WebApplicationFactory` | All application layers |
 
-Algumas decisões:
+Design decisions:
 
-- **Autorização em dois níveis.** Os controllers confirmam o papel do utilizador com o `IPlayerAuthorizationService` (membro ou administrador da equipa do URL). Os validadores voltam a confirmar as regras de cada operação, por exemplo que o pedido de adesão é mesmo dessa equipa.
-- **Erros.** Os serviços lançam exceções de domínio e o `GlobalExceptionHandler` converte-as em `ProblemDetails`:
+- **Two-level authorisation:** controllers use `IPlayerAuthorizationService` to check membership or administrator rights for the team in the URL. Validators enforce operation-specific rules, such as whether a membership request belongs to that team.
+- **Errors:** services throw domain exceptions; `GlobalExceptionHandler` converts them into `ProblemDetails`.
 
-  | Exceção | Resposta |
-  |---|---|
-  | `ValidationException`, `BusinessRuleException`, ... | 400 |
-  | sem sessão (`UnauthorizedAccessException`) | 401 |
-  | `ForbiddenException` | 403 |
-  | `NotFoundException` | 404 |
-  | concorrência (`DbUpdateConcurrencyException`) ou restrição única | 409 |
-  | corpo demasiado grande | 413 |
-  | serviço externo lento (Polly) | 503 |
-  | tudo o resto | 500, sem mostrar a mensagem interna |
+| Exception or condition | HTTP response |
+|---|---|
+| `ValidationException`, `BusinessRuleException`, etc. | 400 |
+| No session (`UnauthorizedAccessException`) | 401 |
+| `ForbiddenException` | 403 |
+| `NotFoundException` | 404 |
+| `DbUpdateConcurrencyException` or unique constraint | 409 |
+| Request body too large | 413 |
+| External-service timeout handled by Polly | 503 |
+| Other errors | 500 without internal messages |
 
-  Rotas inexistentes e métodos errados também respondem em ProblemDetails (404/405).
+Unknown routes and unsupported methods also return ProblemDetails (404/405). The 401/403 distinction matters because 401 ends the frontend session.
 
-  A distinção entre 401 e 403 importa para os clientes: um 401 termina a sessão no frontend.
-- **Dados pessoais.** O e-mail, o telefone, a morada e a data de nascimento de um jogador só são devolvidos ao próprio e aos colegas de equipa (`PlayerDetailsDto.OcultarDadosPessoais`).
-- **Tempo real.** Há quatro hubs:
+- **Personal data:** email, phone, address, and date of birth are returned only to the player and teammates, using `PlayerDetailsDto.OcultarDadosPessoais`.
+- **Real time:** the current hub list is:
 
-  | Hub | Para quê |
-  |---|---|
-  | `/StartMatch` | os dois administradores confirmam o início do jogo |
-  | `/FinishMatch` | cada um regista o resultado e o jogo só termina se coincidirem |
-  | `/Notification` | notificações por equipa |
+| Hub | Purpose |
+|---|---|
+| `/StartMatch` | Both administrators confirm kickoff |
+| `/FinishMatch` | Submit scores; finish only when both agree |
+| `/Notification` | Team notifications |
 
-  O `CompetitionBackGroundService` abre e fecha as épocas das ligas (sorteio das jornadas, troféu, subidas e descidas) e preenche os onzes em falta quando passa o prazo.
-- **Ligas e transferências.** As regras estão em `Application/Competition` (classificação, sorteio pelo método do círculo, táticas, preenchimento do onze, estatísticas) e nos serviços de `Application/Services/Competition`. Decisões e contrato em [docs/novas-funcionalidades.md](../docs/novas-funcionalidades.md).
+`CompetitionBackGroundService` opens/closes league seasons, generates fixtures, awards trophies, handles promotion/relegation, and fills missing lineups after the deadline.
 
-## Executar localmente
+- **Leagues and transfers:** `Application/Competition` contains standings, circle-method scheduling, formations, automatic lineups, and statistics; services live in `Application/Services/Competition`. See [design and API contracts](../docs/novas-funcionalidades.md).
 
-Requisitos:
+## Run locally
 
-- **.NET 8 SDK**;
-- **SQL Server** (por exemplo, em Docker);
-- um **projeto Firebase** com Authentication (e-mail/palavra-passe) e Firestore, e a chave de uma conta de serviço (Admin SDK).
+Requires **.NET 8 SDK**, **SQL Server**, and a **Firebase project** with email/password Authentication, Firestore, and an Admin SDK service-account key.
 
-1. Base de dados (em Docker):
+The following commands assume your working directory is `backend/` and use Bash syntax.
+
+1. Start SQL Server, for example in Docker:
 
    ```bash
-   docker run -d --name futebol-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Uma-Password-Forte-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+   docker run -d --name futebol-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='A-Strong-Password-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
    ```
 
-2. Configuração com *user-secrets* (fica fora do repositório):
+2. Configure user secrets outside the repository:
 
    ```bash
-   cd Api
-   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=FutebolAmador;User Id=sa;Password=Uma-Password-Forte-1;TrustServerCertificate=True"
-   dotnet user-secrets set "Firebase:ProjectId" "o-teu-projeto"
-   dotnet user-secrets set "Firebase:CredentialPath" "C:/caminho/para/firebase-adminsdk.json"
-   dotnet user-secrets set "Authentication:TokenUri" "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=A_WEB_API_KEY_DO_FIREBASE"
-   dotnet user-secrets set "Firebase:ApiKey" "A_WEB_API_KEY_DO_FIREBASE"
-   # Opcionais: Turnstile, Cloudinary (uploads assinados) e, só em desenvolvimento, sem confirmação do e-mail
-   dotnet user-secrets set "Turnstile:SecretKey" "0x..."
-   dotnet user-secrets set "Cloudinary:CloudName" "o-teu-cloud-name"
-   dotnet user-secrets set "Cloudinary:ApiKey" "..."
-   dotnet user-secrets set "Cloudinary:ApiSecret" "..."
-   dotnet user-secrets set "Auth:RequireVerifiedEmail" "false"
+   dotnet user-secrets set --project Api "ConnectionStrings:DefaultConnection" "Server=localhost,1433;Database=FutebolAmador;User Id=sa;Password=A-Strong-Password-1;TrustServerCertificate=True"
+   dotnet user-secrets set --project Api "Firebase:ProjectId" "your-project"
+   dotnet user-secrets set --project Api "Firebase:CredentialPath" "C:/path/to/firebase-adminsdk.json"
+   dotnet user-secrets set --project Api "Authentication:TokenUri" "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=YOUR_FIREBASE_WEB_API_KEY"
+   dotnet user-secrets set --project Api "Firebase:ApiKey" "YOUR_FIREBASE_WEB_API_KEY"
+   # Optional: Turnstile, signed Cloudinary uploads, and development-only unverified email
+   dotnet user-secrets set --project Api "Turnstile:SecretKey" "0x..."
+   dotnet user-secrets set --project Api "Cloudinary:CloudName" "your-cloud-name"
+   dotnet user-secrets set --project Api "Cloudinary:ApiKey" "..."
+   dotnet user-secrets set --project Api "Cloudinary:ApiSecret" "..."
+   dotnet user-secrets set --project Api "Auth:RequireVerifiedEmail" "false"
    ```
 
-   Em produção usam-se variáveis de ambiente com os mesmos nomes (`ConnectionStrings__DefaultConnection`, `Firebase__ProjectId`, ...). As origens autorizadas pelo CORS ficam em `Cors:Origins`; atrás de um proxy, os IPs dele vão em `ForwardedHeaders:KnownProxies`. Todas as chaves de segurança (limites de pedidos, cookies, revogação, Turnstile, Cloudinary) estão em [docs/SEGURANCA.md](../docs/SEGURANCA.md).
+   In production, use corresponding environment variables such as `ConnectionStrings__DefaultConnection` and `Firebase__ProjectId`. Set allowed origins in `Cors:Origins`; behind a proxy, add its IPs to `ForwardedHeaders:KnownProxies`. Security settings are documented in [docs/SEGURANCA.md](../docs/SEGURANCA.md).
 
-3. Migrações e arranque:
+3. Apply migrations and start:
 
    ```bash
-   dotnet tool install --global dotnet-ef
+   dotnet tool install --global dotnet-ef --version 9.0.10
    dotnet ef database update --project Infrastructure --startup-project Api
    dotnet run --project Api        # http://localhost:5218/swagger
    ```
 
-   No primeiro arranque são criadas as quatro divisões, se ainda não existirem.
+   Existing division records are initialised if missing; league assignment for existing teams is described in the main README.
 
-Com Docker (a partir desta pasta):
+Build the Docker image from `backend/`:
 
 ```bash
 docker build -f Api/Dockerfile -t futebol-amador-api .
 ```
 
-## Testes
+## Tests
 
 ```bash
 dotnet test
 ```
 
-Os testes de integração arrancam a API no ambiente `Testing`:
+Integration tests start the API in `Testing` with an in-memory database, mocked Firebase, and a test authentication scheme. `Authorization: Test` identifies a fixed verified user; `Authorization: Test-NaoVerificado` simulates an unverified email. Rate limits are raised except in tests specifically checking them. No credentials are required, including in GitHub Actions.
 
-- a base de dados é em memória;
-- o Firebase é substituído por *mocks*;
-- a autenticação usa um esquema de teste (o cabeçalho `Authorization: Test` identifica um utilizador fixo, com o e-mail confirmado; `Authorization: Test-NaoVerificado` simula um e-mail por confirmar);
-- os limites de pedidos são altos, exceto nos testes que os verificam.
-
-Por isso correm sem credenciais, também no GitHub Actions.
-
-Testes que precisam de serviços reais (ignorados sem a variável de ambiente, também correm no CI):
+Tests against external services are skipped when their required configuration is absent and are also configured to run in CI:
 
 ```bash
-# SQL Server (concorrência otimista, restrições únicas, RGPD de ponta a ponta)
-docker run -d --name fa-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='Uma-Password-Forte-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
-FA_TESTES_SQLSERVER="Server=localhost,1433;User Id=sa;Password=Uma-Password-Forte-1;TrustServerCertificate=True" dotnet test --filter Category=SqlServer
+# Real SQL Server: optimistic concurrency, unique constraints, GDPR workflows
+docker run -d --name fa-sql -e ACCEPT_EULA=Y -e MSSQL_SA_PASSWORD='A-Strong-Password-1' -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+FA_TESTES_SQLSERVER="Server=localhost,1433;User Id=sa;Password=A-Strong-Password-1;TrustServerCertificate=True" dotnet test --filter Category=SqlServer
 
-# Emulador do Firestore (exportação e eliminação das mensagens do chat)
-cd ../firebase && firebase emulators:exec --only firestore --project demo-futebol-amador "dotnet test ../backend/Tests --filter Category=Firestore"
+# Firestore emulator: export/delete chat messages, run from backend/
+(cd ../firebase && firebase emulators:exec --only firestore --project demo-futebol-amador "dotnet test ../backend/Tests --filter Category=Firestore")
 ```
 
-Migrações novas sem arrancar a API (o `AmateurFootballContextFactory` dispensa o Firebase):
+Create migrations without starting the API; `AmateurFootballContextFactory` avoids a Firebase dependency:
 
 ```bash
-dotnet ef migrations add Nome --project Infrastructure --startup-project Infrastructure
+dotnet ef migrations add MigrationName --project Infrastructure --startup-project Infrastructure
 ```
 
-Teste de carga: `Ferramentas/Carga` (ver [docs/OPERACAO.md](../docs/OPERACAO.md)).
+Load testing is in `Ferramentas/Carga`; see [operations documentation](../docs/OPERACAO.md).
 
-## Endpoints principais
+## Main endpoints
 
-| Recurso | Exemplos |
+| Resource | Examples |
 |---|---|
-| Conta | `POST /api/User/login`, `POST /api/User/logout`, `POST /api/User/refresh`, `PUT /api/User/password`, `POST /api/User/resend-verification`, `POST /api/User/forgot-password`, `POST /api/Player/create-profile` |
-| Uploads | `POST /api/uploads/signature` (assinatura para o Cloudinary) |
-| Jogadores | `GET /api/Player/details/{id}`, `PUT /api/Player/update/{id}`, `PUT /api/Player/{id}/leave-team` |
-| Equipas | `POST /api/Team`, `GET/PUT/DELETE /api/Team/{id}`, `GET /api/Team/{id}/search`, `GET /api/Team/homeTeam/{id}` |
-| Membros | `GET /api/Team/{id}/members`, `PUT /api/Team/{id}/members/promote/{playerId}`, `DELETE /api/Team/{id}/members/{playerId}` |
-| Pedidos de adesão | `GET/POST /api/Team/{id}/membership-request...`, `GET/POST /api/Player/{id}/membership-requests...` |
-| Jogos | `GET /api/Calendar/{idTeam}`, `PUT /api/Calendar/{idTeam}/PostponeMatch`, `DELETE /api/Calendar/{idTeam}/CancelMatch/{idMatch}` |
-| Convites | `GET/POST /api/MatchInvite/{idTeam}...`, `AcceptMatchInvite`, `RefuseMatchInvite`, `Negociate` |
-| Adiamentos | `GET /api/Team/{id}/PostPoneMatch`, `AcceptPostponeMatch`, `RejectPostponeMatch` |
-| Classificação | `GET /api/Leaderboard?leagueId=`, `GET /api/leagues/{id}/standings` |
-| Ligas | `GET/POST /api/leagues`, `POST /api/leagues/{id}/seasons`, `POST /api/leagues/{id}/register/{teamId}`, `GET /api/leagues/seasons/{id}/fixtures` |
-| Transferências | `GET /api/transfers/market/{teamId}`, `POST/DELETE /api/transfers/listings/{teamId}/{playerId}`, `POST /api/transfers/offers`, `.../offers/{id}/accept`, `.../reject` |
-| Onze e relatório | `GET/PUT /api/lineups/{matchId}/{teamId}`, `GET /api/lineups/formations`, `POST /api/matches/{id}/result`, `GET /api/matches/{id}/report` |
-| Perfil | `GET /api/Player/{id}/profile`, `GET /api/Team/{id}/titles` |
-| Dados pessoais (RGPD) | `GET /api/User/me/export`, `DELETE /api/User/me`, `GET /api/User/privacy-policy` |
-| Monitorização | `GET /health/live`, `GET /health/ready` |
+| Account | `POST /api/User/login`, `POST /api/User/logout`, `POST /api/User/refresh`, `PUT /api/User/password`, `POST /api/User/resend-verification`, `POST /api/User/forgot-password`, `POST /api/Player/create-profile` |
+| Uploads | `POST /api/uploads/signature` for Cloudinary signatures |
+| Players | `GET /api/Player/details/{id}`, `PUT /api/Player/update/{id}`, `PUT /api/Player/{id}/leave-team` |
+| Teams | `POST /api/Team`, `GET/PUT/DELETE /api/Team/{id}`, `GET /api/Team/{id}/search`, `GET /api/Team/homeTeam/{id}` |
+| Members | `GET /api/Team/{id}/members`, `PUT /api/Team/{id}/members/promote/{playerId}`, `DELETE /api/Team/{id}/members/{playerId}` |
+| Membership requests | `GET/POST /api/Team/{id}/membership-request...`, `GET/POST /api/Player/{id}/membership-requests...` |
+| Matches | `GET /api/Calendar/{idTeam}`, `PUT /api/Calendar/{idTeam}/PostponeMatch`, `DELETE /api/Calendar/{idTeam}/CancelMatch/{idMatch}` |
+| Invitations | `GET/POST /api/MatchInvite/{idTeam}...`, `AcceptMatchInvite`, `RefuseMatchInvite`, `Negociate` |
+| Postponements | `GET /api/Team/{id}/PostPoneMatch`, `AcceptPostponeMatch`, `RejectPostponeMatch` |
+| Standings | `GET /api/Leaderboard?leagueId=`, `GET /api/leagues/{id}/standings` |
+| Leagues | `GET/POST /api/leagues`, `POST /api/leagues/{id}/seasons`, `POST /api/leagues/{id}/register/{teamId}`, `GET /api/leagues/seasons/{id}/fixtures` |
+| Transfers | `GET /api/transfers/market/{teamId}`, `POST/DELETE /api/transfers/listings/{teamId}/{playerId}`, `POST /api/transfers/offers`, `.../offers/{id}/accept`, `.../reject` |
+| Lineups and reports | `GET/PUT /api/lineups/{matchId}/{teamId}`, `GET /api/lineups/formations`, `POST /api/matches/{id}/result`, `GET /api/matches/{id}/report` |
+| Profiles | `GET /api/Player/{id}/profile`, `GET /api/Team/{id}/titles` |
+| Personal data (GDPR) | `GET /api/User/me/export`, `DELETE /api/User/me`, `GET /api/User/privacy-policy` |
+| Monitoring | `GET /health/live`, `GET /health/ready` |
 
-A lista completa, com os modelos de pedido e resposta, está no Swagger (`/swagger`, em desenvolvimento).
+Swagger (`/swagger` in development) provides the complete list and request/response models.

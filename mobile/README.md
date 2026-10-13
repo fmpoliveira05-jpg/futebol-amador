@@ -1,86 +1,74 @@
-# Futebol Amador – app Android
+# Futebol Amador — Android App
 
-App Android do Futebol Amador, em Kotlin com Jetpack Compose. Visão geral do projeto no [README principal](../README.md).
+Kotlin/Jetpack Compose Android app for Futebol Amador. See the [main README](../README.md) for the project overview.
 
-Foi desenvolvida por **Artur Pinto** e **Willkie Filho** para a unidade curricular de Computação Móvel e Ubíqua, sobre a mesma API do trabalho de LDS.
+Originally developed by **Artur Pinto** and **Willkie Filho** for Mobile and Ubiquitous Computing, using the same API as the Software Development Laboratory project. Later contributions are described in the main README.
 
-## Funcionalidades
+## Features
 
-- **Equipas e adesões.** Criar e editar equipas (com fotografia tirada na app, via CameraX), gerir o plantel e os administradores, e enviar ou responder a pedidos de adesão.
-- **Jogos amigáveis.** Procurar adversários com filtros, enviar convites e negociar a data e o campo. Os jogos marcados podem ser adiados ou cancelados.
-- **Ligas.** Classificação da liga (PD, V, E, D, GM, GS, DG, P e a forma só com ícones), com cópia no Firestore para consultar sem rede; lista de ligas com inscrição da equipa e as jornadas. Os jogos competitivos são os da liga (o *matchmaking* foi retirado).
-- **Transferências.** Mercado com filtros (com ou sem equipa, liga, nacionalidade, posição), propostas recebidas e enviadas pela equipa e as propostas à espera do jogador. Os administradores colocam jogadores no mercado a partir da lista de membros.
-- **Onze inicial** num campo desenhado: tática, titulares filtrados pela posição e banco; o relatório do jogo mostra as estatísticas, os acontecimentos e os dois onzes.
-- **Perfil do jogador** com a ficha desportiva (pé, peso, situação, nacionalidade, clube, totais, percurso por época e transferências). O próprio edita os dados desportivos.
-- **Administrador principal.** Só o criador da equipa despromove administradores; ninguém o despromove nem o expulsa.
-- **Início e fim do jogo.** Os administradores das duas equipas entram num *lobby* para confirmar o início. No fim, cada um regista o resultado e os eventos da sua equipa (faltas, golos e assistências, cartões, substituições), e o jogo só termina se os resultados coincidirem.
-- **Calendário em grelha mensal** com setas entre meses, feriados nacionais e bolinhas por dia (cinzento feriado, azul amigável, roxo liga, verde terminado, vermelho cancelado, amarelo adiado); tocar num dia mostra os jogos, o motivo de adiamentos e cancelamentos e as ações. Cancelar um jogo da liga pede nova data.
-- **Chat** entre os administradores das equipas com jogo marcado (Firestore).
-- **Notificações** (Firebase Cloud Messaging): dia de jogo, convites, adesões e alterações de horário.
-- **Calendário do telemóvel.** Os jogos são sincronizados com o calendário nativo.
-- **Moradas e campos** validados e mostrados no mapa com OpenStreetMap (osmdroid).
-- **Números de telemóvel** validados com a libphonenumber.
+- **Teams and membership:** create/edit teams, take badge photos with CameraX, manage players/administrators, and send/respond to membership requests.
+- **Friendlies:** filtered opponent search, invitations, date/ground negotiation, postponement, and cancellation.
+- **Leagues:** standings with played, wins, draws, losses, goals for/against, goal difference, points, and form icons. A Firestore copy supports offline viewing. Browse leagues, register teams, and view fixtures. Competitive matches now come from leagues; matchmaking was removed.
+- **Transfers:** filter by team/free-agent status, league, nationality, and position. Review incoming/outgoing team offers and offers awaiting player approval; administrators list players from the member screen.
+- **Starting lineup:** formation, position-filtered starters, and bench on a drawn pitch. Match reports show statistics, events, and both lineups.
+- **Player profile:** preferred foot, weight, status, nationality, club, totals, season history, and transfers. Players can edit their own sporting details.
+- **Principal administrator:** only the team creator can demote administrators; the creator cannot be demoted or removed.
+- **Match start/finish:** both administrators confirm kickoff in a lobby. Each submits their team's score/events (fouls, goals/assists, cards, substitutions); a match finishes only when scores agree.
+- **Monthly calendar:** month navigation, national holidays, and coloured indicators: grey holiday, blue friendly, purple league, green finished, red cancelled, yellow postponed. Day details show reasons and actions. Cancelling a league match requires a new date.
+- **Chat:** Firestore chat between administrators with a scheduled match.
+- **Notifications:** Firebase Cloud Messaging for match day, invitations, membership, and schedule changes.
+- **Device calendar:** matches synchronised with the native calendar.
+- **Addresses and grounds:** validated and displayed through OpenStreetMap/osmdroid.
+- **Phone numbers:** validated with libphonenumber.
 
-## Arquitetura
+## Architecture
 
-- MVVM:
-  - ecrãs em Compose;
-  - `ViewModel`s com `StateFlow`;
-  - repositórios e serviços que chamam a API com Retrofit.
-- Injeção de dependências com Hilt.
-- Sessão guardada localmente com Room.
-- SignalR para os hubs de início e fim de jogo.
-- As funcionalidades de ligas, transferências e onzes estão no pacote `competicao` (DTOs, API, ecrãs e a lógica sem Android, testada com JUnit).
-- Imagens guardadas no Cloudinary.
+- MVVM with Compose screens, `StateFlow` ViewModels, and repositories/services calling Retrofit.
+- Hilt dependency injection.
+- Local session persistence with Room.
+- SignalR for match-start and match-finish hubs.
+- `competicao` contains league/transfer/lineup DTOs, API calls, screens, and Android-independent JUnit-tested logic.
+- Cloudinary image storage.
 
-## Configuração
+## Setup
 
-1. Criar um projeto no Firebase, adicionar uma app Android com o *package* `com.example.amfootball` e copiar o `google-services.json` para `app/`. O ficheiro não está no repositório. Para apenas compilar, serve `app/google-services.example.json` copiado com esse nome.
-2. Em `local.properties` (também fora do repositório), além do `sdk.dir`:
+1. Create a Firebase project, add an Android app with package `com.example.amfootball`, and copy `google-services.json` into `app/`. It is excluded from Git. For compilation only, copy `app/google-services.example.json` to that name.
+2. Add the following to `local.properties`, alongside `sdk.dir`. This file is also excluded from Git:
 
    ```properties
-   API_BASE_URL=https://o-teu-servidor/
-   CLOUDINARY_CLOUD_NAME=o-teu-cloud-name
+   API_BASE_URL=https://your-server/
+   CLOUDINARY_CLOUD_NAME=your-cloud-name
    ```
 
-   Sem `API_BASE_URL` é usado o servidor da equipa. Os emblemas são enviados para o Cloudinary com uma assinatura pedida à API (`POST api/uploads/signature`); o preset e o segredo ficam só no servidor (ver [docs/SEGURANCA.md](../docs/SEGURANCA.md)).
-3. Abrir a pasta `mobile/` no Android Studio, sincronizar o Gradle e correr num emulador ou num telemóvel (Android 9 ou superior).
+   Without `API_BASE_URL`, the team's configured server is used. Badge uploads use a signature requested from `POST api/uploads/signature`; the preset and secret remain on the server. See [security documentation](../docs/SEGURANCA.md).
+3. Open `mobile/` in Android Studio, sync Gradle, and run on an emulator or Android 9+ device.
 
-## Testes
+## Tests
 
 ```bash
-./gradlew testDebugUnitTest           # testes unitários (JVM)
-./gradlew connectedDebugAndroidTest   # testes instrumentados (precisa de emulador)
+./gradlew testDebugUnitTest           # JVM unit tests
+./gradlew connectedDebugAndroidTest  # Instrumented tests; emulator required
 ```
 
-Os testes instrumentados usam Hilt e um MockWebServer em vez da API.
+Instrumented tests use Hilt and MockWebServer instead of the real API. On Windows, use `gradlew.bat` instead of `./gradlew`.
 
-## Revisão de 2026
+## 2026 review
 
-- **Crash depois de enviar, negociar ou adiar um jogo.** A app navegava para `calendar/<id>`, uma rota que não existe.
-- **Posições.** O enum `Position` estava na ordem inversa da API, e um avançado ficava registado como guarda-redes. Foi acrescentado um teste unitário para esse contrato.
-- **Registo.** Os erros eram ignorados e o ecrã avançava sem sessão.
-- **Configuração.** A API apontava para um túnel ngrok temporário e o Cloudinary estava escrito no código. Agora os dois vêm de `local.properties` (`BuildConfig`).
-- **Eventos SignalR.** Com `replay = 1`, um evento de um jogo (por exemplo, "jogo iniciado") aparecia no *lobby* do jogo seguinte.
-- **Outros erros:**
-  - o chat mostrava as 50 mensagens mais antigas;
-  - `fetchUserId` rebentava sem sessão;
-  - `allowBackup` estava ligado, com a sessão guardada na base de dados local.
-- **Testes instrumentados.** Não compilavam (importavam pacotes que já não existiam) e voltaram a compilar. A versão do Hilt nos testes foi alinhada com a da app e o Jacoco passou a apontar para `src/main/java`.
+- **Navigation crashes:** sending, negotiating, or postponing a match navigated to nonexistent `calendar/<id>`.
+- **Positions:** reversed `Position` ordering relative to the API registered forwards as goalkeepers. A unit test now protects the contract.
+- **Registration:** ignored errors allowed navigation without a session.
+- **Configuration:** replaced a temporary ngrok API URL and hardcoded Cloudinary settings with `local.properties`/`BuildConfig` values.
+- **SignalR events:** `replay = 1` replayed a previous match's event in the next lobby.
+- **Other issues:** chat displayed the oldest 50 messages; `fetchUserId` crashed without a session; `allowBackup` was enabled while local storage contained session data.
+- **Instrumented tests:** fixed stale package imports, aligned test Hilt versions with the app, and corrected Jacoco's source directory to `src/main/java`.
 
-## Produção
+## Production-related controls
 
-- **Rede:** OkHttp com tempos máximos (ligação 10 s, leitura/escrita 20 s, total 30 s), mensagens de erro para o
-  utilizador sem detalhes técnicos (`MensagensErro`), `Idempotency-Key` em todos os `POST` e cache HTTP só para as
-  respostas públicas.
-- **Duplicados:** os formulários ignoram envios repetidos enquanto o anterior não termina (`FormsViewModel.aSubmeter`).
-- **RGPD:** ecrã "Política de Privacidade" (acessível a partir do registo, antes de haver conta), aceitação
-  obrigatória no registo, "Descarregar os meus dados" (JSON partilhado pelo seletor do Android) e eliminação da conta
-  com a palavra-passe nas Definições. A localização é só a aproximada e só quando o utilizador a pede no registo.
-- **Sessão:** cifra AES-GCM com chave do Android Keystore (`CifraLocal`); a parte criptográfica (`CifraAesGcm`) tem
-  testes unitários.
-- **Release:** R8 ativo; o `mapping.txt` fica em `app/build/outputs/mapping/release/` e não vai no APK — guardar o de
-  cada versão publicada.
+- **Network:** OkHttp timeouts of 10 seconds for connection, 20 for reads/writes, and 30 overall; user-facing errors through `MensagensErro`; `Idempotency-Key` on every POST; HTTP caching only for public responses.
+- **Duplicate submissions:** `FormsViewModel.aSubmeter` ignores repeated submissions until the current one finishes.
+- **GDPR:** privacy policy available before registration, mandatory acceptance, JSON data export through Android's share chooser, and password-confirmed account deletion in settings. Approximate location is requested only when the user asks for it during registration.
+- **Session:** AES-GCM with an Android Keystore key (`CifraLocal`); cryptographic logic in `CifraAesGcm` has unit tests.
+- **Release:** R8 enabled. Preserve each published version's `app/build/outputs/mapping/release/mapping.txt`; it is not packaged in the APK.
 
 ```bash
 ./gradlew --no-daemon --max-workers=1 assembleDebug assembleRelease testDebugUnitTest
